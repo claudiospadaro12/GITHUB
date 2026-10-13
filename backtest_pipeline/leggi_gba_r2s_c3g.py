@@ -20,6 +20,39 @@ backtest_pipeline/prove/GBA_R2S_XAGUSD2_2026-10-12.txt, SHA256 dbe11bc3..., pin 
   La lettura dello stadio A (senza R2SXAG2) e' IDENTICA a quella della v2 riga per riga, salvo la riga dell'intestazione con versione e SHA256 di D2.
 REGOLA E3(3), dichiarata e stampata in testa a ogni lettura del lotto R2SXAG2: una conferma a tick reali letta con uno strumento D2 di SHA256 DIVERSO da quello che ha
 letto la passata a Modello 1 e' 'conferma non data' (casella 4 aperta). Lo SHA256 di D2 si stampa per intero. Qualunque modifica invalida il PASS: si ripassa.
+v4 (13/10, BOZZA per il cancello: il PASS della v3 NON vale per questa versione): legge ANCHE la CONFERMA A TICK REALI (E3) dell'argento M1, lotto R2SXAGT (file prova
+backtest_pipeline/prove/GBA_R2S_XAGUSDT_2026-10-13.txt, UNA passata R2SXAGT_01_REPL_T1_m775800, XAGUSD M1, MODELLO 4, T1, magic 775800) con l'eventuale ancora a tick
+R2SXTANC (XAUUSD M1 T1 Modello 4, deve rifare R1A_01: 128 / -6577.48 / 0.83, 25648545 tick, C3G 21.60, righe >= 40x 651, >= 50x 280, EA 6973/128/6614/231):
+  - MECCANISMO 'STESSO D2' (E3: 'letta dallo STESSO D2 (SHA) che ha letto la passata a Modello 1'): la conferma si legge SOLO in UNA invocazione che carica INSIEME
+    l'ancora del 12/10 (GBA_R0_R2SANC.zip), la passata a Modello 1 del 13/10 (GBA_R2S_XAG2.zip o GBA_R0_R2SXAG2.zip, SHA256 dello zip del lotto PINNATO: quella archiviata)
+    e la raccolta a tick (GBA_R2S_XAGT.zip o GBA_R0_R2SXAGT.zip [+ GBA_R0_R2SXTANC.zip]); R2SXAGT senza R2SXAG2 = RIFIUTO. In quella invocazione la passata a Modello 1
+    e quella a tick sono lette dallo STESSO processo (stesso SHA256 di D2, stampato per intero accanto alla conferma), e (0b) rilegge ADESSO, con questo D2, l'archivio
+    del 13/10 (GBA_R2S_XAG2.zip + ancora del 12/10) e lo confronta con la lettura archiviata della v3 (LETTURA_D2_R2S_XAG2.txt, SHA256 77F1F72E... di D2): IDENTICA salvo
+    le DUE righe che portano versione e SHA256 di D2 (riga 2 e riga 5) e la riga del CSV, e il CSV identico byte per byte. (0b) non identica = 'conferma non data'.
+  - casella4() collegata alla lettura vera (prima la provava solo l'autotest con dati finti): ORDINE di E3 in 6 punti, il primo che vale decide:
+    1) storia a tick mancante (KO del driver r.786 'ticks data begins from ... DOPO l inizio della tranche' o r.815 'qualita dello storico', da soli o con altri
+       motivi; OPPURE, col report letto (colonna 'qualita' NON vuota), CE-T (a) del file prova NON verde: 'qualita' diversa da ESATTAMENTE '100%ticksreali', voce
+       '<simbolo> aaaa.mm.gg' di 'ticks_inizio' assente o dopo l'inizio della tranche) = NON ANCORA MISURATO con scritto cosa manca; 2) KO per il SOLO 'ZERO
+       operazioni' sotto l'eccezione n = 0 NON e' un KO per E3, ma toglie SOLO quel KO: il punto 3 si valuta LO STESSO su tutto il resto (file prova ec9e103b, (2));
+       3) passata non lanciata, altro KO, CE2/CE3/CE4/CE6 rosse, CE1 dell'ancora a tick (A1, A2) non verde,
+       CE-D2 non verde, CE-T (a) senza report, CE-T (b) (tick del report <= 353614), (0b) non identica, zip a Modello 1 non quello archiviato, SHA256 di D2
+       diverso = conferma NON data; 4) n netto >= 30 = conferma SMENTITA PER n
+       (resta (B), MAI (A)); 5) una di (i)-(v) falsa sul giornale a tick, o accettazione di D2 non passata = 'n insufficiente / da rimisurare'; 6) altrimenti 'ESCLUSA
+       PER COSTO (Modello 1 e tick reali)' col numero e casella 4 CHIUSA. 'ESCLUSA PER COSTO' non esce MAI senza passata a tick vera letta e D2 accettato.
+  - PIN DEL GIRO A TICK (pin della riga RIGA_LANCIA_GBA_R2S_XAGT): costante 'DA-PINNARE' finche' la riga non ha il suo pin definitivo; con il segnaposto ogni zip del
+    giro a tick e' RIFIUTATO (nessun numero) e l'autotest FALLISCE (UN controllo dedicato: PIN_XAGT = $PIN della riga e SHA256 dei due file prova in D2 = $LOTTI della
+    riga). Pin PER LOTTO come in v3: cc9bcda0 stadio A, d53493a9 R2SXAG2, il pin nuovo SOLO per R2SXAGT/R2SXTANC (RIEPILOGO_R0.txt e ESITI_R2S_XAGT.txt).
+  - CE1 dell'ancora a tick = A1 + A2 del suo file prova, letterali (A3 e' del lettore: precondizione FUORI da D2); CE-D2 = le cifre di D2 v3 rifatte sulla REPL a
+    Modello 1 di QUESTA lettura (quelle del CE7) + righe >= 40x 0 + 'ESCLUSA (Modello 1)' + stesso SHA256 per le due passate; CE-T (a) e (b) come nel file prova.
+  - (2) dell'ordine, secondo il file prova R2SXAGT ec9e103b: l'ECCEZIONE n = 0 toglie SOLO il KO 'ZERO operazioni' e NON salta i controlli del punto 3 (CE1 dell'ancora a
+    tick, CE-D2, CE-T, (0b), SHA, CE2/CE3/CE4/CE6): ancora a tick non lanciata o KO = conferma non data anche con l'argento deterministico a n = 0.
+  - LOTTO R2SXAGH (argento M30/H1/H4, Modello 1, T1; file prova backtest_pipeline/prove/GBA_R2S_XAGUSDH_2026-10-13.txt, SHA256 fd8d997d..., pin della riga f6571dcc...):
+    TF_NUM M30 '30', H1 '16385', H4 '16388' (codici ENUM_TIMEFRAMES); ESITI_R2S_XAGH.txt; si legge SOLO con l'ancora del 12/10; CE1H = ancora del 12/10 (zip archiviato)
+    E CE7H (ticks_gen = 353614 in ogni passata lanciata); CE9 (filtro = costo: L_lt <= S_sp <= L_lt + L_eq sulle righe libere, stampa a 1 decimale) e CE10 (righe
+    'dati non pronti' = 0) per cella; OROLOGIO: SOLO a H4 l'ora della riga sta in [ora server, ora server + 3] con ora server multiplo di 4 (domenica: barra delle 20:00,
+    primo tick alle 23:00), a M30 e H1 uguaglianza come in v3; ALBERO H0 (C) -> H1 (A) -> H2 'ESCLUSA (Modello 1)' -> H3 'n insufficiente', il primo che vale decide,
+    UN esito per cella; cella con 0 segnali = H0 col C3G NON DEFINITO; SMENTITE H (SH1-SH3) e classe S2 del C3G come DESCRIZIONE. Nessun esito chiude le caselle 4 e 5.
+  La lettura dello stadio A e quella del rilancio R2SXAG2 (senza R2SXAGT) sono IDENTICHE a quelle della v3 riga per riga, salvo le righe con versione e SHA256 di D2.
 
 COSA FA (e niente altro). Legge il giornale dell'EA (log\\GBA_<passata>.txt) di ogni passata dei 5 lotti R2SANC / R2SXAG / R2SNAS / R2SD30 / R2SU30 e stampa,
 per ogni cella (simbolo, TF), il C3G = MEDIANA VERA del campo 'stop/spread' delle righe segnale (scheda report/GBA_R2S_A_SCHEDA_2026-10-12.md, decisione D2; blocco L3
@@ -35,7 +68,8 @@ e ESITI (A)(B)(C) dei file prova backtest_pipeline/prove/GBA_R2S_*_2026-10-12.tx
   - la CASELLA 4 secondo E3: 'ESCLUSA (Modello 1)' -> NON ANCORA MISURATO finche' una passata a TICK REALI della stessa cella e tranche non da' n netto < 30 E
     (i)-(v) sul suo giornale (allora 'ESCLUSA PER COSTO (Modello 1 e tick reali)', casella CHIUSA); esiti IN ORDINE (storia a tick mancante; eccezione n=0;
     altro KO / CE rosse / SHA di D2 diverso = conferma non data; n netto >= 30 = conferma smentita per n, resta (B), mai (A); condizione falsa; conferma). casella4();
-    lo zip a tick reali di conferma NON ha ancora un file prova, quindi da riga di comando la conferma non si legge e la casella resta NON ANCORA MISURATO;
+    (v4) da riga di comando la conferma si legge SOLO col giro a tick R2SXAGT nella stessa invocazione della passata a Modello 1 (vedi v4 in testa); senza, la
+    casella resta NON ANCORA MISURATO;
   - la porta dello stadio B (n del report meno gli ingressi a spread zero >= 30), l'eccezione n = 0, i controlli CE1 (ancora) CE2 (firma dell'oro) CE3 CE4 CE6;
   - l'esito A / B / C con la dicitura prescritta. Ogni ESCLUSA esce SOLO se valgono le condizioni E la prova d'accettazione di questo strumento (sui giornali
     archiviati di S0_01 e R1A T1, rifatta a OGNI lancio, righe >= 40x e >= 50x comprese) e' passata.
@@ -60,6 +94,9 @@ USO (sempre con -I)
   python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R0_R2SANC.zip GBA_R0_R2SXAG.zip ... [--csv-out F]
   python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R0_R2SANC.zip GBA_R2S_XAG2.zip [--csv-out D2_C3G_R2S_XAG2.csv]   (ancora del 12/10 + raccolta del rilancio;
        oppure GBA_R0_R2SXAG2.zip al posto della raccolta. GBA_R0_R2SANC.zip e' DENTRO risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip: si estrae, non si rigira)
+  python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R0_R2SANC.zip GBA_R2S_XAG2.zip GBA_R2S_XAGT.zip [--csv-out D2_C3G_R2S_XAGT.csv]   (CONFERMA E3: ancora del 12/10 +
+       passata a Modello 1 archiviata in risultati_archivio/GBA_R2S_XAG2_20261013/ + raccolta a tick, TUTTE nella STESSA invocazione)
+  python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R0_R2SANC.zip GBA_R2S_XAGH.zip [--csv-out D2_C3G_R2S_XAGH.csv]   (argento M30/H1/H4 con la sola ancora del 12/10)
   python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py --autotest
   uscita: 0 letto; 1 autotest fallito; 2 ERRORE / zip RIFIUTATO (nessun numero).
 """
@@ -69,7 +106,8 @@ sys.dont_write_bytecode = True
 
 QD = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(QD, ".."))
-VERSIONE = "leggi_gba_r2s_c3g v3 (D2 + lotto R2SXAG2, rilancio dell'argento)"
+VERSIONE = "leggi_gba_r2s_c3g v4 (D2 + lotto R2SXAG2 + conferma a tick reali R2SXAGT, E3)"
+VERSIONE_V3 = "leggi_gba_r2s_c3g v3 (D2 + lotto R2SXAG2, rilancio dell'argento)"   # la versione che ha letto la passata a Modello 1 il 13/10 (regressione (0b))
 
 # ---------------------------------------------------------------------------------------------------------------------
 #  DEFINIZIONI COPIATE (l'autotest verifica che siano identiche a quelle del lettore leggi_gba_r0.py, SHA256 9CD02D2A...)
@@ -97,9 +135,13 @@ MODELLO = "1"
 MAGIC = "775800"
 PIN_A = "cc9bcda0b64943b1e02ae8f52af68ccff81012d4"      # pin della riga RIGA_LANCIA_GBA_R2S_A (il driver lo scrive minuscolo nel RIEPILOGO, r.142 e r.877)
 PIN_XAG2 = "d53493a92901b82c6b4c12c1d79ec3cb4ebfa5bb"   # pin della riga RIGA_LANCIA_GBA_R2S_XAG2 (PASS al 4o giro, scheda XAG2 in fondo)
-PIN_AMMESSI = (PIN_A, PIN_XAG2)                          # ammessi SOLO PER LOTTO (LOTTI[L]["pin"]): lo zip del 12/10 resta leggibile, nessun pin vale per un altro lotto
+SEGNAPOSTO = "DA-PINNARE"                                # v4: valore NON ancora noto; con un segnaposto il lotto e' RIFIUTATO e l'autotest FALLISCE
+PIN_XAGT = "3537db93754ac8b2474d028c58dc2bc0062ba3dc"   # pin della riga RIGA_LANCIA_GBA_R2S_XAGT (2o giro, c8ccf30a), SOLO per R2SXAGT e R2SXTANC (RIEPILOGO e ESITI_R2S_XAGT)
+PIN_XAGH = "f6571dccbbc5ae07cf73a4310146a7912cfd73fb"   # pin della riga RIGA_LANCIA_GBA_R2S_XAGH (commit f1fe6cbe), SOLO per il lotto R2SXAGH
+PIN_AMMESSI = (PIN_A, PIN_XAG2, PIN_XAGT, PIN_XAGH)                # ammessi SOLO PER LOTTO (LOTTI[L]["pin"]): lo zip del 12/10 resta leggibile, nessun pin vale per un altro lotto
 SHA_EA = "1381E3DC9B4B4E44BCDC0319F023CB1990900CE0D1A6B6A3EC1DF5DF99E601B1"   # EA v1.10 (-ShaEA della riga; il driver lo scrive maiuscolo, r.151 e r.878)
-TF_NUM = {"M1": "1", "M5": "5", "M15": "15"}
+TF_NUM = {"M1": "1", "M5": "5", "M15": "15", "M30": "30", "H1": "16385", "H4": "16388"}   # v4: M30/H1/H4 = codici ENUM_TIMEFRAMES (driver r.126, r.198)
+ORE_BARRA = {"H4": 4}   # v4 (lotto R2SXAGH): ore coperte da una barra quando > 1; l'ora della riga sta in [ora, ora + ORE_BARRA - 1] (solo H4: domenica 20:00 -> 23:00)
 LOTTI = {
     "R2SANC": {"prova": "GBA_R2S_ANCORA_2026-10-12.txt", "sha": "42773ac50e3665e8a1b0fca038bdf2da3faf9c24ed42a2184f90f03eeb0d05ae", "simbolo": "XAUUSD",
                "celle": [("REPL", "M1")], "S": None, "pin": PIN_A},
@@ -115,13 +157,42 @@ LOTTI = {
                "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3, "pin": PIN_A},
     "R2SU30": {"prova": "GBA_R2S_U30USD_2026-10-12.txt", "sha": "5c7e8e4d250f54310a6f4b3b6876e9cc496a0546330bc3d07dfb982983ce6c28", "simbolo": "U30USD",
                "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3, "pin": PIN_A},
+    # v4: CONFERMA A TICK REALI (E3) della cella R2SXAG2 REPL (argento M1, T1): UNA passata a MODELLO 4, stessa cella e stessa tranche
+    "R2SXAGT": {"prova": "GBA_R2S_XAGUSDT_2026-10-13.txt", "sha": "ec9e103b49da44d7c8850d063aaa1b2d8b4b7e2c6baa31fe27b6e7041272e61f", "simbolo": "XAGUSD", "celle": [("REPL", "M1")], "S": 6.65, "pin": PIN_XAGT,
+                "modello": "4", "tag": {"REPL": "R2SXAGT_01_REPL_T1_m775800"}, "conferma_di": ("R2SXAG2", "REPL")},
+    # v4: ANCORA A TICK (CE1 della conferma, A1-A2 del file prova): XAUUSD M1 T1 Modello 4, deve rifare R1A_01 (pin IDENTICI a GBA_R2S_ANCORA_2026-10-12.txt)
+    "R2SXTANC": {"prova": "GBA_R2S_XAGT_ANCORA_2026-10-13.txt", "sha": "23295bf35b6104b1d04002ccbbb6da6b8002823f5467606e3aa96414ea87c18c", "simbolo": "XAUUSD",
+                 "celle": [("REPL", "M1")], "S": None, "pin": PIN_XAGT,
+                 "modello": "4", "tag": {"REPL": "R2SXTANC_01_REPL_T1_m775800"}},
 }
-ORDINE = ["R2SANC", "R2SXAG", "R2SXAG2", "R2SNAS", "R2SD30", "R2SU30"]
+LOTTI["R2SXAGH"] = {"prova": "GBA_R2S_XAGUSDH_2026-10-13.txt", "sha": "fd8d997d2518e58ecc684a54caa4268cb4fa5b4c268171e51509f97575e2c049", "simbolo": "XAGUSD",
+                    "celle": [("M30", "M30"), ("H1", "H1"), ("H4", "H4")], "S": 6.65, "pin": PIN_XAGH, "albero_h": True,
+                    "tag": {"M30": "R2SXAGH_01_M30_T1_m775800", "H1": "R2SXAGH_02_H1_T1_m775800", "H4": "R2SXAGH_03_H4_T1_m775800"}}   # v4: R-XAG-1, esiti H0-H3
+LOTTO_ANCORA_TICK = "R2SXTANC"     # nome del lotto nella riga RIGA_LANCIA_GBA_R2S_XAGT ($LOTTI: R2SXAGT poi R2SXTANC) e nel file prova dell'ancora
+ORDINE = ["R2SANC", "R2SXAG", "R2SXAG2", "R2SXAGT", LOTTO_ANCORA_TICK, "R2SXAGH", "R2SNAS", "R2SD30", "R2SU30"]
 # DUE GIRI, letti separati: lo stadio A del 12/10 (pin cc9bcda0) e il rilancio dell'argento (pin d53493a9) con la SOLA ancora del 12/10 (X6). Un lotto di un giro
 # non si stampa (nemmeno come 'NON CARICATO') nella lettura dell'altro: la lettura dello stadio A resta quella della v2.
 GIRO_A = ("R2SANC", "R2SXAG", "R2SNAS", "R2SD30", "R2SU30")
 GIRO_XAG2 = ("R2SANC", "R2SXAG2")
-ESITI_FILE = {"ESITI_R2S_A.txt": (PIN_A, set(GIRO_A)), "ESITI_R2S_XAG2.txt": (PIN_XAG2, {"R2SXAG2"})}   # raccolta: pin e lotti ammessi
+GIRO_XAGT = ("R2SANC", "R2SXAG2", "R2SXAGT", LOTTO_ANCORA_TICK)   # v4: la conferma si legge NELLA STESSA invocazione della passata a Modello 1 (e della sua ancora)
+ESITI_FILE = {"ESITI_R2S_A.txt": (PIN_A, set(GIRO_A)), "ESITI_R2S_XAG2.txt": (PIN_XAG2, {"R2SXAG2"}),
+              "ESITI_R2S_XAGT.txt": (PIN_XAGT, {"R2SXAGT", LOTTO_ANCORA_TICK}), "ESITI_R2S_XAGH.txt": (PIN_XAGH, {"R2SXAGH"})}   # raccolta: pin e lotti ammessi
+GIRO_XAGH = ("R2SANC", "R2SXAGH")   # v4: il lotto R2SXAGH si legge SOLO con l'ancora del 12/10 (CE1H)
+TICK_GEN_M1 = "353614"              # CE7H del file prova R2SXAGH: colonna ticks_gen di OGNI passata lanciata, tolleranza zero (Modello 1: tick generati dalle barre M1)
+SH1_BANDE = {"H1": (17.0, 34.0), "H4": (31.0, 75.0)}   # SH1 (descrizione): bande del C3G, estremi inclusi; M30 solo il numero accanto all'attesa 16-18x
+# v4, (0b): la passata a Modello 1 da confermare e' QUELLA del 13/10, letta da D2 v3 (77F1F72E...): zip e lettura archiviati, SHA256 pinnati
+SHA_D2_V3 = "77f1f72e136c6c9850a2d77b01d1706f43fabb34f127cb0cc46a76bf9bbd70ae"
+ARCH_XAG2_DIR = os.path.join(QD, "risultati_archivio", "GBA_R2S_XAG2_20261013")
+ARCH_R2S_XAG2 = (os.path.join(ARCH_XAG2_DIR, "GBA_R2S_XAG2.zip"), "dad8fea0e7edf64fe14e703fc68da49c54b75bae7e0f130d6b57e17ed69392d1")
+SHA_ZIP_XAG2_1310 = "472f6e6afda58535d73e8ecd39b933740e4e870d11bbcb9ef249b9b94f71d0b5"   # GBA_R0_R2SXAG2.zip dentro GBA_R2S_XAG2.zip (13/10)
+ARCH_LETTURA_XAG2 = (os.path.join(ARCH_XAG2_DIR, "LETTURA_D2_R2S_XAG2.txt"), "aed6957816c6f22c2c5231d55d818ba7f6e2154e128be2cadfb11ad734cb294e")
+ARCH_CSV_XAG2 = (os.path.join(ARCH_XAG2_DIR, "D2_C3G_R2S_XAG2.csv"), "4e3f994fff142039405814948e0f2a1efe517f41e6f3ed0f8dcf3d517b430281")
+# v4: l'ancora a tick deve rifare R1A_01 (risultati_archivio/GBA_R0_R1A_20261010/GBA_R0_R1A.zip, MANIFEST e giornale), tolleranza ZERO sulle cifre stampate
+# (A1 e A2 del file prova GBA_R2S_XAGT_ANCORA_2026-10-13.txt, letterali; A3 e' del lettore leggi_gba_r0.py: precondizione FUORI da D2)
+ATTESA_ANCORA_TICK = {"manifest": ("128", "-6577.48", "0.83"), "qualita": "100%ticksreali", "barre": "88416", "ticks": "25648545", "ticks_inizio": "XAUUSD 2024.07.10",
+                      "cella": "21.60", "ingressi": 128, "ge40": 651, "ge50": 280, "spread_zero": 0}
+TICK_GENERATI_M1 = 353614          # CE-T (b) del file prova R2SXAGT: tick che il tester GENERA a Modello 1 su XAGUSD M1 T1 (MANIFEST R2SXAG2_02 del 13/10); servono > 353614
+QUALITA_TICK = "100%ticksreali"    # E3 (1): la colonna 'qualita' del manifest di una passata a Modello 4 col report deve essere ESATTAMENTE questa (R1A: 100%ticksreali)
 # X6 (1): l'ancora del lotto R2SXAG2 e' QUELLA del 12/10: GBA_R0_R2SANC.zip dentro risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip (SHA256 dello zip interno)
 SHA_ANCORA_1210 = "259f4ba0922b4406dc58847b29525ea7467b1043565e3e8cc10148d1d2f4b980"
 ARCH_R2S_A = os.path.join(QD, "risultati_archivio", "GBA_R2S_A_20261012", "GBA_R2S_A.zip")
@@ -219,8 +290,10 @@ def _norm(v):
 # ---------------------------------------------------------------------------------------------------------------------
 #  IL GIORNALE DELL'EA
 # ---------------------------------------------------------------------------------------------------------------------
-def leggi_giornale(testo, etich="giornale"):
-    """Restituisce {righe, ingressi_eseguiti, conta, avvio, finestre, doppioni, ridotti}. Rifiuto su ogni riga che non si sa leggere."""
+def leggi_giornale(testo, etich="giornale", tf=None):
+    """Restituisce {righe, ingressi_eseguiti, conta, avvio, finestre, doppioni, ridotti, non_pronti}. Rifiuto su ogni riga che non si sa leggere.
+    tf (v4): TF della cella; SOLO a H4 (ORE_BARRA) l'ora della riga puo' stare in [ora server, ora server + 3] con ora server multiplo di 4."""
+    span = ORE_BARRA.get(tf, 1)
     msgs, ordine, testa = {}, [], []
     for riga in testo.splitlines():
         riga = riga.rstrip()
@@ -242,7 +315,7 @@ def leggi_giornale(testo, etich="giornale"):
                 msgs[k][1] = msg
             msgs[k].append(None)                    # segna il doppione
     doppioni = sum(len(msgs[k]) - 2 for k in ordine)
-    out = {"righe": [], "ingressi_eseguiti": [], "conta": None, "avvio": [], "finestre": [], "doppioni": doppioni, "ridotti": 0, "conta_n": 0,
+    out = {"righe": [], "ingressi_eseguiti": [], "conta": None, "avvio": [], "finestre": [], "doppioni": doppioni, "ridotti": 0, "conta_n": 0, "non_pronti": 0,
            "tester": [t for t in testa if t.startswith("# TESTER ")]}    # righe del tester raccolte dal driver (r.735, r.823): servono SOLO al CE8 (descrizione)
     for t in testa:
         mf = RE_FINESTRA.match(t)
@@ -263,8 +336,13 @@ def leggi_giornale(testo, etich="giornale"):
                 raise Rifiuto("%s: ora server %d fuori da 0-23" % (etich, ora))
             # OROLOGIO: il campo 'ora server' e' dt.hour dell'apertura della barra (EA r.695-696, r.726); l'orario della riga e' quello simulato del tester (driver
             # $reGba r.552), nella stessa barra. Sui giornali dell'oro coincidono su 6973 righe su 6973 (S0_01 e R1A T1): se differiscono, il giornale non si legge.
-            if int(st[11:13]) != ora:
+            # v4 (R2SXAGH, file prova: OROLOGIO E FASCE): a H4 la barra apre a 0/4/8/12/16/20 e la riga si scrive al PRIMO tick della barra (domenica: barra delle 20:00,
+            # primo tick alle 23:00): ora della riga in [ora, ora + 3], stesso giorno, ora multiplo di 4. Ogni altro TF (M1-H1): uguaglianza, come in v3.
+            if span == 1 and int(st[11:13]) != ora:
                 raise Rifiuto("%s: ora server %d diversa dall'ora dell'orario simulato della riga (%s): orologio incoerente, non si indovina la fascia" % (etich, ora, st))
+            if span > 1 and not (ora % span == 0 and ora <= int(st[11:13]) <= ora + span - 1):
+                raise Rifiuto("%s: a %s ora server %d e orario della riga %s: fuori da [ora, ora + %d] o ora non multiplo di %d: orologio incoerente" % (
+                    etich, tf, ora, st, span - 1, span))
             motivo = d["motivo"] or ""
             if d["motivo"] is not None and motivo not in MOTIVI_EA:
                 raise Rifiuto("%s: motivo SALTATO sconosciuto '%s'" % (etich, motivo))
@@ -291,6 +369,8 @@ def leggi_giornale(testo, etich="giornale"):
             continue
         if "lotto richiesto" in msg and "ridotto" in msg:
             out["ridotti"] += 1
+        if msg.startswith("[GBA] dati non pronti"):        # CE10 (R2SXAGH): EA r.683 'dati non pronti sulla barra ... -- segnale non valutato'
+            out["non_pronti"] += 1
     return out
 
 
@@ -428,6 +508,11 @@ def leggi_lotto(nome_zip, dati):
     if base.startswith("GBA_R0_") and base.lower().endswith(".zip") and base[7:-4] != L:
         raise Rifiuto("%s: il nome dello zip dice lotto %s, il manifest dice %s" % (nome_zip, base[7:-4], L))
     D = LOTTI[L]
+    segn = [k for k in ("prova", "sha", "pin") if D[k] == SEGNAPOSTO]
+    if segn:
+        raise Rifiuto("%s: lotto %s con %s ancora '%s' in D2 (la riga a tick non ha ancora il suo pin / il file prova non e' pinnato): nessuna lettura" % (
+            nome_zip, L, ", ".join(segn), SEGNAPOSTO))
+    MOD = D.get("modello", MODELLO)                     # v4: Modello 4 SOLO per il giro a tick; tutti gli altri lotti Modello 1 come in v3
     if D["prova"] not in N:
         raise Rifiuto("%s: il file prova %s NON e' nello zip" % (nome_zip, D["prova"]))
     raw_prova = z.read(N[D["prova"]])
@@ -468,7 +553,7 @@ def leggi_lotto(nome_zip, dati):
             raise Rifiuto("%s: cella '%s' NON dichiarata nel file prova %s (attese: %s)" % (e, r["cella"], D["prova"], ", ".join(celle_att)))
         tf = celle_att[r["cella"]]
         att = {"simbolo": D["simbolo"], "periodo": tf, "prova": D["prova"], "asse": "InpSignalTF", "valore_asse": TF_NUM[tf], "tranche": TRANCHE[0], "da": TRANCHE[1],
-               "a": TRANCHE[2], "modello": MODELLO, "magic": MAGIC}
+               "a": TRANCHE[2], "modello": MOD, "magic": MAGIC}
         for k, v in att.items():
             if (r.get(k) or "").strip() != v:
                 raise Rifiuto("%s: manifest %s='%s', il file prova dice '%s'" % (e, k, r.get(k), v))
@@ -482,7 +567,7 @@ def leggi_lotto(nome_zip, dati):
             raise Rifiuto("%s: ini %s assente: simbolo e TF non verificabili" % (e, ni))
         ini = leggi_ini(z.read(N[ni]).decode("ascii", "replace"))
         te, inp = ini["tester"], ini["inputs"]
-        for k, v in (("Symbol", D["simbolo"]), ("Period", tf), ("Model", MODELLO), ("FromDate", TRANCHE[1]), ("ToDate", TRANCHE[2])):
+        for k, v in (("Symbol", D["simbolo"]), ("Period", tf), ("Model", MOD), ("FromDate", TRANCHE[1]), ("ToDate", TRANCHE[2])):
             if te.get(k) != v:
                 raise Rifiuto("%s: ini [Tester] %s=%s, il file prova dice %s" % (e, k, te.get(k), v))
         attesi = dict(pin)
@@ -499,7 +584,7 @@ def leggi_lotto(nome_zip, dati):
         nl = "log/GBA_" + tag + ".txt"
         if nl not in N:
             raise Rifiuto("%s: giornale %s ASSENTE: il C3G non si legge e non si indovina" % (e, nl))
-        G = leggi_giornale(z.read(N[nl]).decode("ascii", "replace"), e)
+        G = leggi_giornale(z.read(N[nl]).decode("ascii", "replace"), e, tf)
         fuori = [x["st"] for x in G["righe"] if not (TRANCHE[1] <= x["st"][:10] <= TRANCHE[2])]
         if fuori:
             raise Rifiuto("%s: %d righe segnale fuori dalla tranche %s-%s (prima: %s): giornale di un'altra finestra" % (e, len(fuori), TRANCHE[1], TRANCHE[2], fuori[0]))
@@ -526,7 +611,18 @@ def leggi_lotto(nome_zip, dati):
 
 
 def carica(percorsi):
-    """Zip di lotto o raccolta GBA_R2S_A.zip / GBA_R2S_XAG2.zip (zip annidati). Restituisce ({lotto: lettura}, [note])."""
+    """Zip di lotto o raccolta GBA_R2S_A.zip / GBA_R2S_XAG2.zip / GBA_R2S_XAGT.zip (zip annidati). Restituisce ({lotto: lettura}, [note])."""
+    voci = []
+    for p in percorsi:
+        try:
+            voci.append((p, open(p, "rb").read()))
+        except OSError as ex:
+            raise Rifiuto("%s: non leggibile (%s)" % (p, ex))
+    return carica_dati(voci)
+
+
+def carica_dati(voci):
+    """Come carica(), su coppie (nome, bytes): serve anche alla regressione (0b), che rilegge l'archivio senza scrivere file."""
     lotti, note = {}, []
 
     def aggiungi(nome, dati):
@@ -535,11 +631,10 @@ def carica(percorsi):
             raise Rifiuto("lotto %s caricato DUE volte (%s e %s): ogni numero sarebbe doppio" % (Lz["lotto"], lotti[Lz["lotto"]]["zip"], nome))
         lotti[Lz["lotto"]] = Lz
         return Lz["lotto"]
-    for p in percorsi:
+    for p, dati in voci:
         try:
-            dati = open(p, "rb").read()
             z = zipfile.ZipFile(io.BytesIO(dati))
-        except (OSError, zipfile.BadZipFile) as ex:
+        except zipfile.BadZipFile as ex:
             raise Rifiuto("%s: non leggibile (%s)" % (p, ex))
         N = _nomi(z)
         if "MANIFEST_R0.csv" in N:
@@ -554,7 +649,7 @@ def carica(percorsi):
                 note.append("%s: %s -> quel lotto si e' fermato alla COMPILAZIONE: nessuna passata, esito (C)" % (p, n))
                 continue
             dentro.append(aggiungi(p + "!" + n, z.read(N[n])))
-        for ne in ("ESITI_R2S_A.txt", "ESITI_R2S_XAG2.txt"):
+        for ne in ESITI_FILE:      # v4: TUTTI i file ESITI conosciuti (A, XAG2, XAGT, XAGH, in quest'ordine): un ESITI dimenticato qui passerebbe senza controllo del pin
             if ne not in N:
                 continue
             pin_es, lotti_es = ESITI_FILE[ne]
@@ -566,11 +661,27 @@ def carica(percorsi):
             if estranei:
                 raise Rifiuto("%s: la raccolta con %s contiene lotti di un altro giro (%s)" % (p, ne, ", ".join(estranei)))
             note.append(ne + ": " + " / ".join(x.strip() for x in es.splitlines() if x.strip()))
-    if "R2SXAG2" in lotti:
+    if "R2SXAGT" in lotti or LOTTO_ANCORA_TICK in lotti:
+        # v4, MECCANISMO 'STESSO D2': la conferma a tick si legge SOLO nella STESSA invocazione della passata a Modello 1 (R2SXAG2) e della sua ancora
+        if "R2SXAGT" not in lotti:
+            raise Rifiuto("l'ancora a tick %s si legge SOLO insieme alla conferma a tick reali R2SXAGT (GBA_R0_R2SXAGT.zip)" % LOTTO_ANCORA_TICK)
+        if "R2SXAG2" not in lotti:
+            raise Rifiuto("la conferma a tick reali R2SXAGT si legge SOLO nella STESSA invocazione della passata a Modello 1 che conferma (E3: 'stesso D2'): caricare "
+                          "anche GBA_R2S_XAG2.zip (o GBA_R0_R2SXAG2.zip) di risultati_archivio/GBA_R2S_XAG2_20261013 e l'ancora del 12/10 GBA_R0_R2SANC.zip")
+        altri = sorted(L for L in lotti if L not in GIRO_XAGT)
+        if altri:
+            raise Rifiuto("la conferma a tick reali R2SXAGT si legge SOLO con R2SXAG2, l'ancora del 12/10 e l'ancora a tick (%s); caricati anche %s: due giri "
+                          "nella stessa lettura" % (", ".join(GIRO_XAGT), ", ".join(altri)))
+    elif "R2SXAG2" in lotti:
         altri = sorted(L for L in lotti if L not in GIRO_XAG2)
         if altri:
             raise Rifiuto("il lotto R2SXAG2 (rilancio, pin %s) si legge SOLO con l'ancora del 12/10 GBA_R0_R2SANC.zip; caricati anche %s: due giri nella stessa "
                           "lettura (estrarre GBA_R0_R2SANC.zip da GBA_R2S_A.zip e rileggere)" % (PIN_XAG2[:8], ", ".join(altri)))
+    if "R2SXAGH" in lotti:
+        altri = sorted(L for L in lotti if L not in GIRO_XAGH)
+        if altri:
+            raise Rifiuto("il lotto R2SXAGH (argento M30/H1/H4, pin %s) si legge SOLO con l'ancora del 12/10 GBA_R0_R2SANC.zip (CE1H); caricati anche %s: due giri "
+                          "nella stessa lettura" % (PIN_XAGH[:8], ", ".join(altri)))
     return lotti, note
 
 
@@ -780,8 +891,10 @@ def esito(P, S, variante, acc_ok, ce1):
         P["n"], A["ingressi_spread_zero"], n_porta, testa, costo_testo(A)), esclusa
 
 
-def casella4(es_rif, P_m1, P_tick, S, acc_ok):
-    """E3 piena. es_rif = esito 'riferimento' a Modello 1. P_tick = passata a TICK REALI della stessa cella e tranche (gia' passata da controlli()) o None."""
+def casella4(es_rif, P_m1, P_tick, S, acc_ok, blocchi=None):
+    """E3 piena. es_rif = esito 'riferimento' a Modello 1. P_tick = passata a TICK REALI della stessa cella e tranche (gia' passata da controlli()) o None.
+    blocchi (v4) = controlli del GIRO di conferma che non sono della passata (ancora a tick non verde, (0b) non identica, zip a Modello 1 non quello archiviato):
+    ognuno rende la conferma 'NON data' (punto 3 di E3), MAI la da'."""
     if not es_rif[2]:
         if es_rif[0] == "A":
             return "NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)"
@@ -789,9 +902,12 @@ def casella4(es_rif, P_m1, P_tick, S, acc_ok):
     if P_tick is None:
         return ("NON ANCORA MISURATO: ESCLUSA (Modello 1) da confermare con UNA passata a tick reali della stessa cella e tranche (n netto < 30 e (i)-(v) sul suo "
                 "giornale); se la storia a tick reali del simbolo manca, resta NON ANCORA MISURATO e si scrive cosa manca")
-    for k in ("simbolo", "tf", "lotto", "cella"):
+    for k in ("simbolo", "tf", "cella"):
         if P_tick[k] != P_m1[k]:
             raise Rifiuto("E3: la passata a tick reali ha %s=%s, la cella a Modello 1 %s" % (k, P_tick[k], P_m1[k]))
+    # lotto: lo stesso (contro-esempi dell'autotest v3) oppure il lotto di conferma DICHIARATO per QUESTA cella (v4: R2SXAGT conferma R2SXAG2 REPL)
+    if P_tick["lotto"] != P_m1["lotto"] and LOTTI.get(P_tick["lotto"], {}).get("conferma_di") != (P_m1["lotto"], P_m1["cella"]):
+        raise Rifiuto("E3: la passata a tick reali e' del lotto %s, che NON e' dichiarato come conferma della cella %s %s" % (P_tick["lotto"], P_m1["lotto"], P_m1["cella"]))
     rt, rm = P_tick["riga"], P_m1["riga"]
     if (rt["tranche"], rt["da"], rt["a"]) != (rm["tranche"], rm["da"], rm["a"]):
         raise Rifiuto("E3: la passata a tick reali e' su un'altra tranche (%s %s-%s)" % (rt["tranche"], rt["da"], rt["a"]))
@@ -801,10 +917,18 @@ def casella4(es_rif, P_m1, P_tick, S, acc_ok):
     # 1) KO per storia a tick mancante (motivi del driver r.786 / r.815, qualita' != 100% ticks reali, ticks_inizio dopo l'inizio della tranche) -> NON ANCORA MISURATO
     st = storia_tick_mancante(P_tick)
     if st:
-        return "NON ANCORA MISURATO: storia a tick mancante, la conferma non c'e' (manca: %s)" % "; ".join(st)
+        ti = [x.strip() for x in (rt.get("ticks_inizio") or "").split(" / ") if x.strip().startswith(P_tick["simbolo"] + " ")]
+        return ("NON ANCORA MISURATO: storia a tick mancante, la conferma non c'e' (manca: %s; cioe' la storia a tick reali di %s su %s sul PC di backtest, inizio dei "
+                "tick letto: %s, qualita' %s)") % ("; ".join(st), P_tick["simbolo"], rt["tranche"], ti[0].split(" ", 1)[1] if ti else "assente", rt.get("qualita") or "assente")
     # 2) KO per il SOLO 'ZERO operazioni' sotto l'ECCEZIONE n = 0 (tentati 0, scartati spread >= 1, AVVIO/AUTOTEST/finestra/CONTA a posto): NON e' un KO per E3,
-    #    si prosegue con n = 0 (dentro _leggibile); 'ZERO operazioni' con tentati > 0 o segnali(EA) = 0 -> conferma non data (punto 3)
+    #    ma toglie SOLO quel KO (dentro _leggibile, DOPO i blocchi del giro qui sotto): il punto 3 si valuta SEMPRE su tutto il resto (CE1 dell'ancora a tick,
+    #    CE-D2, CE-T, (0b), SHA, CE2/CE3/CE4/CE6), e solo se 3 non vale si va a 4-6 con n = 0 (file prova ec9e103b, (2): MAI 'ESCLUSA PER COSTO' senza ancora);
+    #    'ZERO operazioni' con tentati > 0 o segnali(EA) = 0 -> conferma non data (punto 3)
     # 3) qualunque altro KO, CE rosse, o giornale letto da un D2 con SHA256 diverso da quello che ha letto la passata a Modello 1 -> conferma NON data
+    if rt["stato"] == "NON_LANCIATA" or P_tick.get("giornale") is None:
+        return "NON ANCORA MISURATO: conferma NON data, casella aperta: la passata a tick reali NON e' stata lanciata (%s)" % (rt.get("motivi") or "nessun motivo")
+    if blocchi:
+        return "NON ANCORA MISURATO: conferma NON data, casella aperta: %s" % "; ".join(blocchi)
     if P_tick.get("sha_d2") != P_m1.get("sha_d2"):
         return "NON ANCORA MISURATO: conferma NON data, casella aperta: la passata a tick reali e' stata letta da D2 %s, quella a Modello 1 da D2 %s" % (
             (P_tick.get("sha_d2") or "n.d.")[:12], (P_m1.get("sha_d2") or "n.d.")[:12])
@@ -823,25 +947,43 @@ def casella4(es_rif, P_m1, P_tick, S, acc_ok):
         manca = [k for k in ("i", "ii", "iii", "iv", "v") if not c[k]] or ["accettazione di D2"]
         return "NON ANCORA MISURATO: n insufficiente / da rimisurare (a tick reali %s, n netto %d; non vale: %s)" % (costo_testo(At), nn, ", ".join(manca))
     # 6) conferma
-    return "CHIUSA: ESCLUSA PER COSTO (Modello 1 e tick reali) col numero: C3G Modello 1 %s, tick reali %s < S %s, n netto a tick reali %d, righe >= 40x %d" % (
-        fx(P_m1["A"]["c3g"]), fx(At["c3g"]), fx(S), nn, At["ge40"])
+    q = ("%.1f%% (%d su %d)" % (100.0 * At["scartati_spread"] / At["liberi"], At["scartati_spread"], At["liberi"])) if At["liberi"] else "n.d."
+    return ("CHIUSA: ESCLUSA PER COSTO (Modello 1 e tick reali) col numero: C3G Modello 1 %s, tick reali %s < S %s, n netto a tick reali %d, righe >= 40x %d | "
+            "A TICK REALI: %s; quota dei liberi scartata per spread %s") % (fx(P_m1["A"]["c3g"]), fx(At["c3g"]), fx(S), nn, At["ge40"], costo_testo(At), q)
+
+
+def ce_t_a(P):
+    """CE-T (a) del file prova R2SXAGT, sulle colonne del MANIFEST (lista di cosa NON va; vuota = verde): qualita ALLA LETTERA '100%ticksreali' ('100%' da solo,
+    una percentuale minore o vuota = NON verde) e ticks_inizio con una voce '<simbolo> aaaa.mm.gg' con data <= inizio della tranche (voce assente = NON VALUTABILE =
+    NON verde: la riga 'ticks data begins from' manca se i tick erano in cache, driver r.785, e allora il driver NON fa KO)."""
+    r = P["riga"]
+    out = []
+    q = (r.get("qualita") or "").strip()
+    if q != QUALITA_TICK:
+        out.append("qualita' dello storico '%s' invece di ESATTAMENTE '%s'" % (q, QUALITA_TICK))
+    voci = [tk.strip().split(" ") for tk in (r.get("ticks_inizio") or "").split(" / ") if tk.strip()]
+    sim = [v for v in voci if len(v) == 2 and v[0] == P["simbolo"]]
+    if not sim:
+        out.append("voce '%s aaaa.mm.gg' ASSENTE nella colonna ticks_inizio ('%s'): inizio dei tick reali non verificabile" % (P["simbolo"], r.get("ticks_inizio") or ""))
+    for v in sim:
+        if v[1] > r["da"]:
+            out.append("tick reali di %s solo dal %s, dopo l'inizio della tranche %s" % (v[0], v[1], r["da"]))
+    return out
 
 
 def storia_tick_mancante(P):
-    """Lista di cosa manca della storia a tick (vuota = presente). Fonti: motivi del driver v5 (r.786 'ticks data begins from ... DOPO l inizio della tranche',
-    r.815 'qualita dello storico ... invece di 100% ticks reali'), colonne 'qualita' e 'ticks_inizio' del manifest."""
+    """E3 (1): lista di cosa manca della storia a tick (vuota = presente). Fonti: motivi del driver v5 (r.786 'ticks data begins from ... DOPO l inizio della
+    tranche', r.815 'qualita dello storico ... invece di 100% ticks reali'): (1) SEMPRE, da soli o con altri motivi; CE-T (a) sulle colonne del manifest: (1) SOLO
+    con il report letto (colonna qualita NON vuota), senza report e' un altro KO (punto 3, file prova R2SXAGT CE-T)."""
     r = P["riga"]
     out = []
+    if r["stato"] == "NON_LANCIATA":
+        return out
     for m in (r.get("motivi") or "").split(" | "):
         if m.startswith("qualita dello storico") or (m.startswith("ticks data begins from") and "DOPO l inizio della tranche" in m):
             out.append(m.strip())
-    q = re.sub(r"\s", "", r.get("qualita") or "").lower()
-    if r["stato"] != "NON_LANCIATA" and q and not (q.startswith("100%") and "tick" in q):
-        out.append("qualita' dello storico '%s' invece di '100%% ticks reali'" % r.get("qualita"))
-    for tk in (r.get("ticks_inizio") or "").split(" / "):
-        pz = tk.strip().split(" ")
-        if len(pz) == 2 and pz[0] == P["simbolo"] and pz[1] > r["da"]:
-            out.append("tick reali di %s solo dal %s, dopo l'inizio della tranche %s" % (pz[0], pz[1], r["da"]))
+    if (r.get("qualita") or "").strip():
+        out += [x for x in ce_t_a(P) if x not in out]
     return out
 
 
@@ -938,6 +1080,253 @@ def stato_ce1_x6(lotti, ce1_anc, ce7):
     if err:
         return (False, "NON VERDE -> TUTTE E DUE le celle del lotto R2SXAG2 (M15 e REPL) sono (C), senza appello: " + "; ".join(err))
     return (True, "VERDE (ancora del 12/10 verde, zip archiviato SHA256 %s..., E CE7 verde)" % SHA_ANCORA_1210[:12])
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+#  v4: GIRO DI CONFERMA A TICK REALI (E3): ancora a tick, regressione (0b) della passata a Modello 1, blocchi della conferma
+# ---------------------------------------------------------------------------------------------------------------------
+def stato_ce1_tick(lotti):
+    """CE1 della conferma = A1 + A2 del file prova dell'ancora a tick, LETTERALI, tolleranza ZERO: l'ancora (XAUUSD M1 T1 Modello 4) rifa' R1A_01. (verde, testo).
+    A3 (lettore leggi_gba_r0.py con GBA_R0_R2SXTANC.zip e GBA_R0_R1A.zip insieme: 'caricata DUE volte') e' una precondizione FUORI da D2, stampata."""
+    att = ATTESA_ANCORA_TICK
+    P = _passata(lotti, LOTTO_ANCORA_TICK, "REPL")
+    if P is None:
+        return (False, "NON LETTO: lo zip dell'ancora a tick GBA_R0_%s.zip non e' caricato (o non ha la passata REPL)" % LOTTO_ANCORA_TICK)
+    if P["stato"] == "NON_LANCIATA" or P["giornale"] is None:
+        return (False, "ROSSO: passata dell'ancora a tick non lanciata (%s)" % (P["riga"].get("motivi") or "nessun motivo"))
+    r, A = P["riga"], P["A"]
+    err = []
+    # A1: manifest del driver
+    if not r["stato"].startswith("OK"):
+        err.append("A1 stato %s (%s)" % (r["stato"], r.get("motivi") or "-"))
+    if (r["trades_report"], r["profitto_report"], r["pf_report"]) != att["manifest"]:
+        err.append("A1 manifest %s / %s / %s invece di %s" % (r["trades_report"], r["profitto_report"], r["pf_report"], " / ".join(att["manifest"])))
+    if (r.get("qualita") or "").strip() != att["qualita"]:
+        err.append("A1 qualita '%s' invece di '%s'" % (r.get("qualita"), att["qualita"]))
+    if ((r.get("barre_report") or "").strip(), (r.get("ticks_report") or "").strip()) != (att["barre"], att["ticks"]):
+        err.append("A1 barre / tick del report %s / %s invece di %s / %s" % (r.get("barre_report"), r.get("ticks_report"), att["barre"], att["ticks"]))
+    if att["ticks_inizio"] not in [x.strip() for x in (r.get("ticks_inizio") or "").split(" / ")]:
+        err.append("A1 ticks_inizio '%s' senza '%s'" % (r.get("ticks_inizio") or "", att["ticks_inizio"]))
+    # A2: QUESTO D2 sul giornale dell'ancora
+    if (A["ingressi"], fx(A["c3g"]), A["ge50"], A["ge40"], A["righe_spread_zero"]) != (att["ingressi"], att["cella"], att["ge50"], att["ge40"], att["spread_zero"]):
+        err.append("A2 ingressi %d, C3G cella %s, righe >= 50x %d, >= 40x %d, -1.0x %d invece di %d, %s, %d, %d, %d" % (
+            A["ingressi"], fx(A["c3g"]), A["ge50"], A["ge40"], A["righe_spread_zero"], att["ingressi"], att["cella"], att["ge50"], att["ge40"], att["spread_zero"]))
+    if err:
+        return (False, "ROSSO: l'ancora a tick NON rifa' R1A_01 (" + "; ".join(err) + ")")
+    return (True, "VERDE (A1: OK, 128 / -6577.48 / 0.83, 100%ticksreali, barre 88416, tick 25648545, ticks_inizio con XAUUSD 2024.07.10; A2: ingressi 128, C3G cella "
+                  "21.60, righe >= 50x 280, >= 40x 651, -1.0x 0: identici a R1A_01. A3 e' del lettore: precondizione FUORI da D2)")
+
+
+def stato_ce_d2(lotti, acc_ok, e_m1):
+    """CE-D2 del file prova R2SXAGT: NELLA STESSA lettura, QUESTO D2 rifa' a tolleranza zero, sulla REPL a Modello 1 del 13/10, le cifre di D2 v3 (le stesse del
+    CE7: righe 6611, EA 6611/0/6611/0/0, C3G cella/lati/fasce) + righe >= 40x 0 + esito di riferimento 'ESCLUSA (Modello 1)'; e la passata a tick e' letta dallo
+    STESSO SHA256. (verde, testo)."""
+    P = _passata(lotti, "R2SXAG2", "REPL")
+    ce7 = stato_ce7(lotti, acc_ok)
+    err = []
+    if ce7[0] != "VERDE":
+        err.append("cifre della REPL a Modello 1 (CE7) %s: %s" % (ce7[0], ce7[1]))
+    if P is not None and P.get("A") is not None and P["A"]["ge40"] != 0:
+        err.append("righe >= 40x %d invece di 0" % P["A"]["ge40"])
+    if not (e_m1 and e_m1[2] and "ESCLUSA (Modello 1)" in e_m1[1]):
+        err.append("esito di riferimento a Modello 1 NON 'ESCLUSA (Modello 1)'")
+    Pt = _passata(lotti, "R2SXAGT", "REPL")
+    if P is not None and Pt is not None and Pt.get("sha_d2") is not None and Pt.get("sha_d2") != P.get("sha_d2"):
+        err.append("SHA256 di D2 diverso fra la passata a Modello 1 e quella a tick")
+    if err:
+        return (False, "ROSSO (" + "; ".join(err) + ")")
+    return (True, "VERDE (stesso SHA256 %s per le due passate; la REPL a Modello 1 rifa' D2 v3: 6611 righe, EA 6611/0/6611/0/0, C3G 2.40 / BUY 2.50 n 3364 / SELL "
+                  "2.30 n 3247, fasce identiche, righe >= 40x 0, 'ESCLUSA (Modello 1)')" % sha_d2())
+
+
+def regressione_m1(acc_ok, acc_righe):
+    """(0b) Rilegge ADESSO, con QUESTO D2, l'archivio del 13/10 (GBA_R2S_XAG2.zip + ancora del 12/10 estratta da GBA_R2S_A.zip) e lo confronta con la lettura
+    archiviata della v3: IDENTICA salvo riga 2 (versione + SHA256 corto) e riga 5 (SHA256 intero di D2), riga del CSV esclusa; CSV identico byte per byte.
+    Restituisce (ok, testo, righe_diverse)."""
+    import tempfile, shutil
+    try:
+        raw_a = open(ARCH_R2S_A, "rb").read()
+        raw_x = open(ARCH_R2S_XAG2[0], "rb").read()
+        arch = open(ARCH_LETTURA_XAG2[0], "rb").read()
+        arch_csv = open(ARCH_CSV_XAG2[0], "rb").read()
+    except OSError as ex:
+        return (False, "archivio non leggibile (%s)" % ex, None)
+    for nome, raw, sha in (("GBA_R2S_A.zip", raw_a, SHA_ARCH_R2S_A), ("GBA_R2S_XAG2.zip", raw_x, ARCH_R2S_XAG2[1]),
+                           ("LETTURA_D2_R2S_XAG2.txt", arch, ARCH_LETTURA_XAG2[1]), ("D2_C3G_R2S_XAG2.csv", arch_csv, ARCH_CSV_XAG2[1])):
+        if hashlib.sha256(raw).hexdigest() != sha:
+            return (False, "archivio %s con SHA256 diverso da quello pinnato (%s...)" % (nome, sha[:12]), None)
+    zA = zipfile.ZipFile(io.BytesIO(raw_a))
+    anc = zA.read(_nomi(zA)["GBA_R0_R2SANC.zip"])
+    td = tempfile.mkdtemp(prefix="d2b_")
+    try:
+        lt, nt = carica_dati([("GBA_R0_R2SANC.zip", anc), (ARCH_R2S_XAG2[0], raw_x)])
+        cp = os.path.join(td, "regr_xag2.csv")
+        nuove = stampa(lt, nt, acc_ok, acc_righe, cp).splitlines()
+        csv_ok = open(cp, "rb").read() == arch_csv
+    except Rifiuto as ex:
+        return (False, "l'archivio del 13/10 NON si rilegge (%s)" % ex, None)
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+    vecchie = arch.decode("ascii").splitlines()
+    if not vecchie or not vecchie[-1].startswith(" CSV: "):
+        return (False, "lettura archiviata senza la riga del CSV in fondo", None)
+    vecchie = vecchie[:-1]
+    sha = sha_d2()
+    attese = list(vecchie)
+    if len(attese) >= 5:
+        attese[1] = attese[1].replace(VERSIONE_V3, VERSIONE).replace(SHA_D2_V3[:16], sha[:16])
+        attese[4] = attese[4].replace(SHA_D2_V3, sha)
+    diverse = [i + 1 for i in range(max(len(attese), len(nuove))) if i >= len(attese) or i >= len(nuove) or attese[i] != nuove[i]]
+    cambiate = [i + 1 for i in range(min(len(vecchie), len(nuove))) if vecchie[i] != nuove[i]]
+    ok = not diverse and csv_ok and cambiate == [2, 5] and SHA_D2_V3 in vecchie[4] and vecchie[1].endswith(SHA_D2_V3[:16])
+    testo = ("IDENTICA alla lettura della v3 (D2 %s...) su %d righe, salvo le righe %s (versione e SHA256 di D2); CSV identico byte per byte" % (
+        SHA_D2_V3[:12], len(vecchie), " e ".join(str(x) for x in cambiate)) if ok else
+        "DIVERSA dalla lettura della v3: righe diverse oltre a versione/SHA256 %s; righe cambiate %s; CSV %s" % (
+            diverse or "-", cambiate or "-", "identico" if csv_ok else "DIVERSO"))
+    return (ok, testo, diverse)
+
+
+def ce_t_b(P_tk):
+    """CE-T (b) del file prova R2SXAGT: tick del report (colonna ticks_report del MANIFEST) > 353614 (i tick GENERATI a Modello 1). (verde, testo)."""
+    if P_tk is None:
+        return (False, "NON VALUTABILE: passata R2SXAGT assente")
+    t = (P_tk["riga"].get("ticks_report") or "").strip()
+    if not t.isdigit():
+        return (False, "NON VALUTABILE: ticks_report '%s' non leggibile" % t)
+    if int(t) <= TICK_GENERATI_M1:
+        return (False, "ROSSA: tick del report %s <= %d (i tick GENERATI a Modello 1 dalle barre M1): '100%%' e conteggio non si accordano" % (t, TICK_GENERATI_M1))
+    return (True, "VERDE: tick del report %s > %d" % (t, TICK_GENERATI_M1))
+
+
+def blocchi_conferma(lotti, ce1_tick, reg, ce_d2=None, ce_t=None, ce_ta=None):
+    """I controlli del GIRO che, se rossi o NON VALUTABILI, tolgono la conferma (E3 punto 3; file prova R2SXAGT: CE1, CE-D2, CE-T (a) senza report, CE-T (b)).
+    Lista vuota = nessun blocco. CE-T (a) col report letto e' gia' l'esito (1), che casella4() decide PRIMA di questi."""
+    b = []
+    if not ce1_tick[0]:
+        b.append("CE1 ancora a tick NON verde (" + ce1_tick[1] + ")")
+    if ce_ta:
+        b.append("CE-T (a) tick veri NON verde: " + "; ".join(ce_ta))
+    if ce_d2 is not None and not ce_d2[0]:
+        b.append("CE-D2 (stesso strumento) NON verde " + ce_d2[1])
+    if ce_t is not None and not ce_t[0]:
+        b.append("CE-T (b) tick veri NON verde: " + ce_t[1])
+    if not reg[0]:
+        b.append("(0b) la rilettura della passata a Modello 1 con questo D2 NON e' identica alla lettura archiviata (" + reg[1] + ")")
+    if lotti["R2SXAG2"].get("sha_zip") != SHA_ZIP_XAG2_1310:
+        b.append("lo zip a Modello 1 di questa lettura NON e' GBA_R0_R2SXAG2.zip del 13/10 (SHA256 %s, archiviato %s)" % (
+            (lotti["R2SXAG2"].get("sha_zip") or "n.d.")[:12], SHA_ZIP_XAG2_1310[:12]))
+    return b
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+#  v4: LOTTO R2SXAGH (argento M30/H1/H4, Modello 1, T1): CE7H, CE1H, CE9, CE10, albero H0-H3 (file prova GBA_R2S_XAGUSDH_2026-10-13.txt, LETTERALE)
+# ---------------------------------------------------------------------------------------------------------------------
+def stato_ce7h(lotti):
+    """CE7H: in OGNI passata lanciata del lotto R2SXAGH la colonna ticks_gen del MANIFEST = 353614, tolleranza zero. ('VERDE'|'ROSSA'|'NON VALUTABILE', testo)."""
+    if "R2SXAGH" not in lotti:
+        return ("NON VALUTABILE", "lotto R2SXAGH non caricato")
+    lan = [P for P in lotti["R2SXAGH"]["passate"] if P["stato"] != "NON_LANCIATA"]
+    if not lan:
+        return ("NON VALUTABILE", "nessuna passata lanciata con la riga 'ticks, bars generated'")
+    vuote = [P["tag"] for P in lan if not (P["riga"].get("ticks_gen") or "").strip()]
+    diverse = ["%s %s" % (P["tag"], P["riga"]["ticks_gen"].strip()) for P in lan if (P["riga"].get("ticks_gen") or "").strip() not in ("", TICK_GEN_M1)]
+    if diverse:
+        return ("ROSSA", "ticks_gen diverso da %s: %s (storia M1 di T1 o generatore di tick cambiati)" % (TICK_GEN_M1, "; ".join(diverse)))
+    if vuote:
+        return ("NON VALUTABILE", "passate senza la riga 'ticks, bars generated' (ticks_gen vuoto): %s" % ", ".join(vuote))
+    return ("VERDE", "ticks_gen = %s in tutte le %d passate lanciate" % (TICK_GEN_M1, len(lan)))
+
+
+def stato_ce1h(lotti, ce1_anc, ce7h):
+    """CE1H: ancora del 12/10 VERDE (zip archiviato, SHA 259f4ba0...) E CE7H VERDE; altrimenti TUTTE E TRE le celle (C)."""
+    err = []
+    if not ce1_anc[0]:
+        err.append("ancora del 12/10 NON verde (" + ce1_anc[1] + ")")
+    elif lotti["R2SANC"].get("sha_zip") != SHA_ANCORA_1210:
+        err.append("lo zip dell'ancora NON e' GBA_R0_R2SANC.zip del 12/10 (SHA256 %s, archiviato %s)" % ((lotti["R2SANC"].get("sha_zip") or "n.d.")[:12], SHA_ANCORA_1210[:12]))
+    if ce7h[0] != "VERDE":
+        err.append("CE7H " + ce7h[0])
+    if err:
+        return (False, "NON VERDE -> TUTTE E TRE le celle del lotto R2SXAGH (M30, H1, H4) sono (C), senza appello: " + "; ".join(err))
+    return (True, "VERDE (ancora del 12/10 verde, zip archiviato SHA256 %s..., E CE7H verde)" % SHA_ANCORA_1210[:12])
+
+
+def ce9(P):
+    """CE9 FILTRO = COSTO: righe libere = motivo diverso da 'posizione gia' aperta' e da 'ATR non valido'; S_sp = righe SALTATO per spread; L_lt = libere con stop/spread
+    stampato < 50,0 (-1.0x = INFINITO, non < 50); L_eq = libere stampate esattamente 50,0. VERDE se L_lt <= S_sp <= L_lt + L_eq. (verde, testo)."""
+    rr = P["giornale"]["righe"]
+    lib = [r for r in rr if r["motivo"] not in ("posizione gia' aperta", "ATR non valido")]
+    s_sp = sum(1 for r in rr if (not r["preso"]) and r["motivo"] == "spread oltre il limite")
+    l_lt = sum(1 for r in lib if r["rap"] != -1.0 and r["rap"] < 50.0)
+    l_eq = sum(1 for r in lib if r["rap"] == 50.0)
+    ok = l_lt <= s_sp <= l_lt + l_eq
+    return (ok, "%s: righe libere %d, S_sp %d, L_lt %d, L_eq %d -> %d <= %d <= %d %s" % ("verde" if ok else "ROSSA", len(lib), s_sp, l_lt, l_eq, l_lt, s_sp, l_lt + l_eq,
+                                                                                     "vale" if ok else "NON vale"))
+
+
+def ce10(P):
+    """CE10 RISCALDAMENTO: righe '[GBA] dati non pronti sulla barra ... segnale non valutato' nel giornale = 0. (verde, testo)."""
+    k = P["giornale"]["non_pronti"]
+    return (k == 0, "%s: righe 'dati non pronti' %d (attese 0)" % ("verde" if k == 0 else "ROSSA", k))
+
+
+def classe_s2(c):
+    """Classe S2 del C3G sui segnali grezzi per l'argento (R-XAG-1, DESCRIZIONE): mai la dicitura di chiusura."""
+    if c is None:
+        return "C3G NON DEFINITO"
+    if c >= COSTO_LAVORO:
+        return "zona >= 40x (il costo grezzo non esclude)"
+    if c >= 6.65:
+        return "FRA (6,65x <= C3G < 40x)"
+    return "sotto S 6,65x"
+
+
+def esito_h(P, S, acc_ok, ce1h):
+    """ALBERO H0-H3 del file prova R2SXAGH, il PRIMO che vale decide, UN esito per cella. Restituisce (sigla, lettera, frase, esito di riferimento o None)."""
+    r = P["riga"]
+    if r["stato"] == "NON_LANCIATA" or P["giornale"] is None:
+        return ("H0", "C", "NON SI LEGGE: passata non lanciata (%s)" % (r.get("motivi") or "nessun motivo"), None)
+    if not ce1h[0]:
+        return ("H0", "C", "NON SI LEGGE: CE1H " + ce1h[1], None)
+    c = P["giornale"]["conta"]
+    if P["A"]["n"] == 0 or (c is not None and c["seg"] == 0):
+        return ("H0", "C", "NON SI LEGGE: 0 segnali in T1 (quantificatore vuoto): C3G NON DEFINITO (ne' 0 ne' infinito), SH1 non valutabile; la casella 5 resta NON ANCORA "
+                "MISURATO col numero accanto; si legge la storia (CE10, riga 'bars generated', 'history data begins from')", None)
+    rossi = [x for x in (("CE9", ce9(P)), ("CE10", ce10(P))) if not x[1][0]]
+    if rossi:
+        return ("H0", "C", "NON SI LEGGE: %s" % "; ".join("%s %s" % (k, v[1]) for k, v in rossi), None)
+    e = esito(P, S, "riferimento", acc_ok, ce1h)
+    if e[0] == "C":
+        return ("H0", "C", e[1], e)
+    if e[0] == "A":
+        return ("H1", "A", e[1], e)
+    if e[2]:
+        return ("H2", "B", e[1] + " | casella NON chiusa: per E3 serve UNA passata a tick reali della stessa cella e tranche, con un file prova suo e lo stesso SHA256 di D2", e)
+    cd = condizioni_b(P["A"], S, SOGLIA_II_E1, True)
+    nv = [k for k in ("i", "ii", "iii", "iv", "v") if not cd[k]]
+    return ("H3", "B", e[1] + " | non vale: %s | classe S2 del C3G: %s" % (", ".join("(%s)" % k for k in nv) or "nessuna (accettazione di D2 non passata)",
+                                                                           classe_s2(P["A"]["c3g"])), e)
+
+
+def sh_testo(P):
+    """SMENTITE H (DESCRIZIONE: smentiscono la stima, MAI l'esito)."""
+    A = P["A"]
+    out = []
+    if A["n"] == 0:
+        out.append("SH1 NON VALUTABILE (0 righe)")
+    elif P["tf"] in SH1_BANDE:
+        lo, hi = SH1_BANDE[P["tf"]]
+        dentro = lo <= A["c3g"] <= hi
+        out.append("SH1 C3G %s %s la banda %.0f-%.0fx%s" % (fx(A["c3g"]), "dentro" if dentro else "FUORI (smentita)", lo, hi,
+                                                            "" if A["n"] >= 30 else " (con %d righe)" % A["n"]))
+    else:
+        out.append("SH1 C3G %s accanto all'attesa 16-18x (M30: nessuna banda)" % fx(A["c3g"]))
+    if P["n"] is not None:
+        nn = P["n"] - A["ingressi_spread_zero"]
+        out.append("SH2 n netto %d %s" % (nn, ">= 30 (smentita)" if nn >= 30 else "< 30"))
+    sc = A["spread_cella"]
+    out.append("SH3 spread della cella %s %s" % (fx(sc, 3), "n.d." if sc is None else ("FUORI 0,02-0,08 (smentita)" if (sc > 0.08 or sc < 0.02) else "dentro 0,02-0,08")))
+    return "; ".join(out)
 
 
 RE_TESTER = re.compile(r"^# TESTER \S+\t[^\t]*\t(?P<ora>\d\d):(?P<mi>\d\d):(?P<se>\d\d(?:\.\d+)?)\t[^\t]*\t(?P<msg>.*)$")
@@ -1050,7 +1439,9 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
     W = out.append
     righe_csv = []
     xag2 = "R2SXAG2" in lotti
-    giro = GIRO_XAG2 if xag2 else GIRO_A
+    xagt = "R2SXAGT" in lotti                    # v4: carica() garantisce che R2SXAGT c'e' SOLO con R2SXAG2 (stessa invocazione)
+    xagh = "R2SXAGH" in lotti                    # v4: carica() garantisce che R2SXAGH c'e' SOLO con l'ancora del 12/10
+    giro = GIRO_XAGH if xagh else (GIRO_XAGT if xagt else (GIRO_XAG2 if xag2 else GIRO_A))
     W("=" * 110)
     W(" %s -- GBA R2S stadio A, C3G (mediana vera del campo stop/spread delle righe segnale). SHA256 di questo file: %s" % (
         VERSIONE, hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest()[:16]))
@@ -1061,6 +1452,19 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
         W(" REGOLA E3(3): una conferma a tick reali letta con uno strumento D2 di SHA256 DIVERSO da quello qui sopra (che legge la passata a Modello 1) e' 'conferma non")
         W("   data' (casella 4 aperta). Precondizione FUORI da D2: il PASS del cancello su QUESTO SHA256 PRIMA di aprire lo zip (senza: CE7 non valutabile, tutto (C)).")
         W(" X6: CE1 del lotto = ancora del 12/10 (zip archiviato, pin %s) E CE7; CE7 rossa o non valutabile -> M15 e REPL (C). CE8 = sola descrizione." % PIN_A[:8])
+    if xagt:
+        W(" CONFERMA A TICK REALI (E3), lotto R2SXAGT (pin %s), ancora a tick %s: letta in QUESTA invocazione, insieme alla passata a Modello 1 R2SXAG2_02_REPL," % (
+            LOTTI["R2SXAGT"]["pin"], LOTTO_ANCORA_TICK))
+        W("   dallo STESSO D2 (SHA256 qui sopra, per intero): la passata a Modello 1 e' stata letta il 13/10 da D2 v3 %s; (0b) la rilegge ADESSO con questo D2 e" % SHA_D2_V3)
+        W("   deve uscire IDENTICA (salvo versione/SHA256). Ordine di E3: storia a tick mancante; eccezione n = 0; altro KO / CE rosse / ancora a tick / (0b) / SHA")
+        W("   diverso = conferma non data; n netto >= 30 = smentita per n (mai (A)); (i)-(v) false = da rimisurare; altrimenti la conferma e la casella 4 si chiude.")
+    if xagh:
+        W(" LOTTO R2SXAGH (argento M30/H1/H4, R-XAG-1, Modello 1, T1, pin %s): SHA256 di D2 PER INTERO: %s" % (PIN_XAGH, sha_d2()))
+        W(" CE1H = ancora del 12/10 (zip archiviato, pin %s) E CE7H (ticks_gen = %s in ogni passata lanciata); non verde -> M30, H1 e H4 (C). CE9 (filtro = costo) e CE10" % (
+            PIN_A[:8], TICK_GEN_M1))
+        W("   (righe 'dati non pronti' = 0) per cella. ALBERO H0 (C) -> H1 (A) -> H2 'ESCLUSA (Modello 1)' -> H3 'n insufficiente': il PRIMO che vale decide, UN esito per cella.")
+        W("   (i) e (iv) chiedono >= 200 righe nella cella. OROLOGIO: a H4 l'ora della riga sta in [ora server, ora server + 3] (domenica 20:00 -> 23:00); M30 e H1 uguaglianza.")
+        W("   E3(1): una cella H2 si conferma a tick reali SOLO con lo STESSO SHA256 di D2. Precondizione FUORI da D2: il PASS del cancello su QUESTO SHA256 e il G0 del lettore.")
     W("=" * 110)
     W("(0) PROVA D'ACCETTAZIONE di D2 (giornali archiviati, rifatta adesso): %s" % ("PASSATA" if acc_ok else "NON PASSATA -> nessuna cella esce 'ESCLUSA'"))
     for x in acc_righe:
@@ -1085,6 +1489,40 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
         W("   CE8 (causa dello stallo, DESCRIZIONE, nessun esito ne dipende; lettura scritta nel file prova prima dei numeri):")
         for x in ce8_lettura(lotti):
             W("      - " + x)
+    if xagh:
+        ce7h = stato_ce7h(lotti)
+        ce1_lotto["R2SXAGH"] = stato_ce1h(lotti, ce1, ce7h)
+        W("   CE7H (determinismo della storia M1, ticks_gen di ogni passata lanciata): %s: %s" % (ce7h[0], ce7h[1]))
+        W("   CE1H del lotto R2SXAGH: " + ce1_lotto["R2SXAGH"][1])
+    conferma = None
+    if xagt:
+        # v4: il giro di conferma (E3) PRIMA di qualunque esito: ancora a tick, (0b), zip a Modello 1 archiviato; poi la conferma della cella R2SXAG2 REPL
+        ce1_tick = stato_ce1_tick(lotti)
+        reg = regressione_m1(acc_ok, acc_righe)
+        W("   CE1 dell'ancora a tick (%s, XAUUSD M1 T1 Modello 4, deve rifare R1A_01): %s" % (LOTTO_ANCORA_TICK, ce1_tick[1]))
+        W("   (0b) REGRESSIONE della passata a Modello 1 (archivio del 13/10 riletto ADESSO da questo D2): " + reg[1])
+        W("   zip a Modello 1 di questa lettura = GBA_R0_R2SXAG2.zip del 13/10 (SHA256 %s...): %s" % (
+            SHA_ZIP_XAG2_1310[:12], "SI" if lotti["R2SXAG2"].get("sha_zip") == SHA_ZIP_XAG2_1310 else "NO"))
+        P_m1, P_tk = _passata(lotti, "R2SXAG2", "REPL"), _passata(lotti, "R2SXAGT", "REPL")
+        W("   SHA256 di D2 che ha letto la passata a Modello 1 IN QUESTA LETTURA: %s" % (P_m1.get("sha_d2") or "n.d. (passata non lanciata o assente)" if P_m1 else "n.d. (cella assente)"))
+        W("   SHA256 di D2 che ha letto la passata a tick reali IN QUESTA LETTURA: %s" % (P_tk.get("sha_d2") or "n.d. (passata non lanciata)" if P_tk else "n.d. (cella assente)"))
+        W("   A3 dell'ancora a tick (leggi_gba_r0.py con GBA_R0_%s.zip e GBA_R0_R1A.zip insieme: 'caricata DUE volte'): precondizione FUORI da D2" % LOTTO_ANCORA_TICK)
+        if P_m1 is None or P_m1.get("A") is None:
+            conferma = "NON ANCORA MISURATO: conferma NON data, casella aperta: la passata a Modello 1 R2SXAG2 REPL non e' leggibile in questa lettura"
+        else:
+            e_m1 = esito(P_m1, LOTTI["R2SXAG2"]["S"], "riferimento", acc_ok, ce1_lotto["R2SXAG2"])
+            ce_d2 = stato_ce_d2(lotti, acc_ok, e_m1)
+            ce_t = ce_t_b(P_tk)
+            ce_ta = ce_t_a(P_tk) if P_tk is not None else ["passata R2SXAGT assente"]
+            W("   CE-D2 (stesso strumento, cifre di D2 v3 rifatte sulla REPL a Modello 1 di QUESTA lettura): " + ce_d2[1])
+            W("   CE-T (a) (tick veri della passata R2SXAGT: qualita '100%%ticksreali' e voce XAGUSD in ticks_inizio <= %s): %s" % (
+                TRANCHE[1], "VERDE" if not ce_ta else "NON VERDE (" + "; ".join(ce_ta) + ")"))
+            W("   CE-T (b) (tick veri della passata R2SXAGT): " + ce_t[1])
+            if P_tk is not None or not e_m1[2]:
+                conferma = casella4(e_m1, P_m1, P_tk, LOTTI["R2SXAG2"]["S"], acc_ok, blocchi_conferma(lotti, ce1_tick, reg, ce_d2, ce_t, ce_ta))
+            else:
+                conferma = "NON ANCORA MISURATO: conferma NON data, casella aperta: la passata R2SXAGT REPL e' assente dal manifest"
+        W("   CONFERMA E3 della cella R2SXAG2 REPL (XAGUSD M1, T1): %s" % conferma)
     for L in ORDINE:
         if L not in giro:
             continue
@@ -1108,6 +1546,8 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
                 W("   CE8 (descrizione): " + ce8_testo(ce8_passata(P)))
             if P["giornale"] is None:
                 W("   passata non lanciata: niente da leggere -> esito (C)")
+                if L == "R2SXAGH":
+                    W("   ESITO H (albero H0-H3, il primo che vale decide): H0 (C) NON SI LEGGE: passata non lanciata (%s)" % (P["riga"].get("motivi") or "nessun motivo"))
                 righe_csv.append({"lotto": L, "cella": P["cella"], "simbolo": P["simbolo"], "tf": P["tf"], "livello": "CELLA", "nome": "-", "esito_pinnato": "C", "esito_E1": "C",
                                   "esito_riferimento": "C", "casella4_E3": "NON ANCORA MISURATO: passata non lanciata"})
                 continue
@@ -1140,11 +1580,55 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
                   "ge40": A["ge40"], "ge50": A["ge50"], "ingressi": A["ingressi"], "ingressi_spread_zero": A["ingressi_spread_zero"], "righe_spread_zero": A["righe_spread_zero"],
                   "n_report": "" if P["n"] is None else P["n"], "tentati": "" if c is None else c["ing"], "scartati_spread": "" if c is None else c["spr"],
                   "solo_spread_mediana": "" if not P["solo_spread"] else "%.2f" % mediana(P["solo_spread"]), "spread_cella": fx(A["spread_cella"], 3)}
+            if xagt:
+                rc["sha_d2"] = P.get("sha_d2") or ""
             if L == "R2SANC":
                 W("   ANCORA: nessun esito; vedi CE1 in testa.")
                 righe_csv.append(rc)
                 continue
+            if L == LOTTO_ANCORA_TICK:
+                W("   ANCORA A TICK: nessun esito; vedi 'CE1 dell'ancora a tick' in testa. Storia a tick: %s" % ("; ".join(storia_tick_mancante(P)) or "presente"))
+                righe_csv.append(rc)
+                continue
             S = D["S"]
+            if L == "R2SXAGH":
+                # v4: albero H0-H3 del file prova R2SXAGH, UN esito per cella (niente varianti)
+                for k9, v9 in (("CE9 (filtro = costo)", ce9(P)), ("CE10 (riscaldamento)", ce10(P))):
+                    W("   %s %s" % (k9, v9[1]))
+                W("   righe FRA 40x E 50x (righe >= 40x meno righe >= 50x: scartate dal MARGINE del filtro 0,05, non dal costo; DESCRIZIONE) %d | classe S2 del C3G: %s" % (
+                    A["ge40"] - A["ge50"], classe_s2(A["c3g"])))
+                W("   SMENTITE H (descrizione, nessun esito ne dipende): " + sh_testo(P))
+                if P["n"] is not None:
+                    np_ = P["n"] - A["ingressi_spread_zero"]
+                    W("   PORTA STADIO B: n %d - ingressi a spread zero %d = %d %s 30" % (P["n"], A["ingressi_spread_zero"], np_, ">=" if np_ >= N_PORTA else "<"))
+                W("   eccezione n = 0 (KO solo per ZERO operazioni, tentati 0, scartati spread >= 1): %s" % ("SI" if (not P["riga"]["stato"].startswith("OK") and P["n"] is not None and eccezione_n0(P)) else "no"))
+                cd = condizioni_b(A, S, SOGLIA_II_E1, True)
+                W("   condizioni di ESCLUSA, S = %sx, E1 + E4 ((ii) su fasce >= 30 righe: %s): (i) %s  (ii) %s  (iii) %s  (iv) %s  | (v) righe >= 40x %d < 30: %s" % (
+                    fx(S), ", ".join(cd["fasce_ii"]) or "nessuna", *(["SI" if cd[k] else "no" for k in ("i", "ii", "iii", "iv")] + [A["ge40"], "SI" if cd["v"] else "no"])))
+                eh = esito_h(P, S, acc_ok, ce1_lotto["R2SXAGH"])
+                c4h = casella4(eh[3], P, None, S, acc_ok) if eh[3] is not None else "NON ANCORA MISURATO, caselle 4 e 5 aperte: la cella non si legge (H0)"
+                W("   ESITO H (albero H0-H3, il primo che vale decide): %s (%s) %s" % (eh[0], eh[1], eh[2]))
+                W("   CASELLE 4 e 5 (argento): %s" % c4h)
+                rc.update({"esito_pinnato": "-", "esito_E1": "-", "esito_riferimento": "%s (%s) %s" % eh[:3], "casella4_E3": c4h, "ce9": ce9(P)[1], "ce10": ce10(P)[1],
+                           "ce1h": ("VERDE " if ce1_lotto["R2SXAGH"][0] else "NON VERDE ") + ce1_lotto["R2SXAGH"][1]})
+                righe_csv.append(rc)
+                continue
+            if L == "R2SXAGT":
+                # v4: la passata di CONFERMA non ha un esito dello stadio A: si stampano i numeri a tick e la conferma (E3) della cella R2SXAG2 REPL
+                st = storia_tick_mancante(P)
+                W("   qualita %s | tick del report %s | ticks_inizio %s | storia a tick: %s" % (P["riga"].get("qualita") or "n.d.", P["riga"].get("ticks_report") or "n.d.",
+                                                                                         P["riga"].get("ticks_inizio") or "n.d.", "; ".join(st) or "presente"))
+                if P["n"] is not None:
+                    np_ = P["n"] - A["ingressi_spread_zero"]
+                    W("   n NETTO a tick reali: n %d - ingressi a spread zero %d = %d %s 30" % (P["n"], A["ingressi_spread_zero"], np_, ">=" if np_ >= N_PORTA else "<"))
+                W("   eccezione n = 0 (KO solo per ZERO operazioni, tentati 0, scartati spread >= 1): %s" % ("SI" if (not P["riga"]["stato"].startswith("OK") and P["n"] is not None and eccezione_n0(P)) else "no"))
+                cd = condizioni_b(A, S, SOGLIA_II_E1, True)
+                W("   condizioni (i)-(v) RILETTE A TICK REALI, S = %sx, E1 + E4 ((ii) su fasce >= 30 righe: %s): (i) %s  (ii) %s  (iii) %s  (iv) %s  (v) righe >= 40x %d < 30: %s" % (
+                    fx(S), ", ".join(cd["fasce_ii"]) or "nessuna", *(["SI" if cd[k] else "no" for k in ("i", "ii", "iii", "iv")] + [A["ge40"], "SI" if cd["v"] else "no"])))
+                W("   CONFERMA E3 (vale per la cella R2SXAG2 REPL, nessun esito proprio di questa passata): %s" % conferma)
+                rc.update({"esito_pinnato": "-", "esito_E1": "-", "esito_riferimento": "-", "casella4_E3": conferma})
+                righe_csv.append(rc)
+                continue
             if P["n"] is not None:
                 np_ = P["n"] - A["ingressi_spread_zero"]
                 W("   PORTA STADIO B: n %d - ingressi a spread zero %d = %d %s 30" % (P["n"], A["ingressi_spread_zero"], np_, ">=" if np_ >= N_PORTA else "<"))
@@ -1157,7 +1641,7 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
             e_p = esito(P, S, "pinnato", acc_ok, ce1_p)
             e_1 = esito(P, S, "E1", acc_ok, ce1_p)
             e_r = esito(P, S, "riferimento", acc_ok, ce1_p)
-            c4 = casella4(e_r, P, None, S, acc_ok)
+            c4 = conferma if (xagt and L == "R2SXAG2" and P["cella"] == "REPL") else casella4(e_r, P, None, S, acc_ok)
             W("   (variante) ESITO secondo il testo pinnato, (i)-(iv), (ii) >= 100: (%s) %s" % (e_p[0], e_p[1]))
             W("   (variante) ESITO con E1, (i)-(iv), (ii) >= 30:                  (%s) %s" % (e_1[0], e_1[1]))
             W("   ESITO DI RIFERIMENTO (E1 + E4, (i)-(v), dicitura E3):          (%s) %s" % (e_r[0], e_r[1]))
@@ -1175,6 +1659,10 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
                  "esito_riferimento", "casella4_E3"]
         if xag2:
             campi += ["ce1_x6", "ce8"]           # solo nella lettura del rilancio: il CSV dello stadio A resta quello della v2
+        if xagh:
+            campi += ["ce1h", "ce9", "ce10"]     # v4: solo nella lettura del lotto R2SXAGH
+        if xagt:
+            campi += ["sha_d2"]                  # v4: SHA256 intero di D2 su ogni riga CELLA della lettura con la conferma (stesso D2 per Modello 1 e tick)
         with open(csv_out, "w", newline="", encoding="ascii", errors="replace") as fh:
             w = csv.DictWriter(fh, fieldnames=campi, delimiter=";")
             w.writeheader()
@@ -1234,15 +1722,18 @@ def _zip_lotto(L, celle, prova_bytes=None, togli=(), ini_mod=None, nome_prova=No
     for k, (cn, spec) in enumerate(celle.items()):
         tf = spec.get("tf", tfm.get(cn, "M5"))
         tag = "%s_%02d_%s_T1_m775800" % (L, k + 1, cn)
-        man.append("%s;%s;%s;0.05;T1;2026.07.01;2026.09.30;1;775800;%s;%s;%s;%s;%s;%s;%s;1;1;1;1;%s;1;%s;si;si;2026.07.01-2026.09.30;%s;InpSignalTF;%s;%s;%s;%s" % (
-            L, tag, cn, spec.get("t_avvio", "2026-10-12 10:00:00"), spec.get("durata", "30"), spec.get("stato", "OK"), spec["n"], spec.get("profitto", "-1.00"), spec.get("pf", "0.90"), spec.get("qualita", "100%"), spec.get("ticks_inizio", ""),
+        mod = spec.get("modello", D.get("modello", "1"))      # v4: Modello 4 per il giro a tick (manifest E ini), salvo contro-esempio
+        man.append("%s;%s;%s;0.05;T1;2026.07.01;2026.09.30;%s;775800;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;1;%s;si;si;2026.07.01-2026.09.30;%s;InpSignalTF;%s;%s;%s;%s" % (
+            L, tag, cn, mod, spec.get("t_avvio", "2026-10-12 10:00:00"), spec.get("durata", "30"), spec.get("stato", "OK"), spec["n"], spec.get("profitto", "-1.00"),
+            spec.get("pf", "0.90"), spec.get("qualita", "100%"), spec.get("barre", "1"), spec.get("ticks", "1"), spec.get("barre_gen", "1"), spec.get("ticks_gen", "1"),
+            spec.get("ticks_inizio", ""),
             spec["n"], spec.get("motivi", ""),
             spec.get("valore", TF_NUM.get(tf, "5")), spec.get("simbolo", D["simbolo"]), tf, D["prova"]))
         if "ini" not in togli:
             inp = dict(pin)
             inp["InpSignalTF"] = TF_NUM.get(tf, "5")
             inp["InpMagic"] = "775800"
-            te = {"Expert": "ABTG_GoldBreakoutATR.ex5", "Symbol": D["simbolo"], "Period": tf, "Model": "1", "FromDate": "2026.07.01", "ToDate": "2026.09.30"}
+            te = {"Expert": "ABTG_GoldBreakoutATR.ex5", "Symbol": D["simbolo"], "Period": tf, "Model": spec.get("modello_ini", mod), "FromDate": "2026.07.01", "ToDate": "2026.09.30"}
             if ini_mod:
                 ini_mod(te, inp)
             z.writestr("ini\\gba_%s.ini" % tag, "[Tester]\r\n" + "".join("%s=%s\r\n" % kv for kv in te.items()) + "\r\n[TesterInputs]\r\n" + "".join("%s=%s\r\n" % kv for kv in inp.items()))
@@ -1428,7 +1919,7 @@ def autotest():
     ck("stessa cella senza CE1 verde -> (C)", all(r["REPL"][k][0] == "C" for k in range(3)))
     # 4a-bis. E3 PIENA: la conferma a tick reali (stessa cella, stessa tranche, modello 4)
 
-    def p_tick(righe, n=0, ko=True, cella="REPL", ingressi=None, modello="4", motivi=None, qualita="100% ticks reali", ticks_inizio="EURUSD 2024.07.05 / XAGUSD 2024.07.10"):
+    def p_tick(righe, n=0, ko=True, cella="REPL", ingressi=None, modello="4", motivi=None, qualita="100%ticksreali", ticks_inizio="EURUSD 2024.07.05 / XAGUSD 2024.07.10"):
         spec = dict(KOZ, righe=righe, n=n) if ko else {"righe": righe, "n": n}
         spec.update({"qualita": qualita, "ticks_inizio": ticks_inizio})
         if motivi is not None:
@@ -1642,10 +2133,15 @@ def autotest():
     rifiuta("RIFIUTO: raccolta con ESITI_R2S_A.txt di un altro pin", lambda: carica([raccolta2]))
     # --- 7. lotto R2SXAG2 (v3): regressione dello stadio A, CE7, X6, CE8, pin per lotto, ordine
     _autotest_xag2(ck, rifiuta, td, zip_ancora, log_s0, KOZ)
+    # --- 8. v4: la CONFERMA A TICK REALI (E3) letta dallo zip vero del giro R2SXAGT, nella stessa invocazione della passata a Modello 1
+    _autotest_xagt(ck, rifiuta, td, log_s0, KOZ)
+    # --- 9. v4: il lotto R2SXAGH (argento M30/H1/H4): orologio H4, CE7H/CE1H, CE9, CE10, albero H0-H3
+    _autotest_xagh(ck, rifiuta, td, zip_ancora, log_s0, KOZ)
     ck("il lettore non e' stato modificato dall'autotest", hashlib.sha256(open(lp, "rb").read()).hexdigest() == LETTORE_SHA256)
     import shutil
     shutil.rmtree(td, ignore_errors=True)
-    ck("i 6 file prova non sono stati toccati", all(hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"] for D in LOTTI.values()))
+    ck("i file prova pinnati non sono stati toccati (%d; quelli ancora DA-PINNARE non si aprono)" % sum(1 for D in LOTTI.values() if SEGNAPOSTO not in (D["prova"], D["sha"])),
+       all(hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"] for D in LOTTI.values() if SEGNAPOSTO not in (D["prova"], D["sha"])))
     print("AUTOTEST: %d OK, %d FAIL -> %s" % (ok_tot[0], ok_tot[1], "PASS" if ok_tot[1] == 0 else "FAIL"))
     return 0 if ok_tot[1] == 0 else 1
 
@@ -1657,8 +2153,11 @@ def _autotest_xag2(ck, rifiuta, td, zip_ancora, log_s0, KOZ):
     ck("R2SXAG2: file prova GBA_R2S_XAGUSD2 con lo SHA256 pinnato (dbe11bc3...), XAGUSD, S 6,65, celle M15 -> REPL, tag R2SXAG2_01_M15 / R2SXAG2_02_REPL",
        hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"] and D["S"] == 6.65 and D["simbolo"] == "XAGUSD"
        and [c for c, _t in D["celle"]] == ["M15", "REPL"] and D["tag"] == {"M15": "R2SXAG2_01_M15_T1_m775800", "REPL": "R2SXAG2_02_REPL_T1_m775800"})
-    ck("pin PER LOTTO: i 5 lotti dello stadio A solo cc9bcda0, R2SXAG2 solo d53493a9; PIN_AMMESSI = (cc9bcda0, d53493a9)",
-       all(LOTTI[L]["pin"] == PIN_A for L in GIRO_A) and LOTTI["R2SXAG2"]["pin"] == PIN_XAG2 and set(PIN_AMMESSI) == {PIN_A, PIN_XAG2}
+    ck("pin PER LOTTO: i 5 lotti dello stadio A solo cc9bcda0, R2SXAG2 solo d53493a9, R2SXAGT e l'ancora a tick solo il pin della riga a tick, R2SXAGH solo il pin della "
+       "riga XAGH; PIN_AMMESSI = (cc9bcda0, d53493a9, pin a tick, pin XAGH), quattro pin diversi",
+       all(LOTTI[L]["pin"] == PIN_A for L in GIRO_A) and LOTTI["R2SXAG2"]["pin"] == PIN_XAG2 and PIN_AMMESSI == (PIN_A, PIN_XAG2, PIN_XAGT, PIN_XAGH)
+       and LOTTI["R2SXAGT"]["pin"] == PIN_XAGT and LOTTI[LOTTO_ANCORA_TICK]["pin"] == PIN_XAGT and LOTTI["R2SXAGH"]["pin"] == PIN_XAGH
+       and len({PIN_A, PIN_XAG2, PIN_XAGT, PIN_XAGH}) == 4
        and PIN_XAG2 == "d53493a92901b82c6b4c12c1d79ec3cb4ebfa5bb")
     acc_ok, acc_r = accettazione()
     # 7a. REGRESSIONE: la lettura archiviata dello stadio A (v2) riga per riga
@@ -1671,9 +2170,9 @@ def _autotest_xag2(ck, rifiuta, td, zip_ancora, log_s0, KOZ):
     testo_a = stampa(la, na, acc_ok, acc_r, csv_a).splitlines()
     vecchie = arch.decode("ascii").splitlines()
     diverse = [i + 1 for i in range(min(len(vecchie) - 1, len(testo_a))) if vecchie[i] != testo_a[i]]
-    ck("REGRESSIONE stadio A: la v3 rilegge GBA_R2S_A.zip e stampa le %d righe della v2 IDENTICHE, salvo la riga 2 (versione + SHA256 di D2); l'ultima riga archiviata "
+    ck("REGRESSIONE stadio A: la v4 rilegge GBA_R2S_A.zip e stampa le %d righe della v2 IDENTICHE, salvo la riga 2 (versione + SHA256 di D2); l'ultima riga archiviata "
        "e' il percorso del CSV (stampato da main)" % (len(vecchie) - 1),
-       len(testo_a) == len(vecchie) - 1 and diverse == [2] and vecchie[-1].startswith(" CSV: ") and testo_a[1].startswith(" leggi_gba_r2s_c3g v3 ")
+       len(testo_a) == len(vecchie) - 1 and diverse == [2] and vecchie[-1].startswith(" CSV: ") and testo_a[1].startswith(" leggi_gba_r2s_c3g v4 ")
        and testo_a[1].endswith(sha_d2()[:16]) and vecchie[1].endswith("14384d874d124021"), "righe diverse: %s" % diverse)
     ck("REGRESSIONE stadio A: il CSV della v3 e' IDENTICO byte per byte a D2_C3G_R2S_A.csv archiviato (91010969...)",
        hashlib.sha256(open(csv_a, "rb").read()).hexdigest() == ARCH_CSV_A[1] == hashlib.sha256(open(ARCH_CSV_A[0], "rb").read()).hexdigest())
@@ -1870,6 +2369,486 @@ def _autotest_xag2(ck, rifiuta, td, zip_ancora, log_s0, KOZ):
             lambda: carica([pa, px, _scrivi(pz, "GBA_R0_R2SNAS.zip", zA.read(NA["GBA_R0_R2SNAS.zip"]))]))
 
 
+PIN_TEST_XAGT = "0123456789abcdef0123456789abcdef01234567"   # SOLO autotest, finche' PIN_XAGT e' DA-PINNARE
+
+
+class _PinDiProva(object):
+    """SOLO AUTOTEST: con PIN_XAGT ancora segnaposto, i lotti del giro a tick e ESITI_R2S_XAGT.txt usano un pin di PROVA; all'uscita tutto torna com'era."""
+    def __enter__(self):
+        self.vecchi = (LOTTI["R2SXAGT"]["pin"], LOTTI[LOTTO_ANCORA_TICK]["pin"], ESITI_FILE["ESITI_R2S_XAGT.txt"])
+        self.pin = PIN_XAGT if re.fullmatch(r"[0-9a-f]{40}", PIN_XAGT) else PIN_TEST_XAGT
+        LOTTI["R2SXAGT"]["pin"] = LOTTI[LOTTO_ANCORA_TICK]["pin"] = self.pin
+        ESITI_FILE["ESITI_R2S_XAGT.txt"] = (self.pin, self.vecchi[2][1])
+        return self.pin
+
+    def __exit__(self, *a):
+        LOTTI["R2SXAGT"]["pin"], LOTTI[LOTTO_ANCORA_TICK]["pin"], ESITI_FILE["ESITI_R2S_XAGT.txt"] = self.vecchi
+        return False
+
+
+def _autotest_xagt(ck, rifiuta, td, log_s0, KOZ):
+    """Contro-esempi della CONFERMA A TICK REALI (v4). Ogni lettura passa da carica() + stampa() come da riga di comando, con l'ancora del 12/10 e la passata
+    a Modello 1 ARCHIVIATA (GBA_R2S_XAG2.zip del 13/10) nella stessa invocazione."""
+    print("  --- conferma a tick reali R2SXAGT + ancora a tick %s (v4) ---" % LOTTO_ANCORA_TICK)
+    global ARCH_LETTURA_XAG2
+    # 8a. costanti del giro a tick
+    try:
+        riga_t = open(os.path.join(QD, "righe", "RIGA_LANCIA_GBA_R2S_XAGT.txt"), "rb").read().decode("ascii", "replace")
+    except OSError:
+        riga_t = ""
+    pin_riga = re.findall(r"\$PIN='([^']*)'", riga_t)
+    sha_riga = dict((m[0], (m[1], m[2])) for m in re.findall(r"@\('(R2SXAGT|%s)','([^']*)','([0-9a-fA-F]{64})'" % LOTTO_ANCORA_TICK, riga_t))
+    ck("GIRO A TICK PINNATO (FALLISCE finche' PIN_XAGT e' '%s' o la riga e' cambiata): PIN_XAGT = $PIN della riga RIGA_LANCIA_GBA_R2S_XAGT.txt (40 hex, diverso da "
+       "cc9bcda0 e d53493a9); file prova e SHA256 dei lotti R2SXAGT e %s in D2 = $LOTTI della riga" % (SEGNAPOSTO, LOTTO_ANCORA_TICK),
+       bool(re.fullmatch(r"[0-9a-f]{40}", PIN_XAGT)) and PIN_XAGT not in (PIN_A, PIN_XAG2) and pin_riga == [PIN_XAGT]
+       and all(sha_riga.get(L) is not None and sha_riga[L][0] == LOTTI[L]["prova"] and sha_riga[L][1].lower() == LOTTI[L]["sha"] for L in ("R2SXAGT", LOTTO_ANCORA_TICK)),
+       "D2: pin %s, R2SXAGT %s, %s %s | riga: pin %s, %s" % (PIN_XAGT[:12], LOTTI["R2SXAGT"]["sha"][:8], LOTTO_ANCORA_TICK, LOTTI[LOTTO_ANCORA_TICK]["sha"][:8],
+                                                              ",".join(x[:12] for x in pin_riga) or "assente", ", ".join("%s %s" % (k, v[1][:8]) for k, v in sorted(sha_riga.items())) or "lotti assenti"))
+    Dt, Da = LOTTI["R2SXAGT"], LOTTI[LOTTO_ANCORA_TICK]
+    pin_xg2 = pin_della_prova(open(os.path.join(QD, "prove", LOTTI["R2SXAG2"]["prova"]), "rb").read().decode("ascii"))
+    pin_anc = pin_della_prova(open(os.path.join(QD, "prove", LOTTI["R2SANC"]["prova"]), "rb").read().decode("ascii"))
+    ck("file prova del giro a tick con lo SHA256 pinnato in D2 (R2SXAGT %s..., %s %s...); 30 pin IDENTICI ai file del 12/10 (argento XAGUSD2, ancora); "
+       "Modello 4, cella REPL M1, tag R2SXAGT_01_REPL / R2SXTANC_01_REPL, S 6,65, conferma della cella R2SXAG2 REPL" % (Dt["sha"][:8], LOTTO_ANCORA_TICK, Da["sha"][:8]),
+       all(hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"] for D in (Dt, Da))
+       and pin_della_prova(open(os.path.join(QD, "prove", Dt["prova"]), "rb").read().decode("ascii")) == pin_xg2
+       and pin_della_prova(open(os.path.join(QD, "prove", Da["prova"]), "rb").read().decode("ascii")) == pin_anc
+       and Dt["modello"] == Da["modello"] == "4" and Dt["celle"] == Da["celle"] == [("REPL", "M1")] and Dt["S"] == 6.65 and Dt["simbolo"] == "XAGUSD"
+       and Da["simbolo"] == "XAUUSD" and Dt["tag"]["REPL"] == "R2SXAGT_01_REPL_T1_m775800" and Da["tag"]["REPL"] == LOTTO_ANCORA_TICK + "_01_REPL_T1_m775800"
+       and Dt["conferma_di"] == ("R2SXAG2", "REPL"))
+    acc_ok, acc_r = accettazione()
+    # 8b. (0b) la passata a Modello 1 riletta da QUESTO D2 = la lettura archiviata della v3 (contratto di regressione)
+    reg = regressione_m1(acc_ok, acc_r)
+    ck("(0b) REGRESSIONE: la v4 rilegge GBA_R2S_XAG2.zip + ancora del 12/10 e stampa le righe della v3 IDENTICHE salvo riga 2 e riga 5 (versione/SHA256); CSV identico",
+       reg[0] and reg[2] == [], reg[1][:150])
+    # materiale VERO: ancora del 12/10, raccolta del 13/10, giornale della REPL a Modello 1 del 13/10, passata R1A_01 (tick dell'oro)
+    raw_a = open(ARCH_R2S_A, "rb").read()
+    zA = zipfile.ZipFile(io.BytesIO(raw_a))
+    anc = zA.read(_nomi(zA)["GBA_R0_R2SANC.zip"])
+    raw_x2 = open(ARCH_R2S_XAG2[0], "rb").read()
+    zx = zipfile.ZipFile(io.BytesIO(zipfile.ZipFile(io.BytesIO(raw_x2)).read("GBA_R0_R2SXAG2.zip")))
+    Nx = _nomi(zx)
+    log_m1 = zx.read(Nx["log/GBA_R2SXAG2_02_REPL_T1_m775800.txt"]).decode("ascii")
+    raw1 = open(ACC_R1A["zip"], "rb").read()
+    z1 = zipfile.ZipFile(io.BytesIO(raw1))
+    N1 = _nomi(z1)
+    man1 = list(csv.DictReader(io.StringIO(z1.read(N1["MANIFEST_R0.csv"]).decode("ascii")), delimiter=";"))[0]
+    log_r1 = z1.read(N1[ACC_R1A["log"]]).decode("ascii")
+    ini_r1 = z1.read(N1["ini/gba_R1A_01_REPL_T1_m775800.ini"]).decode("ascii")
+    rep_r1 = z1.read(N1["report/GBA_R0_R1A_01_REPL_T1_m775800.htm"])
+    TICK_OK = {"qualita": "100%ticksreali", "ticks": "1234567", "barre": "88416", "ticks_inizio": "EURUSD 2024.07.05 / XAGUSD 2024.07.10"}
+
+    def zip_tanc(log=None, man_mod=None, ini=None, pin=None):
+        """L'ancora a tick costruita coi file VERI di R1A_01 (manifest, ini, giornale, report) sotto il lotto e il file prova nuovi."""
+        m = dict(man1)
+        m.update({"lotto": LOTTO_ANCORA_TICK, "passata": LOTTO_ANCORA_TICK + "_01_REPL_T1_m775800", "asse": "InpSignalTF", "valore_asse": "1", "simbolo": "XAUUSD",
+                  "periodo": "M1", "prova": Da["prova"]})
+        if man_mod:
+            m.update(man_mod)
+        cols = list(man1.keys()) + ["asse", "valore_asse", "simbolo", "periodo", "prova"]
+        b = io.BytesIO()
+        z = zipfile.ZipFile(b, "w")
+        z.writestr(Da["prova"], open(os.path.join(QD, "prove", Da["prova"]), "rb").read())
+        z.writestr("MANIFEST_R0.csv", ";".join(cols) + "\r\n" + ";".join(m[c] for c in cols))
+        tag = m["passata"]
+        z.writestr("ini\\gba_%s.ini" % tag, ini or ini_r1)
+        z.writestr("log\\GBA_%s.txt" % tag, log or log_r1)
+        z.writestr("report\\GBA_R0_%s.htm" % tag, rep_r1)
+        z.writestr("RIEPILOGO_R0.txt", _riepilogo(LOTTO_ANCORA_TICK, pin=pin))
+        z.close()
+        return b.getvalue()
+
+    def spec_t(**kw):
+        s = dict(KOZ, righe=None, log=log_m1, n=0)
+        s.update(TICK_OK)
+        s.update(kw)
+        return s
+
+    def raccolta_t(nome, xagt=None, tanc=True, pin_es=None, riep=None):
+        p = os.path.join(td, "xagt_" + nome)
+        os.makedirs(p, exist_ok=True)
+        pr = os.path.join(p, "GBA_R2S_XAGT.zip")
+        with zipfile.ZipFile(pr, "w") as zr:
+            zr.writestr("GBA_R0_R2SXAGT.zip", _zip_lotto("R2SXAGT", {"REPL": xagt if xagt is not None else spec_t()}, riepilogo=riep))
+            if tanc:
+                zr.writestr("GBA_R0_%s.zip" % LOTTO_ANCORA_TICK, tanc if isinstance(tanc, bytes) else zip_tanc())
+            zr.writestr("ESITI_R2S_XAGT.txt", "GBA R2S XAGT -- pin %s   pc DESKTOP-H4D7CAJ\r\nR2SXAGT rc 3   minuti 2\r\n%s rc 0   minuti 2" % (
+                pin_es or LOTTI["R2SXAGT"]["pin"], LOTTO_ANCORA_TICK))
+        pa = os.path.join(p, "GBA_R0_R2SANC.zip")
+        open(pa, "wb").write(anc)
+        return p, pa, pr
+
+    def leggi_t(nome, xagt=None, tanc=True, m1=None, acc=None, extra=()):
+        p, pa, pr = raccolta_t(nome, xagt, tanc)
+        if m1 is None:
+            px = ARCH_R2S_XAG2[0]
+        else:
+            px = os.path.join(p, "GBA_R0_R2SXAG2.zip")
+            open(px, "wb").write(m1)
+        lt, nt = carica([pa, px, pr] + list(extra))
+        cp = os.path.join(p, "d2.csv")
+        t = stampa(lt, nt, acc_ok if acc is None else acc, acc_r, cp)
+        return t, open(cp, encoding="ascii").read(), lt
+
+    def leggi_t_sicura(nome, **kw):
+        """Come leggi_t, ma un RIFIUTO inatteso diventa un testo (il controllo FALLISCE invece di fermare l'autotest)."""
+        try:
+            return leggi_t(nome, **kw)
+        except Rifiuto as ex:
+            return "RIFIUTO INATTESO: %s" % ex, "", {}
+
+    def conf(t):
+        r = [x for x in t.splitlines() if x.startswith("   CONFERMA E3 della cella R2SXAG2 REPL")]
+        return r[0] if r else "(assente)"
+
+    def mai_chiusa(t, c):
+        return "ESCLUSA PER COSTO" not in t and "ESCLUSA PER COSTO" not in c and "CHIUSA" not in conf(t)
+
+    with _PinDiProva() as pin_t:
+        # 8c. il giro a tick NON si legge col pin segnaposto: dentro il contesto il pin e' quello di prova; fuori (piu' sotto) e' RIFIUTATO
+        # 8d. TUTTI VERDI: ancora a tick = R1A_01, passata a tick = giornale della REPL a Modello 1 (6611 righe, n 0, eccezione n = 0), storia a tick presente
+        t, c, lt = leggi_t_sicura("verde")
+        P_m1, P_tk = _passata(lt, "R2SXAG2", "REPL") or {}, _passata(lt, "R2SXAGT", "REPL") or {}
+        ck("TUTTI VERDI (ancora a tick = R1A_01 vera; tick: n 0 sotto l'eccezione n = 0, C3G 2,40 < 6,65, (v) 0 righe): 'ESCLUSA PER COSTO (Modello 1 e tick reali)', casella CHIUSA",
+           conf(t).startswith("   CONFERMA E3 della cella R2SXAG2 REPL (XAGUSD M1, T1): CHIUSA: ESCLUSA PER COSTO (Modello 1 e tick reali)") and "C3G Modello 1 2.40, tick reali 2.40 < S 6.65" in conf(t)
+           and "n netto a tick reali 0" in conf(t) and "A TICK REALI: C3G cella 2.40 (n 6611)" in conf(t) and "quota dei liberi scartata per spread 100.0% (6611 su 6611)" in conf(t), conf(t)[:170])
+        ck("TUTTI VERDI: la CASELLA 4 della REPL a Modello 1 e la riga CSV dicono la stessa conferma CHIUSA; la M15 resta 'nessuna ESCLUSA da confermare'",
+           "   CASELLA 4 (E3): CHIUSA: ESCLUSA PER COSTO (Modello 1 e tick reali)" in t and "CASELLA 4 (E3): NON ANCORA MISURATO, casella 4 aperta: nessuna ESCLUSA (Modello 1) da confermare" in t
+           and c.count("CHIUSA: ESCLUSA PER COSTO (Modello 1 e tick reali)") == 2)
+        ck("STESSO D2: le due passate (Modello 1 e tick) lette in QUESTA invocazione dallo STESSO SHA256, stampato PER INTERO due volte, e nel CSV",
+           P_m1["sha_d2"] == P_tk["sha_d2"] == sha_d2() and t.count(": " + sha_d2()) >= 3 and c.count(sha_d2()) >= 3)
+        ck("TUTTI VERDI: CE1 dell'ancora a tick VERDE (A1, A2), CE-D2 VERDE, CE-T (b) VERDE, (0b) IDENTICA, zip a Modello 1 = quello del 13/10",
+           "CE1 dell'ancora a tick (%s, XAUUSD M1 T1 Modello 4, deve rifare R1A_01): VERDE" % LOTTO_ANCORA_TICK in t and "   CE-D2 (stesso strumento" in t
+           and [x for x in t.splitlines() if x.startswith("   CE-D2")][0].endswith("'ESCLUSA (Modello 1)')") and ": VERDE (stesso SHA256" in t
+           and "CE-T (b) (tick veri della passata R2SXAGT): VERDE" in t and "(0b) REGRESSIONE della passata a Modello 1 (archivio del 13/10 riletto ADESSO da questo D2): IDENTICA" in t
+           and "del 13/10 (SHA256 472f6e6afda5...): SI" in t)
+        ck("la lettura con la conferma: ASCII puro, mai la parola vietata, M1 e tick nello stesso testo (REPL a Modello 1 PRIMA della passata a tick)",
+           all(ord(ch) < 128 for ch in t) and "morto" not in t.lower() and 0 < t.find("LOTTO R2SXAG2  CELLA REPL ") < t.find("LOTTO R2SXAGT  CELLA REPL ") < t.find("LOTTO %s  CELLA REPL " % LOTTO_ANCORA_TICK))
+        # 8e. STORIA A TICK MANCANTE, nei modi del driver e del manifest (E3 punto 1)
+        casi = [("r815", dict(stato="KO", motivi='ZERO operazioni nel report | qualita dello storico "100%" invece di 100% ticks reali: il verdetto a ticks reali NON vale', qualita="100%"),
+                 "qualita dello storico"),
+                ("r786", dict(stato="KO", motivi="ZERO operazioni nel report | ticks data begins from EURUSD 2024.07.05 / XAGUSD 2026.08.03: DOPO l inizio della tranche 2026.07.01 "
+                                                 "(prima di quella data MT5 genera i tick: non sono reali)", ticks_inizio="EURUSD 2024.07.05 / XAGUSD 2026.08.03"), "ticks data begins from"),
+                ("tkini", dict(ticks_inizio="EURUSD 2024.07.05 / XAGUSD 2026.08.03"), "tick reali di XAGUSD solo dal 2026.08.03"),
+                ("q100", dict(qualita="100%"), "qualita' dello storico '100%' invece di ESATTAMENTE '100%ticksreali'"),
+                ("senzavoce", dict(ticks_inizio="EURUSD 2024.07.05"), "voce 'XAGUSD aaaa.mm.gg' ASSENTE nella colonna ticks_inizio"),
+                ("qspazi", dict(qualita="100% ticks reali"), "invece di ESATTAMENTE '100%ticksreali'")]
+        for nome, kw, frase in casi:
+            t, c, _l = leggi_t_sicura(nome, xagt=spec_t(**kw))
+            ck("E3 (1) STORIA A TICK MANCANTE [%s] -> NON ANCORA MISURATO con scritto cosa manca (storia di XAGUSD su T1, inizio dei tick, qualita'), MAI CHIUSA" % nome,
+               "CONFERMA E3 della cella R2SXAG2 REPL (XAGUSD M1, T1): NON ANCORA MISURATO: storia a tick mancante" in conf(t) and frase in conf(t)
+               and "la storia a tick reali di XAGUSD su T1 sul PC di backtest, inizio dei tick letto:" in conf(t) and mai_chiusa(t, c), conf(t)[60:230])
+        # 8f. Modello 1 nell'ini (o nel manifest) del lotto a tick -> RIFIUTO; un altro KO -> conferma NON data
+        rifiuta("RIFIUTO: ini della passata R2SXAGT con Model=1 (la 'conferma' sarebbe sugli stessi dati di Modello 1)", lambda: leggi_t("ini1", xagt=spec_t(modello_ini="1")))
+        rifiuta("RIFIUTO: manifest della passata R2SXAGT con modello 1", lambda: leggi_t("man1", xagt=spec_t(modello="1", modello_ini="1")))
+        t, c, _l = leggi_t_sicura("altroko", xagt=spec_t(motivi="ZERO operazioni nel report | AUTOTEST dell EA: FAIL (1 righe)"))
+        ck("E3 (3): KO per un ALTRO motivo (AUTOTEST FAIL) -> conferma NON data, casella aperta", "NON ANCORA MISURATO: conferma NON data" in conf(t) and "AUTOTEST" in conf(t)
+           and mai_chiusa(t, c), conf(t)[60:200])
+        t, c, _l = leggi_t_sicura("timeout", xagt=spec_t(motivi="timeout di 60 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAGT_01_REPL_T1_m775800): senza report "
+                                                          "non c e misura", n="", qualita="", ticks="", senza_report=True))
+        ck("E3 (3): passata a tick in TIMEOUT senza report (qualita' vuota) -> conferma NON data (non 'storia mancante'), CE-T (b) non valutabile",
+           "NON ANCORA MISURATO: conferma NON data" in conf(t) and "storia a tick mancante" not in conf(t) and "CE-T (b) (tick veri della passata R2SXAGT): NON VALUTABILE" in t
+           and mai_chiusa(t, c), conf(t)[60:200])
+        t, c, _l = leggi_t_sicura("timeout2", xagt=spec_t(motivi="timeout di 60 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAGT_01_REPL_T1_m775800): "
+                                                            "senza report non c e misura", n="", qualita="", ticks="", ticks_inizio="EURUSD 2024.07.05", senza_report=True))
+        ck("CE-T (a) SENZA report (qualita' vuota, voce XAGUSD assente) -> esito (3) 'conferma NON data' con CE-T (a) citato, NON (1)",
+           "NON ANCORA MISURATO: conferma NON data" in conf(t) and "CE-T (a) tick veri NON verde" in conf(t) and "ASSENTE" in conf(t)
+           and "storia a tick mancante" not in conf(t) and mai_chiusa(t, c), conf(t)[60:220])
+        t, c, _l = leggi_t_sicura("nonlanc", xagt={"righe": [], "n": "", "stato": "NON_LANCIATA", "motivi": "tetto di 10 minuti", "senza_report": True, "qualita": ""})
+        ck("E3 (3): passata a tick NON LANCIATA -> conferma NON data", "la passata a tick reali NON e' stata lanciata" in conf(t) and mai_chiusa(t, c), conf(t)[60:200])
+        # 8g. SHA256 di D2 diverso fra le due passate (simulato sugli oggetti di una lettura vera): conferma NON data e CE-D2 ROSSO
+        t, c, lt = leggi_t_sicura("sha")
+        P_m1, P_tk = _passata(lt, "R2SXAG2", "REPL"), _passata(lt, "R2SXAGT", "REPL")
+        if P_m1 is None or P_tk is None:
+            raise Rifiuto("autotest: la lettura di base del caso SHA non e' uscita (%s)" % t[:200])
+        P_tk["sha_d2"] = "0" * 64
+        e_m1 = esito(P_m1, 6.65, "riferimento", acc_ok, (True, "x"))
+        cd2 = stato_ce_d2(lt, acc_ok, e_m1)
+        c4s = casella4(e_m1, P_m1, P_tk, 6.65, acc_ok, [])
+        ck("E3 (3): passata a tick letta da un D2 con SHA256 DIVERSO (simulato) -> CE-D2 ROSSO e conferma NON data; stessa passata con lo stesso SHA -> CHIUSA",
+           not cd2[0] and "SHA256 di D2 diverso" in cd2[1] and c4s.startswith("NON ANCORA MISURATO: conferma NON data") and "letta da D2 000000000000" in c4s
+           and casella4(e_m1, P_m1, dict(P_tk, sha_d2=sha_d2()), 6.65, acc_ok, []).startswith("CHIUSA"), c4s[:120])
+        # 8h. n netto 31 -> SMENTITA PER n, mai (A); (v) che cade -> da rimisurare; ZERO operazioni con tentati > 0 -> conferma NON data
+        sp = "spread oltre il limite"
+        base = [("BUY" if i % 2 else "SELL", False, sp, 2.0 + 0.01 * (i % 300), i % 24) for i in range(2400)]
+        t, c, _l = leggi_t_sicura("n31", xagt=spec_t(stato="OK", motivi="", log=None, righe=base + [("BUY", True, "", 60.0, 15) for _i in range(31)], n=31))
+        ck("E3 (4): a tick reali n netto 31 -> conferma SMENTITA PER n, resta (B) 'n insufficiente a Modello 1', MAI (A), MAI CHIUSA",
+           "SMENTITA PER n" in conf(t) and "n netto a tick reali 31 >= 30" in conf(t) and "(A)" not in conf(t) and mai_chiusa(t, c), conf(t)[60:220])
+        t, c, _l = leggi_t_sicura("v", xagt=spec_t(log=None, righe=base + [("BUY" if i % 2 else "SELL", False, sp, 45.0, i % 24) for i in range(30)]))
+        ck("E3 (5): a tick reali 30 righe a 45x -> (v) NO -> 'n insufficiente / da rimisurare' col numero, MAI CHIUSA",
+           "n insufficiente / da rimisurare" in conf(t) and conf(t).rstrip(")").endswith("non vale: v") and "righe >= 40x 30" in conf(t) and mai_chiusa(t, c), conf(t)[-120:])
+        t, c, _l = leggi_t_sicura("tent1", xagt=spec_t(log=None, righe=base[:-1] + [("BUY", True, "", 60.0, 10)], ingressi=0))
+        ck("E3 (3): KO 'ZERO operazioni' con tentati 1 (> 0) -> NON e' l'eccezione n = 0 -> conferma NON data", "NON ANCORA MISURATO: conferma NON data" in conf(t)
+           and mai_chiusa(t, c), conf(t)[60:200])
+        lg_oro = log_r1.replace('InpSymbol="XAUUSD" -> simbolo XAUUSD', 'InpSymbol="XAGUSD" -> simbolo XAGUSD').replace("# FINESTRA XAUUSD|", "# FINESTRA XAGUSD|")
+        t, c, _l = leggi_t_sicura("oro", xagt=spec_t(stato="OK", motivi="", log=lg_oro, n=128))
+        ck("E3 (3): giornale VERO dell'oro a tick rietichettato XAGUSD -> CE2 (firma dell'oro) ROSSA -> conferma NON data", "NON ANCORA MISURATO: conferma NON data" in conf(t)
+           and "CE2" in conf(t) and mai_chiusa(t, c), conf(t)[60:200])
+        # 8i. ANCORA A TICK non verde (assente, giornale di Modello 1, un centesimo diverso) -> conferma NON data
+        rifiuta("RIFIUTO: ancora a tick %s caricata SENZA la passata R2SXAGT" % LOTTO_ANCORA_TICK,
+                lambda: carica_dati([("GBA_R0_R2SANC.zip", anc), (ARCH_R2S_XAG2[0], raw_x2), ("GBA_R0_%s.zip" % LOTTO_ANCORA_TICK, zip_tanc())]))
+        t, c, _l = leggi_t_sicura("senzaanc", tanc=False)
+        ck("ancora a tick ASSENTE -> CE1 NON LETTO -> conferma NON data (anche coi tick dell'argento verdi)", "CE1 dell'ancora a tick" in t and ": NON LETTO:" in t
+           and "CE1 ancora a tick NON verde" in conf(t) and mai_chiusa(t, c), conf(t)[60:200])
+        t, c, _l = leggi_t_sicura("ancm1", tanc=zip_tanc(log=log_s0))
+        ck("ancora a tick col giornale di S0_01 (Modello 1: C3G 22,80, 158 ingressi) -> CE1 ROSSO (A2) -> conferma NON data",
+           "ROSSO: l'ancora a tick NON rifa' R1A_01 (A2 ingressi 158, C3G cella 22.80" in t and "CE1 ancora a tick NON verde" in conf(t) and mai_chiusa(t, c), conf(t)[60:220])
+        for nome_a, mm, frase_a in (("ancnonlanc", {"stato": "NON_LANCIATA", "motivi": "MT5 o MetaEditor aperto prima del lotto", "trades_report": "", "profitto_report": "",
+                                                    "pf_report": "", "qualita": ""}, "ROSSO: passata dell'ancora a tick non lanciata"),
+                                    ("ancko", {"stato": "KO", "motivi": "AUTOTEST dell EA: FAIL (1 righe)"}, "A1 stato KO (AUTOTEST dell EA: FAIL")):
+            t, c, _l = leggi_t_sicura(nome_a, tanc=zip_tanc(man_mod=mm))
+            blq = [x for x in t.split("-" * 110) if x.strip().startswith("LOTTO R2SXAGT  CELLA REPL ")]
+            ck("(2) NON salta (3): argento DETERMINISTICO a n = 0 sotto l'eccezione (KO solo 'ZERO operazioni', tentati 0) ma ancora a tick %s -> CE1 NON verde -> "
+               "conferma NON data, MAI 'ESCLUSA PER COSTO' senza ancora" % ("NON LANCIATA" if nome_a == "ancnonlanc" else "KO"),
+               frase_a in t and "CE1 ancora a tick NON verde" in conf(t) and "NON ANCORA MISURATO: conferma NON data" in conf(t) and mai_chiusa(t, c)
+               and "eccezione n = 0 (KO solo per ZERO operazioni, tentati 0, scartati spread >= 1): SI" in t and "CE-D2 (stesso strumento" in t
+               and "CE-T (b) (tick veri della passata R2SXAGT): VERDE" in t, conf(t)[60:230])
+        t, c, _l = leggi_t_sicura("ancpf", tanc=zip_tanc(man_mod={"profitto_report": "-6577.49"}))
+        ck("ancora a tick con il profitto del manifest diverso di UN centesimo (-6577.49) -> CE1 ROSSO (A1) -> conferma NON data",
+           "A1 manifest 128 / -6577.49 / 0.83" in t and "CE1 ancora a tick NON verde" in conf(t) and mai_chiusa(t, c))
+        t, c, _l = leggi_t_sicura("anctk", tanc=zip_tanc(man_mod={"ticks_inizio": "EURUSD 2024.07.05"}))
+        ck("ancora a tick senza 'XAUUSD 2024.07.10' in ticks_inizio -> CE1 ROSSO (A1) -> conferma NON data", "A1 ticks_inizio 'EURUSD 2024.07.05' senza 'XAUUSD 2024.07.10'" in t
+           and mai_chiusa(t, c))
+        # 8j. CE-T (b): 353614 tick (quelli GENERATI a Modello 1) con qualita' 100%ticksreali -> conferma NON data
+        t, c, _l = leggi_t_sicura("cet", xagt=spec_t(ticks="353614"))
+        ck("CE-T (b): tick del report 353614 (= generati a Modello 1) con '100%ticksreali' -> ROSSA -> conferma NON data",
+           "CE-T (b) (tick veri della passata R2SXAGT): ROSSA: tick del report 353614 <= 353614" in t and "CE-T (b) tick veri NON verde" in conf(t) and mai_chiusa(t, c))
+        # 8k. D2 NON accettato -> CE7/CE-D2 non verdi, (0b) diversa -> mai la conferma
+        t, c, _l = leggi_t_sicura("noacc", acc=False)
+        ck("D2 NON accettato (prova d'accettazione non passata) -> conferma NON data (nessuna ESCLUSA a Modello 1 da confermare), MAI CHIUSA",
+           conf(t).startswith("   CONFERMA E3 della cella R2SXAG2 REPL (XAGUSD M1, T1): NON ANCORA MISURATO") and mai_chiusa(t, c), conf(t)[60:200])
+        # 8l. (0b) DIVERSA (lettura archiviata alterata di un carattere, SHA ripinnato nel test) -> conferma NON data
+        vecchio = ARCH_LETTURA_XAG2
+        pf = os.path.join(td, "LETTURA_D2_R2S_XAG2_alterata.txt")
+        altera = open(vecchio[0], "rb").read().replace(b"C3G cella 2.40 (n 6611)", b"C3G cella 2.41 (n 6611)", 1)
+        open(pf, "wb").write(altera)
+        try:
+            ARCH_LETTURA_XAG2 = (pf, hashlib.sha256(altera).hexdigest())
+            t, c, _l = leggi_t_sicura("reg")
+        finally:
+            ARCH_LETTURA_XAG2 = vecchio
+        ck("(0b) DIVERSA (una cifra della lettura archiviata cambiata: 2.40 -> 2.41) -> conferma NON data, citata (0b)", "(0b) REGRESSIONE della passata a Modello 1" in t
+           and ": DIVERSA dalla lettura della v3" in t and "(0b) la rilettura" in conf(t) and mai_chiusa(t, c), conf(t)[60:200])
+        # 8m. passata a Modello 1 NON archiviata (zip ricostruito col giornale vero del 13/10 ma non quello del 13/10) -> conferma NON data
+        m1_rif = _zip_lotto("R2SXAG2", {"M15": dict(KOZ, righe=[("BUY" if i % 2 else "SELL", False, sp, 9.0, i % 24) for i in range(600)], n=0),
+                                        "REPL": dict(KOZ, righe=None, log=log_m1, n=0)})
+        t, c, _l = leggi_t_sicura("m1altro", m1=m1_rif)
+        ck("zip a Modello 1 ricostruito (cifre identiche al 13/10, CE7 e CE-D2 verdi) ma NON lo zip archiviato -> conferma NON data",
+           "CE-D2 (stesso strumento" in t and ": VERDE (stesso SHA256" in t and "NON e' GBA_R0_R2SXAG2.zip del 13/10" in conf(t) and mai_chiusa(t, c), conf(t)[60:200])
+        # 8n. RIFIUTI del giro a tick (nessun numero)
+        p0, pa0, pr0 = raccolta_t("rif")
+        rifiuta("RIFIUTO: conferma R2SXAGT SENZA la passata a Modello 1 (E3: stesso D2, stessa invocazione)", lambda: carica([pa0, pr0]))
+        rifiuta("RIFIUTO: conferma R2SXAGT con TUTTO lo stadio A (GBA_R2S_A.zip): due giri", lambda: carica([ARCH_R2S_A, ARCH_R2S_XAG2[0], pr0]))
+        rifiuta("RIFIUTO: conferma R2SXAGT con un lotto dello stadio A (R2SNAS)",
+                lambda: carica([pa0, ARCH_R2S_XAG2[0], pr0, _scrivi(p0, "GBA_R0_R2SNAS.zip", zA.read(_nomi(zA)["GBA_R0_R2SNAS.zip"]))]))
+        _p1, pa1, pr1 = raccolta_t("rifes", pin_es=PIN_XAG2)
+        rifiuta("RIFIUTO: ESITI_R2S_XAGT.txt al pin d53493a9 (il pin del rilancio NON vale per il giro a tick)", lambda: carica([pa1, ARCH_R2S_XAG2[0], pr1]))
+        _p2, pa2, pr2 = raccolta_t("rifriep", riep=_riepilogo("R2SXAGT", pin=PIN_XAG2))
+        rifiuta("RIFIUTO: RIEPILOGO del lotto R2SXAGT al pin d53493a9", lambda: carica([pa2, ARCH_R2S_XAG2[0], pr2]))
+        rifiuta("RIFIUTO: RIEPILOGO dell'ancora a tick al pin cc9bcda0", lambda: leggi_lotto("GBA_R0_%s.zip" % LOTTO_ANCORA_TICK, zip_tanc(pin=PIN_A)))
+        rifiuta("RIFIUTO: zip R2SXAG2 col RIEPILOGO al pin del giro a tick", lambda: leggi_lotto("GBA_R0_R2SXAG2.zip", _zip_lotto("R2SXAG2", {
+            "M15": dict(KOZ, righe=[("BUY", False, sp, 9.0, 3)] * 50, n=0), "REPL": dict(KOZ, righe=None, log=log_m1, n=0)}, riepilogo=_riepilogo("R2SXAG2", pin=pin_t))))
+        rifiuta("RIFIUTO: ancora a tick con l'ini di S0_01 (Model=1)", lambda: leggi_lotto("GBA_R0_%s.zip" % LOTTO_ANCORA_TICK, zip_tanc(
+            ini=ini_r1.replace("Model=4", "Model=1"))))
+        rifiuta("RIFIUTO: zip del lotto R2SXAGT col file prova dell'argento a Modello 1 (XAGUSD2)", lambda: leggi_lotto("x.zip", _zip_lotto(
+            "R2SXAGT", {"REPL": spec_t()}, nome_prova=Dt["prova"], prova_bytes=open(os.path.join(QD, "prove", LOTTI["R2SXAG2"]["prova"]), "rb").read())))
+    # 8o. FUORI dal contesto di prova: col pin VERO (o col segnaposto) i giri a tick costruiti col pin di prova NON si leggono
+    if PIN_XAGT == SEGNAPOSTO:
+        rifiuta("RIFIUTO: col pin del giro a tick ancora '%s' in D2 ogni zip R2SXAGT e' rifiutato (nessun numero)" % SEGNAPOSTO,
+                lambda: leggi_lotto("GBA_R0_R2SXAGT.zip", _zip_lotto("R2SXAGT", {"REPL": spec_t()}, riepilogo=_riepilogo("R2SXAGT", pin=PIN_TEST_XAGT))))
+    else:
+        rifiuta("RIFIUTO: zip R2SXAGT col pin di PROVA (non quello della riga)", lambda: leggi_lotto("GBA_R0_R2SXAGT.zip", _zip_lotto(
+            "R2SXAGT", {"REPL": spec_t()}, riepilogo=_riepilogo("R2SXAGT", pin=PIN_TEST_XAGT))))
+    ck("carica() controlla il pin di OGNI file ESITI conosciuto (A, XAG2, XAGT, XAGH): nessun ESITI dimenticato", list(ESITI_FILE) == [
+        "ESITI_R2S_A.txt", "ESITI_R2S_XAG2.txt", "ESITI_R2S_XAGT.txt", "ESITI_R2S_XAGH.txt"])
+    ck("il contesto di prova ha rimesso pin ed ESITI del giro a tick com'erano", LOTTI["R2SXAGT"]["pin"] == LOTTI[LOTTO_ANCORA_TICK]["pin"] == PIN_XAGT
+       and ESITI_FILE["ESITI_R2S_XAGT.txt"][0] == PIN_XAGT and ARCH_LETTURA_XAG2[1] == "aed6957816c6f22c2c5231d55d818ba7f6e2154e128be2cadfb11ad734cb294e")
+    # 8p. senza il giro a tick la lettura del rilancio resta quella della v3: casella NON ANCORA MISURATO, mai 'ESCLUSA PER COSTO'
+    la, na = carica_dati([("GBA_R0_R2SANC.zip", anc), (ARCH_R2S_XAG2[0], raw_x2)])
+    tx = stampa(la, na, acc_ok, acc_r, os.path.join(td, "solo_m1.csv"))
+    ck("senza R2SXAGT: casella 4 della REPL argento NON ANCORA MISURATO, nessuna riga del giro a tick, MAI 'ESCLUSA PER COSTO'",
+       "CASELLA 4 (E3): NON ANCORA MISURATO: ESCLUSA (Modello 1) da confermare" in tx and "ESCLUSA PER COSTO" not in tx and "CONFERMA E3" not in tx and "(0b)" not in tx)
+
+
+def _autotest_xagh(ck, rifiuta, td, zip_ancora, log_s0, KOZ):
+    """Contro-esempi del lotto R2SXAGH (v4). Ogni lettura passa da carica() + stampa() con l'ancora VERA del 12/10."""
+    print("  --- lotto R2SXAGH (argento M30/H1/H4, v4) ---")
+    D = LOTTI["R2SXAGH"]
+    pin_xg2 = pin_della_prova(open(os.path.join(QD, "prove", LOTTI["R2SXAG2"]["prova"]), "rb").read().decode("ascii"))
+    try:
+        riga_h = open(os.path.join(QD, "righe", "RIGA_LANCIA_GBA_R2S_XAGH.txt"), "rb").read().decode("ascii", "replace")
+    except OSError:
+        riga_h = ""
+    ck("R2SXAGH: file prova con lo SHA256 pinnato (%s...), 30 pin IDENTICI a XAGUSD2, celle M30 -> H1 -> H4 coi tag R2SXAGH_01_M30 / _02_H1 / _03_H4, S 6,65, Modello 1; "
+       "TF_NUM M30 30, H1 16385, H4 16388 (codici ENUM_TIMEFRAMES); PIN_XAGH = $PIN della riga e SHA del file prova = $LOTTI della riga" % D["sha"][:8],
+       hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"]
+       and pin_della_prova(open(os.path.join(QD, "prove", D["prova"]), "rb").read().decode("ascii")) == pin_xg2
+       and [c for c, _t in D["celle"]] == ["M30", "H1", "H4"] and D["tag"] == {"M30": "R2SXAGH_01_M30_T1_m775800", "H1": "R2SXAGH_02_H1_T1_m775800",
+                                                                               "H4": "R2SXAGH_03_H4_T1_m775800"}
+       and D["S"] == 6.65 and D.get("modello", MODELLO) == "1" and (TF_NUM["M30"], TF_NUM["H1"], TF_NUM["H4"]) == ("30", "16385", "16388")
+       and re.findall(r"\$PIN='([^']*)'", riga_h) == [PIN_XAGH] and ("@('R2SXAGH','%s','%s'" % (D["prova"], D["sha"])) in riga_h)
+    sp = "spread oltre il limite"
+    # 9a. OROLOGIO A H4 (contro-esempio scritto nel file prova): barra della domenica che apre alle 20:00 col primo tick alle 23:00
+    dom = "2026.07.05 23:00:00   [GBA] segnale BUY SALTATO (spread oltre il limite) | close 37.00 canale 36.00-36.90 EMA 36.50 ATR 0.90 spread 0.05 = 5.6% ATR (max 5.0%) | stop/spread 45.0x | ora server 20"
+    ck("OROLOGIO H4: riga della domenica alle 23:00 con 'ora server 20' -> letta a H4 (fascia dell'ORA SERVER 20 = USA pomeriggio)",
+       leggi_giornale(dom, "h4", "H4")["righe"][0]["ora"] == 20)
+    rifiuta("OROLOGIO (contro-esempio): la STESSA riga a H1 -> RIFIUTO (a H1 una barra copre un'ora: uguaglianza come in v3)", lambda: leggi_giornale(dom, "h1", "H1"))
+    rifiuta("OROLOGIO (contro-esempio): la STESSA riga a M30 / senza TF (regola della v3) -> RIFIUTO", lambda: leggi_giornale(dom, "m30", "M30"))
+    rifiuta("OROLOGIO H4: ora server 21 (non multiplo di 4) con la riga alle 23:00 -> RIFIUTO", lambda: leggi_giornale(dom.replace("ora server 20", "ora server 21"), "h4", "H4"))
+    rifiuta("OROLOGIO H4: ora server 16 con la riga alle 20:00 (ora + 4, barra dopo) -> RIFIUTO",
+            lambda: leggi_giornale(dom.replace("23:00:00", "20:00:00").replace("ora server 20", "ora server 16"), "h4", "H4"))
+    rifiuta("OROLOGIO H4: ora server 20 con la riga alle 19:00 (prima dell'apertura della barra) -> RIFIUTO", lambda: leggi_giornale(dom.replace("23:00:00", "19:00:00"), "h4", "H4"))
+    ck("OROLOGIO H4: ora server 0 con la riga alle 03:00 -> letta; alle 04:00 -> RIFIUTO (bordo ora + 3 / ora + 4)",
+       leggi_giornale(dom.replace("23:00:00", "03:00:00").replace("ora server 20", "ora server 0"), "h4", "H4")["righe"][0]["ora"] == 0)
+    rifiuta("OROLOGIO H4: ora server 0 con la riga alle 04:00 -> RIFIUTO", lambda: leggi_giornale(dom.replace("23:00:00", "04:00:00").replace("ora server 20", "ora server 0"), "h4", "H4"))
+    # materiale vero: l'ancora del 12/10
+    zA = zipfile.ZipFile(io.BytesIO(open(ARCH_R2S_A, "rb").read()))
+    anc = zA.read(_nomi(zA)["GBA_R0_R2SANC.zip"])
+    G353 = {"ticks_gen": TICK_GEN_M1, "barre_gen": "2980"}
+
+    def righe_tf(n, ore, base=16.0, passo=0.01):
+        return [("BUY" if i % 2 else "SELL", False, sp, base + passo * (i % 200), ore[i % len(ore)]) for i in range(n)]
+    R_M30 = righe_tf(180, list(range(0, 22)))
+    R_H1 = righe_tf(90, list(range(0, 22)), 21.0)
+    R_H4 = righe_tf(20, [0, 4, 8, 12, 16, 20], 40.0)
+
+    def cella(righe, **kw):
+        s = dict(KOZ, righe=righe, n=0)
+        s.update(G353)
+        s.update(kw)
+        return s
+
+    def leggi_h(nome, celle=None, ancora=None, acc=None, raccolta=None):
+        pz = os.path.join(td, "xagh_" + nome)
+        os.makedirs(pz, exist_ok=True)
+        pa, px = os.path.join(pz, "GBA_R0_R2SANC.zip"), os.path.join(pz, "GBA_R0_R2SXAGH.zip")
+        open(pa, "wb").write(ancora if ancora is not None else anc)
+        cc = celle if celle is not None else {}
+        tutte = {"M30": cc.get("M30", cella(R_M30)), "H1": cc.get("H1", cella(R_H1)), "H4": cc.get("H4", cella(R_H4))}
+        open(px, "wb").write(_zip_lotto("R2SXAGH", tutte))
+        lt, nt = carica([pa, px] if raccolta is None else [pa, raccolta(pz, open(px, "rb").read())])
+        cp = os.path.join(pz, "d2.csv")
+        acc_ok, acc_r = accettazione() if acc is None else (acc, ["   (accettazione simulata NON passata)"])
+        t = stampa(lt, nt, acc_ok, acc_r, cp)
+        return t, open(cp, encoding="ascii").read()
+
+    def eh(t, c):
+        for p in t.split("-" * 110):
+            if p.strip().startswith("LOTTO R2SXAGH  CELLA %s " % c):
+                nx = t.split("-" * 110)
+                i = nx.index(p)
+                r = [x for x in nx[i + 1].splitlines() if x.startswith("   ESITO H ")]
+                return r[0] if r else "(assente)"
+        return "(cella assente)"
+
+    def blocco(t, c):
+        nx = t.split("-" * 110)
+        for i, p in enumerate(nx):
+            if p.strip().startswith("LOTTO R2SXAGH  CELLA %s " % c):
+                return nx[i + 1]
+        return ""
+    # 9b. il caso ATTESO: tre celle con n = 0 sotto l'eccezione, CE1H verde -> H3 'n insufficiente' per tutte; a H1 e H4 (i) e (iv) non valgono (< 200 righe)
+    dom_cella = cella(None, log=_log("XAGUSD", "H4", R_H4).replace("2026.07.01 20:", "2026.07.05 23:", 1))
+    t, c = leggi_h("atteso", {"H4": cella(R_H4)})
+    ck("ATTESO: CE7H VERDE (ticks_gen 353614 x 3), CE1H VERDE; M30 / H1 / H4 -> H3 (B) 'n insufficiente' con la frase n = 0, la condizione che non vale e la classe S2",
+       "CE7H (determinismo della storia M1, ticks_gen di ogni passata lanciata): VERDE" in t and "CE1H del lotto R2SXAGH: VERDE" in t
+       and all(eh(t, k).startswith("   ESITO H (albero H0-H3, il primo che vale decide): H3 (B) NON PASSA PER n") and "la REPL non apre nessuna operazione" in eh(t, k)
+               and "| classe S2 del C3G: FRA" in eh(t, k) for k in ("M30", "H1")) and "(i)" in eh(t, "H1") and "(iv)" in eh(t, "H1")
+       and "| classe S2 del C3G: zona >= 40x" in eh(t, "H4") and "(i)" in eh(t, "H4"), eh(t, "H1")[-120:])
+    ck("ATTESO: CE9 e CE10 verdi e stampati per cella, righe fra 40x e 50x stampate, SMENTITE H descrittive, UN solo esito per cella (niente varianti), SHA intero in testa",
+       all("   CE9 (filtro = costo) verde" in blocco(t, k) and "   CE10 (riscaldamento) verde: righe 'dati non pronti' 0" in blocco(t, k)
+           and "righe FRA 40x E 50x" in blocco(t, k) and "SMENTITE H" in blocco(t, k) and blocco(t, k).count("ESITO") == 1 for k in ("M30", "H1", "H4"))
+       and ("SHA256 di D2 PER INTERO: " + sha_d2()) in t and "dentro la banda 31-75x (con 20 righe)" in blocco(t, "H4"), blocco(t, "H4")[:200])
+    ck("lettura R2SXAGH: ASCII puro, mai 'ESCLUSA PER COSTO' ne' la parola vietata nel testo e nel CSV; CSV con ce1h, ce9, ce10",
+       all(ord(ch) < 128 for ch in t) and "ESCLUSA PER COSTO" not in t + c and "morto" not in t.lower() and c.splitlines()[0].endswith(";ce1h;ce9;ce10"))
+    t, c = leggi_h("domenica", {"H4": dom_cella})
+    ck("OROLOGIO H4 end-to-end: la cella H4 con una riga della domenica 23:00 / ora server 20 si legge (H3), lo zip NON e' rifiutato; la riga e' davvero nel giornale",
+       eh(t, "H4").startswith("   ESITO H (albero H0-H3, il primo che vale decide): H3 (B)") and "2026.07.05 23:" in dom_cella["log"], eh(t, "H4")[:120])
+    rifiuta("OROLOGIO (contro-esempio end-to-end): la stessa riga della domenica nella cella H1 -> zip RIFIUTATO",
+            lambda: leggi_h("domh1", {"H1": cella(None, log=_log("XAGUSD", "H1", R_H1).replace("2026.07.01 20:", "2026.07.05 23:", 1))}))
+    # 9c. CE7H / CE1H
+    t, c = leggi_h("ce7r", {"H1": cella(R_H1, ticks_gen="353615")})
+    ck("CE7H ROSSA (una passata con ticks_gen 353615) -> CE1H NON verde -> M30, H1 e H4 tutte H0 (C)", "CE7H (determinismo" in t and ": ROSSA: ticks_gen diverso" in t
+       and all("H0 (C) NON SI LEGGE: CE1H NON VERDE" in eh(t, k) for k in ("M30", "H1", "H4")))
+    t, c = leggi_h("ce7nv", {"M30": cella(R_M30, ticks_gen="")})
+    ck("CE7H NON VALUTABILE (ticks_gen vuoto in una passata) -> tutte e tre H0", ": NON VALUTABILE: passate senza la riga" in t
+       and all("H0 (C) NON SI LEGGE: CE1H" in eh(t, k) for k in ("M30", "H1", "H4")))
+    t, c = leggi_h("ancaltra", ancora=zip_ancora(log_s0))
+    ck("CE1H: ancora VERDE nei numeri ma NON lo zip del 12/10 -> tutte e tre H0", "CE1 ancora: VERDE" in t and "NON e' GBA_R0_R2SANC.zip del 12/10" in t
+       and all("H0 (C)" in eh(t, k) for k in ("M30", "H1", "H4")))
+    # 9d. CE9 (filtro = costo) e CE10 (riscaldamento): per cella
+    t, c = leggi_h("ce9", {"M30": cella(R_M30 + [("BUY", True, "", 42.0, 15)], stato="OK", motivi="", n=1)})
+    ck("CE9 ROSSA: un ingresso ('ok') stampato 42,0x (< 50, non scartato) -> L_lt 181 > S_sp 180 -> SOLO la M30 e' H0 (C); H1 e H4 restano H3",
+       "H0 (C) NON SI LEGGE: CE9 ROSSA: righe libere 181, S_sp 180, L_lt 181" in eh(t, "M30") and eh(t, "H1").find("H3 (B)") > 0 and eh(t, "H4").find("H3 (B)") > 0, eh(t, "M30")[:160])
+    g50 = leggi_giornale(_log("XAGUSD", "M30", R_M30 + [("BUY", False, sp, 50.0, 3)] * 3 + [("SELL", True, "", 50.0, 4)]), "x", "M30")
+    v9 = ce9({"giornale": g50})
+    ck("CE9 al bordo della stampa: 3 righe SALTATE per spread stampate 50,0x e 1 ingresso stampato 50,0x -> L_lt 180 <= S_sp 183 <= L_lt + L_eq 184 -> VERDE",
+       v9[0] and "S_sp 183, L_lt 180, L_eq 4" in v9[1], v9[1])
+    v9b = ce9({"giornale": leggi_giornale(_log("XAGUSD", "M30", R_M30 + [("BUY", False, sp, 55.0, 3)]), "x", "M30")})
+    ck("CE9 controprova: una riga SALTATA per spread a 55,0x (filtro che scarta sopra 50x) -> S_sp 181 > L_lt + L_eq 180 -> ROSSA", not v9b[0], v9b[1])
+    np_log = _log("XAGUSD", "H1", R_H1) + "\r\n2026.07.01 01:00:00   [GBA] dati non pronti sulla barra 2026.07.01 00:00 -- segnale non valutato"
+    t, c = leggi_h("ce10", {"H1": cella(None, log=np_log)})
+    ck("CE10 ROSSA: UNA riga 'dati non pronti' nella H1 -> SOLO la H1 e' H0 (C), col numero", "H0 (C) NON SI LEGGE: CE10 ROSSA: righe 'dati non pronti' 1" in eh(t, "H1")
+       and "H3 (B)" in eh(t, "M30"), eh(t, "H1")[:140])
+    # 9e. H4 con ZERO segnali -> H0, C3G NON DEFINITO (quantificatore vuoto)
+    t, c = leggi_h("h4zero", {"H4": cella([])})
+    ck("H4 con 0 segnali -> H0 (C) '0 segnali in T1', C3G NON DEFINITO, SH1 NON VALUTABILE (mai 'ESCLUSA' a vuoto)",
+       "H0 (C) NON SI LEGGE: 0 segnali in T1 (quantificatore vuoto): C3G NON DEFINITO" in eh(t, "H4") and "SH1 NON VALUTABILE (0 righe)" in blocco(t, "H4")
+       and "ESCLUSA" not in eh(t, "H4"), eh(t, "H4")[:140])
+    # 9f. H1 (A): n netto >= 30; H2 'ESCLUSA (Modello 1)' raggiungibile SOLO con >= 200 righe; a H1 e H4 con C3G < 6,65 resta H3
+    rA = righe_tf(400, list(range(0, 22)), 30.0) + [("BUY", True, "", 60.0, 15) for _i in range(31)]
+    t, c = leggi_h("h1A", {"M30": cella(rA, stato="OK", motivi="", n=31)})
+    ck("H1 (A): M30 con n netto 31 e C3G 30x -> 'PASSA ALLO STADIO B' con 'FRA sui segnali grezzi, PASSA solo grazie al filtro'",
+       "H1 (A) PASSA ALLO STADIO B (n 31" in eh(t, "M30") and "FRA sui segnali grezzi, PASSA solo grazie al filtro" in eh(t, "M30"), eh(t, "M30")[:160])
+    r2 = [("BUY" if i % 2 else "SELL", False, sp, 2.0 + 0.01 * (i % 300), i % 22) for i in range(2400)]
+    t, c = leggi_h("h2", {"M30": cella(r2)})
+    ck("H2 (B) 'ESCLUSA (Modello 1)': M30 con 2400 righe a 2-5x (fasce >= 100, lati >= 100, (v) 0) -> casella NON chiusa (E3 con lo stesso SHA), MAI 'ESCLUSA PER COSTO'",
+       "H2 (B) NON PASSA PER n" in eh(t, "M30") and "ESCLUSA (Modello 1): C3G cella" in eh(t, "M30") and "casella NON chiusa" in eh(t, "M30")
+       and "ESCLUSA (Modello 1) da confermare" in blocco(t, "M30") and "ESCLUSA PER COSTO" not in t + c, eh(t, "M30")[-150:])
+    t, c = leggi_h("h2noacc", {"M30": cella(r2)}, acc=False)
+    ck("stessa M30 con la prova d'accettazione di D2 NON passata -> H3 (mai H2)", "H3 (B)" in eh(t, "M30") and "ESCLUSA (Modello 1)" not in eh(t, "M30"), eh(t, "M30")[-120:])
+    t, c = leggi_h("h1basso", {"H1": cella(righe_tf(90, list(range(0, 22)), 3.0)), "H4": cella(righe_tf(20, [0, 4, 8, 12, 16, 20], 3.0))})
+    ck("STRUTTURALE: H1 (90 righe) e H4 (20 righe) con C3G 3x < 6,65 -> H3 'n insufficiente' con (i) e (iv) che non valgono: ESCLUSA NON raggiungibile sotto 200 righe",
+       all("H3 (B)" in eh(t, k) and "(i)" in eh(t, k) and "(iv)" in eh(t, k) and "ESCLUSA (Modello 1)" not in eh(t, k) and "classe S2 del C3G: sotto S 6,65x" in eh(t, k)
+           for k in ("H1", "H4")), eh(t, "H1")[-120:])
+    # 9g. KO di altro tipo, eccezione n = 0 non valida
+    t, c = leggi_h("kotime", {"H1": cella(R_H1, motivi="timeout di 20 minuti | report .htm della passata NON trovato", n="", senza_report=True)})
+    ck("H1 in TIMEOUT -> H0 (C) 'passata KO'; le altre celle si leggono (H3)", "H0 (C) NON SI LEGGE: passata KO (timeout" in eh(t, "H1") and "H3 (B)" in eh(t, "M30"))
+    t, c = leggi_h("tent1", {"M30": cella(R_M30[:-1] + [("BUY", True, "", 60.0, 10)], ingressi=0)})
+    ck("M30 KO 'ZERO operazioni' con tentati 1 (ordine rifiutato) -> H0 (C), non l'eccezione", "H0 (C)" in eh(t, "M30"), eh(t, "M30")[:140])
+    t, c = leggi_h("nonl", {"H4": {"righe": [], "n": "", "stato": "NON_LANCIATA", "motivi": "tetto di 50 minuti", "senza_report": True}})
+    ck("H4 NON LANCIATA -> H0 (C) per la H4; CE7H si valuta sulle passate lanciate (VERDE)", "H0 (C) NON SI LEGGE: passata non lanciata" in eh(t, "H4")
+       and ": VERDE: ticks_gen = 353614 in tutte le 2 passate lanciate" in t)
+    # 9h. RIFIUTI
+    rifiuta("RIFIUTO: manifest della H1 con valore_asse 60 (non e' un codice ENUM_TIMEFRAMES)", lambda: leggi_h("v60", {"H1": cella(R_H1, valore="60")}))
+    rifiuta("RIFIUTO: ini della H4 con InpSignalTF 240", lambda: leggi_lotto("x.zip", _zip_lotto("R2SXAGH", {"M30": cella(R_M30), "H1": cella(R_H1), "H4": cella(R_H4)},
+                                                                                             ini_mod=lambda te, inp: inp.update({"InpSignalTF": "240"}) if te["Period"] == "H4" else None)))
+    rifiuta("RIFIUTO: ini con Model=4 nel lotto R2SXAGH (Modello 1)", lambda: leggi_h("m4", {"M30": cella(R_M30, modello_ini="4")}))
+    rifiuta("RIFIUTO: celle in ordine H1 -> M30 -> H4 (tag diversi da quelli del file prova)",
+            lambda: leggi_lotto("x.zip", _zip_lotto("R2SXAGH", {"H1": cella(R_H1, tf="H1"), "M30": cella(R_M30, tf="M30"), "H4": cella(R_H4)})))
+    rifiuta("RIFIUTO: RIEPILOGO del lotto R2SXAGH al pin cc9bcda0", lambda: leggi_lotto("x.zip", _zip_lotto(
+        "R2SXAGH", {"M30": cella(R_M30), "H1": cella(R_H1), "H4": cella(R_H4)}, riepilogo=_riepilogo("R2SXAGH", pin=PIN_A))))
+    rifiuta("RIFIUTO: H4 con una riga 'ora server 21'", lambda: leggi_h("h421", {"H4": cella(None, log=_log("XAGUSD", "H4", R_H4).replace("ora server 20", "ora server 21", 1))}))
+    zh = _zip_lotto("R2SXAGH", {"M30": cella(R_M30), "H1": cella(R_H1), "H4": cella(R_H4)})
+    pz = os.path.join(td, "xagh_rif")
+    os.makedirs(pz, exist_ok=True)
+    pa = _scrivi(pz, "GBA_R0_R2SANC.zip", anc)
+
+    def racc(nome, testo_es):
+        p = os.path.join(pz, nome)
+        with zipfile.ZipFile(p, "w") as zr:
+            zr.writestr("GBA_R0_R2SXAGH.zip", zh)
+            zr.writestr("ESITI_R2S_XAGH.txt", testo_es)
+        return p
+    lt, nt = carica([pa, racc("GBA_R2S_XAGH.zip", "GBA R2S XAGH -- pin %s   pc DESKTOP-H4D7CAJ\r\nR2SXAGH rc 3   minuti 3" % PIN_XAGH)])
+    ck("raccolta GBA_R2S_XAGH.zip con ESITI_R2S_XAGH.txt al pin della riga XAGH + ancora del 12/10: letta, ESITI in nota",
+       set(lt) == {"R2SANC", "R2SXAGH"} and any(x.startswith("ESITI_R2S_XAGH.txt: GBA R2S XAGH -- pin " + PIN_XAGH) for x in nt))
+    rifiuta("RIFIUTO: ESITI_R2S_XAGH.txt al pin d53493a9", lambda: carica([pa, racc("r2.zip", "GBA R2S XAGH -- pin %s   pc X\r\n" % PIN_XAG2)]))
+    px = _scrivi(pz, "GBA_R0_R2SXAGH.zip", zh)
+    rifiuta("RIFIUTO: R2SXAGH insieme alla passata a Modello 1 R2SXAG2 (due giri)", lambda: carica([pa, px, ARCH_R2S_XAG2[0]]))
+    rifiuta("RIFIUTO: R2SXAGH insieme a un lotto dello stadio A (R2SNAS)", lambda: carica([pa, px, _scrivi(pz, "GBA_R0_R2SNAS.zip", zA.read(_nomi(zA)["GBA_R0_R2SNAS.zip"]))]))
+    rifiuta("RIFIUTO: R2SXAGH insieme a TUTTO lo stadio A (GBA_R2S_A.zip)", lambda: carica([ARCH_R2S_A, px]))
+
+
 def _scrivi(d, nome, dati):
     p = os.path.join(d, nome)
     open(p, "wb").write(dati)
@@ -1898,9 +2877,15 @@ def main(argv):
         print("ERRORE -- zip RIFIUTATO, nessun numero si stampa: %s" % ex)
         return 2
     if csv_out is None:
-        csv_out = "D2_C3G_R2S_XAG2.csv" if "R2SXAG2" in lotti else "D2_C3G_R2S_A.csv"
+        csv_out = ("D2_C3G_R2S_XAGH.csv" if "R2SXAGH" in lotti else "D2_C3G_R2S_XAGT.csv" if "R2SXAGT" in lotti else
+                   ("D2_C3G_R2S_XAG2.csv" if "R2SXAG2" in lotti else "D2_C3G_R2S_A.csv"))
     acc_ok, acc_r = accettazione()
-    print(stampa(lotti, note, acc_ok, acc_r, csv_out))
+    try:
+        testo = stampa(lotti, note, acc_ok, acc_r, csv_out)
+    except Rifiuto as ex:
+        print("ERRORE -- lettura RIFIUTATA, nessun numero si stampa: %s" % ex)
+        return 2
+    print(testo)
     print(" CSV: %s" % os.path.abspath(csv_out))
     return 0
 

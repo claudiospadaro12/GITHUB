@@ -1,14 +1,14 @@
 # GBA R2S — la CONFERMA A TICK REALI DELL'ARGENTO (E3), scheda del 13/10/2026
 
-**Stato: BOZZA, NON consegnata.** Mancano i due strati del cancello (`controlla_prova`/`controlla_riga` + `controllo-preventivo`) e il pin del commit (segnaposto nella riga).
+**Stato: BOZZA, NON consegnata.** Riga pinnata a `3537db93` (secondo giro del cancello); consegnabile solo col PASS di tutti e due gli strati (`controlla_prova`/`controlla_riga` + `controllo-preventivo`) e del verificatore.
 Richiesta di Claudio del 13/10: **"SI PREPARA LA RIGA DELL'ARGENTO A TICK REALI"**.
 Perché: il 13/10 la cella **XAGUSD M1** (REPL, T1) è uscita **"ESCLUSA (Modello 1)"** (C3G 2,40x contro S 6,65x, n 0, 6.611 segnali tutti scartati per spread, `report/GBA_R2S_XAG2_LETTURA_2026-10-13.md`). Per **E3** la casella 4 si chiude solo dopo **una** passata a tick reali della **stessa cella e stessa tranche**, letta dallo **stesso D2**.
 
 | oggetto | file | SHA256 |
 |---|---|---|
-| file prova argento (lotto `R2SXAGT`) | `backtest_pipeline/prove/GBA_R2S_XAGUSDT_2026-10-13.txt` | `dbcdf356b0fd76022c532126928c58bf5681c8577e7be94e716df486aca738e5` (era `6f2ea092…`: CE-T ed esito (1) corretti dal controllo-preventivo il 13/10, pin e input invariati) |
+| file prova argento (lotto `R2SXAGT`) | `backtest_pipeline/prove/GBA_R2S_XAGUSDT_2026-10-13.txt` | `ec9e103b49da44d7c8850d063aaa1b2d8b4b7e2c6baa31fe27b6e7041272e61f` (era `6f2ea092…`: CE-T (a), esito (1) ed eccezione n = 0 corretti dal cancello il 13/10, pin e input invariati; qui era scritto `dbcdf356…`, SHA che nessun commit ha mai avuto: corretto dal controllo-preventivo al secondo giro) |
 | file prova ancora (lotto `R2SXTANC`) | `backtest_pipeline/prove/GBA_R2S_XAGT_ANCORA_2026-10-13.txt` | `23295bf35b6104b1d04002ccbbb6da6b8002823f5467606e3aa96414ea87c18c` |
-| riga (pinnata; il pin va RIFATTO dopo la correzione del file prova argento) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGT.txt` | cambia col pin |
+| riga (pinnata a `3537db93754ac8b2474d028c58dc2bc0062ba3dc`, secondo giro) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGT.txt` | `b924470352d76d6024df36fda0a3cc15b81d36f882249cf92ddb99f3a45e3396` (15.381 caratteri) |
 | file madri | `GBA_R2S_XAGUSD2_2026-10-12.txt` (`dbe11bc3…`) · `GBA_R2SB_ANCORA_2026-10-12.txt` (`822e3a26…`) | PASS |
 | EA / include / driver | invariati: `1381E3DC…` / `3EC97115…` / `GBA_R0_PASSATE.ps1` v5 `C239F628…` | ricalcolati nel worktree |
 
@@ -42,7 +42,8 @@ Perché: il 13/10 la cella **XAGUSD M1** (REPL, T1) è uscita **"ESCLUSA (Modell
 ## 5. ⚪ Cosa NON è stato verificato
 - **La storia a tick reali di XAGUSD sul PC di backtest**: nessuna riga `XAGUSD: ticks data begins from` in tutto il repo; la densità dei tick dell'argento BCM non è misurata (`misura_tick` ha solo NASUSD, D30EUR, U30USD). Lo misura il driver alla prima passata.
 - Quanto dura il download dei tick dal server BCM, se servisse; la riga intera su Windows PowerShell 5.1 (provata solo in `pwsh`, come le precedenti).
-- D2 v4 (lo estende un altro agente): CE-D2, CE1-A2 e CE-T (b) dipendono da lui.
+- D2 v4 (lo estende un altro agente): CE-D2, CE1-A2, CE-T (a) (colonne `qualita` e `ticks_inizio` del MANIFEST, alla lettera) e CE-T (b) dipendono da lui, o da una lettura a mano del MANIFEST dichiarata.
+- Lunghezza della riga: 15.381 caratteri contro i 13.644 della riga XAG2 che ha girato il 13/10; nessun limite misurato su Windows PowerShell 5.1 fra i due. Un troncamento all'incolla lascia aperto il blocco `& {` (si chiude solo all'ultimo carattere): PowerShell mostra `>>` e non esegue niente (fail-closed).
 
 ## 6. 🙋 Decisioni aperte
 1. **CE-D2** è la mia lettura della frase di E3 "stesso strumento D2" (rilettura del Modello 1 con lo stesso SHA, a tolleranza zero): il cancello la accetta così o pretende altro.
