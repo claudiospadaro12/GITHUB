@@ -1,0 +1,32 @@
+====================================================================================================
+ GBA R2 -- lettore (leggi_gba_r0.py), lotti di file prova DICHIARATIVI: R2SXAG2 (file GBA_R2S_XAGUSD2_2026-10-12.txt). Soglie S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, firma 10/10 per regime.
+ Le attese per cella stanno nel file prova (scritte PRIMA dei numeri): il lettore NON le conosce e non le stampa. NON giudica oltre le soglie, NON promuove, NON scrive 'morto'.
+====================================================================================================
+
+(1) CANCELLI DI AFFIDABILITA' (G0 per passata)
+  R2SXAG2_01_M15_T1_m775800          modello 1  stato driver KO                     G0 KO
+       - KO del driver: ZERO operazioni nel report
+  R2SXAG2_02_REPL_T1_m775800         modello 1  stato driver KO                     G0 KO
+       - KO del driver: ZERO operazioni nel report
+
+  G1: nessuna coppia di gemelle (lotto S0 non presente)
+  G2: serve S0 e R1A OK su REPL/T1 per il confronto Modello 1 / Modello 4
+
+----------------------------------------------------------------------------------------------------
+ CELLA REPL [lotto R2SXAG2] (InpSignalTF 1) XAGUSD M1  --  Modello 1 (OHLC su M1: SOLO CONTEGGIO, nessun PF si legge come merito)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1  (G0 KO: non letta) n=n.d.  n.d./giorno  segnali(EA) 6611, ingressi tentati 0, scartati spread 6611, a posizione aperta 0
+   tranche lette: n=0
+   nessuna passata affidabile: niente altro da leggere
+
+----------------------------------------------------------------------------------------------------
+ CELLA M15 [lotto R2SXAG2] (InpSignalTF 15) XAGUSD M15  --  Modello 1 (OHLC su M15: SOLO CONTEGGIO, nessun PF si legge come merito)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1  (G0 KO: non letta) n=n.d.  n.d./giorno  segnali(EA) 384, ingressi tentati 0, scartati spread 384, a posizione aperta 0
+   tranche lette: n=0
+   nessuna passata affidabile: niente altro da leggere
+
+----------------------------------------------------------------------------------------------------
+ CERTIFICATO DI MORTE: mancano le caselle 3 (uscita ad asse), 4 (simboli gemelli), 5 (TF cambiato). Qualunque esito sopra NON e' 'morto': e' 'NON ANCORA MISURATO' o 'la replica non regge (un regime)'.

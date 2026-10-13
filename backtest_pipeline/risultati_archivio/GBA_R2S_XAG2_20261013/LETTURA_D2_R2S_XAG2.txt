@@ -1,0 +1,98 @@
+==============================================================================================================
+ leggi_gba_r2s_c3g v3 (D2 + lotto R2SXAG2, rilancio dell'argento) -- GBA R2S stadio A, C3G (mediana vera del campo stop/spread delle righe segnale). SHA256 di questo file: 77f1f72e136c6c98
+ Regole: righe -1.0x = INFINITO (contate, non scartate); mediana con n PARI = media delle due centrali (INF se una delle due e' INF); fasce = lettore r.52, campo 'ora server'.
+ Precondizione FUORI da D2: il G0 del lettore leggi_gba_r0.py (sezione (1)) per ogni passata; l'A3 dell'ancora (doppione con GBA_R0_S0.zip).
+ LOTTO R2SXAG2 (rilancio dell'argento, pin d53493a92901b82c6b4c12c1d79ec3cb4ebfa5bb): SHA256 di D2 PER INTERO: 77f1f72e136c6c9850a2d77b01d1706f43fabb34f127cb0cc46a76bf9bbd70ae
+ REGOLA E3(3): una conferma a tick reali letta con uno strumento D2 di SHA256 DIVERSO da quello qui sopra (che legge la passata a Modello 1) e' 'conferma non
+   data' (casella 4 aperta). Precondizione FUORI da D2: il PASS del cancello su QUESTO SHA256 PRIMA di aprire lo zip (senza: CE7 non valutabile, tutto (C)).
+ X6: CE1 del lotto = ancora del 12/10 (zip archiviato, pin cc9bcda0) E CE7; CE7 rossa o non valutabile -> M15 e REPL (C). CE8 = sola descrizione.
+==============================================================================================================
+(0) PROVA D'ACCETTAZIONE di D2 (giornali archiviati, rifatta adesso): PASSATA
+   S0_01 (Modello 1): cella 22.80; fasce asia 19.80 / europa 24.50 / pausa 26.20 / USA apertura 39.20 / USA pomeriggio 20.60 / rollover 10.65; asia BUY 21.40 (n 1139) SELL 18.50 (n 1175); ingressi 158, tentati 158, righe -1.0x 0, righe >= 40x 740, >= 50x 355 -> IDENTICI ai numeri scritti
+   R1A T1 (tick reali): cella 21.60, ingressi 128, righe >= 40x 651, >= 50x 280 -> IDENTICI
+   nota: ESITI_R2S_XAG2.txt: GBA R2S XAG2 -- pin d53493a92901b82c6b4c12c1d79ec3cb4ebfa5bb   pc DESKTOP-H4D7CAJ   inizio 2026-10-13 07:14:27   fine 2026-10-13 07:16:10   minuti 2 / R2SXAG2 rc 3   minuti 2 / copiato GBA_R0_R2SXAG2.zip
+   CE1 ancora: VERDE (parte D2: manifest 158/-6364.79/0.86, conteggi EA, C3G cella/fasce/lati asia, solo spread 55.9 identici a S0_01; l'A3 doppione la verifica il lettore)
+   CE7 (determinismo della REPL, tolleranza zero sulle cifre stampate): VERDE: la REPL rifa' il giornale del 12/10 a tolleranza zero (6611 righe; EA 6611/0/6611/0/0; C3G cella 2.40, BUY 2.50 n 3364, SELL 2.30 n 3247; fasce 2149 2.10 / 1458 2.40 / 680 2.80 / 802 4.20 / 1251 2.10 / 271 1.40): l'esito si legge sul giornale NUOVO
+   CE1 del lotto R2SXAG2 (X6): VERDE (ancora del 12/10 verde, zip archiviato SHA256 259f4ba0922b..., E CE7 verde)
+   CE8 (causa dello stallo, DESCRIZIONE, nessun esito ne dipende; lettura scritta nel file prova prima dei numeri):
+      - REPL con n = 0 e report scritto (KO per il SOLO 'ZERO operazioni nel report') -> H-ZERO-R SMENTITA: lo stallo del 12/10 non dipendeva dalle zero operazioni col report; resta lo stallo occasionale (F5)
+      - M15 con n = 0 e report scritto -> H-ZERO-R SMENTITA
+
+--------------------------------------------------------------------------------------------------------------
+ LOTTO R2SANC  CELLA REPL = XAUUSD M1  (passata R2SANC_01_REPL_T1_m775800, stato driver OK)  [ANCORA]
+--------------------------------------------------------------------------------------------------------------
+   righe segnale (segnali grezzi) 6973 | ingressi del giornale (senza SALTATO) 158, di cui a SPREAD ZERO (-1.0x) 0 | righe -1.0x in tutto 0 | righe d'ingresso eseguite 158
+   n del report 158 | EA: segnali 6973, ingressi tentati 158, scartati spread 6520, posizione aperta 295, ATR non valido 0 | quota dei liberi scartata per spread 97.6% (6520 su 6678)
+   motivi delle righe: ok 158, posizione gia' aperta 295, spread oltre il limite 6520 | lotti degli ingressi: 1.00
+   C3G CELLA 22.80 (n 6973)   BUY 23.25 (n 3462)   SELL 22.30 (n 3511)   righe >= 40x 740 (la (v) di E4)   righe >= 50x 355   spread della cella (mediana del campo spread) 0.210
+   fascia          ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi    quota   spread
+   asia            00-07   2314    19.80    21.40   1139    18.50   1175      52      12         9     5.7%     0.24
+   europa          07-12   1426    24.50    24.70    694    24.50    732      73      33        12     7.6%     0.17
+   pausa           12-14    778    26.20    26.05    438    26.35    340     133      70        30    19.0%     0.20
+   USA apertura    14-17    833    39.20    37.35    442    40.00    391     389     195        90    57.0%     0.20
+   USA pomeriggio  17-22   1346    20.60    21.30    561    19.90    785      92      45        17    10.8%     0.20
+   rollover        22-24    276    10.65    10.60    188    11.20     88       1       0         0     0.0%     0.25
+   CE2 verde: ancora: e' oro
+   CE3 verde: solo spread n=158 mediana 55.9 p10 51.2 quota <40x 0%
+   CE4 verde: segnali(EA) 6973 = tentati 158 + spread 6520 + posizione 295 + altri 0 (somma 6973); righe del giornale 6973, senza SALTATO 158, SALTATO per spread 6520
+   CE6 verde: tentati 158 - n 158 = 0 (ammesso 0 o 1)
+   ANCORA: nessun esito; vedi CE1 in testa.
+
+--------------------------------------------------------------------------------------------------------------
+ LOTTO R2SXAG2  CELLA M15 = XAGUSD M15  (passata R2SXAG2_01_M15_T1_m775800, stato driver KO: ZERO operazioni nel report)
+--------------------------------------------------------------------------------------------------------------
+   CE8 (descrizione): t_avvio 2026-10-13 07:14:41 | fine del test ('Test passed' / 'total time') +20 s | 'last test passed' SI (+22 s) | durata 41 s | n del report 0 | final balance 1000000.00 | tentati (EA) 0 | eseguiti (righe d'ingresso) 0 -> report scritto
+   righe segnale (segnali grezzi) 384 | ingressi del giornale (senza SALTATO) 0, di cui a SPREAD ZERO (-1.0x) 0 | righe -1.0x in tutto 0 | righe d'ingresso eseguite 0
+   n del report 0 | EA: segnali 384, ingressi tentati 0, scartati spread 384, posizione aperta 0, ATR non valido 0 | quota dei liberi scartata per spread 100.0% (384 su 384)
+   motivi delle righe: spread oltre il limite 384 | lotti degli ingressi: -
+   C3G CELLA 11.95 (n 384)   BUY 12.20 (n 215)   SELL 11.80 (n 169)   righe >= 40x 3 (la (v) di E4)   righe >= 50x 0   spread della cella (mediana del campo spread) 0.050
+   fascia          ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi    quota   spread
+   asia            00-07    111    10.80    11.10     62    10.30     49       0       0         0     n.d.     0.05
+   europa          07-12     98    11.55    11.30     54    11.80     44       0       0         0     n.d.     0.04
+   pausa           12-14     45    11.60    11.90     23    11.50     22       0       0         0     n.d.     0.04
+   USA apertura    14-17     76    16.65    17.90     45    14.10     31       0       0         0     n.d.     0.04
+   USA pomeriggio  17-22     40    13.65    13.50     21    15.40     19       3       0         0     n.d.     0.04
+   rollover        22-24     14    10.50    11.25     10     9.00      4       0       0         0     n.d.     0.04
+   CE2 verde: firma dell'oro assente
+   CE3 verde: nessun ingresso con spread: non applicabile
+   CE4 verde: segnali(EA) 384 = tentati 0 + spread 384 + posizione 0 + altri 0 (somma 384); righe del giornale 384, senza SALTATO 0, SALTATO per spread 384
+   CE6 verde: tentati 0 - n 0 = 0 (ammesso 0 o 1)
+   PORTA STADIO B: n 0 - ingressi a spread zero 0 = 0 < 30
+   eccezione n = 0 (KO solo per ZERO operazioni, tentati 0, scartati spread >= 1): SI
+   condizioni di ESCLUSA, S = 6.65x, testo pinnato ((ii) su fasce >= 100 righe: asia): (i) SI  (ii) no  (iii) no  (iv) no  | (v) E4 righe >= 40x 3 < 30: SI
+   condizioni di ESCLUSA, S = 6.65x, con E1 ((ii) su fasce >= 30 righe: asia, europa, pausa, USA apertura, USA pomeriggio): (i) SI  (ii) no  (iii) no  (iv) no  | (v) E4 righe >= 40x 3 < 30: SI
+   (variante) ESITO secondo il testo pinnato, (i)-(iv), (ii) >= 100: (B) NON PASSA PER n (n 0, al netto di 0 ingressi a spread zero = 0 < 30): la REPL non apre nessuna operazione su questo (simbolo, TF) in T1: 384 segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G 11.95 -> n insufficiente a Modello 1 su una tranche (NON 'escluso') | COSTO: C3G cella 11.95 (n 384), BUY 12.20 (n 215), SELL 11.80 (n 169); fasce asia 10.80 (n 111) / europa 11.55 (n 98) / pausa 11.60 (n 45) / USA apertura 16.65 (n 76) / USA pomeriggio 13.65 (n 40) / rollover 10.50 (n 14); righe >= 40x 3, >= 50x 0
+   (variante) ESITO con E1, (i)-(iv), (ii) >= 30:                  (B) NON PASSA PER n (n 0, al netto di 0 ingressi a spread zero = 0 < 30): la REPL non apre nessuna operazione su questo (simbolo, TF) in T1: 384 segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G 11.95 -> n insufficiente a Modello 1 su una tranche (NON 'escluso') | COSTO: C3G cella 11.95 (n 384), BUY 12.20 (n 215), SELL 11.80 (n 169); fasce asia 10.80 (n 111) / europa 11.55 (n 98) / pausa 11.60 (n 45) / USA apertura 16.65 (n 76) / USA pomeriggio 13.65 (n 40) / rollover 10.50 (n 14); righe >= 40x 3, >= 50x 0
+   ESITO DI RIFERIMENTO (E1 + E4, (i)-(v), dicitura E3):          (B) NON PASSA PER n (n 0, al netto di 0 ingressi a spread zero = 0 < 30): la REPL non apre nessuna operazione su questo (simbolo, TF) in T1: 384 segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G 11.95 -> n insufficiente a Modello 1 su una tranche (NON 'escluso') | COSTO: C3G cella 11.95 (n 384), BUY 12.20 (n 215), SELL 11.80 (n 169); fasce asia 10.80 (n 111) / europa 11.55 (n 98) / pausa 11.60 (n 45) / USA apertura 16.65 (n 76) / USA pomeriggio 13.65 (n 40) / rollover 10.50 (n 14); righe >= 40x 3, >= 50x 0
+   CASELLA 4 (E3): NON ANCORA MISURATO, casella 4 aperta: nessuna ESCLUSA (Modello 1) da confermare
+
+--------------------------------------------------------------------------------------------------------------
+ LOTTO R2SXAG2  CELLA REPL = XAGUSD M1  (passata R2SXAG2_02_REPL_T1_m775800, stato driver KO: ZERO operazioni nel report)
+--------------------------------------------------------------------------------------------------------------
+   CE8 (descrizione): t_avvio 2026-10-13 07:15:23 | fine del test ('Test passed' / 'total time') +13 s | 'last test passed' SI (+17 s) | durata 33 s | n del report 0 | final balance 1000000.00 | tentati (EA) 0 | eseguiti (righe d'ingresso) 0 -> report scritto
+   righe segnale (segnali grezzi) 6611 | ingressi del giornale (senza SALTATO) 0, di cui a SPREAD ZERO (-1.0x) 0 | righe -1.0x in tutto 0 | righe d'ingresso eseguite 0
+   n del report 0 | EA: segnali 6611, ingressi tentati 0, scartati spread 6611, posizione aperta 0, ATR non valido 0 | quota dei liberi scartata per spread 100.0% (6611 su 6611)
+   motivi delle righe: spread oltre il limite 6611 | lotti degli ingressi: -
+   C3G CELLA 2.40 (n 6611)   BUY 2.50 (n 3364)   SELL 2.30 (n 3247)   righe >= 40x 0 (la (v) di E4)   righe >= 50x 0   spread della cella (mediana del campo spread) 0.050
+   fascia          ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi    quota   spread
+   asia            00-07   2149     2.10     2.20   1103     2.10   1046       0       0         0     n.d.     0.06
+   europa          07-12   1458     2.40     2.50    735     2.30    723       0       0         0     n.d.     0.05
+   pausa           12-14    680     2.80     2.70    373     3.00    307       0       0         0     n.d.     0.04
+   USA apertura    14-17    802     4.20     4.50    434     3.90    368       0       0         0     n.d.     0.04
+   USA pomeriggio  17-22   1251     2.10     2.20    532     2.00    719       0       0         0     n.d.     0.05
+   rollover        22-24    271     1.40     1.30    187     1.45     84       0       0         0     n.d.     0.04
+   CE2 verde: firma dell'oro assente
+   CE3 verde: nessun ingresso con spread: non applicabile
+   CE4 verde: segnali(EA) 6611 = tentati 0 + spread 6611 + posizione 0 + altri 0 (somma 6611); righe del giornale 6611, senza SALTATO 0, SALTATO per spread 6611
+   CE6 verde: tentati 0 - n 0 = 0 (ammesso 0 o 1)
+   PORTA STADIO B: n 0 - ingressi a spread zero 0 = 0 < 30
+   eccezione n = 0 (KO solo per ZERO operazioni, tentati 0, scartati spread >= 1): SI
+   condizioni di ESCLUSA, S = 6.65x, testo pinnato ((ii) su fasce >= 100 righe: asia, europa, pausa, USA apertura, USA pomeriggio, rollover): (i) SI  (ii) SI  (iii) SI  (iv) SI  | (v) E4 righe >= 40x 0 < 30: SI
+   condizioni di ESCLUSA, S = 6.65x, con E1 ((ii) su fasce >= 30 righe: asia, europa, pausa, USA apertura, USA pomeriggio, rollover): (i) SI  (ii) SI  (iii) SI  (iv) SI  | (v) E4 righe >= 40x 0 < 30: SI
+   (variante) ESITO secondo il testo pinnato, (i)-(iv), (ii) >= 100: (B) NON PASSA PER n (n 0, al netto di 0 ingressi a spread zero = 0 < 30): la REPL non apre nessuna operazione su questo (simbolo, TF) in T1: 6611 segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G 2.40 -> VARIANTE NON IN VIGORE (solo descrizione, NON un esito, casella 4 NON chiusa): col testo pinnato senza E1-E4 le condizioni varrebbero: C3G cella 2.40 < S 6.65, righe >= 40x 0 (< 30: SI) | COSTO: C3G cella 2.40 (n 6611), BUY 2.50 (n 3364), SELL 2.30 (n 3247); fasce asia 2.10 (n 2149) / europa 2.40 (n 1458) / pausa 2.80 (n 680) / USA apertura 4.20 (n 802) / USA pomeriggio 2.10 (n 1251) / rollover 1.40 (n 271); righe >= 40x 0, >= 50x 0
+   (variante) ESITO con E1, (i)-(iv), (ii) >= 30:                  (B) NON PASSA PER n (n 0, al netto di 0 ingressi a spread zero = 0 < 30): la REPL non apre nessuna operazione su questo (simbolo, TF) in T1: 6611 segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G 2.40 -> VARIANTE NON IN VIGORE (solo descrizione, NON un esito, casella 4 NON chiusa): con E1 senza E4 le condizioni varrebbero: C3G cella 2.40 < S 6.65, righe >= 40x 0 (< 30: SI) | COSTO: C3G cella 2.40 (n 6611), BUY 2.50 (n 3364), SELL 2.30 (n 3247); fasce asia 2.10 (n 2149) / europa 2.40 (n 1458) / pausa 2.80 (n 680) / USA apertura 4.20 (n 802) / USA pomeriggio 2.10 (n 1251) / rollover 1.40 (n 271); righe >= 40x 0, >= 50x 0
+   ESITO DI RIFERIMENTO (E1 + E4, (i)-(v), dicitura E3):          (B) NON PASSA PER n (n 0, al netto di 0 ingressi a spread zero = 0 < 30): la REPL non apre nessuna operazione su questo (simbolo, TF) in T1: 6611 segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G 2.40 -> ESCLUSA (Modello 1): C3G cella 2.40 < S 6.65, righe >= 40x 0 (< 30: SI) | COSTO: C3G cella 2.40 (n 6611), BUY 2.50 (n 3364), SELL 2.30 (n 3247); fasce asia 2.10 (n 2149) / europa 2.40 (n 1458) / pausa 2.80 (n 680) / USA apertura 4.20 (n 802) / USA pomeriggio 2.10 (n 1251) / rollover 1.40 (n 271); righe >= 40x 0, >= 50x 0
+   CASELLA 4 (E3): NON ANCORA MISURATO: ESCLUSA (Modello 1) da confermare con UNA passata a tick reali della stessa cella e tranche (n netto < 30 e (i)-(v) sul suo giornale); se la storia a tick reali del simbolo manca, resta NON ANCORA MISURATO e si scrive cosa manca
+
+ NON giudica il merito, NON promuove, NON legge PF. Ogni esito vale solo con il G0 del lettore OK sulla stessa passata.
+ CSV: /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/xag2_lettura/D2_C3G_R2S_XAG2.csv
