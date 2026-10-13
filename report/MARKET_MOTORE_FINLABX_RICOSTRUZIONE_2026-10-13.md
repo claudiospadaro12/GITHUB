@@ -11,18 +11,18 @@ Fonte: `data/statements/ReportHistory_50503392_2026-10-13.xlsx` (SHA256 `2e4624c
 
 ## 2. Dove nasce il profitto: nella coda
 Per profondita' del recupero (numero di ingressi `[R]` per ciclo e lato), netto del solo `[R]`:
-| profondita' | cesti | netto `[R]` EUR | lotti max vivi | in perdita | durata max |
+| profondita' | cesti | netto `[R]` EUR | somma lotti d'ingresso della serie (NON il massimo vivo) | in perdita | durata max |
 |---|---:|---:|---:|---:|---:|
 | 1 | 36 | +55,66 | 0,02 | 4 | 0,3 h |
 | 2 | 15 | +89,15 | 0,06 | 0 | 0,4 h |
 | 3-4 | 17 | +139,79 | 0,10 | 1 | 1,0 h |
 | 5-9 | 9 | +124,00 | 0,23 | 0 | 2,4 h |
 | **>= 10** | **3** | **+132,41** | **1,20** | 0 | **6,2 h** |
-**Tre cesti su 80 (3,75%) producono il 24,5% del profitto del `[R]`** (132,41 su 541,01) e sono quelli con 1,2 lotti vivi per oltre 6 ore. Fino ad oggi hanno sempre «chiuso a +»: sono il punto in cui un giorno di trend contro la serie farebbe la perdita grande. Questo e' il numero da guardare, non il +541.
+**Tre cesti su 80 (3,75%) producono il 24,5% del profitto del `[R]`** (132,41 su 541,01) e sono quelli con **1,20 lotti di somma d'ingresso** (il massimo VIVO insieme, misurato sugli istanti di apertura e chiusura, e' **1,01**: la serie chiude in 4 volte) per oltre 6 ore. [CORRETTO 14/10: prima c'era scritto «1,2 lotti vivi»: era una somma]. Fino ad oggi hanno sempre «chiuso a +»: sono il punto in cui un giorno di trend contro la serie farebbe la perdita grande. Questo e' il numero da guardare, non il +541.
 
 ## 3. Il conto del giorno, e cosa NON dice
 - **+442,74 EUR netti** sul conto, **+487,31** sui cicli con `CID` (21 ore) [LETTO]; deposito ricavato dal drawdown: **~4.800 EUR** (264,67 = 5,52%) [DERIVATO]: **~+10% in un giorno**.
-- Win rate 69,2%, **media vincita 3,09 contro media perdita -4,68** (payoff 0,66), PF 1,485, perdita singola massima -52,59, **12 perdite consecutive = -263,91** [LETTO, sezione Risultati].
+- **Conto intero (634 operazioni, compresi altri EA)** [LETTO, sezione Risultati]: win rate 69,2%, media vincita 3,09 contro media perdita -4,68 (payoff 0,66), PF 1,485. **Sulle sole 608 posizioni del gruppo** [DERIVATO da noi, netto con commissione e swap]: 69,2% (421 su 608, coincide), media vincita 2,96, media perdita -4,11, **PF 1,64**. Altro: perdita singola massima -52,59, **12 perdite consecutive = -263,91** [LETTO, sezione Risultati].
 - Il «Drawdown Bilancio» del report e' sul **saldo**, non sull'**equity**: il flottante di una scala senza SL non e' nel file [NON MISURATO]. Un +10% al giorno con 5,5% di drawdown di saldo nello stesso periodo, se fosse su una prop con limite giornaliero 5%, **l'avrebbe gia' sforato come saldo**, prima di contare il flottante.
 
 ## 4. Cosa ne facciamo (ipotesi, non criteri)
