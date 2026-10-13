@@ -1,0 +1,29 @@
+lotto;cella;simbolo;tf;livello;nome;righe;c3g;buy_n;buy_c3g;sell_n;sell_c3g;ge40;ge50;ingressi;quota_ingressi;ingressi_spread_zero;righe_spread_zero;n_report;tentati;scartati_spread;solo_spread_mediana;spread_cella;esito_pinnato;esito_E1;esito_riferimento;casella4_E3;ce1h;ce9;ce10
+R2SANC;REPL;XAUUSD;M1;FASCIA;asia;2314;19.80;1139;21.40;1175;18.50;52;12;9;0.0570;;;;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;europa;1426;24.50;694;24.70;732;24.50;73;33;12;0.0759;;;;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;pausa;778;26.20;438;26.05;340;26.35;133;70;30;0.1899;;;;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;USA apertura;833;39.20;442;37.35;391;40.00;389;195;90;0.5696;;;;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;USA pomeriggio;1346;20.60;561;21.30;785;19.90;92;45;17;0.1076;;;;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;rollover;276;10.65;188;10.60;88;11.20;1;0;0;0.0000;;;;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;CELLA;-;6973;22.80;3462;23.25;3511;22.30;740;355;158;;0;0;158;158;6520;55.87;0.210;;;;;;;
+R2SXAGH;M30;XAGUSD;M30;FASCIA;asia;53;13.20;26;13.10;27;13.30;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;M30;XAGUSD;M30;FASCIA;europa;46;18.70;31;18.80;15;18.60;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;M30;XAGUSD;M30;FASCIA;pausa;11;15.70;5;19.00;6;14.45;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;M30;XAGUSD;M30;FASCIA;USA apertura;39;20.10;24;20.50;15;19.60;1;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;M30;XAGUSD;M30;FASCIA;USA pomeriggio;22;26.20;10;23.10;12;28.15;3;1;1;1.0000;;;;;;;;;;;;;;
+R2SXAGH;M30;XAGUSD;M30;FASCIA;rollover;6;18.35;4;18.35;2;16.50;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;M30;XAGUSD;M30;CELLA;-;177;17.90;100;18.25;77;17.30;4;1;1;;0;0;;1;175;58.00;0.040;-;-;H0 (C) NON SI LEGGE: passata KO (timeout di 20 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAGH_01_M30_T1_m775800): senza report non c e misura);NON ANCORA MISURATO, caselle 4 e 5 aperte: la cella non si legge (H0);VERDE VERDE (ancora del 12/10 verde, zip archiviato SHA256 259f4ba0922b..., E CE7H verde);verde: righe libere 176, S_sp 175, L_lt 175, L_eq 0 -> 175 <= 175 <= 175 vale;verde: righe 'dati non pronti' 0 (attese 0)
+R2SXAGH;H1;XAGUSD;H1;FASCIA;asia;23;25.80;10;24.35;13;25.80;1;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;H1;XAGUSD;H1;FASCIA;europa;27;25.00;17;22.90;10;25.80;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;H1;XAGUSD;H1;FASCIA;pausa;3;20.90;2;23.25;1;20.90;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;H1;XAGUSD;H1;FASCIA;USA apertura;20;31.10;11;32.20;9;27.40;2;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;H1;XAGUSD;H1;FASCIA;USA pomeriggio;16;34.50;6;31.20;10;39.00;5;1;1;1.0000;;;;;;;;;;;;;;
+R2SXAGH;H1;XAGUSD;H1;FASCIA;rollover;2;19.85;1;21.20;1;18.50;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;H1;XAGUSD;H1;CELLA;-;91;26.30;47;25.70;44;27.35;8;1;1;;0;0;;1;89;59.38;0.040;-;-;H0 (C) NON SI LEGGE: passata KO (timeout di 20 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAGH_02_H1_T1_m775800): senza report non c e misura);NON ANCORA MISURATO, caselle 4 e 5 aperte: la cella non si legge (H0);VERDE VERDE (ancora del 12/10 verde, zip archiviato SHA256 259f4ba0922b..., E CE7H verde);verde: righe libere 90, S_sp 89, L_lt 89, L_eq 0 -> 89 <= 89 <= 89 vale;verde: righe 'dati non pronti' 0 (attese 0)
+R2SXAGH;H4;XAGUSD;H4;FASCIA;asia;8;49.00;4;45.90;4;49.50;7;2;1;0.1000;;;;;;;;;;;;;;
+R2SXAGH;H4;XAGUSD;H4;FASCIA;europa;4;48.90;3;51.40;1;41.80;4;2;2;0.2000;;;;;;;;;;;;;;
+R2SXAGH;H4;XAGUSD;H4;FASCIA;pausa;6;55.60;2;61.00;4;52.20;6;5;3;0.3000;;;;;;;;;;;;;;
+R2SXAGH;H4;XAGUSD;H4;FASCIA;USA apertura;6;58.00;4;59.25;2;53.80;6;6;3;0.3000;;;;;;;;;;;;;;
+R2SXAGH;H4;XAGUSD;H4;FASCIA;USA pomeriggio;2;66.75;1;62.50;1;71.00;2;2;1;0.1000;;;;;;;;;;;;;;
+R2SXAGH;H4;XAGUSD;H4;FASCIA;rollover;0;n.d.;0;n.d.;0;n.d.;0;0;0;0.0000;;;;;;;;;;;;;;
+R2SXAGH;H4;XAGUSD;H4;CELLA;-;26;52.20;14;57.15;12;51.10;25;17;10;;0;0;10;10;6;59.25;0.040;-;-;"H3 (B) NON PASSA PER n (n 10, al netto di 0 ingressi a spread zero = 10 < 30): n insufficiente a Modello 1 su una tranche (NON 'escluso') | COSTO: C3G cella 52.20 (n 26), BUY 57.15 (n 14), SELL 51.10 (n 12); fasce asia 49.00 (n 8) / europa 48.90 (n 4) / pausa 55.60 (n 6) / USA apertura 58.00 (n 6) / USA pomeriggio 66.75 (n 2) / rollover n.d. (n 0); righe >= 40x 25, >= 50x 17 | non vale: (i), (iii), (iv) | classe S2 del C3G: zona >= 40x (il costo grezzo non esclude)";NON ANCORA MISURATO, casella 4 aperta: nessuna ESCLUSA (Modello 1) da confermare;VERDE VERDE (ancora del 12/10 verde, zip archiviato SHA256 259f4ba0922b..., E CE7H verde);verde: righe libere 16, S_sp 6, L_lt 6, L_eq 0 -> 6 <= 6 <= 6 vale;verde: righe 'dati non pronti' 0 (attese 0)

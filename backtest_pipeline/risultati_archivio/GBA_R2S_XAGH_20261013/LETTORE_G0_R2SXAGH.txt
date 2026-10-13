@@ -1,0 +1,72 @@
+====================================================================================================
+ GBA R2 -- lettore (leggi_gba_r0.py), lotti di file prova DICHIARATIVI: R2SXAGH (file GBA_R2S_XAGUSDH_2026-10-13.txt). Soglie S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, firma 10/10 per regime.
+ Le attese per cella stanno nel file prova (scritte PRIMA dei numeri): il lettore NON le conosce e non le stampa. NON giudica oltre le soglie, NON promuove, NON scrive 'morto'.
+====================================================================================================
+
+(1) CANCELLI DI AFFIDABILITA' (G0 per passata)
+  R2SXAGH_01_M30_T1_m775800          modello 1  stato driver KO                     G0 KO
+       - KO del driver: timeout di 20 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAGH_01_M30_T1_m775800): senza report non c e misura
+       - report assente o illeggibile
+  R2SXAGH_02_H1_T1_m775800           modello 1  stato driver KO                     G0 KO
+       - KO del driver: timeout di 20 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAGH_02_H1_T1_m775800): senza report non c e misura
+       - report assente o illeggibile
+  R2SXAGH_03_H4_T1_m775800           modello 1  stato driver OK                     G0 OK
+
+  G1: nessuna coppia di gemelle (lotto S0 non presente)
+  G2: serve S0 e R1A OK su REPL/T1 per il confronto Modello 1 / Modello 4
+
+----------------------------------------------------------------------------------------------------
+ CELLA H1 [lotto R2SXAGH] (InpSignalTF 16385) XAGUSD H1  --  Modello 1 (OHLC su H1: SOLO CONTEGGIO, nessun PF si legge come merito)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1  (G0 KO: non letta) n=n.d.  n.d./giorno  segnali(EA) 91, ingressi tentati 1, scartati spread 89, a posizione aperta 1
+   tranche lette: n=0
+   nessuna passata affidabile: niente altro da leggere
+
+----------------------------------------------------------------------------------------------------
+ CELLA H4 [lotto R2SXAGH] (InpSignalTF 16388) XAGUSD H4  --  Modello 1 (OHLC su H4: SOLO CONTEGGIO, nessun PF si legge come merito)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=10  0.15/giorno  segnali(EA) 26, ingressi tentati 10, scartati spread 6, a posizione aperta 10
+   tranche lette: n=10
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=10 mediana 59.2  p10 50.8  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=10 mediana 29.6  p10 25.7  quota <40x: 100%  quota <13,3x: 0%  -> FRA (sotto la frontiera 40x: non puo' diventare sedia)
+   +0,08 USD/oz (per lato)            n=10 mediana 19.8  p10 17.1  quota <40x: 100%  quota <13,3x: 0%  -> FRA (sotto la frontiera 40x: non puo' diventare sedia)
+   il verdetto di costo CAMBIA fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)   [Modello 1: PF di SCREENING, mai un verdetto]
+   commissioni addebitate dal tester (somma): -34.74 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.001   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.001;  senza commissione ipotetica: 0.001)   netto PF_V -26773 EUR   win rate 30%
+      T1  n=10    PF_V 0.00   PF del report 0.0   DD equity 29687.22 EUR (2.97%)   DD bilancio 26783.29 EUR (2.68%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=7 PF_V 0.00 netto -26810
+   lato SELL n=3 PF_V inf netto 37
+   perdita a SL scritta dall'EA: mediana 10472  p90 10906  max 13522 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 1570.5  media 2073.3  p90 4960.7
+(5) concentrazione (S5)
+   migliore operazione = 55% del profitto positivo; netto senza le 5 migliori = -26803 -> FRAGILE
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=1     PF_V 0.00  r medio -0.753  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   europa          07-12  n=2     PF_V 0.00  r medio -0.000  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   pausa           12-14  n=3     PF_V inf  r medio 0.001  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   USA apertura    14-17  n=3     PF_V 0.00  r medio -0.600  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   USA pomeriggio  17-22  n=1     PF_V 0.00  r medio -0.024  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   rollover        22-24  n=0
+   segnali liberi (senza posizione aperta) 16, di cui scartati per spread 6 = 38%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 0.90  spread 0.05  n=8
+      europa          ATR 0.93  spread 0.04  n=4
+      pausa           ATR 0.99  spread 0.04  n=6
+      USA apertura    ATR 0.93  spread 0.04  n=6
+      USA pomeriggio  ATR 1.07  spread 0.04  n=2
+
+----------------------------------------------------------------------------------------------------
+ CELLA M30 [lotto R2SXAGH] (InpSignalTF 30) XAGUSD M30  --  Modello 1 (OHLC su M30: SOLO CONTEGGIO, nessun PF si legge come merito)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1  (G0 KO: non letta) n=n.d.  n.d./giorno  segnali(EA) 177, ingressi tentati 1, scartati spread 175, a posizione aperta 1
+   tranche lette: n=0
+   nessuna passata affidabile: niente altro da leggere
+
+----------------------------------------------------------------------------------------------------
+ CERTIFICATO DI MORTE: mancano le caselle 3 (uscita ad asse), 4 (simboli gemelli), 5 (TF cambiato). Qualunque esito sopra NON e' 'morto': e' 'NON ANCORA MISURATO' o 'la replica non regge (un regime)'.
