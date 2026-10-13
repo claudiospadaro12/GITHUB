@@ -53,6 +53,10 @@ R2SXTANC (XAUUSD M1 T1 Modello 4, deve rifare R1A_01: 128 / -6577.48 / 0.83, 256
     primo tick alle 23:00), a M30 e H1 uguaglianza come in v3; ALBERO H0 (C) -> H1 (A) -> H2 'ESCLUSA (Modello 1)' -> H3 'n insufficiente', il primo che vale decide,
     UN esito per cella; cella con 0 segnali = H0 col C3G NON DEFINITO; SMENTITE H (SH1-SH3) e classe S2 del C3G come DESCRIZIONE. Nessun esito chiude le caselle 4 e 5.
   La lettura dello stadio A e quella del rilancio R2SXAG2 (senza R2SXAGT) sono IDENTICHE a quelle della v3 riga per riga, salvo le righe con versione e SHA256 di D2.
+  Strato 2 del cancello sulla v4 (13/10, SHA 0718F7C9 -> FAIL, 3 difetti corretti qui, classe 999 e A1 letterale): (a) con la passata a tick, una passata a Modello 1
+  NON 'ESCLUSA' in questa lettura usciva 'nessuna ESCLUSA da confermare' e saltava il punto 1 di E3: ora e' (3) DOPO (1); (b) a H0 un KO del driver per un motivo diverso
+  dal solo 'ZERO operazioni' (timeout, AVVIO) col giornale vuoto usciva '0 segnali in T1': ora 'passata KO' PRIMA di quel ramo; (c) A1 dell'ancora a tick: 'stato OK'
+  alla lettera (OK_FINESTRA_NON_LETTA non e' identico a R1A_01).
 
 COSA FA (e niente altro). Legge il giornale dell'EA (log\\GBA_<passata>.txt) di ogni passata dei 5 lotti R2SANC / R2SXAG / R2SNAS / R2SD30 / R2SU30 e stampa,
 per ogni cella (simbolo, TF), il C3G = MEDIANA VERA del campo 'stop/spread' delle righe segnale (scheda report/GBA_R2S_A_SCHEDA_2026-10-12.md, decisione D2; blocco L3
@@ -894,8 +898,11 @@ def esito(P, S, variante, acc_ok, ce1):
 def casella4(es_rif, P_m1, P_tick, S, acc_ok, blocchi=None):
     """E3 piena. es_rif = esito 'riferimento' a Modello 1. P_tick = passata a TICK REALI della stessa cella e tranche (gia' passata da controlli()) o None.
     blocchi (v4) = controlli del GIRO di conferma che non sono della passata (ancora a tick non verde, (0b) non identica, zip a Modello 1 non quello archiviato):
-    ognuno rende la conferma 'NON data' (punto 3 di E3), MAI la da'."""
-    if not es_rif[2]:
+    ognuno rende la conferma 'NON data' (punto 3 di E3), MAI la da'.
+    v4 (strato 2 del cancello, 13/10, classe 999): CON una passata a tick (P_tick) l'esito a Modello 1 di QUESTA lettura che NON e' 'ESCLUSA (Modello 1)' e' un
+    controllo del giro (CE-D2 rossa) e si valuta DENTRO l'ordine di E3, cioe' DOPO il punto 1 (storia a tick mancante): prima usciva 'nessuna ESCLUSA da confermare'
+    (frase che non e' nessuno dei sei esiti) e saltava il punto 1."""
+    if not es_rif[2] and P_tick is None:
         if es_rif[0] == "A":
             return "NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)"
         return "NON ANCORA MISURATO, casella 4 aperta: nessuna ESCLUSA (Modello 1) da confermare"
@@ -915,11 +922,9 @@ def casella4(es_rif, P_m1, P_tick, S, acc_ok, blocchi=None):
         raise Rifiuto("E3: la passata di conferma ha modello %s, non 4 (tick reali)" % rt["modello"])
     # Esiti della passata a tick reali IN ORDINE, decide il PRIMO che vale (E3 del documento, quarto giro del cancello)
     # 1) KO per storia a tick mancante (motivi del driver r.786 / r.815, qualita' != 100% ticks reali, ticks_inizio dopo l'inizio della tranche) -> NON ANCORA MISURATO
-    st = storia_tick_mancante(P_tick)
+    st = esito_storia_tick(P_tick)
     if st:
-        ti = [x.strip() for x in (rt.get("ticks_inizio") or "").split(" / ") if x.strip().startswith(P_tick["simbolo"] + " ")]
-        return ("NON ANCORA MISURATO: storia a tick mancante, la conferma non c'e' (manca: %s; cioe' la storia a tick reali di %s su %s sul PC di backtest, inizio dei "
-                "tick letto: %s, qualita' %s)") % ("; ".join(st), P_tick["simbolo"], rt["tranche"], ti[0].split(" ", 1)[1] if ti else "assente", rt.get("qualita") or "assente")
+        return st
     # 2) KO per il SOLO 'ZERO operazioni' sotto l'ECCEZIONE n = 0 (tentati 0, scartati spread >= 1, AVVIO/AUTOTEST/finestra/CONTA a posto): NON e' un KO per E3,
     #    ma toglie SOLO quel KO (dentro _leggibile, DOPO i blocchi del giro qui sotto): il punto 3 si valuta SEMPRE su tutto il resto (CE1 dell'ancora a tick,
     #    CE-D2, CE-T, (0b), SHA, CE2/CE3/CE4/CE6), e solo se 3 non vale si va a 4-6 con n = 0 (file prova ec9e103b, (2): MAI 'ESCLUSA PER COSTO' senza ancora);
@@ -927,6 +932,9 @@ def casella4(es_rif, P_m1, P_tick, S, acc_ok, blocchi=None):
     # 3) qualunque altro KO, CE rosse, o giornale letto da un D2 con SHA256 diverso da quello che ha letto la passata a Modello 1 -> conferma NON data
     if rt["stato"] == "NON_LANCIATA" or P_tick.get("giornale") is None:
         return "NON ANCORA MISURATO: conferma NON data, casella aperta: la passata a tick reali NON e' stata lanciata (%s)" % (rt.get("motivi") or "nessun motivo")
+    if not es_rif[2]:
+        return ("NON ANCORA MISURATO: conferma NON data, casella aperta: l'esito di riferimento della passata a Modello 1 riletta in QUESTA lettura NON e' "
+                "'ESCLUSA (Modello 1)' ((%s) %s)%s") % (es_rif[0], es_rif[1][:160], ("; " + "; ".join(blocchi)) if blocchi else "")
     if blocchi:
         return "NON ANCORA MISURATO: conferma NON data, casella aperta: %s" % "; ".join(blocchi)
     if P_tick.get("sha_d2") != P_m1.get("sha_d2"):
@@ -985,6 +993,20 @@ def storia_tick_mancante(P):
     if (r.get("qualita") or "").strip():
         out += [x for x in ce_t_a(P) if x not in out]
     return out
+
+
+def esito_storia_tick(P):
+    """E3 (1) come FRASE dell'esito (None se la storia a tick c'e'): usata da casella4() e dalla stampa quando la passata a Modello 1 non si legge
+    (strato 2 del cancello, 13/10: il punto 1 viene PRIMA di ogni controllo del giro, anche di quello sulla passata a Modello 1)."""
+    if P is None:
+        return None
+    st = storia_tick_mancante(P)
+    if not st:
+        return None
+    rt = P["riga"]
+    ti = [x.strip() for x in (rt.get("ticks_inizio") or "").split(" / ") if x.strip().startswith(P["simbolo"] + " ")]
+    return ("NON ANCORA MISURATO: storia a tick mancante, la conferma non c'e' (manca: %s; cioe' la storia a tick reali di %s su %s sul PC di backtest, inizio dei "
+            "tick letto: %s, qualita' %s)") % ("; ".join(st), P["simbolo"], rt["tranche"], ti[0].split(" ", 1)[1] if ti else "assente", rt.get("qualita") or "assente")
 
 
 def costo_testo(A):
@@ -1096,8 +1118,8 @@ def stato_ce1_tick(lotti):
         return (False, "ROSSO: passata dell'ancora a tick non lanciata (%s)" % (P["riga"].get("motivi") or "nessun motivo"))
     r, A = P["riga"], P["A"]
     err = []
-    # A1: manifest del driver
-    if not r["stato"].startswith("OK"):
+    # A1: manifest del driver ('stato OK' ALLA LETTERA, come R1A_01: OK_FINESTRA_NON_LETTA NON e' identico; strato 2 del cancello, 13/10)
+    if r["stato"] != "OK":
         err.append("A1 stato %s (%s)" % (r["stato"], r.get("motivi") or "-"))
     if (r["trades_report"], r["profitto_report"], r["pf_report"]) != att["manifest"]:
         err.append("A1 manifest %s / %s / %s invece di %s" % (r["trades_report"], r["profitto_report"], r["pf_report"], " / ".join(att["manifest"])))
@@ -1288,6 +1310,10 @@ def esito_h(P, S, acc_ok, ce1h):
         return ("H0", "C", "NON SI LEGGE: passata non lanciata (%s)" % (r.get("motivi") or "nessun motivo"), None)
     if not ce1h[0]:
         return ("H0", "C", "NON SI LEGGE: CE1H " + ce1h[1], None)
+    # strato 2 del cancello (13/10, classe 999): un KO del driver per un motivo DIVERSO dal solo 'ZERO operazioni nel report' (timeout, AVVIO, report mancante,
+    # deposito, ...) si dice PRIMA del ramo '0 segnali in T1': una passata che non ha girato T1 per intero NON misura '0 segnali in T1' (prima lo certificava).
+    if not r["stato"].startswith("OK") and (r.get("motivi") or "").strip() != "ZERO operazioni nel report":
+        return ("H0", "C", "NON SI LEGGE: passata KO (%s)" % (r.get("motivi") or "nessun motivo"), None)
     c = P["giornale"]["conta"]
     if P["A"]["n"] == 0 or (c is not None and c["seg"] == 0):
         return ("H0", "C", "NON SI LEGGE: 0 segnali in T1 (quantificatore vuoto): C3G NON DEFINITO (ne' 0 ne' infinito), SH1 non valutabile; la casella 5 resta NON ANCORA "
@@ -1508,7 +1534,7 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
         W("   SHA256 di D2 che ha letto la passata a tick reali IN QUESTA LETTURA: %s" % (P_tk.get("sha_d2") or "n.d. (passata non lanciata)" if P_tk else "n.d. (cella assente)"))
         W("   A3 dell'ancora a tick (leggi_gba_r0.py con GBA_R0_%s.zip e GBA_R0_R1A.zip insieme: 'caricata DUE volte'): precondizione FUORI da D2" % LOTTO_ANCORA_TICK)
         if P_m1 is None or P_m1.get("A") is None:
-            conferma = "NON ANCORA MISURATO: conferma NON data, casella aperta: la passata a Modello 1 R2SXAG2 REPL non e' leggibile in questa lettura"
+            conferma = esito_storia_tick(P_tk) or "NON ANCORA MISURATO: conferma NON data, casella aperta: la passata a Modello 1 R2SXAG2 REPL non e' leggibile in questa lettura"
         else:
             e_m1 = esito(P_m1, LOTTI["R2SXAG2"]["S"], "riferimento", acc_ok, ce1_lotto["R2SXAG2"])
             ce_d2 = stato_ce_d2(lotti, acc_ok, e_m1)
@@ -2463,7 +2489,7 @@ def _autotest_xagt(ck, rifiuta, td, log_s0, KOZ):
         s.update(kw)
         return s
 
-    def raccolta_t(nome, xagt=None, tanc=True, pin_es=None, riep=None):
+    def raccolta_t(nome, xagt=None, tanc=True, pin_es=None, riep=None, anc_b=None):
         p = os.path.join(td, "xagt_" + nome)
         os.makedirs(p, exist_ok=True)
         pr = os.path.join(p, "GBA_R2S_XAGT.zip")
@@ -2474,11 +2500,11 @@ def _autotest_xagt(ck, rifiuta, td, log_s0, KOZ):
             zr.writestr("ESITI_R2S_XAGT.txt", "GBA R2S XAGT -- pin %s   pc DESKTOP-H4D7CAJ\r\nR2SXAGT rc 3   minuti 2\r\n%s rc 0   minuti 2" % (
                 pin_es or LOTTI["R2SXAGT"]["pin"], LOTTO_ANCORA_TICK))
         pa = os.path.join(p, "GBA_R0_R2SANC.zip")
-        open(pa, "wb").write(anc)
+        open(pa, "wb").write(anc if anc_b is None else anc_b)
         return p, pa, pr
 
-    def leggi_t(nome, xagt=None, tanc=True, m1=None, acc=None, extra=()):
-        p, pa, pr = raccolta_t(nome, xagt, tanc)
+    def leggi_t(nome, xagt=None, tanc=True, m1=None, acc=None, extra=(), anc_b=None):
+        p, pa, pr = raccolta_t(nome, xagt, tanc, anc_b=anc_b)
         if m1 is None:
             px = ARCH_R2S_XAG2[0]
         else:
@@ -2608,6 +2634,25 @@ def _autotest_xagt(ck, rifiuta, td, log_s0, KOZ):
         t, c, _l = leggi_t_sicura("anctk", tanc=zip_tanc(man_mod={"ticks_inizio": "EURUSD 2024.07.05"}))
         ck("ancora a tick senza 'XAUUSD 2024.07.10' in ticks_inizio -> CE1 ROSSO (A1) -> conferma NON data", "A1 ticks_inizio 'EURUSD 2024.07.05' senza 'XAUUSD 2024.07.10'" in t
            and mai_chiusa(t, c))
+        # 8i-bis (strato 2 del cancello, 13/10, classe 999): l'esito a Modello 1 NON 'ESCLUSA' in QUESTA lettura (ancora del 12/10 ri-zippata: stessi file, altro
+        # SHA -> X6 rossa -> (C)) e' un controllo del giro (CE-D2) DENTRO l'ordine di E3: con la storia a tick mancante decide (1), senza decide (3); mai la frase
+        # 'nessuna ESCLUSA da confermare' (che non e' uno dei sei esiti) e mai CHIUSA
+        zr0 = zipfile.ZipFile(io.BytesIO(anc))
+        b_rz = io.BytesIO()
+        with zipfile.ZipFile(b_rz, "w", zipfile.ZIP_DEFLATED) as zw:
+            for nn in zr0.namelist():
+                zw.writestr(nn, zr0.read(nn))
+        anc_rz = b_rz.getvalue()
+        t, c, _l = leggi_t_sicura("rz_q100", xagt=spec_t(qualita="100%"), anc_b=anc_rz)
+        ck("ORDINE E3: storia a tick mancante ('100%') E passata a Modello 1 non ESCLUSA in questa lettura (ancora del 12/10 ri-zippata) -> (1), NON 'nessuna ESCLUSA da confermare'",
+           "NON ANCORA MISURATO: storia a tick mancante" in conf(t) and "nessuna ESCLUSA" not in conf(t) and mai_chiusa(t, c), conf(t)[60:200])
+        t, c, _l = leggi_t_sicura("rz_ok", anc_b=anc_rz)
+        ck("ORDINE E3: tick verdi ma passata a Modello 1 non ESCLUSA in questa lettura (ancora del 12/10 ri-zippata) -> (3) conferma NON data, CE-D2 citata",
+           "NON ANCORA MISURATO: conferma NON data" in conf(t) and "NON e' 'ESCLUSA (Modello 1)'" in conf(t) and "CE-D2" in conf(t) and "nessuna ESCLUSA" not in conf(t)
+           and mai_chiusa(t, c), conf(t)[60:220])
+        t, c, _l = leggi_t_sicura("ancfin", tanc=zip_tanc(man_mod={"stato": "OK_FINESTRA_NON_LETTA"}))
+        ck("A1 'stato OK' alla lettera: ancora a tick con stato OK_FINESTRA_NON_LETTA (numeri identici) -> CE1 ROSSO -> conferma NON data",
+           "A1 stato OK_FINESTRA_NON_LETTA" in t and "CE1 ancora a tick NON verde" in conf(t) and mai_chiusa(t, c), conf(t)[60:200])
         # 8j. CE-T (b): 353614 tick (quelli GENERATI a Modello 1) con qualita' 100%ticksreali -> conferma NON data
         t, c, _l = leggi_t_sicura("cet", xagt=spec_t(ticks="353614"))
         ck("CE-T (b): tick del report 353614 (= generati a Modello 1) con '100%ticksreali' -> ROSSA -> conferma NON data",
@@ -2813,6 +2858,14 @@ def _autotest_xagh(ck, rifiuta, td, zip_ancora, log_s0, KOZ):
     # 9g. KO di altro tipo, eccezione n = 0 non valida
     t, c = leggi_h("kotime", {"H1": cella(R_H1, motivi="timeout di 20 minuti | report .htm della passata NON trovato", n="", senza_report=True)})
     ck("H1 in TIMEOUT -> H0 (C) 'passata KO'; le altre celle si leggono (H3)", "H0 (C) NON SI LEGGE: passata KO (timeout" in eh(t, "H1") and "H3 (B)" in eh(t, "M30"))
+    t, c = leggi_h("koto0", {"M30": cella([], motivi="timeout di 20 minuti | report .htm della passata NON trovato | riga [GBA-CONTA] FINE assente", n="",
+                                          senza_report=True, conta={"seg": 0, "ing": 0, "spr": 0, "pos": 0})})
+    ck("ORDINE H0 (strato 2 del cancello, 13/10): M30 in TIMEOUT col giornale VUOTO -> 'passata KO (timeout', MAI '0 segnali in T1' (T1 non e' stata girata)",
+       "H0 (C) NON SI LEGGE: passata KO (timeout" in eh(t, "M30") and "0 segnali in T1" not in eh(t, "M30"), eh(t, "M30")[:140])
+    t, c = leggi_h("koav0", {"H4": cella([], motivi="riga AVVIO dell EA NON trovata nei log | ZERO operazioni nel report", conta={"seg": 0, "ing": 0, "spr": 0, "pos": 0})})
+    ck("ORDINE H0: H4 senza riga AVVIO col giornale vuoto -> 'passata KO (riga AVVIO', MAI '0 segnali in T1'; KO solo 'ZERO operazioni' con 0 segnali resta '0 segnali in T1'",
+       "H0 (C) NON SI LEGGE: passata KO (riga AVVIO" in eh(t, "H4") and "0 segnali in T1" not in eh(t, "H4")
+       and "0 segnali in T1" in eh(leggi_h("ko00", {"H4": cella([], conta={"seg": 0, "ing": 0, "spr": 0, "pos": 0})})[0], "H4"), eh(t, "H4")[:140])
     t, c = leggi_h("tent1", {"M30": cella(R_M30[:-1] + [("BUY", True, "", 60.0, 10)], ingressi=0)})
     ck("M30 KO 'ZERO operazioni' con tentati 1 (ordine rifiutato) -> H0 (C), non l'eccezione", "H0 (C)" in eh(t, "M30"), eh(t, "M30")[:140])
     t, c = leggi_h("nonl", {"H4": {"righe": [], "n": "", "stato": "NON_LANCIATA", "motivi": "tetto di 50 minuti", "senza_report": True}})
