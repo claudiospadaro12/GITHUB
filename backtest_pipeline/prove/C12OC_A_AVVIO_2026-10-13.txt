@@ -19,7 +19,8 @@
 #  '[C12OC][AUTOTEST] *** FAIL', 'stop out'/'no money', e raccolta delle righe [C12OC-AVVIO]/[C12OC-CESTO]/[C12OC-CONTA]/[C12OC-PAUSA-ATTRAVERSATA]/'[C12OC] SESSIONI'.
 #  E SERVE UN LETTORE NUOVO (non scritto): leggi_c12oc.py, che dalle righe CESTO calcola per cella e tranche n, PF PER CESTO, media per cesto, profondita',
 #  coda (p1, minimo, oltre_rischio), giorno peggiore, lato, costo (dist_sl/spread e target/spread dalle righe AVVIO, commissione dai netti), e il confronto con il NULLO.
-#  Il deposito, il tetto di minuti e il modello si leggono dai blocchi @C12OC-LOTTO come nel driver GBA v5; deposito proposto 100000 EUR, leva 100, valuta EUR.
+#  Il tetto di minuti e il modello si leggono dai blocchi @C12OC-LOTTO come nel driver GBA v5 (che accetta ESATTAMENTE nome, modello, tetto_min, passate: r.440);
+#  il DEPOSITO nel GBA v5 NON sta nei blocchi, e' CABLATO nel driver (Deposit=1000000, r.648): l'adattamento lo cabla a 100000 EUR, leva 100, valuta EUR.
 #  (Cancello 13/10: qui c'era 10000 EUR "perche' il margine e' trascurabile". Il margine si', l'EMORRAGIA no: proxy, cella centrale, a 0,01 lotto, perdita
 #  cumulata della tranche peggiore NUL O3 = -15.617 USD (~-13.400 EUR), RIT O3 -15.277, ROT O3 -10.634, e 4 tranche OOS su 5 oltre -5.000 USD. Con 10000 EUR
 #  le tranche OOS finivano in margine insufficiente o stop out = KO e numeri TRONCATI. 100000 EUR = ~7 volte la tranche peggiore; il PF per cesto a lotto
@@ -52,11 +53,11 @@
 #  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI DEL TESTER =======================
 #  Fonte: PROXY a barre M1 HistData (NON il feed BCM), percorso dentro la barra O-L-H-C / O-H-L-C, spread costante 0,20, commissione 0,047 USD/oncia A/R,
 #  stessa geometria e stesse regole di pausa (in versione IDEALE: 17:00 New York e tetto 22:00 server il venerdi'). Contro-esempio del proxy fatto: sul RANDOM WALK
-#  (martingala, nessun edge) da' PF 0,61-0,77 e un lordo per unita' di -0,28/-0,32 contro il -0,20 teorico (lo spread): il proxy e' PESSIMISTA di ~0,1 USD per
+#  (martingala, nessun edge) da' PF 0,59-0,77 e un lordo per unita' di -0,28/-0,32 contro il -0,20 teorico (lo spread): il proxy e' PESSIMISTA di ~0,1 USD per
 #  unita' (sorpasso del livello dentro un passo discreto), UGUALE per i modi e per il nullo. Numeri completi: progetto par. 6.
 #  A1 [n per cella]: proxy IS ROT 19.599 / RIT 12.903 / NUL 23.627 cesti; OOS: vedi progetto par. 6. Banda tester 0,5x-2x. n >= 150 per cella e per finestra: certo.
-#  A2 [PF PER CESTO, IPOTESI NULLA = la mia]: le tre celle in 0,60-0,90 in OGNI finestra, e |PF(ROT o RIT) - PF(NUL)| <= 0,05. Proxy IS: ROT 0,729, RIT 0,738,
-#      NUL 0,713 / 0,729 / 0,731 (semi 1/2/3).
+#  A2 [PF PER CESTO, IPOTESI NULLA = la mia]: le tre celle in 0,60-0,90 in OGNI finestra, e -0,07 <= PF(ROT o RIT) - PF(NUL) <= +0,05 (asimmetrica: vedi A3).
+#      Proxy IS: ROT 0,729, RIT 0,738, NUL 0,713 / 0,729 / 0,731 (semi 1/2/3). Sotto -0,07 = ne' NULLO ne' EFFETTO: NON ANCORA MISURATO, stadio C.
 #  A3 [IPOTESI ALTERNATIVA, col suo numero]: "l'avvio porta edge": PF(ROT o RIT) >= PF(NUL) + 0,10 in IS E in OOS. Il numero che la separa dalla nulla: 0,10 contro 0,05.
 #      Fra +0,05 e +0,10 = ZONA GRIGIA (semi 2-5 del nullo, stadio B, E direzione casuale, stadio C). "Il meccanismo osservato e' un motore": PF per cesto >= 1,00 in IS E OOS.
 #      (Cancello 13/10: sul RANDOM WALK, senza edge, PF(modo) - PF(NUL) va da -0,065 (RIT, OOS) a +0,021: l'ISTANTE sposta il PF anche senza edge. Quindi una
