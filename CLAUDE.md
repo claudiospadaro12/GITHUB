@@ -405,9 +405,9 @@ disciplina — un nome nuovo non deve far pensare a un processo parallelo.
 
 ## 💸 IL MODELLO GIUSTO PER OGNI LAVORO (Claudio, 28/09/2026: "ALTERNA I TUOI MODELLI IN BASE A QUELLO CHE DEVI FARE")
 Per non finire i crediti prima del reset settimanale. Si paga il modello grande solo dove l'errore costa la challenge.
-- **Opus (resta)**: `controllo-preventivo` e `verificatore-stringhe` (il cancello: zero errori), `mql5-ea-developer`
+- **Opus (resta)**: `controllo-preventivo` e `verificatore-stringhe` (il cancello: zero errori), `progettista-da-market` (rielabora i motori del Market in EA nostri `CLAU12_*`: scrive codice), `mql5-ea-developer`
   (codice che gira sui conti), `collaudatore-prop` (misure di rischio che decidono le sedie).
-- **Sonnet**: `cacciatore-strategie`, `cacciatore-config-prop`, `analista-trascrizioni`, `controllo-caccia`,
+- **Sonnet**: `lettore-expert-market` (legge a fondo gli EA del Market in prova sul demo: scheda di natura, mai decompila), `cacciatore-strategie`, `cacciatore-config-prop`, `analista-trascrizioni`, `controllo-caccia`,
   `architetto-prop`, `cercatore-parametri` (ricerca, lettura, sintesi: un errore qui lo prende il cancello dopo).
 - **Haiku** (passato con `model: "haiku"` alla chiamata): lavori meccanici senza giudizio — leggere e riassumere log e
   referti, grep larghi, rigirare un autotest e riportare l'esito, spacchettare uno zip e contare i file.
