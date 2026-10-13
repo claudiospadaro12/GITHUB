@@ -1,12 +1,12 @@
 # GBA R2S: l'ARGENTO A TF PIÙ ALTI (M30, H1, H4), misura R-XAG-1 (scheda, 13/10/2026)
 
-**Stato: BOZZA, NON consegnata.** Mancano i due strati del cancello (`controlla_prova`/`controlla_riga` + `controllo-preventivo`) e il pin del commit (nella riga c'è il segnaposto). Richiesta di Claudio del 13/10: **"SI PREPARA ANCHE QUELLA"**.
+**Stato: riga in cancello (13/10/2026), pin `f6571dccbbc5ae07cf73a4310146a7912cfd73fb`, riga al commit `8686de85` (SHA `485f9d03…`, corretta dal verificatore).** Lettore D2 v4 `leggi_gba_r2s_c3g.py` PASS (SHA256 `1697135a2ba01a27803dace9e72089df52b820c663a671c16869e58304a07b07`, commit `85542985`). Richiesta di Claudio del 13/10: **"SI PREPARA ANCHE QUELLA"**.
 Fonte delle attese: `docs/RISPOSTA_A_GEMINI_GBA_R2S_XAG2_LETTURA_2026-10-13.md`, versione **corretta dal cancello** (commit `584545d3`, SHA256 `3cc5970b…`), regola R-XAG-1.
 
 | oggetto | file | SHA256 |
 |---|---|---|
 | file prova (lotto `R2SXAGH`) | `backtest_pipeline/prove/GBA_R2S_XAGUSDH_2026-10-13.txt` | `fd8d997d2518e58ecc684a54caa4268cb4fa5b4c268171e51509f97575e2c049` |
-| riga di lancio (BOZZA, `$PIN='SEGNAPOSTO_PIN_40_ESADECIMALI'`) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGH.txt` | `ea291a51…` (cambia col pin) |
+| riga di lancio (pin `f6571dcc`, commit `8686de85`) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGH.txt` | `485f9d03eeee0662eb743913b88d8675b31233b48c13c28dd94b039ae07bf28f` |
 | file madre | `backtest_pipeline/prove/GBA_R2S_XAGUSD2_2026-10-12.txt` | `dbe11bc3…` (PASS, girato al pin `d53493a9` il 13/10) |
 | EA / include / driver | invariati: `1381E3DC…` / `3EC97115…` / `GBA_R0_PASSATE.ps1` v5 `C239F628…` | ricalcolati a HEAD `584545d3`: uguali |
 
@@ -50,7 +50,7 @@ Fonte delle attese: `docs/RISPOSTA_A_GEMINI_GBA_R2S_XAG2_LETTURA_2026-10-13.md`,
 - Riga costruita dalla riga XAG2 con **15 sostituzioni**, ognuna controllata per numero di occorrenze; nessun residuo `XAG2`; ASCII puro; `$LOTTI` a un elemento con la forma `@(,@(...))` della riga modello.
 
 ## 5. 📖 Cosa serve a D2 (`leggi_gba_r2s_c3g.py`, lo sta scrivendo un altro agente: qui NON toccato)
-D2 v3 (SHA256 `77F1F72E…`) **oggi rifiuta** questo zip. Per leggerlo servono:
+D2 v4 (SHA256 `1697135a…`, commit `85542985`, 247 autotest OK) legge questo zip; i punti che seguono sono implementati. (Storico: D2 v3 `77F1F72E…` lo rifiutava.) Servivano:
 1. `LOTTI["R2SXAGH"]`: prova `GBA_R2S_XAGUSDH_2026-10-13.txt`, sha `fd8d997d…c049`, simbolo `XAGUSD`, celle `[("M30","M30"),("H1","H1"),("H4","H4")]`, **S = 6,65**, pin = quello della riga XAGH, tag `R2SXAGH_01_M30_T1_m775800` / `_02_H1_` / `_03_H4_`.
 2. `TF_NUM` con **`M30 "30"`, `H1 "16385"`, `H4 "16388"`** (oggi solo M1/M5/M15).
 3. `ESITI_R2S_XAGH.txt` e il giro `("R2SANC","R2SXAGH")`, letto **solo** con l'ancora del 12/10 (SHA `259f4ba0…`).
@@ -64,5 +64,5 @@ D2 v3 (SHA256 `77F1F72E…`) **oggi rifiuta** questo zip. Per leggerlo servono:
 
 ## 7. 🙋 Decisioni aperte
 1. **Cella testimone M15** (+~40 s): renderebbe CE7H un controllo a tolleranza zero sul giornale (384 righe, C3G 11,95, BUY 12,20 / SELL 11,80 del 13/10) e coprirebbe il buco "prezzi M1 riscritti". Il disegno richiesto è a 3 celle: non aggiunta.
-2. **Timeout 20 (questa bozza) o 45 come XAG2**: con 45 il caso peggiore sale a ~155 minuti, senza una lettura in più misurata.
-3. **D2 v4** con i punti del §5, passato dal cancello **prima** di aprire lo zip (senza, CE9 non è valutabile e tutte le celle sono (C)).
+2. **DECISO: timeout 20 (nella riga). Alternativa scartata, 45 come XAG2**: con 45 il caso peggiore sale a ~155 minuti, senza una lettura in più misurata.
+3. **FATTO: D2 v4 PASS** con i punti del §5, passato dal cancello **prima** di aprire lo zip (senza, CE9 non è valutabile e tutte le celle sono (C)).
