@@ -1,0 +1,159 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2S, CONFERMA A TICK REALI DELL'ARGENTO (emendamento E3) -- lotto R2SXAGT: UNA passata a MODELLO 4 (ticks reali) della STESSA cella e della STESSA
+#  tranche che il 13/10 a Modello 1 e' uscita 'ESCLUSA (Modello 1)': XAGUSD M1 (la REPL di R1A con il solo simbolo cambiato), T1 2026.07.01-2026.09.30.
+#  Casella 4 del certificato (simboli gemelli). Regole: E1-E4 e ordine di E3 (docs/RISPOSTA_A_GEMINI_GBA_R2S_STADIO_A_2026-10-12.md), R3
+#  (docs/RISPOSTA_A_GEMINI_GBA_R2S_LETTURA_2026-10-12.md, governata per intero da E3). NESSUN criterio nuovo.
+#  Prova SENZA CODICE (input ESISTENTI dell'EA), 13/10/2026. Richiesta di Claudio del 13/10: 'SI PREPARA LA RIGA DELL'ARGENTO A TICK REALI'.
+#  Lettura a Modello 1 da confermare: report/GBA_R2S_XAG2_LETTURA_2026-10-13.md (zip GBA_R2S_XAG2.zip SHA256 DAD8FEA0..., letto da D2 v3 SHA256 77F1F72E...).
+#  File madre di QUESTO file: backtest_pipeline/prove/GBA_R2S_XAGUSD2_2026-10-12.txt (SHA256 dbe11bc3b219fdc13464e1a8531552658f2b62b42e7e871e3a377b7b6e6c57b3,
+#  PASS, girato al pin d53493a9 il 13/10). Ancora di QUESTO giro: backtest_pipeline/prove/GBA_R2S_XAGT_ANCORA_2026-10-13.txt (lotto R2SXTANC). Scheda:
+#  report/GBA_R2S_XAGT_SCHEDA_2026-10-13.md.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward, MAI sul conto reale 10105439. Nessun parametro in forward, nessuna taglia di rischio (lotto fisso 1,00 nel tester).
+#  BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato: prova SENZA CODICE, solo input esistenti).
+#
+#  ======================= DIFF CONTRO IL FILE MADRE GBA_R2S_XAGUSD2_2026-10-12.txt (clausola per clausola) =======================
+#  T1 LOTTO: R2SXAG2 -> R2SXAGT (T = tick). UNA passata: tag R2SXAGT_01_REPL_T1_m775800 (report GBA_R0_R2SXAGT_01_REPL_T1_m775800, giornale log\GBA_R2SXAGT_01_REPL_T1_m775800.txt).
+#  T2 CELLE: SOLO la REPL (InpSignalTF=1, M1). La M15 NON c'e': a Modello 1 e' uscita 'n insufficiente' (C3G 11,95x), NON 'ESCLUSA', ed E3 si applica SOLO alle celle
+#     'ESCLUSA (Modello 1)'. Il blocco dell'asse dice celle=1.
+#  T3 MODELLO: 1 -> 4 (ticks reali). E' la sola cosa che cambia nel tester: rispetto all'ini archiviato gba_R2SXAG2_02_REPL_T1_m775800.ini cambiano SOLO Model= e il
+#     nome del Report (provato col codice VERO del driver v5 eseguito con pwsh su questo file: scheda, sez. CONTROLLI).
+#  T4 TETTO DEL LOTTO: 50 -> 10 minuti. Il tetto ferma solo l'AVVIO di una passata (driver r.670-677); con una passata sola parte al minuto 0 del lotto.
+#  T5 TIMEOUT PER PASSATA (nella RIGA, non qui): 60 minuti per questo lotto (driver r.152: ammessi 1-90). Perche': la storia a tick dell'argento sul PC e' [NON MISURATA]; se
+#     non e' su disco il terminale la scarica dal server BCM, e quanto dura e' [NON MISURATO]. Lo stallo dopo il test (madre, F1-F5) ha a oggi 2 casi su 335 passate
+#     archiviate del PC (1 su 334 senza il caso indice del 12/10, classe 1396: il tasso PRUDENTE per pianificare i tempi e' 2 su 335); costa un timeout pieno.
+#  T6 MAGIC: INVARIATO 775800 (il driver v5 ammette solo 775800/775850, r.459; nel tester e' un'etichetta). Il nome nuovo della misura e' il LOTTO.
+#  T7 ANCORA (CE1): NON e' quella del madre (X6: ancora del 12/10 a Modello 1 + CE7). Questa passata e' a TICK REALI: l'ancora e' il lotto R2SXTANC dello STESSO giro
+#     (XAUUSD M1, REPL, T1, Modello 4 = la stessa misura di R1A_01 del 10/10), file GBA_R2S_XAGT_ANCORA_2026-10-13.txt. Vedi CE1 qui sotto.
+#  T8 CE7 e CE8 del madre: NON si applicano (CE7 era il determinismo di una passata a Modello 1 contro un'altra a Modello 1; CE8 era la prova di H-ZERO-R, gia'
+#     SMENTITA il 13/10: n = 0 con report scritto in 33 s). Al loro posto: CE-D2 (stesso strumento) e CE-T (tick veri), qui sotto.
+#  NON CAMBIA: i 30 pin e l'asse tecnico (righe Inp... in fondo, IDENTICHE al madre), il blocco @GBA-TRANCHE (T1), la chiave dell'asse (InpSignalTF), il valore della
+#     cella REPL (1), EA, include, driver (GBA_R0_PASSATE.ps1 v5, SHA256 C239F628...), deposito 1000000 EUR, lotto fisso 1,00, magic 775800. Del madre restano in vigore,
+#     PER RIFERIMENTO (testo nel madre, SHA dbe11bc3...): DRIVER E LETTORE (L1-L7), CE2-CE6, l'ECCEZIONE n = 0 e le definizioni del C3G, delle sei fasce, dei lati,
+#     di S = 6,65x per l'argento, di 'n DELLA PORTA' (n meno gli ingressi a spread zero). Gli ESITI (A)(B)(C) del madre sono lo stadio A: questa passata NON da' un esito
+#     dello stadio A, da' solo la CONFERMA di E3 (esiti qui sotto, in ordine).
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  La domanda (E3): la cella XAGUSD M1 REPL in T1, letta sul giornale A TICK REALI dallo STESSO strumento D2, da' di nuovo l'esito (B) ESCLUSA per intero, cioe'
+#  n netto < 30 E le cinque condizioni (i)-(v) con S = 6,65x (E1: (ii) su ogni fascia con >= 30 righe; E4: (v) righe a >= 40x < 30)?
+#  In piu', ed e' la PRIMA volta: se il tester di questo PC ha la storia a TICK REALI di XAGUSD su T1 (riga 'XAGUSD: ticks data begins from' e qualita' dello storico).
+#  NON si legge: nessun PF come merito (una tranche, un regime), nessun confronto in EUR con l'oro, nessuna fascia come merito, nessun passaggio allo stadio B.
+#
+#  ======================= LA STORIA A TICK DELL'ARGENTO: [NON MISURATA] (scritto prima della passata) =======================
+#  FATTI: barre XAGUSD M1 di T1 sul PC: 88.416 (13/10, Modello 1, sotto il tetto 100.000 e sotto l'avviso 95.000 del driver r.778-779); 'XAGUSD: history data begins
+#  from 2016.12.28' (13/10 e NATCLA_F0_D del 07/10). Tick: nessuna riga 'XAGUSD: ticks data begins from' in tutto il repo (cercata nel formato del giornale del tester);
+#  l'oro ha i tick dal 2024.07.10 e EURUSD dal 2024.07.05 (R1A_01, 10/10). Indizi NON misure: risultati_archivio/GoldenCross/realtick_H4/ (un CSV argento 'realtick'
+#  senza date) e i C2C R40/R41 argento (tick dedotti dal NOME del file, report/LETTURA_CSV_TRASPORTATI_A_FOREX_2026-10-05.md D1).
+#  COME LA MISURA IL DRIVER: Modello 4 + qualita' diversa da '100% ticks reali' (r.815) oppure 'XAGUSD: ticks data begins from' DOPO il 2026.07.01 (r.786) = passata KO.
+#  Se la riga dei tick di XAGUSD non c'e' nel giornale, il driver lo dice in giallo (r.785) e decide la qualita' del report.
+#  DENSITA' DEI TICK DELL'ARGENTO BCM: [NON MISURATA], nessuna fonte del repo (misura_tick ha solo NASUSD, D30EUR, U30USD). Per il TEMPO, IPOTESI dichiarata: fra 0,3 e
+#  2 volte l'oro (25.648.545 tick in T1, R1A_01: 48 s di passata) -> circa 0,3-1,6 minuti di test se i tick sono su disco. Nessun numero di questa riga ne dipende.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (T1, Modello 4) =======================
+#  Etichette (classe 1383): [MISURATO] = numero gia' scritto da uno strumento; [INFERITO] = portato da un altro simbolo o da un altro periodo. Nessuna attesa e' [DERIVATO].
+#  a) n del report = 0; ingressi tentati 0; scartati spread = segnali(EA); posizione aperta 0; ATR non valido 0. [INFERITO dal Modello 1 dell'argento: 6.611 su 6.611
+#     scartati per spread, nessuna riga a >= 40x]. Quindi la passata esce KO per 'ZERO operazioni nel report' e il lotto con rc 3: e' l'ECCEZIONE n = 0, ATTESA.
+#  b) righe segnale: 6.480-6.740 (6.611 +- 2%) [INFERITO dall'oro: S0 (Modello 1) e R1A T1 (tick) hanno 6.973 righe l'una, 6.916 in comune, cioe' l'insieme cambia
+#     di circa l'1% e il conteggio no]. L'insieme delle barre di rottura non dipende dallo spread; dipende dalle barre M1 che il tester costruisce dai tick.
+#  c) C3G della cella a tick reali: 1,8-3,0x, centro ~2,3x [INFERITO: dal Modello 1 dell'argento (2,40x [MISURATO]) col VERSO e l'ORDINE dello scarto presi da altri
+#     simboli: oro tick contro Modello 1 -5,3% (stessa tranche, [MISURATO]); indici -10/-20% (sensibilita' con tick di un ALTRO periodo, [INFERITO]). Per l'argento il
+#     verso e' [NON MISURATO]: la banda e' larga +-25% apposta, e i suoi estremi non sono arrotondati verso la soglia]. Lati BUY e SELL nella stessa banda; ogni fascia
+#     con >= 30 righe sotto 6,65x (Modello 1: 1,40-4,20x); righe a >= 40x: 0-5 (< 30, la (v) vale); righe -1.0x (spread zero): 0.
+#  d) spread della cella (mediana del campo spread delle righe segnale): 0,04-0,07 USD (Modello 1: 0,050; una lettura viva del 17/08: 0,041) [INFERITO].
+#  e) ESITO ATTESO della conferma: (6) qui sotto, 'ESCLUSA PER COSTO (Modello 1 e tick reali)' -- SE la storia a tick c'e'. Se manca, (1): quanto sia probabile e'
+#     [NON MISURATO], e non e' un errore di nessuno: e' la misura che manca, e si scrive cosi'.
+#  SMENTITE (smentiscono la STIMA, MAI l'esito: l'esito lo decide SOLO l'ordine degli ESITI qui sotto, nei due versi con la stessa regola; classe 1383):
+#  - verso ALTO: C3G della cella > 3,0x (spread tick piu' STRETTO del Modello 1 di oltre il 20%: verso opposto all'oro e agli indici, e piu' grande di ogni scarto
+#    misurato) -> la stima del verso e' smentita, si scrive col numero e si legge il giornale (spread per fascia). Se poi il C3G e' >= 6,65x (R3: spread tick mediano
+#    <= ~0,018 USD) la (iii) non vale e l'esito e' (5), non per la smentita ma per la regola.
+#  - verso BASSO: C3G della cella < 1,8x (spread tick piu' LARGO del Modello 1 di oltre il 25%) -> la stima e' smentita, si scrive col numero, si legge il giornale.
+#  - righe fuori 6.480-6.740 -> la storia delle barre o dei tick e' diversa da quella di Modello 1: si scrive e si legge il giornale (non decide: i tick generati li
+#    prende CE-T, la storia mancante il driver).
+#  - n >= 1 -> 'tutti i segnali scartati' e' smentito (si scrive quanti e in che fascia); con n netto >= 30 vale l'esito (4).
+#
+#  ======================= CONTROLLI DI STRUMENTO (possono SOLO togliere la lettura, MAI dare un esito; NON VALUTABILE = come ROSSO, classe 1389) =======================
+#  CE1 ANCORA DELLO STESSO GIRO (lotto R2SXTANC, file GBA_R2S_XAGT_ANCORA_2026-10-13.txt): VERDE solo se valgono TUTTE E TRE, senza tolleranza:
+#      A1 manifest del driver: stato OK, operazioni 128, profitto -6577.48, PF 0.83, qualita' 100%ticksreali, barre 88416, ticks 25648545, ticks_inizio che contiene
+#         'XAUUSD 2024.07.10' (IDENTICI a R1A_01 del 10/10, risultati_archivio/GBA_R0_R1A_20261010/GBA_R0_R1A.zip, MANIFEST_R0.csv);
+#      A2 lo strumento D2 (lo stesso SHA che legge questa passata) sul giornale dell'ancora: ingressi 128, C3G della cella 21.60, righe >= 40x 651, righe >= 50x 280,
+#         righe -1.0x 0 (IDENTICI a R1A T1: i primi quattro stampati da D2 v3 nella sua prova d'accettazione, risultati_archivio/GBA_R2S_XAG2_20261013/
+#         LETTURA_D2_R2S_XAG2.txt sez. (0); le righe -1.0x a tick reali sull'oro: zero, docs/RISPOSTA_A_GEMINI_GBA_R2S_STADIO_A_2026-10-12.md, Q2 B1);
+#      A3 leggi_gba_r0.py con GBA_R0_R2SXTANC.zip e GBA_R0_R1A.zip CARICATI INSIEME si ferma con 'la stessa misura e' caricata DUE volte'.
+#      Ancora non lanciata, KO, uno dei tre diverso o non valutabile (anche: D2 che non legge il lotto R2SXTANC) -> CE1 NON verde -> R2SXAGT 'conferma non data' (3).
+#      CONTRO-ESEMPIO: fra il 10/10 e oggi il terminale si aggiorna o il broker riscrive i tick dell'oro di settembre: A1 cambia (tick o operazioni) e CE1 e' rossa.
+#      Cosa NON dice: niente sui tick dell'ARGENTO (li controllano il driver e CE-T).
+#  CE-D2 STESSO STRUMENTO (E3: 'giornale letto da uno strumento D2 con SHA256 diverso da quello che ha letto la passata a Modello 1 = conferma non data'). D2 v3
+#      (SHA 77F1F72E...) ha letto la passata a Modello 1 e NON accetta lotti nuovi: la lettura di QUESTO zip la fa per forza un D2 con SHA nuovo. Scritto ORA, prima dei
+#      numeri: lo STESSO D2 (un solo SHA, passato dal cancello PRIMA di aprire lo zip di questo giro) legge, NELLA STESSA lettura, anche GBA_R2S_XAG2.zip (Modello 1,
+#      13/10), e su quella REPL deve rifare a TOLLERANZA ZERO le cifre di D2 v3: righe 6611; EA segnali 6611, tentati 0, scartati spread 6611, posizione aperta 0, ATR
+#      non valido 0; C3G cella 2.40, BUY 2.50 (n 3364), SELL 2.30 (n 3247); fasce (righe, C3G) asia 2149 2.10, europa 1458 2.40, pausa 680 2.80, USA apertura 802 4.20,
+#      USA pomeriggio 1251 2.10, rollover 271 1.40; righe >= 40x 0; esito di riferimento 'ESCLUSA (Modello 1)' (risultati_archivio/GBA_R2S_XAG2_20261013/
+#      LETTURA_D2_R2S_XAG2.txt). Cosi' le DUE passate di E3 sono lette dallo stesso SHA. Un numero diverso, o la rilettura non fatta = conferma non data (3).
+#      CONTRO-ESEMPIO: un D2 nuovo che contasse le righe -1.0x in un altro modo darebbe sul giornale a tick un C3G diverso da quello che D2 v3 avrebbe dato: la rilettura
+#      del Modello 1 lo vede solo se il Modello 1 ha righe di quel tipo (qui 0), quindi CE-D2 garantisce l'identita' sulle cifre di QUESTA cella, non su ogni caso.
+#  CE2 SIMBOLO VERO (madre, CE2): driver (report, riga del tester, riga AVVIO 'InpSymbol="XAGUSD" -> simbolo XAGUSD': r.602, r.773-774, r.806-813); in lettura la firma
+#      dell'oro (spread mediano 0,15-0,30 E ATR mediana > 0,60 in OGNI fascia stampata, almeno una) = letta come XAUUSD = ROSSA.
+#  CE-T TICK VERI (nuovo, toglie soltanto): (a) la passata deve essere OK per il driver sui tick (qualita' '100%...' r.815; tick di XAGUSD dal 2026.07.01 o prima, r.786):
+#      altrimenti e' l'esito (1); (b) tick del report (colonna ticks_report del MANIFEST) > 353614 = i tick che il tester GENERA a Modello 1 sulla stessa cella dalle sole
+#      barre M1 (MANIFEST del 13/10, R2SXAG2_02: 4 per barra). Con 353614 o meno, la qualita' '100%' e il conteggio non si accordano: ROSSA (3).
+#      CONTRO-ESEMPIO: un terminale che segna 100% su un simbolo senza tick reali e genera i tick dalle barre darebbe circa 353.614 tick: CE-T (b) e' rossa.
+#  CE4, CE6 (madre, letterali): segnali(EA) = tentati + scartati spread + posizione aperta + ATR non valido; tentati - n = 0 oppure 1. CE3 (costo per costruzione degli
+#      ingressi) vale solo con ingressi; CE5 (lotto 1,00) si scrive.
+#
+#  ======================= ESITI DELLA CONFERMA (E3): in QUEST'ORDINE, e il PRIMO che vale decide (classe 999) =======================
+#  (1) STORIA A TICK MANCANTE: passata R2SXAGT KO nel driver v5 per qualita' dello storico diversa da '100% ticks reali' (r.815) o per 'ticks data begins from' di XAGUSD
+#      DOPO il 2026.07.01 (r.786), da sola o insieme ad altri motivi -> la conferma NON c'e', la casella 4 di (XAGUSD, M1) resta NON ANCORA MISURATO, e si scrive cosa
+#      manca: 'storia a tick reali di XAGUSD su T1 sul PC di backtest (inizio dei tick letto: <data o assente>, qualita' <valore>)'. NON e' un errore della riga ne' di
+#      Claudio: e' la misura che manca. La via piu' corta al numero (scaricare i tick dell'argento, o R3 (ii): lo spread orario dai tick storici) e' una DECISIONE.
+#  (2) KO per il SOLO motivo 'ZERO operazioni nel report' con, nella riga [GBA-CONTA] FINE, 'ingressi tentati 0' e 'scartati spread' >= 1 (ECCEZIONE n = 0 del madre,
+#      letta allo stesso modo) -> NON e' un KO per E3: si va a (4)-(6) con n = 0.
+#  (3) CONFERMA NON DATA (casella aperta, si legge il giornale, nessuna lettura dopo i numeri la riapre): passata KO per QUALUNQUE altro motivo (timeout, report
+#      mancante, AVVIO, AUTOTEST, finestra, 'ZERO operazioni' con tentati > 0 o con segnali(EA) = 0, ecc.), passata NON lanciata, CE1 / CE-D2 / CE2 / CE-T (b) / CE4 /
+#      CE6 rosse o NON VALUTABILI, oppure giornale letto da un D2 con SHA diverso da quello che ha riletto la passata a Modello 1 (CE-D2).
+#  (4) n netto >= 30 (n del report meno gli ingressi a spread zero) -> conferma SMENTITA PER n: la cella NON e' ESCLUSA; l'esito dello stadio A resta (B) 'n insufficiente
+#      a Modello 1' con accanto 'n netto a tick reali N >= 30'; la casella resta NON ANCORA MISURATO e NON passa allo stadio B da qui (serve un file prova suo).
+#  (5) una delle cinque condizioni (i)-(v), lette sul giornale A TICK REALI con S = 6,65x, E1 ed E4, NON vale -> 'n insufficiente / da rimisurare' (casella aperta;
+#      si scrive quale condizione cade e il numero).
+#  (6) altrimenti -> 'ESCLUSA PER COSTO (Modello 1 e tick reali)' col numero (C3G della cella, dei lati e di ogni fascia, righe a >= 40x e a >= 50x, n, quota scartata):
+#      e solo allora la casella 4 si CHIUDE per (XAGUSD, M1). Per il motore resta 'NON ANCORA MISURATO' (le altre caselle: TF alti, gestione dell'uscita).
+#  Nessun esito scrive la parola vietata; nessun esito promuove una cella; la M15 dell'argento (n insufficiente a Modello 1) non e' toccata; nessun numero va in un preset.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dal blocco @GBA-TRANCHE qui sotto (una tranche, T1 di R1A; nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 la legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-ASSE chiave=InpSignalTF tranche=1 celle=1 lotti=1
+#  @GBA-CELLA nome=REPL InpSignalTF=1
+#  @GBA-LOTTO nome=R2SXAGT modello=4 tetto_min=10 passate=REPL:T1
+#
+InpSymbol=XAGUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true

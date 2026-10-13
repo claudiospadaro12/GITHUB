@@ -1,0 +1,75 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2S, CONFERMA A TICK REALI DELL'ARGENTO (E3) -- lotto R2SXTANC: la CELLA-ANCORA A TICK REALI di QUESTO giro: XAUUSD M1, la REPL di R1A T1 (Modello 4) rifatta
+#  nello STESSO giro della passata dell'argento (lotto R2SXAGT, file GBA_R2S_XAGUSDT_2026-10-13.txt). E' il CE1 di quella passata (contro-esempio di strumento).
+#  Prova SENZA CODICE (input ESISTENTI dell'EA), 13/10/2026. Richiesta di Claudio del 13/10: 'SI PREPARA LA RIGA DELL'ARGENTO A TICK REALI'.
+#  File madre di QUESTO file: backtest_pipeline/prove/GBA_R2SB_ANCORA_2026-10-12.txt (lotto R2SBANC, SHA256 822e3a26b23943e1cd6e657a397e50dd3862e5d6bbb4f8835e1811f9d817fb2d,
+#  PASS nella riga dello stadio B). Scheda: report/GBA_R2S_XAGT_SCHEDA_2026-10-13.md.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward, MAI sul conto reale 10105439. Nessun parametro in forward, nessuna taglia di rischio (lotto fisso 1,00 nel tester).
+#  BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato).
+#
+#  ======================= DIFF CONTRO IL FILE MADRE GBA_R2SB_ANCORA_2026-10-12.txt =======================
+#  CAMBIA SOLO il NOME DEL LOTTO: R2SBANC -> R2SXTANC (passata R2SXTANC_01_REPL_T1_m775800). I 30 pin, l'asse tecnico, la tranche T1, la cella REPL (InpSignalTF=1), Modello 4,
+#  tetto 10 minuti e il magic 775800 sono IDENTICI al madre, quindi l'ini e' IDENTICO a quello di R1A_01 del 10/10 salvo il nome del Report (provato col codice vero del
+#  driver v5 eseguito con pwsh su questo file: scheda, sez. CONTROLLI).
+#  PERCHE' UN LOTTO NUOVO E NON IL FILE DEL MADRE (decisione dichiarata nella scheda): (1) il driver controlla che -Lotto sia un @GBA-LOTTO del file prova (r.445-446),
+#  quindi col file del madre il lotto si chiamerebbe R2SBANC e lo zip GBA_R0_R2SBANC.zip, lo STESSO nome dello zip della riga dello stadio B (consegnata, zip non ancora
+#  arrivato): due misure di due giri diversi con lo stesso nome (il driver rinomina il vecchio in _VECCHIO_<data>, ma il lettore e D2 distinguono i lotti per nome);
+#  (2) il contratto con D2 v4 (lettore delle due passate di E3) e' per lotto: R2SXAGT (argento) e R2SXTANC (ancora).
+#  NON CAMBIA: EA, include, driver (GBA_R0_PASSATE.ps1 v5, SHA256 C239F628...), deposito 1000000 EUR, lotto fisso 1,00, magic 775800.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  Se, nello stesso giro della passata dell'argento a tick reali, sulla stessa macchina, con lo stesso EA compilato e la stessa storia a tick dell'ORO, lo strumento rifa'
+#  un numero GIA' SCRITTO (R1A_01 del 10/10). Costa una passata a tick reali (R1A_01: 48 s; con apertura e chiusura del terminale ~1-2 minuti).
+#  ATTESE, scritte prima (le stesse del madre, per R1A_01): (A1) manifest del driver: stato OK, operazioni 128, profitto -6577.48, PF 0.83, qualita 100%ticksreali,
+#     barre 88416, ticks 25648545, ticks_inizio che contiene 'XAUUSD 2024.07.10' (IDENTICI a R1A_01: risultati_archivio/GBA_R0_R1A_20261010/GBA_R0_R1A.zip, MANIFEST_R0.csv);
+#     (A2) lo strumento D2 (lo STESSO SHA che legge la passata dell'argento R2SXAGT) sul giornale: ingressi 128, C3G della cella 21,60x, righe >= 50x 280, righe >= 40x 651,
+#     righe -1.0x 0 [MISURATO sul giornale di R1A T1: D2 v3, prova d'accettazione, e verifica dello stadio A]; (A3) leggi_gba_r0.py sugli zip GBA_R0_R2SXTANC.zip e
+#     GBA_R0_R1A.zip CARICATI INSIEME: deve FERMARSI con 'la stessa misura e' caricata DUE volte' (R2SXTANC_01 e R1A_01: stessa identita' letta dagli ini, stessa
+#     tranche, stesso magic). E' la prova POSITIVA che la passata del file dichiarativo e' la stessa configurazione di R1A_01.
+#  SMENTITA (e cosa ne segue): A1 o A2 diversi anche di un'operazione o di un centesimo, A3 che non si ferma, passata KO o non lanciata, oppure D2 che non legge questo
+#     lotto -> CE1 della passata dell'argento NON verde -> per E3 'conferma non data' (esito (3) del file GBA_R2S_XAGUSDT_2026-10-13.txt). Non e' un verdetto sull'argento:
+#     e' lo strumento che non regge, e la causa (tick dell'oro cambiati dal 10/10? compilato diverso? ini diverso?) si cerca PRIMA di qualunque nuova passata.
+#  COSA L'ANCORA NON DICE (dichiarato): conferma macchina, EA, driver e storia a tick dell'ORO; NON dice nulla sui tick di XAGUSD (quelli li controllano, per la passata
+#     dell'argento, la riga 'ticks data begins from' di XAGUSD, la qualita' '100%ticksreali' e CE-T del suo file prova).
+#  PERCHE' MAGIC 775800: e' quello di R1A_01; con 775850 il lettore non troverebbe la gemella in R1A e la prova d'identita' A3 non scatterebbe.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dal blocco @GBA-TRANCHE qui sotto (una tranche, T1 di R1A; nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 la legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-ASSE chiave=InpSignalTF tranche=1 celle=1 lotti=1
+#  @GBA-CELLA nome=REPL InpSignalTF=1
+#  @GBA-LOTTO nome=R2SXTANC modello=4 tetto_min=10 passate=REPL:T1
+#
+InpSymbol=XAUUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true
