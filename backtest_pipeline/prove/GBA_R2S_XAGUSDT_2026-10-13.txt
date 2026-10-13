@@ -46,7 +46,9 @@
 #  from 2016.12.28' (13/10 e NATCLA_F0_D del 07/10). Tick: nessuna riga 'XAGUSD: ticks data begins from' in tutto il repo (cercata nel formato del giornale del tester);
 #  l'oro ha i tick dal 2024.07.10 e EURUSD dal 2024.07.05 (R1A_01, 10/10). Indizi NON misure: risultati_archivio/GoldenCross/realtick_H4/ (un CSV argento 'realtick'
 #  senza date) e i C2C R40/R41 argento (tick dedotti dal NOME del file, report/LETTURA_CSV_TRASPORTATI_A_FOREX_2026-10-05.md D1).
-#  COME LA MISURA IL DRIVER: Modello 4 + qualita' diversa da '100% ticks reali' (r.815) oppure 'XAGUSD: ticks data begins from' DOPO il 2026.07.01 (r.786) = passata KO.
+#  COME LA MISURA IL DRIVER: Modello 4 + qualita' che NON comincia con '100%' (r.815) oppure 'XAGUSD: ticks data begins from' DOPO il 2026.07.01 (r.786) = passata KO.
+#  ATTENZIONE (controllo-preventivo 13/10): r.815 controlla SOLO '^100%' (a Modello 1 la stessa colonna vale '100%' senza 'ticks reali', MANIFEST del 13/10), e
+#  senza la riga 'XAGUSD: ticks data begins from' il driver avvisa in giallo e NON fa KO (r.785). Il driver da solo NON garantisce i tick reali: la garanzia e' CE-T (a).
 #  Se la riga dei tick di XAGUSD non c'e' nel giornale, il driver lo dice in giallo (r.785) e decide la qualita' del report.
 #  DENSITA' DEI TICK DELL'ARGENTO BCM: [NON MISURATA], nessuna fonte del repo (misura_tick ha solo NASUSD, D30EUR, U30USD). Per il TEMPO, IPOTESI dichiarata: fra 0,3 e
 #  2 volte l'oro (25.648.545 tick in T1, R1A_01: 48 s di passata) -> circa 0,3-1,6 minuti di test se i tick sono su disco. Nessun numero di questa riga ne dipende.
@@ -95,22 +97,33 @@
 #      del Modello 1 lo vede solo se il Modello 1 ha righe di quel tipo (qui 0), quindi CE-D2 garantisce l'identita' sulle cifre di QUESTA cella, non su ogni caso.
 #  CE2 SIMBOLO VERO (madre, CE2): driver (report, riga del tester, riga AVVIO 'InpSymbol="XAGUSD" -> simbolo XAGUSD': r.602, r.773-774, r.806-813); in lettura la firma
 #      dell'oro (spread mediano 0,15-0,30 E ATR mediana > 0,60 in OGNI fascia stampata, almeno una) = letta come XAUUSD = ROSSA.
-#  CE-T TICK VERI (nuovo, toglie soltanto): (a) la passata deve essere OK per il driver sui tick (qualita' '100%...' r.815; tick di XAGUSD dal 2026.07.01 o prima, r.786):
-#      altrimenti e' l'esito (1); (b) tick del report (colonna ticks_report del MANIFEST) > 353614 = i tick che il tester GENERA a Modello 1 sulla stessa cella dalle sole
-#      barre M1 (MANIFEST del 13/10, R2SXAG2_02: 4 per barra). Con 353614 o meno, la qualita' '100%' e il conteggio non si accordano: ROSSA (3).
-#      CONTRO-ESEMPIO: un terminale che segna 100% su un simbolo senza tick reali e genera i tick dalle barre darebbe circa 353.614 tick: CE-T (b) e' rossa.
+#  CE-T TICK VERI (nuovo, toglie soltanto): (a) VERDE solo se valgono TUTTE E TRE: la passata non e' KO nel driver per i tick (r.815, r.786); nel MANIFEST la colonna
+#      qualita e' ALLA LETTERA '100%ticksreali' (come A1 dell'ancora; '100%' da solo, una percentuale minore o vuota = NON verde); la colonna ticks_inizio contiene una voce
+#      'XAGUSD aaaa.mm.gg' con data <= 2026.07.01 (voce assente = NON VALUTABILE = NON verde; in tutte le passate GBA a Modello 4 archiviate la voce del simbolo c'e').
+#      Con il report letto (colonna qualita NON vuota) CE-T (a) NON verde = esito (1); senza report = esito (3).
+#      (b) tick del report (colonna ticks_report del MANIFEST) > 353614 = i tick che il tester GENERA a Modello 1 sulla stessa cella dalle sole barre M1 (MANIFEST del
+#      13/10, R2SXAG2_02: 4 per barra). Con 353614 o meno: ROSSA (3).
+#      CONTRO-ESEMPIO di (a): a Modello 4 senza tick reali MT5 NON si ferma e genera i tick dalle barre M1 (checklist, classe sui round R108/R109) con l'algoritmo 'ogni
+#      tick', cioe' MOLTI tick per barra, non 4: il conteggio supera 353.614 e (b) resta VERDE A VUOTO, mentre lo spread di quei tick e' quello delle barre, cioe' il C3G
+#      di Modello 1 (2,40x), e la 'conferma' uscirebbe (6) sugli stessi dati di Modello 1. Lo prende SOLO (a): qualita' non '100%ticksreali' o voce XAGUSD assente/tarda.
+#      (b) prende soltanto il caso stretto dei tick generati 4 per barra (OHLC); resta come rete in piu', NON come garanzia.
 #  CE4, CE6 (madre, letterali): segnali(EA) = tentati + scartati spread + posizione aperta + ATR non valido; tentati - n = 0 oppure 1. CE3 (costo per costruzione degli
 #      ingressi) vale solo con ingressi; CE5 (lotto 1,00) si scrive.
 #
 #  ======================= ESITI DELLA CONFERMA (E3): in QUEST'ORDINE, e il PRIMO che vale decide (classe 999) =======================
-#  (1) STORIA A TICK MANCANTE: passata R2SXAGT KO nel driver v5 per qualita' dello storico diversa da '100% ticks reali' (r.815) o per 'ticks data begins from' di XAGUSD
-#      DOPO il 2026.07.01 (r.786), da sola o insieme ad altri motivi -> la conferma NON c'e', la casella 4 di (XAGUSD, M1) resta NON ANCORA MISURATO, e si scrive cosa
+#  (1) STORIA A TICK MANCANTE: passata R2SXAGT KO nel driver v5 per qualita' dello storico (r.815) o per 'ticks data begins from' di XAGUSD DOPO il 2026.07.01 (r.786),
+#      da sola o insieme ad altri motivi, OPPURE report letto (colonna qualita NON vuota) con CE-T (a) NON verde (qualita' non alla lettera '100%ticksreali', o voce
+#      'XAGUSD aaaa.mm.gg' assente o dopo il 2026.07.01 in ticks_inizio: e' il testo di E3, 'qualita' diversa da 100% ticks reali', che il driver controlla piu' largo)
+#      -> la conferma NON c'e', la casella 4 di (XAGUSD, M1) resta NON ANCORA MISURATO, e si scrive cosa
 #      manca: 'storia a tick reali di XAGUSD su T1 sul PC di backtest (inizio dei tick letto: <data o assente>, qualita' <valore>)'. NON e' un errore della riga ne' di
 #      Claudio: e' la misura che manca. La via piu' corta al numero (scaricare i tick dell'argento, o R3 (ii): lo spread orario dai tick storici) e' una DECISIONE.
 #  (2) KO per il SOLO motivo 'ZERO operazioni nel report' con, nella riga [GBA-CONTA] FINE, 'ingressi tentati 0' e 'scartati spread' >= 1 (ECCEZIONE n = 0 del madre,
-#      letta allo stesso modo) -> NON e' un KO per E3: si va a (4)-(6) con n = 0.
+#      letta allo stesso modo) -> NON e' un KO per E3: quel SOLO motivo non conta in (3), ma (3) si valuta LO STESSO su tutto il resto (CE1, CE-D2, CE2,
+#      CE-T (b), CE4, CE6, SHA di D2); solo se (3) non vale si va a (4)-(6) con n = 0. L'eccezione toglie il KO, MAI i controlli di strumento. CONTRO-ESEMPIO:
+#      ancora R2SXTANC NON lanciata (MT5 aperto prima del suo lotto, ramo della riga) o KO = CE1 NON verde; l'argento a n = 0 e' KO SOLO per 'ZERO operazioni',
+#      e senza questa frase da (2) arriverebbe a (6) 'ESCLUSA PER COSTO' e chiuderebbe la casella 4 senza ancora.
 #  (3) CONFERMA NON DATA (casella aperta, si legge il giornale, nessuna lettura dopo i numeri la riapre): passata KO per QUALUNQUE altro motivo (timeout, report
-#      mancante, AVVIO, AUTOTEST, finestra, 'ZERO operazioni' con tentati > 0 o con segnali(EA) = 0, ecc.), passata NON lanciata, CE1 / CE-D2 / CE2 / CE-T (b) / CE4 /
+#      mancante, AVVIO, AUTOTEST, finestra, 'ZERO operazioni' con tentati > 0 o con segnali(EA) = 0, ecc.), passata NON lanciata, CE1 / CE-D2 / CE2 / CE-T (b) / CE-T (a) senza report / CE4 /
 #      CE6 rosse o NON VALUTABILI, oppure giornale letto da un D2 con SHA diverso da quello che ha riletto la passata a Modello 1 (CE-D2).
 #  (4) n netto >= 30 (n del report meno gli ingressi a spread zero) -> conferma SMENTITA PER n: la cella NON e' ESCLUSA; l'esito dello stadio A resta (B) 'n insufficiente
 #      a Modello 1' con accanto 'n netto a tick reali N >= 30'; la casella resta NON ANCORA MISURATO e NON passa allo stadio B da qui (serve un file prova suo).

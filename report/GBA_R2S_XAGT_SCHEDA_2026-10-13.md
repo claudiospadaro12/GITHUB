@@ -6,9 +6,9 @@ Perché: il 13/10 la cella **XAGUSD M1** (REPL, T1) è uscita **"ESCLUSA (Modell
 
 | oggetto | file | SHA256 |
 |---|---|---|
-| file prova argento (lotto `R2SXAGT`) | `backtest_pipeline/prove/GBA_R2S_XAGUSDT_2026-10-13.txt` | `6f2ea09249cf19588b4c52c724c27794c28966da16d82f4e6e3989cff0d59ad4` |
+| file prova argento (lotto `R2SXAGT`) | `backtest_pipeline/prove/GBA_R2S_XAGUSDT_2026-10-13.txt` | `dbcdf356b0fd76022c532126928c58bf5681c8577e7be94e716df486aca738e5` (era `6f2ea092…`: CE-T ed esito (1) corretti dal controllo-preventivo il 13/10, pin e input invariati) |
 | file prova ancora (lotto `R2SXTANC`) | `backtest_pipeline/prove/GBA_R2S_XAGT_ANCORA_2026-10-13.txt` | `23295bf35b6104b1d04002ccbbb6da6b8002823f5467606e3aa96414ea87c18c` |
-| riga (BOZZA, `$PIN='SEGNAPOSTO_PIN_40_ESADECIMALI'`) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGT.txt` | cambia col pin |
+| riga (pinnata; il pin va RIFATTO dopo la correzione del file prova argento) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGT.txt` | cambia col pin |
 | file madri | `GBA_R2S_XAGUSD2_2026-10-12.txt` (`dbe11bc3…`) · `GBA_R2SB_ANCORA_2026-10-12.txt` (`822e3a26…`) | PASS |
 | EA / include / driver | invariati: `1381E3DC…` / `3EC97115…` / `GBA_R0_PASSATE.ps1` v5 `C239F628…` | ricalcolati nel worktree |
 
@@ -29,7 +29,7 @@ Perché: il 13/10 la cella **XAGUSD M1** (REPL, T1) è uscita **"ESCLUSA (Modell
 ## 3. 🧪 Controlli di strumento (tolgono soltanto; NON VALUTABILE = rosso)
 - **CE1** = ancora dello stesso giro: A1 manifest **128 / −6577.48 / 0.83 / 100%ticksreali / 88416 barre / 25648545 tick / `XAUUSD 2024.07.10`** (= R1A_01); A2 D2 sul giornale **21,60x, ≥40x 651, ≥50x 280, −1.0x 0, 128 ingressi**; A3 `leggi_gba_r0.py` si ferma per doppione con `GBA_R0_R1A.zip`.
 - **CE-D2** (stesso strumento): D2 v3 (`77F1F72E…`) non accetta lotti nuovi, quindi la lettura la fa per forza un D2 con SHA nuovo. **Scritto ora**: lo stesso D2 v4 rilegge **nella stessa lettura** anche `GBA_R2S_XAG2.zip` e deve rifare **a tolleranza zero** le cifre di v3 sulla REPL (6611; 6611/0/6611/0/0; C3G 2.40 / 2.50 / 2.30; le sei fasce; ≥40x 0; "ESCLUSA (Modello 1)"). Così le due passate di E3 sono lette dallo stesso SHA.
-- **CE-T** (tick veri): (a) è il KO del driver sui tick (→ esito (1)); (b) **tick del report > 353.614**, cioè più dei tick che Modello 1 genera dalle sole barre M1 della stessa cella (4 per barra, MANIFEST del 13/10). Contro-esempio: un terminale che segnasse 100% generando i tick dalle barre darebbe ~353.614 → rossa.
+- **CE-T** (tick veri): (a) verde solo se il driver non fa KO sui tick **E** nel MANIFEST la qualità è **alla lettera `100%ticksreali`** **E** `ticks_inizio` contiene `XAGUSD aaaa.mm.gg` con data ≤ 2026.07.01 (con report letto, (a) non verde → esito (1)). Motivo (controllo-preventivo 13/10): il driver r.815 controlla solo `^100%` (a Modello 1 la stessa colonna vale `100%`) e senza la riga dei tick di XAGUSD avvisa in giallo e non fa KO; a Modello 4 senza tick reali MT5 genera i tick dalle barre con l'algoritmo «ogni tick» (molti per barra), quindi (b) **tick del report > 353.614** (4 per barra, OHLC di Modello 1) resterebbe verde a vuoto e la «conferma» uscirebbe (6) sugli stessi spread di Modello 1. (b) resta come rete in più, non come garanzia.
 - CE2 (firma dell'oro), CE4, CE6: come nel file madre.
 
 ## 4. ✅ Controlli eseguiti (worktree, nessuna macchina MT5)
