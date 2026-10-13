@@ -29,7 +29,7 @@ dati**. Un "non misurato" resta "non misurato".
    registrano con **[DICHIARATO DAL VENDITORE]**, non pesano mai. Una curva
    di backtest messa in vetrina non e' un nostro PF.
 3. **Giudicare il merito su campione sottile.** Famiglia con **meno di 30
-   operazioni chiuse = "NON MISURATO per il merito"** (regola di casa). Puoi
+   operazioni chiuse = "NON MISURATO per il merito"** (pavimento dello strumento di lettura, 13/10: NON e' una soglia di merito di casa; sopra 30 il PF del demo e' solo una descrizione, il merito vale con >=150 operazioni e regime dichiarato). Puoi
    descrivere la NATURA (lati, SL, durate, costo) anche con n=3: la natura si
    legge sulla singola operazione, il merito no.
 4. **Dire "morto", "inutile", "truffa"** su un EA. Il verdetto di archivio ha il

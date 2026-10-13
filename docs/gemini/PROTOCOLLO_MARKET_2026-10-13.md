@@ -2,7 +2,8 @@
 
 Scritto da Claude (sviluppatore + cancello) su richiesta di Claudio, il capo del progetto. Testuale: _"sempre ovviamente con la collaborazione di Gemini"_, dopo aver chiesto
 due agenti nuovi per **leggere a fondo** gli Expert del Market che sta provando su un conto demo e per **rielaborarli e migliorarli**. Questo file **estende**
-`docs/gemini/PROTOCOLLO_SQUADRA_2026-10-08.md` (ruoli A-D, regole 1-9, sezione E): quello resta valido per intero. E' una PROPOSTA DI METODO, non un criterio: se una frase
+`docs/gemini/PROTOCOLLO_SQUADRA_2026-10-08.md` (ruoli A-D, regole 1-9, sezione E): quello resta valido per intero, **tranne la deroga dei tre conti del ruolo C, revocata
+il 08/10 (MEMORIA, sez. 7, punto 5): un conto per volta**; e qui i ruoli A-D sono ridefiniti per il caso Market (§3). E' una PROPOSTA DI METODO, non un criterio: se una frase
 qui dentro contraddice una regola di casa (MEMORIA e BASE che ricevi in testa), hanno ragione le regole di casa. Niente codice, preset, numeri di conto, magic, nomi di terzi.
 
 Etichette nostre: **[LETTO nel conto]** = visto negli ordini del conto demo (si cita il file del pacchetto) · **[DICHIARATO DAL VENDITORE]** · **[INFERITO]** (ragionamento
@@ -13,19 +14,22 @@ nostro) · **[NON VISTO]** / **[NON MISURATO]**. Le tue restano quelle della BAS
 ## 1. Il caso: EA a scatola nera
 
 Claudio compra o scarica EA dal Market (file compilati e protetti) e li fa girare su un conto demo. **Il sorgente non c'e' e non lo cerchiamo**: non si decompila, non si
-aggira nessuna protezione, e **non devi suggerirlo ne' chiederlo**. Quello che abbiamo e' (a) la pagina pubblica del prodotto (descrizione, input dichiarati, recensioni),
+aggira nessuna protezione, e **non devi suggerirlo ne' chiederlo**. Quello che abbiamo e' (a) la pagina pubblica del prodotto (descrizione, input dichiarati, recensioni;
+a te arriva solo riassunta da noi, senza nome del prodotto o del venditore, senza collegamenti e senza testo copiato),
 (b) lo storico degli ordini sul demo (apertura e chiusura, lato, lotto, SL/TP, **commento dell'ordine di apertura**, durata), (c) a volte lo screenshot del pannello input.
 La **natura** di un EA (come entra, come esce, quanto rischia, quanto costa) si legge anche su pochi ordini; il **merito** (PF, edge) no.
 
 Regole di casa che qui contano di piu':
-1. **Famiglia con meno di 30 operazioni chiuse = «NON MISURATO per il merito»**, sempre. Sulla natura puoi esprimerti anche con n piccolo, dichiarando n.
+1. **Famiglia con meno di 30 operazioni chiuse = «NON MISURATO per il merito»**, sempre. Sulla natura puoi esprimerti anche con n piccolo, dichiarando n. Il 30 e' il
+   pavimento del nostro lettore (13/10), **non una soglia di merito**: sopra 30 il PF del demo e' una DESCRIZIONE del forward (di solito poche settimane, un solo regime);
+   per il merito valgono le regole 4-5 del protocollo del 08/10 (>= 150 operazioni, regime dichiarato).
 2. **Nessun numero del venditore e' un nostro numero** (PF, win rate, curva di backtest, «% al mese»): [DICHIARATO DAL VENDITORE], non entra in nessun conto.
 3. **Niente «morto», «truffa», «inutile» su un EA scatola nera**: il certificato di morte a 5 caselle (PF misurato; n e DD; gestione dell'uscita ad asse; simboli gemelli;
    TF cambiato) non si completa senza il sorgente. Il verdetto massimo e' **NON ANCORA MISURATO** con scritto cosa manca.
-4. **Attribuzione dal commento d'apertura**: un commento uguale a un prefisso nostro e' un'**ipotesi di attribuzione**, non un fatto (un EA del Market puo' commentare «ORB»). Il
+4. **Attribuzione dal commento d'apertura**: un commento uguale a un prefisso nostro e' un'**ipotesi di attribuzione**, non un fatto (esempio ipotetico: un EA del Market puo' commentare «ORB ...», che e' anche un nostro prefisso). Il
    metodo (per prefisso / per magic) va sempre scritto accanto.
-5. **Orario**: ora SERVER del broker (UTC+1 fisso: d'estate = ora italiana - 1, d'inverno = ora italiana); i log di MT5 sono in ora LOCALE del PC. Dichiara in quale ora e'
-   scritto ogni orario che usi.
+5. **Orario**: ora SERVER del broker del conto demo (per il nostro broker oggi UTC+1 fisso: d'estate = ora italiana - 1, d'inverno = ora italiana; per un altro broker
+   l'offset si misura, non si assume); i log di MT5 sono in ora LOCALE del PC. Dichiara in quale ora e' scritto ogni orario che usi.
 
 ## 2. La squadra nostra per il Market (due agenti nuovi)
 
@@ -38,21 +42,23 @@ Regole di casa che qui contano di piu':
 Flusso: **conto demo + pagina -> scheda di natura (Lettore) -> TU sulla scheda (§3) -> eventuale progetto (Progettista) -> TU sul progetto (§4) -> cancello (due strati) ->
 decisione di Claudio.** La tua risposta e' DATI: passa dal cancello punto per punto contro il repo e nessuna tua proposta si esegue.
 
-## 3. Primo passaggio: TU sulla SCHEDA DI NATURA (una sola chiamata, ruoli separati)
+## 3. Primo passaggio: TU sulla SCHEDA DI NATURA (una domanda per chiamata, un ruolo per domanda)
 
-Ti mandiamo la scheda di UN EA (o di una famiglia di commenti) con i dati del conto demo. Rispondi nei quattro ruoli, con la regola di indipendenza del protocollo del 08/10
-(C si scrive prima di leggere A e B e senza usarli):
+Ti mandiamo la scheda di UN EA (o di una famiglia di commenti) con i dati del conto demo. **Ogni chiamata porta UNA domanda e dice in quale ruolo rispondere** (A, B, C o
+D, come sotto); rispondi solo a quella e solo in quel ruolo. Se ricevi piu' domande, rispondi alla prima e chiedi di rimandare le altre (BASE, punto 9). La regola di
+indipendenza del protocollo del 08/10 resta: il ruolo C non usa risposte di A e B, nemmeno di chiamate precedenti.
 
 | Ruolo | Mestiere nel caso Market | Vincolo |
 |---|---|---|
 | **A -- Lettore alternativo** | propone al massimo **2 spiegazioni alternative del meccanismo** compatibili con gli stessi ordini osservati (es. «due ordini opposti nello stesso istante» = hedging di istanze, straddle su notizia, o un unico EA con due gambe?). Per ognuna: quale osservazione la distinguerebbe dalla nostra lettura (il dato che manca, es. screenshot degli input, magic, un altro giorno) | non inventa input ne' logiche non osservabili; ogni ipotesi porta il dato che la smentirebbe |
 | **B -- Avvocato del diavolo** | per OGNI affermazione della scheda costruisce il caso concreto in cui sarebbe falsa per una ragione DIVERSA da quella scritta (es. «senza SL iniziale» che in realta' e' uno SL messo con una modifica subito dopo l'ingresso; «trailing a gradini» che e' una chiusura parziale; «nostra famiglia» che e' un prefisso omonimo). Dice quale numero produrrebbe l'ipotesi alternativa e se cade nella banda della nostra lettura | non ammorbidisce un contro-esempio |
-| **C -- Auditor dei numeri** | rifa' i conti dai dati scritti nel pacchetto (netto, PF delle sole operazioni chiuse, rapporto stop/commissione, rischio ingresso -> SL, durata mediana, unita': deal o posizioni), indica dove non tornano; **al massimo 3 conti, uno per riga, formula e controllo di verso** | solo dati del pacchetto; NON LO SO se manca un dato |
+| **C -- Auditor dei numeri** | rifa' **UN conto per chiamata** dai dati scritti nel pacchetto (per es. netto, PF delle sole operazioni chiuse, rapporto stop / costo pieno = spread + commissione, rischio ingresso -> SL, durata mediana; unita': deal o posizioni), con formula, base e **controllo di verso** (stop/costo alto = costo BASSO), e indica se non torna | solo dati del pacchetto; NON LO SO se manca un dato (lo spread di solito non e' nel report: allora il costo pieno e' NON LO SO, e il solo stop/commissione non e' il costo) |
 | **D -- Sintesi** | al massimo **5 cose da MISURARE** sull'EA (per es. «lasciar girare fino a n=30», «screenshot degli input», «spread loggato sulle ore degli ingressi», «giorno per giorno la posizione senza SL»), ciascuna con asse unico, cella di controllo, attesa con banda E numero dell'alternativa, falsificatore, costo, «Firma Claudio SI/NO»; poi l'elenco dei punti dove TU e NOI ci contraddiciamo | non decide, non ordina |
 
 ## 4. Secondo passaggio: TU sul PROGETTO della rielaborazione (solo se il Progettista ne produce uno)
 
-Il pacchetto contiene la specifica (meccanismo nostro, difetti tolti, parametri con motivazione, attesa e smentita scritte prima). Rispondi cosi':
+Il pacchetto contiene la specifica (meccanismo nostro, difetti tolti, parametri con motivazione, attesa e smentita scritte prima). Anche qui **un punto per chiamata**
+(la domanda dice quale dei quattro):
 
 1. **Quali difetti della scheda NON sono stati tolti** o sono tornati dalla finestra (es. un filtro che reintroduce rischio non cappato, un'ora fissa non dichiarata per stagione,
    un TP che riduce il rischio solo a parole). Ogni riga: cosa, dove nel progetto (nome dell'input o della sezione, **mai il numero di riga**), contro-esempio.
@@ -70,19 +76,24 @@ Il pacchetto contiene la specifica (meccanismo nostro, difetti tolti, parametri 
 - Non proporre martingala, griglia, recovery, assenza di stop, raddoppio dopo perdita, ne' di cambiare taglie, rischio per operazione, Guardian in campo, conti o spese senza
   «Firma Claudio: SI». Non chiamare nulla «promosso/bocciato» (per le misure: NULLO, ZONA GRIGIA, EFFETTO, NON ANCORA MISURATO).
 - Non inventare input, nomi di EA, righe, soglie, autori o titoli. Cita nomi di input e di sezioni, mai numeri di riga.
+- Non cercare ne' indovinare **quale prodotto o venditore** ci sia dietro un'etichetta «EA-M...»: non serve alla misura e il pacchetto lo omette di proposito.
 
 ## 6. Sezione E (anche qui, massimo 4 righe)
 
 Cosa cambieresti **in questo protocollo** per il caso Market? Quale ruolo manca per leggere meglio una scatola nera in una sola chiamata? Quale regola nostra (30 chiuse, niente
 «morto», attribuzione per prefisso) ti sembra costare piu' di quanto protegge, e **cosa misureresti** per deciderlo? Ogni critica con il contro-esempio concreto in cui il
-nostro metodo sbaglierebbe.
+nostro metodo sbaglierebbe. Non riproporre di rilassare «una domanda per chiamata» (proposta gia' non accolta l'11/10, MEMORIA sez. 5). La sezione E si chiede in una
+chiamata a parte, come le altre domande.
 
 ## 7. Ordine di lavoro e uso del pacchetto
 
 Un EA (o una famiglia di commenti) per pacchetto, **al massimo 3 domande falsificabili, una per chiamata** (nei messaggi lunghi Gemini sbaglia di piu'). Il pacchetto e'
-anonimizzato (nessun conto, magic, nome macchina, nome di terzi; gli EA si chiamano «EA-M1», «EA-M2», ... con il loro commento d'apertura come unica etichetta) e committato in
-`docs/PER_GEMINI_MARKET_<NOME>_<data>.md`. **Primo pacchetto**: dopo la lettura del ReportHistory del conto demo di stasera (famiglie sull'oro con commento d'apertura:
-una a due posizioni sempre senza SL iniziale, una a molte chiusure corte con stop/commissione molto alto, due a n minimo).
+anonimizzato (nessun conto, magic, nome macchina, nome di terzi; gli EA si chiamano «EA-M1», «EA-M2», ...; il commento d'apertura **non** si riporta testuale se contiene
+il nome di un prodotto o di un venditore o un numero che puo' essere un identificativo: si descrive la sua FORMA, per es. «prefisso + numero + suffisso di prima gamba») e
+committato in `docs/PER_GEMINI_MARKET_<NOME>_<data>.md`, insieme a questo protocollo e a quello del 08/10. **Primo pacchetto**: dopo la lettura del report del conto demo
+del 12/10 sera (fatta il 13/10; tutte le famiglie con n chiuse < 30, quindi merito NON MISURATO). Famiglie sull'oro distinte per commento d'apertura: una con posizioni sui
+due lati e senza SL iniziale in 5 ingressi su 5 (3 chiuse); una a operazioni brevi (scalping [INFERITO]) con 4 chiuse, durata mediana 36 minuti, e stop/commissione 106x (commissione sola: lo spread non e' nel report, quindi il
+costo pieno e' NON MISURATO); due con 0 chiuse (solo posizioni aperte).
 
 **Come usiamo le tue risposte.** Due macchine che si contraddicono indicano **una misura da fare**, non un compromesso. Ogni disaccordo entra nella lista delle misure con attesa e
 contro-esempio scritti PRIMA. Ogni tua affermazione viene confrontata col repo punto per punto (tabella «punto / verifica nel repo / cosa se ne fa»); non e' mai la premessa di
