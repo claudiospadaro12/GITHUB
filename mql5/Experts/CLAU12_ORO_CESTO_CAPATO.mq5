@@ -91,6 +91,12 @@
 //         testata nel tester. Il nucleo puro e' stato compilato in
 //         C++ e confrontato col proxy Python a tavolino (specifica,
 //         AUTOVERIFICA).
+//         Cancello 13/10 (controllo-preventivo, strato 2), stessa v1.00
+//         perche' mai compilata ne' girata: OnInit RIFIUTA fuori dal
+//         tester; l'identificativo della posizione entra nel cesto
+//         subito dopo l'invio (prima: un cesto chiuso da SL/TP al tick
+//         successivo usciva con netto 0 e prof 0); "segnali" nella riga
+//         CONTA non conta piu' due volte gli avvii falliti.
 //+------------------------------------------------------------------+
 #property strict
 #property copyright "CLAU12 -- cesto capato sull'oro: meccanismo osservato, codice nostro"
@@ -676,6 +682,11 @@ bool C12Apri(const int lato, const double lots, const double sl, const double tp
                   trade.ResultRetcodeDescription());
       return false;
    }
+   //--- (cancello 13/10) la posizione entra nel cesto SUBITO: se SL/TP
+   //    la chiudono al tick dopo, prima di OnTick, il netto la conta lo
+   //    stesso (senza questa riga il cesto usciva con netto 0 e prof 0)
+   ulong dl = trade.ResultDeal();
+   if(dl > 0 && HistoryDealSelect(dl)) C12RegistraId(lato, (ulong)HistoryDealGetInteger(dl, DEAL_POSITION_ID));
    Log(StringFormat("livello %d %s %.2f lotti @ %s | SL cesto %s | TP %s", livello, (lato > 0 ? "BUY" : "SELL"), lots,
                     DoubleToString(trade.ResultPrice(), digits), DoubleToString(slN, digits), DoubleToString(tpN, digits)));
    return true;
@@ -1018,13 +1029,15 @@ void C12NuovaBarra(const int statoPausa)
       Print("[C12OC] lotto base nullo dopo i vincoli del simbolo -- avvio saltato");
       return;
    }
+   //--- (cancello 13/10) la lista del lato si azzera PRIMA dell'invio:
+   //    C12Apri vi registra subito l'identificativo della posizione
+   if(lato > 0) ArrayResize(g_idsL, 0); else ArrayResize(g_idsS, 0);
    if(!C12Apri(lato, lotto, slC, tp1, 1)) { g_conta[C12_ORDINE_KO]++; return; }
 
    int ix = C12Idx(lato);
    g_vivo[ix] = true; g_ricostruito[ix] = false; g_t0[ix] = TimeCurrent(); g_sl[ix] = slC; g_mae[ix] = 0.0;
    g_rischio[ix] = rischio; g_spread0[ix] = spread; g_avvio[ix] = InpModoAvvio; g_inChiusura[ix] = false;
    g_motivoChiusura[ix] = "";
-   if(lato > 0) ArrayResize(g_idsL, 0); else ArrayResize(g_idsS, 0);
    double distSL = MathAbs(p1 - slC);
    PrintFormat("[C12OC-AVVIO] lato=%s avvio=%d direzione_casuale=%s p1=%s sl=%s dist_sl=%.2f ultimo_livello_sl=%.2f target=%.2f livelli=%d passo=%.2f lotto1=%.2f rischio_pian=%.2f spread=%.2f sl_su_spread=%.1f target_su_spread=%.1f",
                (lato > 0 ? "L" : "S"), InpModoAvvio, (InpDirezioneCasuale ? "SI" : "NO"), DoubleToString(p1, digits),
@@ -1037,6 +1050,15 @@ void C12NuovaBarra(const int statoPausa)
 //==================================================================
 int OnInit()
 {
+   //--- SOLO TESTER (cancello 13/10/2026): e' uno strumento di misura che
+   //    MEDIA a prezzo peggiore e ha un modo a ingressi casuali. Attaccato
+   //    per sbaglio a un grafico vivo (sei terminali sul VPS) NON opera.
+   //    Portarlo su un conto = modifica del codice + firma di Claudio.
+   if(!MQLInfoInteger(MQL_TESTER))
+   {
+      Print("[C12OC] RIFIUTATO: CLAU12_ORO_CESTO_CAPATO gira SOLO nello Strategy Tester (strumento di misura, nessuna firma per un conto)");
+      return(INIT_FAILED);
+   }
    g_sym  = (StringLen(InpSymbol) > 0) ? InpSymbol : _Symbol;
    g_nome = MQLInfoString(MQL_PROGRAM_NAME);
    if(!SymbolSelect(g_sym, true))
@@ -1239,7 +1261,8 @@ string C12MotivoTesto(const int m)
 void C12StampaConta(const string quando)
 {
    int segnali = 0;
-   for(int i = 0; i < C12_N_MOTIVI; i++) if(i != C12_NO_SEGNALE && i != C12_DATI) segnali += g_conta[i];
+   //--- ORDINE_KO escluso: un avvio fallito e' gia' contato in C12_OK (cancello 13/10: prima si contava due volte)
+   for(int i = 0; i < C12_N_MOTIVI; i++) if(i != C12_NO_SEGNALE && i != C12_DATI && i != C12_ORDINE_KO) segnali += g_conta[i];
    int cesti = 0;
    double netto = 0.0;
    for(int d = 0; d <= C12_MAX_LIVELLI; d++) { cesti += g_statN[d]; netto += g_statNet[d]; }

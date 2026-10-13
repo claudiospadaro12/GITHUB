@@ -19,8 +19,11 @@
 #  '[C12OC][AUTOTEST] *** FAIL', 'stop out'/'no money', e raccolta delle righe [C12OC-AVVIO]/[C12OC-CESTO]/[C12OC-CONTA]/[C12OC-PAUSA-ATTRAVERSATA]/'[C12OC] SESSIONI'.
 #  E SERVE UN LETTORE NUOVO (non scritto): leggi_c12oc.py, che dalle righe CESTO calcola per cella e tranche n, PF PER CESTO, media per cesto, profondita',
 #  coda (p1, minimo, oltre_rischio), giorno peggiore, lato, costo (dist_sl/spread e target/spread dalle righe AVVIO, commissione dai netti), e il confronto con il NULLO.
-#  Il deposito, il tetto di minuti e il modello si leggono dai blocchi @C12OC-LOTTO come nel driver GBA v5; deposito proposto 10000 EUR (a 0,01 lotto il margine e'
-#  trascurabile; la cifra del GBA, 1000000, serviva al suo lotto 1,00), leva 100, valuta EUR.
+#  Il deposito, il tetto di minuti e il modello si leggono dai blocchi @C12OC-LOTTO come nel driver GBA v5; deposito proposto 100000 EUR, leva 100, valuta EUR.
+#  (Cancello 13/10: qui c'era 10000 EUR "perche' il margine e' trascurabile". Il margine si', l'EMORRAGIA no: proxy, cella centrale, a 0,01 lotto, perdita
+#  cumulata della tranche peggiore NUL O3 = -15.617 USD (~-13.400 EUR), RIT O3 -15.277, ROT O3 -10.634, e 4 tranche OOS su 5 oltre -5.000 USD. Con 10000 EUR
+#  le tranche OOS finivano in margine insufficiente o stop out = KO e numeri TRONCATI. 100000 EUR = ~7 volte la tranche peggiore; il PF per cesto a lotto
+#  fisso non dipende dal deposito.)
 #
 #  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
 #  UNA variabile: InpModoAvvio, tre celle sulla STESSA geometria di cesto (4 livelli, passo 1,5 USD, SL 8 USD oltre l'ultimo livello, target media + 1,00 USD,
@@ -55,16 +58,21 @@
 #  A2 [PF PER CESTO, IPOTESI NULLA = la mia]: le tre celle in 0,60-0,90 in OGNI finestra, e |PF(ROT o RIT) - PF(NUL)| <= 0,05. Proxy IS: ROT 0,729, RIT 0,738,
 #      NUL 0,713 / 0,729 / 0,731 (semi 1/2/3).
 #  A3 [IPOTESI ALTERNATIVA, col suo numero]: "l'avvio porta edge": PF(ROT o RIT) >= PF(NUL) + 0,10 in IS E in OOS. Il numero che la separa dalla nulla: 0,10 contro 0,05.
-#      Fra 0,05 e 0,10 = ZONA GRIGIA (si legge solo con i semi 2-5 del nullo, stadio B). "Il meccanismo osservato e' un motore": PF per cesto >= 1,00 in IS E OOS.
+#      Fra +0,05 e +0,10 = ZONA GRIGIA (semi 2-5 del nullo, stadio B, E direzione casuale, stadio C). "Il meccanismo osservato e' un motore": PF per cesto >= 1,00 in IS E OOS.
+#      (Cancello 13/10: sul RANDOM WALK, senza edge, PF(modo) - PF(NUL) va da -0,065 (RIT, OOS) a +0,021: l'ISTANTE sposta il PF anche senza edge. Quindi una
+#      differenza NEGATIVA fino a -0,07 si legge NULLO, e solo la direzione casuale tiene fermo l'istante. Progetto par. 6.3.)
 #  A4 [forma del payoff, predizione]: win rate per cesto 0,93-0,95, uscite a SL 4-7%, profondita' 4 su ~18% dei cesti, perdita del cesto a SL = rischio pianificato
-#      (41,19 USD a 0,01 lotto con commissione stimata) ~ 35 EUR; righe oltre_rischio=SI: 0-2 per tranche (le pause chiudono i cesti prima dei gap).
+#      (41,19 USD a 0,01 lotto con commissione stimata) ~ 35 EUR; righe oltre_rischio=SI: 0-2 per tranche (le pause chiudono i cesti prima dei gap); righe
+#      [C12OC-PAUSA-ATTRAVERSATA]: zero FUORI dalle chiusure anticipate per festivita' USA (non stanno nelle specifiche del simbolo: R8 non le vede; si
+#      classificano per data col calendario dichiarato dal lettore).
 #  A5 [costo, per cesto]: dist_sl/spread = 12,5 / 0,20 = 62x (stop del livello 1); stop dell'ultimo livello 8 / 0,20 = 40x; target/spread = 5x, target/(spread+comm.)
 #      = 1,00 / 0,247 = 4,0x: il TARGET sta SOTTO la frontiera di casa (stop >= 40 x spread): 5x contro 40x = fattore 8 sul solo spread, fattore 10 con la
 #      commissione. Il costo e' il motivo meccanico per cui A2 e' negativa.
 #  SMENTITE: (s1) una cella ROT o RIT con PF >= PF(NUL) + 0,10 in tutte e due le finestre -> A2 cade, si apre lo stadio D (assi 3/4/6 x 1,0/1,5/2,0) sul modo vincente;
 #      (s2) PF per cesto >= 1,00 in una cella e in tutte e due le finestre -> il costo non e' il collo di bottiglia che penso: si cerca PERCHE' prima di ogni altra passata;
 #      (s3) PF del tester fuori da 0,60-0,90 per TUTTE le celle -> il proxy sbaglia in un modo da capire PRIMA di leggere il merito;
-#      (s4) righe [C12OC-PAUSA-ATTRAVERSATA] > 0 o oltre_rischio=SI > 2 per tranche -> la difesa R8 non regge sul feed BCM: difetto dell'EA, non del motore.
+#      (s4) righe [C12OC-PAUSA-ATTRAVERSATA] > 0 in un giorno che NON e' una chiusura anticipata per festivita', o oltre_rischio=SI > 2 per tranche -> la difesa
+#      R8 non regge sul feed BCM: difetto dell'EA, non del motore.
 #  CANCELLI DI AFFIDABILITA' (prima di qualunque PF): G0 AUTOTEST 'VERDETTO: PASS' in ogni passata e riga AVVIO v1.00; G1 gemelle 775600/775650 (lotto S0) identiche;
 #  G2 '[C12OC] SESSIONI' con almeno un giorno non 'nessuna' (altrimenti resta solo il tetto del venerdi': dichiararlo); G3 qualita' '100% ticks reali' (Modello 4).
 #  Il lettore STAMPA, non promuove: per le misure si dice NULLO / ZONA GRIGIA / EFFETTO / NON ANCORA MISURATO.
