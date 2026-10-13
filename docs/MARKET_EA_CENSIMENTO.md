@@ -26,3 +26,4 @@ Riscontro sul totale del conto: 21 chiuse (7 XAUUSD), netto 41,96, PF dichiarato
 | Basket_1234567 | XAUUSD M1 (M5?) | 13/10/2026 | 3 | NON ANCORA MISURATO (natura: senza SL iniziale, due lati) |
 | SSP scalp / SSPv4 | XAUUSD M5 | 13/10/2026 | 4 / 0 | NON ANCORA MISURATO (stop/commissione 106x; spread non misurato: costo pieno ignoto) |
 | XAUUSD 5 Minute | XAUUSD M15 | 13/10/2026 | 0 | NON ANCORA MISURATO (solo aperte, senza TP) |
+| **ARENA NEXUS GRID SMART XAU MT5** (commenti `FinlabX`/`CF`/`DZR` + `[F]`/`[R]` + `CID`, [INFERITO] alta confidenza) | XAUUSD M1 | 13/10/2026 | 608 chiuse in ~21 h (UN solo giorno) | NON ANCORA MISURATO: griglia + scala di lotti + recovery a cesto, senza SL iniziale; profitto del giorno 480,71 EUR (pannello) / 487,31 (nostro conto); Risk Mode Moderate; scheda `report/MARKET_SCHEDA_FINLABX_CF_DZR_2026-10-13.md`, ricostruzione `report/MARKET_MOTORE_FINLABX_RICOSTRUZIONE_2026-10-13.md` |
