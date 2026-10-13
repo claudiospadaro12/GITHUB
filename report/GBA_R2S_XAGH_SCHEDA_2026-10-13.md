@@ -1,12 +1,12 @@
 # GBA R2S: l'ARGENTO A TF PIÙ ALTI (M30, H1, H4), misura R-XAG-1 (scheda, 13/10/2026)
 
-**Stato: riga in cancello (13/10/2026), pin `f6571dccbbc5ae07cf73a4310146a7912cfd73fb`, riga al commit `8686de85` (SHA `4d0064d4…`, corretta dal verificatore).** Lettore D2 v4 `leggi_gba_r2s_c3g.py` PASS (SHA256 `1697135a2ba01a27803dace9e72089df52b820c663a671c16869e58304a07b07`, commit `85542985`). Richiesta di Claudio del 13/10: **"SI PREPARA ANCHE QUELLA"**.
+**Stato: riga in cancello (13/10/2026), pin `f6571dccbbc5ae07cf73a4310146a7912cfd73fb`, riga al commit `24dad8d4` (SHA `4d0064d4…`, corretta dal verificatore).** Lettore D2 v4 `leggi_gba_r2s_c3g.py` PASS (SHA256 `1697135a2ba01a27803dace9e72089df52b820c663a671c16869e58304a07b07`, commit `85542985`). Richiesta di Claudio del 13/10: **"SI PREPARA ANCHE QUELLA"**.
 Fonte delle attese: `docs/RISPOSTA_A_GEMINI_GBA_R2S_XAG2_LETTURA_2026-10-13.md`, versione **corretta dal cancello** (commit `584545d3`, SHA256 `3cc5970b…`), regola R-XAG-1.
 
 | oggetto | file | SHA256 |
 |---|---|---|
 | file prova (lotto `R2SXAGH`) | `backtest_pipeline/prove/GBA_R2S_XAGUSDH_2026-10-13.txt` | `fd8d997d2518e58ecc684a54caa4268cb4fa5b4c268171e51509f97575e2c049` |
-| riga di lancio (pin `f6571dcc`, commit `8686de85`) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGH.txt` | `4d0064d40df3055af0261a929bd7fe367ad6991a6a047b2319a84a052ab6416d` |
+| riga di lancio (pin `f6571dcc`, commit `24dad8d4`) | `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_XAGH.txt` | `4d0064d40df3055af0261a929bd7fe367ad6991a6a047b2319a84a052ab6416d` |
 | file madre | `backtest_pipeline/prove/GBA_R2S_XAGUSD2_2026-10-12.txt` | `dbe11bc3…` (PASS, girato al pin `d53493a9` il 13/10) |
 | EA / include / driver | invariati: `1381E3DC…` / `3EC97115…` / `GBA_R0_PASSATE.ps1` v5 `C239F628…` | ricalcolati a HEAD `584545d3`: uguali |
 
