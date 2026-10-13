@@ -49,7 +49,7 @@ Totale conto +442,74 (PF 1,485, dichiarato = ricalcolato). **Il +442 viene tutto
 
 ## 5. Cosa ne facciamo per i nostri EA (ipotesi misurabili, non criteri)
 1. **Uscita a cesto con SL comune** (tutte le posizioni dello stesso segnale chiudono insieme allo stesso SL spostato): e' un meccanismo di gestione che sui nostri motori a due gambe (EMA200: due ordini limite per segnale) si puo' mettere ad asse come uscita. Attesa e smentita da scrivere prima; un asse di uscita per volta.
-2. **Micro-scalp a favore con TP fisso breve** (`[F]`): da misurare solo se lo spread dell'oro regge (`stop >= 40 x spread` sul TP breve e' il primo cancello: a +1,00 USD contro spread ~0,2 il rapporto e' vicino a 5x, **sotto la frontiera**, quindi con ogni probabilita' non e' schierabile come sedia). Va scritto cosi', col numero accanto, prima di perdere tempo macchina.
+2. **Micro-scalp a favore con TP fisso breve** (`[F]`): da misurare solo se lo spread dell'oro regge (`stop >= 40 x spread` sul TP breve e' il primo cancello: a +1,00 USD contro uno spread di ~0,2 [DERIVATO dall'ancora del tester sull'oro, mediana 0,21: NON lo spread del conto live, non misurato] il rapporto e' dell'ordine di 5x, **sotto la frontiera** (e il TP non e' lo stop: e' un'analogia di ordine di grandezza), quindi con ogni probabilita' non e' schierabile come sedia). Va scritto cosi', col numero accanto, prima di perdere tempo macchina.
 3. Il `[R]` si **studia, non si replica**: griglia e recovery sono fuori dal perimetro prop.
 
 ## 6. Cosa manca per una lettura completa, e la via piu' corta
