@@ -18,7 +18,7 @@ Per profondita' del recupero (numero di ingressi `[R]` per ciclo e lato), netto 
 | 3-4 | 17 | +139,79 | 0,10 | 1 | 1,0 h |
 | 5-9 | 9 | +124,00 | 0,23 | 0 | 2,4 h |
 | **>= 10** | **3** | **+132,41** | **1,20** | 0 | **6,2 h** |
-**Tre cesti su 85 (3,5%) producono il 27% del profitto del `[R]`** e sono quelli con 1,2 lotti vivi per oltre 6 ore. Fino ad oggi hanno sempre «chiuso a +»: sono il punto in cui un giorno di trend contro la serie farebbe la perdita grande. Questo e' il numero da guardare, non il +541.
+**Tre cesti su 80 (3,75%) producono il 24,5% del profitto del `[R]`** (132,41 su 541,01) e sono quelli con 1,2 lotti vivi per oltre 6 ore. Fino ad oggi hanno sempre «chiuso a +»: sono il punto in cui un giorno di trend contro la serie farebbe la perdita grande. Questo e' il numero da guardare, non il +541.
 
 ## 3. Il conto del giorno, e cosa NON dice
 - **+442,74 EUR netti** sul conto, **+487,31** sui cicli con `CID` (21 ore) [LETTO]; deposito ricavato dal drawdown: **~4.800 EUR** (264,67 = 5,52%) [DERIVATO]: **~+10% in un giorno**.
@@ -26,6 +26,6 @@ Per profondita' del recupero (numero di ingressi `[R]` per ciclo e lato), netto 
 - Il «Drawdown Bilancio» del report e' sul **saldo**, non sull'**equity**: il flottante di una scala senza SL non e' nel file [NON MISURATO]. Un +10% al giorno con 5,5% di drawdown di saldo nello stesso periodo, se fosse su una prop con limite giornaliero 5%, **l'avrebbe gia' sforato come saldo**, prima di contare il flottante.
 
 ## 4. Cosa ne facciamo (ipotesi, non criteri)
-1. **Versione NOSTRA con coda capata**: stessi ingredienti (stop pending, TP +1,00 / uscita a media + ~1,0 USD, lotto che sale piano) ma **profondita' massima 3-4** (cattura 68 cesti su 85 senza toccare il tetto), **SL di cesto fisso all'ingresso del primo livello**, lotto massimo bloccato, rischio per cesto dentro la taglia firmata da Claudio. Da misurare nel tester a tick reali sull'oro con attesa e smentita scritte PRIMA: il tetto sulla coda **toglie il 27% del profitto** della famiglia `[R]` (se i dati fossero rappresentativi: un giorno) e **cambia il payoff**, quindi non si sa se resta positiva.
+1. **Versione NOSTRA con coda capata**: stessi ingredienti (stop pending, TP +1,00 / uscita a media + ~1,0 USD, lotto che sale piano) ma **profondita' massima 3-4** (68 cesti su 80, l'85%, non toccano il tetto), **SL di cesto fisso all'ingresso del primo livello**, lotto massimo bloccato, rischio per cesto dentro la taglia firmata da Claudio. Da misurare nel tester a tick reali sull'oro con attesa e smentita scritte PRIMA: il tetto sulla coda **toglie fino al 24,5% del profitto** della famiglia `[R]` (se i dati fossero rappresentativi: un giorno) e **cambia il payoff**, quindi non si sa se resta positiva.
 2. **Spread**: sul TP di +1,00 USD lo spread dell'oro (~0,2 nel tester) pesa circa il 20%: la parte `[F]` e' molto sensibile; va misurato con lo spread vero del conto.
 3. Prima di scrivere codice servono: **nome del prodotto, screenshot degli input, e altri giorni** con almeno una giornata di trend contro la scala (senza, la coda non e' misurata).
