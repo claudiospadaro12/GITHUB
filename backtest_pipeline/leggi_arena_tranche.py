@@ -13,7 +13,9 @@ COSA FA: riusa le funzioni di leggi_arena_tester.py (parser del report, accoppia
 14/10/2026) con TRE differenze, tutte dichiarate:
   1. leva attesa 1:100 (la sonda del 14/10 ha mostrato che il tester applica 1:100; la leva del conto demo e' [NON VISTA]);
   2. finestre: TRANCHE1 luglio (2026.07.01 -> 2026.08.01), TRANCHE2 agosto (08.01 -> 09.01), TRANCHE3 settembre (09.01 -> 10.01);
-  3. provenienza: REFERTO_ARENA_TRANCHE.txt, marcatore MARCATORE_ARENA_TESTER_TRANCHE_v1, pin in PIN_PASSATI_TRANCHE (fail-closed se vuota).
+  3. provenienza: REFERTO_ARENA_TRANCHE.txt, marcatore MARCATORE_ARENA_TESTER_TRANCHE_v2, pin in PIN_PASSATI_TRANCHE (fail-closed se vuota).
+  4. (controllo-preventivo 14/10) i CSV di --csv-dir prendono il nome della TRANCHE (TRANCHE1_cesti.csv, ...): con il sonda_di() del
+     lettore della sonda tutte e tre si chiamavano REPORT_*.csv e le prime due venivano SOVRASCRITTE in silenzio.
 NESSUN verdetto (A)(B)(C): erano scritti per le sonde da 1 e 65 giorni. Le tranche si LEGGONO con le ipotesi della scheda
 (report/ARENA_TESTER_TRANCHE_SCHEDA_2026-10-14.md), scritte PRIMA dei numeri; qui si stampano i numeri descrittivi e una tabella di sintesi.
 Se il giro non e' quello dichiarato (input, deposito, leva, finestra, qualita', provenienza), la tabella di sintesi lo dice e i numeri
@@ -33,9 +35,13 @@ L.LEVA_ATTESA = "1:100"
 # la riga 'ANCORA DEL FEED' del lettore della sonda confronta i tick con la finestra di TRE mesi di GBA T1 e scatta quando il report comincia
 # il 2026.07.01: per la tranche di luglio (un mese) darebbe un falso 'DIVERSA'. Si spegne con una data che non compare mai.
 L.ANCORA_T1 = (L.ANCORA_T1[0], L.ANCORA_T1[1], "0000.00.00")
-PIN_PASSATI_TRANCHE = ("d284a709cc35ffe07f649b8abbdc9738f88c7a65",)   # il pin della riga passata dal cancello (fail-closed se vuota)
-MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_TRANCHE_v1"
-DATA_MINIMA_REFERTO = "2026-10-15"
+# il pin della riga passata dai DUE cancelli (fail-closed se vuota). DA SCRIVERE: il commit che porta ARENA_TESTER_TRANCHE.ps1 v2.
+# d284a709 (v1) NON si mette: la v1 lanciava le tranche dopo un .ex5 cambiato (classe 1438) e non e' passata dal cancello di giudizio.
+PIN_PASSATI_TRANCHE = ("5c5d7dc0292caf885a108298c97c63c7548a8e6e",)   # il pin della riga passata dal cancello (fail-closed se vuota)
+MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_TRANCHE_v2"
+# lo script delle tranche nasce col commit d284a709 del 14/10/2026 20:26 UTC: un REFERTO del 14/10 sera e' legittimo (un giro che va KO
+# in pochi minuti la stessa sera). Con "2026-10-15" il lettore lo sospendeva scrivendo il FALSO "lo script non esisteva".
+DATA_MINIMA_REFERTO = "2026-10-14"
 FINESTRE_T = {"TRANCHE1": ("2026.07.01", ("2026.07.31", "2026.08.01")),
               "TRANCHE2": ("2026.08.01", ("2026.08.31", "2026.09.01")),
               "TRANCHE3": ("2026.09.01", ("2026.09.30", "2026.10.01"))}
@@ -48,6 +54,17 @@ def tranche_di(nome):
         if t in b:
             return t
     return None
+
+
+_SONDA_DI_ORIGINALE = L.sonda_di
+
+
+def _sonda_di_tranche(nome):
+    """il nome del giro per stampa() e per i CSV di --csv-dir: TRANCHE1/2/3, altrimenti quello del lettore della sonda."""
+    return tranche_di(nome) or _SONDA_DI_ORIGINALE(nome)
+
+
+L.sonda_di = _sonda_di_tranche
 
 
 def condizioni_tranche(nome, rep):
@@ -124,7 +141,7 @@ def sintesi(nome, rep, a, sospesi):
 
 def stampa_tabella(righe):
     print("=" * 118)
-    print("SINTESI DELLE TRANCHE (descrittiva; nessun verdetto: le ipotesi H1-H3 stanno nella scheda, scritte prima dei numeri)")
+    print("SINTESI DELLE TRANCHE (descrittiva; nessun verdetto: le ipotesi H1-H4 stanno nella scheda, scritte prima dei numeri)")
     print("  %-9s %-9s %6s %11s %6s %20s %7s %8s %10s %12s" % ("tranche", "giro", "oper", "netto EUR", "PF", "primo stop out", "cesti R", "R>=%d" % SOGLIA_PROF, "netto R>=10", "quota di R"))
     for s in righe:
         print("  %-9s %-9s %6s %11s %6s %20s %7d %8d %10.2f %12s" % (
@@ -202,8 +219,10 @@ def autotest():
         ok(any("NON fra quelli passati" in x for x in c), "2 pin diverso: sospeso")
         c, pt, _ = prov(ref(mar="MARCATORE_ARENA_TESTER_SONDA_v3"))
         ok(any("marcatore" in x for x in c), "3 marcatore della sonda: sospeso")
+        c, pt, _ = prov(ref(data="2026-10-13"))
+        ok(any("data del REFERTO" in x for x in c), "4 data prima del 14/10: sospeso")
         c, pt, _ = prov(ref(data="2026-10-14"))
-        ok(any("data del REFERTO" in x for x in c), "4 data prima del 15/10: sospeso")
+        ok(not c, "4b REFERTO del 14/10 sera (giro KO in pochi minuti lo stesso giorno del commit): NON sospeso per la data")
         c, pt, _ = prov(ref(ex=("UGUALE", "DIVERSO", "UGUALE")))
         ok(pt.get("TRANCHE2") and not pt.get("TRANCHE1"), "5 .ex5 cambiato nella TRANCHE2: solo quella sospesa")
         c, pt, _ = prov("", nome="ALTRO.txt")
@@ -236,6 +255,21 @@ def autotest():
         ok(any("leva" in x for x in mot), "10 leva 1:500 nel report: motivo 'leva ... invece di 1:100'")
         mot = condizioni_tranche("ARENA_TRANCHE1_x.htm", rapporto("M1 (2026.07.01 - 2026.07.31)"))
         ok(not mot, "11 estremo finale 2026.07.31 accettato (il tester puo' scrivere l'ultimo giorno incluso)")
+        # 12. CONTRO-ESEMPIO: tre report in una cartella con --csv-dir -> tre coppie di CSV distinte (prima: REPORT_*.csv sovrascritti)
+        with tempfile.TemporaryDirectory() as td, tempfile.TemporaryDirectory() as cd:
+            for t3, per in (("TRANCHE1", "M1 (2026.07.01 - 2026.08.01)"), ("TRANCHE2", "M1 (2026.08.01 - 2026.09.01)"), ("TRANCHE3", "M1 (2026.09.01 - 2026.10.01)")):
+                F = L.Finto(periodo=per)
+                pid = F.apri("2026.07.01 10:00:00", "buy", 0.01, 4000.00, "FinlabX BUY [CID=1] [R]")
+                F.chiudi("2026.07.01 11:00:00", pid, 4001.00)
+                h = F.htm()
+                open(os.path.join(td, "ARENA_%s_x.htm" % t3), "wb").write(h if isinstance(h, bytes) else h.encode("utf-8"))
+            import contextlib
+            import io
+            with contextlib.redirect_stdout(io.StringIO()):
+                leggi_percorsi([td], cd)
+            nomi = sorted(os.listdir(cd))
+            ok(nomi == sorted("%s_%s.csv" % (t3, k) for t3 in ("TRANCHE1", "TRANCHE2", "TRANCHE3") for k in ("cesti", "giorni")),
+               "12 --csv-dir con tre tranche: sei CSV distinti %s (nessuna tranche sovrascritta)" % nomi)
     finally:
         PIN_PASSATI_TRANCHE = salva
     print("AUTOTEST: " + ("tutti i controlli OK" if not esito[0] else "ALMENO UN CONTROLLO CADUTO"))
