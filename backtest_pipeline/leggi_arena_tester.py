@@ -58,7 +58,7 @@ COME SI CONTA
     (il prezzo d'ingresso delle posizioni ancora vive dipende da quali si sono chiuse): con accoppiamento oltre il 5% la (C) della
     SONDA2 lo dice accanto al numero.
   VERDETTI SOSPESI (classe 1381, 14/10/2026, controllo-preventivo): (A), (B), (C) NON si danno, e si dice perche', se il giro non e'
-  quello dichiarato -- REFERTO assente, marcatore diverso da MARCATORE_ARENA_TESTER_SONDA_v2, pin non in PIN_PASSATI (cioe' non quello
+  quello dichiarato -- REFERTO assente, marcatore diverso da MARCATORE_ARENA_TESTER_SONDA_v3, pin non in PIN_PASSATI (cioe' non quello
   della riga passata dal cancello), data del REFERTO prima del pin, .ex5 cambiato durante la passata (righe EX5_DOPO), report sciolto
   senza REFERTO -- oppure se il report stesso dice un'altra cosa: input imposti diversi, deposito, leva, simbolo, Expert, qualita' non
   100%, finestra diversa da quella della sonda. I numeri descrittivi si stampano lo stesso.
@@ -108,7 +108,7 @@ INPUT_ENUM = ("InpTradeMode", "InpGoldPulseTheme")
 # PROVENIENZA (classe 1381): il pin della riga che ha passato il cancello per lo script v2. VUOTO finche' la riga v2 non e' pinnata:
 # con la tupla vuota OGNI zip ha i verdetti SOSPESI (fail-closed). Dopo il commit dello script v2 si scrive qui il suo pin (40 esadecimali).
 PIN_PASSATI = ("fa37652d349bd5f7f26167912a7b360c174949c4",)
-MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_SONDA_v2"
+MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_SONDA_v3"
 DATA_MINIMA_REFERTO = "2026-10-14"   # il giorno dello script v2: un REFERTO datato prima non puo' venire da quel pin
 FINESTRE = {"SONDA1": ("2026.09.28", ("2026.09.28", "2026.09.29")), "SONDA2": ("2026.07.01", ("2026.09.29", "2026.09.30"))}
 DEMO_ENUM = "InpTradeMode demo = GOLDPULSE_BOTH_SIDES (ordinale NON NOTO)"
@@ -1365,7 +1365,7 @@ def autotest():
     salva = PIN_PASSATI
     PIN_PASSATI = ("a" * 40,)
     try:
-        def ref(pin="a" * 40, mar="MARCATORE_ARENA_TESTER_SONDA_v2", data="2026-10-15", ex=("UGUALE", "UGUALE")):
+        def ref(pin="a" * 40, mar="MARCATORE_ARENA_TESTER_SONDA_v3", data="2026-10-15", ex=("UGUALE", "UGUALE")):
             t = "ARENA TESTER SONDA -- EA di TERZI. Script %s, pin %s\r\ndata: %s 10:00:00   pc: DESKTOP-H4D7CAJ\r\n" % (mar, pin, data)
             for sn, e in zip(("SONDA1", "SONDA2"), ex):
                 if e:
@@ -1386,7 +1386,7 @@ def autotest():
     finally:
         PIN_PASSATI = salva
     with tempfile.TemporaryDirectory() as td:
-        open(os.path.join(td, "REFERTO_ARENA_SONDA.txt"), "w").write("Script MARCATORE_ARENA_TESTER_SONDA_v2, pin %s\r\ndata: 2026-10-15 10:00:00\r\n" % ("a" * 40))
+        open(os.path.join(td, "REFERTO_ARENA_SONDA.txt"), "w").write("Script MARCATORE_ARENA_TESTER_SONDA_v3, pin %s\r\ndata: 2026-10-15 10:00:00\r\n" % ("a" * 40))
         com, per, _r = provenienza(Sorgente(td))
     ok(PIN_PASSATI or any("PIN_PASSATI vuota" in x for x in com), "18c con PIN_PASSATI vuota ogni zip e' SOSPESO (fail-closed finche' il pin v2 non e' scritto)")
     v18 = verdetti("ARENA_SONDA1_x.htm", r12, analizza(r12), ["pin X NON fra quelli passati"])

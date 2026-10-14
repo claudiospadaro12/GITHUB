@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_ARENA_TESTER_SONDA_v2
+#  MARCATORE_ARENA_TESTER_SONDA_v3
 #  v2 (14/10/2026, controllo-preventivo): l'impronta SHA256 del .ex5 si RICONTROLLA dopo ogni passata (il terminale, aprendosi, puo'
 #  aggiornare un prodotto del Market: senza ricontrollo il referto attribuirebbe i numeri a un binario che non e' quello provato).
 #  Se cambia o sparisce: la passata e' KO, la SONDA2 non parte, il referto scrive EX5_DOPO ... DIVERSO e il lettore sospende i verdetti.
@@ -235,12 +235,24 @@ foreach($d in @(Get-ChildItem -Path $DataRoot -Directory -ErrorAction SilentlyCo
 }
 # le ALTRE installazioni di questo PC, censite il 05/10/2026 (risultati_archivio/DUKA_P0_20261005_171046/REFERTO_DUKA_P0.txt, sez. 5): AMMESSE PER NOME, chiuse, non toccate
 $Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale')
+# v3 (14/10/2026): una cartella dati con origin.txt = C:\Users\Master\Desktop (nata dopo le 19:28, nessun conto, nessun processo aperto) e ammessa SOLO se
+# il suo common.ini non ha nessun Login= : senza conto non puo operare. Se un giorno ha un Login=, o se common.ini esiste ma non si legge, ci si ferma.
+$CensiteSenzaConto = @('C:\Users\Master\Desktop')
 $diversi = @($origini | Where-Object { $_.Inst -ne $InstAttesa })
-$ignote = @($diversi | Where-Object { $Censite -notcontains $_.Inst.TrimEnd('\') })
+$ignote = @($diversi | Where-Object { ($Censite -notcontains $_.Inst.TrimEnd('\')) -and ($CensiteSenzaConto -notcontains $_.Inst.TrimEnd('\')) })
+foreach($dv in @($diversi | Where-Object { $CensiteSenzaConto -contains $_.Inst.TrimEnd('\') })){
+  $cini = Join-Path $dv.Dir 'config\common.ini'
+  if(Test-Path -LiteralPath $cini){
+    $txc = Leggi-Condiviso $cini
+    if([string]::IsNullOrEmpty($txc)){ throw ('l installazione ' + $dv.Inst + ' (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ') ha un common.ini che NON si legge: non posso dire che non ha un conto. Mi fermo.') }
+    if($txc -match '(?im)^\s*Login\s*=\s*\d'){ throw ('l installazione ' + $dv.Inst + ' (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ') ha un CONTO salvato (Login=): non e piu quella censita il 14/10 senza conto. Mi fermo.') }
+  }
+  Dico ('installazione censita il 14/10 SENZA CONTO (nessun Login= in common.ini), nessun processo aperto, NON TOCCATA: ' + $dv.Inst + '  (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ')') 'Yellow'
+}
 foreach($dv in @($diversi | Where-Object { $Censite -contains $_.Inst.TrimEnd('\') })){ Dico ('altra installazione di questo PC, censita il 05/10, CHIUSA e NON TOCCATA: ' + $dv.Inst + '  (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ')') 'Yellow' }
 if($ignote.Count -gt 0){
   foreach($dv in $ignote){ Write-Host ('     installazione NON censita: ' + $dv.Inst) -ForegroundColor Red }
-  throw 'Mi fermo: oltre al BCM e alle due censite il 05/10 (C:\MT5_Backtest, C:\FundedNext_Manuale) qui ci sono ALTRE installazioni MT5 (regola dei terminali multipli).'
+  throw 'Mi fermo: oltre al BCM, alle due censite il 05/10 (C:\MT5_Backtest, C:\FundedNext_Manuale) e a quella senza conto del 14/10 (C:\Users\Master\Desktop) qui ci sono ALTRE installazioni MT5 (regola dei terminali multipli).'
 }
 $cands = @($origini | Where-Object { $_.Inst -eq $InstAttesa })
 if($cands.Count -ne 1){ throw ('cartella dati NON risolta in modo univoco: trovate ' + $cands.Count + ' candidate per ' + $InstAttesa + '. Mi fermo invece di indovinare.') }
@@ -594,7 +606,7 @@ foreach($s in $SONDE){
 # ---------------------------------------------------------------------
 Titolo '3 - RACCOLTA'
 $testa = @(
-  ('ARENA TESTER SONDA -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_SONDA_v2, pin ' + $Pin),
+  ('ARENA TESTER SONDA -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_SONDA_v3, pin ' + $Pin),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (ASSUNZIONE: leva del demo NON VISTA), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
