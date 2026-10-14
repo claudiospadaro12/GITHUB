@@ -190,7 +190,7 @@ LOTTI["R2SXAGH"] = {"prova": "GBA_R2S_XAGUSDH_2026-10-13.txt", "sha": "fd8d997d2
                     "tag": {"M30": "R2SXAGH_01_M30_T1_m775800", "H1": "R2SXAGH_02_H1_T1_m775800", "H4": "R2SXAGH_03_H4_T1_m775800"}}   # v4: R-XAG-1, esiti H0-H3
 # v5: RIFACIMENTO dell'argento M30/H1 (file prova GBA_R2S_XAGUSDR_2026-10-14.txt): le due passate del lotto R2SXAGH finite in stallo il 13/10, identiche (ini uguale
 # salvo il nome del report). Pin della riga RIGA_LANCIA_GBA_R2S_XAGR.txt: DA-PINNARE finche' la sessione principale non committa i file e non pinna la riga.
-PIN_XAGR = SEGNAPOSTO
+PIN_XAGR = "d194ad680982f2f9d85a450a8df8e9006e90242d"
 LOTTI["R2SXAGR"] = {"prova": "GBA_R2S_XAGUSDR_2026-10-14.txt", "sha": "f6023e157f940126d81d545d6d604e933e8886656a1e1a465b3a6741342923c3", "simbolo": "XAGUSD",
                     "celle": [("M30", "M30"), ("H1", "H1")], "S": 6.65, "pin": PIN_XAGR, "albero_h": True, "rifa": "R2SXAGH",
                     "tag": {"M30": "R2SXAGR_01_M30_T1_m775800", "H1": "R2SXAGR_02_H1_T1_m775800"}}   # v5: albero H0-H3 di R2SXAGH + CE-DET
