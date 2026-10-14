@@ -1,0 +1,602 @@
+# =====================================================================
+#  MARCATORE_ARENA_TESTER_SONDA_v1
+#  ARENA_TESTER_SONDA.ps1 -- PRIMA MISURA (una SONDA) dell'EA di TERZI 'Arena Nexus Grid Smart XAU MT5' (versione 1.20 vista sul demo
+#  50503392 il 13/10/2026) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal.
+#
+#  CHE COSA FA, e una cosa sola:
+#    1. TROVA il file .ex5 dell'Arena in MQL5\Experts\Market della cartella dati del terminale BCM di QUESTA macchina: nome che inizia con
+#       'Arena' (senza distinguere maiuscole), cercato SOLO dentro Market (i nostri EA non stanno li': classe 1275). Ne deve trovare
+#       ESATTAMENTE UNO: zero o due = si FERMA prima di qualunque tester. Ne stampa nome, dimensione, data e SHA256 (il .ex5 e' un binario
+#       di terzi: NON va nello zip ne' in repo, la sua impronta si').
+#    2. DUE passate SINGOLE del tester (Optimization=0), DUE lotti separati, Modello 4 (ticks reali), XAUUSD M1, deposito 5000 EUR,
+#       leva 1:500, valuta EUR, ExecutionMode=0 (come il driver GBA), Visual=0, AllowLiveTrading=false:
+#         SONDA1 (fumo)  2026.09.28 -> 2026.09.29  (il solo 28/09: il tester esclude la data 'a', misurato in GBA R1A)  timeout -TimeoutSonda1Min
+#         SONDA2         2026.07.01 -> 2026.09.30  (tre mesi, contiene il 28/09; stessa finestra della tranche T1 di GBA)  timeout -TimeoutSonda2Min
+#       SONDA2 parte SOLO SE la SONDA1 ha scritto un report leggibile con almeno 1 operazione, con gli input imposti confermati dal report,
+#       senza timeout, E se la stima della sua durata (circa 65 giorni di borsa x il tempo di test della SONDA1) sta dentro il suo timeout.
+#    3. RACCOGLIE: i report .htm (e le immagini .png con lo stesso nome), un estratto dei giornali del tester scritti DOPO la fotografia
+#       (letto riga per riga: con centinaia di operazioni al giorno il giornale puo' pesare centinaia di MB), gli .ini, un REFERTO e un
+#       MANIFEST, in una cartella e uno zip sul Desktop (ARENA_TESTER_SONDA, ARENA_TESTER_SONDA.zip). NON giudica: il lettore e'
+#       backtest_pipeline/leggi_arena_tester.py.
+#
+#  GLI INPUT (letti dallo screenshot del 13/10, report/MARKET_SCHEDA_FINLABX_CF_DZR_2026-10-13.md): i 14 NON-enumerazione si impongono nel
+#  [TesterInputs] con i valori del demo; i DUE enum (InpTradeMode, InpGoldPulseTheme) NON si impongono (il loro ordinale non e' noto: il
+#  tester usa il default dell'EA, o l'ultimo valore salvato nel tester per questo EA [NON VERIFICATO quale dei due]) e il valore che il tester
+#  ha usato si legge nel report ('Dati in ingresso') e nel giornale, e va nel REFERTO.
+#
+#  DERIVATO DA GBA_R0_PASSATE.ps1 v5 (passato dal cancello, NON toccato). STESSE guardie: macchina DESKTOP-H4D7CAJ, nessun terminal64 /
+#  metaeditor64 / metatester64 vivo, installazioni MT5 non censite = stop (C:\MT5_Backtest e C:\FundedNext_Manuale ammesse PER NOME, chiuse,
+#  non toccate), cartella dati risolta per origin.txt, nessun EA sui grafici salvati, AllowLiveTrading=false, fotografia dei log e lettura
+#  della sola coda, CloseMainWindow e MAI Stop-Process sul terminale, cartella e zip esistenti RINOMINATI con la data e mai cancellati.
+#  DEVIAZIONI, tutte dichiarate:
+#   D1. NESSUN sorgente, NESSUNA compilazione, NESSUN file scaricato: l'EA e' il .ex5 del Market gia' installato sul terminale. MetaEditor
+#       non si apre. MQL5\Experts NON si scrive (niente copia, niente rinomina del .ex5: e' di terzi e NON si tocca).
+#   D2. BLOCCO: si prende lo STESSO blocco del driver GBA, Global\ABTG_GBA_R0 (stesso terminale: un giro GBA e questa sonda si escludono a
+#       vicenda), e prima ci si ferma se e' vivo uno dei blocchi elencati per nome: Global\ABTG_NATCLA_F0, Global\ABTG_NATCLA_F1,
+#       Global\ABTG_BULGE_TEL_P0, Global\ABTG_AZZURRA_FREQ, Global\CLAU12_EXPORT_BARRE (classe 1281). Mentre questa sonda gira, una riga
+#       GBA si ferma con il suo messaggio 'Un ALTRO giro di GBA_R0 sta gia girando': e' QUESTA sonda.
+#   D3. Il report si legge SOLO nella sua testa (primo MB: impostazioni, input, risultati) per non caricare in memoria un file da decine di MB.
+#   D4. Lo STOP OUT del conto del tester NON e' un KO: e' la coda che la sonda cerca. Si conta e si scrive; i numeri dopo lo stop out sono di
+#       un conto morto (lo dice il lettore). Deposito 5000 EUR scelto apposta come il demo (~4.900 EUR), non per reggere (classe 1425 letta).
+#   D5. Leva 1:500: ASSUNZIONE DICHIARATA (la leva del demo 50503392 [NON VISTA]; 1:500 e' quella del commento dell'utente del Market).
+#
+#  E' UN BACKTEST, NON UN ORDINE. [Experts] AllowLiveTrading=false nel .ini: il terminale del PC di backtest e' loggato sul DEMO 50503392 e il
+#  14/08/2026 da questa macchina sono partiti ordini VERI. L'Arena nel tester opera solo sul conto virtuale del tester.
+#
+#  NON TOCCA, per nome: PRIMA SU QUESTO PC le installazioni C:\MT5_Backtest (cartella dati 04C7A32B) e C:\FundedNext_Manuale (cartella dati
+#  2B8180C3); POI il VPS VMI3047753 e TUTTE le sue cartelle dati (FTMO 541452707 in C:\FTMO, trial 1514806751, REALE 10105439 in C:\BCM_Reale,
+#  100k 50504263, piccolo 50503392 sul VPS con l'Arena VIVA sul grafico XAUUSD M1, manuale 50503635 in C:\MT5_MANUALE, banco 50504400 in
+#  C:\MT5_Backtest, Pepperstone, Tickmill). Scrive SOLO: %USERPROFILE%\abtg_arena_sonda (gli .ini), il report .htm che il tester scrive nella
+#  cartella dati (Report=), il Desktop (cartella e zip ARENA_TESTER_SONDA). Oltre a quello che MT5 scrive da se' (log, storico, cache del
+#  tester). NON legge ne' scrive conti, ordini, posizioni, preset di nessuna sedia. NON tocca CODA.txt ne' il runner notturno (VPS).
+#
+#  NIENTE EMOJI QUI DENTRO (regola del 17/08): Windows PowerShell 5.1 legge i .ps1 come ANSI e un'emoji dentro una stringa rompe il parser.
+# =====================================================================
+[CmdletBinding()]
+param(
+  [Parameter(Mandatory=$true)][string]$Pin,
+  [int]$TimeoutSonda1Min = 20,
+  [int]$TimeoutSonda2Min = 240
+)
+
+$ErrorActionPreference = 'Stop'
+$IC = [Globalization.CultureInfo]::InvariantCulture
+[Threading.Thread]::CurrentThread.CurrentCulture   = $IC
+[Threading.Thread]::CurrentThread.CurrentUICulture = $IC
+
+$NOME_D   = 'ARENA_TESTER_SONDA'
+$SIMBOLO  = 'XAUUSD'
+$PERIODO  = 'M1'
+$MODELLO  = 4
+$DEPOSITO = 5000
+$VALUTA   = 'EUR'
+$LEVA     = 500
+$TETTO_BARRE  = 100000
+$AVVISO_BARRE = 95000
+$GIORNI_SONDA2 = 65
+# i 14 input NON-enumerazione, valori del demo (screenshot del 13/10). Tipo: b = bool, i = intero, d = decimale
+$INPUT_IMPOSTI = @(
+  @('InpS03FundedPrefix', 'true', 'b'),
+  @('InpEntryPhaseSpacingR33', 'true', 'b'),
+  @('InpMagicNumber', '888', 'i'),
+  @('InpBaseLot', '0.01', 'd'),
+  @('InpFridayGapProtection', 'false', 'b'),
+  @('InpShowDashboard', 'true', 'b'),
+  @('InpCounterFlowRail', 'true', 'b'),
+  @('InpCounterFlowTriggerPrice', '0.2', 'd'),
+  @('InpCounterFlowLotMultiplier', '1.0', 'd'),
+  @('InpCounterFlowMaxLivePositions', '1', 'i'),
+  @('InpCounterFlowRearmDelayMilliseconds', '0', 'i'),
+  @('InpDeadZoneReactionRail', 'true', 'b'),
+  @('InpDeadZoneReactionTriggerPrice', '0.2', 'd'),
+  @('InpDeadZoneReactionRearmDelayMilliseconds', '0', 'i')
+)
+$INPUT_ENUM = @('InpTradeMode', 'InpGoldPulseTheme')
+
+if($Pin -notmatch '^[0-9a-fA-F]{40}$' -or $Pin -match '^0{40}$'){ throw '-Pin obbligatorio, di 40 caratteri esadecimali e NON fatto di zeri: il pin di zeri e il segnaposto della BOZZA, non un commit.' }
+$Pin = $Pin.ToLower()
+if($TimeoutSonda1Min -lt 1 -or $TimeoutSonda1Min -gt 30){ throw '-TimeoutSonda1Min fuori da 1-30 minuti.' }
+if($TimeoutSonda2Min -lt 1 -or $TimeoutSonda2Min -gt 300){ throw '-TimeoutSonda2Min fuori da 1-300 minuti.' }
+$SONDE = @(
+  [pscustomobject]@{ Nome = 'SONDA1'; Da = '2026.09.28'; A = '2026.09.29'; Timeout = $TimeoutSonda1Min; Cosa = 'fumo: il solo 28/09/2026' },
+  [pscustomobject]@{ Nome = 'SONDA2'; Da = '2026.07.01'; A = '2026.09.30'; Timeout = $TimeoutSonda2Min; Cosa = 'tre mesi, luglio-settembre 2026, contiene il 28/09' }
+)
+
+function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
+function Titolo($t){ Write-Host ''; Write-Host ('=== ' + $t + ' ===') -ForegroundColor Cyan }
+function Num($s){ return [double]::Parse($s, [Globalization.NumberStyles]::Float, $IC) }
+function Leggi-Condiviso($path){
+  $b = $null
+  try{
+    $path = (Convert-Path -LiteralPath $path)
+    $fs = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+    $b  = New-Object byte[] $fs.Length
+    [void]$fs.Read($b, 0, $b.Length)
+    $fs.Close()
+  } catch { return '' }
+  if($null -eq $b -or $b.Count -lt 2){ return '' }
+  if($b[0] -eq 0xFF -and $b[1] -eq 0xFE){ return ([Text.Encoding]::Unicode.GetString($b)).TrimStart([char]0xFEFF) }
+  $zeri = 0; $nb = [math]::Min(400, $b.Count)
+  for($i = 1; $i -lt $nb; $i += 2){ if($b[$i] -eq 0){ $zeri++ } }
+  if($zeri -gt ($nb / 4)){ return ([Text.Encoding]::Unicode.GetString($b)).TrimStart([char]0xFEFF) }
+  return ([Text.Encoding]::UTF8.GetString($b)).TrimStart([char]0xFEFF)
+}
+# D3: la TESTA del report (impostazioni, input, risultati stanno prima delle tabelle Ordini/Affari): al massimo $maxB byte
+function Leggi-Testa($path, $maxB){
+  $fs = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+  try{
+    $n = [int][math]::Min([long]$fs.Length, [long]$maxB)
+    $b = New-Object byte[] $n
+    $letti = 0
+    while($letti -lt $n){ $r = $fs.Read($b, $letti, $n - $letti); if($r -le 0){ break }; $letti = $letti + $r }
+  } finally { $fs.Close() }
+  if($letti -lt 2){ return '' }
+  if($b[0] -eq 0xFF -and $b[1] -eq 0xFE){ $q = $letti - 2; if($q % 2 -eq 1){ $q = $q - 1 }; return [Text.Encoding]::Unicode.GetString($b, 2, $q) }
+  $zeri = 0; $nb = [math]::Min(400, $letti)
+  for($i = 1; $i -lt $nb; $i += 2){ if($b[$i] -eq 0){ $zeri++ } }
+  if($zeri -gt ($nb / 4)){ $q = $letti; if($q % 2 -eq 1){ $q = $q - 1 }; return [Text.Encoding]::Unicode.GetString($b, 0, $q) }
+  return ([Text.Encoding]::UTF8.GetString($b, 0, $letti)).TrimStart([char]0xFEFF)
+}
+function CercaCella([string]$t, [string[]]$etichette){
+  foreach($e in $etichette){
+    $m = [regex]::Match($t, '\|' + $e + ':\|([^|]*)\|')
+    if($m.Success){ return (([regex]::Replace($m.Groups[1].Value, '\s', ''))) }
+  }
+  return $null
+}
+function LeggiReport($path){
+  $r = @{ Ok = $false; Motivo = ''; Trades = $null; Profitto = $null; PF = ''; Qualita = ''; Barre = ''; Ticks = ''; Expert = $null; NExpert = 0; Simbolo = $null; Periodo = $null; Deposito = $null; Leva = $null; Valuta = $null; DDEq = ''; DDBil = ''; Input = @{}; InputOrd = @() }
+  $testo = ''
+  try{ $testo = Leggi-Testa $path 1048576 }catch{ $r.Motivo = 'report illeggibile: ' + $_.Exception.Message; return $r }
+  if([string]::IsNullOrEmpty($testo)){ $r.Motivo = 'report vuoto o illeggibile'; return $r }
+  $t = [regex]::Replace($testo, '<[^>]+>', '|')
+  $t = [regex]::Replace($t, '\s*\|[\s|]*', '|')
+  $r.NExpert = ([regex]::Matches($t, '\|Expert:\|')).Count
+  $r.Expert   = CercaCella $t @('Expert')
+  $r.Simbolo  = CercaCella $t @('Simbolo', 'Symbol')
+  $r.Periodo  = CercaCella $t @('Periodo', 'Period')
+  $r.Deposito = CercaCella $t @('Deposito Iniziale', 'Initial Deposit')
+  $r.Leva     = CercaCella $t @('Leva', 'Leverage')
+  $r.Valuta   = CercaCella $t @('Valuta', 'Currency')
+  $vq = CercaCella $t @('Qualit. dello Storico', 'History Quality'); if($null -ne $vq){ $r.Qualita = $vq }
+  $vb = CercaCella $t @('Barre', 'Bars'); if($null -ne $vb){ $r.Barre = $vb }
+  $vk = CercaCella $t @('Ticks'); if($null -ne $vk){ $r.Ticks = $vk }
+  $vf = CercaCella $t @('Fattore di Profitto', 'Profit Factor'); if($null -ne $vf){ $r.PF = $vf }
+  $ve = CercaCella $t @('Equit. Drawdown Massima', 'Equity Drawdown Maximal'); if($null -ne $ve){ $r.DDEq = $ve }
+  $vd = CercaCella $t @('Bilancio Drawdown Massimo', 'Balance Drawdown Maximal'); if($null -ne $vd){ $r.DDBil = $vd }
+  # gli input come il tester li ha usati ('Dati in ingresso'): celle 'Nome=valore'. Il lookahead non consuma il separatore (celle adiacenti)
+  foreach($mi in [regex]::Matches($t, '\|(Inp[A-Za-z0-9_]+)=([^|]*)(?=\|)')){
+    $kI = $mi.Groups[1].Value
+    if(-not $r.Input.ContainsKey($kI)){ $r.Input[$kI] = $mi.Groups[2].Value.Trim(); $r.InputOrd = $r.InputOrd + @($kI) }
+  }
+  $vt = CercaCella $t @('Numero di Operazioni di Trading Totali', 'Total Trades')
+  $vp = CercaCella $t @('Profitto Totale Netto', 'Total Net Profit')
+  if($null -eq $vt){ $r.Motivo = 'etichetta del totale operazioni (Numero di Operazioni di Trading Totali / Total Trades) NON trovata'; return $r }
+  if($null -eq $vp){ $r.Motivo = 'etichetta del profitto netto (Profitto Totale Netto / Total Net Profit) NON trovata'; return $r }
+  if($vt -notmatch '^[0-9]+$'){ $r.Motivo = 'totale operazioni non numerico: "' + $vt + '"'; return $r }
+  if($vp -notmatch '^-?[0-9]+(\.[0-9]+)?$'){ $r.Motivo = 'profitto netto non numerico: "' + $vp + '"'; return $r }
+  $r.Trades = [int]$vt
+  $r.Profitto = Num $vp
+  $r.Ok = $true
+  return $r
+}
+# un valore imposto contro quello che il report dice: '' se coincide, altrimenti il motivo
+function InputDiverso($nome, $atteso, $tipo, $visto){
+  if($null -eq $visto){ return ($nome + ' ASSENTE dai Dati in ingresso del report') }
+  if($tipo -eq 'b'){ if($visto.ToLower() -ne $atteso){ return ($nome + '=' + $visto + ' invece di ' + $atteso) }; return '' }
+  $v = 0.0
+  if(-not [double]::TryParse($visto, [Globalization.NumberStyles]::Float, $IC, [ref]$v)){ return ($nome + '=' + $visto + ': non numerico (atteso ' + $atteso + ')') }
+  if([math]::Abs($v - (Num $atteso)) -gt 1e-9){ return ($nome + '=' + $visto + ' invece di ' + $atteso) }
+  return ''
+}
+
+# ---------------------------------------------------------------------
+#  0. LA MACCHINA E IL TERMINALE. Fail-closed, come GBA_R0_PASSATE v5.
+# ---------------------------------------------------------------------
+Titolo '0 - MACCHINA E TERMINALE'
+if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){
+  throw ('ARENA_TESTER_SONDA gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia: la challenge FTMO sta operando (firma del 21/09/2026: i giri del tester stanno sul PC di backtest).')
+}
+Dico ('pc   : ' + $env:COMPUTERNAME) 'Green'
+Dico ('pin  : ' + $Pin) 'Green'
+foreach($altro in @('Global\ABTG_NATCLA_F0', 'Global\ABTG_NATCLA_F1', 'Global\ABTG_BULGE_TEL_P0', 'Global\ABTG_AZZURRA_FREQ', 'Global\CLAU12_EXPORT_BARRE')){
+  $mx = $null
+  if([System.Threading.Mutex]::TryOpenExisting($altro, [ref]$mx)){
+    try{ $mx.Dispose() }catch{ }
+    throw ('Un giro che tiene il blocco ' + $altro + ' e VIVO su questo PC: un solo giro di tester alla volta (classe 853). Aspetta la sua riga finale con rc, NON chiudere il suo terminale.')
+  }
+}
+$Mutex = New-Object System.Threading.Mutex($false, 'Global\ABTG_GBA_R0')
+$preso = $false
+try{ $preso = $Mutex.WaitOne(0) } catch [System.Threading.AbandonedMutexException] { $preso = $true; Dico 'il blocco Global\ABTG_GBA_R0 era stato lasciato da un giro INTERROTTO: lo riprendo (nessun altro giro sta girando)' 'Yellow' }
+if(-not $preso){
+  throw 'Un giro GBA (o un altra sonda Arena) sta gia girando su questo PC (blocco Global\ABTG_GBA_R0 occupato). Un solo giro alla volta: aspetta la sua riga finale con rc, NON chiudere il suo terminale.'
+}
+$aperti = @(Get-Process -Name terminal64, metaeditor64, metatester64 -ErrorAction SilentlyContinue)
+if($aperti.Count -gt 0){
+  $aperti | Select-Object Id, ProcessName, MainWindowTitle, Path | Format-Table -AutoSize | Out-String -Width 300 | Write-Host
+  throw 'MT5, METAEDITOR o un AGENTE DEL TESTER risulta APERTO su questo PC (PID, titolo, cartella qui sopra). Se sta lavorando NON chiuderlo: aspetta la sua riga finale con rc. Se e un MT5 aperto a vuoto (per esempio quello usato per installare l Arena dal Market), chiudilo A MANO riconoscendolo dal PID e dalla cartella, e rilancia.'
+}
+
+$InstAttesa = 'C:\Program Files\BCM Markets MT5 Terminal'
+$Terminal   = Join-Path $InstAttesa 'terminal64.exe'
+if(-not (Test-Path -LiteralPath $Terminal)){ throw ('terminale non trovato dove la sonda lo aspetta: ' + $Terminal + '. Non si cerca altrove apposta.') }
+$DataRoot = Join-Path $env:APPDATA 'MetaQuotes\Terminal'
+$origini = @()
+foreach($d in @(Get-ChildItem -Path $DataRoot -Directory -ErrorAction SilentlyContinue)){
+  $o = Join-Path $d.FullName 'origin.txt'
+  if(Test-Path -LiteralPath $o){
+    $v = (Leggi-Condiviso $o).Trim()
+    if($v -ne ''){ $origini = $origini + @([pscustomobject]@{ Dir = $d.FullName; Inst = $v }) }
+  }
+}
+# le ALTRE installazioni di questo PC, censite il 05/10/2026 (risultati_archivio/DUKA_P0_20261005_171046/REFERTO_DUKA_P0.txt, sez. 5): AMMESSE PER NOME, chiuse, non toccate
+$Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale')
+$diversi = @($origini | Where-Object { $_.Inst -ne $InstAttesa })
+$ignote = @($diversi | Where-Object { $Censite -notcontains $_.Inst.TrimEnd('\') })
+foreach($dv in @($diversi | Where-Object { $Censite -contains $_.Inst.TrimEnd('\') })){ Dico ('altra installazione di questo PC, censita il 05/10, CHIUSA e NON TOCCATA: ' + $dv.Inst + '  (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ')') 'Yellow' }
+if($ignote.Count -gt 0){
+  foreach($dv in $ignote){ Write-Host ('     installazione NON censita: ' + $dv.Inst) -ForegroundColor Red }
+  throw 'Mi fermo: oltre al BCM e alle due censite il 05/10 (C:\MT5_Backtest, C:\FundedNext_Manuale) qui ci sono ALTRE installazioni MT5 (regola dei terminali multipli).'
+}
+$cands = @($origini | Where-Object { $_.Inst -eq $InstAttesa })
+if($cands.Count -ne 1){ throw ('cartella dati NON risolta in modo univoco: trovate ' + $cands.Count + ' candidate per ' + $InstAttesa + '. Mi fermo invece di indovinare.') }
+$DataFolder = $cands[0].Dir
+$chrRoot = Join-Path (Join-Path (Join-Path $DataFolder 'MQL5') 'Profiles') 'Charts'
+$nChr = 0; $conEA = @()
+if(Test-Path -LiteralPath $chrRoot){
+  foreach($fc in @(Get-ChildItem -LiteralPath $chrRoot -Recurse -File -Filter '*.chr' -ErrorAction SilentlyContinue)){
+    $nChr = $nChr + 1
+    $tx = Leggi-Condiviso $fc.FullName
+    if(-not $tx){ $conEA = $conEA + @($fc.Directory.Name + '\' + $fc.Name + '  ILLEGGIBILE: conta come EA attaccato'); continue }
+    if($tx -match '<expert>'){ $conEA = $conEA + @($fc.Directory.Name + '\' + $fc.Name + '  EA ATTACCATO') }
+  }
+}
+if($nChr -le 0){ throw ('ho letto ZERO grafici salvati sotto ' + $chrRoot + ': una guardia che non legge niente non ha verificato niente. Non si parte.') }
+if($conEA.Count -gt 0){ throw ('EA ATTACCATI ai grafici salvati del terminale BCM (' + ($conEA -join '; ') + '). Staccali prima: aprire il terminale col profilo li rimetterebbe in marcia sul demo 50503392 (14/08/2026). Se hai attaccato l Arena a un grafico per provarla, toglila dal grafico, chiudi MT5 e rilancia.') }
+Dico ('terminale: ' + $Terminal) 'Green'
+Dico ('dati     : ' + $DataFolder) 'Green'
+Dico ('grafici salvati letti: ' + $nChr + ', nessun EA attaccato') 'Green'
+
+# ---------------------------------------------------------------------
+#  1. IL .EX5 DELL'ARENA: SOLO in MQL5\Experts\Market, ESATTAMENTE UNO
+# ---------------------------------------------------------------------
+Titolo '1 - IL FILE DELL ARENA (MQL5\Experts\Market di QUESTO terminale)'
+$MsgInstalla = 'Installa l EA dal Market su QUESTO terminale: apri MT5 dalla cartella C:\Program Files\BCM Markets MT5 Terminal (conto demo 50503392 di QUESTO PC DESKTOP-H4D7CAJ), scheda Market -> Acquistati (o la pagina del prodotto Arena Nexus Grid Smart XAU MT5) -> Installa [NON VERIFICATO nei dettagli del menu]; NON attaccarlo a nessun grafico; chiudi MT5 e rilancia questa riga. Se il prodotto offre la versione DEMO gratuita (scheda del prodotto -> Demo), per il tester basta quella e non consuma attivazioni [NON VERIFICATO].'
+$MqlExp = Join-Path (Join-Path $DataFolder 'MQL5') 'Experts'
+$MktDir = Join-Path $MqlExp 'Market'
+if(-not (Test-Path -LiteralPath $MqlExp)){ throw ('la cartella ' + $MqlExp + ' NON esiste o non si legge: il terminale BCM di questa macchina non ha MQL5\Experts. Mi fermo.') }
+$errMkt = @()
+$tuttiMkt = @()
+if(Test-Path -LiteralPath $MktDir){
+  $tuttiMkt = @(Get-ChildItem -LiteralPath $MktDir -Recurse -File -Filter '*.ex5' -ErrorAction SilentlyContinue -ErrorVariable errMkt)
+} else {
+  $sondaE = @(Get-ChildItem -LiteralPath $MqlExp -ErrorAction SilentlyContinue -ErrorVariable errMkt)
+  Dico ('la cartella ' + $MktDir + ' NON esiste: su questo terminale non e installato nessun prodotto del Market (MQL5\Experts letta: ' + $sondaE.Count + ' voci, errori di lettura ' + @($errMkt).Count + ')') 'Yellow'
+}
+if(@($errMkt).Count -gt 0){ throw ('errori di lettura nella cartella del Market (' + @($errMkt).Count + ', il primo: ' + @($errMkt)[0].Exception.Message + '): l elenco e INCOMPLETO e non dico ne trovato ne assente. Mi fermo.') }
+$arena = @($tuttiMkt | Where-Object { $_.Name -like 'Arena*' } | Sort-Object LastWriteTime -Descending)
+if($arena.Count -ne 1){
+  Write-Host ('   .ex5 che iniziano con Arena in ' + $MktDir + ': ' + $arena.Count + ' (ne serve ESATTAMENTE uno)') -ForegroundColor Red
+  foreach($fa in $arena){ Write-Host ('     ' + $fa.FullName.Substring($MqlExp.Length + 1) + '   ' + $fa.Length + ' byte   ' + $fa.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   SHA256 ' + (Get-FileHash -LiteralPath $fa.FullName -Algorithm SHA256).Hash) -ForegroundColor Red }
+  $altri = @($tuttiMkt | Where-Object { $_.Name -notlike 'Arena*' } | Sort-Object LastWriteTime -Descending)
+  Write-Host ('   TUTTI gli altri .ex5 del Market su questo terminale (' + $altri.Count + ', dal piu recente, NON contati: se l Arena c e con un altro nome, e qui):') -ForegroundColor Yellow
+  foreach($fa in $altri){ Write-Host ('     ' + $fa.FullName.Substring($MqlExp.Length + 1) + '   ' + $fa.Length + ' byte   ' + $fa.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss', $IC)) -ForegroundColor Yellow }
+  if($arena.Count -eq 0){ throw ('NESSUN .ex5 che inizia con Arena in ' + $MktDir + '. ' + $MsgInstalla + ' Nessun tester e partito.') }
+  throw ('PIU di un .ex5 che inizia con Arena (' + $arena.Count + ', elencati qui sopra con data e SHA256): non scelgo io quale provare. Manda la foto di questa finestra: si decide quale tenere. Nessun tester e partito.')
+}
+$Ex5 = $arena[0]
+if(-not $Ex5.FullName.StartsWith($MqlExp + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)){ throw ('il .ex5 trovato (' + $Ex5.FullName + ') non sta sotto ' + $MqlExp + ': non so scrivere il percorso relativo per il .ini. Mi fermo.') }
+$RelEx5 = $Ex5.FullName.Substring($MqlExp.Length + 1)
+if($RelEx5 -match '[^\x20-\x7E]' -or $RelEx5 -match '[;="]'){ throw ('il nome del .ex5 (' + $RelEx5 + ') ha caratteri che non si scrivono in un .ini ASCII (non ASCII, ; = o virgolette): non lo rinomino (e di terzi). Manda la foto: si decide come procedere. Nessun tester e partito.') }
+$ShaEx5 = (Get-FileHash -LiteralPath $Ex5.FullName -Algorithm SHA256).Hash
+$DataEx5 = $Ex5.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss', $IC)
+Dico ('trovato : ' + $RelEx5) 'Green'
+Dico ('byte    : ' + $Ex5.Length + '   data file ' + $DataEx5) 'Green'
+Dico ('SHA256  : ' + $ShaEx5 + '   (binario di TERZI: va nel referto, NON nello zip ne in repo)') 'Green'
+if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la SONDA1 esce senza report e il giornale lo dice.' 'Yellow' }
+
+# ---------------------------------------------------------------------
+#  2. LE DUE SONDE (passate singole, Optimization=0)
+# ---------------------------------------------------------------------
+$Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
+$Work = Join-Path $env:USERPROFILE 'abtg_arena_sonda'
+New-Item -ItemType Directory -Force -Path $Work | Out-Null
+$dsk  = [Environment]::GetFolderPath('Desktop')
+$Cart = Join-Path $dsk $NOME_D
+$zip  = Join-Path $dsk ($NOME_D + '.zip')
+if(Test-Path -LiteralPath $Cart){ Move-Item -LiteralPath $Cart -Destination ($Cart + '_VECCHIA_' + $Stamp); Dico ('cartella di un giro PRECEDENTE rinominata: ' + $Cart + '_VECCHIA_' + $Stamp) 'Yellow' }
+if(Test-Path -LiteralPath $zip){ $zz = Join-Path $dsk ($NOME_D + '_VECCHIO_' + $Stamp + '.zip'); Move-Item -LiteralPath $zip -Destination $zz; Dico ('zip di un giro PRECEDENTE rinominato: ' + $zz) 'Yellow' }
+New-Item -ItemType Directory -Force -Path $Cart | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $Cart 'report'), (Join-Path $Cart 'log'), (Join-Path $Cart 'ini') | Out-Null
+
+$LogRoot = Join-Path $env:APPDATA 'MetaQuotes'
+$RadiciLog = @($LogRoot, (Join-Path $InstAttesa 'Tester'))
+$DirLog = @{}
+foreach($rad in $RadiciLog){
+  if(-not (Test-Path -LiteralPath $rad)){ continue }
+  foreach($lf in @(Get-ChildItem -Path $rad -Recurse -Filter '*.log' -File -ErrorAction SilentlyContinue)){ $DirLog[$lf.DirectoryName] = $true }
+}
+$PatLog = @((Join-Path $LogRoot 'Tester\*\Agent-*\logs'), (Join-Path $InstAttesa 'Tester\Agent-*\logs'), (Join-Path $InstAttesa 'Tester\logs'), (Join-Path $DataFolder 'Tester\logs'), (Join-Path $DataFolder 'logs'), (Join-Path (Join-Path $DataFolder 'MQL5') 'Logs'))
+function ElencoLog(){
+  $dirs = @{}
+  foreach($dk in @($DirLog.Keys)){ $dirs[$dk] = $true }
+  foreach($pt in $PatLog){ foreach($it in @(Get-Item -Path $pt -ErrorAction SilentlyContinue)){ if($it.PSIsContainer){ $dirs[$it.FullName] = $true } } }
+  $v = @()
+  foreach($dk in @($dirs.Keys)){ $v = $v + @(Get-ChildItem -LiteralPath $dk -Filter '*.log' -File -ErrorAction SilentlyContinue) }
+  return $v
+}
+function Fotografia(){
+  $h = @{}
+  foreach($f in @(ElencoLog)){ $h[$f.FullName] = $f.Length }
+  return $h
+}
+$ExpEsc = [regex]::Escape('Experts\' + $RelEx5)
+$reChiave = New-Object Text.RegularExpressions.Regex('(?i)stop ?out|no money|not enough money|margin|started with inputs|testing of|ticks data begins|bars generated|final balance|test passed|last test|history|quality|error|failed|cannot|not found|invalid|licen|dll|removed|initiali|deinit|disconnect|synchron|critical|stopped|expired')
+$reFin = New-Object Text.RegularExpressions.Regex(('(?<sim>[A-Za-z0-9_.#-]+),(?<tf>[A-Za-z0-9]+)(?:\s+\([^)]*\))?:\s+testing of ' + $ExpEsc + ' from (?<da>\d{4}\.\d\d\.\d\d) (?<ha>\d\d:\d\d) to (?<a>\d{4}\.\d\d\.\d\d) (?<hb>\d\d:\d\d)'), [Text.RegularExpressions.RegexOptions]::IgnoreCase)
+$reBarre = New-Object Text.RegularExpressions.Regex('(?<sim>[A-Za-z0-9_.#-]+),(?<tf>[A-Za-z0-9]+): (?<tick>\d+) ticks, (?<barre>\d+) bars generated')
+$reTickIni = New-Object Text.RegularExpressions.Regex('(?<sim>[A-Za-z0-9_.#-]+): ticks data begins from (?<d>\d{4}\.\d\d\.\d\d)')
+$rePassed = New-Object Text.RegularExpressions.Regex('Test passed in (?<h>\d+):(?<m>\d\d):(?<s>\d\d)(?:\.(?<ms>\d+))?')
+$reInp = New-Object Text.RegularExpressions.Regex('^\s*(?<k>[A-Za-z_][A-Za-z0-9_]*)=(?<v>.*)$')
+# l'estratto di UN giornale, letto riga per riga dalla coda dopo la fotografia: testa (3000 righe), righe chiave (al massimo 20000), coda (1000)
+function EstraiLog($f, $offset, $dest, $st){
+  $fs = [IO.File]::Open($f.FullName, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+  $testa = New-Object 'System.Collections.Generic.List[string]'
+  $coda  = New-Object 'System.Collections.Generic.Queue[string]'
+  $chiave = New-Object 'System.Collections.Generic.List[string]'
+  $n = 0; $dopoInp = 0
+  try{
+    $b = New-Object byte[] 2
+    [void]$fs.Read($b, 0, 2)
+    $enc = [Text.Encoding]::UTF8
+    if($b[0] -eq 0xFF -and $b[1] -eq 0xFE){ $enc = [Text.Encoding]::Unicode }
+    elseif($b[0] -eq 0xFE -and $b[1] -eq 0xFF){ $enc = [Text.Encoding]::BigEndianUnicode }
+    $da = [long]$offset
+    if($da -lt 2 -and $enc -ne [Text.Encoding]::UTF8){ $da = 2 }
+    [void]$fs.Seek($da, [IO.SeekOrigin]::Begin)
+    $sr = New-Object IO.StreamReader($fs, $enc, $false)
+    while($true){
+      $l = $sr.ReadLine()
+      if($null -eq $l){ break }
+      $n = $n + 1
+      if($testa.Count -lt 3000){ $testa.Add($l) }
+      $coda.Enqueue($l); if($coda.Count -gt 1000){ [void]$coda.Dequeue() }
+      $msg = $l; $ut = $l.LastIndexOf("`t"); if($ut -ge 0){ $msg = $l.Substring($ut + 1) }
+      if($dopoInp -gt 0){
+        $dopoInp = $dopoInp - 1
+        $mI = $reInp.Match($msg)
+        if($mI.Success){ $st.InputLog[$mI.Groups['k'].Value] = $mI.Groups['v'].Value.Trim(); if($chiave.Count -lt 20000){ $chiave.Add($l) }; continue }
+      }
+      if(-not $reChiave.IsMatch($l)){ continue }
+      if($chiave.Count -lt 20000){ $chiave.Add($l) }
+      if($l.IndexOf('started with inputs', [StringComparison]::OrdinalIgnoreCase) -ge 0){ $dopoInp = 80 }
+      if($l -match '(?i)stop ?out'){ $st.StopOut = $st.StopOut + 1 }
+      if($l -match '(?i)no money|not enough money'){ $st.NoMoney = $st.NoMoney + 1 }
+      $mf = $reFin.Match($l)
+      if($mf.Success){ $st.Fin[($mf.Groups['sim'].Value + '|' + $mf.Groups['tf'].Value + '|' + $mf.Groups['da'].Value + '|' + $mf.Groups['ha'].Value + '|' + $mf.Groups['a'].Value + '|' + $mf.Groups['hb'].Value)] = $true }
+      $mb = $reBarre.Match($l)
+      if($mb.Success -and $mb.Groups['sim'].Value -eq $SIMBOLO){ $st.Barre = [long]$mb.Groups['barre'].Value; $st.Tick = [long]$mb.Groups['tick'].Value }
+      $mt = $reTickIni.Match($l)
+      if($mt.Success){ $st.TickIni[$mt.Groups['sim'].Value + ' ' + $mt.Groups['d'].Value] = $true }
+      $mp = $rePassed.Match($l)
+      if($mp.Success){
+        $sec = [int]$mp.Groups['h'].Value * 3600 + [int]$mp.Groups['m'].Value * 60 + [int]$mp.Groups['s'].Value
+        if($sec -gt $st.TestSec){ $st.TestSec = $sec }
+      }
+      if($l -match '(?i)final balance'){ $st.Finale = $msg.Trim() }
+      if($st.Errori.Count -lt 40 -and $l -match '(?i)error|failed|cannot|not found|invalid|licen|dll|critical|expired|removed'){ [void]$st.Errori.Add($msg.Trim()) }
+    }
+  } finally { $fs.Close() }
+  $out = New-Object 'System.Collections.Generic.List[string]'
+  $out.Add('# giornale ' + $f.FullName + '   offset ' + $offset + '   righe lette dopo la fotografia ' + $n)
+  if($n -le 4000){
+    $out.Add('# === TUTTE LE RIGHE (' + $n + ') ===')
+    foreach($x in $testa){ $out.Add($x) }
+    if($n -gt $testa.Count){ $skip = $testa.Count - ($n - $coda.Count); $i = 0; foreach($x in $coda){ if($i -ge $skip){ $out.Add($x) }; $i = $i + 1 } }
+  } else {
+    $out.Add('# === TESTA (prime ' + $testa.Count + ' righe) ===')
+    foreach($x in $testa){ $out.Add($x) }
+    $out.Add('# === RIGHE CHIAVE (' + $chiave.Count + ', al massimo 20000, nell ordine del giornale) ===')
+    foreach($x in $chiave){ $out.Add($x) }
+    $out.Add('# === CODA (ultime ' + $coda.Count + ' righe) ===')
+    foreach($x in $coda){ $out.Add($x) }
+  }
+  Set-Content -LiteralPath $dest -Value $out -Encoding ASCII
+  return $n
+}
+function TestoIni($s, $nomeRep){
+  $r = New-Object System.Collections.ArrayList
+  foreach($x in @('[Experts]', 'AllowLiveTrading=false', 'AllowDllImport=false', '', '[Tester]', ('Expert=' + $RelEx5), ('Symbol=' + $SIMBOLO), ('Period=' + $PERIODO), ('Model=' + $MODELLO), 'Optimization=0', ('FromDate=' + $s.Da), ('ToDate=' + $s.A), 'ForwardMode=0', ('Deposit=' + $DEPOSITO), ('Currency=' + $VALUTA), ('Leverage=' + $LEVA), 'ExecutionMode=0', 'Visual=0', 'ReplaceReport=1', 'ShutdownTerminal=1', ('Report=' + $nomeRep), '', '[TesterInputs]')){ [void]$r.Add($x) }
+  foreach($ip in $INPUT_IMPOSTI){ [void]$r.Add($ip[0] + '=' + $ip[1]) }
+  return (($r -join "`r`n") + "`r`n")
+}
+
+$manifest = New-Object System.Collections.ArrayList
+[void]$manifest.Add('sonda;da;a;timeout_min;t_avvio;durata_s;test_s;stato;report;trades;profitto;pf;dd_equita;dd_saldo;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;finestra;stop_out_log;no_money_log;input_ok;enum;motivi')
+$referto = New-Object System.Collections.ArrayList
+$esiti = @{}
+$s1Passa = $false
+$s1Motivo = 'SONDA1 non girata'
+$stimaS2 = -1
+foreach($s in $SONDE){
+  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', XAUUSD M1, Modello 4, deposito 5000 EUR, leva 1:500, timeout ' + $s.Timeout + ' minuti')
+  $esiti[$s.Nome] = 'NON_LANCIATA'
+  if($s.Nome -eq 'SONDA2'){
+    if(-not $s1Passa){
+      Write-Host ('   SONDA2 NON LANCIATA: ' + $s1Motivo) -ForegroundColor Red
+      [void]$manifest.Add('SONDA2;' + $s.Da + ';' + $s.A + ';' + $s.Timeout + ';;0;;NON_LANCIATA;;;;;;;;;;;;;;;;;;' + ($s1Motivo -replace ';', ','))
+      [void]$referto.Add('SONDA2: NON LANCIATA -- ' + $s1Motivo)
+      continue
+    }
+  }
+  if((@(Get-Process -Name terminal64, metaeditor64 -ErrorAction SilentlyContinue)).Count -gt 0){
+    $why = 'un terminal64 o un metaeditor64 e VIVO prima della passata: non apro un secondo terminale'
+    Write-Host ('   ' + $s.Nome + ' NON LANCIATA: ' + $why) -ForegroundColor Red
+    @(Get-Process -Name terminal64, metaeditor64 -ErrorAction SilentlyContinue) | Select-Object Id, ProcessName, MainWindowTitle, Path | Format-Table -AutoSize | Out-String -Width 300 | Write-Host
+    [void]$manifest.Add($s.Nome + ';' + $s.Da + ';' + $s.A + ';' + $s.Timeout + ';;0;;NON_LANCIATA;;;;;;;;;;;;;;;;;;' + $why)
+    [void]$referto.Add($s.Nome + ': NON LANCIATA -- ' + $why)
+    if($s.Nome -eq 'SONDA1'){ $s1Motivo = 'la SONDA1 non e partita (' + $why + ')' }
+    continue
+  }
+  $nomeRep = 'ARENA_' + $s.Nome + '_' + $Stamp
+  $iniF = Join-Path $Work ('arena_' + $s.Nome + '_' + $Stamp + '.ini')
+  Set-Content -LiteralPath $iniF -Value (TestoIni $s $nomeRep) -Encoding ASCII -NoNewline
+  Copy-Item -LiteralPath $iniF -Destination (Join-Path (Join-Path $Cart 'ini') ('arena_' + $s.Nome + '.ini'))
+  $foto = Fotografia
+  $tRun = Get-Date
+  Dico ('avvio ' + $tRun.ToString('HH:mm:ss', $IC) + '   ini ' + $iniF + '   report atteso ' + $nomeRep + '.htm') 'Green'
+  $p = Start-Process -FilePath $Terminal -ArgumentList ('/config:"' + $iniF + '"') -PassThru
+  $scade = $tRun.AddMinutes($s.Timeout)
+  while(-not $p.HasExited -and (Get-Date) -lt $scade){ Start-Sleep -Seconds 5 }
+  $timeout = $false; $nonChiuso = $false
+  if(-not $p.HasExited){
+    $timeout = $true
+    Write-Host ('   TIMEOUT: dopo ' + $s.Timeout + ' minuti il tester e ancora aperto. Lo chiudo con CloseMainWindow (MAI Stop-Process sul terminale). Un tester interrotto NON scrive il report.') -ForegroundColor Red
+    try{ [void]$p.CloseMainWindow() }catch{ }
+    $att = 0; while(-not $p.HasExited -and $att -lt 18){ Start-Sleep -Seconds 5; $att = $att + 1 }
+    if(-not $p.HasExited){ $nonChiuso = $true; Write-Host ('   il terminale (PID ' + $p.Id + ') NON si e chiuso: la riga NON lo chiude con la forza. Chiudilo A MANO a fine riga riconoscendolo dal PID ' + $p.Id + ' e dalla cartella C:\Program Files\BCM Markets MT5 Terminal, MAI dal solo titolo.') -ForegroundColor Red }
+  }
+  Start-Sleep -Seconds 8
+  $dur = [int]((Get-Date) - $tRun).TotalSeconds
+
+  # --- i giornali: solo la coda scritta dopo la fotografia, estratto per file
+  $st = @{ StopOut = 0; NoMoney = 0; Fin = @{}; Barre = $null; Tick = $null; TickIni = @{}; TestSec = -1; Finale = ''; Errori = (New-Object System.Collections.ArrayList); InputLog = @{} }
+  $kf = 0; $righeTot = 0
+  foreach($f in @(ElencoLog)){
+    $off = 0; if($foto.ContainsKey($f.FullName)){ $off = [long]$foto[$f.FullName] }
+    if($f.Length -le $off){ continue }
+    $kf = $kf + 1
+    $nomeL = $s.Nome + '_' + $kf.ToString('00') + '_' + (Split-Path -Leaf $f.DirectoryName) + '_' + $f.Name + '.txt'
+    try{ $righeTot = $righeTot + (EstraiLog $f $off (Join-Path (Join-Path $Cart 'log') $nomeL) $st) }catch{ Dico ('giornale ' + $f.FullName + ' NON letto: ' + $_.Exception.Message) 'Yellow' }
+  }
+  $motivi = New-Object System.Collections.ArrayList
+  if($timeout){ [void]$motivi.Add('timeout di ' + $s.Timeout + ' minuti (report non scritto da un tester interrotto)') }
+  if($nonChiuso){ [void]$motivi.Add('terminale PID ' + $p.Id + ' NON chiuso: da chiudere A MANO per PID e cartella') }
+  $finest = 'non letta'
+  if($st.Fin.Count -ge 1){
+    $kk = @($st.Fin.Keys)
+    $giuste = @($kk | Where-Object { $_ -eq ($SIMBOLO + '|' + $PERIODO + '|' + $s.Da + '|00:00|' + $s.A + '|00:00') })
+    if($giuste.Count -eq $kk.Count){ $finest = $s.Da + '-' + $s.A } else { $finest = 'DIVERSA: ' + ($kk -join ' / '); [void]$motivi.Add('finestra girata ' + ($kk -join ' / ') + ' invece di ' + $SIMBOLO + ',' + $PERIODO + ' ' + $s.Da + '-' + $s.A) }
+  }
+  if($null -ne $st.Barre){
+    if($st.Barre -ge $TETTO_BARRE){ [void]$motivi.Add('barre generate ' + $st.Barre + ' >= ' + $TETTO_BARRE + ': finestra TRONCATA dal tetto del tester') }
+    elseif($st.Barre -ge $AVVISO_BARRE){ Dico ('ATTENZIONE: barre generate ' + $st.Barre + ' fra ' + $AVVISO_BARRE + ' e ' + $TETTO_BARRE + ': vicino al tetto') 'Yellow' }
+  }
+  $tickIniTxt = (($st.TickIni.Keys | Sort-Object) -join ' / ')
+  $okTick = $false; $nTickSim = 0
+  foreach($tk in @($st.TickIni.Keys)){ $pz2 = $tk -split ' '; if($pz2[0] -eq $SIMBOLO){ $nTickSim = $nTickSim + 1; if([string]::CompareOrdinal($pz2[1], $s.Da) -le 0){ $okTick = $true } } }
+  if($nTickSim -gt 0 -and -not $okTick){ [void]$motivi.Add('ticks data begins from ' + $tickIniTxt + ': DOPO l inizio della finestra ' + $s.Da + ' (prima di quella data MT5 GENERA i tick: non sono reali)') }
+
+  # --- il report
+  $rep = $null
+  foreach($rad in @($DataFolder, $InstAttesa, $Work, (Join-Path (Join-Path $DataFolder 'MQL5') 'Files'), $dsk)){
+    if(-not (Test-Path -LiteralPath $rad)){ continue }
+    $cr = @(Get-ChildItem -LiteralPath $rad -Filter ($nomeRep + '*.htm*') -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $tRun } | Sort-Object LastWriteTime -Descending)
+    if($cr.Count -gt 0){
+      $rep = $cr[0]
+      foreach($im in @(Get-ChildItem -LiteralPath $rad -Filter ($nomeRep + '*.png') -File -ErrorAction SilentlyContinue)){ Copy-Item -LiteralPath $im.FullName -Destination (Join-Path (Join-Path $Cart 'report') $im.Name) -Force }
+      break
+    }
+  }
+  $lr = $null; $inputOk = 'no'; $enumTxt = ''
+  if($null -eq $rep){ [void]$motivi.Add('report .htm NON trovato (Report=' + $nomeRep + '): senza report non c e misura. Se il giornale dice che l EA non e partito (licenza, DLL, simbolo), e una MISURA MANCANTE, non un errore') }
+  else {
+    Copy-Item -LiteralPath $rep.FullName -Destination (Join-Path (Join-Path $Cart 'report') $rep.Name) -Force
+    $lr = LeggiReport $rep.FullName
+    if(-not $lr.Ok){ [void]$motivi.Add('report illeggibile: ' + $lr.Motivo) }
+    else {
+      if($lr.NExpert -ne 1){ [void]$motivi.Add('il report ha ' + $lr.NExpert + ' celle Expert: un report con due EA non e questa sonda') }
+      if($null -eq $lr.Expert -or $lr.Expert -notlike '*Arena*'){ [void]$motivi.Add('il report e di un altro EA (' + $lr.Expert + ')') }
+      if($lr.Simbolo -ne $SIMBOLO){ [void]$motivi.Add('il report e di un altro simbolo (' + $lr.Simbolo + ')') }
+      if($null -ne $lr.Periodo){
+        $mpd = [regex]::Match($lr.Periodo, '^' + $PERIODO + '\((\d{4}\.\d\d\.\d\d)-(\d{4}\.\d\d\.\d\d)\)')
+        $okP = $false
+        if($mpd.Success -and $mpd.Groups[1].Value -eq $s.Da){
+          $dA = [datetime]::ParseExact($mpd.Groups[2].Value, 'yyyy.MM.dd', $IC); $dB = [datetime]::ParseExact($s.A, 'yyyy.MM.dd', $IC)
+          if([math]::Abs(($dA - $dB).TotalDays) -le 1){ $okP = $true }
+        }
+        if(-not $okP){ [void]$motivi.Add('il periodo del report e "' + $lr.Periodo + '" invece di ' + $PERIODO + ' (' + $s.Da + ' - ' + $s.A + ')') }
+      } else { [void]$motivi.Add('periodo del report non letto') }
+      if($lr.Qualita -notmatch '^100%'){ [void]$motivi.Add('qualita dello storico "' + $lr.Qualita + '" invece di 100% ticks reali') }
+      $depN = $null; if($null -ne $lr.Deposito){ $dd0 = 0.0; if([double]::TryParse($lr.Deposito, [Globalization.NumberStyles]::Float, $IC, [ref]$dd0)){ $depN = $dd0 } }
+      if($null -eq $depN -or [math]::Abs($depN - $DEPOSITO) -gt 0.005){ [void]$motivi.Add('deposito del report "' + $lr.Deposito + '" invece di ' + $DEPOSITO + ': il .ini non e stato applicato come dichiarato') }
+      if($lr.Leva -ne ('1:' + $LEVA)){ [void]$motivi.Add('leva del report "' + $lr.Leva + '" invece di 1:' + $LEVA) }
+      $diff = @()
+      foreach($ip in $INPUT_IMPOSTI){ $vv = $null; if($lr.Input.ContainsKey($ip[0])){ $vv = $lr.Input[$ip[0]] }; $dx = InputDiverso $ip[0] $ip[1] $ip[2] $vv; if($dx -ne ''){ $diff = $diff + @($dx) } }
+      if($diff.Count -eq 0){ $inputOk = 'si' } else { [void]$motivi.Add('INPUT NON APPLICATI come dichiarato (' + $diff.Count + '): ' + (($diff | Select-Object -First 6) -join ' ## ')) }
+      if($lr.Trades -eq 0){ [void]$motivi.Add('ZERO operazioni nel report (attesa A non verificata: e una MISURA MANCANTE -- l EA nel tester non opera o rifiuta il tester -- non un errore della riga)') }
+    }
+  }
+  $enumTxt = (@($INPUT_ENUM | ForEach-Object { $ev = 'NON NEL REPORT'; if($null -ne $lr -and $lr.Input.ContainsKey($_)){ $ev = $lr.Input[$_] }; $el = 'NON NEL GIORNALE'; if($st.InputLog.ContainsKey($_)){ $el = $st.InputLog[$_] }; ($_ + ' report=' + $ev + ' giornale=' + $el) }) -join ' | ')
+  $stato = 'OK'
+  if($motivi.Count -gt 0){ $stato = 'KO' }
+  $esiti[$s.Nome] = $stato
+  $tTxt = ''; $pTxt = ''; $pfTxt = ''; $deTxt = ''; $dbTxt = ''; $qTxt = ''; $brTxt = ''; $tkTxt = ''
+  if($null -ne $lr -and $lr.Ok){ $tTxt = [string]$lr.Trades; $pTxt = $lr.Profitto.ToString('0.00', $IC); $pfTxt = $lr.PF; $deTxt = $lr.DDEq; $dbTxt = $lr.DDBil; $qTxt = $lr.Qualita; $brTxt = $lr.Barre; $tkTxt = $lr.Ticks }
+  $bgTxt = ''; if($null -ne $st.Barre){ $bgTxt = [string]$st.Barre }
+  $tgTxt = ''; if($null -ne $st.Tick){ $tgTxt = [string]$st.Tick }
+  $repNome = ''; if($null -ne $rep){ $repNome = $rep.Name }
+  [void]$manifest.Add(($s.Nome + ';' + $s.Da + ';' + $s.A + ';' + $s.Timeout + ';' + $tRun.ToString('yyyy-MM-dd HH:mm:ss', $IC) + ';' + $dur + ';' + $st.TestSec + ';' + $stato + ';' + $repNome + ';' + $tTxt + ';' + $pTxt + ';' + $pfTxt + ';' + $deTxt + ';' + $dbTxt + ';' + $qTxt + ';' + $brTxt + ';' + $tkTxt + ';' + $bgTxt + ';' + $tgTxt + ';' + $tickIniTxt + ';' + $finest + ';' + $st.StopOut + ';' + $st.NoMoney + ';' + $inputOk + ';' + ($enumTxt -replace ';', ',') + ';' + (($motivi -join ' | ') -replace ';', ',')))
+  [void]$referto.Add($s.Nome + ' (' + $s.Cosa + ')  ' + $s.Da + ' -> ' + $s.A + '   STATO ' + $stato)
+  [void]$referto.Add('   durata ' + $dur + ' s (orologio), test ' + $st.TestSec + ' s (riga Test passed del giornale; -1 = non letta)   giornali letti ' + $kf + ', righe ' + $righeTot)
+  [void]$referto.Add('   report ' + $repNome + '   operazioni ' + $tTxt + '   netto ' + $pTxt + '   PF ' + $pfTxt + '   DD equita ' + $deTxt + '   DD saldo ' + $dbTxt)
+  [void]$referto.Add('   qualita ' + $qTxt + '   barre report ' + $brTxt + '   ticks report ' + $tkTxt + '   barre generate ' + $bgTxt + '   ticks generati ' + $tgTxt + '   inizio tick ' + $tickIniTxt + '   finestra ' + $finest)
+  [void]$referto.Add('   input imposti confermati dal report: ' + $inputOk + '   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): ' + $enumTxt)
+  if($null -ne $lr -and $lr.Ok){ [void]$referto.Add('   TUTTI gli input del report: ' + (@($lr.InputOrd | ForEach-Object { $_ + '=' + $lr.Input[$_] }) -join ' ; ')) }
+  if($st.InputLog.Count -gt 0){ [void]$referto.Add('   input stampati dal giornale (dopo started with inputs): ' + (@($st.InputLog.Keys | Sort-Object | ForEach-Object { $_ + '=' + $st.InputLog[$_] }) -join ' ; ')) } else { [void]$referto.Add('   input stampati dal giornale: NESSUNA riga Nome=valore letta dopo started with inputs (formato [NON VERIFICATO]: fa fede il report)') }
+  [void]$referto.Add('   righe stop out nei giornali ' + $st.StopOut + ', no money ' + $st.NoMoney + ' (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)')
+  if($st.Finale -ne ''){ [void]$referto.Add('   ' + $st.Finale) }
+  foreach($x in @($st.Errori | Select-Object -First 15)){ [void]$referto.Add('   giornale: ' + $x) }
+  foreach($x in $motivi){ [void]$referto.Add('   - ' + $x) }
+  $col = 'Green'; if($stato -ne 'OK'){ $col = 'Red' }
+  Write-Host ('   ' + $s.Nome + '  ' + $stato + '   ' + $dur + ' s   operazioni ' + $tTxt + '   netto ' + $pTxt + '   PF ' + $pfTxt + '   DD equita ' + $deTxt + '   stop out nel giornale ' + $st.StopOut) -ForegroundColor $col
+  Dico ('ENUM non imposti, valore usato dal tester: ' + $enumTxt) 'Gray'
+  foreach($x in $motivi){ Write-Host ('        - ' + $x) -ForegroundColor Red }
+  if($stato -ne 'OK'){ foreach($x in @($st.Errori | Select-Object -First 5)){ Write-Host ('        giornale: ' + $x) -ForegroundColor DarkYellow } }
+
+  if($s.Nome -eq 'SONDA1'){
+    # la SONDA2 parte SOLO con: report leggibile, >= 1 operazione, input imposti confermati, nessun timeout, e la stima di durata dentro il suo timeout
+    if($timeout -or $nonChiuso){ $s1Motivo = 'la SONDA1 e andata in timeout: con la SONDA2 (65 volte piu lunga) il timeout sarebbe certo' }
+    elseif($null -eq $lr -or -not $lr.Ok){ $s1Motivo = 'la SONDA1 non ha scritto un report leggibile' }
+    elseif($lr.Trades -lt 1){ $s1Motivo = 'la SONDA1 ha ZERO operazioni (attesa A non verificata): si guarda il giornale prima di spendere ore' }
+    elseif($inputOk -ne 'si'){ $s1Motivo = 'gli input imposti NON sono confermati dal report della SONDA1' }
+    else {
+      $base = $st.TestSec; $fonte = 'riga Test passed'
+      if($base -lt 0){ $base = $dur; $fonte = 'orologio della passata (riga Test passed non letta)' }
+      $stimaS2 = [int][math]::Ceiling($GIORNI_SONDA2 * $base / 60.0) + 3
+      $msgS = ('SONDA1: ' + $base + ' s di test per 1 giorno (' + $fonte + '). La SONDA2 copre circa ' + $GIORNI_SONDA2 + ' giorni di borsa: stima circa ' + $stimaS2 + ' minuti [STIMA NON MISURATA: il 28/09 puo essere piu lento o piu veloce di un giorno medio], timeout ' + $TimeoutSonda2Min + ' minuti.')
+      Dico $msgS 'Yellow'
+      [void]$referto.Add('   ' + $msgS)
+      if($stimaS2 -gt $TimeoutSonda2Min){ $s1Motivo = 'la stima della SONDA2 (' + $stimaS2 + ' minuti) supera il suo timeout (' + $TimeoutSonda2Min + '): un tester interrotto non scrive il report, sarebbero ore spese a vuoto. Decisione aperta: spezzare la SONDA2 in tranche mensili' }
+      else { $s1Passa = $true; $s1Motivo = '' }
+    }
+  }
+}
+
+# ---------------------------------------------------------------------
+#  3. RACCOLTA
+# ---------------------------------------------------------------------
+Titolo '3 - RACCOLTA'
+$testa = @(
+  ('ARENA TESTER SONDA -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_SONDA_v1, pin ' + $Pin),
+  ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
+  ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip)'),
+  ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (ASSUNZIONE: leva del demo NON VISTA), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
+  ('input imposti (14, valori del demo del 13/10): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ')),
+  ('input NON imposti (enum, ordinale sconosciuto): ' + ($INPUT_ENUM -join ', ') + ' -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: il valore usato e quello del report, riga ENUM qui sotto'),
+  ('esiti: SONDA1 ' + $esiti['SONDA1'] + '   SONDA2 ' + $esiti['SONDA2']),
+  'ATTENZIONE: la SONDA1 parte a conto vuoto il LUNEDI 28/09: un cesto aperto il venerdi 25/09 (InpFridayGapProtection=false) e il suo gap del weekend NON ci sono. Li vede solo la SONDA2.',
+  ''
+)
+(($testa + $referto + @('', 'COME SI LEGGE: python3 backtest_pipeline/leggi_arena_tester.py ARENA_TESTER_SONDA.zip. Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_ARENA_SONDA.txt') -Encoding ASCII
+(($manifest) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'MANIFEST_ARENA.csv') -Encoding ASCII
+Compress-Archive -Path (Join-Path $Cart '*') -DestinationPath $zip
+Write-Host ''
+foreach($x in $testa){ if($x -ne ''){ Write-Host ('   ' + $x) } }
+Write-Host ''
+Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
+Write-Host 'FILE ATTESI NELLO ZIP: REFERTO_ARENA_SONDA.txt + MANIFEST_ARENA.csv + ini\arena_SONDA1.ini (+ ini\arena_SONDA2.ini se lanciata) + report\ARENA_SONDA1_<data>.htm (+ SONDA2, + le .png) se il tester li ha scritti + log\SONDA1_*.txt (+ log\SONDA2_*.txt)' -ForegroundColor Gray
+try{ $Mutex.ReleaseMutex() }catch{ }
+if($esiti['SONDA1'] -eq 'OK' -and $esiti['SONDA2'] -eq 'OK'){ Write-Host 'ESITO ARENA SONDA: DUE SONDE OK (rc 0)' -ForegroundColor Green; exit 0 }
+Write-Host 'ESITO ARENA SONDA: almeno una sonda KO o NON LANCIATA (rc 3): lo zip esce lo stesso, il REFERTO e il MANIFEST dicono quale e perche.' -ForegroundColor Red
+exit 3
