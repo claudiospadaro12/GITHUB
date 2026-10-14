@@ -1,0 +1,75 @@
+----------------------------------------------------------------------------------------------------------------------
+REFERTO dello script (REFERTO_ARENA_SONDA.txt) -- righe chiave:
+  ARENA TESTER SONDA -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_SONDA_v3, pin 1f0cdf62e950162080a76eb7f406a605c9ab7fd7
+  data: 2026-10-14 22:17:37   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+  EX5: Market\Arena Nexus Grid Smart XAU MT5.ex5   byte 200368   data file 2026-10-14 20:53:53   SHA256 B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+  input NON imposti (enum, ordinale sconosciuto): InpTradeMode, InpGoldPulseTheme -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: il valore usato e quello del report, riga ENUM qui sotto
+  esiti: SONDA1 KO   SONDA2 NON_LANCIATA
+  ATTENZIONE: la SONDA1 parte a conto vuoto il LUNEDI 28/09: un cesto aperto il venerdi 25/09 (InpFridayGapProtection=false) e il suo gap del weekend NON ci sono. Li vede solo la SONDA2.
+  SONDA1 (fumo: il solo 28/09/2026)  2026.09.28 -> 2026.09.29   STATO KO
+  EX5_DOPO SONDA1: B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A UGUALE
+  input imposti confermati dal report: si   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): InpTradeMode report=0 giornale=0 | InpGoldPulseTheme report=0 giornale=0
+  - leva del report "1:100" invece di 1:500
+  SONDA1: 467 s di test per 1 giorno (riga Test passed). La SONDA2 copre circa 65 giorni di borsa: stima circa 509 minuti [STIMA NON MISURATA: il 28/09 puo essere piu lento o piu veloce di un giorno medio], timeout 240 minuti.
+  SONDA2: NON LANCIATA -- la stima della SONDA2 (509 minuti) supera il suo timeout (240): un tester interrotto non scrive il report, sarebbero ore spese a vuoto. Decisione aperta: spezzare la SONDA2 in tranche mensili
+PROVENIENZA dal REFERTO: marcatore MARCATORE_ARENA_TESTER_SONDA_v3 | pin 1f0cdf62e950162080a76eb7f406a605c9ab7fd7 | data 2026-10-14 | pin passati dal cancello: 1f0cdf62e950162080a76eb7f406a605c9ab7fd7
+impronta del .ex5 dopo SONDA1: UGUALE
+GIORNALE SONDA1 (10 estratti): input stampati dopo 'started with inputs': InpS03FundedPrefix=true, InpEntryPhaseSpacingR33=true, InpMagicNumber=888, InpBaseLot=0.01, InpTradeMode=0, InpFridayGapProtection=false, InpShowDashboard=true, InpGoldPulseTheme=0, InpCounterFlowRail=true, InpCounterFlowTriggerPrice=0.2, InpCounterFlowLotMultiplier=1.0, InpCounterFlowMaxLivePositions=1, InpCounterFlowRearmDelayMilliseconds=0, InpDeadZoneReactionRail=true, InpDeadZoneReactionTriggerPrice=0.2, InpDeadZoneReactionRearmDelayMilliseconds=0
+  enum nel giornale: InpTradeMode=0, InpGoldPulseTheme=0 | righe distinte di stop out 7, di no money 0
+    stop out: 2026.09.28 14:31:00   position stop out triggered at 49.40% [#122 buy 0.04 XAUUSD 4251.43]
+    stop out: 2026.09.28 14:31:00   position stop out triggered at 49.40% [#130 buy 0.05 XAUUSD 4231.45]
+    stop out: 2026.09.28 14:31:00   position stop out triggered at 49.40% [#279 buy 0.08 XAUUSD 4227.37]
+    giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+    giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+    giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+    giornale: custom indicator DIEGO_Nasdaq_Bands_Indicator (1) (GBPUSD,H1) removed
+    giornale: 2026.09.28 00:40:26   failed modify #29 sell 0.01 XAUUSD sl: 0.00, tp: 4259.72 -> sl: 4260.40, tp: 4259.72 [Modification failed due to order or position being close to market]
+    giornale: 2026.09.28 00:40:26   Arena Nexus Grid Smart XAU MT5: apply rebuilt common positive trailing failed | retcode=10029 (frozen) | last_error=4756
+    giornale: 2026.09.28 00:40:26   failed modify #30 sell 0.01 XAUUSD sl: 0.00, tp: 4259.72 -> sl: 4260.40, tp: 4259.72 [Modification failed due to order or position being close to market]
+    giornale: 2026.09.28 00:40:27   failed modify #29 sell 0.01 XAUUSD sl: 0.00, tp: 4259.72 -> sl: 4260.36, tp: 4259.72 [Modification failed due to order or position being close to market]
+======================================================================================================================
+SONDA1  --  report/ARENA_SONDA1_20261014_220918.htm
+======================================================================================================================
+Expert Arena Nexus Grid Smart XAU MT5 | simbolo XAUUSD | periodo M1(2026.09.28-2026.09.29) | qualita 100%ticksreali | barre 872 | tick 272740 | deposito 5000.00 | leva 1:100
+ATTENZIONE: leva 1:100 invece di 1:500.
+
+INPUT (dal report, 'Dati in ingresso': quelli che il tester ha USATO)
+  imposti (14): TUTTI come dichiarato
+  enum NON imposti, valore usato dal tester: InpTradeMode=0, InpGoldPulseTheme=0
+
+RISULTATO (dal report)
+  operazioni 111 | netto -3351.18 EUR | PF 0.04 | DD equita' massimo 3362.84 EUR (67.10%) | DD saldo massimo 3465.35 EUR (67.76%)
+  deal di trading 222 (ingressi 111, uscite 111), posizioni aperte a fine test 0 (il tester le chiude da se' con 'end of test': di norma 0)
+  STOP OUT: 6 deal col commento di stop out, il primo il 2026-09-28 14:31:00 (so 49.40%). DA QUI il conto del tester e' MORTO: i giorni dopo non misurano l'EA.
+
+COMMISSIONI addebitate dal tester: -5.94 EUR su 3.06 lotti di deal -> 3.88 EUR per lotto a giro (atteso 3.90 [NON VERIFICATO]; demo 4.00 [LETTO nel conto]; tester BCM oro 3.42 [MISURATO R1A 10/10])
+  a 0,01 lotti la commissione di un deal e' arrotondata al centesimo (1,71 x 0,01 = 0,0171 -> 0,02): il valore per lotto qui sopra e' distorto verso l'ALTO; il totale in EUR e' quello vero.
+PREZZO ESATTO degli ingressi da ordine stop/limit: 111 ingressi, 15 esattamente al prezzo dell'ordine (13.5%), 96 a prezzo PEGGIORE (max 12.84 USD, media dei peggiori 0.439), 0 migliori. Ingressi a mercato o senza ordine leggibile: 0.
+  nel tester (ExecutionMode=0) non c'e' latenza: uno scarto > 0 e' un salto fra due tick, non slippage di esecuzione. Demo 14/10: 731/731 esatti [LETTO].
+
+ACCOPPIAMENTO in -> out (ricostruito: il report non ha l'identificativo di posizione): univoci 56, per insieme (cesto intero) 33, stesso cesto 0, AMBIGUI 22 (+ 0 in grappoli ambigui), parziali 0, senza volume uguale 0, non accoppiati 0 -> quota incerta 19.8% delle uscite
+  oltre il 5%: i netti PER CESTO qui sotto sono APPROSSIMATI (i netti per giorno e i lotti vivi NO).
+  k = 87.99 EUR per 1,0 di prezzo x 1 lotto (mediana di 80 posizioni accoppiate). DD d'equita' STIMATO agli istanti dei deal: 3006.38 EUR contro 3362.84 del report (la stima deve stare SOTTO o vicino al vero: e' un limite inferiore).
+
+PER GIORNO (data server). netto = realizzato (deal del giorno, commissioni comprese); picco lotti vivi = buy + sell lordi; perdite rispetto al saldo d'inizio giorno; equita' STIMATA = limite inferiore della perdita vera
+  giorno      ingr lotti_in      netto   picco    buy   sell  prof  saldo_min- equita_min- flott_peggio   %dep
+  2026-09-28   111     1.53   -3351.18    0.42   0.38   0.09    10    -3351.18    -2996.41      -492.42  -59.9  <-- 28/09  (stop out)
+
+CESTI DI RECUPERO [R] (CID, lato) -- APPROSSIMATI: 23 cesti, netto [R] -3286.73 EUR, profondita' massima 10, peggior cesto -3357.08, aperti a fine test 0
+  prof.   cesti       netto  somma lotti (max) vivi insieme (max) in perdita  durata h
+  1          14       24.00               0.02               0.02          0       0.1
+  2           6       25.24               0.04               0.04          0       0.5
+  3-4         2       21.11               0.08               0.08          0       0.3
+  5-9         0
+  >=10        1    -3357.08               0.37               0.37          1      13.6
+  CONCENTRAZIONE: cesti >= 10 livelli = -3357.08 (102.1% del netto [R]); >= 5 livelli = -3357.08 (102.1%); 3 cesti migliori = 30.80 (-0.9%). Demo: 24,5% il 13/10 e 50,8% il 14/10 dai >= 10 [LETTO].
+  modulo [F] CF       posizioni     61 netto     -67.67 PF 0.42
+  modulo [F] FinlabX  posizioni      7 netto       3.22 PF 2.79
+
+28/09/2026, ORDINE DI GRANDEZZA: netto realizzato -3351.18 EUR (-67.0% del deposito), ingressi 111, lotti d'ingresso 1.53, picco lotti vivi 0.42, profondita' massima viva 10, cesti [R] attraversati 23 (netto -3286.73)
+
+(A) NESSUN verdetto: il giro NON e' quello dichiarato -> leva 1:100 invece di 1:500
+(B) NESSUN verdetto: il giro NON e' quello dichiarato -> leva 1:100 invece di 1:500
+(C) NESSUN verdetto: il giro NON e' quello dichiarato -> leva 1:100 invece di 1:500
+
+COSA NON SI PUO' CONCLUDERE: un trimestre = un regime; tester senza slippage ne' latenza (ExecutionMode=0); feed BCM, non quello dell'utente; enum al valore del tester (sopra); nessun merito (n per regime, e la natura griglia + scala di lotti + recupero senza SL iniziale resta fuori dall'imbuto prop).
