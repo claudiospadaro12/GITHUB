@@ -1,6 +1,6 @@
 # 🧪 ARENA NEL NOSTRO STRATEGY TESTER — scheda della PRIMA SONDA (14/10/2026)
 
-> **Stato: BOZZA, in cancello.** Riga col pin di 40 zeri (segnaposto: la riga si rifiuta di partire), strato 2 (`controllo-preventivo`) NON ancora eseguito. Niente di questo è partito.
+> **Stato: BOZZA v2, in cancello.** Lo strato 2 (`controllo-preventivo`, 14/10) ha trovato e corretto tre difetti (classi 1437, 1438, 1439): lo script e' passato a **v2** (impronta del `.ex5` ricontrollata dopo ogni passata), quindi la riga e' tornata col **pin di zeri** (si rifiuta di partire) finche' lo script v2 non e' committato e ripinnato; il lettore sospende i verdetti finche' `PIN_PASSATI` non contiene quel pin. Niente di questo e' partito.
 > Richiesta di Claudio (14/10): _«provare l'Arena vera nel nostro Strategy Tester... Procedi»_.
 
 ## 1. Cosa misura, e perché
@@ -13,9 +13,9 @@
 ## 2. File (worktree, NON committati) e SHA256
 | file | SHA256 |
 |---|---|
-| `backtest_pipeline/righe/ARENA_TESTER_SONDA.ps1` (marcatore `MARCATORE_ARENA_TESTER_SONDA_v1`) | `2043EA4963D3C573A328B79D68088B8078E017E3005E59393302074444EDEDC0` |
-| `backtest_pipeline/righe/RIGA_LANCIA_ARENA_TESTER_SONDA.txt` (BOZZA, pin di zeri: lo SHA cambia quando il pin vero entra) | `E3CAC280106095322B4240FF722BF07B7A40AA84E0A901980A7B9F720895E2B9` |
-| `backtest_pipeline/leggi_arena_tester.py` (lettore, sola lettura) | `76AC8EAF546226361473756C95791A8FEB0A93E8FDB1EEE03C7BD7F672BAF5C4` |
+| `backtest_pipeline/righe/ARENA_TESTER_SONDA.ps1` (marcatore `MARCATORE_ARENA_TESTER_SONDA_v2`) | `38103274C94220BC098AD1675AEF8036875C02BF3105B8D0E75687602C2B5C76` |
+| `backtest_pipeline/righe/RIGA_LANCIA_ARENA_TESTER_SONDA.txt` (BOZZA v2, pin di zeri: lo SHA cambia quando il pin vero entra) | `33E9F2B1F1205E0816E6CA563D3688ACCAC872618AA2CF7C70E992EDCD833A44` |
+| `backtest_pipeline/leggi_arena_tester.py` (lettore, sola lettura; `PIN_PASSATI` da riempire col pin della riga v2) | vedi il referto del cancello (cambia quando entra il pin) |
 
 ## 3. ✋ I passi a mano di Claudio (PRIMA della riga)
 **Bersaglio: 🪟 terminale MT5 `50503392` nella cartella `C:\Program Files\BCM Markets MT5 Terminal` sul PC di backtest `DESKTOP-H4D7CAJ`. NON il VPS, NON il reale `10105439`, NON `C:\MT5_Backtest`, NON `C:\FundedNext_Manuale`.** Prima di toccarlo, la finestra si riconosce da una riga stampata, non a occhio (🖥️ PowerShell sul PC di backtest): `Get-Process terminal64 | select Id, MainWindowTitle, Path`.

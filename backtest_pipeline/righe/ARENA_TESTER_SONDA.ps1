@@ -1,5 +1,8 @@
 # =====================================================================
-#  MARCATORE_ARENA_TESTER_SONDA_v1
+#  MARCATORE_ARENA_TESTER_SONDA_v2
+#  v2 (14/10/2026, controllo-preventivo): l'impronta SHA256 del .ex5 si RICONTROLLA dopo ogni passata (il terminale, aprendosi, puo'
+#  aggiornare un prodotto del Market: senza ricontrollo il referto attribuirebbe i numeri a un binario che non e' quello provato).
+#  Se cambia o sparisce: la passata e' KO, la SONDA2 non parte, il referto scrive EX5_DOPO ... DIVERSO e il lettore sospende i verdetti.
 #  ARENA_TESTER_SONDA.ps1 -- PRIMA MISURA (una SONDA) dell'EA di TERZI 'Arena Nexus Grid Smart XAU MT5' (versione 1.20 vista sul demo
 #  50503392 il 13/10/2026) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal.
 #
@@ -472,6 +475,15 @@ foreach($s in $SONDE){
   $motivi = New-Object System.Collections.ArrayList
   if($timeout){ [void]$motivi.Add('timeout di ' + $s.Timeout + ' minuti (report non scritto da un tester interrotto)') }
   if($nonChiuso){ [void]$motivi.Add('terminale PID ' + $p.Id + ' NON chiuso: da chiudere A MANO per PID e cartella') }
+  # v2: il binario provato e' quello dell'impronta? (il terminale, aprendosi, puo' aggiornare un prodotto del Market)
+  $shaDopo = ''
+  try{ $shaDopo = [string](Get-FileHash -LiteralPath $Ex5.FullName -Algorithm SHA256).Hash }catch{ $shaDopo = '' }
+  $ex5Cambiato = $false
+  if($shaDopo -ne $ShaEx5){
+    $ex5Cambiato = $true
+    $vistoDopo = $shaDopo; if($vistoDopo -eq ''){ $vistoDopo = 'FILE ASSENTE O ILLEGGIBILE' }
+    [void]$motivi.Add('il .ex5 e CAMBIATO durante la passata (SHA256 prima ' + $ShaEx5 + ', dopo ' + $vistoDopo + '): il binario provato NON e quello del referto (aggiornamento dal Market?)')
+  }
   $finest = 'non letta'
   if($st.Fin.Count -ge 1){
     $kk = @($st.Fin.Keys)
@@ -538,6 +550,9 @@ foreach($s in $SONDE){
   $repNome = ''; if($null -ne $rep){ $repNome = $rep.Name }
   [void]$manifest.Add(($s.Nome + ';' + $s.Da + ';' + $s.A + ';' + $s.Timeout + ';' + $tRun.ToString('yyyy-MM-dd HH:mm:ss', $IC) + ';' + $dur + ';' + $st.TestSec + ';' + $stato + ';' + $repNome + ';' + $tTxt + ';' + $pTxt + ';' + $pfTxt + ';' + $deTxt + ';' + $dbTxt + ';' + $qTxt + ';' + $brTxt + ';' + $tkTxt + ';' + $bgTxt + ';' + $tgTxt + ';' + $tickIniTxt + ';' + $finest + ';' + $st.StopOut + ';' + $st.NoMoney + ';' + $inputOk + ';' + ($enumTxt -replace ';', ',') + ';' + (($motivi -join ' | ') -replace ';', ',')))
   [void]$referto.Add($s.Nome + ' (' + $s.Cosa + ')  ' + $s.Da + ' -> ' + $s.A + '   STATO ' + $stato)
+  $esitoEx5 = 'UGUALE'; if($ex5Cambiato){ $esitoEx5 = 'DIVERSO' }
+  $shaTxt = $shaDopo; if($shaTxt -eq ''){ $shaTxt = 'ASSENTE' }
+  [void]$referto.Add('EX5_DOPO ' + $s.Nome + ': ' + $shaTxt + ' ' + $esitoEx5)
   [void]$referto.Add('   durata ' + $dur + ' s (orologio), test ' + $st.TestSec + ' s (riga Test passed del giornale; -1 = non letta)   giornali letti ' + $kf + ', righe ' + $righeTot)
   [void]$referto.Add('   report ' + $repNome + '   operazioni ' + $tTxt + '   netto ' + $pTxt + '   PF ' + $pfTxt + '   DD equita ' + $deTxt + '   DD saldo ' + $dbTxt)
   [void]$referto.Add('   qualita ' + $qTxt + '   barre report ' + $brTxt + '   ticks report ' + $tkTxt + '   barre generate ' + $bgTxt + '   ticks generati ' + $tgTxt + '   inizio tick ' + $tickIniTxt + '   finestra ' + $finest)
@@ -556,7 +571,8 @@ foreach($s in $SONDE){
 
   if($s.Nome -eq 'SONDA1'){
     # la SONDA2 parte SOLO con: report leggibile, >= 1 operazione, input imposti confermati, nessun timeout, e la stima di durata dentro il suo timeout
-    if($timeout -or $nonChiuso){ $s1Motivo = 'la SONDA1 e andata in timeout: con la SONDA2 (65 volte piu lunga) il timeout sarebbe certo' }
+    if($ex5Cambiato){ $s1Motivo = 'il .ex5 dell Arena e CAMBIATO (o sparito) durante la SONDA1: non si spendono ore su un binario diverso da quello dell impronta' }
+    elseif($timeout -or $nonChiuso){ $s1Motivo = 'la SONDA1 e andata in timeout: con la SONDA2 (65 volte piu lunga) il timeout sarebbe certo' }
     elseif($null -eq $lr -or -not $lr.Ok){ $s1Motivo = 'la SONDA1 non ha scritto un report leggibile' }
     elseif($lr.Trades -lt 1){ $s1Motivo = 'la SONDA1 ha ZERO operazioni (attesa A non verificata): si guarda il giornale prima di spendere ore' }
     elseif($inputOk -ne 'si'){ $s1Motivo = 'gli input imposti NON sono confermati dal report della SONDA1' }
@@ -578,9 +594,9 @@ foreach($s in $SONDE){
 # ---------------------------------------------------------------------
 Titolo '3 - RACCOLTA'
 $testa = @(
-  ('ARENA TESTER SONDA -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_SONDA_v1, pin ' + $Pin),
+  ('ARENA TESTER SONDA -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_SONDA_v2, pin ' + $Pin),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
-  ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip)'),
+  ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (ASSUNZIONE: leva del demo NON VISTA), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
   ('input imposti (14, valori del demo del 13/10): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ')),
   ('input NON imposti (enum, ordinale sconosciuto): ' + ($INPUT_ENUM -join ', ') + ' -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: il valore usato e quello del report, riga ENUM qui sotto'),

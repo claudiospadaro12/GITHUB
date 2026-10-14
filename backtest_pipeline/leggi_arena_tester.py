@@ -48,8 +48,17 @@ COME SI CONTA
     2. il resto deal per deal: posizioni aperte dello stesso lato e volume; se il commento dell'out e' 'tp X' / 'sl X', si
        preferiscono quelle con quel T/P o S/L nell'ordine d'apertura; un candidato = UNIVOCO; piu' candidati dello stesso cesto =
        STESSO CESTO (netto del cesto esatto); di cesti diversi = AMBIGUO (si prende il piu' vecchio).
+    Un grappolo chiuso 'per insieme' conta come AMBIGUO anche quando un ALTRO cesto aperto dello stesso lato contiene lo stesso
+    insieme di volumi (il grappolo potrebbe essere una chiusura PARZIALE di quel cesto: il report non lo distingue).
     Se gli AMBIGUI superano il 5% dei deal 'out', i netti PER CESTO si stampano come APPROSSIMATI. Il netto PER GIORNO e i lotti
-    vivi NON dipendono dall'accoppiamento (somme sui deal), e il netto totale si riconcilia col report.
+    vivi NON dipendono dall'accoppiamento (somme sui deal), e il netto totale si riconcilia col report. L'EQUITA' STIMATA SI'
+    (il prezzo d'ingresso delle posizioni ancora vive dipende da quali si sono chiuse): con accoppiamento oltre il 5% la (C) della
+    SONDA2 lo dice accanto al numero.
+  VERDETTI SOSPESI (classe 1381, 14/10/2026, controllo-preventivo): (A), (B), (C) NON si danno, e si dice perche', se il giro non e'
+  quello dichiarato -- REFERTO assente, marcatore diverso da MARCATORE_ARENA_TESTER_SONDA_v2, pin non in PIN_PASSATI (cioe' non quello
+  della riga passata dal cancello), data del REFERTO prima del pin, .ex5 cambiato durante la passata (righe EX5_DOPO), report sciolto
+  senza REFERTO -- oppure se il report stesso dice un'altra cosa: input imposti diversi, deposito, leva, simbolo, Expert, qualita' non
+  100%, finestra diversa da quella della sonda. I numeri descrittivi si stampano lo stesso.
   Cesto = (CID, lato) dei deal d'ingresso col commento '... [CID=n] [R]' (modulo di recupero); il lato e' quello della COLONNA tipo
   del deal, non del commento (classe 1393: le discordanze si contano). Profondita' = numero di ingressi [R] del cesto.
   Moduli [F] ('FinlabX ... [F]', 'CF ... [F]', 'DZR ... [F]'): ogni posizione da sola. Commenti non riconosciuti: si contano a parte.
@@ -92,7 +101,14 @@ INPUT_IMPOSTI = (("InpS03FundedPrefix", "true", "b"), ("InpEntryPhaseSpacingR33"
                  ("InpDeadZoneReactionRail", "true", "b"), ("InpDeadZoneReactionTriggerPrice", "0.2", "d"),
                  ("InpDeadZoneReactionRearmDelayMilliseconds", "0", "i"))
 INPUT_ENUM = ("InpTradeMode", "InpGoldPulseTheme")
-CLASSI_PROF = ((1, 1, "1"), (2, 2, "2"), (3, 4, "3-4"), (5, 9, "5-9"), (10, 10 ** 9, ">=10"))
+# PROVENIENZA (classe 1381): il pin della riga che ha passato il cancello per lo script v2. VUOTO finche' la riga v2 non e' pinnata:
+# con la tupla vuota OGNI zip ha i verdetti SOSPESI (fail-closed). Dopo il commit dello script v2 si scrive qui il suo pin (40 esadecimali).
+PIN_PASSATI = ()
+MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_SONDA_v2"
+DATA_MINIMA_REFERTO = "2026-10-14"   # il giorno dello script v2: un REFERTO datato prima non puo' venire da quel pin
+FINESTRE = {"SONDA1": ("2026.09.28", ("2026.09.28", "2026.09.29")), "SONDA2": ("2026.07.01", ("2026.09.29", "2026.09.30"))}
+DEMO_ENUM = "InpTradeMode demo = GOLDPULSE_BOTH_SIDES (ordinale NON NOTO)"
+CLASSI_PROF = ((1, 1, "1"),(2, 2, "2"), (3, 4, "3-4"), (5, 9, "5-9"), (10, 10 ** 9, ">=10"))
 
 RE_DATA = re.compile(r"^\d{4}\.\d\d\.\d\d \d\d:\d\d:\d\d$")
 RE_MOD = re.compile(r"^(FinlabX|CF|DZR)\s+(BUY|SELL|B|S)\b")
@@ -432,7 +448,18 @@ def analizza(rep):
                 if not adatti:
                     break
                 adatti.sort(key=lambda x: (-x[0], x[2][0]["t"]))
-                if amb_grappolo or (len(adatti) >= 2 and adatti[1][0] == adatti[0][0] and collections.Counter(round(p["vol"], 2) for p in adatti[1][2]) == collections.Counter(round(p["vol"], 2) for p in adatti[0][2])):
+                # un ALTRO cesto aperto dello stesso lato che contiene lo stesso insieme di volumi: il grappolo puo' essere una sua
+                # chiusura PARZIALE (controllo-preventivo 14/10: senza questo, un parziale veniva contato 'per insieme', cioe' certo)
+                cv0 = collections.Counter(round(p["vol"], 2) for p in adatti[0][2])
+                alternativa = False
+                for ep2, ps2 in per_ep.items():
+                    if ep2 == adatti[0][1]:
+                        continue
+                    cv2 = collections.Counter(round(p["vol"], 2) for p in ps2)
+                    if all(cv2[v] >= n for v, n in cv0.items()):
+                        alternativa = True
+                        break
+                if amb_grappolo or alternativa or (len(adatti) >= 2 and adatti[1][0] == adatti[0][0] and collections.Counter(round(p["vol"], 2) for p in adatti[1][2]) == collections.Counter(round(p["vol"], 2) for p in adatti[0][2])):
                     # due cesti con lo stesso insieme di volumi: la scelta e' arbitraria, e lo resta per tutto il grappolo
                     acc["ambigui"] += adatti[0][0]
                     modo = "ambiguo"
@@ -574,10 +601,52 @@ def finestra_contiene_28(rep):
     return bool(m) and m.group(1) <= "2026.09.28" < m.group(2)
 
 
-def verdetti(nome, rep, a):
-    """(A), (B), (C) come scritte nel docstring. Restituisce le righe."""
+def condizioni(nome, rep):
+    """i motivi per cui QUESTO report non e' il giro dichiarato (lista vuota = conforme). Classe 1381: senza questo, (B) veniva
+    'giudicata' anche con InpBaseLot=0.02 o su un'altra finestra (contro-esempi 14 e 15 dell'autotest)."""
+    m = []
+    for nm, val, tipo in INPUT_IMPOSTI:
+        v = rep["input"].get(nm)
+        if v is None:
+            m.append(nm + " ASSENTE dal report")
+        elif tipo == "b":
+            if v.lower() != val:
+                m.append("%s=%s invece di %s" % (nm, v, val))
+        else:
+            n = numero(v)
+            if n is None or abs(n - float(val)) > 1e-9:
+                m.append("%s=%s invece di %s" % (nm, v, val))
+    if rep.get("deposito") is None or abs(rep["deposito"] - DEPOSITO_ATTESO) > 0.005:
+        m.append("deposito %s invece di %.0f" % (rep.get("deposito"), DEPOSITO_ATTESO))
+    if rep.get("leva") != LEVA_ATTESA:
+        m.append("leva %s invece di %s" % (rep.get("leva"), LEVA_ATTESA))
+    if rep.get("simbolo") != "XAUUSD":
+        m.append("simbolo %s invece di XAUUSD" % rep.get("simbolo"))
+    if not rep.get("expert") or "arena" not in rep["expert"].lower() or len(rep.get("esperti") or []) != 1:
+        m.append("Expert %s (celle Expert %d): non e' la sola Arena" % (rep.get("expert"), len(rep.get("esperti") or [])))
+    if not (rep.get("qualita") or "").startswith("100%"):
+        m.append("qualita' dello storico %s invece di 100%%" % rep.get("qualita"))
+    s = sonda_di(nome)
+    if s in FINESTRE:
+        da, fini = FINESTRE[s]
+        p = rep.get("periodo") or ""
+        mm = re.match(r"^M1\((\d{4}\.\d\d\.\d\d)-(\d{4}\.\d\d\.\d\d)\)", p)
+        if not mm or mm.group(1) != da or mm.group(2) not in fini:
+            m.append("periodo %s invece di M1(%s-%s)" % (p or "NON LETTO", da, fini[-1]))
+    return m
+
+
+def verdetti(nome, rep, a, sospesi=None):
+    """(A), (B), (C) come scritte nel docstring. Restituisce le righe. Se il giro non e' quello dichiarato (condizioni del report o
+    provenienza passata in 'sospesi'), NESSUN verdetto, con i motivi."""
     out = []
     s = sonda_di(nome)
+    motivi = list(sospesi or []) + condizioni(nome, rep)
+    if motivi:
+        txt = "; ".join(motivi[:8]) + ("; ... (%d motivi)" % len(motivi) if len(motivi) > 8 else "")
+        for x in ("(A)", "(B)", "(C)"):
+            out.append("%s NESSUN verdetto: il giro NON e' quello dichiarato -> %s" % (x, txt))
+        return out
     if s in ("SONDA1", "REPORT") and rep["trades"] is not None:
         if rep["trades"] >= 1:
             out.append("(A) VERIFICATA: %d operazioni nel report: l'EA opera nel tester." % rep["trades"])
@@ -586,16 +655,23 @@ def verdetti(nome, rep, a):
     giorni = a["giorni"]
     validi = [(g, v) for g, v in giorni.items() if a["t_stop_out"] is None or g < a["t_stop_out"].date()]
     netti = [v["netto"] for g, v in validi if v["n_in"] > 0 or v["netto"] != 0]
+    lati = collections.Counter(k[2] for k in a.get("episodi", {}) if k[0] == "R")
+    lati_txt = "cesti [R] buy %d, sell %d (%s: se un lato e' 0 il tester puo' aver usato un altro modo)" % (lati["buy"], lati["sell"], DEMO_ENUM)
     if netti:
         med = statistics.median(netti)
         if s == "SONDA2":
             quale = "si GIUDICA qui"
-            esito = "REGGE (stesso ordine del demo)" if med >= SOGLIA_B else "SMENTITA (demo ottimista: feed/spread o regime; NON lo slippage, che manca anche qui)"
+            esito = "REGGE (stesso ordine del demo)" if med >= SOGLIA_B else "SMENTITA (demo ottimista: feed/spread o regime, o un enum diverso dal demo; NON lo slippage, che manca anche qui)"
         else:
             quale = "NESSUN verdetto: %d giorno/i, e la SONDA1 e' il solo giorno sospetto; B si giudica sulla SONDA2" % len(netti)
             esito = "sopra la soglia" if med >= SOGLIA_B else "sotto la soglia"
-        out.append("(B) mediana del netto per giorno %.2f EUR su %d giorni (prima di uno stop out), media %.2f; soglia %.0f -> %s [%s]. Demo: %s." % (
-            med, len(netti), sum(netti) / len(netti), SOGLIA_B, esito, quale, ", ".join("%s %+.2f" % x for x in DEMO_GIORNO)))
+        tronca = ""
+        if a.get("t_stop_out") is not None:
+            tronca = " FINESTRA TRONCATA dallo stop out del %s: %d giorni con deal prima di lui." % (a["t_stop_out"].strftime("%Y-%m-%d"), len(netti))
+        out.append("(B) mediana del netto per giorno %.2f EUR su %d giorni (prima di uno stop out), media %.2f; soglia %.0f -> %s [%s].%s %s. Demo: %s." % (
+            med, len(netti), sum(netti) / len(netti), SOGLIA_B, esito, quale, tronca, lati_txt, ", ".join("%s %+.2f" % x for x in DEMO_GIORNO)))
+    elif rep["trades"] is not None and rep["trades"] > 0:
+        out.append("(B) NON VALUTABILE: nessun giorno con deal prima dello stop out (o nessun deal letto).")
     soglia = SOGLIA_C * a["deposito"]
     g28 = giorni.get(GIORNO_CROLLO)
     if rep["trades"] is not None and rep["trades"] == 0:
@@ -616,15 +692,18 @@ def verdetti(nome, rep, a):
             if perdita is None or a["stima_rotta"]:
                 out.append("(C) 28/09: perdita d'equita' stimata NON disponibile (stima rotta o saldo d'inizio giorno non letto).")
             else:
-                esito = "CADUTA" if perdita >= soglia else "NESSUNA CADUTA VISTA (limite inferiore: l'equita' e' campionata agli istanti dei deal)"
-                out.append("(C) 28/09 (fonte: equita' STIMATA dentro il giorno rispetto al saldo d'inizio giorno %.2f): perdita %.2f EUR (%.1f%% del deposito) contro soglia %.2f -> %s. DD di equita' del report sull'intera finestra: %s EUR (%s%%)." % (
-                    g28["saldo_inizio"], perdita, 100.0 * perdita / a["deposito"], soglia, esito, fmt(rep["dd_eq_abs"]), fmt(rep["dd_eq_pct"])))
+                approx = a.get("quota_ambigui", 0.0) > SOGLIA_AMBIGUI
+                esito = "CADUTA" if perdita >= soglia else ("NESSUNA CADUTA VISTA (limite inferiore: l'equita' e' campionata agli istanti dei deal)" if not approx else "NESSUNA CADUTA VISTA")
+                coda = (" ACCOPPIAMENTO APPROSSIMATO (quota incerta %.1f%% > %.0f%%): l'equita' stimata dipende da quali posizioni risultano ancora vive, quindi il numero NON e' un limite inferiore garantito, in nessuno dei due versi." % (
+                    100.0 * a["quota_ambigui"], 100 * SOGLIA_AMBIGUI)) if approx else ""
+                out.append("(C) 28/09 (fonte: equita' STIMATA dentro il giorno rispetto al saldo d'inizio giorno %.2f): perdita %.2f EUR (%.1f%% del deposito) contro soglia %.2f -> %s. DD di equita' del report sull'intera finestra: %s EUR (%s%%).%s" % (
+                    g28["saldo_inizio"], perdita, 100.0 * perdita / a["deposito"], soglia, esito, fmt(rep["dd_eq_abs"]), fmt(rep["dd_eq_pct"]), coda))
     elif finestra_contiene_28(rep):
         out.append("(C) 28/09: nessun deal quel giorno nel report (l'EA non ha operato il 28/09, o il giorno non ha tick): C NON VALUTABILE da questa sonda.")
     return out
 
 
-def stampa(nome, rep, a, csv_dir=None):
+def stampa(nome, rep, a, csv_dir=None, sospesi=None):
     W = print
     s = sonda_di(nome)
     W("=" * 118)
@@ -680,7 +759,7 @@ def stampa(nome, rep, a, csv_dir=None):
         W("  AVVISO: " + e)
     if rep["trades"] == 0:
         W("")
-        for v in verdetti(nome, rep, a):
+        for v in verdetti(nome, rep, a, sospesi):
             W(v)
         return 0
     if any(e.startswith("REPORT TRONCATO") or "deal persi" in e for e in a["errori"]):
@@ -789,7 +868,7 @@ def stampa(nome, rep, a, csv_dir=None):
         W("28/09/2026, ORDINE DI GRANDEZZA: netto realizzato %.2f EUR (%.1f%% del deposito), ingressi %d, lotti d'ingresso %.2f, picco lotti vivi %.2f, profondita' massima viva %d, cesti [R] attraversati %d (netto %.2f)" % (
             g28["netto"], 100 * g28["netto"] / a["deposito"], g28["n_in"], g28["lotti_in"], g28["picco"], g28["prof_max"], len(e28), sum(e["netto"] for e in e28)))
     W("")
-    for v in verdetti(nome, rep, a):
+    for v in verdetti(nome, rep, a, sospesi):
         W(v)
     W("")
     W("COSA NON SI PUO' CONCLUDERE: un trimestre = un regime; tester senza slippage ne' latenza (ExecutionMode=0); feed BCM, non quello dell'utente; enum al valore del tester (sopra); nessun merito (n per regime, e la natura griglia + scala di lotti + recupero senza SL iniziale resta fuori dall'imbuto prop).")
@@ -855,6 +934,50 @@ def stampa_giornali(per):
             print("    giornale: " + x)
 
 
+def provenienza(src):
+    """classe 1381: il REFERTO dello zip dice QUALE script, QUALE pin, QUANDO e se il .ex5 e' rimasto lo stesso.
+    Restituisce (sospesi_comuni, sospesi_per_sonda, righe_da_stampare). Fail-closed: senza REFERTO o con un dato che non torna,
+    i verdetti si sospendono (i numeri descrittivi si stampano lo stesso)."""
+    comuni, per_sonda, righe = [], collections.defaultdict(list), []
+    nomi_ref = [n for n in src.nomi() if os.path.basename(n) == "REFERTO_ARENA_SONDA.txt"]
+    if not nomi_ref:
+        comuni.append("REFERTO_ARENA_SONDA.txt ASSENTE (report sciolto o zip incompleto): provenienza (script, pin, data, impronta del .ex5) NON verificata")
+        return comuni, per_sonda, righe
+    if len(nomi_ref) > 1:
+        comuni.append("%d REFERTO nella stessa sorgente: non so quale vale" % len(nomi_ref))
+    testo = decodifica(src.leggi(nomi_ref[0]))
+    rr = testo.splitlines()
+    prima = rr[0] if rr else ""
+    mpin = re.search(r"\bpin ([0-9a-fA-F]{40})\b", prima)
+    mmar = re.search(r"MARCATORE_ARENA_TESTER_SONDA_v\d+", prima)
+    mdat = None
+    for r in rr[:3]:
+        mdat = re.match(r"^data: (\d{4}-\d\d-\d\d) \d\d:\d\d:\d\d", r)
+        if mdat:
+            break
+    pin = mpin.group(1).lower() if mpin else None
+    righe.append("PROVENIENZA dal REFERTO: marcatore %s | pin %s | data %s | pin passati dal cancello: %s" % (
+        mmar.group(0) if mmar else "ASSENTE", pin or "ASSENTE", mdat.group(1) if mdat else "ASSENTE", ", ".join(PIN_PASSATI) if PIN_PASSATI else "NESSUNO (tupla PIN_PASSATI vuota)"))
+    if not mmar or mmar.group(0) != MARCATORE_ATTESO:
+        comuni.append("marcatore %s invece di %s" % (mmar.group(0) if mmar else "ASSENTE", MARCATORE_ATTESO))
+    if pin is None or pin not in PIN_PASSATI:
+        comuni.append("pin %s NON fra quelli passati dal cancello (%s)" % (pin or "ASSENTE", ", ".join(PIN_PASSATI) if PIN_PASSATI else "PIN_PASSATI vuota: va scritto il pin della riga v2"))
+    if not mdat or mdat.group(1) < DATA_MINIMA_REFERTO:
+        comuni.append("data del REFERTO %s prima del %s (lo script v2 non esisteva)" % (mdat.group(1) if mdat else "ASSENTE", DATA_MINIMA_REFERTO))
+    visti = set()
+    for r in rr:
+        me = re.match(r"^EX5_DOPO (SONDA[12]): (\S+) (UGUALE|DIVERSO)\s*$", r)
+        if me:
+            visti.add(me.group(1))
+            righe.append("impronta del .ex5 dopo %s: %s" % (me.group(1), me.group(3)))
+            if me.group(3) != "UGUALE":
+                per_sonda[me.group(1)].append("il .ex5 e' CAMBIATO durante la %s (EX5_DOPO DIVERSO): il binario provato non e' quello dell'impronta" % me.group(1))
+    for sn in ("SONDA1", "SONDA2"):
+        if sn not in visti:
+            per_sonda[sn].append("riga EX5_DOPO %s ASSENTE dal REFERTO: impronta del .ex5 dopo la passata NON ricontrollata" % sn)
+    return comuni, per_sonda, righe
+
+
 def leggi_percorsi(percorsi, csv_dir=None):
     rc = 0
     trovati = 0
@@ -867,15 +990,20 @@ def leggi_percorsi(percorsi, csv_dir=None):
                 print("-" * 118)
                 print("REFERTO dello script (%s) -- righe chiave:" % n)
                 for r in testo.splitlines():
-                    if re.search(r"^EX5:|^esiti:|STATO|ENUM|NON LANCIATA|stima|ATTENZIONE|^   - ", r):
+                    if re.search(r"MARCATORE|^data:|^EX5:|^EX5_DOPO|^esiti:|STATO|ENUM|NON LANCIATA|stima|ATTENZIONE|^   - ", r):
                         print("  " + r.strip())
+        comuni, per_sonda, righe_p = provenienza(src)
+        for r in righe_p:
+            print(r)
+        for x in comuni:
+            print("PROVENIENZA NON VERIFICATA: " + x + " -> verdetti SOSPESI")
         stampa_giornali(leggi_giornali(src))
         for n in src.nomi():
             if n.lower().endswith((".htm", ".html")):
                 trovati += 1
                 rep = leggi_report(src.leggi(n))
                 a = analizza(rep) if rep["ok"] else {"errori": [], "avvisi": [], "giorni": {}}
-                rc = max(rc, stampa(n, rep, a, csv_dir))
+                rc = max(rc, stampa(n, rep, a, csv_dir, comuni + per_sonda.get(sonda_di(n), [])))
     if trovati == 0:
         print("NESSUN report .htm nelle sorgenti date: la sonda non ha misurato niente (guardare il REFERTO e i log).")
         return 2
@@ -1136,8 +1264,104 @@ def autotest():
     v11 = [x for x in verdetti("ARENA_SONDA2_x.htm", r11, analizza(r11)) if x.startswith("(B)")]
     ok(v11 and "REGGE" in v11[0], "11 (B) mediana ~120 EUR/giorno (150, 50, 120 meno le commissioni): REGGE")
     # 12. (B) sulla SONDA1: nessun verdetto (un giorno, il giorno sospetto)
-    v12 = [x for x in verdetti("ARENA_SONDA1_x.htm", r11, analizza(r11)) if x.startswith("(B)")]
-    ok(v12 and "NESSUN verdetto" in v12[0] and "REGGE" not in v12[0] and "SMENTITA" not in v12[0], "12 (B) sulla SONDA1: stampata SENZA verdetto")
+    # (controllo-preventivo 14/10: prima usava il report di TRE MESI chiamato SONDA1; ora un report della finestra vera della SONDA1)
+    F12 = Finto(periodo="M1 (2026.09.28 - 2026.09.29)")
+    p = F12.apri("2026.09.28 10:00:00", "buy", 0.01, 4000.0, "FinlabX BUY [CID=1] [R]")
+    F12.chiudi("2026.09.28 11:00:00", p, 4150.0, "")
+    r12 = leggi_report(F12.htm())
+    ok(not condizioni("ARENA_SONDA1_x.htm", r12), "12a il report finto della SONDA1 e' CONFORME (nessun motivo di sospensione)")
+    v12 = [x for x in verdetti("ARENA_SONDA1_x.htm", r12, analizza(r12)) if x.startswith("(B)")]
+    ok(v12 and "giorno sospetto" in v12[0] and "REGGE" not in v12[0] and "SMENTITA" not in v12[0], "12 (B) sulla SONDA1 conforme (150 EUR, sopra soglia): stampata SENZA verdetto")
+    v12a = [x for x in verdetti("ARENA_SONDA1_x.htm", r12, analizza(r12)) if x.startswith("(A)")]
+    ok(v12a and v12a[0].startswith("(A) VERIFICATA"), "12b (A) VERIFICATA sulla SONDA1 conforme")
+    # 14. CONTRO-ESEMPIO (classe 1381): SONDA2 girata con InpBaseLot=0.02 -> la v1 diceva '(B) ... REGGE [si GIUDICA qui]'
+    F14 = Finto(periodo="M1 (2026.07.01 - 2026.09.30)")
+    F14.inputs = [(k, ("0.02" if k == "InpBaseLot" else v)) for k, v in F14.inputs]
+    for gi, guad in enumerate((150.0, 120.0, 130.0)):
+        p = F14.apri("2026.07.%02d 10:00:00" % (gi + 1), "buy", 0.02, 4000.0, "FinlabX BUY [CID=%d] [R]" % (gi + 1))
+        F14.chiudi("2026.07.%02d 11:00:00" % (gi + 1), p, 4000.0 + guad / 2, "")
+    r14 = leggi_report(F14.htm())
+    v14 = verdetti("ARENA_SONDA2_x.htm", r14, analizza(r14))
+    ok(all("NESSUN verdetto" in x for x in v14) and not any("REGGE" in x for x in v14) and any("InpBaseLot=0.02" in x for x in v14), "14 SONDA2 con InpBaseLot=0.02: (A)(B)(C) NESSUN verdetto, motivo stampato")
+    # 15. CONTRO-ESEMPIO: SONDA2 su un'altra finestra (agosto-settembre) -> nessun verdetto
+    F15 = Finto(periodo="M1 (2026.08.01 - 2026.09.30)")
+    p = F15.apri("2026.08.03 10:00:00", "buy", 0.01, 4000.0, "FinlabX BUY [CID=1] [R]")
+    F15.chiudi("2026.08.03 11:00:00", p, 4150.0, "")
+    r15 = leggi_report(F15.htm())
+    v15 = verdetti("ARENA_SONDA2_x.htm", r15, analizza(r15))
+    ok(all("NESSUN verdetto" in x for x in v15) and any("periodo" in x for x in v15), "15 SONDA2 sulla finestra sbagliata: NESSUN verdetto")
+    # 16. CONTRO-ESEMPIO: chiusura PARZIALE di un cesto con lo stesso insieme di volumi di un altro -> AMBIGUO, non 'per insieme'
+    F16 = Finto()
+    a1 = F16.apri("2026.09.28 10:00:00", "buy", 0.01, 4000.0, "FinlabX BUY [CID=1] [R]")
+    a2_ = F16.apri("2026.09.28 10:01:00", "buy", 0.02, 3998.0, "FinlabX BUY [CID=1] [R]")
+    b1 = F16.apri("2026.09.28 10:02:00", "buy", 0.01, 3980.0, "FinlabX BUY [CID=2] [R]")
+    b2 = F16.apri("2026.09.28 10:03:00", "buy", 0.02, 3978.0, "FinlabX BUY [CID=2] [R]")
+    b3 = F16.apri("2026.09.28 10:04:00", "buy", 0.04, 3976.0, "FinlabX BUY [CID=2] [R]")
+    F16.chiudi("2026.09.28 10:30:00", b1, 3990.0, "")
+    F16.chiudi("2026.09.28 10:30:00", b2, 3990.0, "")
+    for p in (a1, a2_, b3):
+        F16.chiudi("2026.09.28 11:00:00", p, 4005.0, "")
+    a16 = analizza(leggi_report(F16.htm()))
+    ok(a16["acc"]["ambigui"] >= 2 and a16["quota_ambigui"] > SOGLIA_AMBIGUI, "16 parziale del cesto 2 con lo stesso insieme {0.01, 0.02} del cesto 1: AMBIGUO (quota %.0f%%), non 'per insieme'" % (100 * a16["quota_ambigui"]))
+    ok(abs(sum(v["netto"] for v in a16["giorni"].values()) - (F16.saldo - F16.dep)) < 0.011, "16b il netto per giorno resta esatto")
+    # 16c. il caso normale resta 'per insieme': cesto 1 {0.01, 0.02} chiuso intero, cesto 2 aperto {0.01} (non lo contiene)
+    F16c = Finto()
+    c1 = F16c.apri("2026.09.28 10:00:00", "buy", 0.01, 4000.0, "FinlabX BUY [CID=1] [R]")
+    c2 = F16c.apri("2026.09.28 10:01:00", "buy", 0.02, 3998.0, "FinlabX BUY [CID=1] [R]")
+    c3 = F16c.apri("2026.09.28 10:02:00", "buy", 0.01, 3990.0, "FinlabX BUY [CID=2] [R]")
+    F16c.chiudi("2026.09.28 10:30:00", c1, 4001.0, "")
+    F16c.chiudi("2026.09.28 10:30:00", c2, 4001.0, "")
+    F16c.chiudi("2026.09.28 11:00:00", c3, 3995.0, "")
+    a16c = analizza(leggi_report(F16c.htm()))
+    ok(a16c["acc"]["per_insieme"] == 2 and a16c["acc"]["ambigui"] == 0, "16c caso normale: cesto intero chiuso, l'altro non contiene il suo insieme -> 'per insieme'")
+    # 17. stop out il primo giorno della SONDA2: (B) NON VALUTABILE, non un verdetto su zero giorni; stop out dopo 2 giorni: TRONCATA
+    F17 = Finto(periodo="M1 (2026.07.01 - 2026.09.30)")
+    p = F17.apri("2026.07.01 10:00:00", "buy", 0.10, 4000.0, "FinlabX BUY [CID=1] [R]")
+    F17.chiudi("2026.07.01 12:00:00", p, 3600.0, "so: 45.10%/123.00/272.70")
+    r17 = leggi_report(F17.htm())
+    v17 = [x for x in verdetti("ARENA_SONDA2_x.htm", r17, analizza(r17)) if x.startswith("(B)")]
+    ok(v17 and "NON VALUTABILE" in v17[0], "17 stop out il primo giorno: (B) NON VALUTABILE (la partizione non resta muta)")
+    F17b = Finto(periodo="M1 (2026.07.01 - 2026.09.30)")
+    for gi in (1, 2):
+        p = F17b.apri("2026.07.%02d 10:00:00" % gi, "buy", 0.01, 4000.0, "FinlabX BUY [CID=%d] [R]" % gi)
+        F17b.chiudi("2026.07.%02d 11:00:00" % gi, p, 4150.0, "")
+    p = F17b.apri("2026.07.03 10:00:00", "buy", 0.10, 4000.0, "FinlabX BUY [CID=9] [R]")
+    F17b.chiudi("2026.07.03 12:00:00", p, 3600.0, "so: 45.10%/123.00/272.70")
+    r17b = leggi_report(F17b.htm())
+    v17b = [x for x in verdetti("ARENA_SONDA2_x.htm", r17b, analizza(r17b)) if x.startswith("(B)")]
+    ok(v17b and "FINESTRA TRONCATA" in v17b[0] and "2 giorni" in v17b[0] and "sell 0" in v17b[0], "17b stop out dopo 2 giorni: (B) dice FINESTRA TRONCATA, 2 giorni, e i lati dei cesti (sell 0)")
+    # 18. PROVENIENZA (classe 1381): REFERTO di un altro pin, di un altro giorno, del marcatore v1, senza EX5_DOPO, con EX5 DIVERSO
+    global PIN_PASSATI
+    import tempfile
+    salva = PIN_PASSATI
+    PIN_PASSATI = ("a" * 40,)
+    try:
+        def ref(pin="a" * 40, mar="MARCATORE_ARENA_TESTER_SONDA_v2", data="2026-10-15", ex=("UGUALE", "UGUALE")):
+            t = "ARENA TESTER SONDA -- EA di TERZI. Script %s, pin %s\r\ndata: %s 10:00:00   pc: DESKTOP-H4D7CAJ\r\n" % (mar, pin, data)
+            for sn, e in zip(("SONDA1", "SONDA2"), ex):
+                if e:
+                    t += "EX5_DOPO %s: %s %s\r\n" % (sn, "B" * 64, e)
+            return t
+        casi = (("buono", ref(), 0, 0), ("altro pin", ref(pin="b" * 40), 1, 0), ("altro giorno", ref(data="2026-10-13"), 1, 0),
+                ("marcatore v1", ref(mar="MARCATORE_ARENA_TESTER_SONDA_v1"), 1, 0), ("ex5 DIVERSO", ref(ex=("DIVERSO", "UGUALE")), 0, 1),
+                ("EX5_DOPO assente", ref(ex=("UGUALE", None)), 0, 0))
+        for nome_c, testo_c, att_com, att_s1 in casi:
+            with tempfile.TemporaryDirectory() as td:
+                open(os.path.join(td, "REFERTO_ARENA_SONDA.txt"), "w").write(testo_c)
+                com, per, _r = provenienza(Sorgente(td))
+            ok(len(com) == att_com and len(per.get("SONDA1", [])) == att_s1 and (nome_c != "EX5_DOPO assente" or len(per.get("SONDA2", [])) == 1),
+               "18 provenienza '%s': %d motivi comuni (attesi %d), SONDA1 %d (attesi %d)" % (nome_c, len(com), att_com, len(per.get("SONDA1", [])), att_s1))
+        with tempfile.TemporaryDirectory() as td:
+            com, per, _r = provenienza(Sorgente(td))
+        ok(len(com) == 1 and "ASSENTE" in com[0], "18b REFERTO assente: provenienza NON verificata, verdetti sospesi")
+    finally:
+        PIN_PASSATI = salva
+    with tempfile.TemporaryDirectory() as td:
+        open(os.path.join(td, "REFERTO_ARENA_SONDA.txt"), "w").write("Script MARCATORE_ARENA_TESTER_SONDA_v2, pin %s\r\ndata: 2026-10-15 10:00:00\r\n" % ("a" * 40))
+        com, per, _r = provenienza(Sorgente(td))
+    ok(PIN_PASSATI or any("PIN_PASSATI vuota" in x for x in com), "18c con PIN_PASSATI vuota ogni zip e' SOSPESO (fail-closed finche' il pin v2 non e' scritto)")
+    v18 = verdetti("ARENA_SONDA1_x.htm", r12, analizza(r12), ["pin X NON fra quelli passati"])
+    ok(all("NESSUN verdetto" in x for x in v18) and len(v18) == 3, "18d un motivo di provenienza sospende (A)(B)(C) anche su un report conforme")
     # 13. gli estratti dei giornali: input dopo 'started with inputs' (enum compresi), stop out, righe di errore; un file fuori da log/ NON conta
     import tempfile
     with tempfile.TemporaryDirectory() as td:
