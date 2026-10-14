@@ -1,0 +1,269 @@
+========================================================================================================================
+ leggi_gba_r2sb_c3g v1 BOZZA (D2-B, NON passata dal cancello) -- GBA R2S STADIO B (tick reali, tre tranche). SHA256 di questo file: cc5e3c6b170b0386
+ Un esito vale SOLO se questo SHA256 e' quello che ha avuto il PASS dei due strati del cancello. Aritmetica copiata da D2 v2 14384d87; G0 dal lettore 9cd02d2a (pinnato).
+========================================================================================================================
+(0) ACCETTAZIONE di D2-B sui giornali archiviati (rifatta adesso): PASSATA
+   R1A T1 (tick reali, i NUMERI dell'ancora): letta SI, n 128, n netto 128, righe 6973, a spread > 0 6973, C3G 21.60 (senza -1.0x 21.60), >= 40x 651, >= 50x 280, G0 OK -> IDENTICI
+   R1A T3 (CONTRO-ESEMPIO VERO: tentati 565, n 557): CE6 ROSSO -> non letta, come deve
+   cella oro R1A T1-T3 con le regole dello stadio B: (C) -> (C) per T3, come deve
+   S0_01 (Modello 1, qualita' '100%', C3G 22.80): tick NON confermati -> (C) storia a tick non confermata, come deve
+   nota: ESITI_R2S_B.txt: GBA R2S B -- pin d53493a92901b82c6b4c12c1d79ec3cb4ebfa5bb   pc DESKTOP-H4D7CAJ   inizio 2026-10-14 07:35:26   fine 2026-10-14 07:44:28   minuti 9 / R2SBANC rc 0   minuti 1 / R2SBNAS rc 0   minuti 3 / R2SBD30 rc 0   minuti 2 / R2SBU30 rc 0   minuti 2 / copiato GBA_R0_R2SBANC.zip / copiato GBA_R0_R2SBNAS.zip / copiato GBA_R0_R2SBD30.zip / copiato GBA_R0_R2SBU30.zip
+   CE1 ANCORA: VERDE: 128 / -6577.48 / PF 0.83 / 100%ticksreali / 88416 barre / 25648545 tick / XAUUSD dal 2024.07.10; C3G 21.60, righe >= 40x 651, >= 50x 280, -1.0x 0; ini identico a R1A_01 salvo Report. (L'A3, doppione R2SBANC/R1A, la verifica il lettore.)
+
+------------------------------------------------------------------------------------------------------------------------
+ LOTTO R2SBNAS  CELLA NASUSD M15 (Nasdaq 100)
+------------------------------------------------------------------------------------------------------------------------
+
+   T1 2026.07.01-2026.09.30 (ToDate NON compreso)  passata R2SBNAS_01_M15_T1_m775800  stato driver OK
+     LETTA
+     n 129 | n NETTO 129 (meno 0 ingressi a spread zero) | righe segnale 488 | a spread > 0 488 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 59.10 | senza le -1.0x 59.10 | CE7 verde: C3G con le -1.0x 59.10, senza 59.10: stessa parte di 40,0
+     BUY 53.40 (n 280)  SELL 69.05 (n 208)  righe >= 40x 391  >= 50x 314   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 488, tentati 129, scartati spread 144, posizione aperta 215, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'EURUSD 2024.07.05 / NASUSD 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07    107    50.70    42.30     56    58.60     51      77      54        22
+     europa          07-12    125    46.20    38.70     73    59.75     52      81      52        21
+     pausa           12-14     54    50.95    48.70     35    53.80     19      40      29        19
+     USA apertura    14-17    116    81.25    77.05     60    85.40     56     112     108        42
+     USA pomeriggio  17-22     77    84.80    68.30     49    95.95     28      73      63        22
+     rollover        22-24      9    63.00    60.30      7    73.45      2       8       8         3
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 44.63 | mediana spread delle righe a spread > 0 1.800 | giorni server distinti con righe segnale 68
+       R5: ingressi n 129, mediana stop/spread 69.30, mediana ATR 53.21 | scartate per spread n 144, mediana stop/spread 36.85, mediana ATR 28.04 | scartate per posizione aperta n 215, mediana stop/spread 71.60, mediana ATR 53.08 | posizione aperta 71.60 >= 90% degli ingressi 69.30: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'USA apertura': 42 su 129 ingressi (32.6%); righe >= 50x nella fascia 108 = 34.4% delle righe >= 50x della cella, 93.1% delle righe della fascia; segnali 488 contro ingressi 129
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.62 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.78 (n 55), SELL 0.48 (n 74) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 133.04, p90 220.87, max 410.57 | DD equity del report 2343.01
+       lati degli ingressi: BUY 43% SELL 57%
+       ATTESA T1 [INFERITO, estrapolazione]: C3G 48.75-52.87 -> FUORI in ALTO: smentisce la STIMA (sensibilita'), non l'esito | n ingressi banda larga 40-160 -> dentro
+
+   T2 2026.04.01-2026.06.30 (ToDate NON compreso)  passata R2SBNAS_02_M15_T2_m775800  stato driver OK
+     LETTA
+     n 130 | n NETTO 130 (meno 0 ingressi a spread zero) | righe segnale 499 | a spread > 0 499 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 59.20 | senza le -1.0x 59.20 | CE7 verde: C3G con le -1.0x 59.20, senza 59.20: stessa parte di 40,0
+     BUY 53.60 (n 356)  SELL 80.30 (n 143)  righe >= 40x 383  >= 50x 323   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 499, tentati 130, scartati spread 139, posizione aperta 230, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'EURUSD 2024.07.05 / NASUSD 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07    108    47.50    38.20     75    62.40     33      62      48        13
+     europa          07-12     87    39.50    36.50     65    70.30     22      43      32        13
+     pausa           12-14     41    47.80    40.10     28    52.00     13      26      17         7
+     USA apertura    14-17    123    68.30    60.50     88   100.00     35     116     106        58
+     USA pomeriggio  17-22    116    83.75    73.85     84   138.55     32     115     101        30
+     rollover        22-24     24    70.25    58.95     16    70.55      8      21      19         9
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 43.72 | mediana spread delle righe a spread > 0 1.800 | giorni server distinti con righe segnale 67
+       R5: ingressi n 130, mediana stop/spread 77.25, mediana ATR 57.49 | scartate per spread n 139, mediana stop/spread 36.50, mediana ATR 27.79 | scartate per posizione aperta n 230, mediana stop/spread 71.70, mediana ATR 54.38 | posizione aperta 71.70 >= 90% degli ingressi 77.25: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'USA apertura': 58 su 130 ingressi (44.6%); righe >= 50x nella fascia 106 = 32.8% delle righe >= 50x della cella, 86.2% delle righe della fascia; segnali 499 contro ingressi 130
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.81 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.68 (n 79), SELL 0.98 (n 51) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 143.72, p90 260.95, max 427.96 | DD equity del report 1983.61
+       lati degli ingressi: BUY 61% SELL 39%
+       ATTESA T2: [NON STIMATO] (nessuna riga di segnale del GBA su NASUSD in T2 nel repo: il numero e' NUOVO, nessuna smentita possibile)
+
+   T3 2026.01.01-2026.03.31 (ToDate NON compreso)  passata R2SBNAS_03_M15_T3_m775800  stato driver OK
+     LETTA
+     n 85 | n NETTO 85 (meno 0 ingressi a spread zero) | righe segnale 423 | a spread > 0 423 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 51.90 | senza le -1.0x 51.90 | CE7 verde: C3G con le -1.0x 51.90, senza 51.90: stessa parte di 40,0
+     BUY 42.45 (n 200)  SELL 54.30 (n 223)  righe >= 40x 259  >= 50x 222   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 423, tentati 85, scartati spread 193, posizione aperta 145, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'EURUSD 2024.07.05 / NASUSD 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07     60    38.55    21.65     24    52.35     36      26      20         6
+     europa          07-12     95    31.90    21.20     38    36.50     57      17       4         3
+     pausa           12-14     34    34.10    32.90     21    39.10     13      10       9         5
+     USA apertura    14-17    110    58.35    57.80     58    58.90     52      85      72        46
+     USA pomeriggio  17-22    119    96.70   109.10     59    92.50     60     118     115        24
+     rollover        22-24      5    40.70     n.d.      0    40.70      5       3       2         1
+     (T3: l'apertura cash USA e' alle 15:30 server fino al 07/03 e quella del DAX alle 9:00 fino al 28/03: le fasce di T3 NON si confrontano con T1/T2)
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 43.81 | mediana spread delle righe a spread > 0 2.300 | giorni server distinti con righe segnale 64
+       R5: ingressi n 85, mediana stop/spread 71.90, mediana ATR 60.07 | scartate per spread n 193, mediana stop/spread 30.00, mediana ATR 29.97 | scartate per posizione aperta n 145, mediana stop/spread 86.30, mediana ATR 61.75 | posizione aperta 86.30 >= 90% degli ingressi 71.90: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'USA apertura': 46 su 85 ingressi (54.1%); righe >= 50x nella fascia 72 = 32.4% delle righe >= 50x della cella, 65.5% delle righe della fascia; segnali 423 contro ingressi 85
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.65 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.69 (n 34), SELL 0.63 (n 51) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 150.18, p90 244.75, max 300.07 | DD equity del report 1369.91
+       lati degli ingressi: BUY 40% SELL 60%
+       ATTESA T3: [NON STIMATO] (nessuna riga di segnale del GBA su NASUSD in T3 nel repo: il numero e' NUOVO, nessuna smentita possibile)
+
+   C3G AGGREGATO sulle tre tranche (mediana di TUTTE le righe insieme): 57.60 -- DESCRIZIONE, NON DECIDE (classe 1104 b)
+
+   ESITO DELLA CELLA NASUSD M15: (P) PASSA LO STADIO B (COSTO): T1 C3G 59.10, n netto 129, righe a spread > 0 488; T2 C3G 59.20, n netto 130, righe a spread > 0 499; T3 C3G 51.90, n netto 85, righe a spread > 0 423. Significa SOLO che il costo a tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.
+   MERITO: NON MISURATO, qualunque sia il PF. Motivo: le tre tranche del 2026 sono UN SOLO regime (piano 5.3; emendamento D: un solo regime = non misurabile anche per il merito) e il regime degli indici non e' classificato; una tranche non e' un regime (classe 1384), qualunque sia il suo n.
+
+------------------------------------------------------------------------------------------------------------------------
+ LOTTO R2SBD30  CELLA D30EUR M15 (DAX 40)   -- CELLA DICHIARATA A RISCHIO (regola R1): un C3G di T1 sotto 40x NON e' una sorpresa
+------------------------------------------------------------------------------------------------------------------------
+
+   T1 2026.07.01-2026.09.30 (ToDate NON compreso)  passata R2SBD30_01_M15_T1_m775800  stato driver OK
+     LETTA
+     n 84 | n NETTO 84 (meno 0 ingressi a spread zero) | righe segnale 418 | a spread > 0 418 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 44.20 | senza le -1.0x 44.20 | CE7 verde: C3G con le -1.0x 44.20, senza 44.20: stessa parte di 40,0
+     BUY 42.85 (n 222)  SELL 47.20 (n 196)  righe >= 40x 233  >= 50x 179   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 418, tentati 84, scartati spread 214, posizione aperta 120, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'D30EUR 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07     83    17.50    14.10     46    20.10     37       1       0         0
+     europa          07-12    177    53.00    51.00     91    57.05     86     127     100        51
+     pausa           12-14     45    54.00    49.80     27    68.65     18      41      29        11
+     USA apertura    14-17     65    60.40    61.60     33    58.35     32      55      45        20
+     USA pomeriggio  17-22     43    26.40    20.60     22    30.00     21       9       5         2
+     rollover        22-24      5    21.40    32.80      3    16.70      2       0       0         0
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 31.43 | mediana spread delle righe a spread > 0 1.600 | giorni server distinti con righe segnale 69
+       R5: ingressi n 84, mediana stop/spread 62.90, mediana ATR 40.50 | scartate per spread n 214, mediana stop/spread 24.60, mediana ATR 23.64 | scartate per posizione aperta n 120, mediana stop/spread 65.40, mediana ATR 40.46 | posizione aperta 65.40 >= 90% degli ingressi 62.90: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'europa': 51 su 84 ingressi (60.7%); righe >= 50x nella fascia 100 = 55.9% delle righe >= 50x della cella, 56.5% delle righe della fascia; segnali 418 contro ingressi 84
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.58 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.30 (n 44), SELL 1.02 (n 40) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 101.26, p90 125.45, max 163.11 | DD equity del report 2102.20
+       lati degli ingressi: BUY 52% SELL 48%
+       ATTESA T1 [INFERITO, estrapolazione]: C3G 39.77-44.37 -> dentro la banda (cella a rischio: sotto 40x gia' scritto) | n ingressi banda larga 40-160 -> dentro
+
+   T2 2026.04.01-2026.06.30 (ToDate NON compreso)  passata R2SBD30_02_M15_T2_m775800  stato driver OK
+     LETTA
+     n 91 | n NETTO 91 (meno 0 ingressi a spread zero) | righe segnale 403 | a spread > 0 403 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 54.60 | senza le -1.0x 54.60 | CE7 verde: C3G con le -1.0x 54.60, senza 54.60: stessa parte di 40,0
+     BUY 56.70 (n 219)  SELL 50.60 (n 184)  righe >= 40x 268  >= 50x 215   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 403, tentati 91, scartati spread 165, posizione aperta 147, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'D30EUR 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07     93    27.70    24.10     37    28.95     56      19      10         1
+     europa          07-12    145    63.40    60.00    107    72.45     38     126     106        50
+     pausa           12-14     32    71.55    66.70     20    76.55     12      32      26         9
+     USA apertura    14-17     58    73.40    77.95     24    71.65     34      57      55        22
+     USA pomeriggio  17-22     56    39.65    31.40     19    41.70     37      28      16         7
+     rollover        22-24     19    34.10    34.15     12    34.10      7       6       2         2
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 39.59 | mediana spread delle righe a spread > 0 1.700 | giorni server distinti con righe segnale 66
+       R5: ingressi n 91, mediana stop/spread 70.50, mediana ATR 48.09 | scartate per spread n 165, mediana stop/spread 29.00, mediana ATR 27.82 | scartate per posizione aperta n 147, mediana stop/spread 73.70, mediana ATR 49.36 | posizione aperta 73.70 >= 90% degli ingressi 70.50: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'europa': 50 su 91 ingressi (54.9%); righe >= 50x nella fascia 106 = 49.3% delle righe >= 50x della cella, 73.1% delle righe della fascia; segnali 403 contro ingressi 91
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.88 | PF per lato dai deal SENZA commissione aggiunta: BUY 1.26 (n 49), SELL 0.51 (n 42) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 120.21, p90 171.11, max 258.64 | DD equity del report 1424.78
+       lati degli ingressi: BUY 54% SELL 46%
+       ATTESA T2: [NON STIMATO] (nessuna riga di segnale del GBA su D30EUR in T2 nel repo: il numero e' NUOVO, nessuna smentita possibile)
+
+   T3 2026.01.01-2026.03.31 (ToDate NON compreso)  passata R2SBD30_03_M15_T3_m775800  stato driver OK
+     LETTA
+     n 73 | n NETTO 73 (meno 0 ingressi a spread zero) | righe segnale 385 | a spread > 0 385 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 48.70 | senza le -1.0x 48.70 | CE7 verde: C3G con le -1.0x 48.70, senza 48.70: stessa parte di 40,0
+     BUY 47.40 (n 181)  SELL 50.10 (n 204)  righe >= 40x 248  >= 50x 186   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 385, tentati 73, scartati spread 181, posizione aperta 131, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'D30EUR 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07     79    17.50    11.90     34    25.30     45       6       3         1
+     europa          07-12    131    51.20    47.60     57    54.05     74      88      66        30
+     pausa           12-14     44    75.75    76.25     28    69.95     16      43      37        10
+     USA apertura    14-17     66    64.15    60.80     31    76.50     35      61      48        17
+     USA pomeriggio  17-22     61    52.20    53.10     31    52.10     30      48      32        15
+     rollover        22-24      4    33.50     n.d.      0    33.50      4       2       0         0
+     (T3: l'apertura cash USA e' alle 15:30 server fino al 07/03 e quella del DAX alle 9:00 fino al 28/03: le fasce di T3 NON si confrontano con T1/T2)
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 40.76 | mediana spread delle righe a spread > 0 1.700 | giorni server distinti con righe segnale 66
+       R5: ingressi n 73, mediana stop/spread 69.50, mediana ATR 53.75 | scartate per spread n 181, mediana stop/spread 28.10, mediana ATR 28.29 | scartate per posizione aperta n 131, mediana stop/spread 75.40, mediana ATR 54.71 | posizione aperta 75.40 >= 90% degli ingressi 69.50: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'europa': 30 su 73 ingressi (41.1%); righe >= 50x nella fascia 66 = 35.5% delle righe >= 50x della cella, 50.4% delle righe della fascia; segnali 385 contro ingressi 73
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.93 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.63 (n 35), SELL 1.33 (n 38) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 134.38, p90 201.34, max 233.77 | DD equity del report 1158.31
+       lati degli ingressi: BUY 48% SELL 52%
+       ATTESA T3: [NON STIMATO] (nessuna riga di segnale del GBA su D30EUR in T3 nel repo: il numero e' NUOVO, nessuna smentita possibile)
+
+   C3G AGGREGATO sulle tre tranche (mediana di TUTTE le righe insieme): 48.65 -- DESCRIZIONE, NON DECIDE (classe 1104 b)
+
+   ESITO DELLA CELLA D30EUR M15: (P) PASSA LO STADIO B (COSTO): T1 C3G 44.20, n netto 84, righe a spread > 0 418; T2 C3G 54.60, n netto 91, righe a spread > 0 403; T3 C3G 48.70, n netto 73, righe a spread > 0 385. Significa SOLO che il costo a tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.
+   MERITO: NON MISURATO, qualunque sia il PF. Motivo: le tre tranche del 2026 sono UN SOLO regime (piano 5.3; emendamento D: un solo regime = non misurabile anche per il merito) e il regime degli indici non e' classificato; una tranche non e' un regime (classe 1384), qualunque sia il suo n.
+
+------------------------------------------------------------------------------------------------------------------------
+ LOTTO R2SBU30  CELLA U30USD M15 (Dow Jones 30)
+------------------------------------------------------------------------------------------------------------------------
+
+   T1 2026.07.01-2026.09.30 (ToDate NON compreso)  passata R2SBU30_01_M15_T1_m775800  stato driver OK
+     LETTA
+     n 96 | n NETTO 96 (meno 0 ingressi a spread zero) | righe segnale 460 | a spread > 0 460 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 47.50 | senza le -1.0x 47.50 | CE7 verde: C3G con le -1.0x 47.50, senza 47.50: stessa parte di 40,0
+     BUY 44.05 (n 246)  SELL 52.50 (n 214)  righe >= 40x 278  >= 50x 213   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 460, tentati 96, scartati spread 189, posizione aperta 175, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'EURUSD 2024.07.05 / U30USD 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07     78    29.85    31.30     45    29.00     33      16       3         1
+     europa          07-12    114    36.95    36.20     69    40.70     45      52      26        17
+     pausa           12-14     84    47.05    47.50     44    46.85     40      55      35        14
+     USA apertura    14-17    112    81.55    73.90     49    84.20     63      94      91        47
+     USA pomeriggio  17-22     64    94.00    96.20     31    94.00     33      58      55        15
+     rollover        22-24      8    34.15    34.15      8     n.d.      0       3       3         2
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 46.43 | mediana spread delle righe a spread > 0 2.000 | giorni server distinti con righe segnale 67
+       R5: ingressi n 96, mediana stop/spread 74.75, mediana ATR 65.86 | scartate per spread n 189, mediana stop/spread 30.20, mediana ATR 34.21 | scartate per posizione aperta n 175, mediana stop/spread 68.70, mediana ATR 64.71 | posizione aperta 68.70 >= 90% degli ingressi 74.75: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'USA apertura': 47 su 96 ingressi (49.0%); righe >= 50x nella fascia 91 = 42.7% delle righe >= 50x della cella, 81.2% delle righe della fascia; segnali 460 contro ingressi 96
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.71 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.63 (n 51), SELL 0.83 (n 45) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 164.64, p90 253.93, max 410.00 | DD equity del report 1685.22
+       lati degli ingressi: BUY 53% SELL 47%
+       ATTESA T1 [INFERITO, estrapolazione]: C3G 45.25-50.61 -> dentro la banda | n ingressi banda larga 40-160 -> dentro
+
+   T2 2026.04.01-2026.06.30 (ToDate NON compreso)  passata R2SBU30_02_M15_T2_m775800  stato driver OK
+     LETTA
+     n 126 | n NETTO 126 (meno 0 ingressi a spread zero) | righe segnale 448 | a spread > 0 448 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 59.60 | senza le -1.0x 59.60 | CE7 verde: C3G con le -1.0x 59.60, senza 59.60: stessa parte di 40,0
+     BUY 56.00 (n 274)  SELL 65.80 (n 174)  righe >= 40x 338  >= 50x 275   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 448, tentati 126, scartati spread 130, posizione aperta 192, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'EURUSD 2024.07.05 / U30USD 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07     68    40.30    36.00     36    45.30     32      34      22         9
+     europa          07-12     94    41.65    41.65     62    41.70     32      52      27        17
+     pausa           12-14     55    51.70    51.15     40    71.80     15      41      30        14
+     USA apertura    14-17    111    83.70    83.70     73    86.35     38      98      90        49
+     USA pomeriggio  17-22    106    87.80    79.90     55   100.00     51     105     100        33
+     rollover        22-24     14    46.05    46.05      8    57.45      6       8       6         4
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 57.47 | mediana spread delle righe a spread > 0 2.000 | giorni server distinti con righe segnale 68
+       R5: ingressi n 126, mediana stop/spread 76.70, mediana ATR 68.57 | scartate per spread n 130, mediana stop/spread 37.30, mediana ATR 36.50 | scartate per posizione aperta n 192, mediana stop/spread 74.50, mediana ATR 66.33 | posizione aperta 74.50 >= 90% degli ingressi 76.70: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'USA apertura': 49 su 126 ingressi (38.9%); righe >= 50x nella fascia 90 = 32.7% delle righe >= 50x della cella, 81.1% delle righe della fascia; segnali 448 contro ingressi 126
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.71 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.64 (n 75), SELL 0.84 (n 51) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 171.43, p90 257.86, max 427.14 | DD equity del report 2158.67
+       lati degli ingressi: BUY 60% SELL 40%
+       ATTESA T2: [NON STIMATO] (nessuna riga di segnale del GBA su U30USD in T2 nel repo: il numero e' NUOVO, nessuna smentita possibile)
+
+   T3 2026.01.01-2026.03.31 (ToDate NON compreso)  passata R2SBU30_03_M15_T3_m775800  stato driver OK
+     LETTA
+     n 116 | n NETTO 116 (meno 0 ingressi a spread zero) | righe segnale 400 | a spread > 0 400 | -1.0x 0 | giudica il costo: SI
+     C3G CELLA 73.80 | senza le -1.0x 73.80 | CE7 verde: C3G con le -1.0x 73.80, senza 73.80: stessa parte di 40,0
+     BUY 82.60 (n 171)  SELL 71.40 (n 229)  righe >= 40x 307  >= 50x 278   [lati: DESCRIZIONE, nessun lato si promuove da solo]
+     EA: segnali 400, tentati 116, scartati spread 114, posizione aperta 170, ATR non valido 0
+     tick: modello 4, ini Model=4, qualita '100%ticksreali', ticks_inizio 'EURUSD 2024.07.05 / U30USD 2024.09.26' -> CONFERMATI
+     G0 del lettore: OK | CE2 verde | CE3 verde | CE4 verde | CE5 verde | CE6 verde
+     fascia (server) ore    righe      C3G      BUY      n     SELL      n   >=40x   >=50x  ingressi
+     asia            00-07     37    53.80    21.30      9    66.45     28      23      19         9
+     europa          07-12     78    42.15    29.90     22    49.20     56      41      28        14
+     pausa           12-14     39    50.20    55.15     24    50.10     15      23      21        12
+     USA apertura    14-17    139    83.00    82.95     66    90.00     73     113     103        53
+     USA pomeriggio  17-22    102   135.30   131.80     50   139.90     52     102     102        25
+     rollover        22-24      5    69.30     n.d.      0    69.30      5       5       5         3
+     (T3: l'apertura cash USA e' alle 15:30 server fino al 07/03 e quella del DAX alle 9:00 fino al 28/03: le fasce di T3 NON si confrontano con T1/T2)
+     DESCRITTIVE (NON decidono nulla):
+       R4: mediana ATR delle righe 69.70 | mediana spread delle righe a spread > 0 2.050 | giorni server distinti con righe segnale 65
+       R5: ingressi n 116, mediana stop/spread 94.25, mediana ATR 77.81 | scartate per spread n 114, mediana stop/spread 32.10, mediana ATR 32.03 | scartate per posizione aperta n 170, mediana stop/spread 109.70, mediana ATR 84.28 | posizione aperta 109.70 >= 90% degli ingressi 94.25: attesa R5 [INFERITO] non smentita
+       R2: fascia dominante degli ingressi 'USA apertura': 53 su 116 ingressi (45.7%); righe >= 50x nella fascia 103 = 37.1% delle righe >= 50x della cella, 74.1% delle righe della fascia; segnali 400 contro ingressi 116
+       PF per fascia (solo con >= 100 operazioni nella fascia): nessuna fascia con >= 100 operazioni
+       PF del report 0.75 | PF per lato dai deal SENZA commissione aggiunta: BUY 0.98 (n 44), SELL 0.60 (n 72) | commissioni del tester 0.00 (attesa ZERO)
+       RISCHIO (a 1,00 lotto, EUR, NON si confronta con l'oro): perdita a SL mediana 194.54, p90 334.82, max 522.77 | DD equity del report 3172.42
+       lati degli ingressi: BUY 38% SELL 62%
+       ATTESA T3: [NON STIMATO] (nessuna riga di segnale del GBA su U30USD in T3 nel repo: il numero e' NUOVO, nessuna smentita possibile)
+
+   C3G AGGREGATO sulle tre tranche (mediana di TUTTE le righe insieme): 59.50 -- DESCRIZIONE, NON DECIDE (classe 1104 b)
+
+   ESITO DELLA CELLA U30USD M15: (P) PASSA LO STADIO B (COSTO): T1 C3G 47.50, n netto 96, righe a spread > 0 460; T2 C3G 59.60, n netto 126, righe a spread > 0 448; T3 C3G 73.80, n netto 116, righe a spread > 0 400. Significa SOLO che il costo a tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.
+   MERITO: NON MISURATO, qualunque sia il PF. Motivo: le tre tranche del 2026 sono UN SOLO regime (piano 5.3; emendamento D: un solo regime = non misurabile anche per il merito) e il regime degli indici non e' classificato; una tranche non e' un regime (classe 1384), qualunque sia il suo n.
+
+ NON giudica il merito, NON promuove, NON legge un PF come merito; nessun numero va in un preset.
+ CSV: /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/LETT_B/D2B_C3G_R2S_B.csv

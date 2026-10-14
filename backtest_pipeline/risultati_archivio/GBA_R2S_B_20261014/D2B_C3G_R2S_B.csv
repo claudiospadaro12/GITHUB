@@ -1,0 +1,13 @@
+zip;lotto;simbolo;tf;tranche;letta;manca;n;n_netto;righe;righe_spread_pos;righe_m1;c3g;c3g_senza_m1;ce7;ge40;ge50;buy_c3g;buy_n;sell_c3g;sell_n;giudica;esito_cella;merito
+;R2SBNAS;NASUSD;M15;T1;si;;129;129;488;488;0;59.10;59.10;verde;391;314;53.40;280;69.05;208;si;;
+;R2SBNAS;NASUSD;M15;T2;si;;130;130;499;499;0;59.20;59.20;verde;383;323;53.60;356;80.30;143;si;;
+;R2SBNAS;NASUSD;M15;T3;si;;85;85;423;423;0;51.90;51.90;verde;259;222;42.45;200;54.30;223;si;;
+;R2SBNAS;NASUSD;M15;CELLA;;;;;;;;;;;;;;;;;;"(P) PASSA LO STADIO B (COSTO): T1 C3G 59.10, n netto 129, righe a spread > 0 488; T2 C3G 59.20, n netto 130, righe a spread > 0 499; T3 C3G 51.90, n netto 85, righe a spread > 0 423. Significa SOLO che il costo a tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.";NON MISURATO
+;R2SBD30;D30EUR;M15;T1;si;;84;84;418;418;0;44.20;44.20;verde;233;179;42.85;222;47.20;196;si;;
+;R2SBD30;D30EUR;M15;T2;si;;91;91;403;403;0;54.60;54.60;verde;268;215;56.70;219;50.60;184;si;;
+;R2SBD30;D30EUR;M15;T3;si;;73;73;385;385;0;48.70;48.70;verde;248;186;47.40;181;50.10;204;si;;
+;R2SBD30;D30EUR;M15;CELLA;;;;;;;;;;;;;;;;;;"(P) PASSA LO STADIO B (COSTO): T1 C3G 44.20, n netto 84, righe a spread > 0 418; T2 C3G 54.60, n netto 91, righe a spread > 0 403; T3 C3G 48.70, n netto 73, righe a spread > 0 385. Significa SOLO che il costo a tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.";NON MISURATO
+;R2SBU30;U30USD;M15;T1;si;;96;96;460;460;0;47.50;47.50;verde;278;213;44.05;246;52.50;214;si;;
+;R2SBU30;U30USD;M15;T2;si;;126;126;448;448;0;59.60;59.60;verde;338;275;56.00;274;65.80;174;si;;
+;R2SBU30;U30USD;M15;T3;si;;116;116;400;400;0;73.80;73.80;verde;307;278;82.60;171;71.40;229;si;;
+;R2SBU30;U30USD;M15;CELLA;;;;;;;;;;;;;;;;;;"(P) PASSA LO STADIO B (COSTO): T1 C3G 47.50, n netto 96, righe a spread > 0 460; T2 C3G 59.60, n netto 126, righe a spread > 0 448; T3 C3G 73.80, n netto 116, righe a spread > 0 400. Significa SOLO che il costo a tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.";NON MISURATO
