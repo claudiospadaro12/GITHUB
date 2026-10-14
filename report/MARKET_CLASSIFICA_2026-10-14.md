@@ -17,7 +17,7 @@ Conto: **netto chiuse +793,15** (+871,27 dai deal), PF 1,284, **drawdown di SALD
 | 9 | GZ (TP1/TP2/TP3) | 51 | **-63,6** | buy -96,2 (36), sell +32,3 (15) |
 | 10 | TIG Breakout LOW | 2 | -138,4 | lotto 0,30, -70,3 e -68,1 |
 | 11 | MP by SPLpulse | 3 | **-220,6** | lotti 0,05-0,20, peggiore -179,2 |
-| -- | nostre (BULGE, MAXMIN ORO, LARRY, ...) | 9 | ~+40 | n minimo |
+| -- | nostre: BULGE (7 chiuse) | 7 | +15,3 | AUDNZD -39,2, EURNZD +6,4, GBPNZD +26,7 e +12,3, XAUUSD +9,1; **aperte**: MAXMIN ORO flott. +79,2, LARRY flott. -31,5; n minimo |
 
 ## 2. Classifica di QUALITA' (i criteri scritti il 14/10 mattina PRIMA dei numeri: SL iniziale, niente griglia/scala di lotti/recovery, rischio calcolabile, costo, giornate osservate; il netto NON ordina)
 | posto | EA | natura [LETTO nel conto] | giudizio |
