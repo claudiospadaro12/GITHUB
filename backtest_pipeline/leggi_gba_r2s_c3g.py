@@ -68,6 +68,8 @@ backtest_pipeline/prove/GBA_R2S_XAGUSDR_2026-10-14.txt, le due passate del lotto
     stessa cella (zip ARCHIVIATO, SHA256 pinnati), e lo zip archiviato riletto da QUESTO D2 rifa' DET_ATTESA. ROSSA o NON VALUTABILE -> quella cella H0 (C), senza
     appello; nell'albero sta DOPO il KO del driver e PRIMA di '0 segnali';
   - STALLO (DESCRIZIONE): la voce della partizione del file prova sulle passate LANCIATE (lanciate, stalli) = (2,0) (2,1) (2,2) (1,1) (1,0) (0,0).
+    Strato 2 del cancello (14/10, classe 1369): (2,0) smentisce H-TF SOLO con 1 ingresso eseguito in ciascuna cella del giornale nuovo; (2,2) non attribuisce un
+    luogo ('queste passate') senza una passata di controllo; (2,1) e (1,0) rimandano la cella non stallata all'albero H0-H3 invece di dire 'si legge'.
   Le letture dello stadio A, del rilancio R2SXAG2, della conferma R2SXAGT e del lotto R2SXAGH sono IDENTICHE a quelle della v4 riga per riga, salvo le righe che portano
   versione e SHA256 di D2 (e la colonna sha_d2 del CSV della conferma).
 
@@ -1448,18 +1450,27 @@ def stallo_r(lotti, L="R2SXAGR"):
     if len(pp) != 2:
         return "(%d passate nel manifest invece di 2: la partizione e' scritta per due passate)" % len(pp)
     if k == (2, 0):
-        return ("0 stalli su 2 lanciate: lo stallo del 13/10 NON si ripete sulle stesse passate rifatte da sole -> smentita la forma DETERMINISTICA di H-TF ('1 ingresso -> "
-                "stallo, sempre') e di 'queste passate stallano sempre'; resta lo stallo occasionale, tasso NON stimabile con 2 passate")
+        # cancello 14/10 (strato 2, classe 1369): H-TF parla delle passate con 1 SOLO ingresso; se il giornale nuovo non ne ha 1 per cella, NON e' messa alla prova
+        ing = [(P["cella"], len(P["giornale"]["ingressi_eseguiti"]) if P.get("giornale") is not None else None) for P in lan]
+        base = ("0 stalli su 2 lanciate: lo stallo del 13/10 NON si ripete sulle stesse passate rifatte da sole -> smentita la forma DETERMINISTICA di 'queste passate "
+                "stallano sempre' (stesso ini)")
+        if all(x == 1 for _c, x in ing):
+            return base + (" e di H-TF ('1 ingresso -> stallo, sempre': 1 ingresso eseguito in ciascuna cella anche nel giro nuovo); resta lo stallo occasionale, tasso NON "
+                           "stimabile con 2 passate")
+        return base + ("; H-TF ('1 ingresso -> stallo') NON messa alla prova: ingressi eseguiti nel giornale nuovo %s (non 1 in ciascuna cella); resta lo stallo "
+                       "occasionale, tasso NON stimabile con 2 passate" % ", ".join("%s %s" % (c, "n.d." if x is None else x) for c, x in ing))
     if k == (2, 1):
-        return "1 stallo su 2 lanciate (cella %s): non conferma e non smentisce nessuna causa; la cella stallata e' di nuovo H0 (C), l'altra si legge" % nomi(st)
+        return ("1 stallo su 2 lanciate (cella %s): non conferma e non smentisce nessuna causa; la cella stallata e' di nuovo H0 (C), l'altra va all'albero H0-H3 (si "
+                "legge solo se l'albero lo dice)" % nomi(st))
     if k == (2, 2):
-        return ("2 stalli su 2 lanciate: stallo RIPRODOTTO su queste passate (4 su 4 col 13/10), legato a qualcosa di QUESTE passate che NON si sa; NON si rilancia una "
-                "terza volta e NON si allunga il timeout: si porta a Claudio, la misura dopo la decide lui")
+        return ("2 stalli su 2 lanciate: stallo RIPRODOTTO su queste passate (4 su 4 col 13/10); senza una passata di controllo nello stesso giro NON si separa 'queste "
+                "passate' da 'questo PC o terminale oggi': nessuna causa e nessun luogo si attribuisce; NON si rilancia una terza volta e NON si allunga il timeout: si porta "
+                "a Claudio, la misura dopo la decide lui")
     if k == (1, 1):
         return ("1 stallo su 1 lanciata (cella %s; NON LANCIATA %s: %s): la seconda NON e' misurata, MAI '2 su 2'" % (
             nomi(st), nomi(non), "; ".join((P["riga"].get("motivi") or "nessun motivo") for P in non)))
     if k == (1, 0):
-        return ("0 stalli su 1 lanciata (NON LANCIATA %s: %s): niente sulla causa dello stallo; la cella lanciata si legge, quella non lanciata e' H0 (C)" % (
+        return ("0 stalli su 1 lanciata (NON LANCIATA %s: %s): niente sulla causa dello stallo; la cella lanciata va all'albero H0-H3, quella non lanciata e' H0 (C)" % (
             nomi(non), "; ".join((P["riga"].get("motivi") or "nessun motivo") for P in non)))
     return "0 passate lanciate: nessuna misura dello stallo e nessuna lettura"
 
@@ -3248,6 +3259,16 @@ def _autotest_xagr(ck, rifiuta, td, KOZ):
         t, c = leggi_r("st10", {"H1": dict(non, motivi="terminale ancora vivo")})
         ck("H1 NON_LANCIATA per 'terminale ancora vivo' SENZA stallo -> '0 stalli su 1 lanciata'; la M30 si legge (H3)", "0 stalli su 1 lanciata (NON LANCIATA H1: terminale "
            "ancora vivo)" in t and "H3 (B)" in eh(t, "M30"))
+        # 10b-bis (cancello 14/10, strato 2, classe 1369): la partizione NON smentisce H-TF se il giornale nuovo non ha 1 ingresso per cella; a 2 su 2 nessun luogo
+        def _pp(c_, ing, motivi=""):
+            return {"cella": c_, "stato": "KO" if motivi else "OK", "riga": {"motivi": motivi}, "giornale": {"ingressi_eseguiti": [None] * ing}}
+        s0 = stallo_r({"R2SXAGR": {"passate": [_pp("M30", 0), _pp("H1", 2)]}})
+        s1 = stallo_r({"R2SXAGR": {"passate": [_pp("M30", 1), _pp("H1", 1)]}})
+        ck("STALLO 0 su 2 con ingressi eseguiti M30 0 / H1 2 (giornale cambiato) -> H-TF NON messa alla prova (quantificatore vuoto); con 1 e 1 -> smentita",
+           "H-TF ('1 ingresso -> stallo') NON messa alla prova" in s0 and "di H-TF" not in s0.split(";")[0] and "smentita" in s1 and "e di H-TF" in s1, s0[:220])
+        s2 = stallo_r({"R2SXAGR": {"passate": [_pp("M30", 1, "timeout di 8 minuti"), _pp("H1", 1, "timeout di 8 minuti")]}})
+        ck("STALLO 2 su 2: nessun luogo attribuito ('legato a qualcosa di QUESTE passate' assente), 'NON si separa', 'si porta a Claudio'",
+           "legato a qualcosa" not in s2 and "NON si separa" in s2 and "si porta a Claudio" in s2, s2[:220])
         # 10c. CE-DET: i contro-esempi del file prova, uno per volta, sulla M30 (la H1 resta quella vera: H3)
         r179 = re.compile(r"^(2026\.07\.13 19:00:00   \[GBA\] segnale SELL SALTATO .*stop/spread )17\.9(x .*)$", re.M)
         ck("contro-esempio pronto: nel giornale vero della M30 c'e' la riga del 2026.07.13 19:00 a 17,9x", len(r179.findall(LOG["M30"])) == 1)
