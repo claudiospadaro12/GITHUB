@@ -1,57 +1,65 @@
 # =====================================================================
-#  MARCATORE_ARENA_TESTER_TRANCHE_v1
-#  v2 (14/10/2026, controllo-preventivo): l'impronta SHA256 del .ex5 si RICONTROLLA dopo ogni passata (il terminale, aprendosi, puo'
-#  aggiornare un prodotto del Market: senza ricontrollo il referto attribuirebbe i numeri a un binario che non e' quello provato).
-#  Se cambia o sparisce: la passata e' KO, la SONDA2 non parte, il referto scrive EX5_DOPO ... DIVERSO e il lettore sospende i verdetti.
-#  ARENA_TESTER_SONDA.ps1 -- PRIMA MISURA (una SONDA) dell'EA di TERZI 'Arena Nexus Grid Smart XAU MT5' (versione 1.20 vista sul demo
+#  MARCATORE_ARENA_TESTER_TRANCHE_v2
+#  v2 (14/10/2026, controllo-preventivo, strato 2): (1) se l'impronta del .ex5 CAMBIA (o il file sparisce) durante una tranche, le tranche
+#  DOPO NON partono (NON_LANCIATA, motivo nel referto): e' la regola della classe 1438 che la v1, togliendo il cancello SONDA1->SONDA2,
+#  aveva perso (ore di tester su un binario che non e' quello dell'impronta). (2) intestazione riscritta: la v1 portava ancora quella della
+#  sonda (due passate, leva 1:500, cartelle e zip ARENA_TESTER_SONDA, lettore leggi_arena_tester.py), che il codice NON fa piu'.
+#  ARENA_TESTER_TRANCHE.ps1 -- TRE TRANCHE MENSILI dell'EA di TERZI 'Arena Nexus Grid Smart XAU MT5' (versione 1.20 vista sul demo
 #  50503392 il 13/10/2026) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal.
+#  DERIVATO da ARENA_TESTER_SONDA.ps1 v3 (pin 1f0cdf62, passato dai cancelli): stesse guardie, stessa lettura di report e giornali.
 #
 #  CHE COSA FA, e una cosa sola:
 #    1. TROVA il file .ex5 dell'Arena in MQL5\Experts\Market della cartella dati del terminale BCM di QUESTA macchina: nome che inizia con
 #       'Arena' (senza distinguere maiuscole), cercato SOLO dentro Market (i nostri EA non stanno li': classe 1275). Ne deve trovare
 #       ESATTAMENTE UNO: zero o due = si FERMA prima di qualunque tester. Ne stampa nome, dimensione, data e SHA256 (il .ex5 e' un binario
 #       di terzi: NON va nello zip ne' in repo, la sua impronta si').
-#    2. DUE passate SINGOLE del tester (Optimization=0), DUE lotti separati, Modello 4 (ticks reali), XAUUSD M1, deposito 5000 EUR,
-#       leva 1:500, valuta EUR, ExecutionMode=0 (come il driver GBA), Visual=0, AllowLiveTrading=false:
-#         SONDA1 (fumo)  2026.09.28 -> 2026.09.29  (il solo 28/09: il tester esclude la data 'a', misurato in GBA R1A)  timeout -TimeoutSonda1Min
-#         SONDA2         2026.07.01 -> 2026.09.30  (tre mesi, contiene il 28/09; stessa finestra della tranche T1 di GBA)  timeout -TimeoutSonda2Min
-#       SONDA2 parte SOLO SE la SONDA1 ha scritto un report leggibile con almeno 1 operazione, con gli input imposti confermati dal report,
-#       senza timeout, E se la stima della sua durata (circa 65 giorni di borsa x il tempo di test della SONDA1) sta dentro il suo timeout.
+#    2. TRE passate SINGOLE del tester (Optimization=0), una dopo l'altra, OGNUNA A CONTO VUOTO (deposito 5000 EUR) e indipendente,
+#       Modello 4 (ticks reali), XAUUSD M1, leva 1:100, valuta EUR, ExecutionMode=0 (come il driver GBA), Visual=0, AllowLiveTrading=false:
+#         TRANCHE1  2026.07.01 -> 2026.08.01  (luglio)      timeout -TimeoutTrancheMin
+#         TRANCHE2  2026.08.01 -> 2026.09.01  (agosto)      timeout -TimeoutTrancheMin
+#         TRANCHE3  2026.09.01 -> 2026.10.01  (settembre, contiene il 28/09)   timeout -TimeoutTrancheMin
+#       'A' e' il primo giorno del mese dopo (il tester esclude la data 'a', misurato in GBA R1A). Un mese M1 d'oro e' circa 30.000 barre,
+#       sotto il tetto di 100.000. NESSUN cancello fra le tranche, TRANNE due: un terminale ancora vivo (la tranche dopo NON parte) e il
+#       .ex5 cambiato (le tranche dopo NON partono, v2). Un TIMEOUT NON ferma le tranche dopo (i mesi non pesano uguale): la tranche e' KO.
 #    3. RACCOGLIE: i report .htm (e le immagini .png con lo stesso nome), un estratto dei giornali del tester scritti DOPO la fotografia
 #       (letto riga per riga: con centinaia di operazioni al giorno il giornale puo' pesare centinaia di MB), gli .ini, un REFERTO e un
-#       MANIFEST, in una cartella e uno zip sul Desktop (ARENA_TESTER_SONDA, ARENA_TESTER_SONDA.zip). NON giudica: il lettore e'
-#       backtest_pipeline/leggi_arena_tester.py.
+#       MANIFEST, in una cartella e uno zip sul Desktop (ARENA_TESTER_TRANCHE, ARENA_TESTER_TRANCHE.zip). NON giudica: il lettore e'
+#       backtest_pipeline/leggi_arena_tranche.py, con le ipotesi di report/ARENA_TESTER_TRANCHE_SCHEDA_2026-10-14.md.
 #
 #  GLI INPUT (letti dallo screenshot del 13/10, report/MARKET_SCHEDA_FINLABX_CF_DZR_2026-10-13.md): i 14 NON-enumerazione si impongono nel
 #  [TesterInputs] con i valori del demo; i DUE enum (InpTradeMode, InpGoldPulseTheme) NON si impongono (il loro ordinale non e' noto: il
 #  tester usa il default dell'EA, o l'ultimo valore salvato nel tester per questo EA [NON VERIFICATO quale dei due]) e il valore che il tester
 #  ha usato si legge nel report ('Dati in ingresso') e nel giornale, e va nel REFERTO.
 #
-#  DERIVATO DA GBA_R0_PASSATE.ps1 v5 (passato dal cancello, NON toccato). STESSE guardie: macchina DESKTOP-H4D7CAJ, nessun terminal64 /
-#  metaeditor64 / metatester64 vivo, installazioni MT5 non censite = stop (C:\MT5_Backtest e C:\FundedNext_Manuale ammesse PER NOME, chiuse,
-#  non toccate), cartella dati risolta per origin.txt, nessun EA sui grafici salvati, AllowLiveTrading=false, fotografia dei log e lettura
-#  della sola coda, CloseMainWindow e MAI Stop-Process sul terminale, cartella e zip esistenti RINOMINATI con la data e mai cancellati.
+#  STESSE guardie di GBA_R0_PASSATE.ps1 v5 e della sonda v3: macchina DESKTOP-H4D7CAJ, nessun terminal64 / metaeditor64 / metatester64 vivo,
+#  installazioni MT5 non censite = stop (C:\MT5_Backtest e C:\FundedNext_Manuale ammesse PER NOME, chiuse, non toccate; la cartella dati
+#  con origine C:\Users\Master\Desktop ammessa SOLO senza Login= nel suo common.ini), cartella dati risolta per origin.txt, nessun EA sui
+#  grafici salvati, AllowLiveTrading=false, fotografia dei log e lettura della sola coda, CloseMainWindow e MAI Stop-Process sul terminale,
+#  cartella e zip esistenti RINOMINATI con la data e mai cancellati, impronta del .ex5 PRIMA e DOPO ogni tranche (classe 1438).
 #  DEVIAZIONI, tutte dichiarate:
 #   D1. NESSUN sorgente, NESSUNA compilazione, NESSUN file scaricato: l'EA e' il .ex5 del Market gia' installato sul terminale. MetaEditor
 #       non si apre. MQL5\Experts NON si scrive (niente copia, niente rinomina del .ex5: e' di terzi e NON si tocca).
-#   D2. BLOCCO: si prende lo STESSO blocco del driver GBA, Global\ABTG_GBA_R0 (stesso terminale: un giro GBA e questa sonda si escludono a
+#   D2. BLOCCO: si prende lo STESSO blocco del driver GBA, Global\ABTG_GBA_R0 (stesso terminale: un giro GBA e questo giro si escludono a
 #       vicenda), e prima ci si ferma se e' vivo uno dei blocchi elencati per nome: Global\ABTG_NATCLA_F0, Global\ABTG_NATCLA_F1,
-#       Global\ABTG_BULGE_TEL_P0, Global\ABTG_AZZURRA_FREQ, Global\CLAU12_EXPORT_BARRE (classe 1281). Mentre questa sonda gira, una riga
-#       GBA si ferma con il suo messaggio 'Un ALTRO giro di GBA_R0 sta gia girando': e' QUESTA sonda.
+#       Global\ABTG_BULGE_TEL_P0, Global\ABTG_AZZURRA_FREQ, Global\CLAU12_EXPORT_BARRE (classe 1281).
 #   D3. Il report si legge SOLO nella sua testa (primo MB: impostazioni, input, risultati) per non caricare in memoria un file da decine di MB.
-#   D4. Lo STOP OUT del conto del tester NON e' un KO: e' la coda che la sonda cerca. Si conta e si scrive; i numeri dopo lo stop out sono di
+#   D4. Lo STOP OUT del conto del tester NON e' un KO: e' la coda che si cerca. Si conta e si scrive; i numeri dopo lo stop out sono di
 #       un conto morto (lo dice il lettore). Deposito 5000 EUR scelto apposta come il demo (~4.900 EUR), non per reggere (classe 1425 letta).
-#   D5. Leva 1:500: ASSUNZIONE DICHIARATA (la leva del demo 50503392 [NON VISTA]; 1:500 e' quella del commento dell'utente del Market).
+#   D5. Leva 1:100: e' quella che il tester ha STAMPATO il 14/10 (sonda, .ini con 500) e il 27/08 (R114, .ini con 15). Il MARGINE dell'oro
+#       nel tester NON e' prezzo x contratto / 100: R114 (stessa cartella dati) ha letto TRADE_CALC_MODE 0, MARGIN_RATE 10000 e 8580,52 EUR
+#       per 1 lotto = 10.000 USD fissi a lotto al cambio di quel giorno, circa 1:45 sul nozionale a 4.535 [DERIVATO, non riletto oggi].
+#       Lo stop out del tester misura QUEL margine, non quello di un altro conto.
 #
 #  E' UN BACKTEST, NON UN ORDINE. [Experts] AllowLiveTrading=false nel .ini: il terminale del PC di backtest e' loggato sul DEMO 50503392 e il
 #  14/08/2026 da questa macchina sono partiti ordini VERI. L'Arena nel tester opera solo sul conto virtuale del tester.
 #
 #  NON TOCCA, per nome: PRIMA SU QUESTO PC le installazioni C:\MT5_Backtest (cartella dati 04C7A32B) e C:\FundedNext_Manuale (cartella dati
-#  2B8180C3); POI il VPS VMI3047753 e TUTTE le sue cartelle dati (FTMO 541452707 in C:\FTMO, trial 1514806751, REALE 10105439 in C:\BCM_Reale,
-#  100k 50504263, piccolo 50503392 sul VPS con l'Arena VIVA sul grafico XAUUSD M1, manuale 50503635 in C:\MT5_MANUALE, banco 50504400 in
-#  C:\MT5_Backtest, Pepperstone, Tickmill). Scrive SOLO: %USERPROFILE%\abtg_arena_sonda (gli .ini), il report .htm che il tester scrive nella
-#  cartella dati (Report=), il Desktop (cartella e zip ARENA_TESTER_SONDA). Oltre a quello che MT5 scrive da se' (log, storico, cache del
-#  tester). NON legge ne' scrive conti, ordini, posizioni, preset di nessuna sedia. NON tocca CODA.txt ne' il runner notturno (VPS).
+#  2B8180C3) e la cartella dati senza conto con origine C:\Users\Master\Desktop; POI il VPS VMI3047753 e TUTTE le sue cartelle dati (FTMO
+#  541452707 in C:\FTMO, trial 1514806751, REALE 10105439 in C:\BCM_Reale, 100k 50504263, piccolo 50503392 sul VPS con l'Arena VIVA sul
+#  grafico XAUUSD M1, manuale 50503635 in C:\MT5_MANUALE, banco 50504400 in C:\MT5_Backtest, Pepperstone, Tickmill). Scrive SOLO:
+#  %USERPROFILE%\abtg_arena_tranche (gli .ini), i report .htm che il tester scrive nella cartella dati (Report=), il Desktop (cartella e zip
+#  ARENA_TESTER_TRANCHE). Oltre a quello che MT5 scrive da se' (log, storico, cache del tester). NON legge ne' scrive conti, ordini,
+#  posizioni, preset di nessuna sedia. NON tocca CODA.txt ne' il runner notturno (VPS).
 #
 #  NIENTE EMOJI QUI DENTRO (regola del 17/08): Windows PowerShell 5.1 legge i .ps1 come ANSI e un'emoji dentro una stringa rompe il parser.
 # =====================================================================
@@ -312,7 +320,7 @@ Dico ('SHA256  : ' + $ShaEx5 + '   (binario di TERZI: va nel referto, NON nello 
 if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la tranche esce senza report e il giornale lo dice.' 'Yellow' }
 
 # ---------------------------------------------------------------------
-#  2. LE DUE SONDE (passate singole, Optimization=0)
+#  2. LE TRE TRANCHE (passate singole, Optimization=0, ognuna a conto vuoto)
 # ---------------------------------------------------------------------
 $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $Work = Join-Path $env:USERPROFILE 'abtg_arena_tranche'
@@ -430,9 +438,17 @@ $manifest = New-Object System.Collections.ArrayList
 [void]$manifest.Add('sonda;da;a;timeout_min;t_avvio;durata_s;test_s;stato;report;trades;profitto;pf;dd_equita;dd_saldo;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;finestra;stop_out_log;no_money_log;input_ok;enum;motivi')
 $referto = New-Object System.Collections.ArrayList
 $esiti = @{}
+$fermaEx5 = ''
 foreach($s in $SONDE){
   Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', XAUUSD M1, Modello 4, deposito 5000 EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
   $esiti[$s.Nome] = 'NON_LANCIATA'
+  if($fermaEx5 -ne ''){
+    # v2 (classe 1438): niente ore di tester su un binario che non e' quello dell'impronta
+    Write-Host ('   ' + $s.Nome + ' NON LANCIATA: ' + $fermaEx5) -ForegroundColor Red
+    [void]$manifest.Add($s.Nome + ';' + $s.Da + ';' + $s.A + ';' + $s.Timeout + ';;0;;NON_LANCIATA;;;;;;;;;;;;;;;;;;' + ($fermaEx5 -replace ';', ','))
+    [void]$referto.Add($s.Nome + ': NON LANCIATA -- ' + $fermaEx5)
+    continue
+  }
   if((@(Get-Process -Name terminal64, metaeditor64 -ErrorAction SilentlyContinue)).Count -gt 0){
     $why = 'un terminal64 o un metaeditor64 e VIVO prima della passata: non apro un secondo terminale'
     Write-Host ('   ' + $s.Nome + ' NON LANCIATA: ' + $why) -ForegroundColor Red
@@ -483,6 +499,7 @@ foreach($s in $SONDE){
     $ex5Cambiato = $true
     $vistoDopo = $shaDopo; if($vistoDopo -eq ''){ $vistoDopo = 'FILE ASSENTE O ILLEGGIBILE' }
     [void]$motivi.Add('il .ex5 e CAMBIATO durante la passata (SHA256 prima ' + $ShaEx5 + ', dopo ' + $vistoDopo + '): il binario provato NON e quello del referto (aggiornamento dal Market?)')
+    $fermaEx5 = ('il .ex5 dell Arena e CAMBIATO (o sparito) durante la ' + $s.Nome + ': le tranche dopo NON partono, non si spendono ore su un binario diverso da quello dell impronta (classe 1438)')
   }
   $finest = 'non letta'
   if($st.Fin.Count -ge 1){
@@ -575,14 +592,14 @@ foreach($s in $SONDE){
 # ---------------------------------------------------------------------
 Titolo '3 - RACCOLTA'
 $testa = @(
-  ('ARENA TESTER TRANCHE -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_TRANCHE_v1, pin ' + $Pin),
+  ('ARENA TESTER TRANCHE -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_TRANCHE_v2, pin ' + $Pin),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
-  ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha applicato il 14/10 nella SONDA1, il report diceva 1:100; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
+  ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
   ('input imposti (14, valori del demo del 13/10): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ')),
   ('input NON imposti (enum, ordinale sconosciuto): ' + ($INPUT_ENUM -join ', ') + ' -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: il valore usato e quello del report, riga ENUM qui sotto'),
   ('esiti: TRANCHE1 ' + $esiti['TRANCHE1'] + '   TRANCHE2 ' + $esiti['TRANCHE2'] + '   TRANCHE3 ' + $esiti['TRANCHE3']),
-  'ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre.',
+  'ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre. Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).',
   ''
 )
 (($testa + $referto + @('', 'COME SI LEGGE: python3 backtest_pipeline/leggi_arena_tranche.py ARENA_TESTER_TRANCHE.zip. Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_ARENA_TRANCHE.txt') -Encoding ASCII
