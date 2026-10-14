@@ -33,5 +33,5 @@ Fonte: `GBA_R2S_B.zip` (SHA256 `56b6176a5ab6f967…`), riga `4ac08402…` al pin
 
 ## 5. Cosa si misura adesso (una cosa per volta, un giro GBA alla volta)
 1. **Conferma a tick reali dell'argento (XAGT)** [riga gia' con Claudio] e rifare le celle M30/H1 dell'argento da sole.
-2. **Gestione dell'uscita ad asse** sul GBA a M15 degli indici (casella 3): R2 USCITA gia' impostato nel piano; da riprendere con il cancello.
+2. **Gestione dell'uscita ad asse** sul GBA a M15 degli indici (casella 3): un giro «R2 USCITA» e' nominato nelle righe di lancio, ma il suo stato [NON VERIFICATO: va letto nel registro dei test] e va ripreso col cancello.
 3. **Piu' regimi**: lo storico indici parte dal 2024.09.26 (un anno e mezzo): servono i regimi dichiarati (toro / orso / laterale) e n >= 150 per regime; il 2026 da solo non basta.
