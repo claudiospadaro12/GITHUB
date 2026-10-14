@@ -107,7 +107,7 @@ INPUT_IMPOSTI = (("InpS03FundedPrefix", "true", "b"), ("InpEntryPhaseSpacingR33"
 INPUT_ENUM = ("InpTradeMode", "InpGoldPulseTheme")
 # PROVENIENZA (classe 1381): il pin della riga che ha passato il cancello per lo script v2. VUOTO finche' la riga v2 non e' pinnata:
 # con la tupla vuota OGNI zip ha i verdetti SOSPESI (fail-closed). Dopo il commit dello script v2 si scrive qui il suo pin (40 esadecimali).
-PIN_PASSATI = ("fa37652d349bd5f7f26167912a7b360c174949c4",)
+PIN_PASSATI = ("1f0cdf62e950162080a76eb7f406a605c9ab7fd7",)
 MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_SONDA_v3"
 DATA_MINIMA_REFERTO = "2026-10-14"   # il giorno dello script v2: un REFERTO datato prima non puo' venire da quel pin
 FINESTRE = {"SONDA1": ("2026.09.28", ("2026.09.28", "2026.09.29")), "SONDA2": ("2026.07.01", ("2026.09.29", "2026.09.30"))}
