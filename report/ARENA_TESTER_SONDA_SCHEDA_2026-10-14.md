@@ -1,6 +1,6 @@
 # 🧪 ARENA NEL NOSTRO STRATEGY TESTER — scheda della PRIMA SONDA (14/10/2026)
 
-> **Stato: BOZZA v2, in cancello.** Lo strato 2 (`controllo-preventivo`, 14/10) ha trovato e corretto tre difetti (classi 1437, 1438, 1439): lo script e' passato a **v2** (impronta del `.ex5` ricontrollata dopo ogni passata), quindi la riga e' tornata col **pin di zeri** (si rifiuta di partire) finche' lo script v2 non e' committato e ripinnato; il lettore sospende i verdetti finche' `PIN_PASSATI` non contiene quel pin. Niente di questo e' partito.
+> **Stato: v2 PINNATA (`fa37652d`), secondo giro dello strato 2 (14/10).** Il primo giro (`controllo-preventivo`) ha trovato tre difetti (classi 1437, 1438, 1439), corretti in **v2** (impronta del `.ex5` ricontrollata dopo ogni passata; lettore con provenienza/condizioni). Il **secondo giro** ha provato le tre correzioni con contro-esempi nuovi: lo **script v2 regge** (prova a secco: `.ex5` aggiornato o sparito durante la SONDA1 -> SONDA1 KO, SONDA2 NON lanciata, `EX5_DOPO ... DIVERSO`, lettore sospeso); il **lettore** aveva due difetti (classi **1440**: la correzione della 1439 copriva la forma del caso, non la regola; **1441**: la (B) si giudicava su 2 giorni dopo uno stop out) corretti nel lettore (autotest **50/50**). Il lettore non e' scaricato dalla riga: **pin e SHA della riga non cambiano**. Niente di questo e' partito.
 > Richiesta di Claudio (14/10): _«provare l'Arena vera nel nostro Strategy Tester... Procedi»_.
 
 ## 1. Cosa misura, e perché
@@ -10,12 +10,12 @@
   - **SONDA1 (fumo)** `2026.09.28 → 2026.09.29`: il solo 28/09 (il tester esclude la data «a», misurato in GBA R1A). Timeout 20 min.
   - **SONDA2** `2026.07.01 → 2026.09.30`: tre mesi, **stessa finestra della tranche T1 di GBA** (sullo stesso PC: 25.648.545 tick, 88.416 barre, 100% tick reali **[MISURATO 10/10 e 14/10]**: è l'ancora del feed). Timeout 240 min. Parte **solo se** la SONDA1 ha un report leggibile con ≥ 1 operazione, input confermati dal report, nessun timeout **e** stima di durata (≈ 65 × tempo di test della SONDA1) ≤ 240 min.
 
-## 2. File (worktree, NON committati) e SHA256
+## 2. File e SHA256
 | file | SHA256 |
 |---|---|
 | `backtest_pipeline/righe/ARENA_TESTER_SONDA.ps1` (marcatore `MARCATORE_ARENA_TESTER_SONDA_v2`) | `38103274C94220BC098AD1675AEF8036875C02BF3105B8D0E75687602C2B5C76` |
-| `backtest_pipeline/righe/RIGA_LANCIA_ARENA_TESTER_SONDA.txt` (BOZZA v2, pin di zeri: lo SHA cambia quando il pin vero entra) | `33E9F2B1F1205E0816E6CA563D3688ACCAC872618AA2CF7C70E992EDCD833A44` |
-| `backtest_pipeline/leggi_arena_tester.py` (lettore, sola lettura; `PIN_PASSATI` da riempire col pin della riga v2) | vedi il referto del cancello (cambia quando entra il pin) |
+| `backtest_pipeline/righe/RIGA_LANCIA_ARENA_TESTER_SONDA.txt` (pin `fa37652d349bd5f7f26167912a7b360c174949c4`, che contiene lo script v2 con lo SHA qui sopra) | vedi il referto del cancello (la raccolta e' stata ritoccata dopo il commit `61d5c64c`: classe 1021, voci dello zip) |
+| `backtest_pipeline/leggi_arena_tester.py` (lettore, sola lettura; `PIN_PASSATI = fa37652d...`; classi 1440-1441, autotest 50/50) | `2ECF7CA2B71DC6349FF0B12FDF7FC5636CF36687CDEC8D07528A81F3EBC5F7B9` |
 
 ## 3. ✋ I passi a mano di Claudio (PRIMA della riga)
 **Bersaglio: 🪟 terminale MT5 `50503392` nella cartella `C:\Program Files\BCM Markets MT5 Terminal` sul PC di backtest `DESKTOP-H4D7CAJ`. NON il VPS, NON il reale `10105439`, NON `C:\MT5_Backtest`, NON `C:\FundedNext_Manuale`.** Prima di toccarlo, la finestra si riconosce da una riga stampata, non a occhio (🖥️ PowerShell sul PC di backtest): `Get-Process terminal64 | select Id, MainWindowTitle, Path`.
@@ -26,7 +26,7 @@
 
 ## 4. Attese scritte PRIMA dei numeri (le stesse del docstring del lettore)
 - **(A)** La SONDA1 apre ≥ 1 operazione. Se zero: l'EA nel tester non opera o lo rifiuta (licenza, DLL, simbolo, versione demo) → **MISURA MANCANTE**, non errore.
-- **(B)** Mediana del netto per giorno (prima di un eventuale stop out) **≥ 100 EUR** a 0,01 con 5.000 EUR → stesso ordine del demo; **< 100** → demo ottimista. Si giudica **sulla SONDA2**. Alternativa: il tester come il demo **non ha slippage**, quindi un tester sotto soglia NON si spiega con lo slippage: restano **feed/spread** e **regime** (due giorni di ottobre contro un trimestre); questa sonda non li separa.
+- **(B)** Mediana del netto per giorno (prima di un eventuale stop out) **≥ 100 EUR** a 0,01 con 5.000 EUR → stesso ordine del demo; **< 100** → demo ottimista. Si giudica **sulla SONDA2**, e solo con **almeno 20 giorni con deal** prima di un eventuale stop out (aggiunto dal cancello il 14/10, prima dei numeri: classe 1441). Alternativa: il tester come il demo **non ha slippage**, quindi un tester sotto soglia NON si spiega con lo slippage: restano **feed/spread** e **regime** (due giorni di ottobre contro un trimestre); questa sonda non li separa.
 - **(C)** **CADUTA = DD di equità ≥ 10% del deposito (≥ 500 EUR) dentro il 28/09** (data server BCM). SONDA1: DD di equità del report (la finestra è il giorno). SONDA2: perdita d'equità **stimata** dentro il giorno (limite inferiore). Alternativa col numero **[INFERITO]**: con lotto cresciuto col saldo (≈ 32× il nostro), la stessa traiettoria a 0,01 vale ≈ 31.000/32 ≈ 1.000 USD ≈ 850 EUR ≈ **17%** → sopra soglia. **Nessuna caduta in SONDA1 NON smentisce l'utente** (vedi §5, punti 3-4).
 
 ## 5. Contro-esempi (costruiti per rompere la misura) e come sono coperti
@@ -47,9 +47,9 @@ Un trimestre = un regime; tester **senza slippage né latenza**; feed BCM (non l
 ## 7. La decisione dopo (SOLO dopo aver letto la sonda)
 Sonda con **lotto 0,03 / 0,05 / 0,10** e **finestra più lunga** (la coda scala col lotto; più regimi); se la stima di durata supera il timeout, **tranche mensili**; eventuale contro-prova con `ExecutionMode` a ritardo casuale come proxy dello slippage. Ogni passo nuovo con attese scritte prima e il suo cancello.
 
-## 8. Controlli fatti dallo Sviluppatore (strato 2 ancora da fare)
+## 8. Controlli fatti dallo Sviluppatore (e dallo strato 2, due giri)
 - `controlla_riga.py --oggetto riga`: unico BLOCCANTE il **pin di zeri** (atteso); con un pin vero (copia temporanea) **nessun difetto meccanico**. `--ps1`: nessun difetto meccanico.
 - Parser pwsh: 0 errori (ps1 e riga). Binder statico su tutti i comandi (classe 586/1385): nessun problema vero (solo i falsi positivi noti `-File`/`-Encoding`/`-NoNewline`), nessun `-ForegroundColor` doppio. ASCII puro.
 - Prova a secco in pwsh (macchina finta `DESKTOP-H4D7CAJ`, terminale finto che scrive report e giornale nel formato vero): rami **nessun Market, Market vuoto, solo altri .ex5, due .ex5, un .ex5 (rc 0, zip completo), zero operazioni, report assente, timeout (KO, nessuna chiusura forzata, PID stampato), stima oltre il timeout, EA su un grafico salvato, blocco GBA occupato, blocco di un altro driver occupato, pin di zeri**.
-- Lettore: autotest 28/28 verdi; letto un report VERO del tester (GBA R1A_03: 557 operazioni, riconciliazione esatta, commissione 3,42 EUR/lotto a giro); 94.000 deal / 78 MB in ~30 s.
+- Lettore: autotest 28/28 verdi alla v1, **50/50** dopo il secondo giro del cancello (contro-esempi 14-18 della v2, 11b/16d/16e/17c del secondo giro); letto un report VERO del tester (GBA R1A_03: 557 operazioni, riconciliazione esatta, commissione 3,42 EUR/lotto a giro); 94.000 deal / 78 MB in ~30 s.
 - **NON verificato (il tester gira solo sul PC di backtest)**: che il tester accetti il `.ex5` del Market col percorso `Market\<nome con spazi>.ex5`; il formato delle righe input nel giornale; che l'Arena operi nel tester; la sua velocità; il valore degli enum; il nome esatto del file nel Market.

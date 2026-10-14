@@ -19,6 +19,8 @@ ATTESE, SCRITTE PRIMA DEI NUMERI (14/10/2026, prima di qualunque giro del tester
       e +817,57 EUR il 14/10 a lotto 0,01 su ~4.900 EUR [LETTO nel conto]. Regola: MEDIANA del netto per giorno (giorni con
       almeno un deal, PRIMA di un eventuale stop out) >= 100 EUR -> B regge; < 100 EUR -> B SMENTITA.
       Si giudica sulla SONDA2 (65 giorni). Sulla SONDA1 (un giorno solo, ed e' il giorno sospetto) si stampa e basta.
+      E sulla SONDA2 SOLO con almeno 20 giorni con deal prima di uno stop out (aggiunto dal cancello il 14/10, PRIMA dei numeri: uno
+      stop out al terzo giorno lasciava giudicare 'REGGE' o 'SMENTITA' su due giorni, lo stesso campione che sulla SONDA1 si rifiuta).
       Ipotesi alternativa, col numero: se B e' smentita, il demo e' OTTIMISTA. Ma il tester, come il demo, NON ha slippage
       (ExecutionMode=0, ordini stop riempiti al prezzo: lo misura il punto 'prezzo esatto'), quindi un tester sotto 100 EUR/giorno
       NON si spiega con lo slippage: restano il FEED/SPREAD (storico BCM di luglio-settembre contro il live di ottobre) e il
@@ -48,8 +50,9 @@ COME SI CONTA
     2. il resto deal per deal: posizioni aperte dello stesso lato e volume; se il commento dell'out e' 'tp X' / 'sl X', si
        preferiscono quelle con quel T/P o S/L nell'ordine d'apertura; un candidato = UNIVOCO; piu' candidati dello stesso cesto =
        STESSO CESTO (netto del cesto esatto); di cesti diversi = AMBIGUO (si prende il piu' vecchio).
-    Un grappolo chiuso 'per insieme' conta come AMBIGUO anche quando un ALTRO cesto aperto dello stesso lato contiene lo stesso
-    insieme di volumi (il grappolo potrebbe essere una chiusura PARZIALE di quel cesto: il report non lo distingue).
+    Un grappolo chiuso 'per insieme' conta come AMBIGUO anche quando le ALTRE posizioni aperte dello stesso lato (un altro cesto, o
+    piu' cesti insieme, moduli [F] e commenti non riconosciuti compresi) contengono lo stesso insieme di volumi (il grappolo potrebbe
+    essere una chiusura PARZIALE di quelle: il report non lo distingue; il demo chiude cesti grandi "in 4 volte").
     Se gli AMBIGUI superano il 5% dei deal 'out', i netti PER CESTO si stampano come APPROSSIMATI. Il netto PER GIORNO e i lotti
     vivi NON dipendono dall'accoppiamento (somme sui deal), e il netto totale si riconcilia col report. L'EQUITA' STIMATA SI'
     (il prezzo d'ingresso delle posizioni ancora vive dipende da quali si sono chiuse): con accoppiamento oltre il 5% la (C) della
@@ -86,6 +89,7 @@ DEPOSITO_ATTESO = 5000.0
 LEVA_ATTESA = "1:500"
 DEMO_GIORNO = (("2026-10-13", 487.31), ("2026-10-14", 817.57))   # [LETTO nel conto 50503392] netto del gruppo Arena
 SOGLIA_B = 100.0           # EUR al giorno (mediana) a 0,01 con 5000 EUR
+GIORNI_MIN_B = 20          # giorni con deal (prima dello stop out) sotto i quali la (B) della SONDA2 NON si giudica [cancello 14/10, prima dei numeri]
 SOGLIA_C = 0.10            # caduta = DD di equita' >= 10% del deposito, dentro il 28/09
 GIORNO_CROLLO = datetime.date(2026, 9, 28)
 COMM_ATTESA = 3.90         # EUR/lotto a giro [NON VERIFICATO]
@@ -450,15 +454,12 @@ def analizza(rep):
                 adatti.sort(key=lambda x: (-x[0], x[2][0]["t"]))
                 # un ALTRO cesto aperto dello stesso lato che contiene lo stesso insieme di volumi: il grappolo puo' essere una sua
                 # chiusura PARZIALE (controllo-preventivo 14/10: senza questo, un parziale veniva contato 'per insieme', cioe' certo)
+                # secondo giro del cancello (14/10): l'alternativa si cerca nell'UNIONE di tutte le ALTRE posizioni aperte dello stesso
+                # lato (cesti diversi insieme, moduli [F], commenti non riconosciuti), non in un solo cesto: {0.01 del cesto 2 + 0.02 del
+                # cesto 3} spiega il grappolo {0.01, 0.02} quanto il cesto 1 intero (autotest 16d). Il caso normale 16c non cambia.
                 cv0 = collections.Counter(round(p["vol"], 2) for p in adatti[0][2])
-                alternativa = False
-                for ep2, ps2 in per_ep.items():
-                    if ep2 == adatti[0][1]:
-                        continue
-                    cv2 = collections.Counter(round(p["vol"], 2) for p in ps2)
-                    if all(cv2[v] >= n for v, n in cv0.items()):
-                        alternativa = True
-                        break
+                altri_vol = collections.Counter(round(p["vol"], 2) for p in aperte[lato] if p["ep"] != adatti[0][1])
+                alternativa = all(altri_vol[v] >= n for v, n in cv0.items())
                 if amb_grappolo or alternativa or (len(adatti) >= 2 and adatti[1][0] == adatti[0][0] and collections.Counter(round(p["vol"], 2) for p in adatti[1][2]) == collections.Counter(round(p["vol"], 2) for p in adatti[0][2])):
                     # due cesti con lo stesso insieme di volumi: la scelta e' arbitraria, e lo resta per tutto il grappolo
                     acc["ambigui"] += adatti[0][0]
@@ -659,7 +660,10 @@ def verdetti(nome, rep, a, sospesi=None):
     lati_txt = "cesti [R] buy %d, sell %d (%s: se un lato e' 0 il tester puo' aver usato un altro modo)" % (lati["buy"], lati["sell"], DEMO_ENUM)
     if netti:
         med = statistics.median(netti)
-        if s == "SONDA2":
+        if s == "SONDA2" and len(netti) < GIORNI_MIN_B:
+            quale = "NESSUN verdetto: campione sottile, %d giorni < %d (la regola R59: il campione sottile sospende il MERITO; lo stop out, se c'e', e' il RISCHIO e sta sopra)" % (len(netti), GIORNI_MIN_B)
+            esito = "sopra la soglia" if med >= SOGLIA_B else "sotto la soglia"
+        elif s == "SONDA2":
             quale = "si GIUDICA qui"
             esito = "REGGE (stesso ordine del demo)" if med >= SOGLIA_B else "SMENTITA (demo ottimista: feed/spread o regime, o un enum diverso dal demo; NON lo slippage, che manca anche qui)"
         else:
@@ -1256,13 +1260,17 @@ def autotest():
     a10 = analizza(leggi_report(("\ufeff" + t10b.lstrip("\ufeff")).encode("utf-16-le")))
     ok(any("deal persi" in e or "diversa" in e for e in a10["errori"]), "10 un valore di un deal alterato (9 999,99): la riconciliazione deposito + deal = ultimo saldo lo segnala")
     # 11. (B): mediana sopra/sotto 100 EUR
-    F11 = Finto(periodo="M1 (2026.07.01 - 2026.09.30)")
-    for gi, guad in enumerate((150.0, 50.0, 120.0)):
-        p = F11.apri("2026.07.%02d 10:00:00" % (gi + 1), "buy", 0.01, 4000.0, "FinlabX BUY [CID=%d] [R]" % (gi + 1))
-        F11.chiudi("2026.07.%02d 11:00:00" % (gi + 1), p, 4000.0 + guad, "")
-    r11 = leggi_report(F11.htm())
-    v11 = [x for x in verdetti("ARENA_SONDA2_x.htm", r11, analizza(r11)) if x.startswith("(B)")]
-    ok(v11 and "REGGE" in v11[0], "11 (B) mediana ~120 EUR/giorno (150, 50, 120 meno le commissioni): REGGE")
+    # (secondo giro del cancello 14/10: 21 giorni, perche' sotto GIORNI_MIN_B la (B) della SONDA2 non si giudica; 11b il caso a 19)
+    for ng, att11 in ((21, "REGGE"), (19, "NESSUN verdetto: campione sottile")):
+        F11 = Finto(periodo="M1 (2026.07.01 - 2026.09.30)")
+        for gi in range(ng):
+            guad = (150.0, 50.0, 120.0)[gi % 3]
+            p = F11.apri("2026.07.%02d 10:00:00" % (gi + 1), "buy", 0.01, 4000.0, "FinlabX BUY [CID=%d] [R]" % (gi + 1))
+            F11.chiudi("2026.07.%02d 11:00:00" % (gi + 1), p, 4000.0 + guad, "")
+        r11 = leggi_report(F11.htm())
+        v11 = [x for x in verdetti("ARENA_SONDA2_x.htm", r11, analizza(r11)) if x.startswith("(B)")]
+        ok(v11 and att11 in v11[0] and (att11 == "REGGE" or ("REGGE" not in v11[0] and "SMENTITA" not in v11[0])),
+           "11%s (B) %d giorni, mediana ~120 EUR/giorno (150, 50, 120 meno le commissioni): %s" % ("" if ng >= GIORNI_MIN_B else "b", ng, att11))
     # 12. (B) sulla SONDA1: nessun verdetto (un giorno, il giorno sospetto)
     # (controllo-preventivo 14/10: prima usava il report di TRE MESI chiamato SONDA1; ora un report della finestra vera della SONDA1)
     F12 = Finto(periodo="M1 (2026.09.28 - 2026.09.29)")
@@ -1314,6 +1322,24 @@ def autotest():
     F16c.chiudi("2026.09.28 11:00:00", c3, 3995.0, "")
     a16c = analizza(leggi_report(F16c.htm()))
     ok(a16c["acc"]["per_insieme"] == 2 and a16c["acc"]["ambigui"] == 0, "16c caso normale: cesto intero chiuso, l'altro non contiene il suo insieme -> 'per insieme'")
+    # 16d. CONTRO-ESEMPIO del secondo giro (14/10): cesto 1 {0.01, 0.02}, cesto 2 {0.01, 0.04}, cesto 3 {0.02, 0.08}; nello stesso
+    # secondo escono lo 0.01 del cesto 2 e lo 0.02 del cesto 3. Nessun ALTRO cesto da solo contiene {0.01, 0.02}: la v2 contava il
+    # cesto 1 'per insieme' (certo, quota incerta 0%). L'unione dei cesti 2 e 3 lo contiene: deve essere AMBIGUO.
+    F16d = Finto()
+    d1 = F16d.apri("2026.09.28 10:00:00", "buy", 0.01, 4000.0, "FinlabX BUY [CID=1] [R]")
+    d2 = F16d.apri("2026.09.28 10:01:00", "buy", 0.02, 3998.0, "FinlabX BUY [CID=1] [R]")
+    e1 = F16d.apri("2026.09.28 10:02:00", "buy", 0.01, 3990.0, "FinlabX BUY [CID=2] [R]")
+    e2 = F16d.apri("2026.09.28 10:03:00", "buy", 0.04, 3985.0, "FinlabX BUY [CID=2] [R]")
+    f1 = F16d.apri("2026.09.28 10:04:00", "buy", 0.02, 3980.0, "FinlabX BUY [CID=3] [R]")
+    f2 = F16d.apri("2026.09.28 10:05:00", "buy", 0.08, 3975.0, "FinlabX BUY [CID=3] [R]")
+    F16d.chiudi("2026.09.28 10:30:00", e1, 3995.0, "")
+    F16d.chiudi("2026.09.28 10:30:00", f1, 3995.0, "")
+    for p in (d1, d2, e2, f2):
+        F16d.chiudi("2026.09.28 11:00:00", p, 4005.0, "")
+    a16d = analizza(leggi_report(F16d.htm()))
+    ok(a16d["acc"]["ambigui"] >= 2 and a16d["quota_ambigui"] > SOGLIA_AMBIGUI,
+       "16d {0.01 del cesto 2 + 0.02 del cesto 3} nello stesso secondo, cesto 1 = {0.01, 0.02}: AMBIGUO (quota %.0f%%), non 'per insieme'" % (100 * a16d["quota_ambigui"]))
+    ok(abs(sum(v["netto"] for v in a16d["giorni"].values()) - (F16d.saldo - F16d.dep)) < 0.011, "16e il netto per giorno resta esatto anche nel 16d")
     # 17. stop out il primo giorno della SONDA2: (B) NON VALUTABILE, non un verdetto su zero giorni; stop out dopo 2 giorni: TRONCATA
     F17 = Finto(periodo="M1 (2026.07.01 - 2026.09.30)")
     p = F17.apri("2026.07.01 10:00:00", "buy", 0.10, 4000.0, "FinlabX BUY [CID=1] [R]")
@@ -1330,6 +1356,9 @@ def autotest():
     r17b = leggi_report(F17b.htm())
     v17b = [x for x in verdetti("ARENA_SONDA2_x.htm", r17b, analizza(r17b)) if x.startswith("(B)")]
     ok(v17b and "FINESTRA TRONCATA" in v17b[0] and "2 giorni" in v17b[0] and "sell 0" in v17b[0], "17b stop out dopo 2 giorni: (B) dice FINESTRA TRONCATA, 2 giorni, e i lati dei cesti (sell 0)")
+    # 17c. CONTRO-ESEMPIO del secondo giro (14/10): con lo stop out al terzo giorno la v2 stampava '(B) ... REGGE [si GIUDICA qui]' su 2 giorni
+    ok(v17b and "NESSUN verdetto: campione sottile" in v17b[0] and "REGGE" not in v17b[0] and "SMENTITA" not in v17b[0],
+       "17c stop out dopo 2 giorni: (B) NESSUN verdetto (campione sottile), ne' REGGE ne' SMENTITA")
     # 18. PROVENIENZA (classe 1381): REFERTO di un altro pin, di un altro giorno, del marcatore v1, senza EX5_DOPO, con EX5 DIVERSO
     global PIN_PASSATI
     import tempfile
