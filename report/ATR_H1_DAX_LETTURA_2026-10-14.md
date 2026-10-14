@@ -36,3 +36,6 @@ Mediana ATR H1 da 37 (dic 2024) a 100,5 (apr 2025) e 117,6 (mar 2026). Sotto la 
 - Spread orario da tick fino al 30/06/2026 (stagioni miste).
 - L'orologio resta non confermato nelle stagioni 2024/25 e estate 2025: le letture per ora restano sospese.
 - Contro-esempio provato dal lettore (autotest): sezione `--autotest` del lettore; non rieseguito qui oltre alla lettura reale.
+
+## 7. Aggiunta dopo il cancello sul giro con Gemini (14/10)
+Il cancello ha ricalcolato dal CSV con codice proprio: ATR di Wilder mediana 59,06 (contro 58,47 della media semplice), quindi la differenza fra le due definizioni NON spiega il 37-40, ma su una lettura singola Wilder non si esclude (barre del mattino con ATR in 37-40: 8,1% con la media semplice contro 6,3% con Wilder). Le barre del mattino da settembre 2026 in poi (estate, orologio confermato) hanno mediana 38,15 e il 53,2% delle letture <= 40: la spiegazione piu' corta del 37-40 e' **ora bassa + regime recente**. Dettagli: `docs/RISPOSTA_A_GEMINI_ATR_H1_DAX_2026-10-14.md`. Il conteggio 08/09 del 2024/25 non e' un'alternanza (z +1,21) e non cambia il verdetto del collaudo: orologio 2024/25 resta NON CONFERMATO.
