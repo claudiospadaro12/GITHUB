@@ -18,7 +18,7 @@ Zip `ARENA_TESTER_SONDA.zip` (SHA256 `5adc28f0…`), archivio `backtest_pipeline
 - Giornale: modifiche di SL/TP rifiutate «close to market» (retcode 10029 frozen) alle 00:40:26-27, ripetute.
 
 ## 3. Quello che NON si puo' concludere (scritto dal lettore e da me)
-- Un giorno, un regime, il solo 28/09 da conto vuoto: **non e' la frequenza del crollo**, e' una prova che **a 0,01 lotti il cesto profondo puo' ammazzare un conto da 5.000 in un giorno quando il margine e' 1:100**. Con leva 1:500 lo stop out sarebbe arrivato piu' tardi o non arrivato: la perdita flottante e' la stessa, il margine no.
+- Un giorno, un regime, il solo 28/09 da conto vuoto: **non e' la frequenza del crollo**, e' una prova che **a 0,01 lotti il cesto profondo puo' ammazzare un conto da 5.000 in un giorno quando il margine e' 1:100**. [INFERITO, non misurato] Con leva 1:500 lo stop out sarebbe arrivato piu' tardi o non arrivato: la perdita flottante e' la stessa, il margine no.
 - Tester senza slippage ne' latenza: il reale sarebbe PEGGIORE (la recensione del 03/10 dice che nel reale «alcuni ordini non vengono eseguiti»: dichiarato da terzi).
 - Feed BCM, non quello dell'utente; enum al default del tester (`InpTradeMode=0`, `InpGoldPulseTheme=0`).
 - Nessun merito: griglia + scala di lotti + recupero senza SL iniziale resta fuori dall'imbuto prop. **Non e' un verdetto ne' una promozione ne' un'archiviazione.**
