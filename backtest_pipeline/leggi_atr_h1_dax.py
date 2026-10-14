@@ -41,7 +41,7 @@ ATTESE SCRITTE PRIMA DEI NUMERI (14/10/2026), ognuna col numero dell'alternativa
         [48,0 ; 60,0]    IL DERIVATO REGGE (banda attorno a 53,6; 1,5 x 48 / 1,70 = 42,4x).
         > 60,0           SOPRA LA BANDA: il derivato SOTTOSTIMA.
       Numero dell'altra spiegazione, "Emiliano vede un'ora bassa" [INFERITO, aritmetica d'esempio, non misura]: con una
-      notte a ~0,4 e una sera a ~0,6 della volatilita' del giorno, l'ATR(14) letto alle 7-8 server copre ~9 ore di notte e
+      notte a ~0,4 e una sera a ~0,6 della volatilita' del giorno, l'ATR(14) letto alle 08:30-10:00 IT copre ~9 ore di notte e
       ~5 di sera e vale ~0,7-0,75 della media su tutte le ore: con la mediana a 53,6 darebbe ~37-40 al mattino. Quindi
       questa spiegazione PREDICE E1 in [48 ; 60] E E2 <= 44; la "sovrastima" predice E1 <= 42 (e E2 ancora piu' basso).
       Distorsione dichiarata: il 53,6 viene da un ADR (MEDIA delle escursioni giornaliere), l'ATR ha coda a destra:
@@ -55,11 +55,16 @@ ATTESE SCRITTE PRIMA DEI NUMERI (14/10/2026), ognuna col numero dell'alternativa
       Portato sul DAX [INFERITO: altro simbolo, altre ore di sessione]: E1 ~ 53,6 x 1,22 = 65,4 -> SOPRA LA BANDA, e il
       minimo del giorno ~ 0,662 x E1 = 35,5 (se E1 = 53,6) - 43,3 (se E1 = 65,4). Quindi il ramo "> 60" NON e' un ramo
       teorico: e' quello che il Dow predice, e la lettura di Emiliano starebbe vicino al minimo del giorno in tutti e due.
-  E2. "COME LO VEDE UN TRADER ALLE 08:30-10:00 SERVER": ATR alle barre CHIUSE 7 e 8 server (le ultime chiuse in quella
-      finestra: e' l'ATR(14) che copre la notte). Partizione (bande della scheda N1, scritte li' per la barra delle 09:00
+  E2. "COME LO VEDE UN TRADER ALLE 08:30-10:00 ITALIANE" (la live: file LIVE_EMILIANO_14.10.26_2026-10-14_08-30-00,
+      "c'e' l'apertura tra cinque minuti" a r.101): ATR alle barre CHIUSE delle 07:00 e 08:00 IT (le ultime chiuse in
+      quella finestra: e' l'ATR(14) che copre la notte) = barre 06 e 07 server d'ESTATE UE, 07 e 08 d'INVERNO UE
+      (corretto dal cancello il 14/10: la prima stesura diceva "08:30-10:00 SERVER, barre 7 e 8" fisse, che d'estate
+      mettono dentro la barra 08 server CHIUSA = l'apertura Xetra, mai vista chiusa da chi legge alle 09:00-10:00 IT).
+      Partizione (bande della scheda N1, scritte li' per la barra delle 09:00
       italiane): < 33 SOTTO EMILIANO; [33 ; 44] NELLA BANDA DI EMILIANO; (44 ; 50) GRIGIA; [50 ; 57] NELLA BANDA DEL
       DERIVATO; > 57 SOPRA. Si stampa anche la FORCHETTA della barra in formazione (Emiliano legge di giorno, a barra
-      aperta): valore mostrato fra (somma dei 13 TR chiusi)/14 e l'ATR a barra chiusa.
+      aperta: barre delle 08:00 e 09:00 IT = 07 e 08 server d'estate, 08 e 09 d'inverno): valore mostrato fra (somma dei
+      13 TR chiusi)/14 e l'ATR a barra chiusa.
   E3. "09:00 ITALIANE" (scheda N1): con l'orologio UTC+1 fisso la barra delle 09:00 italiane e' la 08 server d'ESTATE UE
       e la 09 d'INVERNO UE. Si stampa l'ATR alla barra delle 09:00 IT chiusa (contiene il TR dell'apertura cash) e alla
       barra delle 08:00 IT chiusa (quello mostrato fra le 09:00 e le 10:00), con le bande della scheda: H0 50-57,
@@ -200,6 +205,13 @@ def barra_cash(d):
     return 8 if COLL.ora_legale_eu(d) else 9
 
 
+def ore_e2(d):
+    """E2, trader alle 08:30-10:00 ITALIANE: (barre CHIUSE viste, barre IN FORMAZIONE) in ora server.
+    Estate UE: chiuse 06 e 07, in formazione 07 e 08. Inverno UE: chiuse 07 e 08, in formazione 08 e 09."""
+    c = barra_cash(d)
+    return (c - 2, c - 1), (c - 1, c)
+
+
 # ------------------------------------------------------------------ provenienza (classe 1381)
 def controlla_provenienza(riep, pin, run_csv, sha_csv):
     motivi = []
@@ -325,23 +337,24 @@ def misura(testo, riep=None, pin=None, sha_csv=None, esplora=False, stampa=True)
         hmax = max(meds, key=meds.get)
         dico("   minimo alla barra %02d (%.2f), massimo alla barra %02d (%.2f); E4 attesa: minimo fra 5 e 8 -> %s%s" % (
             hmin, meds[hmin], hmax, meds[hmax], "COERENTE" if 5 <= hmin <= 8 else "SMENTITA la finestra notturna", tag))
-    # 5. trader 08:30-10:00 server: barre chiuse 7 e 8, e forchetta della barra in formazione
+    # 5. trader 08:30-10:00 ITALIANE: barre chiuse delle 07:00 e 08:00 IT (06-07 server d'estate, 07-08 d'inverno),
+    #    e forchetta delle barre in formazione delle 08:00 e 09:00 IT (07-08 server d'estate, 08-09 d'inverno)
     dico("")
-    dico("E2 COME LO VEDE UN TRADER ALLE 08:30-10:00 SERVER (barre CHIUSE 7 e 8)" + tag)
-    v7 = [atr[i] for i in idx if barre[i][0].hour == 7]
-    v8 = [atr[i] for i in idx if barre[i][0].hour == 8]
+    dico("E2 COME LO VEDE UN TRADER ALLE 08:30-10:00 ITALIANE (barre CHIUSE delle 07:00 e 08:00 IT = 06-07 server d'estate UE, 07-08 d'inverno UE)" + tag)
+    v7 = [atr[i] for i in idx if barre[i][0].hour == ore_e2(barre[i][0].date())[0][0]]
+    v8 = [atr[i] for i in idx if barre[i][0].hour == ore_e2(barre[i][0].date())[0][1]]
     r7, r8, r78 = riassunto(v7), riassunto(v8), riassunto(v7 + v8)
-    dico("   barra 07  " + fmt(r7))
-    dico("   barra 08  " + fmt(r8))
-    dico("   7 e 8     " + fmt(r78))
-    for hf in (8, 9):
-        lo, hi = forchetta(barre, atr, tr, idx, hf)
+    dico("   barra 07:00 IT  " + fmt(r7))
+    dico("   barra 08:00 IT  " + fmt(r8))
+    dico("   le due          " + fmt(r78))
+    for k, nome_f in ((0, "08:00 IT"), (1, "09:00 IT")):
+        lo, hi = forchetta(barre, atr, tr, idx, lambda d, k=k: ore_e2(d)[1][k])
         if lo:
-            dico("   barra %02d IN FORMAZIONE: valore mostrato fra (13 TR chiusi)/14 = mediana %.2f e ATR a barra chiusa = mediana %.2f" % (hf, statistics.median(lo), statistics.median(hi)))
+            dico("   barra %s IN FORMAZIONE: valore mostrato fra (13 TR chiusi)/14 = mediana %.2f e ATR a barra chiusa = mediana %.2f" % (nome_f, statistics.median(lo), statistics.median(hi)))
     if r78:
         res["e2"] = r78["med"]
         dico("   E2 -> %s (mediana %.2f; bande: <33 / 33-44 / 44-50 / 50-57 / >57)%s" % (etichetta_e2(r78["med"]), r78["med"], tag))
-        dico("   quota delle letture alle barre 7-8 con ATR >= %.2f (1,5 x ATR / 1,70 >= 40x): %.1f%%" % (
+        dico("   quota delle letture alle barre delle 07:00-08:00 IT con ATR >= %.2f (1,5 x ATR / 1,70 >= 40x): %.1f%%" % (
             ATR_FRONTIERA, 100.0 * sum(1 for x in v7 + v8 if x >= ATR_FRONTIERA) / len(v7 + v8)))
     # 6. 09:00 italiane per stagione
     dico("")
@@ -361,15 +374,15 @@ def misura(testo, riep=None, pin=None, sha_csv=None, esplora=False, stampa=True)
             etichetta_e2(rc["med"]), rc["med"], etichetta_e2(rp["med"]) if rp else "-", rp["med"] if rp else float("nan"), tag))
     # 7. per mese
     dico("")
-    dico("E5 PER MESE (tutte le ore; e barre 7-8)")
+    dico("E5 PER MESE (tutte le ore; e barre CHIUSE delle 07:00-08:00 IT di E2)")
     mesi = {}
     for i in idx:
         mesi.setdefault(barre[i][0].strftime("%Y-%m"), []).append(i)
     for k in sorted(mesi):
         v = [atr[i] for i in mesi[k]]
-        vm = [atr[i] for i in mesi[k] if barre[i][0].hour in (7, 8)]
+        vm = [atr[i] for i in mesi[k] if barre[i][0].hour in ore_e2(barre[i][0].date())[0]]
         r = riassunto(v)
-        dico("   %s  n %4d  mediana %6.2f  p25 %6.2f  p75 %6.2f   | barre 7-8: n %3d mediana %s" % (
+        dico("   %s  n %4d  mediana %6.2f  p25 %6.2f  p75 %6.2f   | barre E2: n %3d mediana %s" % (
             k, r["n"], r["med"], r["p25"], r["p75"], len(vm), ("%6.2f" % statistics.median(vm)) if vm else "   -"))
     # 8. cancello di costo
     dico("")
@@ -380,7 +393,7 @@ def misura(testo, riep=None, pin=None, sha_csv=None, esplora=False, stampa=True)
                ("MISURATO mediana tutte le ore", r_all["med"]), ("MISURATO media tutte le ore", r_all["media"]),
                ("MISURATO p25 tutte le ore", r_all["p25"]), ("MISURATO p75 tutte le ore", r_all["p75"])]
     if r78:
-        righe_c.append(("MISURATO mediana barre 7-8" + (" [SOSP.]" if sosp else ""), r78["med"]))
+        righe_c.append(("MISURATO mediana E2 07-08 IT" + (" [SOSP.]" if sosp else ""), r78["med"]))
     for nome, a in righe_c:
         dico("   %-36s %6.2f   %6.1f   %6.1fx   %6.1fx  | %6.1f   %6.1fx   %6.1fx" % (
             nome, a, K_FADE * a, x_costo(a, K_FADE, SPREAD_BCM), x_costo(a, K_FADE, SPREAD_FTMO),
@@ -398,7 +411,7 @@ def misura(testo, riep=None, pin=None, sha_csv=None, esplora=False, stampa=True)
             s13 = sum(tr[i - PERIODO + 1:i]) / PERIODO
             dico("   barra %02d server (%02d IT): ATR a barra chiusa %.2f; a barra aperta fra %.2f e %.2f" % (
                 barre[i][0].hour, barre[i][0].hour + 1, atr[i], s13, atr[i]))
-        dico("   Emiliano 37 (r.261) e Luca 40 (r.523), ora esatta NON nota [INFERITO 09-10 IT = barre 08-09 server]: UN giorno, taratura, non misura")
+        dico("   Emiliano 37 (r.261) e Luca 40 (r.523), ora esatta NON nota [INFERITO 09-10 IT = 08-09 server: barra 08 in formazione, 07 l'ultima chiusa]: UN giorno, taratura, non misura")
     # 10. verdetti
     dico("")
     if esplora:
@@ -417,7 +430,7 @@ def misura(testo, riep=None, pin=None, sha_csv=None, esplora=False, stampa=True)
             spieg = "la scala sqrt(T) sovrastima: il valore basso non e' solo del mattino"
         else:
             spieg = "nessuna delle due spiegazioni scritte prima descrive da sola i due numeri: si legge la tabella per ora"
-        dico("VERDETTO E2 (barre 7-8): %.2f -> %s; insieme a E1: %s" % (r78["med"], e2, spieg))
+        dico("VERDETTO E2 (barre chiuse delle 07:00-08:00 IT): %.2f -> %s; insieme a E1: %s" % (r78["med"], e2, spieg))
     else:
         dico("VERDETTO E2: SOSPESO (orologio NON confermato dal collaudo): resta solo E1")
     return fine(0)
@@ -426,7 +439,8 @@ def misura(testo, riep=None, pin=None, sha_csv=None, esplora=False, stampa=True)
 def forchetta(barre, atr, tr, idx, ora):
     lo, hi = [], []
     for i in idx:
-        if barre[i][0].hour == ora and i >= PERIODO + 1:
+        h = ora(barre[i][0].date()) if callable(ora) else ora
+        if barre[i][0].hour == h and i >= PERIODO + 1:
             lo.append(sum(tr[i - PERIODO + 1:i]) / PERIODO)
             hi.append(atr[i])
     return lo, hi
@@ -515,6 +529,11 @@ def autotest():
     # T9 la barra delle 09:00 IT ai bordi dell'ora legale UE
     verifica("T9 barra delle 09:00 IT: ven 28/03/2025 -> 09, lun 31/03/2025 -> 08, ven 24/10/2025 -> 08, lun 27/10/2025 -> 09, 14/10/2026 -> 08",
              [barra_cash(d) for d in (dt.date(2025, 3, 28), dt.date(2025, 3, 31), dt.date(2025, 10, 24), dt.date(2025, 10, 27), dt.date(2026, 10, 14))] == [9, 8, 8, 9, 8])
+    # T9b E2 = trader alle 08:30-10:00 ITALIANE: d'estate le barre server 06-07 chiuse (07-08 in formazione), d'inverno
+    # 07-08 (08-09). Contro-esempio: la prima stesura (07-08 server fisse) sbaglia d'estate, e T9b la boccerebbe.
+    verifica("T9b E2 per stagione: 14/10/2026 chiuse (6,7) in formazione (7,8); 27/10/2025 chiuse (7,8) in formazione (8,9); 31/03/2025 (6,7)",
+             ore_e2(dt.date(2026, 10, 14)) == ((6, 7), (7, 8)) and ore_e2(dt.date(2025, 10, 27)) == ((7, 8), (8, 9))
+             and ore_e2(dt.date(2025, 3, 31))[0] == (6, 7) and ore_e2(dt.date(2025, 3, 28))[0] == (7, 8))
     # --- da qui, CSV interi sintetici (generatore del collaudo, orologio UTC+1 fisso)
     pin = "0123456789abcdef0123456789abcdef01234567"
     base = COLL.genera("utc1", a=dt.datetime(2026, 10, 14, 23))
