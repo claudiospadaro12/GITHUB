@@ -33,7 +33,7 @@ L.LEVA_ATTESA = "1:100"
 # la riga 'ANCORA DEL FEED' del lettore della sonda confronta i tick con la finestra di TRE mesi di GBA T1 e scatta quando il report comincia
 # il 2026.07.01: per la tranche di luglio (un mese) darebbe un falso 'DIVERSA'. Si spegne con una data che non compare mai.
 L.ANCORA_T1 = (L.ANCORA_T1[0], L.ANCORA_T1[1], "0000.00.00")
-PIN_PASSATI_TRANCHE = ()   # da scrivere: il pin della riga passata dal cancello (fail-closed finche' e' vuota)
+PIN_PASSATI_TRANCHE = ("d284a709cc35ffe07f649b8abbdc9738f88c7a65",)   # il pin della riga passata dal cancello (fail-closed se vuota)
 MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_TRANCHE_v1"
 DATA_MINIMA_REFERTO = "2026-10-15"
 FINESTRE_T = {"TRANCHE1": ("2026.07.01", ("2026.07.31", "2026.08.01")),
