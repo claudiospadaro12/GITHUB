@@ -1,0 +1,100 @@
+=== COLLAUDO (collaudo_export_barre_dax_h1.py) ===
+  orologio  : orologio INVERNO_UE_2024_25: le due grandezze NON concordano (escursione 09, tick_volume 08) (A4)
+  orologio  : orologio ESTATE_UE_2025: salto alla barra attesa ma NON netto (margine 1.10) (A4)
+  integrita' PASS, orologio NON CONFERMATO
+  provenienza: pin, SHA256 EA e .ini, run, SHA256 del CSV e STATO OK coincidono col RIEPILOGO
+
+=== ATR(14) H1 D30EUR (iATR di MT5: media SEMPLICE di 14 TR) -- finestra 2024-09-26 -> 2026-09-30 inclusa, giorni feriali ===
+barre nel file 11498 (prima 2024.09.26 16:00, ultima 2026.10.13 21:00); barre nella finestra con ATR definito 11218
+E1 TUTTE LE ORE: n 11218  mediana  58.47  media  66.78  p10  36.94  p25  45.44  p75  78.23  p90 103.23
+
+E4 PER ORA SERVER (ATR alla barra h CHIUSA; e' quello che un ingresso nell'ora h+1 legge)  [SOSPESA: orologio NON confermato]
+   ora   n     mediana  p25     p75    | ingresso nell'ora h+1: spread mediano dell'ora, 1,5xATR/spread
+   00    439   65.32   53.03   86.64  | ore 01: spread 3.9 ->  25.1x
+   01    507   59.54   48.27   78.75  | ore 02: spread 3.7 ->  24.1x
+   02    507   57.71   45.80   76.42  | ore 03: spread 3.6 ->  24.0x
+   03    507   55.09   43.96   73.12  | ore 04: spread 3.5 ->  23.6x
+   04    507   51.78   41.35   70.47  | ore 05: spread 3.5 ->  22.2x
+   05    507   48.24   39.00   65.98  | ore 06: spread 3.7 ->  19.6x
+   06    507   46.41   36.75   62.66  | ore 07: spread 2.8 ->  24.9x
+   07    507   45.31   34.89   60.53  | ore 08: spread 1.7 ->  40.0x
+   08    508   46.07   36.28   63.65  | ore 09: spread 1.7 ->  40.6x
+   09    508   48.85   38.33   65.98  | ore 10: spread 1.7 ->  43.1x
+   10    508   51.72   40.35   68.46  | ore 11: spread 1.6 ->  48.5x
+   11    508   52.90   42.39   71.08  | ore 12: spread 1.6 ->  49.6x
+   12    508   54.70   44.40   72.55  | ore 13: spread 1.6 ->  51.3x
+   13    508   57.12   46.26   74.84  | ore 14: spread 1.7 ->  50.4x
+   14    508   60.38   49.08   78.42  | ore 15: spread 1.7 ->  53.3x
+   15    508   62.76   51.62   80.80  | ore 16: spread 1.7 ->  55.4x
+   16    508   65.55   53.64   84.12  | ore 17: spread 2.6 ->  37.8x
+   17    508   67.50   54.79   86.84  | ore 18: spread 2.7 ->  37.5x
+   18    508   68.50   55.88   88.13  | ore 19: spread 2.7 ->  38.1x
+   19    508   69.13   55.89   89.75  | ore 20: spread 2.7 ->  38.4x
+   20    508   68.66   56.25   89.94  | ore 21: spread 2.8 ->  36.8x
+   21    472   67.68   55.01   88.55  | ore 22: spread 4.0 ->  25.4x
+   22     29   51.41   43.25   61.36  | ore 23: spread 2.8 ->  27.5x
+   23    125   68.19   52.05   81.56  | ore 00: spread 3.8 ->  26.9x
+   minimo alla barra 07 (45.31), massimo alla barra 19 (69.13); E4 attesa: minimo fra 5 e 8 -> COERENTE  [SOSPESA: orologio NON confermato]
+
+E2 COME LO VEDE UN TRADER ALLE 08:30-10:00 ITALIANE (barre CHIUSE delle 07:00 e 08:00 IT = 06-07 server d'estate UE, 07-08 d'inverno UE)  [SOSPESA: orologio NON confermato]
+   barra 07:00 IT  n   507  mediana  46.11  media  54.32  p10  30.38  p25  35.70  p75  62.30  p90  86.39
+   barra 08:00 IT  n   507  mediana  44.39  media  52.83  p10  29.12  p25  34.52  p75  59.91  p90  85.45
+   le due          n  1014  mediana  45.07  media  53.58  p10  29.87  p25  35.20  p75  61.34  p90  86.21
+   barra 08:00 IT IN FORMAZIONE: valore mostrato fra (13 TR chiusi)/14 = mediana 39.02 e ATR a barra chiusa = mediana 44.39
+   barra 09:00 IT IN FORMAZIONE: valore mostrato fra (13 TR chiusi)/14 = mediana 39.53 e ATR a barra chiusa = mediana 47.09
+   E2 -> GRIGIA (mediana 45.07; bande: <33 / 33-44 / 44-50 / 50-57 / >57)  [SOSPESA: orologio NON confermato]
+   quota delle letture alle barre delle 07:00-08:00 IT con ATR >= 45.33 (1,5 x ATR / 1,70 >= 40x): 49.6%
+
+E3 ALLE 09:00 ITALIANE (scheda N1): barra delle 09:00 IT = 08 server d'estate UE, 09 d'inverno UE  [SOSPESA: orologio NON confermato]
+   barra delle 09:00 IT CHIUSA (contiene l'apertura cash)   n   508  mediana  47.04  media  56.29  p10  31.70  p25  37.37  p75  64.33  p90  88.18
+   barra delle 08:00 IT CHIUSA (mostrata fra 09:00 e 10:00) n   507  mediana  44.39  media  52.83  p10  29.12  p25  34.52  p75  59.91  p90  85.45
+   ESTATE  barra delle 08:00 IT chiusa: n   297  mediana  45.04  media  54.01  p10  31.36  p25  35.64  p75  59.66  p90  83.42
+   INVERNO barra delle 08:00 IT chiusa: n   210  mediana  42.58  media  51.17  p10  27.55  p25  32.09  p75  61.40  p90  91.79
+   E3 -> barra 09:00 IT: GRIGIA (47.04); barra 08:00 IT: GRIGIA (44.39); H0 della scheda 50-57, smentita 33-44  [SOSPESA: orologio NON confermato]
+
+E5 PER MESE (tutte le ore; e barre CHIUSE delle 07:00-08:00 IT di E2)
+   2024-09  n   35  mediana  40.22  p25  38.66  p75  43.86   | barre E2: n   2 mediana  40.01
+   2024-10  n  499  mediana  43.45  p25  35.73  p75  51.57   | barre E2: n  46 mediana  31.80
+   2024-11  n  456  mediana  48.29  p25  41.00  p75  58.02   | barre E2: n  42 mediana  38.08
+   2024-12  n  392  mediana  37.49  p25  31.73  p75  47.73   | barre E2: n  36 mediana  31.12
+   2025-01  n  483  mediana  42.15  p25  36.14  p75  52.44   | barre E2: n  44 mediana  35.66
+   2025-02  n  440  mediana  51.46  p25  38.55  p75  72.74   | barre E2: n  40 mediana  40.16
+   2025-03  n  462  mediana  89.04  p25  70.73  p75 110.08   | barre E2: n  42 mediana  64.75
+   2025-04  n  436  mediana 100.50  p25  76.66  p75 194.46   | barre E2: n  40 mediana  86.54
+   2025-05  n  456  mediana  61.16  p25  51.78  p75  76.91   | barre E2: n  42 mediana  54.35
+   2025-06  n  458  mediana  65.07  p25  53.47  p75  77.03   | barre E2: n  42 mediana  51.90
+   2025-07  n  501  mediana  54.90  p25  46.54  p75  62.72   | barre E2: n  46 mediana  43.43
+   2025-08  n  457  mediana  51.89  p25  43.24  p75  61.71   | barre E2: n  42 mediana  39.16
+   2025-09  n  479  mediana  49.73  p25  42.91  p75  59.92   | barre E2: n  44 mediana  36.53
+   2025-10  n  503  mediana  53.65  p25  43.96  p75  64.87   | barre E2: n  46 mediana  39.79
+   2025-11  n  440  mediana  67.20  p25  51.33  p75  80.90   | barre E2: n  40 mediana  48.81
+   2025-12  n  417  mediana  45.99  p25  37.99  p75  53.92   | barre E2: n  38 mediana  36.41
+   2026-01  n  461  mediana  51.19  p25  42.44  p75  66.71   | barre E2: n  42 mediana  42.09
+   2026-02  n  440  mediana  61.29  p25  48.95  p75  78.37   | barre E2: n  40 mediana  46.95
+   2026-03  n  486  mediana 117.62  p25 100.81  p75 144.64   | barre E2: n  44 mediana 100.75
+   2026-04  n  458  mediana  82.71  p25  63.29  p75 101.96   | barre E2: n  40 mediana  64.42
+   2026-05  n  455  mediana  78.53  p25  66.04  p75  91.98   | barre E2: n  40 mediana  62.10
+   2026-06  n  502  mediana  74.01  p25  63.11  p75  88.74   | barre E2: n  44 mediana  61.21
+   2026-07  n  524  mediana  72.22  p25  60.04  p75  84.08   | barre E2: n  46 mediana  54.00
+   2026-08  n  479  mediana  47.76  p25  40.55  p75  55.34   | barre E2: n  42 mediana  33.77
+   2026-09  n  499  mediana  58.89  p25  46.63  p75  68.93   | barre E2: n  44 mediana  37.09
+
+E6 CANCELLO DI COSTO H1 (mappa par. 3.2): riproduzione 53,6 -> 47.3x / 65.4x (1,5x) e 78.8x / 108.9x (2,5x): OK
+   ATR                                  valore   1,5xATR  x su 1,70  x su 1,23 | 2,5xATR  x su 1,70  x su 1,23
+   derivato della mappa                  53.60     80.4     47.3x     65.4x  |  134.0     78.8x    108.9x
+   Emiliano r.261                        37.00     55.5     32.6x     45.1x  |   92.5     54.4x     75.2x
+   Luca r.523                            40.00     60.0     35.3x     48.8x  |  100.0     58.8x     81.3x
+   MISURATO mediana tutte le ore         58.47     87.7     51.6x     71.3x  |  146.2     86.0x    118.8x
+   MISURATO media tutte le ore           66.78    100.2     58.9x     81.4x  |  166.9     98.2x    135.7x
+   MISURATO p25 tutte le ore             45.44     68.2     40.1x     55.4x  |  113.6     66.8x     92.4x
+   MISURATO p75 tutte le ore             78.23    117.3     69.0x     95.4x  |  195.6    115.0x    159.0x
+   MISURATO mediana E2 07-08 IT [SOSP.]  45.07     67.6     39.8x     55.0x  |  112.7     66.3x     91.6x
+   frontiera 40x a BCM 1,70 con 1,5xATR = ATR 45.33; pavimento duro 13,3x = ATR 15.07
+   quota delle letture (tutte le ore) con ATR >= 45.33: 75.4%
+
+IL MATTINO DELLA LIVE (14/10/2026, estate UE: cash = barra 08 server)  [SOSPESA: orologio NON confermato]
+   NON PRESENTE nel CSV (export lanciato prima del 15/10/2026, o barre mancanti): nessuna taratura
+
+VERDETTO E1 (mediana ATR(14) H1 su tutte le ore, 2024-09-26 -> 2026-09-30): 58.47 -> IL DERIVATO REGGE
+   riga H1 del cancello con la mediana misurata: 1,5 x 58.47 / 1,70 = 51.6x (SOPRA la frontiera 40x)
+VERDETTO E2: SOSPESO (orologio NON confermato dal collaudo): resta solo E1

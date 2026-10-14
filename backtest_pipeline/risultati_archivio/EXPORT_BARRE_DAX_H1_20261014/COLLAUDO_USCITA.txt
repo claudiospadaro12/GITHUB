@@ -1,0 +1,27 @@
+barre: 11498   prima 2024.09.26 16:00   ultima 2026.10.13 21:00
+barre nella finestra di misura 2024.09.26 -> 2026.09.30: 11292 (attese ~11.238 dal ritmo della sonda, DERIVATO)
+ancora A2: barre in [2024.09.26 00:00 ; 2026.08.17 17:00] = 10554 contro 10553 della sonda (+0.01%, banda +-1%)
+ANNO_2024 (parziale): 1396 barre (A3 non si applica)
+ANNO_2025 (intero): 5562 barre, attese 5301-5859 (A3) -> OK
+ANNO_2026 (parziale): 4540 barre (A3 non si applica)
+feste dell'elenco SENZA barre: 2024.12.24 (Vigilia 2024), 2024.12.25 (Natale 2024), 2024.12.26 (S.Stefano 2024), 2024.12.31 (S.Silvestro 2024), 2025.01.01 (Capodanno 2025), 2025.04.18 (Venerdi Santo 2025), 2025.04.21 (Pasquetta 2025), 2025.05.01 (1 maggio 2025), 2025.12.24 (Vigilia 2025), 2025.12.25 (Natale 2025), 2025.12.26 (S.Stefano 2025), 2025.12.31 (S.Silvestro 2025), 2026.01.01 (Capodanno 2026), 2026.05.01 (1 maggio 2026)
+feste dell'elenco CON barre (BCM quota lo stesso, FATTO): 2026.04.03 (1 barre), 2026.04.06 (1 barre)
+giorni feriali senza barre FUORI dall'elenco delle feste (0): nessuno
+ore di sessione ESTATE (presenti in >= 80% dei giorni, FATTO dal file): lun 00-21 (22 ore); mar 00-21 (22 ore); mer 00-21 (22 ore); gio 00-21 (22 ore); ven 00-20 (21 ore)
+ore di sessione INVERNO (presenti in >= 80% dei giorni, FATTO dal file): lun 01-21 (21 ore); mar 00-21 (22 ore); mer 00-21 (22 ore); gio 01-21 (21 ore); ven 01-21 (21 ore)
+chiusure (giorni fuori elenco con >= 3 ore di sessione mancanti): 1, tetto 30.7 su 747 giorni (A5)
+   chiusura 2024.09.26 (gio): 16 ore di sessione mancanti, 7 barre
+orologio ESTATE_UE_2024: NON VALUTABILE (22 giorni feriali)
+orologio INVERNO_UE_2024_25: 105 giorni feriali; escursione salto max alla 09 (x1.67, secondo 08 x1.62); tick_volume salto max alla 08 (x2.97, secondo 09 x2.70); atteso 09
+orologio ESTATE_UE_2025: 147 giorni feriali; escursione salto max alla 08 (x1.64, secondo 06 x1.54); tick_volume salto max alla 08 (x3.03, secondo 07 x2.44); atteso 08
+   -> coerente con UTC+1 (d'estate coincide col vecchio orologio)  [SALTO NON NETTO]
+orologio INVERNO_UE_2025_26: 105 giorni feriali; escursione salto max alla 09 (x1.86, secondo 08 x1.54); tick_volume salto max alla 09 (x3.67, secondo 08 x2.21); atteso 09
+   -> UTC+1 FISSO (dichiarato)
+orologio ESTATE_UE_2026: 141 giorni feriali; escursione salto max alla 08 (x1.79, secondo 06 x1.36); tick_volume salto max alla 08 (x2.13, secondo 07 x1.82); atteso 08
+   -> coerente con UTC+1 (d'estate coincide col vecchio orologio)
+
+NON CONFERMATO (orologio): orologio INVERNO_UE_2024_25: le due grandezze NON concordano (escursione 09, tick_volume 08) (A4)
+NON CONFERMATO (orologio): orologio ESTATE_UE_2025: salto alla barra attesa ma NON netto (margine 1.10) (A4)
+INTEGRITA': PASS
+OROLOGIO : NON CONFERMATO: le letture PER ORA del lettore si sospendono
+VERDETTO: PASS SOLO INTEGRITA' (esce 4)

@@ -1,0 +1,12 @@
+EXPORT_BARRE_DAX_H1 -- export delle barre H1 di D30EUR dal tester (Model=1, Visual=0), EA CLAU12_EXPORT_BARRE_H1 v1.00
+data: 2026-10-14 19:16:11   pc: DESKTOP-H4D7CAJ   pin: 671c3579f3678df272d902952e2ca2f42e22f4a4   run: a6e3e67227b8
+EA SHA256 2F65C46067E4B9E0E868D974BE94C1239FD9CB01C5A62FD2DA6D0A055CD1523D   ini SHA256 2D2ABFBBCA6892908A4C15596F59E868B9E2D1C0D4278A07A9AE2BE1A66A04E1   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+finestra chiesta: 2024.09.26 -> 2026.10.14   durata passata 36 s
+finestra della MISURA ATR: 2024.09.26 -> 2026.09.30 INCLUSA (la taglia il lettore; le barre dopo il 30/09 servono solo alla lettura del mattino della live del 14/10)
+CSV: D30EUR_H1_a6e3e67227b8.csv   SHA256 43C49748886624AC498690AC067F250DDB76FB87242D03DF7D6A4C147F99FD4F   barre 11498   prima 2024.09.26 16:00   ultima 2026.10.13 21:00
+riga #FINE: #FINE;n=11498;prima=2024.09.26 16:00;ultima=2026.10.13 21:00;errori_copia=0;scartate=0;motivo_deinit=1
+STATO: OK
+motivi: 
+
+OROLOGIO: la colonna time_server e l ora del server BCM come registrata dal terminale, NON convertita. Il referto dice UTC+1 fisso sugli indici dal 2024.09.26 (report/OROLOGIO_BCM_2026-09-24.md par. 3.2): lo VERIFICA il collaudo.
+COME SI LEGGE: python3 backtest_pipeline/collaudo_export_barre_dax_h1.py <csv> --run <run>, poi python3 backtest_pipeline/leggi_atr_h1_dax.py <csv> --riepilogo RIEPILOGO.txt --pin <pin>. Questo script RACCOGLIE e basta: non giudica la serie.
