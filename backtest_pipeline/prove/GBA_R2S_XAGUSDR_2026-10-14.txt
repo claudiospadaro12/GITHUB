@@ -1,0 +1,461 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2S, ARGENTO A M30 E H1, RIFACIMENTO -- lotto R2SXAGR ('R' = rifacimento): le due passate del lotto R2SXAGH del 13/10 finite KO per STALLO del terminale
+#  (timeout di 20 minuti, report .htm NON scritto), rifatte DA SOLE e IDENTICHE: XAGUSD M30 e H1, REPL invariata, Modello 1, T1 2026.07.01-2026.09.30.
+#  Prova SENZA CODICE (input ESISTENTI dell'EA), 14/10/2026. Richiesta di Claudio del 14/10: 'PREPARA LA RIGA PER M30 E H1 DELL'ARGENTO'.
+#  File madre di QUESTO file: backtest_pipeline/prove/GBA_R2S_XAGUSDH_2026-10-13.txt (SHA256 fd8d997d2518e58ecc684a54caa4268cb4fa5b4c268171e51509f97575e2c049, PASS,
+#  girato al pin f6571dcc il 13/10, zip archiviato in risultati_archivio/GBA_R2S_XAGH_20261013/GBA_R2S_XAGH.zip, SHA256 a63bda42e3dee4c6df515af75049eced0724f737795169096b16e9fd4ec8d1c7).
+#  Lettura del giro del 13/10: report/GBA_R2S_XAGH_LETTURA_2026-10-13.md (sezioni 2 e 5.1: 'rifare M30 e H1 una per una').
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward, MAI sul conto reale 10105439. Nessun parametro in forward, nessuna taglia di rischio (lotto fisso 1,00 nel tester).
+#  BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato: prova SENZA CODICE, solo input esistenti).
+#
+#  ======================= DIFF CONTRO IL FILE GBA_R2S_XAGUSDH_2026-10-13.txt (clausola per clausola) =======================
+#  Z1 LOTTO: R2SXAGH -> R2SXAGR (blocco in fondo). Passate, report e giornali nuovi: R2SXAGR_01_M30_T1_m775800, R2SXAGR_02_H1_T1_m775800.
+#  Z2 CELLE: M30 = 30 e H1 = 16385, IDENTICHE alle celle omonime del file madre (codici ENUM_TIMEFRAMES, driver v5 TF_NOMI r.126). La cella H4 e' TOLTA: il 13/10 e'
+#     uscita OK (33 s) ed e' letta (H3 'n insufficiente', n 10): non si rifa'. Blocco dell'asse: una tranche, 2 celle, 1 lotto. Ordine delle passate M30, H1 (come il 13/10).
+#  Z3 TIMEOUT PER PASSATA (nella RIGA, non qui): -TimeoutRunMin 20 -> 8. TETTO DEL LOTTO: tetto_min 50 -> 15. PERCHE': il 13/10 le passate M30 e H1 hanno finito il
+#     test in 0,914 e 0,513 s (righe 'Test passed' del tester, la M30 a +19 s dall'avvio della passata) e il terminale NON si e' chiuso: il timeout di 20 minuti le ha
+#     chiuse a 1213 e 1215 s, e 40 minuti non hanno comprato nessuna lettura. Le passate GBA archiviate SENZA stallo durano 28-41 s a Modello 1 (15 passate) e 33-73 s
+#     a tick reali (86 passate) [MISURATO il 14/10 sulla colonna durata_s di TUTTI i MANIFEST GBA di risultati_archivio, stalli esclusi]: 8 minuti = 480 s = 11,7 volte
+#     la passata a Modello 1 piu' lunga senza stallo (41 s). CASO PEGGIORE DI UNA PASSATA col driver v5: 8 minuti di timeout + fino a 5 s di polling (r.694-695) + fino
+#     a 1,5 minuti di CloseMainWindow (18 x 5 s, r.701) + 8 s di attesa dei log (r.704) = circa 9,7 minuti. TETTO 15: ferma solo l'AVVIO di una passata (r.671),
+#     quindi la seconda passata parte anche dopo uno stallo PIENO della prima (9,7 < 15: 5,3 minuti di margine per la lettura dei log fra le due passate; il 13/10
+#     quel tempo e' stato di 1 s). Se il terminale NON si chiude dopo CloseMainWindow il driver ferma il lotto (r.702: la seconda passata esce NON_LANCIATA, 'lotto
+#     fermato') e non apre un secondo terminale (r.678-681): uno stallo NON fa mai girare due terminali insieme.
+#  Z4 NON CAMBIA: magic 775800, ancora del 12/10 NON rigirata (Y5), EA/include/driver (GBA_R0_PASSATE.ps1 v5, SHA256 C239F628...), i 30 pin e l'asse tecnico (righe Inp...
+#     in fondo: IDENTICHE al file madre, diff vuoto), la tranche T1, Modello 1, deposito 1000000 EUR, lotto fisso 1,00. Nessuna riga di codice cambiata.
+#  Z5 DEITTICI DEL TESTO COPIATO (classe 1387): il testo del file madre copiato qui sotto (le sue righe 14-328) resta BYTE PER BYTE e si legge CON QUESTE SOSTITUZIONI,
+#     scritte qui e non dentro:
+#     (a) Y1 'R2SXAGH' e i tag R2SXAGH_0x -> Z1; Y2 'M30, H1, H4' e '3 celle' -> Z2 (solo M30 e H1); Y3 'timeout 20, tetto 50' e i loro conti -> Z3;
+#     (b) CE1H e CE7H: 'TUTTE E TRE le celle' -> 'TUTTE E DUE le celle (M30 e H1)'; 'in OGNI passata lanciata' = le passate del lotto R2SXAGR (il giro NUOVO);
+#         CE1H per questo lotto si chiama CE1R ed e' la STESSA regola: ancora del 12/10 verde E CE7H verde sulle passate di R2SXAGR;
+#     (c) ATTESE H: le righe della M30 e della H1 sono SOSTITUITE per intero dalle ATTESE R qui sotto (che sono MISURE del 13/10, non stime); le righe H4 non si
+#         applicano. SMENTITE H: restano DESCRIZIONE (SH1 della H1 banda 17-34x, SH2, SH3; M30 solo il numero accanto all'attesa); quelle della H4 non si applicano;
+#     (d) ESITI H: l'albero H0-H3 vale com'e', per M30 e H1, con CE-DET aggiunto ai controlli di H0 (ESITI R qui sotto); 'NESSUN esito chiude la casella 4 o la 5'
+#         resta vero;
+#     (e) il testo del file madre XAG2 che il file madre XAGH copia dentro di se' (sue righe 144-327, da leggere con Y7) si legge con Y7 E con questa Z5;
+#     (f) 'il 13/10', 'oggi', 'qui' nel testo copiato sono la data e il giro del file madre (13/10, lotto R2SXAGH): i fatti del giro nuovo sono solo quelli scritti
+#         in QUESTA testa.
+#
+#  ======================= ATTESE R, SCRITTE PRIMA DEI NUMERI (T1, Modello 1) =======================
+#  (a) DETERMINISMO [MISURATO: giornali del 13/10 nello zip archiviato qui sopra; numeri come li stampa D2 v4 1697135a nella lettura archiviata
+#      risultati_archivio/GBA_R2S_XAGH_20261013/LETTURA_D2_R2S_XAGH.txt, ricontrollati sul giornale il 14/10]. I giornali NUOVI devono rifare i vecchi a tolleranza
+#      ZERO sulle cifre stampate:
+#      | cella | righe segnale | EA segnali/tentati/scartati spread/posizione aperta/ATR non valido | C3G cella | BUY (n)     | SELL (n)    | righe >= 40x / >= 50x | ingressi eseguiti | barre generate | tick generati | final balance |
+#      | M30   | 177           | 177 / 1 / 175 / 1 / 0                                              | 17.90     | 18.25 (100) | 17.30 (77)  | 4 / 1                 | 1                 | 2978           | 353614        | 1000008.33    |
+#      | H1    | 91            | 91 / 1 / 89 / 1 / 0                                                | 26.30     | 25.70 (47)  | 27.35 (44)  | 8 / 1                 | 1                 | 1489           | 353614        | 1000008.33    |
+#      Fasce (righe, C3G) M30: asia 53 13.20 / europa 46 18.70 / pausa 11 15.70 / USA apertura 39 20.10 / USA pomeriggio 22 26.20 / rollover 6 18.35.
+#      Fasce (righe, C3G) H1: asia 23 25.80 / europa 27 25.00 / pausa 3 20.90 / USA apertura 20 31.10 / USA pomeriggio 16 34.50 / rollover 2 19.85.
+#      E IN PIU': l'insieme delle righe [GBA...] del giornale nuovo (ora simulata + testo) = quello del giornale del 13/10 della stessa cella, riga per riga (come
+#      multinsieme: l'ordine in cui il driver legge i file di log del tester non e' una misura), compresa la riga d'ingresso (M30: SELL 1.00 lotti @ 66.312 del
+#      2026.08.28 19:30; H1: SELL 1.00 lotti @ 66.937 del 2026.08.28 18:00).
+#  (b) n DEL REPORT, ora leggibile (il 13/10 assente: report non scritto): ATTESO n = 1 in ciascuna cella [INFERITO: 1 ingresso eseguito nel giornale e 'final balance'
+#      diverso dal deposito; il driver pretende operazioni del report = ingressi del giornale +-1, r.817]. CE6: tentati 1 - n 1 = 0. IL PF NON SI LEGGE: n < 30 su una
+#      tranche a Modello 1 (il motivo che resta vero anche col Modello 4 e' il REGIME UNICO, classe 1384). Alternativa scritta prima: n = 0 nel report con 1 ingresso
+#      eseguito -> KO 'ZERO operazioni' con tentati 1 -> H0 (C) (classe 1372), non l'eccezione n = 0.
+#  (c) ESITO DI D2 ATTESO, per tutte e due le celle: H3 (B) 'n insufficiente a Modello 1 su una tranche (NON escluso)'. Non valgono in tutte e due: (i) (nessuna fascia
+#      a 100 righe: al massimo 53 e 27), (iii) (C3G 17,90 e 26,30 >= 6,65), (iv) (lati sotto 100 righe, salvo il BUY della M30 a 100 righe, che pero' fa 18,25 >= 6,65);
+#      a M30 non vale nemmeno la (ii) (asia, europa e USA apertura, le fasce con >= 30 righe, sono tutte >= 6,65); a H1 la (ii) e' vera A VUOTO (nessuna fascia a 30). Con
+#      177 e 91 righe 'ESCLUSA (Modello 1)' NON e' raggiungibile (la (i) e la (iv) chiedono >= 200 righe), qualunque cosa esca: la casella 5 dell'argento a M30 e H1
+#      resta 'n insufficiente'. Classe S2 del C3G: FRA in tutte e due. H1 (A) e' escluso dalla (a): n netto >= 30 vorrebbe dire giornale diverso, cioe' CE-DET rossa.
+#  (d) LO STALLO E' UNA MISURA, NON UN GUASTO DA NASCONDERE. Fatti: il 13/10 2 stalli su 2 passate M30/H1 e 0 su 1 a H4, nello stesso lotto; prima del 13/10, 2 stalli
+#      su circa 337 passate di questo PC (R2SXAG_01 del 12/10, argento M1, 0 ingressi; NatCla F0 C E35EUR AUDIO_D1 del 08/10, altra famiglia); nei MANIFEST GBA archiviati
+#      3 stalli su 104 passate lanciate, tutti e 3 su XAGUSD a Modello 1 (3 su 6 passate XAGUSD a Modello 1 lanciate; 0 su 12 a Modello 1 di altri simboli; 0 su 86 a
+#      tick reali) [MISURATO il 14/10 sui MANIFEST]. IPOTESI H-TF 'le passate con 1 solo ingresso stallano': NON dimostrata, e da sola non spiega l'archivio
+#      (R2SXAG_01 aveva 0 ingressi e ha stallato, R2SXAG2_02 aveva 0 ingressi e non ha stallato). Altre ipotesi MAI messe ad asse: posizione aperta a fine test,
+#      TF del grafico, simbolo. Qui NON si decide nessuna causa.
+#      STALLO = passata KO col motivo 'timeout di 8 minuti' nel MANIFEST (anche se poi il terminale non si chiude e il lotto si ferma).
+#      PARTIZIONE DEGLI ESITI, sulle passate LANCIATE (le colonne stato e motivi del MANIFEST), scritta PRIMA dei numeri:
+#      - 0 stalli su 2 lanciate: lo stallo del 13/10 NON si ripete sulle stesse passate rifatte da sole. Smentisce la forma DETERMINISTICA di H-TF ('1 ingresso ->
+#        stallo, sempre') e di ogni ipotesi 'queste passate stallano sempre'; resta lo stallo occasionale, il cui tasso NON si stima con 2 passate. Le due celle si leggono.
+#      - 1 stallo su 2 lanciate: non conferma e non smentisce nessuna causa; la cella stallata e' di nuovo H0 (C), l'altra si legge. Si scrive quale delle due.
+#      - 2 stalli su 2 lanciate: stallo RIPRODOTTO su queste passate (4 su 4 fra il 13/10 e il rifacimento): e' legato a qualcosa di QUESTE passate, e NON si sa che
+#        cosa. NON si rilancia una terza volta e NON si allunga il timeout: si porta a Claudio, e la misura dopo la decide lui (chiusura del terminale nel driver,
+#        oppure una passata che separa le ipotesi).
+#      - 1 stallo su 1 lanciata (la seconda NON_LANCIATA per 'lotto fermato' o 'terminale ancora vivo'): la prima non si e' chiusa nemmeno con CloseMainWindow; la
+#        seconda NON e' misurata. Si scrive cosi', MAI '2 su 2'.
+#      - 0 stalli su 1 lanciata (l'altra NON_LANCIATA per un motivo che NON e' uno stallo, per esempio 'terminale ancora vivo' perche' un MT5 e' stato aperto a mano
+#        durante la riga): niente sulla causa dello stallo; la cella lanciata si legge, quella non lanciata e' H0 (C).
+#      - 0 passate lanciate (MT5 aperto, compilazione fallita, mutex occupato): nessuna misura dello stallo e nessuna lettura.
+#      Le sei voci coprono ogni coppia (lanciate, stalli) possibile con due passate: (2,0) (2,1) (2,2) (1,1) (1,0) (0,0).
+#      In ogni caso il giornale c'e' anche per una passata stallata (driver r.820-826): CE-DET si calcola e si scrive lo stesso (DESCRIZIONE: la cella resta H0 per il KO).
+#
+#  ======================= CE-DET: DETERMINISMO DEI GIORNALI (controllo di STRUMENTO: puo' solo togliere la lettura, MAI dare un esito) =======================
+#  Per ogni cella lanciata, VERDE solo se valgono TUTTE E QUATTRO: (1) le cifre stampate da D2 sul giornale nuovo = la tabella (a) (tolleranza ZERO sulle stringhe:
+#  C3G a 2 decimali, interi); (2) il multinsieme delle righe [GBA...] = quello del giornale del 13/10 della stessa cella, letto dallo zip ARCHIVIATO (SHA256 pinnato
+#  in D2); (3) barre e tick generati (colonne barre_gen e ticks_gen del MANIFEST) e la riga 'final balance' del tester nel giornale = la tabella (a); (4) lo zip
+#  archiviato riletto da QUESTO D2 rifa' la tabella (a) (senza, la tabella o l'archivio sono sbagliati). ROSSA: almeno una differenza (D2 stampa le prime).
+#  NON VALUTABILE (se non c'e' gia' una differenza): passata non lanciata, giornale senza UNA riga [GBA-CONTA] FINE, barre/tick generati o riga 'final balance' ASSENTI,
+#  archivio assente o con un altro SHA256, (4) non vera, prova d'accettazione di D2 non passata. ROSSA o NON VALUTABILE -> quella cella H0 (C), senza appello (classe 1389): una spiegazione scritta dopo i numeri disegna la misura successiva, non
+#  riapre questa. E il giornale del 13/10 NON si usa al posto di quello nuovo (come CE7 di XAG2).
+#  CONTRO-ESEMPI (costruiti prima, nell'autotest di D2): una riga segnale da 17,9x a 18,0x; una riga tolta (176 righe); stesse cifre di D2 ma una riga spostata di
+#  un minuto; final balance diverso; archivio con un altro SHA256 -> ROSSA, ROSSA, ROSSA, ROSSA, NON VALUTABILE, e la cella e' H0 in tutti i casi.
+#  COSA NON VEDE (dichiarato): un tester che rifa' le stesse righe da una storia M1 cambiata in modo che barre e segnali di M30/H1 restino identici; i KO del driver
+#  (li vede l'albero, prima di CE-DET).
+#
+#  ======================= ESITI R: L'ALBERO PER M30 E H1 (quello di ESITI H, il PRIMO che vale decide, UN esito per cella) =======================
+#  H0 (C) NON SI LEGGE se vale almeno uno di, in quest'ordine: passata NON_LANCIATA; CE1R non verde (allora tutte e due); KO del driver per un motivo DIVERSO dal solo
+#     'ZERO operazioni nel report' (timeout compreso: e' lo stallo, (d)); CE-DET rossa o NON VALUTABILE; 0 segnali; CE9 o CE10 rossi; CE2, CE3, CE4 o CE6 rossi;
+#     e tutte le altre voci di H0 del file madre.
+#  H1 (A), H2 (B) 'ESCLUSA (Modello 1)' e H3 (B) 'n insufficiente': come ESITI H del file madre, invariati. [Atteso: H3 per tutte e due, (c).]
+#  NESSUN esito di questo lotto chiude la casella 4 o la 5 dell'argento; nessun PF si legge; nessuna cella diventa sedia; nessun numero va in un preset.
+#  LETTURA (precondizioni FUORI da questo file): D2 = backtest_pipeline/leggi_gba_r2s_c3g.py v5 o successiva, col pin della riga e lo SHA256 di QUESTO file al loro
+#  posto, che ha passato il cancello PRIMA di aprire lo zip (lo SHA256 di D2 si stampa per intero in testa alla lettura); G0 del lettore leggi_gba_r0.py (SHA256
+#  9cd02d2a...) su GBA_R0_R2SXAGR.zip; ancora del 12/10 GBA_R0_R2SANC.zip estratta da risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip (non si rigira).
+#
+#  ======================= TESTO COPIATO BYTE PER BYTE DAL FILE MADRE GBA_R2S_XAGUSDH_2026-10-13.txt (sue righe 14-328), da leggere con Z5 =======================
+#  ======================= DIFF CONTRO IL FILE GBA_R2S_XAGUSD2_2026-10-12.txt (clausola per clausola) =======================
+#  Y1 LOTTO: R2SXAG2 -> R2SXAGH (blocco in fondo). Passate, report e giornali nuovi: R2SXAGH_01_M30_T1_m775800, R2SXAGH_02_H1_T1_m775800, R2SXAGH_03_H4_T1_m775800.
+#  Y2 CELLE (la variabile del file resta InpSignalTF): REPL (1) e M15 (15) -> M30 = 30, H1 = 16385, H4 = 16388. Sono i codici ENUM_TIMEFRAMES di MQL5, i SOLI che il driver v5
+#     accetta come TF (tabella TF_NOMI r.126, validazione r.198): 60 e 240 NON sono codici MQL5 e il driver li rifiuterebbe ('non e un codice ENUM_TIMEFRAMES').
+#     Il pin InpSignalTF resta 1 (M1, come nel file madre): in questo lotto NON c'e' una cella REPL (il driver v5 la ammette facoltativa, r.425-433; nessuna delle tre celle
+#     ha il valore del pin). Blocco dell'asse: una tranche, 3 celle, 1 lotto. Ordine delle passate M30, H1, H4 (non entra nel tester: ogni passata ha il SUO terminale e il SUO ini).
+#  Y3 TIMEOUT PER PASSATA (nella RIGA, non qui): -TimeoutRunMin 45 -> 20. TETTO DEL LOTTO: tetto_min 50, invariato. PERCHE': il 13/10 la CE8 ha SMENTITO H-ZERO-R (la REPL
+#     argento con n = 0 e Report= si e' chiusa in 33 s, la M15 in 41 s); resta lo stallo occasionale (2 su ~337 passate di questo PC), e nessuno dei due stalli misurati si e'
+#     risolto da solo (12/10 e NatCla F0 C: chiusi dal timeout a 20 minuti): 45 minuti non hanno mai comprato una lettura in piu', solo tempo. Le passate GBA archiviate durano
+#     28-73 s: 20 minuti = 16 volte il massimo. Tetto 50: la terza passata parte anche dopo DUE stalli pieni (2 x (20 + 1,5 di CloseMainWindow + 0,13 di attesa dei log,
+#     driver r.694-704) = 43,3 minuti < 50; il tetto ferma solo l'AVVIO di una passata, r.670-677). Uno stallo qui e' KO per timeout: quella cella e' (C) e si scrive.
+#  Y4 MAGIC: INVARIATO 775800 (stesso motivo di X5 del file madre: il driver v5 ammette solo 775800/775850, D2 pretende 775800). Il nome nuovo della misura e' il LOTTO.
+#  Y5 ANCORA: NON si rigira. CE1 si legge come CE1H (qui sotto): ancora del 12/10 E CE7H del giro nuovo (CE7 del file madre chiede una REPL, che qui non c'e').
+#  Y6 TOLTI dal file madre (non si applicano): X2 (ordine M15/REPL), X6 (sostituito da Y5/CE1H), CE7 (nessuna REPL), CE8 (H-ZERO-R e' chiusa, smentita il 13/10), e il blocco
+#     'LA CAUSA DEL TIMEOUT DEL 12/10' (storia gia' letta: report/GBA_R2S_XAG2_LETTURA_2026-10-13.md). Non sono copiati qui sotto.
+#  Y7 DEITTICI DEL TESTO COPIATO (classe 1387): il testo del file madre copiato in fondo resta BYTE PER BYTE e si legge CON QUESTE SOSTITUZIONI, scritte qui e non dentro:
+#     (a) 'D2 ... Celle: REPL = 1 ... e M15 = 15' e 'D3 ... R2SXAG ... passate REPL:T1,M15:T1, tetto 15 minuti' -> si leggono Y1-Y3;
+#     (b) 'M1 BCM dell'argento su questo PC [NON MISURATO]' -> ora MISURATO: la storia M1 di T1 c'e' (88.416 barre M1 generate il 12/10 e il 13/10; storia delle barre
+#         dell'argento dal 2016.12.28, riga 'history data begins from' del tester);
+#     (c) CHE COSA MISURA, 'ai TF M1 e M15' -> 'ai TF M30, H1 e H4';
+#     (d) ATTESE: la tabella (REPL, M15), la riga 'ATR alle barre di rottura', 'ATTESA DELLO STADIO A' e le SMENTITE -> SOSTITUITE per intero da ATTESE H e SMENTITE H qui sotto
+#         (LATI, COMMISSIONE e RISCHIO restano quelli copiati);
+#     (e) CE1 ('la passata R2SANC ... stesso giro') -> SOSTITUITO da CE1H;
+#     (f) CE2, 'l'intestazione della cella DEVE portare XAGUSD M..' -> 'XAGUSD <TF della cella>' (XAGUSD M30, XAGUSD H1, XAGUSD H4): alla lettera 'M..' farebbe ROSSA
+#         la H1 e la H4 senza nessun difetto. La banda d'ordine di grandezza 'ATR mediana per fascia 0,005-0,60 USD' e' una ATTESA, non un cancello (testo copiato): a H4
+#         l'ATR attesa e' ~0,78-1,24 USD (ATTESE H), quindi un'ATR > 0,60 SENZA lo spread dell'oro (0,15-0,30) si scrive come numero nuovo; la CE2 la fanno ROSSA SOLO
+#         l'intestazione sbagliata o la firma dell'oro (spread 0,15-0,30 E ATR > 0,60 in OGNI fascia stampata), come nel testo copiato;
+#     (g) CERTIFICATO, 'questo lotto lavora sulla casella 4' -> caselle 4 E 5 per l'argento; NESSUN esito di questo lotto le chiude (ESITI H).
+#  NON CAMBIA: i 30 pin e l'asse tecnico (righe Inp... in fondo: IDENTICHE al file madre, diff vuoto), la tranche T1 2026.07.01-2026.09.30, Modello 1, e il testo copiato in fondo
+#  dalle righe 94-276 del file madre (DIFF CONTRO GBA_R0_REPLICA, DRIVER E LETTORE con L1-L7, TRANCHE/MODELLO/REGIME, SOGLIE, CHE COSA MISURA, ATTESE, CE1-CE6, ESITI (A)(B)(C)
+#  ed ECCEZIONE n = 0), letto con Y7. Regole di lettura: E1-E4 + ordine di E3 (docs/RISPOSTA_A_GEMINI_GBA_R2S_STADIO_A_2026-10-12.md) e R3 (governata per intero da E3),
+#  S = 6,65x per l'argento. NESSUN criterio nuovo: CE1H, CE7H, CE9 e CE10 sono controlli di STRUMENTO, possono solo togliere la lettura, MAI dare un esito.
+#
+#  ======================= R-XAG-1 E GLI ESITI DI CASA (classe 1382: un esito si CITA per nome, non si ridefinisce) =======================
+#  R-XAG-1 (corretta dal cancello) legge con le soglie DEL LOTTO, S = 6,65x per l'argento, e NON con 13,3x ne' con 40x: per ciascuna cella, C3G < 6,65x con (i)-(v)
+#  -> 'ESCLUSA (Modello 1)', da confermare con E3 su quella cella; 6,65x <= C3G < 40x -> 'n insufficiente / FRA, NON escluso' (si misura per capire, non diventa sedia);
+#  C3G >= 40x -> il costo grezzo non esclude, e la cella passa a un file prova SUO con n e tranche (PROPOSTA di passo dopo, decisione: non un esito di questo lotto).
+#  Qui quelle tre frasi si leggono come gli esiti di casa: 'ESCLUSA (Modello 1)' e' SOLO l'esito H2 qui sotto (E1-E4, tutte e cinque le condizioni, E3 per chiudere);
+#  'FRA' e 'zona >= 40x' sono le CLASSI della S2 sui segnali grezzi (DESCRIZIONE, scritte accanto al C3G in H3). Un H4 a 30x NON e' 'escluso per costo': e' FRA.
+#  CONSEGUENZA STRUTTURALE, scritta prima dei numeri: la (i) chiede una fascia con >= 100 righe e la (iv) >= 100 righe PER LATO, cioe' almeno 200 righe nella cella. Con le righe
+#  attese a H1 (~90) e a H4 (~20) [INFERITO, R-XAG-1] ESCLUSA non e' raggiungibile, QUALUNQUE C3G esca: la cella H1 e la cella H4 escono al massimo 'n insufficiente', e la
+#  casella 5 dell'argento NON si chiude con questo lotto a H1 e H4. Lo decide il conteggio vero delle righe, non questa stima.
+#
+#  ======================= ATTESE H, SCRITTE PRIMA DEI NUMERI (T1, Modello 1) [tutte INFERITO, nessuna e' una misura] =======================
+#  Fonti: R-XAG-1 corretta (C3G con BASE M15, spread invariato: estremo basso con l'esponente dell'ORO fra M15 e la giornata, 0,42, misura 3 del documento; estremo alto con
+#  l'esponente dell'argento M1->M15, 0,593; due punti di UNA tranche piu' il proxy dell'oro) e i conteggi MISURATI delle passate del 13/10: M1 88.416 barre e 6.611 righe
+#  segnale (7,48%), M15 5.955 barre e 384 righe (6,45%), C3G M1 2,40x e M15 11,95x, spread mediano 0,05.
+#  | cella | barre generate [scalatura dalla M15] | righe segnale [R-XAG-1] | C3G della cella [R-XAG-1] | classe S2 attesa       | ATR alle barre [C3G x 0,05 / 2,5] | n ingressi T1 |
+#  | M30   | ~2.980                              | ~180                    | 16-18x                    | FRA                    | ~0,32-0,36 USD                    | 0-10          |
+#  | H1    | ~1.490                              | ~90                     | 21-27x                    | FRA                    | ~0,42-0,54 USD                    | 0-12          |
+#  | H4    | ~370-400                            | ~20 (meno di 30: probabile) | 39-62x                | a cavallo di 40x       | ~0,78-1,24 USD                    | 0-14          |
+#  n: righe libere a >= 50x (le sole che il filtro 0,05 fa passare) meno quelle bloccate da una posizione aperta (uscita a tempo 48 barre: 1 giorno a M30, 2 a H1, 8 a H4).
+#  Quota delle righe a >= 50x [INFERITO dalla forma dell'oro: S0, C3G 22,8x, 5,1% delle righe a >= 50x]: M30 pochi per cento, H1 ~5%, H4 da ~0 (C3G ~40x e distribuzione
+#  stretta) a oltre meta' (C3G ~60x). Quindi n > 0 e' POSSIBILE a H1 e H4 (la passata allora NON esce KO per 'ZERO operazioni': il report c'e' e l'esito si legge senza
+#  eccezione); n = 0 resta possibile ovunque.
+#  RIGHE FRA 40x E 50x (= righe >= 40x meno righe >= 50x), stampate e lette per OGNI cella: sono righe a costo da PASSA scartate dal MARGINE del filtro 0,05 (2,5 / 0,05 = 50x),
+#  non dal costo. A H4 l'attesa (39-62x) attraversa proprio quella banda: con 40x <= C3G < 50x e' POSSIBILE che il filtro scarti il 100% delle righe libere (nessuna libera a
+#  >= 50x), ed e' la spiegazione (b) di Gemini (Q2 N2, corretta dal cancello): DESCRIZIONE, nessun esito ne dipende; la (v) di E4 la isola gia' (righe >= 40x). R-XAG-3 (nessun
+#  asse InpSpreadMaxATR) e' misurata SOLO a M1 e M15: a M30, H1 e H4 la forbice 40-50x NON e' misurata, la misura e' questa; nessun asse si discute prima di averla.
+#  Righe -1.0x (spread zero): ZERO in tutti i giornali GBA esistenti; se ci sono, si contano accanto (valgono infinito, classe 1376).
+#  ESITO ATTESO, per tutte e tre le celle: (B) 'n insufficiente a Modello 1 su una tranche (NON escluso)'; a M30 per la (iii) (C3G atteso 16-18x > 6,65), a H1 e H4 anche per
+#  la (i) e la (iv) (meno di 200 righe). 'ESCLUSA (Modello 1)' e' raggiungibile SOLO a M30, e solo con >= 200 righe, >= 100 per lato e C3G < 6,65x, cioe' con l'esponente crollato
+#  (C3G piu' basso della M15, 11,95x): producibile (per esempio con spread molto piu' larghi all'apertura delle barre M30), non atteso. A H4, 'C3G >= 40x' (costo grezzo che non
+#  esclude) e 'FRA' sono ATTESI con la stessa forza: e' un testa o croce scritto prima, non un'attesa di uno dei due.
+#  REGIME: UNA tranche, un trimestre (lug-set 2026), regime dell'argento NON classificato [NON MISURATO]. Nessun PF si legge come merito, per DUE motivi; quello che resta vero
+#  anche quando l'altro cade (classe 1384) e' il REGIME UNICO (Firma 1 del 10/10, emendamento D): anche con 150 operazioni in T1 il merito resterebbe NON MISURATO. L'altro e' Modello 1.
+#  LATI SEPARATI: per ogni cella si scrivono righe, C3G e ingressi di BUY e di SELL; la (iv) si legge su ciascun lato (>= 100 righe l'uno); un lato sotto 100 righe -> mai ESCLUSA.
+#  OROLOGIO E FASCE: la fascia di una riga e' l'ora server d'APERTURA della barra (campo 'ora server', EA r.695-696); a H1 e H4 una barra copre una o quattro ore e la fascia e'
+#  solo l'etichetta della sua apertura (DESCRIZIONE, nessuna fascia si legge come merito). A H4 le aperture sono 0, 4, 8, 12, 16, 20: la fascia 'rollover' (22-24) resta vuota.
+#  L'argento BCM ha la pausa giornaliera 22-23 server e riapre la domenica alle 23 [MISURATO sul giornale M1 del 13/10: nessuna riga alle 22 in nessun giorno; le 71 righe di
+#  domenica sono tutte alle 23]: quindi a H4 la barra della domenica apre alle 20:00 e il suo PRIMO tick (dove l'EA scrive la riga) e' alle 23:00. L'ora della riga e l'ora server
+#  coincidono a M30 e H1, NON sempre a H4 (vale per lo strumento che legge: scheda, richieste a D2).
+#
+#  ======================= SMENTITE H (smentiscono lo STRUMENTO di stima, MAI l'esito; simmetriche; classe 1383) =======================
+#  SH1 ESPONENTE (R-XAG-1 corretta, bande nostre, estremi inclusi: -20% sull'estremo basso, +20-25% sull'alto): C3G della cella H1 fuori da 17-34x, oppure H4 fuori da 31-75x
+#      -> l'estrapolazione con base M15 e' smentita, nei due versi. M30: R-XAG-1 non scrive una banda; si scrive il numero accanto all'attesa 16-18x, senza parola di smentita.
+#      Con 0 righe nella cella: NON VALUTABILE (la mediana di un insieme vuoto non esiste: non e' 0 e non e' infinito). Con 1-29 righe: si valuta e si scrive accanto il numero
+#      di righe.
+#  SH2 n >= 30 in una cella (n netto, porta (A)) -> la stima delle righe libere e del blocco della posizione e' sbagliata.
+#  SH3 SPREAD DELLA CELLA alle barre di rottura (definizione nel blocco L3 copiato) > 0,08 o < 0,02 -> lo spread delle passate del 13/10 (0,05) non descrive le aperture delle
+#      barre a TF alti: si scrive il numero nuovo.
+#  Una smentita si scrive e si legge il giornale per capire; l'esito resta quello della regola. Nessuna smentita sposta un esito, in nessuno dei due versi.
+#
+#  ======================= CONTROLLI IN PIU' (di STRUMENTO: possono solo togliere la lettura, MAI dare un esito) =======================
+#  CE1H ANCORA (sostituisce il CE1 copiato, Y5/Y7e): VERDE solo se valgono TUTTE E DUE: (1) l'ancora del 12/10 e' verde (GBA_R0_R2SANC.zip dentro
+#      risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip, SHA256 dello zip interno 259f4ba0922b4406dc58847b29525ea7467b1043565e3e8cc10148d1d2f4b980, pin cc9bcda0, stessi
+#      EA/include/driver; lo stesso zip con cui D2 v3 legge il rilancio R2SXAG2) E (2) CE7H e' VERDE. Altrimenti TUTTE E TRE le celle sono (C), senza appello.
+#  CE7H DETERMINISMO DELLA STORIA M1 (il controllo del GIRO NUOVO, al posto di CE7): in OGNI passata lanciata, la riga del tester 'XAGUSD,<TF>: N ticks, M bars generated'
+#      (colonna ticks_gen del MANIFEST) deve dire N = 353614, tolleranza ZERO. [MISURATO: 353614 in tre passate su due giorni e due TF: 12/10 M1, 13/10 M1, 13/10 M15; a Modello 1
+#      i tick si generano dalle barre M1, quindi il numero non dipende dal TF del grafico.] Anche UNA passata con un altro numero -> CE7H ROSSA -> CE1H non verde -> tutte e tre (C).
+#      Nessuna passata lanciata con quella riga -> NON VALUTABILE = non verde. COSA VEDE: storia M1 di T1 accorciata o allungata, generatore di tick cambiato. COSA NON VEDE
+#      (dichiarato): prezzi o spread delle barre M1 riscritti dal broker a parita' di tick generati (lo vedrebbe solo una cella testimone gia' misurata: decisione aperta nella
+#      scheda). Direzione: un difetto non visto sposta il C3G; ma 'ESCLUSA (Modello 1)' resta provvisoria fino ai tick reali (E3), quindi l'etichetta che non si rimedia NON
+#      dipende da CE7H. CONTRO-ESEMPIO: se a H1 o H4 il tester generasse i tick in un altro modo (non misurato sopra M15), CE7H sarebbe rossa senza difetti di storia:
+#      sbaglia verso la NON lettura, non verso un esito.
+#  CE9 FILTRO = COSTO (R-XAG-1, 'controllo di coerenza obbligatorio'; misura 1 della verifica del 13/10: la riga e' scartata per spread se e solo se stop/spread < 50x, con
+#      la posizione controllata PRIMA dello spread): per ogni cella con righe segnale, RIGHE LIBERE = righe segnale con motivo diverso da 'posizione gia' aperta' e da
+#      'ATR non valido'; S_sp = righe 'SALTATO (spread oltre il limite)'; L_lt = righe libere con stop/spread stampato < 50,0 (le -1.0x non sono < 50: valgono infinito);
+#      L_eq = righe libere stampate esattamente 50,0. Deve valere L_lt <= S_sp <= L_lt + L_eq (la stampa a 1 decimale porta a 50,0 una riga vera fra 49,95 e 49,99, che e'
+#      scartata). Altrimenti CE9 ROSSA -> quella cella (C): e' un difetto dell'EA o dello strumento, da trovare. CONTRO-ESEMPIO: un ingresso tentato stampato 42,0x (riga 'ok'
+#      sotto 50) -> L_lt supera S_sp -> rossa, ed e' quello che deve vedere. CE9 la calcola lo strumento che legge (D2, richiesta nella scheda); se non la stampa:
+#      NON VALUTABILE = non verde -> (C). Con 0 righe segnale la cella e' gia' (C) per l'ECCEZIONE (qui sotto), non per CE9.
+#  CE10 RISCALDAMENTO (canale 48 barre, EMA 100, ATR 14 del TF del segnale: a H4 l'EMA chiede ~17 giorni di borsa PRIMA del 2026.07.01): righe '[GBA] dati non pronti sulla barra
+#      ... segnale non valutato' nel giornale della passata (il driver tiene TUTTE le righe [GBA, r.552 e r.716-724). Attese ZERO [MISURATO: 0 nella M1 e nella M15 del 13/10;
+#      a M30, H1, H4 NON MISURATO]. Anche UNA riga -> quella cella (C), col numero accanto. CONTRO-ESEMPIO: se il tester non carica la storia H4 prima del 2026.07.01, le prime
+#      barre non si valutano e righe, n e C3G vengono da una finestra piu' corta di T1; senza CE10 la cella si leggerebbe sulla tranche dichiarata (e meno righe spingono verso
+#      'ESCLUSA' a vuoto).
+#
+#  ======================= ESITI H: L'ALBERO PER OGNI CELLA (M30, H1, H4). Si legge IN QUEST'ORDINE e il PRIMO che vale decide: UN solo esito per cella =======================
+#  H0 (C) NON SI LEGGE (i controlli hanno precedenza su TUTTI gli esiti, classe 1369), se vale almeno uno di:
+#     passata NON_LANCIATA; KO nel driver per un motivo DIVERSO dal solo 'ZERO operazioni nel report' (timeout compreso); CE1H non verde (allora tutte e tre); CE2, CE4, CE6,
+#     CE9 o CE10 rossi o non valutabili; CE3 rossa in una cella con ingressi; KO per il solo 'ZERO operazioni' MA con segnali(EA) = 0 (QUANTIFICATORE VUOTO: 'tutti i liberi
+#     scartati' sarebbe vero a vuoto, classe 1369) oppure con ingressi tentati > 0 (ordini rifiutati, non filtrati: CE6, classe 1372); G0 del lettore KO per un motivo diverso
+#     dal KO noto 'ZERO operazioni'; strumento D2 che rifiuta lo zip o che non ha passato il cancello PRIMA di aprirlo.
+#     CELLA CON 0 SEGNALI (il caso piu' probabile a H4 se la stima delle righe e' troppo alta): e' H0. C3G NON DEFINITO (ne' 0 ne' infinito), SH1 non valutabile, e si scrive
+#     '0 segnali in T1': la casella 5 resta NON ANCORA MISURATO col numero accanto; si legge la storia (CE10, riga 'bars generated', 'history data begins from').
+#  H1 (A) PASSA ALLO STADIO B: n netto (n del report meno gli ingressi a spread zero) >= 30 E 'solo spread' sugli ingressi >= 40x: e' l'esito (A) copiato, con le sue frasi
+#     'FRA sui segnali grezzi, PASSA solo grazie al filtro' / 'SOTTO 13,3x sui segnali grezzi, PASSA solo grazie al filtro'. [Atteso in nessuna cella.]
+#     (n netto >= 30 con 'solo spread' < 40x NON e' un caso: per L2 un ingresso ha stop/spread >= 50x, quindi CE3 sarebbe rossa e la cella e' gia' H0.)
+#  H2 (B) 'ESCLUSA (Modello 1)': n netto < 30 E valgono TUTTE E CINQUE (i)-(v) di E1-E4 sul C3G, con S = 6,65x: (i) almeno una fascia con >= 100 righe; (ii) C3G < S in ogni
+#     fascia con >= 30 righe (E1); (iii) C3G della cella < S; (iv) C3G < S su ciascun lato, ciascuno con >= 100 righe; (v) righe a >= 40x (le -1.0x contate) < 30 (E4).
+#     La casella NON si chiude: per E3 serve UNA passata a tick reali della stessa cella e tranche, con un file prova suo (e lo stesso SHA256 di D2, E3(1)).
+#     [Atteso in nessuna cella; raggiungibile solo a M30, vedi ATTESE H.]
+#  H3 (B) 'n insufficiente a Modello 1 su una tranche (NON escluso)': ogni altro caso con lettura. Si scrivono n (lordo e netto), righe segnale, quota scartata per spread fra le
+#     righe libere, C3G della cella, delle fasce e dei lati col numero di righe, righe a >= 40x e a >= 50x, la condizione fra (i)-(v) che NON vale e la classe S2 del C3G.
+#     Con n = 0 (ECCEZIONE valida) la frase e' quella copiata ('la REPL non apre nessuna operazione su questo (simbolo, TF) in T1 ...').
+#  Le quattro voci coprono ogni combinazione (H0 controlli; con lettura: n netto >= 30 -> H1, oppure H0 via CE3; n netto < 30 -> H2 se (i)-(v) tutte, altrimenti H3).
+#  NESSUN esito di questo lotto chiude la casella 4 o la 5 dell'argento: H0 non legge, H1 apre lo stadio B (n e tick reali), H2 aspetta E3, H3 e' 'n insufficiente'.
+#  L'argento NON e' 'morto' in nessun caso; nessun numero di questo lotto va in un preset; nessuna cella diventa sedia.
+#
+#  ======================= TESTO COPIATO BYTE PER BYTE DAL FILE MADRE (righe 94-276), da leggere con Y7 =======================
+#  ======================= DIFF CONTRO IL FILE MADRE prove/GBA_R0_REPLICA_2026-10-09.txt (i 30 pin, classe 1274) =======================
+#  CAMBIA, e nient'altro di cio' che entra nel tester:
+#   D1 pin InpSymbol: XAUUSD -> XAGUSD. Gli altri 29 pin sono IDENTICI al file madre (canale 48, EMA 100, ATR 14, spread max 0,05 x ATR, SL e trailing 2,5 x ATR,
+#      trailing sull'ATR dell'ultima barra chiusa, tempo 48 barre, BE a 1,0 ATR con offset 0, ore 0-24, tetto giornaliero e perdita giornaliera spenti, lotto fisso 1,00,
+#      InpTrendTF=0 e InpAtrTF=0: EMA e ATR seguono il TF del segnale).
+#   D2 @GBA-ASSE chiave=InpSignalTF (la variabile di questo file; il pin resta 1 come nel file madre). Celle: REPL = 1 (M1: il valore del pin, quindi per il driver v5 SI CHIAMA REPL e vuol dire 'la REPL di R1A con il solo simbolo cambiato') e M15 = 15.
+#   D3 @GBA-LOTTO R2SXAG: Modello 1 (OHLC su M1, sonda come S0), UNA tranche (T1), passate REPL:T1,M15:T1, tetto 15 minuti.
+#   RISULTATO SULL'INI (la sola cosa che il tester vede): rispetto a S0_01 (REPL T1, archiviato in risultati_archivio/GBA_R0_S0_20261010/GBA_R0_S0.zip) cambiano Symbol=,
+#      Period= (= TF della cella), InpSymbol, InpSignalTF (= la cella) e il nome del Report. Nient'altro. (Provato il 12/10 col codice VERO del driver v5 eseguito con pwsh
+#      su questo file: parsing r.342-470 e TestoIni r.638-651; scheda, sezione CONTROLLI.)
+#  NON CAMBIA: EA, include, driver (GBA_R0_PASSATE.ps1 v5, SHA256 C239F628...), deposito 1000000 EUR, lotto fisso 1,00, magic 775800 (il driver v5 ammette solo 775800 e
+#  775850; nel tester il magic e' un'etichetta; il blocco 7758xx non e' usato da nessuna sedia: 775900 e' la variante _Ottimizzato, mai in campo), soglie S1-S7.
+#
+#  ======================= DRIVER E LETTORE =======================
+#  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628...), file prova DICHIARATIVO (@GBA-ASSE, una chiave per file).
+#  Il simbolo e il TF della passata vanno nel .ini (Symbol= e Period=) dai pin EFFETTIVI (driver r.464-466, r.647); il driver mette la passata KO se il report, la riga
+#  'Tester <simbolo>,<TF>: testing of ...' o la riga AVVIO dell'EA ('InpSymbol="<simbolo>" -> simbolo <simbolo>') dicono un altro simbolo o un altro TF (r.602-603, r.773-774, r.806-813).
+#  L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) la prova uscirebbe con un CSV da zero byte (file madre).
+#  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
+#  LETTORE: backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A...), lo stesso di R2M5H24. Legge i lotti dichiarativi con qualunque simbolo e TF: l'intestazione della cella
+#  stampa simbolo e TF (r.1024: solo XAUUSD M1 resta senza etichetta). COSA STAMPA che serve qui: (2) n per tranche, segnali dell'EA, ingressi tentati, scartati per spread,
+#  a posizione aperta; (3) costo S2 sugli INGRESSI; (4) commissioni addebitate dal tester (somma), n e PF_V per lato BUY e SELL, perdita a SL scritta dall'EA (mediana, p90,
+#  massimo); (6) segnali liberi e quota scartata per spread; ATR mediana e spread mediana alle barre di rottura PER FASCIA (tutte le righe segnale, 2 decimali).
+#  DIFETTI DEL LETTORE PER UN SIMBOLO DIVERSO DALL'ORO (cercati nel sorgente il 12/10; NON si scrive un lettore nuovo adesso, si dichiara cosa NON si legge):
+#   L1 costo (3): le righe '+0,04 USD/oz' e '+0,08 USD/oz' sono la commissione dell'ORO (COMM_USD_OZ r.44) sommata allo spread nel prezzo del simbolo. Sugli indici la
+#      commissione vera e' ZERO [MISURATO, CANCELLO_COSTO_FLOTTA r.188] e 0,04 punti e' trascurabile; sull'argento 0,04 USD e' quanto lo spread (0,041) e la sua commissione e'
+#      [NON MISURATO]. In questo lotto si legge SOLO la riga 'solo spread'; le altre due NON si leggono.
+#   L2 costo (3) e' sugli INGRESSI, che hanno passato il filtro 0,05 x ATR: spread <= 0,05 x ATR => stop/spread = 2,5 x ATR / spread >= 50x PER COSTRUZIONE (l'EA lo stampa:
+#      'stop/spread minimo garantito = 50.0x'; R1A: mediana 58,8x, p10 51,3). Quindi la riga 'solo spread' NON puo' produrre un numero < 50x su NESSUN simbolo: le attese
+#      del piano 5.3 sono sui SEGNALI GREZZI (tutte le barre di rottura, come la colonna 'sui segnali grezzi' del piano 4.1) e su quella riga NON si possono leggere.
+#   L3 la mediana del campo 'stop/spread' che l'EA scrive a piena precisione in OGNI riga segnale (anche SALTATO) NON e' stampata da nessun lettore passato. Al suo posto,
+#      DICHIARATO ORA: il 'costo grezzo per fascia' = 2,5 x (ATR mediana) / (spread mediana) dalle righe (6) del lettore, fascia per fascia (rapporto delle mediane, NON
+#      mediana dei rapporti: un'approssimazione, e lo si scrive accanto al numero).
+#      COSTO GREZZO DELLA CELLA, scritto ORA prima dei numeri (controllo-preventivo 12/10, classe 1104 b: un criterio su un insieme dice se vale per ciascuno o
+#      sull'aggregato). Le righe (6) danno SEI rapporti, uno per fascia; il 'costo grezzo' di una CELLA (quello che usano le attese, le smentite, la frase 'FRA sui
+#      segnali grezzi' e l'esito A) e' UNO solo: la MEDIANA PONDERATA dei rapporti per fascia, peso = n della fascia nelle righe (6) (fasce con n = 0 escluse): si ordinano
+#      i rapporti in modo crescente e si prende il primo a cui la somma dei pesi raggiunge la meta' del totale. Accanto si scrivono TUTTE le fasce. Resta fascia per fascia,
+#      come gia' scritto, SOLO la regola 'ESCLUSA PER COSTO' dell'esito B e la smentita dell'argento 'in una fascia'. SECONDO GIRO del cancello (12/10, classi 1369 e
+#      1104 b): 'in OGNI fascia con >= 100 segnali' e' vero A VUOTO se nessuna fascia arriva a 100, e una fascia sola non descrive la cella. Quindi 'ESCLUSA' chiede ANCHE
+#      almeno una fascia con >= 100 segnali E il costo grezzo della CELLA sotto soglia; la smentita dell'argento scatta ANCHE sul costo grezzo della CELLA >= 13,3x.
+#      Il testo che decide e' negli ESITI (B) dei file dei simboli gemelli.
+#      Controprova sull'oro (righe (6) di S0_01): fasce 10,6 / 19,25 / 19,5 / 25,1 / 25,1 / 37,0x con n 276 / 1346 / 2314 / 1426 / 778 / 833 -> mediana ponderata 19,5x
+#      (FRA), stessa classe del proxy del piano (21,6x). Campione = barre di rottura (SELEZIONATO), non tutte le barre: si scrive accanto al numero.
+#      TERZO GIRO del cancello (12/10, classi 291 e 1104 b): la L3 confrontata coi numeri VERI gia' nello zip di S0 (log\GBA_S0_01_REPL_T1_m775800.txt, 6973 righe
+#      segnale, campo 'stop/spread' che l'EA calcola a piena precisione e stampa a 1 decimale, EA r.711 e r.720-727): mediana di TUTTE le righe 22,80x contro la mediana ponderata
+#      L3 19,48x (-14,6%: la mediana delle mediane di fascia NON e' la mediana della cella); fascia per fascia il rapporto delle mediane sta fra -6,6% e +2,7% del campo.
+#      La L3 SOTTOSTIMA, cioe' sbaglia verso 'ESCLUSA': resta DESCRIZIONE (attese, smentite, frase dell'esito A), si scrive col suo nome '[L3, sottostima misurata
+#      sull'oro -14,6%]' e NON decide 'ESCLUSA PER COSTO'. COSTO GREZZO MISURATO (C3G) = mediana del campo 'stop/spread' delle righe segnale del giornale della passata
+#      (log\GBA_<passata>.txt nello zip del lotto; righe con -1.0x = spread zero NON escluse: valgono stop/spread INFINITO, sopra ogni soglia, e si contano
+#      accanto; QUARTO GIRO del cancello: escluderle abbasserebbe la mediana proprio verso 'ESCLUSA'), per CELLA (tutte le righe) e per FASCIA (le sei fasce del
+#      lettore, sul campo 'ora server' della riga, con il loro n). Lo legge uno strumento che passa il cancello PRIMA di aprire lo zip (D2 della scheda); il giornale c'e'
+#      anche per le passate KO (driver r.820-826), quindi il C3G si legge anche a n = 0. Prova sull'oro: C3G della cella S0_01 = 22,80x (FRA, stessa classe della L3).
+#      SPREAD DELLA CELLA, dove serve: mediana del campo 'spread' di tutte le righe segnale del giornale con lo strumento D2, altrimenti mediana ponderata per n degli
+#      spread mediani di fascia delle righe (6) (stessa regola della L3, e allora si scrive '[L3]' accanto).
+#   L4 le righe segnale scrivono ATR e spread a 2 decimali (EA r.720-727, '%.2f'): sugli indici e' irrilevante, sull'argento (spread ~0,04) l'errore di arrotondamento
+#      arriva a +-25% su ogni mediana (le righe d'ingresso usano invece le cifre del simbolo, 3 per XAGUSD).
+#   L5 PF_V (4): se il tester non addebita commissioni, il lettore sottrae 3,90 EUR/lotto a operazione (la commissione dell'ORO, r.42). Sugli indici BCM la commissione e'
+#      zero, quindi il PF_V sarebbe distorto al ribasso: in questo lotto (Modello 1) nessun PF si legge come merito, ma per lo STADIO B il difetto va tolto PRIMA.
+#   L6 le sei fasce S6 sono le fasce dell'oro in ora server; sugli indici (e sul DAX in particolare) si stampano come DESCRIZIONE, nessuna fascia si legge come merito.
+#   L7 il lettore prende simbolo e TF dal MANIFEST e dall'ini, e NON li confronta col campo 'Simbolo' del report (provato il 12/10 con uno zip finto: CE2). La guardia sul
+#      simbolo vero e' il driver (r.806-813); in lettura, la firma dello spread (CE2).
+#  backtest_pipeline/leggi_gba_uscite.py ha 100 oz cablati (r.161, r.172) e backtest_pipeline/leggi_gba_notti.py legge solo i lotti notte: NON si usano qui.
+#
+#  ======================= TRANCHE, MODELLO, REGIME =======================
+#  UNA tranche: T1 2026.07.01 -> 2026.09.30, la STESSA di R1A T1 e di S0 (ToDate ESCLUSIVO, MISURATO in R1A). Dentro lo storico BCM degli indici (barre dal 2024.09.26,
+#  'COMPLETO: il broker non ha di piu'', sonda 17/08) e dell'argento (barre H1 dal 2008.11.07; M1 BCM dell'argento su questo PC [NON MISURATO]: se manca, il driver lo dice).
+#  MODELLO 1 (OHLC su M1) = SONDA, come S0 (09/10): solo CONTEGGIO e COSTO, nessun PF si legge come merito (il lettore stampa 'OHLC: SOLO CONTEGGIO'). Lo spread a Modello 1
+#  e' quello delle barre M1 della storia BCM, non quello dei tick: sull'oro S0 (Modello 1) ha dato 158 ingressi e solo spread 55,9x contro R1A (tick reali) 128 e 58,8x (G2 0,81).
+#  UN SOLO REGIME (lug-set 2026; per l'oro la regola del lotto R2REG lo chiama LATERALE volatile; per gli altri simboli il regime NON e' classificato [NON MISURATO]): nessun
+#  verdetto di regime si scrive da qui (Firma 1 del 10/10: un regime giudica il merito solo con >= 150 operazioni; questo lotto non giudica il merito).
+#  OROLOGIO: BCM = UTC+1 fisso (CLAUDE.md 24/09); T1 e' tutta estate: ora server = ora italiana - 1. Le fasce S6 si stampano in ora server.
+#  TAGLIA: lotto fisso 1,00 su tutti i simboli. 1,00 lotto NON e' 100 oz sugli indici e sull'argento: le cifre in EUR (profitto, DD, perdita a SL) NON si confrontano con l'oro
+#  ne' fra simboli; il PF e il rapporto stop/spread si'. Il deposito 1000000 EUR serve solo a non far scattare il margine.
+#
+#  ======================= SOGLIE CONGELATE (copiate, non spostate) =======================
+#  S1 (file madre, letterale) MERITO: si legge solo con n >= 150 nella cella (somma delle tre tranche); una tranche si legge da sola solo con n >= 150. Sotto: MERITO SOSPESO.
+#     Il RISCHIO (DD, perdita per operazione, peggior giornata) si legge a qualunque n.  -> qui UNA tranche a Modello 1: MERITO non letto in ogni caso.
+#  S2 (file madre, letterale) COSTO: prima del PF. >= 40 PASSA; 13,3-40 FRA; < 13,3 ESCLUSA PER COSTO. Mediana sugli ingressi, con commissione 0,04 USD/oz come base e 0,08 come
+#     contro-esempio (E6).  -> per questo lotto vedi L1/L2: si legge la riga 'solo spread' (commissione indici = 0 MISURATA; argento [NON MISURATO]).
+#  REGOLA CONGELATA DEL PIANO 5.3 (letterale): 'passa allo stadio B solo (simbolo, TF) con mediana >= 40x (S2 PASSA) e n >= 30 segnali in T1; una cella FRA si puo' misurare
+#     per capire (lo dichiaro) ma non puo' diventare sedia.'
+#  LETTURA DI QUESTA REGOLA, SCRITTA ORA (prima dei numeri; e' una DECISIONE APERTA nella scheda, D1): 'mediana' = S2 del file madre, cioe' sugli INGRESSI, riga 'solo spread';
+#     'n' = operazioni del report in T1 (ingressi), non le righe segnale. Conseguenza dichiarata (L2): con il filtro 0,05 la condizione di costo sugli ingressi e' vera per
+#     costruzione su un simbolo a commissione zero, e la porta dello stadio B diventa n >= 30. E' la stessa condizione della REPL sull'oro: grezzo M1 21,6x (FRA, proxy),
+#     ingressi 58,8x (PASSA). Una cella che PASSA sugli ingressi ma ha il costo GREZZO in FRA (13,3-40) si scrive 'FRA sui segnali grezzi, PASSA solo grazie al filtro': e' un
+#     fatto da portare allo stadio B, non una promozione. L'altra lettura (mediana sui segnali GREZZI, intento del piano 5.2) e' scritta nelle attese come DESCRIZIONE (L3).
+#  S8-S10 (piano 3.3) non si applicano: nessun PF di questo lotto si legge.
+#  CERTIFICATO DEI 5 PUNTI (CLAUDE.md 09/09): questo lotto lavora sulla casella 4 (simboli GEMELLI). Lo stadio A da solo la CHIUDE solo per i (simbolo, TF) che escono
+#     ESCLUSI PER COSTO col numero accanto; per gli altri la casella resta aperta fino allo stadio B (tick reali). Qualunque esito qui e' 'NON ANCORA MISURATO' per il motore.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  La domanda (casella 4, piano 5.3 stadio A): su XAGUSD, ai TF M1 e M15, il GBA con la REPL invariata ha abbastanza ingressi in T1 e a che costo, per decidere se vale
+#  la pena girarlo a TICK REALI (stadio B)? Si legge: n di ingressi (totale e per lato BUY/SELL), quota dei segnali liberi scartati dal filtro di spread, costo 'solo spread'
+#  sugli ingressi, costo GREZZO per fascia (L3), ATR e spread del simbolo alle barre di rottura, commissione addebitata dal tester, perdita a SL per operazione (scala del rischio).
+#  NON si legge: nessun PF come merito (Modello 1, una tranche); nessun confronto in EUR con l'oro; nessuna fascia oraria come merito.
+#  XAGUSD: spread 0,041 USD da UNA lettura (sonda 17/08, SpreadPt 41, Point 0,001, Digits 3), commissione [NON MISURATO], ADR 1,095 USD su n=4 ('NON CITABILE'); due fonti del repo non si accordano (MAPPA 26,7x sul giorno, NatCla 434,8x su un altro stop): nessuna e' la geometria del GBA (piano 5.1). Questa sonda e' l'UNICO modo di chiudere il numero (piano 5.4).
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (T1, Modello 1) =======================
+#  METODO [INFERITO, NON misurato]: (a) costo GREZZO = stima del piano 5.2 per scalatura dalla forma intraday dell'oro (il piano lo dichiara 'il punto debole'); (b) quota
+#  di segnali liberi che passano il filtro 0,05 (= quota con stop/spread >= 50x sullo spread del momento) dalla corrispondenza mediana grezza -> quota che passa del proxy
+#  dell'oro (piano 4.1: 21,6x -> 14,5%; 40,1x -> 45%; 53,3x -> 69%; 95,9x -> 99%), RIDOTTA col rapporto tester/proxy misurato sull'oro (M1: R1A 5,2% contro 14,5% del
+#  proxy = 0,36; M5: R2M5H24 T1 45% contro 69% = 0,65); (c) n = ingressi in T1: dall'oro M5 a 24 ore T1 (R2M5H24, tick reali, 336 ingressi con il 45% dei segnali liberi
+#  che passa), scalato per la quota che passa e per il blocco della posizione aperta (a M15 l'uscita a tempo di 48 barre vale 12 ore), x1,2 per il Modello 1 (S0/R1A 158/128).
+#  Le bande sono LARGHE di proposito: sono stime su stime. Una cella fuori banda NON e' un risultato: si legge il giornale (segnali, scarti per spread e per posizione) prima.
+#  | cella | costo GREZZO (piano 5.3, letterale per l'argento: 'XAGUSD < 13,3x a M1 e a M15 (cioe' esclusa)'; stima 5.2) | quota scartata per spread (dei liberi) | n ingressi T1 |
+#  | REPL (M1) | < 13,3x (stima 2,2x)  | >= 97%                                                                                   | 0-30 (centro ~5)  |
+#  | M15       | < 13,3x (stima 9,6x)  | >= 95%                                                                                   | 0-15 (centro ~3)  |
+#  ATR alle barre di rottura [INFERITO dalla legge di casa ATR = ADR x radice(T/1380), ADR 1,1-1,6 USD]: M1 ~0,02-0,08 USD, M15 ~0,08-0,30; spread ~0,03-0,06 (2 decimali).
+#  ATTESA DELLO STADIO A: esito (B) sulle DUE celle -> nessuna passata dell'argento allo stadio B. n = 0 e' PRODUCIBILE e PROBABILE (servirebbe ATR >= 20 x spread,
+#     cioe' ATR >= ~0,8 USD con spread 0,041): allora la passata esce KO per 'ZERO operazioni' e il lotto R2SXAG con rc 3, ed e' ATTESO (eccezione negli ESITI); il lettore
+#     non stampa le righe (6) e il costo grezzo dell'argento resta NON MISURATO finche' non si decide D2 (scheda). Con n fra 1 e 29 il lettore stampa le righe (6) (L3,
+#     descrizione); 'ESCLUSA PER COSTO col numero' dell'esito (B) si legge SOLO sul C3G, anche a n = 0: almeno una fascia con >= 100 segnali, C3G < 6,65x in ognuna di
+#     esse, C3G della CELLA < 6,65x e C3G < 6,65x su ciascun lato (BUY e SELL, >= 100 righe l'uno). Senza lo strumento D2: niente 'ESCLUSA'.
+#  SMENTITE: n >= 30 in una cella, oppure quota scartata < 90%, oppure costo grezzo (C3G se c'e', altrimenti L3) >= 13,3x in una fascia con >= 100 segnali o nella CELLA -> la stima del piano (n=4 e una lettura) e'
+#     sbagliata: si scrive cosi', si legge il giornale (spread vero alle barre: righe d'ingresso a 3 decimali) e la cella va allo stadio B con l'esito (A) se lo merita.
+#     SPREAD DELLA CELLA alle barre di rottura (definizione nel blocco L3) > 0,08 o < 0,02 -> lo spread di una lettura (0,041) non descrive l'argento BCM: si scrive il numero nuovo (e' IL numero che mancava).
+#  LATI: il lettore stampa n per BUY e per SELL (sezione 4); attesa: nessuno dei due lati sotto il 25% degli ingressi della cella (EMA 100 e canale sono simmetrici). Un lato
+#     solo = DA GUARDARE (InpAllowLong/Short sono true nei pin: il driver lo verifica nella riga AVVIO). Per gli indici la regola dei due lati (CLAUDE.md 25/08) vale allo stadio B.
+#  COMMISSIONE: argento [NON MISURATO]: il lettore stampa la somma delle commissioni addebitate dal tester. Se > 0, e' la PRIMA misura della commissione dell'argento sul feed BCM (EUR per operazione a 1,00 lotto); se = 0, il lettore sottrae 3,90 EUR (oro, L5): non si legge. La conversione in USD per oncia NON e' stampata: non si scrive.
+#  RISCHIO (a qualunque n, Modello 1 = indicativo): perdita a SL scritta dall'EA (mediana, p90, massimo) in EUR a 1,00 lotto: si scrive, non si confronta con l'oro.
+#
+#  ======================= CONTRO-ESEMPI DI STRUMENTO (costruiti PRIMA: come si vede che driver e lettore NON certificano il falso) =======================
+#  CE1 ANCORA: la passata R2SANC (file prova GBA_R2S_ANCORA_2026-10-12.txt, stesso giro) deve rifare S0_01 al centesimo (158 / -6364,79 / 0,86, solo spread 55,9x) e il lettore,
+#      caricato con GBA_R0_S0.zip, deve fermarsi per doppione. Se no: NESSUN numero di questo lotto si usa.
+#  CE2 SIMBOLO VERO: il driver mette KO la passata se report, riga del tester o riga AVVIO dicono un altro simbolo/TF. In piu', nel lettore: l'intestazione della cella DEVE
+#      portare 'XAGUSD M..' (r.1024) e gli ordini di grandezza alle barre di rottura devono essere quelli del simbolo, NON dell'oro: ATR mediana per fascia 0,005-0,60 USD e spread mediana 0,01-0,10 USD (2 decimali). CE2 e' ROSSA SOLO se
+#      l'intestazione non porta 'XAGUSD M..', oppure se OGNI fascia stampata (almeno una) ha lo spread mediano in 0,15-0,30 E l'ATR mediana > 0,60 (la firma dell'oro: S0 spread
+#      0,17-0,25 USD e ATR 1,06-2,96 in tutte e sei le fasce) = letta come XAUUSD: non si usa. Le bande d'ordine di grandezza qui sopra sono ATTESE, NON cancelli: una
+#      fascia fuori banda senza la firma dell'oro si scrive come numero nuovo (TERZO GIRO del cancello, classi 1104 b e 1369: prima non era scritto se la CE2 la
+#      facevano rossa le bande o la firma, ne' se 'per fascia' voleva dire ogni fascia o almeno una). PERCHE' SERVE: il lettore NON confronta il simbolo
+#      del report con quello del manifest (L7): PROVATO il 12/10 con uno zip FINTO (deal, giornale e report VERI di S0_01, oro, sotto l'etichetta R2SXAG M15 e l'ini del driver):
+#      il lettore stampa 'CELLA M15 [lotto R2SXAG] ... XAGUSD M15', G0 OK, e i numeri dell'oro (solo spread 55,9x, spread per fascia 0,17-0,25). La guardia e' il driver
+#      (report di un altro simbolo = KO, r.806) e, in lettura, questa firma.
+#  CE3 COSTO PER COSTRUZIONE: riga 'solo spread' sugli ingressi: mediana >= 50x e 'quota <40x: 0%' in ogni cella con ingressi (L2). Una cella con quota <40x > 0% o p10 < 49 =
+#      difetto di arrotondamento/parsing del lettore su questo simbolo: la riga costo di quella cella non si usa (n e gli scarti restano leggibili).
+#  CE4 SCARTI COERENTI: segnali(EA) = ingressi tentati + scartati spread + posizione aperta (+ ATR non valido, tutto il resto a zero con questi pin) nella riga (2); se non torna,
+#      il giornale e' incompleto (dedup del driver): si legge il giornale prima di qualunque numero.
+#  CE5 LOTTO: le righe d'ingresso devono dire '1.00 lotti'. Se il simbolo non ammette 1,00 l'EA stampa 'ATTENZIONE: lotto richiesto ... ridotto' e la passata resta OK: la
+#      taglia diversa NON cambia n, quota scartata e costo, ma si scrive.
+#  CE6 ORDINI ESEGUITI (TERZO GIRO del cancello, classe 1372): 'ingressi tentati' della riga (2) conta i segnali che passano il filtro, NON gli ordini eseguiti (EA r.704).
+#      Deve valere: ingressi tentati - n = 0 oppure 1 (la tolleranza del driver r.817; S0_01: 158 = 158). Con 2 o piu': ordini saltati o rifiutati sul simbolo nuovo
+#      (intestazione del log 'errori d ordine N   altri ordini saltati M', driver r.822; nel giornale 'ERRORE ordine' / 'ordine saltato'): n e' TRONCATO, la cella e' (C)
+#      finche' la causa non e' scritta. Vale anche a n = 0 (ECCEZIONE qui sotto).
+#
+#  ======================= ESITI DELLO STADIO A PER OGNI (simbolo, TF): TRE, e nient'altro =======================
+#  Prima: passata OK nel driver, G0 OK nel lettore, CE1-CE4 e CE6 verdi. Altrimenti: GUASTO, nessun esito.
+#  ECCEZIONE, SCRITTA ORA (contro-esempio trovato preparando il lotto): una passata KO per il SOLO motivo 'ZERO operazioni nel report' (driver r.816; AVVIO, AUTOTEST,
+#  finestra e riga [GBA-CONTA] FINE a posto) E con, nella riga (2), 'ingressi tentati 0' E 'scartati spread' >= 1 NON e' un guasto. (TERZO GIRO del cancello, classi
+#  1369 e 1372: l'EA conta 'ingressi tentati' PRIMA di mandare l'ordine (EA r.704, poi GbaApri r.623-667 puo' saltarlo) e il driver NON mette KO 'ERRORE ordine' ne'
+#  'ordine saltato' (r.745-746, solo contati): con tentati > 0 e n = 0 gli ordini sono stati RIFIUTATI, non filtrati -> (C), CE6; con segnali(EA) = 0 la frase 'tutti i
+#  liberi scartati' sarebbe vera A VUOTO -> (C), si legge la storia M1 del simbolo.) In quel caso: e' n = 0, ed e' PRODUCIBILE (sull'argento e' l'attesa). Il driver la conta KO (il lotto esce con rc 3) e il
+#  lettore la scarta (G0: 'KO del driver'), ma nella riga (2) stampa LO STESSO i conteggi della riga [GBA-CONTA] FINE dell'EA ('(G0 KO: non letta) n=n.d. ... segnali(EA)
+#  N, ingressi tentati 0, scartati spread X, a posizione aperta Y': PROVATO il 12/10 su uno zip finto con stato KO e motivo 'ZERO operazioni nel report') e NON stampa le
+#  righe (6) (ATR e spread per fascia). L'esito e' (B) con n = 0, coi conteggi della riga (2); il costo grezzo e' il C3G dal giornale se lo strumento D2 ha passato il
+#  cancello prima di aprire lo zip, altrimenti resta NON MISURATO (nessun lettore passato legge il campo stop/spread delle righe segnale).
+#   (A) PASSA ALLO STADIO B: n (ingressi, T1) >= 30 E 'solo spread' sugli ingressi >= 40x. Si scrive accanto il costo GREZZO (il C3G se lo strumento D2 c'e', e sempre
+#       la L3 col suo nome; la frase la decide il C3G se c'e', altrimenti la L3) e, se e' < 40x, la frase 'FRA sui segnali grezzi, PASSA solo grazie al filtro'
+#       (13,3-40) oppure 'SOTTO 13,3x sui segnali grezzi, PASSA solo grazie al filtro' (< 13,3). (TERZO GIRO del cancello, classe 1369: prima, sotto 13,3x non si
+#       scriveva nessuna frase.)
+#       n DELLA PORTA (QUINTO GIRO del cancello, classe 1372): gli ingressi a spread ZERO NON contano per i 30. Sono le righe segnale del giornale SENZA 'SALTATO'
+#       e con 'stop/spread -1.0x' (EA r.711): il lettore li tiene in n ma li toglie dal costo SENZA stamparne il numero (leggi_gba_r0.py r.431-442, 'spread_zero'),
+#       quindi CE3 non li vede. Si contano nel giornale e si scrivono accanto a n; se n meno quegli ingressi e' < 30, l'esito e' (B). Contro-esempio: 40 ingressi, 15
+#       su barre a spread zero -> il lettore stampa n=40 e il costo dei soli 25 con spread, e la cella passerebbe con 25 ingressi a costo vero.
+#   (B) NON PASSA PER n: n < 30. Si scrivono n, la quota scartata per spread e il costo grezzo (della CELLA e di TUTTE le fasce). Soglia S con il margine dell'arrotondamento
+#       (L4): S = 6,65x per l'argento, S = 13,3x per gli indici. 'ESCLUSA PER COSTO col numero' (e la casella 4 si chiude per quel (simbolo, TF)) SOLO se valgono TUTTE E QUATTRO:
+#       (i) ALMENO UNA fascia con >= 100 segnali; (ii) C3G < S in OGNI fascia con >= 100 segnali; (iii) C3G della CELLA < S; (iv) C3G < S anche su CIASCUN LATO:
+#       mediana del campo stop/spread delle sole righe BUY della cella, e delle sole righe SELL, ciascun lato con >= 100 righe. Senza la (i) la (ii) sarebbe vera A VUOTO:
+#       NON e' 'ESCLUSA'. (QUINTO GIRO del cancello, classe 1104 b e regola dei due lati CLAUDE.md 25/08: (i)-(iii) mescolano i due lati, e il lato e' un asse del GBA,
+#       prove GBA_R2_SOLOBUY/SOLOSELL. Contro-esempio: in una fascia BUY 150 righe a 8-14x e SELL 130 a 12-18x, fuori fascia 10 BUY a 10x e 10 SELL a 14x -> fascia e cella
+#       12,85x < 13,3 = 'ESCLUSA' con (i)-(iii), mentre il SELL da solo fa 14,77x. Misurato sull'oro S0_01, fascia asia: 19,80x la fascia, BUY 21,40x, SELL 18,50x:
+#       i lati si separano del 16% dentro una fascia. Un lato a >= S, o sotto 100 righe -> 'n insufficiente', mai 'ESCLUSA'.)
+#       (TERZO GIRO del cancello, classe 291: (i)-(iv) si leggono SOLO sul C3G, il campo stop/spread delle righe del giornale; la L3 sottostima
+#       sull'oro del 14,6% proprio verso 'ESCLUSA' e NON decide. Se lo strumento D2 non ha passato il cancello PRIMA di aprire lo zip: NIENTE 'ESCLUSA', l'esito e'
+#       'n insufficiente' con la L3 accanto come descrizione. Con il C3G l'arrotondamento L4 non entra: 6,65x per l'argento resta come margine prudenziale scritto
+#       prima dei numeri. Sulla L3 quel margine NON bastava: con lo spread di fascia stampato 0,01 una cella stampata 5,00x puo' valere 24,5x, ricerca esaustiva
+#       sulla stampa vera del lettore, EA '%.2f' per riga + statistics.median + '%.2f'.) Contro-esempi scritti prima (secondo giro del cancello, 12/10): storia M1 parziale o pochi
+#       segnali -> nessuna fascia a 100 -> 'ESCLUSA' a vuoto; una sola fascia a >= 100 segnali (asia, spread largo fuori cassa) sotto S e le altre cinque (99 segnali l'una)
+#       a 45x -> 'ESCLUSA' con la cella a 45x. Tutti e due ora escono 'n insufficiente'.
+#       Altrimenti -> 'n insufficiente a Modello 1 su una tranche' (NON 'escluso'). Con n = 0 (eccezione qui sopra) -> 'la REPL non apre nessuna operazione su questo
+#       (simbolo, TF) in T1: N segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G se lo strumento D2 c'e' (e allora vale la
+#       regola 'ESCLUSA' qui sopra), altrimenti NON MISURATO' -> non passa allo stadio B.
+#   (C) NON SI LEGGE: passata KO (salvo l'ECCEZIONE), lettore che non stampa la cella, CE1-CE4 o CE6 rossi.
+#  Nessun esito scrive la parola vietata; nessun esito promuove una cella a sedia; nessun numero di questo lotto va in un preset.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dal blocco @GBA-TRANCHE qui sotto (una tranche, T1 di R1A; nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 la legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-ASSE chiave=InpSignalTF tranche=1 celle=2 lotti=1
+#  @GBA-CELLA nome=M30 InpSignalTF=30
+#  @GBA-CELLA nome=H1 InpSignalTF=16385
+#  @GBA-LOTTO nome=R2SXAGR modello=1 tetto_min=15 passate=M30:T1,H1:T1
+#
+InpSymbol=XAGUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true
