@@ -35,3 +35,13 @@ Dati: 13 deal di stop out del 28/09 15:47 (prezzo di liquidazione 4.119,05; 0,57
 - **Se l'oro e' sceso sotto 4.078,7**: stop out a equity circa 509 EUR contro i 2.495 finali del tester: circa **-1.990 EUR**.
 - Agosto (05/08 12:59) NON e' ricostruibile allo stesso modo: lo stop out chiude 6 buy (0,27 lotti) ma c'erano anche sell vivi (0,46) e il conto e' finito a 1.936,71: il modello a una sola gamba non riproduce il prezzo (previsto 4.087 contro 4.191 reale).
 - **NON calcolabile da questo report**: la differenza di comportamento dell'EA. Con 4,8 volte meno margine i blocchi `margin level too low` (migliaia dal 01/09 02:32) non scatterebbero, quindi ingressi e cesti dei giorni 1-27 sarebbero diversi.
+
+## 3. Il minimo dell'oro (CSV M1 BCM esportato da Claudio, `data/prezzi/XAUUSD_M1_BCM_2026-09-28_30.csv`, 4.032 barre 28/09 00:00 - 30/09 21:36, ora server) [MISURATO]
+- Controllo del dato: la barra 15:46-15:47 del 28/09 passa da 4.119,04 a 4.116,75: coincide col prezzo di stop out del tester (4.119,05).
+- **Minimo fra 28/09 15:47 e 30/09 07:52: 4.110,83 il 28/09 alle 15:57** (28/09 low 4.110,83; 29/09 low 4.113,40 alle 02:00; 30/09 low 4.165,63 alle 06:18). Massimo nella finestra 4.188,28; il prezzo NON torna all'entrata media del cesto (4.240,09).
+- Soglia di stop out col margine del reale: 4.078,7. **Il minimo e' 31,9 USD sopra: nessuno stop out.** Equity minima 2.091 EUR, livello di margine minimo **205,6%** (contro 42,8% del tester).
+- Perdita flottante del cesto: -6.367 al minimo (15:57), **-2.435 alle 07:52 del 30/09** (close 4.190,66), -3.494 alle 04:01 del 02/10 (4.169,14).
+- **Differenza rispetto al tester (-5.962 realizzati)**: **+3.527 EUR** marcata alle 07:52 del 30/09; +2.468 alle 04:01 del 02/10; swap long -98,78 USD/lotto/notte x 0,57 lotti (circa -50 EUR a notte, mercoledi' x3). Sono valori FLOTTANTI: l'EA avrebbe agito ancora sul cesto [NON SIMULATO].
+- Settembre del tester -2.505 -> circa **+1.020** marcato al 30/09 07:52 (circa +920 dopo lo swap).
+- 🔴 Ma il drawdown d'equity del giorno: **-6.367 EUR flottanti al minimo = 75% del saldo di 8.458**; su 100k a lotto 0,01 sarebbero -6,4%, oltre il limite giornaliero FTMO -5% del nostro piano; sul reale da 7.500 sarebbero -85%.
+- Restano NON calcolabili i giorni 1-27 (blocchi di margine assenti nel reale) e agosto.
