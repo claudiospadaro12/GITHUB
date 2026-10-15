@@ -1,0 +1,30 @@
+# The Impossible Gold 2.1 (XAUUSD, M5) -- scheda dai parametri (screenshot di Claudio, 15/10/2026 09:43-09:44)
+
+Fonte: tre screenshot della finestra Proprieta' -> Dati in ingresso dell'EA sul demo piccolo 50503392 (caricato da Claudio il **14/10**). I valori sono LETTI dallo schermo [LETTO]; il codice e' di terzi (scatola nera). Collegato ai trade `TIG Breakout HIGH/LOW` (magic **778899**) del `report/MARKET_CLASSIFICA_2026-10-15.md` §4: **"TIG" = The Impossible Gold**.
+
+## 1. Gli input (tutti letti)
+- **STRATEGY**: Timeframe 5 Minutes; Breakout lookback bars **16** (80 minuti); Breakout buffer **1,5 pips** sopra/sotto il range; Minimum range **5,0 pips**; Maximum range to skip **1500 pips**; Minimum score (0-100) per aprire **50** (come si calcola lo "score" [NON NOTO]); Max bars to hold **0** (off); Cooldown bars **0** (off).
+- **SESSION FILTER (GMT)**: inizio **10**, fine **20**; zona di esclusione **12 - 15**; nessun giorno bloccato (lun-ven tutti false). Quindi si opera **10-12 e 15-20 GMT**.
+- **RISK**: Risk per trade **1,5% dell'equity**, **Compound = true** (sull'equity corrente); Fixed lot 0,0 (= usa il rischio %); lotto minimo 0,01, massimo 10,0; Magic **778899**.
+- **TP & SL**: Take Profit **300 pips**; Stop Loss **25 pips**; Max spread **50 pips**; Min-stop spread multiplier 3.
+- **TRADE MANAGEMENT**: Enable breakeven **false** (trigger 50, offset 5 se acceso); **Enable trailing stop = TRUE**, start **10 pips** in profitto, distanza **2 pips**; **Enable progressive TP extension = TRUE**, trigger distance = pips di estensione x moltiplicatore **1,0**, sposta il TP piu' avanti di **14 pips** ogni volta, **max estensioni per posizione 0 = illimitate**; "Move existing SL by extension pips (trailing OFF only)" false.
+- **PROTECTION**: Max drawdown % dal capitale iniziale **0,0 (off)**; Max daily loss % **0,0 (off)**; **Max simultaneous positions 1**; **Max trades per day 5**; Max consecutive losses before daily pause **0 (off)**.
+- **NEWS FILTER** false (30 min prima, 15 dopo se acceso). **SHIELD circuit breaker** false (arm dopo 400%, trigger DD 10%). **PROP FIRM dynamic protection = false** (Firm max DD 6,0%, daily 3,0%, zone 40/65/85% se acceso).
+- **REGIME FILTER (weekly)**: Enable weekly trend detection **true**, EMA settimanale **50**, pendenza su **4** settimane, pendenza minima **0,3%**; "trade WITH trend only" **false** (opera in entrambe le direzioni). Direction exclusions tutte 0. Discord alerts accesi (webhook vuoto). Dashboard e extras true.
+
+## 2. Cosa confermano i trade del 14/10 [MISURATO, confronto con il report del 15/10]
+- **Il lotto e' il 1,5% di rischio, come stimato dai dati**: perdita al SL di 69, 67 e 89 EUR = **1,44%, 1,40% e ~1,5%** del saldo [DERIVATO]. Stima giusta, ora spiegata dall'input (Risk 1,5%, compound).
+- **SL 25 pips = 2,5 USD** (pip = 0,10 sull'oro) e **TP 300 pips = 30 USD**: **tornano esattamente con i due LOW** (SL +2,5, TP -30; rapporto 12:1).
+- **Gli orari tornano con la sessione**: BCM e' UTC+1 fisso (`report/OROLOGIO_BCM_2026-09-24.md`): LOW 11:05 e 12:05 server = **10:05 e 11:05 GMT** (dentro 10-12), HIGH 19:15 server = **18:15 GMT** (dentro 15-20). Nessun trade nella zona 12-15 GMT [coerente].
+- **Il TP del HIGH e' stato ESTESO**: TP 4164,33 contro il TP iniziale atteso 4091,20 + 30 = 4121,20 -> **+43,13 USD = ~31 passi da 1,4 USD** [DERIVATO]: e' la "progressive TP extension" al lavoro (prezzo salito dal 14/10 sera, TP spostato avanti ~31 volte).
+- **CORREZIONE alla frequenza scritta nel §4 della pagella**: l'EA e' stato caricato il **14/10**, quindi i 3 trade sono di **UN giorno** (il primo giorno), non di tre. Il tetto e' 5 al giorno. Non si puo' dire "un segnale al giorno": n = 1 giorno.
+- **NON risolto**: con il trailing ACCESO (start 10 pips, distanza 2 pips) lo SL del HIGH nel report delle ~07:30 e' ancora **4088,43 (l'originale)**. O il report mostra lo SL iniziale e non quello corrente, o il trailing e' "virtuale" (l'EA chiude da se') o non sta lavorando [NON VERIFICATO]. **Il fatto si legge dal terminale: lo SL corrente della posizione nella scheda Operazioni.** Se e' ~4138 il profitto e' protetto e quanto scritto nel §4 sul "restituire ~1.600" e' sbagliato; se e' 4088,43 non lo e'.
+
+## 3. Natura (criteri del 14/10 scritti prima dei numeri)
+- ✅ **SL iniziale su ogni trade; nessuna griglia, nessuna scala di lotti, nessun recupero, nessun martingala; rischio per trade calcolabile (1,5% x SL fisso 25 pips)**, una posizione alla volta, max 5 al giorno. E' **il profilo opposto all'Arena**: perdita massima nota per trade, vincite rare e grandi (TP 12:1, esteso e con trailing).
+- 🟠 **Il rischio per trade e' 1,5%**, contro lo 0,65% per sedia dei nostri EA nel campo (CLAUDE.md, C1). Max 5 trade/giorno x 1,5% = **fino a -7,5% in un giorno teorico di 5 stop di fila**; **le protezioni proprie dell'EA (daily loss, max DD, pausa dopo perdite consecutive) sono TUTTE spente (0,0)**, anche se gli input esistono. Il tetto di una prop sarebbe da impostare (decisione di Claudio, taglie e rischio sono sue).
+- 🟠 **Dipende dalla sessione e dal feed**: orari in GMT (l'orologio BCM e' UTC+1 fisso, ma l'orologio invernale e' una decisione aperta per il 25/10).
+- **Merito: NON MISURATO.** n = 3 trade in un giorno: 2 stop (-138,4 realizzati) + 1 aperto (+1.510 flottante al momento del report). Nessun PF.
+
+## 4. Cosa si puo' fare (proposta di misura, nessun criterio mosso)
+- L'EA espone quasi tutta la logica (lookback, buffer, range minimo/massimo, sessione, rischio, SL/TP, trailing, estensione del TP) tranne lo **"score" 0-100** e il filtro di regime. **Una sonda nel nostro Strategy Tester** come quella dell'Arena (ticks reali, XAUUSD M5, finestre mensili, input dichiarati) misurerebbe: quanti trade, quanto frequentemente il TP esteso viene preso, la distribuzione dei trade e il drawdown, **senza ordini veri**. Prerequisito: il prodotto deve essere installato dal Market sul terminale del PC di backtest (non attaccato a nessun grafico). Tempo macchina: va deciso da Claudio. Non ora: le tre tranche dell'Arena stanno girando su quel PC.
