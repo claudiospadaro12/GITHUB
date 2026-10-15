@@ -1,0 +1,161 @@
+----------------------------------------------------------------------------------------------------------------------
+REFERTO dello script (REFERTO_ARENA_TRANCHE.txt) -- righe chiave:
+  ARENA TESTER TRANCHE -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_TRANCHE_v2, pin 5c5d7dc0292caf885a108298c97c63c7548a8e6e
+  data: 2026-10-15 16:11:59   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+  EX5: Market\Arena Nexus Grid Smart XAU MT5.ex5   byte 200368   data file 2026-10-14 20:53:53   SHA256 B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+  input NON imposti (enum, ordinale sconosciuto): InpTradeMode, InpGoldPulseTheme -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: il valore usato e quello del report, riga ENUM qui sotto
+  esiti: TRANCHE1 KO   TRANCHE2 OK   TRANCHE3 KO
+  ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre. Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).
+  TRANCHE1 (luglio 2026)  2026.07.01 -> 2026.08.01   STATO KO
+  EX5_DOPO TRANCHE1: B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A UGUALE
+  input imposti confermati dal report: no   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): InpTradeMode report=NON NEL REPORT giornale=0 | InpGoldPulseTheme report=NON NEL REPORT giornale=0
+  - timeout di 270 minuti (report non scritto da un tester interrotto)
+  - il report e di un altro EA (Simbolo:)
+  - il report e di un altro simbolo (Periodo:)
+  - il periodo del report e "M0(1970.01.01-1970.01.01)" invece di M1 (2026.07.01 - 2026.08.01)
+  - deposito del report "0" invece di 5000: il .ini non e stato applicato come dichiarato
+  - leva del report "1:0" invece di 1:100
+  - INPUT NON APPLICATI come dichiarato (14): InpS03FundedPrefix ASSENTE dai Dati in ingresso del report ## InpEntryPhaseSpacingR33 ASSENTE dai Dati in ingresso del report ## InpMagicNumber ASSENTE dai Dati in ingresso del report ## InpBaseLot ASSENTE dai Dati in ingresso del report ## InpFridayGapProtection ASSENTE dai Dati in ingresso del report ## InpShowDashboard ASSENTE dai Dati in ingresso del report
+  - ZERO operazioni nel report (attesa A non verificata: e una MISURA MANCANTE -- l EA nel tester non opera o rifiuta il tester -- non un errore della riga)
+  TRANCHE2 (agosto 2026)  2026.08.01 -> 2026.09.01   STATO OK
+  EX5_DOPO TRANCHE2: B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A UGUALE
+  input imposti confermati dal report: si   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): InpTradeMode report=0 giornale=0 | InpGoldPulseTheme report=0 giornale=0
+  TRANCHE3 (settembre 2026, contiene il 28/09)  2026.09.01 -> 2026.10.01   STATO KO
+  EX5_DOPO TRANCHE3: B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A UGUALE
+  input imposti confermati dal report: no   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): InpTradeMode report=NON NEL REPORT giornale=0 | InpGoldPulseTheme report=NON NEL REPORT giornale=0
+  - il report e di un altro EA (Simbolo:)
+  - il report e di un altro simbolo (Periodo:)
+  - il periodo del report e "M0(1970.01.01-1970.01.01)" invece di M1 (2026.09.01 - 2026.10.01)
+  - deposito del report "0" invece di 5000: il .ini non e stato applicato come dichiarato
+  - leva del report "1:0" invece di 1:100
+  - INPUT NON APPLICATI come dichiarato (14): InpS03FundedPrefix ASSENTE dai Dati in ingresso del report ## InpEntryPhaseSpacingR33 ASSENTE dai Dati in ingresso del report ## InpMagicNumber ASSENTE dai Dati in ingresso del report ## InpBaseLot ASSENTE dai Dati in ingresso del report ## InpFridayGapProtection ASSENTE dai Dati in ingresso del report ## InpShowDashboard ASSENTE dai Dati in ingresso del report
+  - ZERO operazioni nel report (attesa A non verificata: e una MISURA MANCANTE -- l EA nel tester non opera o rifiuta il tester -- non un errore della riga)
+PROVENIENZA dal REFERTO: marcatore MARCATORE_ARENA_TESTER_TRANCHE_v2 | pin 5c5d7dc0292caf885a108298c97c63c7548a8e6e | data 2026-10-15 | pin passati dal cancello: 5c5d7dc0292caf885a108298c97c63c7548a8e6e, 07947bbeb0657bad49c4a918cd7ff90db5b02193
+impronta del .ex5 dopo TRANCHE1: UGUALE
+impronta del .ex5 dopo TRANCHE2: UGUALE
+impronta del .ex5 dopo TRANCHE3: UGUALE
+GIORNALE TRANCHE1 (10 estratti): input stampati dopo 'started with inputs': InpS03FundedPrefix=true, InpEntryPhaseSpacingR33=true, InpMagicNumber=888, InpBaseLot=0.01, InpTradeMode=0, InpFridayGapProtection=false, InpShowDashboard=true, InpGoldPulseTheme=0, InpCounterFlowRail=true, InpCounterFlowTriggerPrice=0.2, InpCounterFlowLotMultiplier=1.0, InpCounterFlowMaxLivePositions=1, InpCounterFlowRearmDelayMilliseconds=0, InpDeadZoneReactionRail=true, InpDeadZoneReactionTriggerPrice=0.2, InpDeadZoneReactionRearmDelayMilliseconds=0
+  enum nel giornale: InpTradeMode=0, InpGoldPulseTheme=0 | righe distinte di stop out 0, di no money 0
+    giornale: last test passed with result "some error after pass finished" in 0:00:00.000
+    giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+    giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+    giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+    giornale: custom indicator DIEGO_Nasdaq_Bands_Indicator (1) (GBPUSD,H1) removed
+    giornale: 2026.07.01 00:08:45   failed cancel order #22 buy stop 0.01 XAUUSD at 4017.86 [Modification failed due to order or position being close to market]
+    giornale: 2026.07.01 00:08:45   Arena Nexus Grid Smart XAU MT5: delete stale same-side pending failed | retcode=10029 (frozen) | last_error=4756
+    giornale: 2026.07.01 00:08:46   failed cancel order #22 buy stop 0.01 XAUUSD at 4017.86 [Modification failed due to order or position being close to market]
+GIORNALE TRANCHE2 (10 estratti): input stampati dopo 'started with inputs': InpS03FundedPrefix=true, InpEntryPhaseSpacingR33=true, InpMagicNumber=888, InpBaseLot=0.01, InpTradeMode=0, InpFridayGapProtection=false, InpShowDashboard=true, InpGoldPulseTheme=0, InpCounterFlowRail=true, InpCounterFlowTriggerPrice=0.2, InpCounterFlowLotMultiplier=1.0, InpCounterFlowMaxLivePositions=1, InpCounterFlowRearmDelayMilliseconds=0, InpDeadZoneReactionRail=true, InpDeadZoneReactionTriggerPrice=0.2, InpDeadZoneReactionRearmDelayMilliseconds=0
+  enum nel giornale: InpTradeMode=0, InpGoldPulseTheme=0 | righe distinte di stop out 7, di no money 0
+    stop out: 2026.08.05 12:59:00   position stop out triggered at 49.64% [#4220 sell 0.03 XAUUSD 4076.61]
+    stop out: 2026.08.05 12:59:00   position stop out triggered at 49.64% [#4227 sell 0.04 XAUUSD 4078.82]
+    stop out: 2026.08.05 12:59:00   position stop out triggered at 49.64% [#4287 sell 0.03 XAUUSD 4082.23]
+    giornale: failed getting balance
+    giornale: failed to get list of virtual hosts [405]
+    giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+    giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+    giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+    giornale: custom indicator DIEGO_Nasdaq_Bands_Indicator (1) (GBPUSD,H1) removed
+    giornale: 2026.08.03 00:00:50   failed cancel order #5 sell stop 0.01 XAUUSD at 4063.94 [Modification failed due to order or position being close to market]
+    giornale: 2026.08.03 00:00:50   Arena Nexus Grid Smart XAU MT5: delete stale same-side pending failed | retcode=10029 (frozen) | last_error=4756
+GIORNALE TRANCHE3 (10 estratti): input stampati dopo 'started with inputs': InpS03FundedPrefix=true, InpEntryPhaseSpacingR33=true, InpMagicNumber=888, InpBaseLot=0.01, InpTradeMode=0, InpFridayGapProtection=false, InpShowDashboard=true, InpGoldPulseTheme=0, InpCounterFlowRail=true, InpCounterFlowTriggerPrice=0.2, InpCounterFlowLotMultiplier=1.0, InpCounterFlowMaxLivePositions=1, InpCounterFlowRearmDelayMilliseconds=0, InpDeadZoneReactionRail=true, InpDeadZoneReactionTriggerPrice=0.2, InpDeadZoneReactionRearmDelayMilliseconds=0
+  enum nel giornale: InpTradeMode=0, InpGoldPulseTheme=0 | righe distinte di stop out 0, di no money 0
+    giornale: failed connect to server
+    giornale: failed to load products
+    giornale: authorization failed
+    giornale: last test passed with result "some error after pass finished" in 0:00:00.000
+    giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+    giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+    giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+    giornale: custom indicator DIEGO_Nasdaq_Bands_Indicator (1) (GBPUSD,H1) removed
+======================================================================================================================
+TRANCHE1  --  report/ARENA_TRANCHE1_20261015_082438.htm
+======================================================================================================================
+Expert Simbolo: | simbolo Periodo: | periodo M0(1970.01.01-1970.01.01) | qualita 100% | barre 0 | tick 0 | deposito 0.00 | leva 1:0
+ATTENZIONE: l'Expert del report (Simbolo:) non contiene 'Arena': report di un altro EA?
+ATTENZIONE: deposito 0.00 invece di 5000.00: l'.ini non e' stato applicato come dichiarato (le % sotto sono sul deposito del report).
+ATTENZIONE: leva 1:0 invece di 1:100.
+
+INPUT (dal report, 'Dati in ingresso': quelli che il tester ha USATO)
+  imposti (14): DIVERSI: InpS03FundedPrefix ASSENTE; InpEntryPhaseSpacingR33 ASSENTE; InpMagicNumber ASSENTE; InpBaseLot ASSENTE; InpFridayGapProtection ASSENTE; InpShowDashboard ASSENTE; InpCounterFlowRail ASSENTE; InpCounterFlowTriggerPrice ASSENTE; InpCounterFlowLotMultiplier ASSENTE; InpCounterFlowMaxLivePositions ASSENTE; InpCounterFlowRearmDelayMilliseconds ASSENTE; InpDeadZoneReactionRail ASSENTE; InpDeadZoneReactionTriggerPrice ASSENTE; InpDeadZoneReactionRearmDelayMilliseconds ASSENTE
+  enum NON imposti, valore usato dal tester: InpTradeMode=NON NEL REPORT, InpGoldPulseTheme=NON NEL REPORT
+
+RISULTATO (dal report)
+  operazioni 0 | netto 0.00 EUR | PF 0.00 | DD equita' massimo 0.00 EUR (0.00%) | DD saldo massimo 0.00 EUR (0.00%)
+
+(A) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda; InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; ... (38 motivi)
+(B) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda; InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; ... (38 motivi)
+(C) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda; InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; ... (38 motivi)
+GIRO NON CONFORME a quello dichiarato -> InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; InpCounterFlowTriggerPrice ASSENTE dal report
+======================================================================================================================
+TRANCHE2  --  report/ARENA_TRANCHE2_20261015_082438.htm
+======================================================================================================================
+Expert Arena Nexus Grid Smart XAU MT5 | simbolo XAUUSD | periodo M1(2026.08.01-2026.09.01) | qualita 100%ticksreali | barre 3565 | tick 805412 | deposito 5000.00 | leva 1:100
+
+INPUT (dal report, 'Dati in ingresso': quelli che il tester ha USATO)
+  imposti (14): TUTTI come dichiarato
+  enum NON imposti, valore usato dal tester: InpTradeMode=0, InpGoldPulseTheme=0
+
+RISULTATO (dal report)
+  operazioni 1481 | netto -3063.29 EUR | PF 0.47 | DD equita' massimo 4072.45 EUR (67.77%) | DD saldo massimo 4135.45 EUR (68.11%)
+  deal di trading 2962 (ingressi 1481, uscite 1481), posizioni aperte a fine test 0 (il tester le chiude da se' con 'end of test': di norma 0)
+  STOP OUT: 6 deal col commento di stop out, il primo il 2026-08-05 12:59:00 (so 49.64%). DA QUI il conto del tester e' MORTO: i giorni dopo non misurano l'EA.
+
+COMMISSIONI addebitate dal tester: -75.40 EUR su 41.10 lotti di deal -> 3.67 EUR per lotto a giro (atteso 3.90 [NON VERIFICATO]; demo 4.00 [LETTO nel conto]; tester BCM oro 3.42 [MISURATO R1A 10/10])
+  a 0,01 lotti la commissione di un deal e' arrotondata al centesimo (1,71 x 0,01 = 0,0171 -> 0,02): il valore per lotto qui sopra e' distorto verso l'ALTO; il totale in EUR e' quello vero.
+PREZZO ESATTO degli ingressi da ordine stop/limit: 1481 ingressi, 246 esattamente al prezzo dell'ordine (16.6%), 1235 a prezzo PEGGIORE (max 1.09 USD, media dei peggiori 0.098), 0 migliori. Ingressi a mercato o senza ordine leggibile: 0.
+  nel tester (ExecutionMode=0) non c'e' latenza: uno scarto > 0 e' un salto fra due tick, non slippage di esecuzione. Demo 14/10: 731/731 esatti [LETTO].
+
+ACCOPPIAMENTO in -> out (ricostruito: il report non ha l'identificativo di posizione): univoci 820, per insieme (cesto intero) 311, stesso cesto 63, AMBIGUI 287 (+ 0 in grappoli ambigui), parziali 0, senza volume uguale 0, non accoppiati 0 -> quota incerta 19.4% delle uscite
+  oltre il 5%: i netti PER CESTO qui sotto sono APPROSSIMATI (i netti per giorno e i lotti vivi NO).
+  k = 86.78 EUR per 1,0 di prezzo x 1 lotto (mediana di 1048 posizioni accoppiate). DD d'equita' STIMATO agli istanti dei deal: 3518.99 EUR contro 4072.45 del report (la stima deve stare SOTTO o vicino al vero: e' un limite inferiore).
+
+PER GIORNO (data server). netto = realizzato (deal del giorno, commissioni comprese); picco lotti vivi = buy + sell lordi; perdite rispetto al saldo d'inizio giorno; equita' STIMATA = limite inferiore della perdita vera
+  giorno      ingr lotti_in      netto   picco    buy   sell  prof  saldo_min- equita_min- flott_peggio   %dep
+  2026-08-03   616     8.53     429.70    0.47   0.43   0.30    19       -0.06      -72.85      -278.54   -1.5
+  2026-08-04   791    10.55     545.15    0.50   0.38   0.38    11       -6.77     -393.42      -403.43   -7.9
+  2026-08-05    74     1.47   -4038.14    0.48   0.12   0.46    19    -4038.14    -3459.30      -241.41  -69.2  (stop out)
+
+CESTI DI RECUPERO [R] (CID, lato) -- APPROSSIMATI: 266 cesti, netto [R] -3088.44 EUR, profondita' massima 19, peggior cesto -4086.37, aperti a fine test 0
+  prof.   cesti       netto  somma lotti (max) vivi insieme (max) in perdita  durata h
+  1         144      114.80               0.02               0.02         27       1.8
+  2          56       68.06               0.04               0.04          6       2.3
+  3-4        44      303.84               0.10               0.10          2       2.6
+  5-9        18      388.34               0.29               0.29          0       2.6
+  >=10        4    -3963.48               0.79               0.45          1      12.5
+  CONCENTRAZIONE: cesti >= 10 livelli = -3963.48 (128.3% del netto [R]); >= 5 livelli = -3575.14 (115.8%); 3 cesti migliori = 157.20 (-5.1%). Demo: 24,5% il 13/10 e 50,8% il 14/10 dai >= 10 [LETTO].
+  modulo [F] CF       posizioni    742 netto      -8.98 PF 0.98
+  modulo [F] FinlabX  posizioni    162 netto      34.13 PF 1.44
+
+28/09/2026 (data server BCM): nessun deal in questo report.
+
+(A) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda
+(B) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda
+(C) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda
+
+COSA NON SI PUO' CONCLUDERE: un trimestre = un regime; tester senza slippage ne' latenza (ExecutionMode=0); feed BCM, non quello dell'utente; enum al valore del tester (sopra); nessun merito (n per regime, e la natura griglia + scala di lotti + recupero senza SL iniziale resta fuori dall'imbuto prop).
+======================================================================================================================
+TRANCHE3  --  report/ARENA_TRANCHE3_20261015_082438.htm
+======================================================================================================================
+Expert Simbolo: | simbolo Periodo: | periodo M0(1970.01.01-1970.01.01) | qualita 100% | barre 0 | tick 0 | deposito 0.00 | leva 1:0
+ATTENZIONE: l'Expert del report (Simbolo:) non contiene 'Arena': report di un altro EA?
+ATTENZIONE: deposito 0.00 invece di 5000.00: l'.ini non e' stato applicato come dichiarato (le % sotto sono sul deposito del report).
+ATTENZIONE: leva 1:0 invece di 1:100.
+
+INPUT (dal report, 'Dati in ingresso': quelli che il tester ha USATO)
+  imposti (14): DIVERSI: InpS03FundedPrefix ASSENTE; InpEntryPhaseSpacingR33 ASSENTE; InpMagicNumber ASSENTE; InpBaseLot ASSENTE; InpFridayGapProtection ASSENTE; InpShowDashboard ASSENTE; InpCounterFlowRail ASSENTE; InpCounterFlowTriggerPrice ASSENTE; InpCounterFlowLotMultiplier ASSENTE; InpCounterFlowMaxLivePositions ASSENTE; InpCounterFlowRearmDelayMilliseconds ASSENTE; InpDeadZoneReactionRail ASSENTE; InpDeadZoneReactionTriggerPrice ASSENTE; InpDeadZoneReactionRearmDelayMilliseconds ASSENTE
+  enum NON imposti, valore usato dal tester: InpTradeMode=NON NEL REPORT, InpGoldPulseTheme=NON NEL REPORT
+
+RISULTATO (dal report)
+  operazioni 0 | netto 0.00 EUR | PF 0.00 | DD equita' massimo 0.00 EUR (0.00%) | DD saldo massimo 0.00 EUR (0.00%)
+
+(A) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda; InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; ... (38 motivi)
+(B) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda; InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; ... (38 motivi)
+(C) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda; InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; ... (38 motivi)
+GIRO NON CONFORME a quello dichiarato -> InpS03FundedPrefix ASSENTE dal report; InpEntryPhaseSpacingR33 ASSENTE dal report; InpMagicNumber ASSENTE dal report; InpBaseLot ASSENTE dal report; InpFridayGapProtection ASSENTE dal report; InpShowDashboard ASSENTE dal report; InpCounterFlowRail ASSENTE dal report; InpCounterFlowTriggerPrice ASSENTE dal report
+======================================================================================================================
+SINTESI DELLE TRANCHE (descrittiva; nessun verdetto: le ipotesi H1-H4 stanno nella scheda, scritte prima dei numeri)
+  tranche@f   giro        oper   netto EUR     PF       primo stop out cesti R    R>=10 netto R>=10   quota di R
+  TRANCHE1@1  NON CONF.    0.0         0.0    0.0              nessuno       0        0       0.00          n/d
+  TRANCHE2@1  CONFORME  1481.0    -3063.29   0.47  2026-08-05 12:59:00     266        4   -3963.48       128.3%
+  TRANCHE3@1  NON CONF.    0.0         0.0    0.0              nessuno       0        0       0.00          n/d
+  NON CONF. = il giro non e' quello dichiarato (vedi i motivi sopra): i numeri sono descrittivi di QUEL giro.
