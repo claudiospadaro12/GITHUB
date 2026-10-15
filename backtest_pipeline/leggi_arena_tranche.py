@@ -44,13 +44,14 @@ L.LEVA_ATTESA = "1:100"
 L.ANCORA_T1 = (L.ANCORA_T1[0], L.ANCORA_T1[1], "0000.00.00")
 # il pin della riga passata dai DUE cancelli (fail-closed se vuota). DA SCRIVERE: il commit che porta ARENA_TESTER_TRANCHE.ps1 v2.
 # d284a709 (v1) NON si mette: la v1 lanciava le tranche dopo un .ex5 cambiato (classe 1438) e non e' passata dal cancello di giudizio.
-PIN_PASSATI_TRANCHE = ("5c5d7dc0292caf885a108298c97c63c7548a8e6e", "07947bbeb0657bad49c4a918cd7ff90db5b02193")   # v2 (3 tranche) e v3 (-Tranche)   # il pin della riga passata dal cancello (fail-closed se vuota)
-MARCATORI_ATTESI = ("MARCATORE_ARENA_TESTER_TRANCHE_v2", "MARCATORE_ARENA_TESTER_TRANCHE_v3")
+PIN_PASSATI_TRANCHE = ("5c5d7dc0292caf885a108298c97c63c7548a8e6e", "07947bbeb0657bad49c4a918cd7ff90db5b02193", "24aa4bd300944258110c805b8bd8807dbecba348")   # v2 (3 tranche), v3 (-Tranche), v4 (timeout fino a 900 min)   # il pin della riga passata dal cancello (fail-closed se vuota)
+MARCATORI_ATTESI = ("MARCATORE_ARENA_TESTER_TRANCHE_v2", "MARCATORE_ARENA_TESTER_TRANCHE_v3", "MARCATORE_ARENA_TESTER_TRANCHE_v4")
 MARCATORE_ATTESO = MARCATORI_ATTESI[0]
 # (controllo-preventivo 15/10) ogni pin passato porta UN marcatore: il pin e' quello che la riga passa a -Pin, lo script non lo verifica.
 # Un pin passato SENZA voce qui e' sospeso (fail-closed).
 MARCATORE_PER_PIN = {"5c5d7dc0292caf885a108298c97c63c7548a8e6e": "MARCATORE_ARENA_TESTER_TRANCHE_v2",
-                     "07947bbeb0657bad49c4a918cd7ff90db5b02193": "MARCATORE_ARENA_TESTER_TRANCHE_v3"}
+                     "07947bbeb0657bad49c4a918cd7ff90db5b02193": "MARCATORE_ARENA_TESTER_TRANCHE_v3",
+                     "24aa4bd300944258110c805b8bd8807dbecba348": "MARCATORE_ARENA_TESTER_TRANCHE_v4"}
 # lo script delle tranche nasce col commit d284a709 del 14/10/2026 20:26 UTC: un REFERTO del 14/10 sera e' legittimo (un giro che va KO
 # in pochi minuti la stessa sera). Con "2026-10-15" il lettore lo sospendeva scrivendo il FALSO "lo script non esisteva".
 DATA_MINIMA_REFERTO = "2026-10-14"
