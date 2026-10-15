@@ -11,6 +11,9 @@ Perche': la sonda del 14/10 (`report/ARENA_TESTER_SONDA_LETTURA_2026-10-14.md`) 
 - Tempo [STIMA, NON MISURATA]: la sonda ha fatto 467 s per il 28/09 (il giorno con il cesto profondo); un mese di ~22 giorni di borsa = ~170 minuti a giorno medio simile. Totale ~8,5 ore, caso peggiore ~14 ore (3 timeout + chiusure). **Ore del PC di backtest: la decisione e' di Claudio.**
 - Lettore: `backtest_pipeline/leggi_arena_tranche.py` (riusa il parser, l'accoppiamento e i cesti del lettore della sonda; leva attesa 1:100; nessun verdetto (A)(B)(C)).
 
+### 1b. Variante v3 (15/10/2026): rifare solo le tranche perse
+`ARENA_TESTER_TRANCHE_SELEZIONE.ps1` (marcatore `MARCATORE_ARENA_TESTER_TRANCHE_v3`, pin `07947bbe`) accetta `-Tranche` (es. `2,3`) per rifare SOLO le tranche perse (PC in sospensione: un tester interrotto non scrive il report). Le tranche di due giri (v2 + v3) si leggono insieme col lettore SOLO se il `.ex5` ha la STESSA SHA256 nei due REFERTO (classe 1455): se e' diversa, le tranche vengono da binari diversi e NON si sommano in H1-H4. Una tranche presente in due giri si conta UNA volta, dichiarando quale.
+
 ## 2. Ipotesi, scritte PRIMA dei numeri, ognuna con la sua smentita
 Partono da UN dato (il 28/09, un cesto >= 10 livelli = 102% del netto del modulo [R], stop out al 49,4%). Sono ipotesi, non criteri.
 - **H1 (coda nel trimestre):** in almeno UNA delle tre tranche il conto del tester va in STOP OUT. *Smentita:* nessuno stop out in nessuna delle tre (allora il 28/09 era un caso, non la coda del motore a questo lotto e a 1:100).

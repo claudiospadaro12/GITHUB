@@ -892,11 +892,11 @@ def stampa(nome, rep, a, csv_dir=None, sospesi=None):
 
 
 def leggi_giornali(src):
-    """gli estratti dei giornali (log/SONDAx_*.txt): input stampati dopo 'started with inputs', righe di stop out / no money, errori"""
+    """gli estratti dei giornali (log/SONDAx_*.txt o log/TRANCHEn_*.txt): input stampati dopo 'started with inputs', righe di stop out / no money, errori"""
     per = collections.OrderedDict()
     for n in src.nomi():
         b = os.path.basename(n)
-        m = re.match(r"^(SONDA[12])_", b)
+        m = re.match(r"^(SONDA[12]|TRANCHE[123])_", b)
         if not m or not n.replace("\\", "/").split("/")[-2:-1] == ["log"]:
             continue
         d = per.setdefault(m.group(1), {"input": collections.OrderedDict(), "stop_out": set(), "no_money": set(), "errori": [], "file": 0})
@@ -925,7 +925,7 @@ def leggi_giornali(src):
 
 def stampa_giornali(per):
     if not per:
-        print("GIORNALI: nessun estratto log/SONDAx_*.txt nelle sorgenti.")
+        print("GIORNALI: nessun estratto log/SONDAx_*.txt o log/TRANCHEn_*.txt nelle sorgenti.")
         return
     for sn, d in per.items():
         print("GIORNALE %s (%d estratti): input stampati dopo 'started with inputs': %s" % (
