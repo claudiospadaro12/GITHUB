@@ -51,3 +51,10 @@ Dati: 13 deal di stop out del 28/09 15:47 (prezzo di liquidazione 4.119,05; 0,57
 - CSV M1 BCM del 28-30/09 (campo SPREAD della barra): mediana 0,21; P95 0,27; max 0,29; nessuna barra >= 1 USD (la barra porta lo spread di chiusura, non il massimo).
 - A mediana 0,21 USD il giro costa circa 21 USD per lotto (circa 19 EUR) contro 4 USD di commissione: lo spread pesa circa 5 volte la commissione. Gia' dentro il tester (tick reali).
 - NON verificato: che il REALE abbia lo stesso spread del demo (stesso nome server, ma non lo stesso conto). Controesempio economico, senza installare niente: screenshot simultaneo della colonna Spread di XAUUSD nei due terminali (10105439 e 50503392) a due orari. La riga di installazione del logger sul reale NON e' stata preparata: `RIGA_SPREADLOGGER.ps1` ha il bersaglio 50503392 scritto dentro (`$CONTO_PICCOLO`) e un'altra destinazione richiede il cancello completo (non disponibile in questa esecuzione).
+
+## 5. SpreadLogger sul reale: AVVIATO (15/10 21:55 ora locale PC, screenshot di Claudio)
+`ABTG_SpreadLogger` sul grafico XAUUSD H1 del terminale 10105439: conto 10105439 @ BCMMarkets-Server, autotest 36/36 con 0 falliti, 1 simbolo selezionabile, campione ogni 5 s, nessuno stato precedente (raccolta nuova), salvataggio ogni 300 s, file `MQL5\Files\ABTG_SpreadLogger_*`.
+**Attesa scritta PRIMA dei numeri** (confronto con il demo 50503392, 04-11/09, 5 giornate, mediana 0,18-0,27 USD, P95 0,22-0,29, spike 2,88 e 1,48 USD):
+- *Reale come demo*: per OGNI ora con almeno 5 giornate, mediana entro 0,03 USD e P95 entro 0,05 USD da quella del demo, e nessuna ora con max stabilmente sopra 1 USD fuori dalle ore di notizie. Smentita: anche una sola fascia con mediana o P95 che differisce di piu' di 0,10 USD, oppure P95 sistematicamente piu' alto nel reale.
+- Non si decide: ore con meno di 5 giornate (SOTTILE). Si raccoglie da venerdi' 16/10 a venerdi' 23/10 (sei giornate di borsa) e si legge in quel momento.
+- Non misura lo slippage ne' la commissione.
