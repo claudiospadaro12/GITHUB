@@ -1,0 +1,13 @@
+deal XAUUSD 2962 posizioni 1481 out non accoppiati 0
+
+limite -500 EUR, slip 0.00 USD/lotto, valutazione CHIUSURA minuto
+giorno      bal_tester  bal_guard delta g-b stop alle  perd.stop
+2026.08.02     5000.00    5000.00      0.00 -                  -
+2026.08.03     5429.70    5429.70      0.00 -                  -
+2026.08.04     5974.85    5974.85      0.00 -                  -
+2026.08.05     1936.71    5384.62   3447.91 03:20:00         549
+2026.08.06     1936.71    5384.62   3447.91 -                  -
+2026.08.07     1936.71    5384.62   3447.91 -                  -
+
+FINE: saldo tester 1936.71 | saldo con Guardian 5384.62 | differenza +3447.91 | giorni fermati 1 su 6
+DD massimo di equita (picco->minimo): tester 4065.15 | con Guardian 617.24
