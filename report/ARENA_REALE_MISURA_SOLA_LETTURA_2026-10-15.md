@@ -45,3 +45,9 @@ Dati: 13 deal di stop out del 28/09 15:47 (prezzo di liquidazione 4.119,05; 0,57
 - Settembre del tester -2.505 -> circa **+1.020** marcato al 30/09 07:52 (circa +920 dopo lo swap).
 - 🔴 Ma il drawdown d'equity del giorno: **-6.367 EUR flottanti al minimo = 75% del saldo di 8.458**; su 100k a lotto 0,01 sarebbero -6,4%, oltre il limite giornaliero FTMO -5% del nostro piano; sul reale da 7.500 sarebbero -85%.
 - Restano NON calcolabili i giorni 1-27 (blocchi di margine assenti nel reale) e agosto.
+
+## 4. Spread dell'oro: GIA' misurato sul feed BCM (nessuna installazione sul reale) [MISURATO sul demo, stesso server]
+- `ABTG_SpreadLogger` sul demo 50503392 (server `BCMMarkets-Server`, lo stesso del titolo finestra del reale 10105439), campionamento ogni 5 s, 04-11/09, 5 giornate per ora: **XAUUSD mediana 0,18-0,27 USD** (notte 0,25-0,27; giorno 0,18-0,21), **P95 0,22-0,29**, max normale 0,28; due spike: **2,88 USD** (ora 13 server) e **1,48** (ora 21). Dati: `data/spread_vivo/SPREAD_VIVO_2026-09-12_*`.
+- CSV M1 BCM del 28-30/09 (campo SPREAD della barra): mediana 0,21; P95 0,27; max 0,29; nessuna barra >= 1 USD (la barra porta lo spread di chiusura, non il massimo).
+- A mediana 0,21 USD il giro costa circa 21 USD per lotto (circa 19 EUR) contro 4 USD di commissione: lo spread pesa circa 5 volte la commissione. Gia' dentro il tester (tick reali).
+- NON verificato: che il REALE abbia lo stesso spread del demo (stesso nome server, ma non lo stesso conto). Controesempio economico, senza installare niente: screenshot simultaneo della colonna Spread di XAUUSD nei due terminali (10105439 e 50503392) a due orari. La riga di installazione del logger sul reale NON e' stata preparata: `RIGA_SPREADLOGGER.ps1` ha il bersaglio 50503392 scritto dentro (`$CONTO_PICCOLO`) e un'altra destinazione richiede il cancello completo (non disponibile in questa esecuzione).
