@@ -110,6 +110,21 @@ def main():
     out = collections.OrderedDict()
     peak_b = bal_b; ddmax_b = 0.0; peak_g = bal_g; ddmax_g = 0.0
     primo = None
+    # deal PRIMA della prima barra (es. giorni senza barre M1): stato iniziale uguale nei due mondi
+    if B:
+        for i, d in enumerate(D):
+            if d['t'][:16] >= B[0][0][:16]:
+                break
+            pid = mappa.get(i)
+            if d['dir'] == 'in':
+                if pid is not None:
+                    open_b.append(pos[pid]); open_g.append(pos[pid])
+                bal_b += d['co']; bal_g += d['co']
+            else:
+                if pid is not None and pos[pid] in open_b:
+                    open_b.remove(pos[pid])
+                    if pos[pid] in open_g: open_g.remove(pos[pid])
+                bal_b += d['pr'] + d['co'] + d['sw']; bal_g += d['pr'] + d['co'] + d['sw']
     for (tm, o, h, l, c, sp) in B:
         g = tm[:10]
         spr = sp * 0.01
