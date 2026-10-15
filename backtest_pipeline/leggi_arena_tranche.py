@@ -18,6 +18,9 @@ COSA FA: riusa le funzioni di leggi_arena_tester.py (parser del report, accoppia
   5. (controllo-preventivo 15/10, classe 1455) con PIU' sorgenti (il giro v2 + il giro v3 che rifa' le tranche perse) l'impronta del .ex5
      (riga EX5: del REFERTO) dev'essere la STESSA in tutte: se cambia fra un giro e l'altro (aggiornamento dal Market) le tranche vengono da
      binari diversi e NON si sommano nelle ipotesi H1-H4; e una tranche presente in piu' sorgenti si segnala (non si conta due volte).
+  6. (controllo-preventivo 15/10, ripasso strato 2) con PIU' sorgenti e --csv-dir i CSV vanno in una sottocartella PER FONTE
+     (fonte1/, fonte2/, ...): una tranche presente in due giri scriveva lo STESSO TRANCHEn_*.csv e la seconda fonte sovrascriveva la
+     prima in silenzio (ricorrenza della 4, fra i giri). E ogni blocco stampato porta l'intestazione FONTE n (i giornali compresi).
   4. (controllo-preventivo 14/10) i CSV di --csv-dir prendono il nome della TRANCHE (TRANCHE1_cesti.csv, ...): con il sonda_di() del
      lettore della sonda tutte e tre si chiamavano REPORT_*.csv e le prime due venivano SOVRASCRITTE in silenzio.
 NESSUN verdetto (A)(B)(C): erano scritti per le sonde da 1 e 65 giorni. Le tranche si LEGGONO con le ipotesi della scheda
@@ -197,7 +200,13 @@ def leggi_percorsi(percorsi, csv_dir=None):
             print("IMPRONTA del .ex5 nel REFERTO di %s: %s" % (p, v or "NON LETTA"))
         for x in fra:
             print("SORGENTI NON SOMMABILI: " + x)
+    multi = len(sorgenti) > 1
     for fonte, (p, src) in enumerate(sorgenti, 1):
+        # (ripasso strato 2, 15/10) con piu' fonti i CSV vanno in csv_dir/fonteN: la stessa tranche in due giri NON si sovrascrive
+        cdir = os.path.join(csv_dir, "fonte%d" % fonte) if (csv_dir and multi) else csv_dir
+        if multi:
+            print("=" * 118)
+            print("FONTE %d = %s" % (fonte, p))
         for n in src.nomi():
             if os.path.basename(n) == "REFERTO_ARENA_TRANCHE.txt":
                 print("-" * 118)
@@ -220,7 +229,7 @@ def leggi_percorsi(percorsi, csv_dir=None):
                 motivi = comuni + per_t.get(tranche_di(n), []) + (condizioni_tranche(n, rep) if rep["ok"] else ["report illeggibile"])
                 # nessun verdetto (A)(B)(C): le tranche non le hanno; si passa SEMPRE un motivo cosi' stampa() non le giudica
                 sosp = ["tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda"] + motivi
-                rc = max(rc, L.stampa(n, rep, a, csv_dir, sosp))
+                rc = max(rc, L.stampa(n, rep, a, cdir, sosp))
                 if motivi:
                     print("GIRO NON CONFORME a quello dichiarato -> " + "; ".join(motivi[:8]))
                 if rep["ok"]:
@@ -386,6 +395,17 @@ def autotest():
                     ok("SORGENTI NON SOMMABILI" not in out and ncf == 0, msg)
                 else:
                     ok(atteso in out and "SORGENTI NON SOMMABILI" not in out, msg)
+        # 17. CONTRO-ESEMPIO (ripasso strato 2): la STESSA tranche in due giri con --csv-dir -> due CSV distinti, uno per fonte
+        with tempfile.TemporaryDirectory() as td, tempfile.TemporaryDirectory() as cd:
+            a = os.path.join(td, "g2")
+            b = os.path.join(td, "g3")
+            giro(a, "TRANCHE1", "M1 (2026.07.01 - 2026.08.01)", "A" * 64, pin, MARCATORI_ATTESI[0])
+            giro(b, "TRANCHE1", "M1 (2026.07.01 - 2026.08.01)", "A" * 64, pin3, MARCATORI_ATTESI[1])
+            with contextlib.redirect_stdout(io.StringIO()):
+                leggi_percorsi([a, b], cd)
+            trovati_csv = sorted(os.path.relpath(os.path.join(r, f), cd).replace(os.sep, "/") for r, _d, fs in os.walk(cd) for f in fs)
+            ok(trovati_csv == ["fonte1/TRANCHE1_cesti.csv", "fonte1/TRANCHE1_giorni.csv", "fonte2/TRANCHE1_cesti.csv", "fonte2/TRANCHE1_giorni.csv"],
+               "17 la stessa tranche in due giri con --csv-dir: un CSV PER FONTE %s (nessuna fonte sovrascritta)" % trovati_csv)
     finally:
         PIN_PASSATI_TRANCHE = salva
         MARCATORE_PER_PIN = salva_m
