@@ -1,3 +1,4 @@
+// MARCATORE_ABTG_SPREADLOGGER_v1 (15/10/2026: aggiunta solo questa riga di commento, nessun cambio di codice)
 //+------------------------------------------------------------------+
 //|                                        ABTG_SpreadLogger.mq5      |
 //|                                                                   |
