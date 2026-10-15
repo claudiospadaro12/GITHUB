@@ -10922,8 +10922,21 @@ falliscono sempre.
 > $fs=[IO.File]::Open($p,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::ReadWrite)
 > ```
 > **E il rimedio era gia' in casa**: la funzione `Leggi-Condiviso` sta in
-> `CODA_01`, `CODA_02`, `CODA_03`, `CODA_05`, `CODA_06`, `CODA_07`, `CODA_08` --
-> e' scritta **apposta per questo**, dal primo giorno del runner.
+> `CODA_01`, `CODA_03`, `CODA_05`, `CODA_06`, `CODA_07`, `CODA_08` (e poi
+> `CODA_09`, `CODA_10`) -- e' scritta **apposta per questo**, dal primo giorno
+> del runner.
+> 🔴 **CORRETTO IL 15/10/2026, E LA CORREZIONE E' IL MOTIVO PER CUI LA CLASSE
+> 1472 E' VISSUTA CINQUE SETTIMANE**: questo elenco conteneva anche **`CODA_02`**,
+> che non l'ha **MAI** avuta. Misurato: occorrenze **0**, e
+> `git log --all -S"Leggi-Condiviso" -- backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1`
+> e' **vuoto** (zero commit). 👉 Chi verificava *"CODA_02 ha il lettore
+> condiviso?"* leggendo QUI trovava scritto **si'** -- e la nota finale di questa
+> stessa classe aveva **previsto** il danno (*"il difetto si vede solo sul log di
+> OGGI... compare esattamente quando la domanda e' 'cosa e' successo adesso'"*)
+> assolvendosi su un elenco sbagliato.
+> 📌 **Regola che ne esce**: un elenco di file *"che ce l'hanno"* dentro una
+> classe si scrive **con il grep accanto**, mai a memoria -- ed e' il controllo
+> della **1472**, da rifare ogni volta che una sonda nuova legge un log.
 > L'ho dimenticata scrivendo una riga al volo. **Una riga "veloce" che salta una
 > funzione gia' collaudata non e' veloce: e' da rifare.**
 
@@ -39472,7 +39485,7 @@ La griglia delle letture incrociate (durata x lato sotto 150) era calcolata SOLO
 - **Regola.** 🔧 **Un'assenza non si deduce MAI da una dimensione** (`Length`, `0 KB`) su un file che un processo tiene aperto: si deduce dal **contenuto letto in condivisione** (`FileShare::ReadWrite`, come fa `Leggi-Condiviso`). 📌 E quando due sonde dello **stesso giro** si contraddicono su uno **stesso file**, vince **quella che ne ha stampato il CONTENUTO**: una riga letta e' una prova positiva, una dimensione e' un'istantanea di metadato. 🔴 Infine: prima di usare una colonna "ultima riga / ultimo evento", si verifica **su che chiave e' ordinata** -- se non stampa la data, non e' una colonna temporale, e il confronto si fa contro l'**ultima scrittura dei file letti**.
 
 ### CLASSE 1472 (15/10/2026, sessione principale, nono giro) -- la sonda che deve scoprire una SEDIA FERMA e' CIECA al giorno corrente, e lo e' per un difetto gia' catalogato (163) rimasto in UN solo file su nove
-- **Caso reale.** `backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1` r.58 legge i giornali con `Get-Content -LiteralPath ... -ErrorAction SilentlyContinue`. Il log del giorno corrente e' **tenuto aperto dal terminale**: `Get-Content` fallisce (classe **163**, pagata l'08/09/2026, ed e' il motivo per cui esiste `Leggi-Condiviso` con `FileShare::ReadWrite`), e `-ErrorAction SilentlyContinue` **nasconde il fallimento**. Misurato sul parco sonde: `Leggi-Condiviso` compare **4 volte in CODA_01, 3 in CODA_03, 4 in CODA_05, 3 in CODA_06, 2 in CODA_07, 4 in CODA_08, 5 in CODA_09, 4 in CODA_10 -- e ZERO in CODA_02**.
+- **Caso reale.** `backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1` r.58 legge i giornali con `Get-Content -LiteralPath ... -ErrorAction SilentlyContinue`. Il log del giorno corrente e' **tenuto aperto dal terminale**: `Get-Content` fallisce (classe **163**, pagata l'08/09/2026, ed e' il motivo per cui esiste `Leggi-Condiviso` con `FileShare::ReadWrite`), e `-ErrorAction SilentlyContinue` **nasconde il fallimento**. Misurato sul parco sonde, **e il perimetro giusto sono le sonde che aprono `MQL5\Logs`, che sono QUATTRO**: `CODA_02` **0** · `CODA_03` 3 · `CODA_05` 4 · `CODA_09` 5. 👉 Quindi la frase esatta e' **"una su QUATTRO che leggono i giornali"**, non "una su nove": le altre otto sonde usano `Leggi-Condiviso` su **altri** file (`origin.txt`, `.chr`, `common.ini`), e uno zero in una che non apre log **non e' un difetto**. 🟢 E una verifica di correttezza che assolve il resto del parco: l'unico `Get-Content` di `CODA_09` sta **dentro il commento** che documenta la 163 (r.28), mentre le sue letture vere sono tutte `Leggi-Condiviso` (rr.72, 83, 109).
 - **Perche' costa, e non e' un dettaglio di stile.** `CODA_02` si chiama *"chi ha operato"* ed e' la sonda della corsia **TAGLIANDO** firmata il 18/08 (*"frequenza molto sotto il promesso -> revisione"*): serve a scoprire **una sedia che si e' fermata**. Se non legge il giorno corrente, **la scopre con un giorno di ritardo** -- ed e' esattamente il danno della classe **466** (19/09: la colonna mostrava una riga di due giorni prima), riparata nell'ORDINAMENTO ma non nella LETTURA. 🔴 Due difetti diversi sullo stesso campo, e il secondo e' sopravvissuto alla riparazione del primo.
 - **E il sintomo e' silenzioso**, che e' la parte peggiore: la sonda stampa il file del giorno corrente nell'elenco (`20261015.log (0 KB, ultimo 00:00:08)`) **come se l'avesse letto**, e la dimensione `0 KB` e' a sua volta metadato stantio (classe **1471**). Niente nel referto dice *"questo file non l'ho letto"*.
-- **Regola.** 🔧 **Ogni sonda che apre un log di MT5 usa `Leggi-Condiviso`**, senza eccezioni: il file del giorno corrente e' per definizione aperto. 📌 E `-ErrorAction SilentlyContinue` su una **lettura** e' una bandiera rossa: nasconde la differenza fra *"vuoto"* e *"non leggibile"*. Se si tiene, accanto va stampato **quante righe sono state lette per file**, cosi' uno zero si vede. 📏 Controllo eseguibile sul parco: `for f in backtest_pipeline/righe/CODA_*.ps1; do grep -c 'Leggi-Condiviso' $f; done` -- uno zero in una sonda che legge log e' un difetto, non una scelta.
+- **Regola.** 🔧 **Ogni sonda che apre un log di MT5 usa `Leggi-Condiviso`**, senza eccezioni: il file del giorno corrente e' per definizione aperto. 📌 E `-ErrorAction SilentlyContinue` su una **lettura** e' una bandiera rossa: nasconde la differenza fra *"vuoto"* e *"non leggibile"*. Se si tiene, accanto va stampato **quante righe sono state lette per file**, cosi' uno zero si vede. 📏 **Controllo eseguibile, col filtro giusto** (senza il filtro segnerebbe difetti dove non ci sono): `for f in backtest_pipeline/righe/CODA_*.ps1; do if grep -q 'MQL5.Logs' $f; then printf "%s %s\n" $(basename $f) $(grep -c 'Leggi-Condiviso' $f); fi; done` -- **uno zero fra QUESTE e' un difetto**, non una scelta.
