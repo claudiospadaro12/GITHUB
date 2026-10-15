@@ -6,12 +6,13 @@ Zip `ARENA_TESTER_TRANCHE.zip` (giro v2, pin `5c5d7dc0`, PC di backtest DESKTOP-
 - Marcatore v2, pin passato dal cancello, `.ex5` UGUALE dopo ognuna (SHA `B261E252...`), data 15/10: provenienza OK [MISURATO].
 - **Una sola tranche su tre e' conforme: TRANCHE2 (agosto).** TRANCHE1 e TRANCHE3 non hanno scritto il report (deposito 0, leva 1:0, periodo 1970): NON CONFORMI, numeri solo descrittivi.
 
-## 2. Perche' due tranche non hanno il report [MISURATO sul REFERTO e sui giornali]
-- **TRANCHE1 (luglio): TIMEOUT a 270 min.** Il tester era arrivato al **15/07 ore 19:57**: 14,8 giorni simulati in 283 minuti = **circa 19 minuti per giorno simulato**.
-- **TRANCHE3 (settembre): chiusa a 160 min** (`tester forced to close` alle 16:11:13), il tester era al **08/09 ore 20:54** = circa 18 minuti per giorno. NON era un timeout (160 < 270). La **causa della chiusura non e' dimostrata**: le righe `failed connect to server / authorization failed` sono quelle della chiusura, non spiegano chi l'ha chiusa. Compatibile con il PC in sospensione/spostato [INFERITO, non provato].
-- TRANCHE2 e' finita in 23 minuti ma perche' il conto e' morto per stop out il 5/08 (4,5 giorni simulati, circa 5 minuti per giorno).
-- Il rallentamento ha una firma nei giornali (estratti parziali: 24.004 righe su 608.539 per la TRANCHE1): migliaia di `BUY/SELL blocked: current margin level too low` e di `modify failed ... close to market` (retcode 10029). Il margine dell'oro nel tester (10.000 USD a lotto [DERIVATO]) blocca l'EA fin dal primo giorno in tutte e tre le tranche (primo blocco: 01/07 01:30, 03/08 14:25, 01/09 02:32).
-- 🔴 **La stima di tempo che stava nella riga («circa 170 minuti a mese») era SBAGLIATA di 3-4 volte** ([STIMA NON MISURATA] dichiarata, ora falsificata): a 18-19 min/giorno un mese pieno costa circa **9-10 ore** [ESTRAPOLATO]. Il timeout di 270 minuti uccide la stessa tranche allo stesso punto: **rilanciare le righe cosi' come sono (v2 o v3) rifa' lo stesso errore.**
+## 2. Perche' due tranche non hanno il report [MISURATO sui giornali; CORRETTO il 15/10 sera]
+🔴 **Correzione.** La prima stesura di questa sezione diceva «19 minuti per giorno simulato» e «un mese costa 9-10 ore»: era SBAGLIATA, nata dividendo per l'orologio da parete. I giornali hanno buchi di sospensione del PC.
+- **TRANCHE1 (luglio): il PC e' rimasto fermo 153 minuti** (nessuna riga fra 10:34 e 13:07; `AutoTesting processing 47 %` alle 10:29:58, poi di nuovo 47 % alle 13:07:02; prima c'era gia' un buco di 64 minuti, 09:28-10:33). Il timeout di 270 minuti, a orologio da parete, e' scaduto mentre il PC dormiva (tester al 15/07 ore 20:00 simulate). Questo spiega «timeout» e «report non scritto».
+- **TRANCHE3 (settembre): buco di 90 minuti** (14:41-16:11), poi `prepare for shutdown`, `tester forced to close`, `some error after pass finished`, nessun report. NON era un timeout (160 < 270): e' il risveglio dalla sospensione [MISURATO come buco nei timestamp; che fosse sospensione e non altro resta la lettura piu' semplice, non una prova di causa].
+- **Velocita' vera, tolti i buchi:** luglio 14,8 giorni simulati in 129 minuti, settembre 7,9 giorni in 69 minuti, circa **9 minuti per giorno** → un mese circa **4-5 ore** [ESTRAPOLATO, il 28/09 con il cesto profondo non e' stato raggiunto]. La stima della riga («170 minuti a mese») era comunque troppo bassa, di circa 1,5-2 volte, ma la causa dei due fallimenti NON e' la lentezza.
+- TRANCHE2 e' finita in 23 minuti perche' il conto e' morto per stop out il 5/08.
+- Segnale ulteriore nei giornali: migliaia di `BUY/SELL blocked: current margin level too low` e di `modify failed ... close to market` (retcode 10029) dal primo giorno in tutte e tre le tranche: il margine dell'oro nel tester (10.000 USD a lotto [DERIVATO]) tiene l'EA in blocco.
 
 ## 3. TRANCHE2 (agosto 2026) -- l'unica conforme
 - XAUUSD M1, ticks reali 100%, deposito 5.000 EUR, leva 1:100 (stampata), input imposti confermati dal report, enum al default 0/0.
@@ -34,5 +35,5 @@ Zip `ARENA_TESTER_TRANCHE.zip` (giro v2, pin `5c5d7dc0`, PC di backtest DESKTOP-
 - Nessuna promozione, nessuna archiviazione: l'EA resta sul demo in osservazione. Nessuna taglia: decisione di Claudio.
 
 ## 6. Che cosa manca per chiudere (e la via piu' corta)
-1. TRANCHE3 (settembre, contiene il 28/09) e TRANCHE1 (luglio): servono 9-10 ore a tranche con timeout di 270 minuti SBAGLIATO. Via piu' corta: rifare solo TRANCHE3 con timeout >= 720 minuti, oppure spezzare le tranche in meta' mese (nuova scheda, nuove finestre, nuova riga con i due cancelli). 
-2. Ogni cambio di timeout o finestra e' una modifica allo script: passa dai due cancelli prima di arrivare a Claudio.
+1. TRANCHE3 (settembre, contiene il 28/09): circa 4-5 ore SE il PC non va in sospensione. Riga `RIGA_LANCIA_ARENA_TESTER_TRANCHE_LUNGA.txt` (script v4, timeout 840 min, richiesta di veglia a Windows). Luglio resta da fare solo se serve a decidere H3/H4.
+2. Ogni cambio di riga o script passa dai due cancelli prima di arrivare a Claudio.
