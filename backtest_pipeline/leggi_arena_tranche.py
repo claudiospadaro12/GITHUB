@@ -37,8 +37,9 @@ L.LEVA_ATTESA = "1:100"
 L.ANCORA_T1 = (L.ANCORA_T1[0], L.ANCORA_T1[1], "0000.00.00")
 # il pin della riga passata dai DUE cancelli (fail-closed se vuota). DA SCRIVERE: il commit che porta ARENA_TESTER_TRANCHE.ps1 v2.
 # d284a709 (v1) NON si mette: la v1 lanciava le tranche dopo un .ex5 cambiato (classe 1438) e non e' passata dal cancello di giudizio.
-PIN_PASSATI_TRANCHE = ("5c5d7dc0292caf885a108298c97c63c7548a8e6e",)   # il pin della riga passata dal cancello (fail-closed se vuota)
-MARCATORE_ATTESO = "MARCATORE_ARENA_TESTER_TRANCHE_v2"
+PIN_PASSATI_TRANCHE = ("5c5d7dc0292caf885a108298c97c63c7548a8e6e", "07947bbeb0657bad49c4a918cd7ff90db5b02193")   # v2 (3 tranche) e v3 (-Tranche)   # il pin della riga passata dal cancello (fail-closed se vuota)
+MARCATORI_ATTESI = ("MARCATORE_ARENA_TESTER_TRANCHE_v2", "MARCATORE_ARENA_TESTER_TRANCHE_v3")
+MARCATORE_ATTESO = MARCATORI_ATTESI[0]
 # lo script delle tranche nasce col commit d284a709 del 14/10/2026 20:26 UTC: un REFERTO del 14/10 sera e' legittimo (un giro che va KO
 # in pochi minuti la stessa sera). Con "2026-10-15" il lettore lo sospendeva scrivendo il FALSO "lo script non esisteva".
 DATA_MINIMA_REFERTO = "2026-10-14"
@@ -105,8 +106,8 @@ def provenienza_tranche(src):
     righe.append("PROVENIENZA dal REFERTO: marcatore %s | pin %s | data %s | pin passati dal cancello: %s" % (
         mmar.group(0) if mmar else "ASSENTE", pin or "ASSENTE", mdat.group(1) if mdat else "ASSENTE",
         ", ".join(PIN_PASSATI_TRANCHE) if PIN_PASSATI_TRANCHE else "NESSUNO (tupla PIN_PASSATI_TRANCHE vuota)"))
-    if not mmar or mmar.group(0) != MARCATORE_ATTESO:
-        comuni.append("marcatore %s invece di %s" % (mmar.group(0) if mmar else "ASSENTE", MARCATORE_ATTESO))
+    if not mmar or mmar.group(0) not in MARCATORI_ATTESI:
+        comuni.append("marcatore %s invece di %s" % (mmar.group(0) if mmar else "ASSENTE", " / ".join(MARCATORI_ATTESI)))
     if pin is None or pin not in PIN_PASSATI_TRANCHE:
         comuni.append("pin %s NON fra quelli passati dal cancello (%s)" % (pin or "ASSENTE", ", ".join(PIN_PASSATI_TRANCHE) if PIN_PASSATI_TRANCHE else "PIN_PASSATI_TRANCHE vuota"))
     if not mdat or mdat.group(1) < DATA_MINIMA_REFERTO:
@@ -219,6 +220,10 @@ def autotest():
         ok(any("NON fra quelli passati" in x for x in c), "2 pin diverso: sospeso")
         c, pt, _ = prov(ref(mar="MARCATORE_ARENA_TESTER_SONDA_v3"))
         ok(any("marcatore" in x for x in c), "3 marcatore della sonda: sospeso")
+        c, pt, _ = prov(ref(mar="MARCATORE_ARENA_TESTER_TRANCHE_v3"))
+        ok(not c and not pt, "3b marcatore v3 (variante -Tranche): accettato")
+        c, pt, _ = prov(ref(mar="MARCATORE_ARENA_TESTER_TRANCHE_v4"))
+        ok(any("marcatore" in x for x in c), "3c marcatore v4 (mai passato dal cancello): sospeso")
         c, pt, _ = prov(ref(data="2026-10-13"))
         ok(any("data del REFERTO" in x for x in c), "4 data prima del 14/10: sospeso")
         c, pt, _ = prov(ref(data="2026-10-14"))
