@@ -32,7 +32,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import leggi_arena_tester as L  # noqa: E402
 
-PIN_PASSATI_TIG = ()      # da scrivere: il pin della riga passata dal cancello (fail-closed finche' e' vuota)
+PIN_PASSATI_TIG = ("f1f72fc0f4362de9d5f290b225067bc5235125c2",)   # il pin della riga passata dal cancello (fail-closed se vuota)
 MARCATORE_ATTESO = "MARCATORE_TIG_TESTER_SONDA_v1"
 DATA_MINIMA_REFERTO = "2026-10-15"
 PERIODO_ATTESO = ("2026.10.14", ("2026.10.14", "2026.10.15"))
