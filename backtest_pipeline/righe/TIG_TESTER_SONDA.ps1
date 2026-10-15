@@ -1,5 +1,10 @@
 # =====================================================================
-#  MARCATORE_TIG_TESTER_SONDA_v1
+#  MARCATORE_TIG_TESTER_SONDA_v2
+#  v2 (15/10/2026, verificatore-stringhe, ricorrenza della classe 1447: testo del PADRE rimasto nel derivato): il titolo della passata
+#  stampava 'XAUUSD M1' a mano (ora dalle costanti: M5); il REFERTO scriveva 'input imposti (14, valori del demo del 13/10)' e 'enum' con
+#  zero input imposti (ora: NESSUNO, e fanno fede i valori del report); due messaggi e due commenti nominavano ancora l'Arena.
+#  v2 (stesso giorno, controllo-preventivo, strato 2): il 14/10 TIG ha aperto CINQUE trade sul demo, non tre (11:05, 12:05, 17:05 SELL;
+#  18:25, 19:15 BUY; il tetto e' 5 al giorno): la v1 scriveva 3 nel REFERTO e nel MANIFEST. Nota sull'orologio GMT del tester (classe 762).
 #  TIG_TESTER_SONDA.ps1 -- SONDA 1 (gemello del 14/10) dell'EA di TERZI 'The Impossible Gold 2.1' (XAUUSD M5, magic 778899) nel NOSTRO Strategy Tester.
 #  Scatola nera: NESSUN sorgente, NESSUNA compilazione. Si prova il file .ex5 che il MQL5 Market ha scaricato in MQL5\Experts\Market di QUESTO terminale
 #  (C:\Program Files\BCM Markets MT5 Terminal, demo 50503392 del PC di backtest DESKTOP-H4D7CAJ), SOLO nel tester, mai su un grafico.
@@ -10,7 +15,7 @@
 #    1. L'EA e' 'The Impossible Gold*' (il file sul demo piccolo del VPS e' 'The Impossible Gold.ex5', del 13/10 23:06 [LETTO in CODA_06]); si cerca per
 #       nome 'The Impossible Gold*' in MQL5\Experts\Market e ne serve ESATTAMENTE UNO.
 #    2. UNA sola passata: TIG1 = il solo 14/10/2026 (2026.10.14 -> 2026.10.15), XAUUSD **M5**, Modello 4 (ticks reali), deposito 5000 EUR, leva 1:100 (la
-#       leva che il tester stampa, misurata il 14/10), ExecutionMode=0, Visual=0, AllowLiveTrading=false. E' il GIORNO IN CUI l'EA ha operato sul demo (3 trade).
+#       leva che il tester stampa, misurata il 14/10), ExecutionMode=0, Visual=0, AllowLiveTrading=false. E' il GIORNO IN CUI l'EA ha operato sul demo (5 trade, il suo tetto giornaliero).
 #    3. NESSUN input imposto: i NOMI delle variabili di questo EA non si conoscono [NON VERIFICATO] (le etichette della finestra Proprieta' non sono i nomi).
 #       Il tester usa i default dell'EA o l'ultimo valore salvato nel tester; i valori USATI si leggono nel report ('Dati in ingresso') e nel giornale, e il
 #       lettore li confronta con i valori della finestra del demo (screenshot di Claudio del 15/10). Se i default sono quelli del demo, le passate dopo non
@@ -50,7 +55,7 @@ $Pin = $Pin.ToLower()
 if($TimeoutMin -lt 1 -or $TimeoutMin -gt 120){ throw '-TimeoutMin fuori da 1-120 minuti.' }
 # UNA sola passata: TIG1 = il solo 14/10/2026 (il report scrive l estremo 'A' come data finale; l ultimo giorno incluso e quello prima).
 $SONDE = @(
-  [pscustomobject]@{ Nome = 'TIG1'; Da = '2026.10.14'; A = '2026.10.15'; Timeout = $TimeoutMin; Cosa = 'il solo 14/10/2026: il giorno dei 3 trade sul demo' }
+  [pscustomobject]@{ Nome = 'TIG1'; Da = '2026.10.14'; A = '2026.10.15'; Timeout = $TimeoutMin; Cosa = 'il solo 14/10/2026: il giorno dei 5 trade TIG sul demo (tetto 5 al giorno)' }
 )
 
 function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
@@ -166,7 +171,7 @@ if(-not $preso){
 $aperti = @(Get-Process -Name terminal64, metaeditor64, metatester64 -ErrorAction SilentlyContinue)
 if($aperti.Count -gt 0){
   $aperti | Select-Object Id, ProcessName, MainWindowTitle, Path | Format-Table -AutoSize | Out-String -Width 300 | Write-Host
-  throw 'MT5, METAEDITOR o un AGENTE DEL TESTER risulta APERTO su questo PC (PID, titolo, cartella qui sopra). Se sta lavorando NON chiuderlo: aspetta la sua riga finale con rc. Se e un MT5 aperto a vuoto (per esempio quello usato per installare l Arena dal Market), chiudilo A MANO riconoscendolo dal PID e dalla cartella, e rilancia.'
+  throw 'MT5, METAEDITOR o un AGENTE DEL TESTER risulta APERTO su questo PC (PID, titolo, cartella qui sopra). Se sta lavorando NON chiuderlo: aspetta la sua riga finale con rc. Se e un MT5 aperto a vuoto (per esempio quello usato per installare TIG dal Market), chiudilo A MANO riconoscendolo dal PID e dalla cartella, e rilancia.'
 }
 
 $InstAttesa = 'C:\Program Files\BCM Markets MT5 Terminal'
@@ -216,13 +221,13 @@ if(Test-Path -LiteralPath $chrRoot){
   }
 }
 if($nChr -le 0){ throw ('ho letto ZERO grafici salvati sotto ' + $chrRoot + ': una guardia che non legge niente non ha verificato niente. Non si parte.') }
-if($conEA.Count -gt 0){ throw ('EA ATTACCATI ai grafici salvati del terminale BCM (' + ($conEA -join '; ') + '). Staccali prima: aprire il terminale col profilo li rimetterebbe in marcia sul demo 50503392 (14/08/2026). Se hai attaccato l Arena a un grafico per provarla, toglila dal grafico, chiudi MT5 e rilancia.') }
+if($conEA.Count -gt 0){ throw ('EA ATTACCATI ai grafici salvati del terminale BCM (' + ($conEA -join '; ') + '). Staccali prima: aprire il terminale col profilo li rimetterebbe in marcia sul demo 50503392 (14/08/2026). Se hai attaccato TIG a un grafico per provarlo, toglila dal grafico, chiudi MT5 e rilancia.') }
 Dico ('terminale: ' + $Terminal) 'Green'
 Dico ('dati     : ' + $DataFolder) 'Green'
 Dico ('grafici salvati letti: ' + $nChr + ', nessun EA attaccato') 'Green'
 
 # ---------------------------------------------------------------------
-#  1. IL .EX5 DELL'ARENA: SOLO in MQL5\Experts\Market, ESATTAMENTE UNO
+#  1. IL .EX5 DI THE IMPOSSIBLE GOLD: SOLO in MQL5\Experts\Market, ESATTAMENTE UNO
 # ---------------------------------------------------------------------
 Titolo '1 - IL FILE DI THE IMPOSSIBLE GOLD (MQL5\Experts\Market di QUESTO terminale)'
 $MsgInstalla = 'Installa l EA dal Market su QUESTO terminale: apri MT5 dalla cartella C:\Program Files\BCM Markets MT5 Terminal (conto demo 50503392 di QUESTO PC DESKTOP-H4D7CAJ), scheda Market -> Acquistati (o la pagina del prodotto The Impossible Gold) -> Installa [NON VERIFICATO nei dettagli del menu]; NON attaccarlo a nessun grafico; chiudi MT5 e rilancia questa riga. Se il prodotto offre la versione DEMO gratuita (scheda del prodotto -> Demo), per il tester basta quella e non consuma attivazioni [NON VERIFICATO].'
@@ -260,7 +265,7 @@ Dico ('SHA256  : ' + $ShaEx5 + '   (binario di TERZI: va nel referto, NON nello 
 if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la passata esce senza report e il giornale lo dice.' 'Yellow' }
 
 # ---------------------------------------------------------------------
-#  2. LE TRE TRANCHE (passate singole, Optimization=0, ognuna a conto vuoto)
+#  2. LA PASSATA TIG1 (passata singola, Optimization=0, a conto vuoto)
 # ---------------------------------------------------------------------
 $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $Work = Join-Path $env:USERPROFILE 'abtg_tig_sonda'
@@ -380,7 +385,7 @@ $referto = New-Object System.Collections.ArrayList
 $esiti = @{}
 $fermaEx5 = ''
 foreach($s in $SONDE){
-  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', XAUUSD M1, Modello 4, deposito 5000 EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
+  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ', deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ', timeout ' + $s.Timeout + ' minuti')
   $esiti[$s.Nome] = 'NON_LANCIATA'
   if($fermaEx5 -ne ''){
     # v2 (classe 1438): niente ore di tester su un binario che non e' quello dell'impronta
@@ -513,7 +518,7 @@ foreach($s in $SONDE){
   [void]$referto.Add('   durata ' + $dur + ' s (orologio), test ' + $st.TestSec + ' s (riga Test passed del giornale; -1 = non letta)   giornali letti ' + $kf + ', righe ' + $righeTot)
   [void]$referto.Add('   report ' + $repNome + '   operazioni ' + $tTxt + '   netto ' + $pTxt + '   PF ' + $pfTxt + '   DD equita ' + $deTxt + '   DD saldo ' + $dbTxt)
   [void]$referto.Add('   qualita ' + $qTxt + '   barre report ' + $brTxt + '   ticks report ' + $tkTxt + '   barre generate ' + $bgTxt + '   ticks generati ' + $tgTxt + '   inizio tick ' + $tickIniTxt + '   finestra ' + $finest)
-  [void]$referto.Add('   input imposti confermati dal report: ' + $inputOk + '   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): ' + $enumTxt)
+  [void]$referto.Add('   input imposti: NESSUNO (' + @($INPUT_IMPOSTI).Count + '; confermati dal report: ' + $inputOk + '). Il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: fanno fede i valori della riga TUTTI gli input del report qui sotto')
   if($null -ne $lr -and $lr.Ok){ [void]$referto.Add('   TUTTI gli input del report: ' + (@($lr.InputOrd | ForEach-Object { $_ + '=' + $lr.Input[$_] }) -join ' ; ')) }
   if($st.InputLog.Count -gt 0){ [void]$referto.Add('   input stampati dal giornale (dopo started with inputs): ' + (@($st.InputLog.Keys | Sort-Object | ForEach-Object { $_ + '=' + $st.InputLog[$_] }) -join ' ; ')) } else { [void]$referto.Add('   input stampati dal giornale: NESSUNA riga Nome=valore letta dopo started with inputs (formato [NON VERIFICATO]: fa fede il report)') }
   [void]$referto.Add('   righe stop out nei giornali ' + $st.StopOut + ', no money ' + $st.NoMoney + ' (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)')
@@ -522,7 +527,7 @@ foreach($s in $SONDE){
   foreach($x in $motivi){ [void]$referto.Add('   - ' + $x) }
   $col = 'Green'; if($stato -ne 'OK'){ $col = 'Red' }
   Write-Host ('   ' + $s.Nome + '  ' + $stato + '   ' + $dur + ' s   operazioni ' + $tTxt + '   netto ' + $pTxt + '   PF ' + $pfTxt + '   DD equita ' + $deTxt + '   stop out nel giornale ' + $st.StopOut) -ForegroundColor $col
-  Dico ('ENUM non imposti, valore usato dal tester: ' + $enumTxt) 'Gray'
+  if(@($INPUT_ENUM).Count -gt 0){ Dico ('ENUM non imposti, valore usato dal tester: ' + $enumTxt) 'Gray' }
   foreach($x in $motivi){ Write-Host ('        - ' + $x) -ForegroundColor Red }
   if($stato -ne 'OK'){ foreach($x in @($st.Errori | Select-Object -First 5)){ Write-Host ('        giornale: ' + $x) -ForegroundColor DarkYellow } }
 }
@@ -532,14 +537,14 @@ foreach($s in $SONDE){
 # ---------------------------------------------------------------------
 Titolo '3 - RACCOLTA'
 $testa = @(
-  ('TIG TESTER SONDA -- EA di TERZI (The Impossible Gold 2.1) dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_TIG_TESTER_SONDA_v1, pin ' + $Pin),
+  ('TIG TESTER SONDA -- EA di TERZI (The Impossible Gold 2.1) dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_TIG_TESTER_SONDA_v2, pin ' + $Pin),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella sonda dell Arena con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
-  ('input imposti (14, valori del demo del 13/10): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ')),
-  ('input NON imposti (enum, ordinale sconosciuto): ' + ($INPUT_ENUM -join ', ') + ' -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: il valore usato e quello del report, riga ENUM qui sotto'),
+  ('input imposti: NESSUNO (' + @($INPUT_IMPOSTI).Count + '): i NOMI delle variabili di questo EA non si conoscono [NON VERIFICATO]'),
+  'input NON imposti: TUTTI -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: i valori USATI sono quelli del report (riga TUTTI gli input del report) e del giornale (riga input stampati dal giornale), qui sotto',
   ('esiti: TIG1 ' + $esiti['TIG1']),
-  'ATTENZIONE: la passata parte a CONTO VUOTO il 14/10: i trade vivi del demo (3, uno dei quali ancora aperto la mattina del 15/10) non hanno storia nel tester prima di quel giorno. Nessun input e imposto: fanno fede i valori che il report dice USATI.',
+  'ATTENZIONE: la passata parte a CONTO VUOTO il 14/10, come il demo, che prima del 14/10 non ha trade TIG (magic 778899) nel CSV del logger: i trade TIG del demo quel giorno sono 5 (11:05, 12:05, 17:05 SELL; 18:25, 19:15 BUY, l ultimo ancora aperto la mattina del 15/10). Nessun input e imposto: fanno fede i valori che il report dice USATI. Nel tester TimeGMT() = ora server (classe 762): se TIG legge la sessione GMT da TimeGMT, nel tester la sposta di UN ORA rispetto al demo; il lettore lo misura (attesa D).',
   ''
 )
 (($testa + $referto + @('', 'COME SI LEGGE: python3 backtest_pipeline/leggi_tig_sonda.py TIG_TESTER_SONDA.zip. Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_TIG_SONDA.txt') -Encoding ASCII
