@@ -33,6 +33,9 @@ Riusa il parser del report di leggi_arena_tester.py (passato dal cancello il 14/
      sotto H2. Esito: H1 se c'e' un trade del tester alle ore 12/21 (o il gemello delle 12:05) e nessuno alle 10/15; H2 se il contrario; ENTRAMBE o
      ore fuori da tutte e due = l'EA non usa (solo) TimeGMT; nessuna ora discriminante = NON DECISA. Se H2: OGNI sonda lunga di TIG nel tester misura
      un EA con la sessione spostata di un'ora rispetto al campo, e va detto prima di leggerne i numeri.
+     (Si giudica SOLO se il giro e' CONFORME e le ancore di SESSIONE (C) -- ora inizio 10, ora fine 20, esclusione fine 15 -- ci sono: le ore
+     discriminanti sono ricavate da QUELLA sessione; con un'altra sessione nel tester un trade alle 10 server non dice niente sull'orologio.
+     Verificatore-stringhe 15/10, secondo giro: la v2 dava 'H2' con la sessione 8-22 nel report.)
 Giro CONFORME = simbolo XAUUSD, periodo M5(2026.10.14-2026.10.15), qualita' 100% ticks reali, deposito 5000, leva 1:100, un solo Expert 'Impossible',
 provenienza (REFERTO_TIG_SONDA.txt: marcatore, pin passato dal cancello, data, .ex5 UGUALE). Le ancore (C) NON sono parte della conformita' del giro
 ma della lettura di (B): senza di esse (B) e' descrittiva. Se il giro NON e' conforme NESSUNA attesa (A, B, C, D) riceve un verdetto. ASCII puro.
@@ -68,6 +71,8 @@ ORE_H1 = (11, 12, 16, 17, 18, 19, 20, 21)
 ORE_H2 = (10, 11, 15, 16, 17, 18, 19, 20)
 ORE_SOLO_H1 = tuple(h for h in ORE_H1 if h not in ORE_H2)
 ORE_SOLO_H2 = tuple(h for h in ORE_H2 if h not in ORE_H1)
+# (D) le PREMESSE dell'attesa: le ore H1/H2 valgono SOLO se il tester usa la sessione del demo (nomi delle ancore qui sotto)
+ANCORE_SESSIONE = ("ora inizio GMT", "ora fine GMT", "esclusione fine")
 # ancore: (descrizione, valore numerico o testo) dalla finestra Proprieta' del demo (15/10 09:43-09:44)
 ANCORE = [("magic", 778899.0), ("take profit pips", 300.0), ("stop loss pips", 25.0), ("rischio % equity", 1.5), ("lookback barre", 16.0),
           ("buffer pips", 1.5), ("range minimo pips", 5.0), ("ora inizio GMT", 10.0), ("ora fine GMT", 20.0), ("esclusione fine", 15.0),
@@ -303,6 +308,7 @@ def stampa(nome, rep, inp, comuni):
     if manc:
         W("   MANCANTI: %s -> i default NON sono (tutti) quelli del demo: (B) e' descrittiva e la sonda 2 deve imporre gli input coi nomi sopra." % ", ".join(manc))
     ancore_ok = not manc
+    sessione_ok = not [d for d in ANCORE_SESSIONE if d in manc]
     W("")
     W("RISULTATO (dal report): operazioni %s | netto %s EUR | PF %s | DD equita' %s EUR (%s%%)" % (
         L.fmt(rep["trades"], 0), L.fmt(rep["profitto"]), L.fmt(rep["pf"]), L.fmt(rep["dd_eq_abs"]), L.fmt(rep["dd_eq_pct"], 2)))
@@ -337,10 +343,13 @@ def stampa(nome, rep, inp, comuni):
     else:
         W("(B) GEMELLO: %d su %d -> NESSUN verdetto (giro non conforme o ancore (C) mancanti): descrittivo." % (n, nl))
     esD, perD = orologio(tr)
-    if conforme:
+    if conforme and sessione_ok:
         W("(D) OROLOGIO GMT DEL TESTER: %s -- %s" % (esD, perD))
         if esD == "H2":
             W("    -> OGNI sonda lunga di TIG nel tester misura la sessione spostata di UN'ORA rispetto al campo (classe 762): va detto PRIMA di leggerne i numeri.")
+    elif conforme:
+        W("(D) OROLOGIO GMT DEL TESTER: NESSUN verdetto (ancore di SESSIONE (C) mancanti: le ore discriminanti valgono solo con la sessione 10-20, "
+          "esclusa 12-15, del demo); lettura descrittiva: %s -- %s" % (esD, perD))
     else:
         W("(D) OROLOGIO GMT DEL TESTER: NESSUN verdetto (giro non conforme); lettura descrittiva: %s -- %s" % (esD, perD))
     W("")
@@ -483,6 +492,21 @@ def autotest():
     ok("3 su 5 -> NON DECISA" in o, "25 tre gemelli su cinque: NON DECISA")
     rep2 = dict(rep5, deals=deals[:2])
     ok("2 su 5 -> SMENTITA" in esce(rep2, []), "26 due gemelli su cinque: SMENTITA")
+    # (D) senza le ancore di SESSIONE nessun verdetto (verificatore-stringhe 15/10, secondo giro): sessione 8-22 nel tester, trade alle 10:05 server
+    inp_s = collections.OrderedDict(inp)
+    for k_s in list(inp_s.keys()):
+        if num(inp_s[k_s]) in (10.0, 20.0, 15.0):
+            inp_s[k_s] = {10.0: "8", 20.0: "22", 15.0: "9"}[num(inp_s[k_s])]
+    d10 = dict(deals[0], t=dt.datetime(2026, 10, 14, 10, 5, 0), prezzo=4150.0)
+    rep10 = dict(rep5, deals=[d10] + deals[2:3])
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        stampa("x", rep10, inp_s, [])
+    o = buf.getvalue()
+    ok("(D) OROLOGIO GMT DEL TESTER: NESSUN verdetto (ancore di SESSIONE" in o and "-> OGNI sonda lunga" not in o,
+       "27 giro conforme ma sessione 8-22 nel report e trade alle 10:05: (D) NESSUN verdetto (v2 stampava H2)")
+    o = esce(rep10, [])
+    ok("(D) OROLOGIO GMT DEL TESTER: H2" in o, "27b stessa passata con la sessione del demo nel report: (D) H2 (il ramo resta vivo)")
     # condizioni
     rep = {"simbolo": "XAUUSD", "periodo": "M5(2026.10.14-2026.10.15)", "qualita": "100%ticksreali", "deposito": 5000.0, "leva": "1:100", "expert": "The Impossible Gold", "esperti": ["The Impossible Gold"]}
     ok(not condizioni("x", rep), "14 report conforme: nessun motivo")
