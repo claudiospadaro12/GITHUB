@@ -21,3 +21,12 @@ Non si allarga la griglia dopo aver visto i risultati.
 
 ## Cosa NON potra' dire
 Nessun mese fuori da luglio-settembre; tester con margine 4,8 volte quello reale; niente slippage vero; lotto 0,01 di base; un'unica fonte (Arena di terzi, scatola nera).
+
+## ESITO (16/10/2026, griglia completa di 10 celle, slip 0,3; tabella in `ARENA_REGOLE_RISCHIO_GRIGLIA_2026-10-16.txt`)
+Variazione del saldo finale rispetto al tester (replay validato al centesimo) -- LUGLIO | SETTEMBRE | agosto 3 giorni:
+- profondita' 8: -4.815 | +275 | +2.949; 10: -4.071 | +92 | +3.130; 12: -4.612 | +3.742 | +3.645; 15: -1.742 | -828 | +3.906
+- stop cesto 300: -4.620 | +59 | +3.031; 500: -5.645 | +1.684 | +2.934; 1000: -4.825 | +1.847 | +3.045
+- stop a tempo 6 h: -4.189 | +732 | +1.775; 12 h: -4.749 | -1.376 | +1.024; 24 h: -1.897 | -725 | 0
+**Esito secondo il criterio scritto prima: 10 celle su 10 SMENTITE** (nessuna migliora il saldo di luglio; la meno cattiva, profondita' 15, perde -1.742 a luglio e -828 a settembre). Il DD di equita' scende quasi sempre, ma costa il profitto di luglio.
+Lettura [INFERITA]: ogni regola che CHIUDE i cesti taglia anche quelli che in luglio rientrano dopo 1.000-3.400 EUR di perdita flottante; i cesti buoni e i cattivi hanno lo stesso aspetto finche' non rientrano. Nessuna regola di chiusura trovata. Non si allarga la griglia dopo aver visto i risultati.
+Resta una famiglia NON simulabile con questi dati: regole sul DIMENSIONAMENTO (il lotto minimo e' 0,01) e su un limite al numero di livelli che l'EA APRE (richiede l'EA, che e' di terzi).

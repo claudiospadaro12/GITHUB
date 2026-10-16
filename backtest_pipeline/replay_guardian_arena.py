@@ -5,6 +5,7 @@
 # i deal XAUUSD si accoppiano in->out per volume e prezzo d'entrata INFERITO dal profitto; dopo lo stop del Guardian le posizioni chiuse
 # e quelle aperte nel blocco sono "morte" (i loro deal successivi si ignorano); i giorni dopo ripartono dal baseline del tester.
 import re, sys, zipfile, collections, argparse
+from datetime import datetime
 
 K = 86.41
 
@@ -57,7 +58,7 @@ def accoppia(D):
         if d['dir'] == 'in':
             lato = 'buy' if d['tipo'] == 'buy' else 'sell'
             mc = re.search(r'\[CID=(\d+)\]', d['cm'])
-            P = dict(id=len(pos), lato=lato, v=d['v'], e=d['p'], t0=d['t'], t1=None, deal_in=i, deal_out=None, cid=(mc.group(1) if mc else None))
+            P = dict(id=len(pos), lato=lato, v=d['v'], e=d['p'], t0=d['t'], t1=None, deal_in=i, deal_out=None, cid=(mc.group(1) if mc else None), tag=('R' if '[R]' in d['cm'] else ('F' if '[F]' in d['cm'] else '')))
             pos.append(P)
             aperte[lato].append(P)
             mappa[i] = P['id']
@@ -83,6 +84,7 @@ def main():
     ap.add_argument('--slip', type=float, default=0.0, help='USD di scivolamento per lotto alla chiusura forzata')
     ap.add_argument('--dal', default='0000.00.00'); ap.add_argument('--al', default='9999.99.99')
     ap.add_argument('--deposito', type=float, default=5000.0)
+    ap.add_argument('--regola', default='', help='regola PER CESTO [R]: depth:N | bstop:X | tstop:H (ore); usare con --limite 0')
     ap.add_argument('--worst', action='store_true', help='valuta l equita con il peggiore fra low e high della barra')
     a = ap.parse_args()
     D = deals_xau(leggi_html(a.report))
@@ -104,6 +106,7 @@ def main():
     bal_b = a.deposito; open_b = []
     bal_g = a.deposito; open_g = []
     morte = set()           # id posizioni morte nel mondo guardian
+    depth_g = collections.Counter(); first_g = {}; real_g = collections.defaultdict(float); tagliati = 0
     cid_morti = set()       # cicli [CID] chiusi a forza: i livelli successivi dello stesso ciclo non esistono piu'
     giorno = None; bloccato = False
     start_eq_g = None
@@ -119,11 +122,15 @@ def main():
             if d['dir'] == 'in':
                 if pid is not None:
                     open_b.append(pos[pid]); open_g.append(pos[pid])
+                    if pos[pid]['tag'] == 'R' and pos[pid]['cid']:
+                        cc = pos[pid]['cid']; depth_g[cc] += 1; real_g[cc] += d['co']
+                        if cc not in first_g: first_g[cc] = datetime.strptime(d['t'][:16], '%Y.%m.%d %H:%M')
                 bal_b += d['co']; bal_g += d['co']
             else:
                 if pid is not None and pos[pid] in open_b:
                     open_b.remove(pos[pid])
                     if pos[pid] in open_g: open_g.remove(pos[pid])
+                    if pos[pid]['tag'] == 'R' and pos[pid]['cid']: real_g[pos[pid]['cid']] += d['pr'] + d['co'] + d['sw']
                 bal_b += d['pr'] + d['co'] + d['sw']; bal_g += d['pr'] + d['co'] + d['sw']
     for (tm, o, h, l, c, sp) in B:
         g = tm[:10]
@@ -158,14 +165,45 @@ def main():
                 continue
             if d['dir'] == 'in':
                 open_g.append(pos[pid]) if pid is not None else None
+                if pid is not None and pos[pid]['tag'] == 'R' and pos[pid]['cid']:
+                    cc = pos[pid]['cid']; depth_g[cc] += 1
+                    if cc not in first_g: first_g[cc] = datetime.strptime(tm[:16], '%Y.%m.%d %H:%M')
+                    real_g[cc] += d['co']
             else:
                 if pid is not None and pos[pid] in open_g:
                     open_g.remove(pos[pid])
                     bal_g += d['pr'] + d['co'] + d['sw']
+                    if pos[pid]['tag'] == 'R' and pos[pid]['cid']: real_g[pos[pid]['cid']] += d['pr'] + d['co'] + d['sw']
                 else:
                     pass
             if d['dir'] == 'in':
                 bal_g += d['co']
+        # regola per CESTO [R] (dopo gli eventi del minuto)
+        if a.regola and not bloccato:
+            kind, val = a.regola.split(':'); val = float(val)
+            por = collections.defaultdict(list)
+            for x in open_g:
+                if x['tag'] == 'R' and x['cid']:
+                    por[x['cid']].append(x)
+            ora_t = datetime.strptime(tm[:16], '%Y.%m.%d %H:%M')
+            for cc, lst in list(por.items()):
+                prezzo = c
+                fl = flo(lst, prezzo, spr)
+                if a.worst:
+                    fl = min(fl, flo(lst, l, spr), flo(lst, h, spr))
+                scatta = False
+                if kind == 'depth':
+                    scatta = depth_g[cc] >= val
+                elif kind == 'bstop':
+                    scatta = (real_g[cc] + fl) <= -val
+                elif kind == 'tstop':
+                    scatta = (ora_t - first_g[cc]).total_seconds() >= val * 3600
+                if scatta:
+                    lotti = sum(x['v'] for x in lst)
+                    bal_g += flo(lst, c, spr) - a.slip * lotti * K
+                    for x in lst:
+                        open_g.remove(x); morte.add(x['id'])
+                    cid_morti.add(cc); tagliati += 1
         # equita a fine minuto
         def eq(world_bal, world_open, p):
             return world_bal + flo(world_open, p, spr)
@@ -179,7 +217,7 @@ def main():
             if a.worst:
                 eq_g = min(eq_g, eq(bal_g, open_g, l), eq(bal_g, open_g, h))
             peak_g = max(peak_g, eq_g); ddmax_g = max(ddmax_g, peak_g - eq_g)
-            if start_eq_g - eq_g >= a.limite and out[g]['stop'] is None:
+            if a.limite > 0 and start_eq_g - eq_g >= a.limite and out[g]['stop'] is None:
                 # chiusura forzata di tutto a prezzo c (peggiorato dallo slippage)
                 lotti = sum(x['v'] for x in open_g)
                 real = flo(open_g, c, spr) - a.slip * lotti * K
@@ -205,6 +243,7 @@ def main():
     nstop = sum(1 for r in out.values() if r['stop'])
     print('\nFINE: saldo tester %.2f | saldo con Guardian %.2f | differenza %+.2f | giorni fermati %d su %d' % (ult['bal_b'], ult['bal_g'], ult['bal_g'] - ult['bal_b'], nstop, len(out)))
     print('DD massimo di equita (picco->minimo): tester %.2f | con Guardian %.2f' % (ddmax_b, ddmax_g))
+    if a.regola: print('cesti chiusi a forza dalla regola %s: %d' % (a.regola, tagliati))
 
 
 if __name__ == '__main__':
