@@ -1,0 +1,14 @@
+# The Impossible Gold 2.1 (TIG) -- attese scritte PRIMA di avere un solo numero nostro (16/10/2026)
+
+Cosa si prova: l'EA di terzi `The Impossible Gold 2.1` (magic 778899 sul demo piccolo, scheda `report/MARKET_SCHEDA_THE_IMPOSSIBLE_GOLD_2026-10-15.md`) nel nostro Strategy Tester: XAUUSD **M5**, ticks reali, deposito 5.000 EUR, leva 1:100, luglio/agosto/settembre 2026, **nessun input imposto** (default dell'EA o ultimo valore salvato nel tester [NON VERIFICATO quale]; fa fede il report). I valori della scheda (Breakout lookback 16, buffer 1,5, SL 25 pips, TP 300, rischio 1,5% compound, sessione 10-20 GMT con esclusione 12-15, max 1 posizione, max 5 trade/giorno, trailing 10/2, estensione TP 14) sono letti da screenshot con le ETICHETTE, non con i nomi degli input.
+
+## Ipotesi con smentita
+- **T0 (i default coincidono con il demo)**: nel report gli input leggibili coincidono con la scheda (lookback 16, SL 25, TP 300, rischio 1,5, max posizioni 1, max trade/giorno 5). *Smentita*: anche uno solo diverso. Se T0 cade, le prove sotto sono dei DEFAULT, non del demo di Claudio, e si rifa' con i valori del demo.
+- **T1 (nessuna scala)**: in ogni mese al massimo 1 posizione viva per volta e nessun lotto crescente dopo perdita oltre l'effetto del compounding (rapporto lotto massimo/minimo del mese <= 2). *Smentita*: 2 posizioni vive insieme o rapporto > 2.
+- **T2 (massimo 5 trade al giorno)**: nessun giorno con piu' di 5 aperture. *Smentita*: un giorno con 6 o piu'.
+- **T3 (sessione)**: nessuna apertura fuori 10-12 e 15-20 GMT (= 11-13 e 16-21 ora server BCM). *Smentita*: una apertura fuori.
+- **T4 (rischio per stop)**: una perdita al SL vale 1,5% dell'equita' del momento, tolleranza fra 1,0% e 2,0% (il 14/10 reale: 1,40%-1,5%). *Smentita*: fuori banda su piu' del 10% degli stop.
+- **T5 (profilo vincite rare)**: win rate sotto il 40% in ogni mese (SL 25 pips contro TP 300 + trailing). *Smentita*: un mese sopra il 40%.
+- **T6 (perdita giornaliera)**: con 5 trade x 1,5% la perdita di equita' di un giorno non supera il 7,5% del saldo del giorno (replay M1 come per l'Arena). *Smentita*: un giorno oltre 7,5%.
+- **T7 (merito)**: favorevole = netto positivo in almeno 2 mesi su 3 E somma dei tre mesi positiva. Contrario = netto positivo in 0 o 1 mese. **Non si decide**: meno di 60 operazioni totali, o mese con giro non conforme (finestra, ticks reali 100%, deposito, leva, `.ex5` uguale fra i mesi). Il merito si legge solo sui mesi conformi.
+**Un esito favorevole restera' "candidato da misurare ancora", mai "pronto per una prop"**: tre mesi, un anno, un feed. Il filtro news dell'EA (spento nel demo) e il calendario non cambiano la lettura; il filtro di regime settimanale usa l'EMA a 50 settimane: se il tester non ha lo storico settimanale prima di luglio il filtro puo' comportarsi diversamente dal vivo [NON VERIFICATO].
