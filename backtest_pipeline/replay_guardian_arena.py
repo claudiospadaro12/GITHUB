@@ -84,6 +84,8 @@ def main():
     ap.add_argument('--slip', type=float, default=0.0, help='USD di scivolamento per lotto alla chiusura forzata')
     ap.add_argument('--dal', default='0000.00.00'); ap.add_argument('--al', default='9999.99.99')
     ap.add_argument('--deposito', type=float, default=5000.0)
+    ap.add_argument('--profitto', type=float, default=0.0, help='obiettivo giornaliero in EUR: a +P chiude tutto e blocca il giorno')
+    ap.add_argument('--realizzato', action='store_true', help='con --profitto: il traguardo e il guadagno REALIZZATO del giorno (saldo), non l equita')
     ap.add_argument('--regola', default='', help='regola PER CESTO [R]: depth:N | bstop:X | tstop:H (ore); usare con --limite 0')
     ap.add_argument('--worst', action='store_true', help='valuta l equita con il peggiore fra low e high della barra')
     a = ap.parse_args()
@@ -139,6 +141,7 @@ def main():
             if giorno is not None:
                 pass
             giorno = g; bloccato = False
+            bal_inizio_g = bal_g
             eq_start = bal_g + flo(open_g, o, spr)
             start_eq_g = eq_start
             out[g] = dict(stop=None, loss_stop=None, base_start=bal_b + flo(open_b, o, spr), g_start=eq_start, n_ev=0)
@@ -217,7 +220,7 @@ def main():
             if a.worst:
                 eq_g = min(eq_g, eq(bal_g, open_g, l), eq(bal_g, open_g, h))
             peak_g = max(peak_g, eq_g); ddmax_g = max(ddmax_g, peak_g - eq_g)
-            if a.limite > 0 and start_eq_g - eq_g >= a.limite and out[g]['stop'] is None:
+            if ((a.limite > 0 and start_eq_g - eq_g >= a.limite) or (a.profitto > 0 and ((bal_g - bal_inizio_g >= a.profitto) if a.realizzato else (eq_g - start_eq_g >= a.profitto)))) and out[g]['stop'] is None:
                 # chiusura forzata di tutto a prezzo c (peggiorato dallo slippage)
                 lotti = sum(x['v'] for x in open_g)
                 real = flo(open_g, c, spr) - a.slip * lotti * K
