@@ -18,4 +18,4 @@ Fonte: `risultati_archivio/ARENA_REALE_20261016/cronistorico_reale_10105439_2026
 La coda dell'Arena non e' un'ipotesi: un'ora e mezza dopo l'attacco il recupero era a 0,30 lotti contro un rialzo di 37 USD, e il Guardian ha tagliato a -455. Coerente con tester e demo (nessuna regola separa le code dai profitti). Il bonus non ha assorbito niente: la perdita e' uscita dal saldo (5.051 -> 4.662).
 
 ## Aperto
-Soglia del Guardian (-455 su 7.551 di equity iniziale e' circa 6%: compatibile con InpDailyLossPct=6, da confermare); ora dello stacco dell'Arena; se il Guardian e' ancora vivo; commissione BCM vera; termini del bonus.
+Soglia del Guardian: CORREZIONE del 16/10 sera -- non e' 6%: il codice (ABTG_Guardian.mq5 v1.14) misura la perdita del giorno come equity a inizio giornata meno equity corrente (-455 sulle vendite, ma +75 di guadagni gia' incassati oggi: circa -380 di giornata) contro InpDailyLossPct x gStart; 5,0% (default) x 7.551 = circa 378: **e' il default del 5%** [DERIVATO, da confermare dal pannello del Guardian: gStart e soglie]; ora dello stacco dell'Arena; se il Guardian e' ancora vivo; commissione BCM vera; termini del bonus.
