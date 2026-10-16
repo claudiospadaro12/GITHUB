@@ -1,0 +1,97 @@
+----------------------------------------------------------------------------------------------------------------------
+REFERTO dello script (REFERTO_ARENA_TRANCHE.txt) -- righe chiave:
+  ARENA TESTER TRANCHE -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA_TESTER_TRANCHE_v4, pin 24aa4bd300944258110c805b8bd8807dbecba348
+  data: 2026-10-16 02:26:01   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+  EX5: Market\Arena Nexus Grid Smart XAU MT5.ex5   byte 200368   data file 2026-10-14 20:53:53   SHA256 B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+  input NON imposti (enum, ordinale sconosciuto): InpTradeMode, InpGoldPulseTheme -- il tester usa il default dell EA o l ultimo valore salvato nel tester [NON VERIFICATO quale]: il valore usato e quello del report, riga ENUM qui sotto
+  esiti: TRANCHE1 OK   TRANCHE2 SALTATA   TRANCHE3 SALTATA
+  ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre. Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).
+  TRANCHE1 (luglio 2026)  2026.07.01 -> 2026.08.01   STATO OK
+  EX5_DOPO TRANCHE1: B261E2528DB43F1DCB0C1B8ED9DDC3E3260495F77D4E6586DEAF93255366FC5A UGUALE
+  input imposti confermati dal report: si   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): InpTradeMode report=0 giornale=0 | InpGoldPulseTheme report=0 giornale=0
+PROVENIENZA dal REFERTO: marcatore MARCATORE_ARENA_TESTER_TRANCHE_v4 | pin 24aa4bd300944258110c805b8bd8807dbecba348 | data 2026-10-16 | pin passati dal cancello: 5c5d7dc0292caf885a108298c97c63c7548a8e6e, 07947bbeb0657bad49c4a918cd7ff90db5b02193, 24aa4bd300944258110c805b8bd8807dbecba348
+impronta del .ex5 dopo TRANCHE1: UGUALE
+EX5_DOPO TRANCHE2: assente dal REFERTO (tranche non lanciata o REFERTO incompleto)
+EX5_DOPO TRANCHE3: assente dal REFERTO (tranche non lanciata o REFERTO incompleto)
+GIORNALE TRANCHE1 (13 estratti): input stampati dopo 'started with inputs': InpS03FundedPrefix=true, InpEntryPhaseSpacingR33=true, InpMagicNumber=888, InpBaseLot=0.01, InpTradeMode=0, InpFridayGapProtection=false, InpShowDashboard=true, InpGoldPulseTheme=0, InpCounterFlowRail=true, InpCounterFlowTriggerPrice=0.2, InpCounterFlowLotMultiplier=1.0, InpCounterFlowMaxLivePositions=1, InpCounterFlowRearmDelayMilliseconds=0, InpDeadZoneReactionRail=true, InpDeadZoneReactionTriggerPrice=0.2, InpDeadZoneReactionRearmDelayMilliseconds=0
+  enum nel giornale: InpTradeMode=0, InpGoldPulseTheme=0 | righe distinte di stop out 0, di no money 0
+    giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+    giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+    giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+    giornale: custom indicator DIEGO_Nasdaq_Bands_Indicator (1) (GBPUSD,H1) removed
+    giornale: 2026.07.01 00:08:45   failed cancel order #22 buy stop 0.01 XAUUSD at 4017.86 [Modification failed due to order or position being close to market]
+    giornale: 2026.07.01 00:08:45   Arena Nexus Grid Smart XAU MT5: delete stale same-side pending failed | retcode=10029 (frozen) | last_error=4756
+    giornale: 2026.07.01 00:08:46   failed cancel order #22 buy stop 0.01 XAUUSD at 4017.86 [Modification failed due to order or position being close to market]
+    giornale: 2026.07.01 00:08:46   Arena Nexus Grid Smart XAU MT5: delete stale same-side pending failed | retcode=10029 (frozen) | last_error=4756
+======================================================================================================================
+TRANCHE1  --  report/ARENA_TRANCHE1_20261015_221522.htm
+======================================================================================================================
+Expert Arena Nexus Grid Smart XAU MT5 | simbolo XAUUSD | periodo M1(2026.07.01-2026.08.01) | qualita 100%ticksreali | barre 31131 | tick 9064027 | deposito 5000.00 | leva 1:100
+
+INPUT (dal report, 'Dati in ingresso': quelli che il tester ha USATO)
+  imposti (14): TUTTI come dichiarato
+  enum NON imposti, valore usato dal tester: InpTradeMode=0, InpGoldPulseTheme=0
+
+RISULTATO (dal report)
+  operazioni 13498 | netto 4800.36 EUR | PF 1.21 | DD equita' massimo 5284.37 EUR (45.93%) | DD saldo massimo 3296.24 EUR (27.98%)
+  deal di trading 26996 (ingressi 13498, uscite 13498), posizioni aperte a fine test 0 (il tester le chiude da se' con 'end of test': di norma 0)
+  stop out: NESSUNO (nessun deal col commento 'so ...' / 'stop out')
+
+COMMISSIONI addebitate dal tester: -729.13 EUR su 386.50 lotti di deal -> 3.77 EUR per lotto a giro (atteso 3.90 [NON VERIFICATO]; demo 4.00 [LETTO nel conto]; tester BCM oro 3.42 [MISURATO R1A 10/10])
+  a 0,01 lotti la commissione di un deal e' arrotondata al centesimo (1,71 x 0,01 = 0,0171 -> 0,02): il valore per lotto qui sopra e' distorto verso l'ALTO; il totale in EUR e' quello vero.
+PREZZO ESATTO degli ingressi da ordine stop/limit: 13498 ingressi, 2285 esattamente al prezzo dell'ordine (16.9%), 11213 a prezzo PEGGIORE (max 34.97 USD, media dei peggiori 0.111), 0 migliori. Ingressi a mercato o senza ordine leggibile: 0.
+  nel tester (ExecutionMode=0) non c'e' latenza: uno scarto > 0 e' un salto fra due tick, non slippage di esecuzione. Demo 14/10: 731/731 esatti [LETTO].
+
+ACCOPPIAMENTO in -> out (ricostruito: il report non ha l'identificativo di posizione): univoci 7493, per insieme (cesto intero) 2591, stesso cesto 778, AMBIGUI 2636 (+ 0 in grappoli ambigui), parziali 0, senza volume uguale 0, non accoppiati 0 -> quota incerta 19.5% delle uscite
+  oltre il 5%: i netti PER CESTO qui sotto sono APPROSSIMATI (i netti per giorno e i lotti vivi NO).
+  k = 87.50 EUR per 1,0 di prezzo x 1 lotto (mediana di 9374 posizioni accoppiate). DD d'equita' STIMATO agli istanti dei deal: 3396.26 EUR contro 5284.37 del report (la stima deve stare SOTTO o vicino al vero: e' un limite inferiore).
+
+PER GIORNO (data server). netto = realizzato (deal del giorno, commissioni comprese); picco lotti vivi = buy + sell lordi; perdite rispetto al saldo d'inizio giorno; equita' STIMATA = limite inferiore della perdita vera
+  giorno      ingr lotti_in      netto   picco    buy   sell  prof  saldo_min- equita_min- flott_peggio   %dep
+  2026-07-01   337     4.57     279.19    0.40   0.38   0.38    11       -0.02     -249.82      -300.68   -5.0
+  2026-07-02  1412    18.75    1040.34    0.44   0.30   0.38    10       -0.07     -130.09      -271.77   -2.6
+  2026-07-03   140     2.09      94.06    0.50   0.09   0.46    11       -0.02     -186.45      -247.63   -3.7
+  2026-07-06   571     8.03     448.60    0.58   0.30   0.46    16       -0.04     -178.73      -576.53   -3.6
+  2026-07-07   974    13.66     686.76    0.71   0.52   0.46    19      -10.37     -623.17     -1277.20  -12.5
+  2026-07-08   472     6.50     375.47    0.64   0.57   0.25    19       -5.58     -863.66      -895.26  -17.3
+  2026-07-09   523     6.90     344.06    0.63   0.57   0.25    13       -6.30     -491.55      -494.10   -9.8
+  2026-07-10   743    10.14     466.35    0.61   0.25   0.57    12       -0.09     -521.05      -962.11  -10.4
+  2026-07-13  1234    17.65     885.18    0.61   0.57   0.57    17       -0.02     -633.17      -776.02  -12.7
+  2026-07-14  1039    13.80     759.06    0.76   0.74   0.30    19       -4.60     -815.69     -1503.23  -16.3
+  2026-07-15   208     4.49     248.73    0.84   0.74   0.68    33       -0.04    -1720.72     -1922.46  -34.4
+  2026-07-16   213     3.93     308.27    0.92   0.78   0.30    39      -33.32    -1483.27     -1688.07  -29.7
+  2026-07-17    22     0.26   -1351.20    0.85   0.76   0.09    39    -1351.20    -1940.63     -1604.64  -38.8
+  2026-07-20   885    11.99     607.31    0.63   0.25   0.62    22       -0.02     -995.83     -1081.86  -19.9
+  2026-07-21   766    10.95     561.42    0.77   0.20   0.68    23      -32.66    -1396.64     -1637.95  -27.9
+  2026-07-22   668    10.04     554.45    0.93   0.38   0.68    18       -0.06    -3000.87     -3411.79  -60.0
+  2026-07-23   450     6.66     340.54    0.89   0.85   0.20    20      -48.25    -2080.49     -2421.03  -41.6
+  2026-07-24     2     0.02   -3162.20    0.80   0.78   0.02    20    -3162.20    -3874.66     -2263.22  -77.5
+  2026-07-27   821    11.36     573.54    0.58   0.57   0.46    14       -0.04    -1431.71     -1464.57  -28.6
+  2026-07-28   147     2.52     155.63    0.75   0.68   0.12    19       -0.31    -1366.08     -1474.92  -27.3
+  2026-07-29   602     9.12     544.14    0.72   0.63   0.69    20       -0.04    -1454.91     -1777.94  -29.1
+  2026-07-30   849    13.93     807.66    0.85   0.68   0.69    22       -5.10    -1767.94     -1987.11  -35.4
+  2026-07-31   420     5.89    -767.00    0.84   0.68   0.20    13     -767.00    -2644.04     -2914.41  -52.9
+
+CESTI DI RECUPERO [R] (CID, lato) -- APPROSSIMATI: 2380 cesti, netto [R] 4575.60 EUR, profondita' massima 39, peggior cesto -3129.85, aperti a fine test 0
+  prof.   cesti       netto  somma lotti (max) vivi insieme (max) in perdita  durata h
+  1        1329     1343.84               0.02               0.02        228       1.5
+  2         504     1262.33               0.04               0.04         42       1.9
+  3-4       343     2535.56               0.10               0.10         16       2.3
+  5-9       161     3202.67               0.36               0.36          2      11.9
+  >=10       43    -3768.80               2.43               0.84          4      76.7
+  CONCENTRAZIONE: cesti >= 10 livelli = -3768.80 (-82.4% del netto [R]); >= 5 livelli = -566.13 (-12.4%); 3 cesti migliori = 440.69 (9.6%). Demo: 24,5% il 13/10 e 50,8% il 14/10 dai >= 10 [LETTO].
+  modulo [F] CF       posizioni   6961 netto      85.64 PF 1.02
+  modulo [F] FinlabX  posizioni   1360 netto     139.12 PF 1.16
+
+28/09/2026 (data server BCM): nessun deal in questo report.
+
+(A) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda
+(B) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda
+(C) NESSUN verdetto: il giro NON e' quello dichiarato -> tranche mensile: i verdetti (A)(B)(C) erano delle sonde da 1 e 65 giorni; si leggono le ipotesi della scheda
+
+COSA NON SI PUO' CONCLUDERE: un trimestre = un regime; tester senza slippage ne' latenza (ExecutionMode=0); feed BCM, non quello dell'utente; enum al valore del tester (sopra); nessun merito (n per regime, e la natura griglia + scala di lotti + recupero senza SL iniziale resta fuori dall'imbuto prop).
+======================================================================================================================
+SINTESI DELLE TRANCHE (descrittiva; nessun verdetto: le ipotesi H1-H4 stanno nella scheda, scritte prima dei numeri)
+  tranche@f   giro        oper   netto EUR     PF       primo stop out cesti R    R>=10 netto R>=10   quota di R
+  TRANCHE1@1  CONFORME  13498.0     4800.36   1.21              nessuno    2380       43   -3768.80       -82.4%
+  NON CONF. = il giro non e' quello dichiarato (vedi i motivi sopra): i numeri sono descrittivi di QUEL giro.
