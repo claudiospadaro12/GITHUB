@@ -1,0 +1,173 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-18 03:33:15  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261017   (11.9 KB, ultima scrittura 2026-10-17 23:49) ---
+    righe totali: 49
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (1.7 KB, ultima scrittura 2026-10-18 03:20) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751
+=====================================================================
+
+--- GIORNO 20261017   (12.1 KB, ultima scrittura 2026-10-17 23:47) ---
+    righe totali: 48
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (1.8 KB, ultima scrittura 2026-10-18 03:17) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261006   (1.7 KB, ultima scrittura 2026-10-06 20:42) ---
+    righe totali: 6
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QJ020:42:10.503ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261017   (729 KB, ultima scrittura 2026-10-17 23:51) ---
+    righe totali: 1056
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (106.3 KB, ultima scrittura 2026-10-18 03:22) ---
+    righe totali: 154
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261016   (5278.6 KB, ultima scrittura 2026-10-16 22:54) ---
+    righe totali: 15776
+    RIGHE DI ORDINE / DEAL: 14014
+      JM014:49:50.158Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENV | phase=1 tester=0 login=10105439 server=BCMMarkets-Server symbol=XAUUSD currency=EUR base=0.0100 leverage=500 profit_probe_ok=1 loss_probe_ok=1 move1_gain=88.94000000 move1_loss=-88.94000000
+      RI014:49:50.644Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4177.59000
+      NL014:50:10.374Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=FLOW | active L0 | lot=0.0100 | entry=4175.09000
+      EP014:51:24.799Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4175.57000
+      EH014:51:27.107Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=FLOW | active L0 | lot=0.0100 | entry=4173.05000
+      OQ014:51:47.091Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4174.96000
+      EM014:52:13.849Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4173.98000
+      CK014:52:39.247Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=FLOW | active L0 | lot=0.0100 | entry=4170.69000
+      RR014:52:59.289Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4172.83000
+      DN014:53:54.770Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4171.89000
+      PN014:54:56.675Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=FLOW | active L0 | lot=0.0100 | entry=4168.61000
+      MR014:55:16.529Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4170.52000
+      OJ014:55:24.146Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=FLOW | active L0 | lot=0.0100 | entry=4167.91000
+      CN014:55:38.922Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=FLOW | active L0 | lot=0.0100 | entry=4165.90000
+      IE014:55:48.639Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL entered DEBT/RECOVERY mode | native=1 | adverse threshold=1.000
+      DR014:55:49.049Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4167.23000
+      ND014:55:49.071Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4166.80 tp: 4167.80 [invalid price]
+      MS014:55:49.255Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: COUNTER FLOW BUY | lot=0.0100 | entry=4166.86000 | TP=4167.86000
+      HI014:56:01.145Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: COUNTER FLOW BUY | lot=0.0100 | entry=4166.55000 | TP=4167.55000
+      OH014:56:04.174Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4166.62000
+      NN014:56:05.815Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: COUNTER FLOW BUY | lot=0.0100 | entry=4166.33000 | TP=4167.33000
+      OI014:56:17.840Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: COUNTER FLOW BUY | lot=0.0100 | entry=4166.60000 | TP=4167.60000
+      GI014:56:18.658Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=FLOW | active L0 | lot=0.0100 | entry=4167.25000
+      QS014:56:18.925Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY entered DEBT/RECOVERY mode | native=1 | adverse threshold=1.000
+      LG014:56:19.199Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: COUNTER FLOW SELL | lot=0.0100 | entry=4165.42000 | TP=4164.42000
+      JK014:56:20.104Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: COUNTER FLOW SELL | lot=0.0100 | entry=4165.43000 | TP=4164.43000
+      DM014:56:20.363Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4166.73 tp: 4167.73 [invalid price]
+      GE014:56:20.385Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: DEAD-ZONE REACTION BUY | lot=0.0100 | entry=4166.75000 | TP=4167.75000
+      DG014:57:40.467Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=BUY allowed=0 factor=1.4579 basegap=0.850 required=1.2392 newest=4166.910 target=4166.050 tr5=2.2780 tr20=1.8425 er=-0.9159 pullback=0.0000 expansion=0.2364 pressure=0.9159 dislocation=0.0000 lastclosed=2026.10.16 13:56
+      CE014:57:42.184Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=FLOW | active L0 | lot=0.0100 | entry=4163.60000
+      IL014:57:42.623Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=BUY allowed=1 factor=1.4579 basegap=0.850 required=1.2392 newest=4166.910 target=4165.660 tr5=2.2780 tr20=1.8425 er=-0.9159 pullback=0.0000 expansion=0.2364 pressure=0.9159 dislocation=0.0000 lastclosed=2026.10.16 13:56
+      FF014:57:42.644Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158591 | role=RECOVERY | active L1 | lot=0.0200 | entry=4165.66000
+      EO014:58:05.745Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL entered DEBT/RECOVERY mode | native=1 | adverse threshold=1.000
+      NE014:59:00.908Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=SELL allowed=1 factor=1.1184 basegap=0.850 required=0.9506 newest=4164.140 target=4165.240 tr5=2.3060 tr20=1.8645 er=-0.9107 pullback=0.6135 expansion=0.2368 pressure=0.0000 dislocation=0.0000 lastclosed=2026.10.16 13:58
+      JO014:59:01.020Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=RECOVERY | active L0 | lot=0.0100 | entry=4165.24000
+      HN014:59:12.716Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)CTrade::OrderSend: market sell 0.02 position #3739951 XAUUSD [close order already exists]
+      GQ014:59:12.723Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: portfolio reset paused safely | credit/actual 0.00 | positions 4 -> 4
+      HL014:59:12.810Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=SELL allowed=1 factor=1.1184 basegap=0.850 required=0.9506 newest=4164.140 target=4165.580 tr5=2.3060 tr20=1.8645 er=-0.9107 pullback=0.5711 expansion=0.2368 pressure=0.0000 dislocation=0.0566 lastclosed=2026.10.16 13:58
+      QI014:59:12.857Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158592 | role=RECOVERY | active L0 | lot=0.0100 | entry=4165.58000
+      JQ015:00:06.064Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=SELL allowed=1 factor=1.1631 basegap=0.850 required=0.9886 newest=4165.470 target=4166.520 tr5=2.6100 tr20=1.9680 er=-0.3902 pullback=0.3559 expansion=0.3262 pressure=0.0000 dislocation=0.0000 lastclosed=2026.10.16 13:59
+      ... altre 13974 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      PS022:53:58.533ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6748.07  dayLoss=10.71%  totDD=10.03%  rischioAperto=0.00%  stato=BLOCKED  pausa=ON  cap=off
+
+--- GIORNO 20261017   (0.1 KB, ultima scrittura 2026-10-17 08:51) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
