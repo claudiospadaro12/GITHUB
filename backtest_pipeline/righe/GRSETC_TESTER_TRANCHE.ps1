@@ -1,7 +1,7 @@
 # =====================================================================
 #  MARCATORE_GRSETC_TESTER_TRANCHE_v1
 #  GRSETC_TESTER_TRANCHE.ps1 -- Gold Reaper col SET PROPFIRM di Claudio, UNA CORSA CONTINUA gennaio 2025 - settembre 2026 (un solo giro di 21 mesi) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal).
-#  DERIVATO da GOLDREAPER_TESTER_TRANCHE.ps1 (stesse guardie, stessa lettura di report e giornali). Cambiano SOLO: nome (GRSETC), le finestre (1 tranche MENSILI da 2025.01 a 2025.01), gli input imposti (4), come dichiarato nel REFERTO.
+#  DERIVATO da GOLDREAPER_TESTER_TRANCHE.ps1 (stesse guardie, stessa lettura di report e giornali). Cambiano SOLO: nome (GRSETC), la finestra (UNA SOLA passata CONTINUA 2025.01.01 -> 2026.10.01, 21 mesi, NON tranche mensili), gli input imposti (4), come dichiarato nel REFERTO.
 #  E' UN BACKTEST: [Experts] AllowLiveTrading=false. NON TOCCA: C:\MT5_Backtest, C:\FundedNext_Manuale, il VPS e i suoi conti.
 #  NIENTE EMOJI QUI DENTRO (regola del 17/08): Windows PowerShell 5.1 legge i .ps1 come ANSI.
 # =====================================================================
@@ -26,7 +26,11 @@ $VALUTA   = 'EUR'
 $LEVA     = 100
 $TETTO_BARRE  = 100000
 $AVVISO_BARRE = 95000
-# NESSUN input imposto: si prova coi default dell'EA, fa fede il report (G1). Tipo: b = bool, i = intero, d = decimale
+# GLI INPUT IMPOSTI dal .ini sono SOLO quelli di $INPUT_IMPOSTI qui sotto (lista VUOTA = nessuno imposto: default dell'EA, o ultimo valore salvato
+# nel tester per questo EA su questo PC [NON VERIFICATO quale]). Fa fede sempre il REPORT: InputDiverso rilegge dal report ogni input imposto e la
+# tranche va KO se il nome manca o il valore e' diverso. ATTENZIONE: il referto NON elenca a mano questa lista, la COSTRUISCE da $INPUT_IMPOSTI
+# (classe 1480, RECIDIVA il 18/10 = classe 1497: la variante nata per copia dal giro a default si portava dietro la frase "input imposti: NESSUNO").
+# Tipo: b = bool, i = intero, d = decimale
 $INPUT_IMPOSTI = @(
   @('TradeFrequency', '2', 'i'),
   @('MaxAllowedDD', '9.0', 'd'),
@@ -38,16 +42,18 @@ $INPUT_ENUM = @()
 if($Pin -notmatch '^[0-9a-fA-F]{40}$' -or $Pin -match '^0{40}$'){ throw '-Pin obbligatorio, di 40 caratteri esadecimali e NON fatto di zeri: il pin di zeri e il segnaposto della BOZZA, non un commit.' }
 $Pin = $Pin.ToLower()
 if($TimeoutTrancheMin -lt 1 -or $TimeoutTrancheMin -gt 900){ throw '-TimeoutTrancheMin fuori da 1-900 minuti.' }
-if($Tranche -notmatch '^[0-9]{1,2}(,[0-9]{1,2}){0,39}$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono cifre 1, 2, 3 separate da virgola (es. 2,3).') }
+if($Tranche -notmatch '^[0-9]{1,2}(,[0-9]{1,2}){0,39}$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono i NUMERI delle passate separati da virgola, senza zeri davanti (es. 2,3,17); quelle disponibili sono elencate in $SONDE qui sotto, e il valore di default le prende TUTTE.') }
 $TrScelte = @($Tranche -split ',')
 if(@($TrScelte | Select-Object -Unique).Count -ne $TrScelte.Count){ throw ('-Tranche ' + $Tranche + ' ha una tranche ripetuta.') }
-# TRE tranche MENSILI, una dopo l altra, ognuna a conto vuoto (deposito 5000 EUR): luglio, agosto, settembre 2026. 'A' e il primo giorno del mese dopo
+# UNA SOLA passata CONTINUA (un conto da 5000 EUR aperto una volta, 2025.01.01 -> 2026.10.01): il conto NON si azzera a ogni mese e lo stato interno
+# dell EA attraversa tutta la finestra. QUANTE e QUALI passate le dice l elenco qui sotto, non questo commento. 'A' e il primo giorno dopo l ultimo incluso
 # (il report scrive l estremo 'A' come data finale; l ultimo giorno incluso e quello prima).
 $SONDE = @(
   [pscustomobject]@{ Nome = 'TRANCHE1'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = $TimeoutTrancheMin; Cosa = 'CORSA CONTINUA gennaio 2025 - settembre 2026' }
 )
 $SONDE_TUTTE = $SONDE
 $SONDE = @($SONDE_TUTTE | Where-Object { $TrScelte -contains $_.Nome.Substring(7) })
+if($SONDE.Count -lt 1){ throw ('-Tranche ' + $Tranche + ' non seleziona NESSUNA delle passate disponibili (' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome }) -join ', ') + '): non lancio un giro che non misura niente (classe 1502).') }
 
 function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
 function Titolo($t){ Write-Host ''; Write-Host ('=== ' + $t + ' ===') -ForegroundColor Cyan }
@@ -256,7 +262,7 @@ Dico ('SHA256  : ' + $ShaEx5 + '   (binario di TERZI: va nel referto, NON nello 
 if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la tranche esce senza report e il giornale lo dice.' 'Yellow' }
 
 # ---------------------------------------------------------------------
-#  2. LE TRE TRANCHE (passate singole, Optimization=0, ognuna a conto vuoto)
+#  2. LA PASSATA CONTINUA DI 21 MESI (passata singola, Optimization=0, UN SOLO conto da 5000 EUR)
 # ---------------------------------------------------------------------
 $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $Work = Join-Path $env:USERPROFILE 'abtg_grsetc_tranche'
@@ -376,7 +382,7 @@ $referto = New-Object System.Collections.ArrayList
 $esiti = @{}; foreach($sx in $SONDE_TUTTE){ $esiti[$sx.Nome] = 'SALTATA' }
 $fermaEx5 = ''
 foreach($s in $SONDE){
-  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', XAUUSD H1, Modello 4, deposito 5000 EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
+  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', ' + $SIMBOLO + ' ' + $PERIODO + ', Modello 4, deposito 5000 EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
   $esiti[$s.Nome] = 'NON_LANCIATA'
   if($fermaEx5 -ne ''){
     # v2 (classe 1438): niente ore di tester su un binario che non e' quello dell'impronta
@@ -532,11 +538,11 @@ $testa = @(
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
-  'input imposti: NESSUNO (default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]; fanno fede gli input del REPORT, riga TUTTI gli input del report qui sopra)',
+  ('input imposti dal .ini (' + $INPUT_IMPOSTI.Count + '): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ') + '   (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).'),
   'The Gold Reaper MT5: EA di TERZI dal Market, scatola nera. Il calendario MQL5 (filtro NFP) non esiste nello Strategy Tester: il filtro news puo non agire come dal vivo [NON VERIFICATO].',
   ('tranche scelte: ' + $Tranche + ' (le altre: SALTATA, non lanciate per scelta)'),
   ('esiti: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + ' ' + $esiti[$_.Nome] }) -join '   ')),
-  'ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre. Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).',
+  'ATTENZIONE: questa NON e una serie di tranche mensili. E UNA SOLA passata CONTINUA di 21 mesi (2025.01.01 -> 2026.10.01) su UN SOLO conto da 5000 EUR: il conto NON si azzera a ogni mese, i cesti a cavallo del mese e i loro gap CI SONO, e lo stato interno dell EA (il picco che usa OnlyUp, il saldo che dimensiona i lotti con MaxAllowedDD) attraversa tutta la finestra. E esattamente cio che questo giro esiste per misurare (ipotesi C1-C3 di report/PACCHETTO_ORO_ATTESE_2026-10-17.md): il DD letto qui NON e la somma dei DD dei mesi indipendenti e non si confronta con quelli. Se il .ex5 cambia durante la passata, il referto lo dice (v2).',
   ''
 )
 (($testa + $referto + @('', 'COME SI LEGGE: il lettore del Gold Reaper lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_GRSETC_TRANCHE.txt') -Encoding ASCII
@@ -546,7 +552,7 @@ Write-Host ''
 foreach($x in $testa){ if($x -ne ''){ Write-Host ('   ' + $x) } }
 Write-Host ''
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
-Write-Host 'FILE ATTESI NELLO ZIP: REFERTO_GRSETC_TRANCHE.txt + MANIFEST_GRSETC.csv + ini\grsetc_TRANCHE1.ini .. TRANCHE3 (quelle lanciate) + report\GRSETC_TRANCHE1_<data>.htm .. (+ le .png) se il tester li ha scritti + log\TRANCHE1_*.txt ..' -ForegroundColor Gray
+Write-Host 'FILE ATTESI NELLO ZIP: REFERTO_GRSETC_TRANCHE.txt + MANIFEST_GRSETC.csv + ini\grsetc_TRANCHE1.ini (UNA SOLA: la passata continua) + report\GRSETC_TRANCHE1_<data>.htm (+ le .png) se il tester li ha scritti + log\TRANCHE1_*.txt ..' -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
 $nSc = @($TrScelte | Where-Object { $esiti['TRANCHE' + $_] -eq 'OK' }).Count
 if($nSc -eq $TrScelte.Count){ Write-Host ('ESITO GRSETC TRANCHE: le ' + $TrScelte.Count + ' tranche scelte (' + $Tranche + ') sono OK (rc 0)') -ForegroundColor Green; exit 0 }
