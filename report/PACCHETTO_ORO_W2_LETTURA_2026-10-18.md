@@ -28,3 +28,36 @@ Correlazione dei risultati giornalieri (giorni feriali, n = 390): **r = 0,277**,
 
 ## Cosa decide e cosa NO
 La regola di acquisto (B2, B3, B5 su tre EA su quattro + B6) **non e' ancora decidibile**: per il pacchetto e' stato misurato solo il Gold Reaper, che supera B2, B3, B4, B7; mancano gli altri tre. Il Gold Reaper da solo e' un **candidato** (mai "garantito"): un feed, 21 mesi, tester senza slippage, e il segnale pubblico a 46% di prelievo resta una smentita non spiegata.
+
+---
+
+## ✏️ ANNOTAZIONE DEL 18/10/2026 (09:30) -- il DD rimesso su un conto CONTINUO, e B5 col metodo congelato
+Aggiunta **in coda**, senza toccare niente sopra. Due misure che la lettura lascia aperte, fatte sugli stessi quattro zip.
+
+### 1. 🔴 Il «DD massimo in un mese» NON e' il DD che vedrebbe un conto, ed e' la chiave del 46% non spiegato
+Il limite strutturale dichiarato a r.4 (ogni mese riparte da 5.000 indipendenti) ha una conseguenza che cambia i numeri citati: **il DD di equita' «massimo in un mese» e' cieco alle strisce fra mesi**, perche' a ogni primo del mese il conto torna a 5.000 e il picco precedente sparisce. Confrontarlo col **prelievo di un conto continuo** (il 46% del segnale pubblico, il 10% di FTMO, il 10% del nostro Guardian) e' il confronto fra due unita' diverse (classe 1488).
+**Stima del DD di un conto CONTINUO**, rimettendo dentro sia le strisce sia il dentro-mese. Metodo: equita' composta mese per mese; dentro il mese `m` l'equita' scende di `DD_abs(m) x E/5.000`; il massimo prelievo si legge su picchi e fondi di quel percorso. 📐 **Ipotesi dichiarata**: il lotto scala col saldo — ed e' **misurata**, non assunta (`UseWeightedLots=true`, `OnlyUp=true` nei `Dati in ingresso`, e il rapporto lotti che cresce col saldo, H3' smentita in W1).
+
+| | DD max DENTRO un mese (citato sopra) | DD a sola granularita' mensile | **DD stimato di un conto CONTINUO** | equita' finale stimata |
+|---|---|---|---|---|
+| **Gold Reaper default** (18 mesi) | 9,40% | 5,48% | **13,45%** (peggiore a marzo 2025) | 5.000 -> **17.547** (x3,51) |
+| **Set propfirm di Claudio** (21 mesi) | 4,53% | 3,07% | **5,47%** | 5.000 -> **10.084** (x2,02) |
+| **TIG default** (18 mesi) | 78,13% | 99,97% | **119,56%** | 5.000 -> **circa 2 EUR** |
+
+**Tre conseguenze, e sono tutte operative:**
+- 🟠 **Il Gold Reaper default sta a 13,45%, non a 9,40%.** B2 (`<= 15,2%`) **regge ancora**, ma il margine passa da 5,8 punti a **1,75**: e' un *regge*, non un *regge largo*. 🔴 E **sfonda il 10% di FTMO e del nostro Guardian**: il default **non e' schierabile su una prop** cosi' com'e'.
+- 🟢 **Il set di Claudio sta a 5,47%, e questo e' il numero che conta**: sotto il 10% di FTMO con il 45% di margine. La lettura di r.19 (*"meta' del rendimento con meta' del drawdown"*) regge anche su conto continuo: **x2,02 di equita' con 5,47% di prelievo**. 👉 Fra i due, **l'unico candidato per una prop e' il set**, non il default.
+- 🔴 **TIG a conto continuo si AZZERA**: da 5.000 a **circa 2 EUR** in 18 mesi, DD stimato oltre il 100%. Il `-24.833,23` citato sopra e' la **somma di 18 conti separati** e per questo **sottostima** cosa succede davvero: un conto solo muore prima, e i mesi successivi girerebbero su niente. Questo chiude il giudizio su TIG piu' di qualunque PF.
+- ⬜ **E il 46% del venditore resta NON SPIEGATO**: anche corretto a conto continuo siamo a **13,45%**, un fattore **3,4** di distanza. Quindi la differenza **non** e' l'artefatto delle tranche. Resta da spiegare (periodo diverso, slippage del reale, leva, dimensionamento, o un'altra versione dell'EA) ed e' **l'elemento piu' scomodo di tutta la misura**: un venditore il cui conto pubblico perde il 46% con gli stessi default che da noi perdono il 13,45% descrive un EA che non e' quello che abbiamo girato. **Su questo, prima di comprare, si chiede a lui.**
+
+### 2. B5 col metodo CONGELATO (non ad hoc): REGGE, e nei giorni brutti vanno in direzioni OPPOSTE
+Rifatta con `backtest_pipeline/correlazione_pacchetto.py` (metodo in `report/PACCHETTO_ORO_B5_B6_METODO_2026-10-17.md`, scritto prima di questi numeri), che aggiunge i due cancelli che un calcolo ad hoc non ha: minimo 30 giorni co-attivi e intervallo bootstrap al 95%.
+- **Gold Reaper / TIG, 18 mesi: `r = 0,259`** su **n = 393** giorni, **146 co-attivi**, bootstrap 95% **[0,099; 0,416]** -> **B5 REGGE** (`<= 0,30`, e l'intervallo non tocca la soglia di smentita 0,50). Contro-prova sull'equita' a inizio giornata: `r = 0,258`, **stesso esito** — le due varianti non si contraddicono.
+- 🟢 **E nel 10% dei giorni peggiori del portafoglio (41 giorni): `r = -0,355`.** Cioe' nei giorni che fanno male **si muovono in direzioni opposte**: il contrario di W1, dove su 6 soli giorni usciva +0,418. Con 39 giorni il numero ora **ha un campione**.
+- La lettura di r.27 dava `r = 0,277` con un metodo dichiarato ad hoc: lo scostamento (0,259 contro 0,277) viene da **come si contano i giorni** — qui l'insieme dei giorni e' l'unione delle **finestre delle tranche conformi** e i giorni senza operazioni valgono **zero** (classe 1486). Stesso verdetto, metodo riproducibile.
+- ⬜ Invariato: **B5 sul pacchetto VERO e B6 non sono misurabili**, mancano gli zip di Gold Trade Pro, Goldbot One e Gold Phantom.
+
+### Cosa questa annotazione NON misura
+- Il DD di conto continuo e' una **STIMA**, non una corsa: nessuno ha girato 18 mesi di fila su un conto solo. Resta cieco all'**equita' intraday** (il DD vero di un giorno), e la prova vera e' **una corsa continua nel tester** — che va aggiunta alla coda, con l'attesa scritta prima.
+- L'ipotesi «il lotto scala col saldo» e' misurata ma **lineare per assunzione**: se l'EA ha scalini o tetti, la stima sbaglia. Direzione dell'errore **non determinata**.
+- GS2 resta **NON OSSERVATA** e il filtro NFP resta sfasato nel tester: due cose che una prop vera cambierebbe.
