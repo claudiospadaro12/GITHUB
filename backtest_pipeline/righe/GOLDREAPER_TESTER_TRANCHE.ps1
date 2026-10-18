@@ -69,11 +69,13 @@ $INPUT_ENUM = @()
 if($Pin -notmatch '^[0-9a-fA-F]{40}$' -or $Pin -match '^0{40}$'){ throw '-Pin obbligatorio, di 40 caratteri esadecimali e NON fatto di zeri: il pin di zeri e il segnaposto della BOZZA, non un commit.' }
 $Pin = $Pin.ToLower()
 if($TimeoutTrancheMin -lt 1 -or $TimeoutTrancheMin -gt 900){ throw '-TimeoutTrancheMin fuori da 1-900 minuti.' }
-if($Tranche -notmatch '^[123](,[123]){0,2}$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono cifre 1, 2, 3 separate da virgola (es. 2,3).') }
+if($Tranche -notmatch '^[123](,[123]){0,2}$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono i NUMERI delle tranche (1-3) separati da virgola, es. 2,3; quelle disponibili sono elencate in $SONDE qui sotto e il valore di default le prende TUTTE.') }
 $TrScelte = @($Tranche -split ',')
 if(@($TrScelte | Select-Object -Unique).Count -ne $TrScelte.Count){ throw ('-Tranche ' + $Tranche + ' ha una tranche ripetuta.') }
-# TRE tranche MENSILI, una dopo l altra, ognuna a conto vuoto (deposito 5000 EUR): luglio, agosto, settembre 2026. 'A' e il primo giorno del mese dopo
-# (il report scrive l estremo 'A' come data finale; l ultimo giorno incluso e quello prima).
+# TRANCHE MENSILI INDIPENDENTI, una dopo l altra, ognuna a conto vuoto (deposito 5000 EUR): QUANTE e QUALI le dice SOLO l elenco qui sotto,
+# e le frasi del REFERTO che descrivono la natura del giro si COSTRUISCONO da $SONDE_TUTTE (classi 1498 e 1499, 18/10/2026: questo commento
+# diceva "TRE tranche ... luglio, agosto, settembre 2026", vero per QUESTO script e FALSO in ogni copia nata da lui -- e tre copie l hanno
+# ereditato). 'A' e il primo giorno del mese dopo (il report scrive l estremo 'A' come data finale; l ultimo giorno incluso e quello prima).
 $SONDE = @(
   [pscustomobject]@{ Nome = 'TRANCHE1'; Da = '2026.07.01'; A = '2026.08.01'; Timeout = $TimeoutTrancheMin; Cosa = 'luglio 2026' },
   [pscustomobject]@{ Nome = 'TRANCHE2'; Da = '2026.08.01'; A = '2026.09.01'; Timeout = $TimeoutTrancheMin; Cosa = 'agosto 2026' },
@@ -81,6 +83,8 @@ $SONDE = @(
 )
 $SONDE_TUTTE = $SONDE
 $SONDE = @($SONDE_TUTTE | Where-Object { $TrScelte -contains $_.Nome.Substring(7) })
+# classe 1502: mai produrre referto, MANIFEST e zip con ZERO passate lanciate.
+if($SONDE.Count -lt 1){ throw ('-Tranche ' + $Tranche + ' non seleziona NESSUNA delle passate disponibili (' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome }) -join ', ') + '): non lancio un giro che non misura niente (classe 1502).') }
 
 function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
 function Titolo($t){ Write-Host ''; Write-Host ('=== ' + $t + ' ===') -ForegroundColor Cyan }
@@ -289,7 +293,7 @@ Dico ('SHA256  : ' + $ShaEx5 + '   (binario di TERZI: va nel referto, NON nello 
 if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la tranche esce senza report e il giornale lo dice.' 'Yellow' }
 
 # ---------------------------------------------------------------------
-#  2. LE TRE TRANCHE (passate singole, Optimization=0, ognuna a conto vuoto)
+#  2. LE TRANCHE (quante e quali le dice $SONDE; passate singole, Optimization=0, ognuna a conto vuoto)
 # ---------------------------------------------------------------------
 $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $Work = Join-Path $env:USERPROFILE 'abtg_goldreaper_tranche'
@@ -565,11 +569,11 @@ $testa = @(
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + $PERIODO + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
-  'input imposti: NESSUNO (default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]; fanno fede gli input del REPORT, riga TUTTI gli input del report qui sopra)',
+  ('input imposti dal .ini (' + $INPUT_IMPOSTI.Count + '): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ') + '   (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report.'),
   'The Gold Reaper MT5: EA di TERZI dal Market, scatola nera. Il calendario MQL5 (filtro NFP) non esiste nello Strategy Tester: il filtro news puo non agire come dal vivo [NON VERIFICATO].',
   ('tranche scelte: ' + $Tranche + ' (le altre: SALTATA, non lanciate per scelta)'),
   ('esiti: TRANCHE1 ' + $esiti['TRANCHE1'] + '   TRANCHE2 ' + $esiti['TRANCHE2'] + '   TRANCHE3 ' + $esiti['TRANCHE3']),
-  'ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre. Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).',
+  ('ATTENZIONE: sono ' + $SONDE_TUTTE.Count + ' tranche MENSILI INDIPENDENTI (' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + ' ' + $_.Da + '-' + $_.A }) -join ', ') + '), ognuna a CONTO VUOTO (deposito ' + $DEPOSITO + ' ' + $VALUTA + ') il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono, e uno stop out in una non fa morire le altre. I DD NON si sommano e il DD continuo NON si legge qui (per quello c e la corsa continua GRC). Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).'),
   ''
 )
 (($testa + $referto + @('', 'COME SI LEGGE: il lettore del Gold Reaper lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_GOLDREAPER_TRANCHE.txt') -Encoding ASCII
@@ -579,7 +583,7 @@ Write-Host ''
 foreach($x in $testa){ if($x -ne ''){ Write-Host ('   ' + $x) } }
 Write-Host ''
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
-Write-Host 'FILE ATTESI NELLO ZIP: REFERTO_GOLDREAPER_TRANCHE.txt + MANIFEST_GOLDREAPER.csv + ini\goldreaper_TRANCHE1.ini .. TRANCHE3 (quelle lanciate) + report\GOLDREAPER_TRANCHE1_<data>.htm .. (+ le .png) se il tester li ha scritti + log\TRANCHE1_*.txt ..' -ForegroundColor Gray
+Write-Host ('FILE ATTESI NELLO ZIP: REFERTO_GOLDREAPER_TRANCHE.txt + MANIFEST_GOLDREAPER.csv + per ognuna delle tranche LANCIATE (' + (@($SONDE | ForEach-Object { $_.Nome }) -join ', ') + '): ini\goldreaper_<tranche>.ini, report\GOLDREAPER_<tranche>_<data>.htm (+ le .png) se il tester li ha scritti, log\<tranche>_*.txt') -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
 $nSc = @($TrScelte | Where-Object { $esiti['TRANCHE' + $_] -eq 'OK' }).Count
 if($nSc -eq $TrScelte.Count){ Write-Host ('ESITO GOLDREAPER TRANCHE: le ' + $TrScelte.Count + ' tranche scelte (' + $Tranche + ') sono OK (rc 0)') -ForegroundColor Green; exit 0 }

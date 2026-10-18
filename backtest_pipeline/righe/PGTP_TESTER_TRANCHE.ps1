@@ -21,7 +21,8 @@ $IC = [Globalization.CultureInfo]::InvariantCulture
 
 $NOME_D   = 'PGTP_TESTER_TRANCHE'
 $SIMBOLO  = 'XAUUSD'
-$PERIODO  = 'D1'
+# NIENTE $PERIODO qui: questa sonda ha 4 periodi del grafico e li porta ognuno la sua voce di $SONDE ($s.Per). La variabile unica
+# era MORTA e diceva il falso (classe 1499): restava 'D1' mentre le passate girano M15, H1, H4 e D1.
 $MODELLO  = 4
 $DEPOSITO = 5000
 $VALUTA   = 'EUR'
@@ -35,11 +36,14 @@ $INPUT_ENUM = @()
 if($Pin -notmatch '^[0-9a-fA-F]{40}$' -or $Pin -match '^0{40}$'){ throw '-Pin obbligatorio, di 40 caratteri esadecimali e NON fatto di zeri: il pin di zeri e il segnaposto della BOZZA, non un commit.' }
 $Pin = $Pin.ToLower()
 if($TimeoutTrancheMin -lt 1 -or $TimeoutTrancheMin -gt 900){ throw '-TimeoutTrancheMin fuori da 1-900 minuti.' }
-if($Tranche -notmatch '^[1-4](,[1-4]){0,3}$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono cifre 1, 2, 3 separate da virgola (es. 2,3).') }
+if($Tranche -notmatch '^[1-4](,[1-4]){0,3}$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono i NUMERI delle passate (1-4) separati da virgola, es. 2,3; quelle disponibili sono elencate in $SONDE qui sotto e il valore di default le prende TUTTE.') }
 $TrScelte = @($Tranche -split ',')
 if(@($TrScelte | Select-Object -Unique).Count -ne $TrScelte.Count){ throw ('-Tranche ' + $Tranche + ' ha una tranche ripetuta.') }
-# TRE tranche MENSILI, una dopo l altra, ognuna a conto vuoto (deposito 5000 EUR): luglio, agosto, settembre 2026. 'A' e il primo giorno del mese dopo
-# (il report scrive l estremo 'A' come data finale; l ultimo giorno incluso e quello prima).
+# SONDA DEL PERIODO DEL GRAFICO: le passate stanno TUTTE sulla STESSA finestra e differiscono SOLO per il periodo (vedi l elenco qui sotto).
+# NON sono tranche mensili e non sono in sequenza: ognuna parte a CONTO VUOTO (deposito 5000 EUR) e i loro numeri NON si sommano, si CONFRONTANO.
+# QUANTE e QUALI passate le dice l elenco qui sotto, non questo commento: le frasi del REFERTO che descrivono la natura del giro si COSTRUISCONO
+# da $SONDE_TUTTE (classi 1498 e 1499, 18/10/2026: qui c'era scritto "TRE tranche MENSILI ... luglio, agosto, settembre 2026" sopra QUATTRO passate
+# del primo trimestre 2026). 'A' e il primo giorno dopo l ultimo incluso (il report scrive l estremo 'A' come data finale; l ultimo incluso e il giorno prima).
 $SONDE = @(
   [pscustomobject]@{ Nome = 'TRANCHE1'; Per = 'M15'; Da = '2026.01.01'; A = '2026.04.01'; Timeout = $TimeoutTrancheMin; Cosa = 'primo trimestre 2026 su M15' },
   [pscustomobject]@{ Nome = 'TRANCHE2'; Per = 'H1'; Da = '2026.01.01'; A = '2026.04.01'; Timeout = $TimeoutTrancheMin; Cosa = 'primo trimestre 2026 su H1' },
@@ -48,6 +52,8 @@ $SONDE = @(
 )
 $SONDE_TUTTE = $SONDE
 $SONDE = @($SONDE_TUTTE | Where-Object { $TrScelte -contains $_.Nome.Substring(7) })
+# classe 1502: mai produrre referto, MANIFEST e zip con ZERO passate lanciate.
+if($SONDE.Count -lt 1){ throw ('-Tranche ' + $Tranche + ' non seleziona NESSUNA delle passate disponibili (' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome }) -join ', ') + '): non lancio un giro che non misura niente (classe 1502).') }
 
 function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
 function Titolo($t){ Write-Host ''; Write-Host ('=== ' + $t + ' ===') -ForegroundColor Cyan }
@@ -256,7 +262,7 @@ Dico ('SHA256  : ' + $ShaEx5 + '   (binario di TERZI: va nel referto, NON nello 
 if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la tranche esce senza report e il giornale lo dice.' 'Yellow' }
 
 # ---------------------------------------------------------------------
-#  2. LE TRE TRANCHE (passate singole, Optimization=0, ognuna a conto vuoto)
+#  2. LE PASSATE (una per PERIODO DEL GRAFICO, stessa finestra; passate singole, Optimization=0, ognuna a conto vuoto)
 # ---------------------------------------------------------------------
 $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $Work = Join-Path $env:USERPROFILE 'abtg_pgtp_tranche'
@@ -532,11 +538,11 @@ $testa = @(
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ',') + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
-  'input imposti: NESSUNO (default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]; fanno fede gli input del REPORT, riga TUTTI gli input del report qui sopra)',
-  'The Gold Trade Pro MT5: EA di TERZI dal Market, scatola nera. SONDA DEL TIMEFRAME: quattro periodi sullo stesso trimestre; non si sceglie il periodo dai risultati.',
+  ('input imposti dal .ini (' + $INPUT_IMPOSTI.Count + '): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ') + '   (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report.'),
+  ('The Gold Trade Pro MT5: EA di TERZI dal Market, scatola nera. SONDA DEL PERIODO DEL GRAFICO: ' + $SONDE_TUTTE.Count + ' periodi (' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ', ') + ') sulla STESSA finestra; il periodo NON si sceglie dai risultati di questa sonda.'),
   ('tranche scelte: ' + $Tranche + ' (le altre: SALTATA, non lanciate per scelta)'),
   ('esiti: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + ' (' + $_.Per + ') ' + $esiti[$_.Nome] }) -join '   ')),
-  'ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre. Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).',
+  ('ATTENZIONE: questo NON e un giro di tranche MENSILI. Sono ' + $SONDE_TUTTE.Count + ' passate INDIPENDENTI sulla STESSA finestra (' + $SONDE_TUTTE[0].Da + ' -> ' + $SONDE_TUTTE[0].A + '), ognuna a CONTO VUOTO (deposito ' + $DEPOSITO + ' ' + $VALUTA + '), e cambia SOLO il periodo del grafico: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).'),
   ''
 )
 (($testa + $referto + @('', 'COME SI LEGGE: il lettore del Gold Trade Pro lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_PGTP_TRANCHE.txt') -Encoding ASCII
@@ -546,7 +552,7 @@ Write-Host ''
 foreach($x in $testa){ if($x -ne ''){ Write-Host ('   ' + $x) } }
 Write-Host ''
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
-Write-Host 'FILE ATTESI NELLO ZIP: REFERTO_PGTP_TRANCHE.txt + MANIFEST_PGTP.csv + ini\pgtp_TRANCHE1.ini .. TRANCHE3 (quelle lanciate) + report\PGTP_TRANCHE1_<data>.htm .. (+ le .png) se il tester li ha scritti + log\TRANCHE1_*.txt ..' -ForegroundColor Gray
+Write-Host ('FILE ATTESI NELLO ZIP: REFERTO_PGTP_TRANCHE.txt + MANIFEST_PGTP.csv + per ognuna delle passate LANCIATE (' + (@($SONDE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '): ini\pgtp_<passata>.ini, report\PGTP_<passata>_<data>.htm (+ le .png) se il tester li ha scritti, log\<passata>_*.txt') -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
 $nSc = @($TrScelte | Where-Object { $esiti['TRANCHE' + $_] -eq 'OK' }).Count
 if($nSc -eq $TrScelte.Count){ Write-Host ('ESITO PGTP TRANCHE: le ' + $TrScelte.Count + ' tranche scelte (' + $Tranche + ') sono OK (rc 0)') -ForegroundColor Green; exit 0 }

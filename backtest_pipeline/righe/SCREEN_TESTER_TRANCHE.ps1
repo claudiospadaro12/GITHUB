@@ -5,6 +5,9 @@
 #  SCOPO: (a) vedere se l'EA opera nel tester, (b) vedere se il risultato DIPENDE dal periodo. NON giudica il profitto (due mesi non bastano) e NON serve a
 #  scegliere il periodo migliore: il periodo del test a fondo sara' quello dichiarato dal venditore. Regole scritte PRIMA dei numeri: report/SETACCIO_MARKET_ATTESE_2026-10-18.md.
 #  DERIVATO da PGTP_TESTER_TRANCHE.ps1 / GOLDREAPER_TESTER_TRANCHE.ps1 (stesse guardie). Il file .ex5 si cerca per NOME ESATTO in MQL5\Experts\Market.
+#  v2 (18/10/2026, cancello strato 2): tutte le frasi che descrivono la NATURA del giro (quante passate, conto vuoto o continuo, quali periodi,
+#  quali file nello zip, input imposti) sono COSTRUITE da $SONDE_TUTTE e da $INPUT_IMPOSTI, non scritte a mano: la prosa ereditata diceva
+#  "TRE tranche MENSILI luglio-settembre 2026" e "input imposti: NESSUNO" (classi 1497, 1498, 1499). Aggiunta la guardia dell insieme vuoto (1502).
 #  E' UN BACKTEST: AllowLiveTrading=false. NON TOCCA C:\MT5_Backtest, C:\FundedNext_Manuale, il VPS. NIENTE EMOJI QUI DENTRO (regola del 17/08).
 # =====================================================================
 [CmdletBinding()]
@@ -28,14 +31,17 @@ $TOKU = $TOK.ToUpper(); $TOKL = $TOK.ToLower()
 $TOKEXP = [regex]::Replace([IO.Path]::GetFileNameWithoutExtension($Ex5Nome), '[^A-Za-z0-9]', '').ToLower()
 $NOME_D   = 'SCREEN_' + $TOKU
 $SIMBOLO  = 'XAUUSD'
-$PERIODO  = 'H1'
+# NIENTE $PERIODO qui: questo giro ha DUE periodi del grafico e li porta ognuna la sua voce di $SONDE ($s.Per). Una variabile
+# unica di periodo sarebbe falsa e finirebbe nei titoli e nel referto (classe 1499: i conteggi e le etichette si COSTRUISCONO).
 $MODELLO  = 4
 $DEPOSITO = 5000
 $VALUTA   = 'EUR'
 $LEVA     = 100
 $TETTO_BARRE  = 100000
 $AVVISO_BARRE = 95000
-# NESSUN input imposto: si prova coi default dell'EA, fa fede il report (G1). Tipo: b = bool, i = intero, d = decimale
+# NESSUN input imposto: si prova coi default dell'EA, fa fede il report (G1). Tipo: b = bool, i = intero, d = decimale.
+# ATTENZIONE: il referto NON scrive a mano "input imposti: NESSUNO", COSTRUISCE la riga da $INPUT_IMPOSTI (classe 1480,
+# recidiva 1497): se un giorno questa lista si riempie, il referto lo dice da solo invece di mentire.
 $INPUT_IMPOSTI = @()
 $INPUT_ENUM = @()
 
@@ -45,14 +51,20 @@ if($TimeoutTrancheMin -lt 1 -or $TimeoutTrancheMin -gt 900){ throw '-TimeoutTran
 if($Tranche -notmatch '^[12](,[12])?$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono 1, 2 o 1,2.') }
 $TrScelte = @($Tranche -split ',')
 if(@($TrScelte | Select-Object -Unique).Count -ne $TrScelte.Count){ throw ('-Tranche ' + $Tranche + ' ha una tranche ripetuta.') }
-# TRE tranche MENSILI, una dopo l altra, ognuna a conto vuoto (deposito 5000 EUR): luglio, agosto, settembre 2026. 'A' e il primo giorno del mese dopo
-# (il report scrive l estremo 'A' come data finale; l ultimo giorno incluso e quello prima).
+# DUE passate sulla STESSA finestra (2026.01.01 -> 2026.03.01, cioe gennaio e febbraio 2026), ognuna a CONTO VUOTO (deposito 5000 EUR), che
+# differiscono SOLO per il periodo del grafico: H1 e M15. NON sono tranche mensili e non sono in sequenza: non si sommano, si CONFRONTANO.
+# QUANTE e QUALI passate le dice l elenco qui sotto, non questo commento; e le frasi del REFERTO che descrivono la natura del giro si
+# COSTRUISCONO da $SONDE_TUTTE (classi 1498 e 1499: la prosa ereditata da un altro giro aveva scritto "TRE tranche MENSILI ... luglio,
+# agosto, settembre 2026" sopra questo stesso elenco). 'A' e il primo giorno dopo l ultimo incluso (il report scrive l estremo 'A' come
+# data finale; l ultimo giorno incluso e quello prima).
 $SONDE = @(
   [pscustomobject]@{ Nome = 'TRANCHE1'; Per = 'H1'; Da = '2026.01.01'; A = '2026.03.01'; Timeout = $TimeoutTrancheMin; Cosa = 'gennaio-febbraio 2026 su H1' },
   [pscustomobject]@{ Nome = 'TRANCHE2'; Per = 'M15'; Da = '2026.01.01'; A = '2026.03.01'; Timeout = $TimeoutTrancheMin; Cosa = 'gennaio-febbraio 2026 su M15' }
 )
 $SONDE_TUTTE = $SONDE
 $SONDE = @($SONDE_TUTTE | Where-Object { $TrScelte -contains $_.Nome.Substring(7) })
+# classe 1502 (seconda guardia, dopo il -notmatch di -Tranche qui sopra): mai produrre referto, MANIFEST e zip con ZERO passate lanciate.
+if($SONDE.Count -lt 1){ throw ('-Tranche ' + $Tranche + ' non seleziona NESSUNA delle passate disponibili (' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '): non lancio un giro che non misura niente (classe 1502).') }
 
 function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
 function Titolo($t){ Write-Host ''; Write-Host ('=== ' + $t + ' ===') -ForegroundColor Cyan }
@@ -258,10 +270,10 @@ $DataEx5 = $Ex5.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss', $IC)
 Dico ('trovato : ' + $RelEx5) 'Green'
 Dico ('byte    : ' + $Ex5.Length + '   data file ' + $DataEx5) 'Green'
 Dico ('SHA256  : ' + $ShaEx5 + '   (binario di TERZI: va nel referto, NON nello zip ne in repo)') 'Green'
-if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la tranche esce senza report e il giornale lo dice.' 'Yellow' }
+if($RelEx5.Contains(' ')){ Dico 'il nome ha degli SPAZI: il .ini lo scrive cosi com e (Expert=Market\...). Che il tester lo accetti e [NON VERIFICATO]: se non lo trova, la passata esce senza report e il giornale lo dice.' 'Yellow' }
 
 # ---------------------------------------------------------------------
-#  2. LE TRE TRANCHE (passate singole, Optimization=0, ognuna a conto vuoto)
+#  2. LE PASSATE (una per PERIODO DEL GRAFICO, stessa finestra; passate singole, Optimization=0, ognuna a conto vuoto)
 # ---------------------------------------------------------------------
 $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $Work = Join-Path $env:USERPROFILE ('abtg_screen_' + $TOKL)
@@ -537,11 +549,11 @@ $testa = @(
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ',') + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
-  'input imposti: NESSUNO (default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]; fanno fede gli input del REPORT, riga TUTTI gli input del report qui sopra)',
-  ('EA scelto (' + $Ex5Nome + '): EA di TERZI dal Market, scatola nera. SETACCIO: due passate (H1 e M15) su gennaio-febbraio 2026, default dell EA; serve a vedere SE opera e SE dipende dal periodo, NON a giudicare il profitto ne a scegliere il periodo.'),
+  ('input imposti dal .ini (' + $INPUT_IMPOSTI.Count + '): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ') + '   (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).'),
+  ('EA scelto (' + $Ex5Nome + '): EA di TERZI dal Market, scatola nera. SETACCIO: ' + $SONDE_TUTTE.Count + ' passate, una per periodo del grafico (' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ', ') + '), sulla STESSA finestra ' + $SONDE_TUTTE[0].Da + ' -> ' + $SONDE_TUTTE[0].A + ', default dell EA. Serve a vedere SE opera (regola S1) e SE il risultato dipende dal periodo del grafico (regola S2): NON a giudicare il profitto, NON a scegliere il periodo, NON a decidere un acquisto (regole scritte PRIMA dei numeri: report/SETACCIO_MARKET_ATTESE_2026-10-18.md). NESSUN EA si archivia con questi numeri: zero operazioni qui e una MISURA MANCANTE, non una bocciatura (certificato di morte del 09/09/2026).'),
   ('tranche scelte: ' + $Tranche + ' (le altre: SALTATA, non lanciate per scelta)'),
   ('esiti: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + ' (' + $_.Per + ') ' + $esiti[$_.Nome] }) -join '   ')),
-  'ATTENZIONE: ogni tranche parte a CONTO VUOTO il primo giorno del mese: un cesto aperto a fine del mese prima e il suo gap NON ci sono. Le tre tranche sono INDIPENDENTI (deposito 5000 EUR ognuna): uno stop out in una non fa morire le altre. Se il .ex5 cambia in una tranche, le tranche dopo NON partono (v2).',
+  ('ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono ' + $SONDE_TUTTE.Count + ' passate INDIPENDENTI sulla STESSA finestra (' + $SONDE_TUTTE[0].Da + ' -> ' + $SONDE_TUTTE[0].A + '), ognuna a CONTO VUOTO (deposito ' + $DEPOSITO + ' ' + $VALUTA + '), e cambia SOLO il periodo del grafico: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).'),
   ''
 )
 (($testa + $referto + @('', 'COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_SCREEN_TRANCHE.txt') -Encoding ASCII
@@ -551,7 +563,7 @@ Write-Host ''
 foreach($x in $testa){ if($x -ne ''){ Write-Host ('   ' + $x) } }
 Write-Host ''
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
-Write-Host 'FILE ATTESI NELLO ZIP: REFERTO_SCREEN_TRANCHE.txt + MANIFEST_SCREEN.csv + ini\screen_<ea>_TRANCHE1.ini .. TRANCHE2 (quelle lanciate) + report\SCREEN_<EA>_TRANCHE1_<data>.htm .. (+ le .png) se il tester li ha scritti + log\TRANCHE1_*.txt ..' -ForegroundColor Gray
+Write-Host ('FILE ATTESI NELLO ZIP: REFERTO_SCREEN_TRANCHE.txt + MANIFEST_SCREEN.csv + per ognuna delle passate LANCIATE (' + (@($SONDE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '): ini\screen_' + $TOKL + '_<passata>.ini, report\SCREEN_' + $TOKU + '_<passata>_<data>.htm (+ le .png) se il tester li ha scritti, log\<passata>_*.txt') -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
 $nSc = @($TrScelte | Where-Object { $esiti['TRANCHE' + $_] -eq 'OK' }).Count
 if($nSc -eq $TrScelte.Count){ Write-Host ('ESITO SCREEN TRANCHE: le ' + $TrScelte.Count + ' tranche scelte (' + $Tranche + ') sono OK (rc 0)') -ForegroundColor Green; exit 0 }
