@@ -10,7 +10,7 @@ Soglie e criteri di scelta: `MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md`
 - **Prop Firm Gold EA dichiara randomizzazione** (H1 +550 e M15 +524 nel setaccio, a parita' di operazioni: coerente con una componente casuale): per S-STAB la corsa continua va ripetuta 3 volte; in questo giro ne gira una, le altre due dopo, se quella supera la soglia.
 
 ## Previsioni dichiarate ORA (da verificare, non da difendere)
-- **P1**: al massimo **3 dei 10** soddisfano TUTTE le soglie S-N, S-M, S-H, S-DD, S-NOSCALA, S-COSTO. (Base: negli altri test su 4 EA oro del pacchetto, 1 solo ha passato una regola analoga sul rischio.)
+- **P1**: al massimo **3 dei 10** soddisfano TUTTE le soglie S-N, S-M, S-H, S-DD, S-NOSCALA, S-COSTO.
 - **P2**: **TitanForge e Nebula** (profit factor 85 e 36 nel setaccio) avranno profit factor su 21 mesi **sotto 10**.
 - **P3**: **EA Super Trend** avra' un drawdown mensile massimo **sopra il 15,2%** in almeno un mese (nel setaccio, M15: 16,1%; lotto 4 volte piu' grande del minimo).
 - **P4**: **Quantum iGold e PolyGold** restano in perdita su 21 mesi.
