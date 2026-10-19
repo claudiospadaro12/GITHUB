@@ -30,7 +30,7 @@
 //|  Tutto-in-uno: compila con F7. Usa solo Trade.mqh (standard MT5). |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.14"
+#property version   "1.15"
 #property strict
 #include <Trade/Trade.mqh>
 //  v1.11 -- 19/08/2026. Il calcolo del cap e la scrittura delle bandiere
@@ -164,6 +164,33 @@ input bool   InpWarnNoSL       = true;   // logga un warning per le posizioni SE
 //  ("XAUUSD*"). Un simbolo puo' stare in piu' cluster.
 input double InpMaxClusterRiskPct = 0;   // CAP C2: rischio aperto massimo per CLUSTER, % equity (0=spento). Firma 07/09: 3.0
 input string InpClusterMappa      = "";  // CAP C2: mappa dei cluster ("" = spento). Es. USD=EURUSD,GBPUSD;METALLI=XAUUSD,XAGUSD
+//--- E1 -- TETTO DI ESPOSIZIONE (v1.15, 19/10/2026) -----------------
+//  PERCHE': il 19/10/2026 sul conto reale una griglia (Arena Nexus Grid)
+//  ha aperto 15 BUY senza stop contro il calo, da 0,01 a 0,17 lotti
+//  (0,89 lotti insieme): il saldo era +347 ma l'equity era gia' sotto il
+//  limite giornaliero; il lockdown e' arrivato quando la perdita era
+//  -838. Il lockdown guarda l'equity e arriva TARDI. Questo tetto guarda
+//  la DIMENSIONE (lotti e numero di posizioni) e agisce PRIMA, su quanto
+//  e' gia' aperto, indipendentemente dal prezzo e dagli stop.
+//  OPT-IN e NO-OP di default: a 0 e 0 il guardiano si comporta ESATTAMENTE
+//  come la v1.14 (nessun giro sulle posizioni in piu', nessuna riga).
+//  I VALORI non li decide l'EA ne' chi scrive il codice: sono una scelta
+//  di Claudio (taglia/rischio del conto).
+//  NETTO: una griglia a due lati apre buy E sell insieme: i lotti TOTALI
+//  includono la parte coperta. Il 19/10 il netto lungo ha raggiunto 0,83
+//  lotti alle 14:43:39 mentre il totale era 0,87. Il tetto NETTO misura
+//  la direzione scoperta (per simbolo), che e' quella che fa male.
+//  Azione 0 = CANCELLA i pendenti (nessuno stop/limit puo' scattare e
+//             far crescere l'esposizione; le posizioni gia' aperte restano)
+//  Azione 1 = come 0 E CHIUDE le posizioni PIU' RECENTI finche' rientra
+//             nel tetto (realizza la perdita di quelle: e' il costo)
+//  Azione 2 = SOLO ALLARME (log e pannello, non tocca niente)
+//  Un EA di terzi che apre a MERCATO puo' superare il tetto di un passo
+//  entro 1 secondo (il guardiano controlla ogni secondo).
+input double InpMaxTotalLots     = 0;   // E1: lotti totali aperti insieme, massimo (0=spento). Esempio: 0.30
+input int    InpMaxOpenPositions = 0;   // E1: posizioni aperte insieme, massimo (0=spento). Esempio: 10
+input double InpMaxNetLots       = 0;   // E1: esposizione NETTA massima su UN simbolo, |lotti buy - lotti sell| (0=spento). Esempio: 0.30
+input int    InpExposureAction   = 1;   // E1: 0=cancella i pendenti . 1=cancella i pendenti E chiude le piu' recenti . 2=solo allarme
 //--- COMPORTAMENTO -------------------------------------------------
 input int    InpAction         = 0;      // 0=CHIUDI+BLOCCA (enforce) . 1=SOLO ALLARME (monitor, non chiude)
 input bool   InpCloseAllMagics = true;   // true=chiude posizioni/pendenti di QUALSIASI magic (tutto il conto)
@@ -260,6 +287,23 @@ string BaselineModoTesto(const int modo)
 //| v1.60) e' un cancello di collaudo -- il modo della baseline e'    |
 //| roba del solo guardiano e non deve spostare quel numero.          |
 //+------------------------------------------------------------------+
+bool ExposureEccede(const double lots,const int npos,const double netAbs,const double capLots,const int capPos,const double capNet);   // prototipo (definita prima di OnTimer)
+//--- v1.15: AUTOTEST del tetto di esposizione (funzione pura, conto non toccato)
+int AutotestEsposizione()
+  {
+   int falliti=0;
+   Print("[AUTOTEST] ABTG_Guardian v1.15 -- TETTO DI ESPOSIZIONE (funzione pura, conto non toccato)");
+   ABTG_AutotestCaso("spento (0,0,0): non eccede mai", !ExposureEccede(5.0,50,4.0,0.0,0,0.0), true, falliti);
+   ABTG_AutotestCaso("0,89 lotti con tetto 0,30: eccede", ExposureEccede(0.89,14,0.83,0.30,0,0.0), true, falliti);
+   ABTG_AutotestCaso("0,30 lotti con tetto 0,30: NON eccede (uguale)", !ExposureEccede(0.30,3,0.10,0.30,0,0.0), true, falliti);
+   ABTG_AutotestCaso("11 posizioni con tetto 10: eccede", ExposureEccede(0.11,11,0.11,0.0,10,0.0), true, falliti);
+   ABTG_AutotestCaso("10 posizioni con tetto 10: NON eccede", !ExposureEccede(0.10,10,0.10,0.0,10,0.0), true, falliti);
+   ABTG_AutotestCaso("totale 0,87 ma netto 0,05 con tetto netto 0,30: NON eccede (coperto)", !ExposureEccede(0.87,20,0.05,0.0,0,0.30), true, falliti);
+   ABTG_AutotestCaso("netto 0,83 con tetto netto 0,30: eccede", ExposureEccede(0.87,14,0.83,0.0,0,0.30), true, falliti);
+   ABTG_AutotestCaso("netto 0,30 con tetto netto 0,30: NON eccede (uguale)", !ExposureEccede(0.50,6,0.30,0.0,0,0.30), true, falliti);
+   return(falliti);
+  }
+
 bool BaselineUguale(const double a,const double b){ return(MathAbs(a-b)<0.005); }
 
 int AutotestBaselineGiorno()
@@ -560,6 +604,7 @@ int OnInit()
      {
       ABTG_AutotestGuardia();       // casi del canale (nell'include, INVARIATI)
       AutotestBaselineGiorno();     // v1.14: casi del modo della baseline
+      AutotestEsposizione();        // v1.15: casi del tetto di esposizione
      }
 
    double bal=AccountInfoDouble(ACCOUNT_BALANCE);
@@ -661,6 +706,9 @@ int OnInit()
    PrintFormat("[GUARDIAN] pausa morbida=%.2f%%  cap rischio aperto=%.2f%% (modo %s)  reset giorno=%02d:00 server",
                InpDailyPausePct,InpMaxOpenRiskPct,
                (InpRiskMode==1?"prezzo corrente":"ingresso"),InpDailyResetHour);
+   if(InpMaxTotalLots>0 || InpMaxOpenPositions>0 || InpMaxNetLots>0)
+      PrintFormat("[GUARDIAN] tetto di esposizione ATTIVO: %.2f lotti, %d posizioni, netto %.2f, azione %d (0=pendenti, 1=pendenti+chiude piu recenti, 2=allarme)",
+                  InpMaxTotalLots,InpMaxOpenPositions,InpMaxNetLots,InpExposureAction);
    OnTimer();
    return(INIT_SUCCEEDED);
   }
@@ -697,6 +745,111 @@ int FlattenAll()
       if(!InpCloseAllMagics && OrderGetInteger(ORDER_MAGIC)!=InpMagic) continue;
       if(gTrade.OrderDelete(tk)) acted++;
      }
+   return(acted);
+  }
+
+//+------------------------------------------------------------------+
+//| E1 -- TETTO DI ESPOSIZIONE (v1.15)                                |
+//+------------------------------------------------------------------+
+bool gEsposizioneOn=false;
+
+// Funzione PURA: non legge il conto. Vera se lotti, posizioni o esposizione netta superano un tetto acceso.
+bool ExposureEccede(const double lots,const int npos,const double netAbs,
+                    const double capLots,const int capPos,const double capNet)
+  {
+   if(capLots>0 && lots>capLots+0.0000001) return(true);
+   if(capPos>0 && npos>capPos) return(true);
+   if(capNet>0 && netAbs>capNet+0.0000001) return(true);
+   return(false);
+  }
+
+// Misura: lotti totali, numero di posizioni, e l'esposizione NETTA piu' grande fra i simboli
+// (netSigned > 0 = lunga: piu' buy che sell; il simbolo in netSym).
+void ExposureMisura(double &lots,int &npos,double &netSigned,string &netSym)
+  {
+   lots=0.0; npos=0; netSigned=0.0; netSym="";
+   string sy[64]; double nt[64]; int ns=0;
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(!InpCloseAllMagics && PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      double v=PositionGetDouble(POSITION_VOLUME);
+      lots+=v; npos++;
+      string s=PositionGetString(POSITION_SYMBOL);
+      double sg=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)? v : -v;
+      int k=-1;
+      for(int q=0;q<ns;q++) if(sy[q]==s){ k=q; break; }
+      if(k<0 && ns<64){ k=ns; sy[k]=s; nt[k]=0.0; ns++; }
+      if(k>=0) nt[k]+=sg;
+     }
+   for(int q=0;q<ns;q++)
+      if(MathAbs(nt[q])>MathAbs(netSigned)){ netSigned=nt[q]; netSym=sy[q]; }
+  }
+
+// Torna il numero di azioni fatte (0 se spento, rientrato o solo allarme).
+int ExposureCheck(double &lots,int &npos,double &netSigned)
+  {
+   lots=0.0; npos=0; netSigned=0.0;
+   if(InpMaxTotalLots<=0 && InpMaxOpenPositions<=0 && InpMaxNetLots<=0) return(0);   // spento: NO-OP
+   string netSym="";
+   ExposureMisura(lots,npos,netSigned,netSym);
+   if(!ExposureEccede(lots,npos,MathAbs(netSigned),InpMaxTotalLots,InpMaxOpenPositions,InpMaxNetLots))
+     {
+      if(gEsposizioneOn)
+         PrintFormat("[GUARDIAN] tetto esposizione rientrato: %.2f lotti, %d posizioni, netto %.2f",lots,npos,netSigned);
+      gEsposizioneOn=false;
+      return(0);
+     }
+   int azione=(InpAction==1)? 2 : InpExposureAction;                 // monitor: mai agire
+   if(!gEsposizioneOn)
+      PrintFormat("[GUARDIAN] # TETTO ESPOSIZIONE superato: %.2f lotti (tetto %.2f), %d posizioni (tetto %d), netto %.2f su %s (tetto %.2f). Azione=%s",
+                  lots,InpMaxTotalLots,npos,InpMaxOpenPositions,netSigned,netSym,InpMaxNetLots,
+                  (azione==2?"SOLO ALLARME":(azione==1?"CANCELLA PENDENTI + CHIUDE LE PIU RECENTI":"CANCELLA PENDENTI")));
+   gEsposizioneOn=true;
+   if(azione==2) return(0);
+
+   int acted=0;
+   // 1) tutti i pendenti: nessuno stop/limit deve poter scattare e far crescere l'esposizione
+   for(int j=OrdersTotal()-1;j>=0;j--)
+     {
+      ulong tk=OrderGetTicket(j);
+      if(tk==0) continue;
+      if(!InpCloseAllMagics && OrderGetInteger(ORDER_MAGIC)!=InpMagic) continue;
+      if(gTrade.OrderDelete(tk)) acted++;
+     }
+   // 2) azione 1: chiude la posizione PIU' RECENTE (per tempo in millisecondi) finche' rientra nel tetto.
+   //    Se a sforare e' il NETTO, si chiude la piu' recente del lato scoperto di quel simbolo.
+   if(azione==1)
+     {
+      for(int giro=0;giro<200;giro++)
+        {
+         ExposureMisura(lots,npos,netSigned,netSym);
+         if(!ExposureEccede(lots,npos,MathAbs(netSigned),InpMaxTotalLots,InpMaxOpenPositions,InpMaxNetLots)) break;
+         bool soloNetto=(!(InpMaxTotalLots>0 && lots>InpMaxTotalLots+0.0000001) &&
+                         !(InpMaxOpenPositions>0 && npos>InpMaxOpenPositions));
+         ulong best=0; long bt=0;
+         for(int i=PositionsTotal()-1;i>=0;i--)
+           {
+            ulong tk=PositionGetTicket(i);
+            if(tk==0) continue;
+            if(!InpCloseAllMagics && PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+            if(soloNetto)
+              {
+               if(PositionGetString(POSITION_SYMBOL)!=netSym) continue;
+               bool buy=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY);
+               if(buy!=(netSigned>0)) continue;
+              }
+            long tm=PositionGetInteger(POSITION_TIME_MSC);
+            if(best==0 || tm>bt){ best=tk; bt=tm; }
+           }
+         if(best==0) break;
+         if(gTrade.PositionClose(best)) acted++; else break;
+        }
+      ExposureMisura(lots,npos,netSigned,netSym);
+     }
+   if(acted>0)
+      PrintFormat("[GUARDIAN] # tetto esposizione: %d azioni; ora %.2f lotti, %d posizioni, netto %.2f",acted,lots,npos,netSigned);
    return(acted);
   }
 
@@ -769,6 +922,10 @@ void OnTimer()
      {
       if(PositionsTotal()>0 || OrdersTotal()>0) FlattenAll();
      }
+
+   //=== E1 -- TETTO DI ESPOSIZIONE (v1.15): spento a 0/0 = nessuna azione ===
+   double esLots=0.0; int esPos=0; double esNet=0.0;
+   if(InpMaxTotalLots>0 || InpMaxOpenPositions>0 || InpMaxNetLots>0) ExposureCheck(esLots,esPos,esNet);
 
    //=== B1 -- PAUSA MORBIDA (non chiude niente, blocca i NUOVI ingressi) ===
    bool nowBlocked=((int)GlobalVariableGet(GV_BLOCKDAY)==pk);
@@ -877,6 +1034,11 @@ void OnTimer()
                              gClN,InpMaxClusterRiskPct,
                              (StringLen(clMaxNome)>0?clMaxNome:"-"),clMax,
                              (StringLen(clPanel)>0?clPanel:""));
+      // E1: il pannello cresce SOLO se il tetto di esposizione e' acceso
+      if(InpMaxTotalLots>0 || InpMaxOpenPositions>0 || InpMaxNetLots>0)
+         panel+=StringFormat("\nEsposizione: %.2f lotti / tetto %.2f . %d pos / tetto %d . netto %.2f / tetto %.2f%s",
+                             esLots,InpMaxTotalLots,esPos,InpMaxOpenPositions,esNet,InpMaxNetLots,
+                             (gEsposizioneOn?"  -> TETTO SUPERATO":""));
       Comment(panel);
      }
 
@@ -891,6 +1053,9 @@ void OnTimer()
       // riga SEPARATA per C2, e solo a tetto acceso: non contiene
       // "rischioAperto=" apposta, cosi' il campo C9.RISCHIO del collaudo
       // enforcement continua a estrarre SOLO il numero di C1.
+      if(InpMaxTotalLots>0 || InpMaxOpenPositions>0 || InpMaxNetLots>0)
+         PrintFormat("[GUARDIAN] esposizione: %.2f lotti (tetto %.2f), %d posizioni (tetto %d), netto %.2f (tetto %.2f), tetto=%s",
+                     esLots,InpMaxTotalLots,esPos,InpMaxOpenPositions,esNet,InpMaxNetLots,(gEsposizioneOn?"SUPERATO":"ok"));
       if(gClN>0)
          PrintFormat("[GUARDIAN] cluster: %d dichiarati, peggiore %s clusterMax=%.2f%% (tetto generale %.2f%%)",
                      gClN,(StringLen(clMaxNome)>0?clMaxNome:"-"),clMax,InpMaxClusterRiskPct);
