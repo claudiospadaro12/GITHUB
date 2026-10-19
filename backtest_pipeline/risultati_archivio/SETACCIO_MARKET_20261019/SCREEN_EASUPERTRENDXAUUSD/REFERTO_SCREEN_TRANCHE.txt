@@ -1,0 +1,62 @@
+SCREEN TESTER TRANCHE (EA Super Trend XAUUSD.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_SCREEN_TESTER_TRANCHE_v1, pin 0b59adb7b1cd361f5871347864c30671f59e8be9
+data: 2026-10-19 11:58:34   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\EA Super Trend XAUUSD.ex5   byte 249126   data file 2026-10-18 21:31:33   SHA256 0874EB8DF33D777D7BCDC4FC5D74D7206B448550FD5E05BD6B5DEBA5BD2E9D73   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1,M15, Modello 4 (ticks reali), deposito 5000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (EA Super Trend XAUUSD.ex5): EA di TERZI dal Market, scatola nera. SETACCIO: 2 passate, una per periodo del grafico (H1, M15), sulla STESSA finestra 2026.01.01 -> 2026.03.01, default dell EA. Serve a vedere SE opera (regola S1) e SE il risultato dipende dal periodo del grafico (regola S2): NON a giudicare il profitto, NON a scegliere il periodo, NON a decidere un acquisto (regole scritte PRIMA dei numeri: report/SETACCIO_MARKET_ATTESE_2026-10-18.md). NESSUN EA si archivia con questi numeri: zero operazioni qui e una MISURA MANCANTE, non una bocciatura (certificato di morte del 09/09/2026).
+tranche scelte: 1,2 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE1 (H1) OK   TRANCHE2 (M15) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 2 passate INDIPENDENTI sulla STESSA finestra (2026.01.01 -> 2026.03.01), ognuna a CONTO VUOTO (deposito 5000 EUR), e cambia SOLO il periodo del grafico: TRANCHE1=H1, TRANCHE2=M15. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE1 (gennaio-febbraio 2026 su H1)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE1: 0874EB8DF33D777D7BCDC4FC5D74D7206B448550FD5E05BD6B5DEBA5BD2E9D73 UGUALE
+   durata 43 s (orologio), test 21 s (riga Test passed del giornale; -1 = non letta)   giornali letti 8, righe 32050
+   report SCREEN_EASUPERTRENDXAUUSD_TRANCHE1_20261019_115654.htm   operazioni 318   netto 15247.38   PF 2.67   DD equita 1204.33(5.83%)   DD saldo 762.07(5.52%)
+   qualita 100%ticksreali   barre report 931   ticks report 15389728   barre generate 931   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: a1=XAUUSD - H1 ; a2=https://t.me/EAQuantumLab ; close_orders_by_signals=true ; UseAutoLot=true ; LotPerStep=0.01 ; BalancePerLot=1000.0 ; ManualLot=0.0 ; OrderMagic=887441147 ; stoploss=4290 ; takeprofit=4730 ; bot_comment=EA Super Trend XAUUSD ; UsePartialClose=true ; PartialClosePoints=1000 ; PartialClosePercent=50.0 ; PartialCloseOnce=true ; UseTrailingStop=true ; TrailingStartPoints=3280 ; TrailingDistance=2530 ; TrailingStep=990 ; ShowSuperTrend=true ; SuperTrendATRPeriod=10 ; SuperTrendMultiplier=3.0 ; SuperTrendHistory=300 ; SuperTrendLineWidth=3 ; ShowTrendArrows=true ; ShowCandleAnimation=true ; CandleAnimationMs=900 ; CandleGlowWidth=3 ; UseTimeFilter=true ; StartHour=1 ; StartMinute=0 ; EndHour=23 ; EndMinute=0 ; TradeMonday=true ; TradeTuesday=true ; TradeWednesday=true ; TradeThursday=true ; TradeFriday=true ; TradeSaturday=false ; TradeSunday=false ; UseNewsFilter=true ; NewsMinutesBefore=60 ; NewsMinutesAfter=30 ; NewsHighOnly=true ; NewsCurrencies=USD
+   input stampati dal giornale (dopo started with inputs): a1=XAUUSD - H1 ; a2=https://t.me/EAQuantumLab ; BalancePerLot=1000.0 ; bot_comment=EA Super Trend XAUUSD ; CandleAnimationMs=900 ; CandleGlowWidth=3 ; close_orders_by_signals=true ; EndHour=23 ; EndMinute=0 ; LotPerStep=0.01 ; ManualLot=0.0 ; NewsCurrencies=USD ; NewsHighOnly=true ; NewsMinutesAfter=30 ; NewsMinutesBefore=60 ; OrderMagic=887441147 ; PartialCloseOnce=true ; PartialClosePercent=50.0 ; PartialClosePoints=1000 ; ShowCandleAnimation=true ; ShowSuperTrend=true ; ShowTrendArrows=true ; StartHour=1 ; StartMinute=0 ; stoploss=4290 ; SuperTrendATRPeriod=10 ; SuperTrendHistory=300 ; SuperTrendLineWidth=3 ; SuperTrendMultiplier=3.0 ; takeprofit=4730 ; TradeFriday=true ; TradeMonday=true ; TradeSaturday=false ; TradeSunday=false ; TradeThursday=true ; TradeTuesday=true ; TradeWednesday=true ; TrailingDistance=2530 ; TrailingStartPoints=3280 ; TrailingStep=990 ; UseAutoLot=true ; UseNewsFilter=true ; UsePartialClose=true ; UseTimeFilter=true ; UseTrailingStop=true
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 20247.38 EUR
+   giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+   giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+   giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+   giornale: CUDA, CUDNN and TensortRT package load failed
+   giornale: 2026.01.06 21:58:24   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.05, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:24   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:24   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.04, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:24   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:32   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.03, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:32   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:35   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.03, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:35   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:36   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.03, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:36   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:36   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.06, tp: 4510.83 [Market closed]
+TRANCHE2 (gennaio-febbraio 2026 su M15)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE2: 0874EB8DF33D777D7BCDC4FC5D74D7206B448550FD5E05BD6B5DEBA5BD2E9D73 UGUALE
+   durata 43 s (orologio), test 21 s (riga Test passed del giornale; -1 = non letta)   giornali letti 8, righe 45189
+   report SCREEN_EASUPERTRENDXAUUSD_TRANCHE2_20261019_115654.htm   operazioni 422   netto 15678.74   PF 2.04   DD equita 1558.59(16.11%)   DD saldo 1430.14(14.85%)
+   qualita 100%ticksreali   barre report 3719   ticks report 15389728   barre generate 3719   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: a1=XAUUSD - H1 ; a2=https://t.me/EAQuantumLab ; close_orders_by_signals=true ; UseAutoLot=true ; LotPerStep=0.01 ; BalancePerLot=1000.0 ; ManualLot=0.0 ; OrderMagic=887441147 ; stoploss=4290 ; takeprofit=4730 ; bot_comment=EA Super Trend XAUUSD ; UsePartialClose=true ; PartialClosePoints=1000 ; PartialClosePercent=50.0 ; PartialCloseOnce=true ; UseTrailingStop=true ; TrailingStartPoints=3280 ; TrailingDistance=2530 ; TrailingStep=990 ; ShowSuperTrend=true ; SuperTrendATRPeriod=10 ; SuperTrendMultiplier=3.0 ; SuperTrendHistory=300 ; SuperTrendLineWidth=3 ; ShowTrendArrows=true ; ShowCandleAnimation=true ; CandleAnimationMs=900 ; CandleGlowWidth=3 ; UseTimeFilter=true ; StartHour=1 ; StartMinute=0 ; EndHour=23 ; EndMinute=0 ; TradeMonday=true ; TradeTuesday=true ; TradeWednesday=true ; TradeThursday=true ; TradeFriday=true ; TradeSaturday=false ; TradeSunday=false ; UseNewsFilter=true ; NewsMinutesBefore=60 ; NewsMinutesAfter=30 ; NewsHighOnly=true ; NewsCurrencies=USD
+   input stampati dal giornale (dopo started with inputs): a1=XAUUSD - H1 ; a2=https://t.me/EAQuantumLab ; BalancePerLot=1000.0 ; bot_comment=EA Super Trend XAUUSD ; CandleAnimationMs=900 ; CandleGlowWidth=3 ; close_orders_by_signals=true ; EndHour=23 ; EndMinute=0 ; LotPerStep=0.01 ; ManualLot=0.0 ; NewsCurrencies=USD ; NewsHighOnly=true ; NewsMinutesAfter=30 ; NewsMinutesBefore=60 ; OrderMagic=887441147 ; PartialCloseOnce=true ; PartialClosePercent=50.0 ; PartialClosePoints=1000 ; ShowCandleAnimation=true ; ShowSuperTrend=true ; ShowTrendArrows=true ; StartHour=1 ; StartMinute=0 ; stoploss=4290 ; SuperTrendATRPeriod=10 ; SuperTrendHistory=300 ; SuperTrendLineWidth=3 ; SuperTrendMultiplier=3.0 ; takeprofit=4730 ; TradeFriday=true ; TradeMonday=true ; TradeSaturday=false ; TradeSunday=false ; TradeThursday=true ; TradeTuesday=true ; TradeWednesday=true ; TrailingDistance=2530 ; TrailingStartPoints=3280 ; TrailingStep=990 ; UseAutoLot=true ; UseNewsFilter=true ; UsePartialClose=true ; UseTimeFilter=true ; UseTrailingStop=true
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 20678.74 EUR
+   giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+   giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+   giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+   giornale: CUDA, CUDNN and TensortRT package load failed
+   giornale: 2026.01.06 21:58:24   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.05, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:24   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:24   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.04, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:24   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:32   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.03, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:32   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:35   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.03, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:35   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:36   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.03, tp: 4510.83 [Market closed]
+   giornale: 2026.01.06 21:58:36   EA Super Trend XAUUSD: trailing modify failed, retcode=10018
+   giornale: 2026.01.06 21:58:36   failed modify #30 buy 0.03 XAUUSD sl: 4420.63, tp: 4510.83 -> sl: 4471.06, tp: 4510.83 [Market closed]
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.

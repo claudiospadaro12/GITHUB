@@ -1,0 +1,64 @@
+CENSIMENTO DEGLI EA DEL MARKET  2026-10-19 11:42:53   pc DESKTOP-H4D7CAJ   pin 0b59adb7b1cd361f5871347864c30671f59e8be9
+cartella letta: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\Market
+.ex5 trovati (nomi unici): 31   da setacciare: 25   saltati: 6
+Un EA SALTATO non e un EA bocciato: e un EA NON MISURATO. I pattern di esclusione sono JOLLY, quindi piu larghi dei sei nomi che intendono (Arena, Gold Trade Pro, Goldbot One, The Gold Phantom, The Gold Reaper, The Impossible Gold): se qui sotto un SALTATO non e uno di quei sei, va setacciato a parte: manda questo file e si prepara la riga apposta (passa dal cancello come tutte le altre).
+
+stato;ea;motivo;rc
+DA SETACCIARE;AI Golden Life MT5.ex5;;
+SALTATO;Arena Nexus Grid Smart XAU MT5.ex5;ha gia il suo giro dedicato, saltato dal pattern *Arena*;
+DA SETACCIARE;Drifter EA.ex5;;
+DA SETACCIARE;Dynamic Liquidity Intelligence.ex5;;
+DA SETACCIARE;EA Super Trend XAUUSD.ex5;;
+DA SETACCIARE;Ghost Scalper MT5.ex5;;
+DA SETACCIARE;Gold Beaver.ex5;;
+SALTATO;Gold Trade Pro MT5.ex5;ha gia il suo giro dedicato, saltato dal pattern *Gold*Trade*Pro*;
+SALTATO;Goldbot One MT5.ex5;ha gia il suo giro dedicato, saltato dal pattern *Goldbot*;
+DA SETACCIARE;Golden Mirage mt5.ex5;;
+DA SETACCIARE;Institutional SMC Robot.ex5;;
+DA SETACCIARE;My AI Gold.ex5;;
+DA SETACCIARE;Nebula Cartographer AI EA.ex5;;
+DA SETACCIARE;Night Scalper by NoCap FX.ex5;;
+DA SETACCIARE;Pac Man BTC.ex5;;
+DA SETACCIARE;PolyGold Scalper.ex5;;
+DA SETACCIARE;Prop Firm Gold EA.ex5;;
+DA SETACCIARE;Quantum Commander.ex5;;
+DA SETACCIARE;Quantum Emperor MT5.ex5;;
+DA SETACCIARE;Quantum iGold MT5.ex5;;
+DA SETACCIARE;Quantum Titan MT5.ex5;;
+DA SETACCIARE;Range Breakout EA with Range Filters.ex5;;
+DA SETACCIARE;Scalping Robot Pro MT5.ex5;;
+DA SETACCIARE;Smart Gold Hunter.ex5;;
+SALTATO;The Gold Phantom.ex5;ha gia il suo giro dedicato, saltato dal pattern *Phantom*;
+SALTATO;The Gold Reaper MT5.ex5;ha gia il suo giro dedicato, saltato dal pattern *Reaper*;
+SALTATO;The Impossible Gold.ex5;ha gia il suo giro dedicato, saltato dal pattern *Impossible*;
+DA SETACCIARE;TitanForge EA MT5.ex5;;
+DA SETACCIARE;Ultimate Breakout System.ex5;;
+DA SETACCIARE;Waka Waka EA MT5.ex5;;
+DA SETACCIARE;Wave Rider EA MT5.ex5;;
+
+ESITO DEI LANCIATI (0 = le due passate sono OK; 3 = almeno una KO o non lanciata, lo zip esce lo stesso; 1 = fermato PRIMA del tester)
+LANCIATO;AI Golden Life MT5.ex5;;rc 0
+LANCIATO;Drifter EA.ex5;;rc 0
+LANCIATO;Dynamic Liquidity Intelligence.ex5;;rc 0
+LANCIATO;EA Super Trend XAUUSD.ex5;;rc 0
+LANCIATO;Ghost Scalper MT5.ex5;;rc 0
+LANCIATO;Gold Beaver.ex5;;rc 0
+LANCIATO;Golden Mirage mt5.ex5;;rc 0
+LANCIATO;Institutional SMC Robot.ex5;;rc 0
+LANCIATO;My AI Gold.ex5;;rc 0
+LANCIATO;Nebula Cartographer AI EA.ex5;;rc 0
+LANCIATO;Night Scalper by NoCap FX.ex5;;rc 3
+LANCIATO;Pac Man BTC.ex5;;rc 0
+LANCIATO;PolyGold Scalper.ex5;;rc 0
+LANCIATO;Prop Firm Gold EA.ex5;;rc 0
+LANCIATO;Quantum Commander.ex5;;rc 0
+LANCIATO;Quantum Emperor MT5.ex5;;rc 0
+LANCIATO;Quantum iGold MT5.ex5;;rc 0
+LANCIATO;Quantum Titan MT5.ex5;;rc 0
+LANCIATO;Range Breakout EA with Range Filters.ex5;;rc 0
+LANCIATO;Scalping Robot Pro MT5.ex5;;rc 0
+LANCIATO;Smart Gold Hunter.ex5;;rc 0
+LANCIATO;TitanForge EA MT5.ex5;;rc 0
+LANCIATO;Ultimate Breakout System.ex5;;rc 0
+LANCIATO;Waka Waka EA MT5.ex5;;rc 0
+LANCIATO;Wave Rider EA MT5.ex5;;rc 0

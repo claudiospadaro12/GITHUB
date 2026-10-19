@@ -1,0 +1,62 @@
+SCREEN TESTER TRANCHE (Quantum Commander.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_SCREEN_TESTER_TRANCHE_v1, pin 0b59adb7b1cd361f5871347864c30671f59e8be9
+data: 2026-10-19 12:38:55   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\Quantum Commander.ex5   byte 269564   data file 2026-10-18 21:35:24   SHA256 1173D8958D901265B42F132082C65ED4680D697AEC1470F52A6C4DFF3C939BB7   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1,M15, Modello 4 (ticks reali), deposito 5000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (Quantum Commander.ex5): EA di TERZI dal Market, scatola nera. SETACCIO: 2 passate, una per periodo del grafico (H1, M15), sulla STESSA finestra 2026.01.01 -> 2026.03.01, default dell EA. Serve a vedere SE opera (regola S1) e SE il risultato dipende dal periodo del grafico (regola S2): NON a giudicare il profitto, NON a scegliere il periodo, NON a decidere un acquisto (regole scritte PRIMA dei numeri: report/SETACCIO_MARKET_ATTESE_2026-10-18.md). NESSUN EA si archivia con questi numeri: zero operazioni qui e una MISURA MANCANTE, non una bocciatura (certificato di morte del 09/09/2026).
+tranche scelte: 1,2 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE1 (H1) OK   TRANCHE2 (M15) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 2 passate INDIPENDENTI sulla STESSA finestra (2026.01.01 -> 2026.03.01), ognuna a CONTO VUOTO (deposito 5000 EUR), e cambia SOLO il periodo del grafico: TRANCHE1=H1, TRANCHE2=M15. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE1 (gennaio-febbraio 2026 su H1)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE1: 1173D8958D901265B42F132082C65ED4680D697AEC1470F52A6C4DFF3C939BB7 UGUALE
+   durata 38 s (orologio), test 19 s (riga Test passed del giornale; -1 = non letta)   giornali letti 8, righe 521
+   report SCREEN_QUANTUMCOMMANDER_TRANCHE1_20261019_123738.htm   operazioni 9   netto -266.70   PF 0.19   DD equita 336.52(6.72%)   DD saldo 316.75(6.33%)
+   qualita 100%ticksreali   barre report 931   ticks report 15389728   barre generate 931   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: QX_US30Symbol=US30 ; QX_AutoDetectBrokerSymbol=true ; QX_MagicNotice=0 ; QX_LotCalculation=3 ; QX_AutomaticLevel=3 ; QX_RiskPercent=1.0 ; QX_FixedLot=0.1 ; QX_LotsPer1000=0.1 ; QX_BalanceStep=1000.0 ; QX_TradeMonday=true ; QX_TradeTuesday=true ; QX_TradeWednesday=true ; QX_TradeThursday=true ; QX_TradeFriday=true ; QX_AvoidNFPDays=true ; QX_AvoidFOMCDays=true ; QX_MaxDrawdownPercent=0.0 ; QX_LockUntilNextBrokerDay=true ; QX_AvoidWeekendExposure=true ; QX_ShowPanel=true
+   input stampati dal giornale (dopo started with inputs): QX_AutoDetectBrokerSymbol=true ; QX_AutomaticLevel=3 ; QX_AvoidFOMCDays=true ; QX_AvoidNFPDays=true ; QX_AvoidWeekendExposure=true ; QX_BalanceStep=1000.0 ; QX_FixedLot=0.1 ; QX_LockUntilNextBrokerDay=true ; QX_LotCalculation=3 ; QX_LotsPer1000=0.1 ; QX_MagicNotice=0 ; QX_MaxDrawdownPercent=0.0 ; QX_RiskPercent=1.0 ; QX_ShowPanel=true ; QX_TradeFriday=true ; QX_TradeMonday=true ; QX_TradeThursday=true ; QX_TradeTuesday=true ; QX_TradeWednesday=true ; QX_US30Symbol=US30
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 4733.30 EUR
+   giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+   giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+   giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+   giornale: 2026.01.01 00:00:00   [QC W120] Contract sizing preflight=NORMALIZATION_ERROR. Quantum Commander remains active and retries automatically when broker contract data is ready.
+   giornale: 2026.01.02 16:16:00   [QC E201] C06 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.08 18:46:00   [QC E201] C07 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.12 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.13 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.16 08:16:00   [QC E201] C03 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.22 18:46:00   [QC E201] C07 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.23 01:16:00   [QC E201] C01 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.30 18:46:00   [QC E201] C07 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.02.10 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.02.13 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.02.17 01:16:00   [QC E201] C01 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+TRANCHE2 (gennaio-febbraio 2026 su M15)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE2: 1173D8958D901265B42F132082C65ED4680D697AEC1470F52A6C4DFF3C939BB7 UGUALE
+   durata 38 s (orologio), test 19 s (riga Test passed del giornale; -1 = non letta)   giornali letti 8, righe 532
+   report SCREEN_QUANTUMCOMMANDER_TRANCHE2_20261019_123738.htm   operazioni 9   netto -266.70   PF 0.19   DD equita 336.52(6.72%)   DD saldo 316.75(6.33%)
+   qualita 100%ticksreali   barre report 3719   ticks report 15389728   barre generate 3719   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: QX_US30Symbol=US30 ; QX_AutoDetectBrokerSymbol=true ; QX_MagicNotice=0 ; QX_LotCalculation=3 ; QX_AutomaticLevel=3 ; QX_RiskPercent=1.0 ; QX_FixedLot=0.1 ; QX_LotsPer1000=0.1 ; QX_BalanceStep=1000.0 ; QX_TradeMonday=true ; QX_TradeTuesday=true ; QX_TradeWednesday=true ; QX_TradeThursday=true ; QX_TradeFriday=true ; QX_AvoidNFPDays=true ; QX_AvoidFOMCDays=true ; QX_MaxDrawdownPercent=0.0 ; QX_LockUntilNextBrokerDay=true ; QX_AvoidWeekendExposure=true ; QX_ShowPanel=true
+   input stampati dal giornale (dopo started with inputs): QX_AutoDetectBrokerSymbol=true ; QX_AutomaticLevel=3 ; QX_AvoidFOMCDays=true ; QX_AvoidNFPDays=true ; QX_AvoidWeekendExposure=true ; QX_BalanceStep=1000.0 ; QX_FixedLot=0.1 ; QX_LockUntilNextBrokerDay=true ; QX_LotCalculation=3 ; QX_LotsPer1000=0.1 ; QX_MagicNotice=0 ; QX_MaxDrawdownPercent=0.0 ; QX_RiskPercent=1.0 ; QX_ShowPanel=true ; QX_TradeFriday=true ; QX_TradeMonday=true ; QX_TradeThursday=true ; QX_TradeTuesday=true ; QX_TradeWednesday=true ; QX_US30Symbol=US30
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 4733.30 EUR
+   giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+   giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+   giornale: custom indicator PL-SUPERTREND 3_LIVELLI V09 (NASUSD,M15) removed
+   giornale: 2026.01.01 00:00:00   [QC W120] Contract sizing preflight=NORMALIZATION_ERROR. Quantum Commander remains active and retries automatically when broker contract data is ready.
+   giornale: 2026.01.02 16:16:00   [QC E201] C06 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.08 18:46:00   [QC E201] C07 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.12 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.13 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.16 08:16:00   [QC E201] C03 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.22 18:46:00   [QC E201] C07 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.23 01:16:00   [QC E201] C01 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.01.30 18:46:00   [QC E201] C07 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.02.10 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.02.13 14:31:00   [QC E201] C05 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+   giornale: 2026.02.17 01:16:00   [QC E201] C01 sizing skipped | reason=NORMALIZATION_ERROR | EA remains active.
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.
