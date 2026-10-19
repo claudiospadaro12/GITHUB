@@ -1,0 +1,20 @@
+== PROPFIRM SMARTGH GRSET
+  PAVIMENTO (peso 1, realizzi giornalieri, NON vede l'intraday): 231.26 EUR = 4.63% del deposito (mese 2026-06-01)
+  TETTO     (peso 1, i DD dello stesso mese tutti insieme)     : 442.41 EUR = 8.85% del deposito
+  ESITO B6: REGGE  (regge persino il TETTO: non serve nessuna compensazione fra gli EA)
+== PROPFIRM SMARTGH GOLDBOT
+  PAVIMENTO (peso 1, realizzi giornalieri, NON vede l'intraday): 383.29 EUR = 7.67% del deposito (mese 2026-03-01)
+  TETTO     (peso 1, i DD dello stesso mese tutti insieme)     : 554.45 EUR = 11.09% del deposito
+  ESITO B6: NON MISURATA  (regge il pavimento 383.29 EUR ma non il tetto 554.45 EUR: il DD vero e'
+== PROPFIRM SMARTGH GTP
+  PAVIMENTO (peso 1, realizzi giornalieri, NON vede l'intraday): 581.27 EUR = 11.63% del deposito (mese 2026-04-01)
+  TETTO     (peso 1, i DD dello stesso mese tutti insieme)     : 866.18 EUR = 17.32% del deposito
+  ESITO B6: NON MISURATA  (regge il pavimento 581.27 EUR ma non il tetto 866.18 EUR: il DD vero e'
+== PROPFIRM GRSET
+  PAVIMENTO (peso 1, realizzi giornalieri, NON vede l'intraday): 263.96 EUR = 5.28% del deposito (mese 2026-06-01)
+  TETTO     (peso 1, i DD dello stesso mese tutti insieme)     : 435.63 EUR = 8.71% del deposito
+  ESITO B6: REGGE  (regge persino il TETTO: non serve nessuna compensazione fra gli EA)
+== PROPFIRM SMARTGH GOLDBOT GRSET
+  PAVIMENTO (peso 1, realizzi giornalieri, NON vede l'intraday): 388.74 EUR = 7.77% del deposito (mese 2026-04-01)
+  TETTO     (peso 1, i DD dello stesso mese tutti insieme)     : 668.60 EUR = 13.37% del deposito
+  ESITO B6: NON MISURATA  (regge il pavimento 388.74 EUR ma non il tetto 668.60 EUR: il DD vero e'

@@ -1,0 +1,69 @@
+======================================================================================================================
+  B5 / B6 DEL PACCHETTO ORO -- metodo congelato in report/PACCHETTO_ORO_B5_B6_METODO_2026-10-17.md
+  SOLA LETTURA. Soglie: B5 regge <= 0.30, smentita > 0.50 | B6 <= 1.5 x il DD del singolo peggiore
+======================================================================================================================
+
+--- GLI EA LETTI ---
+  PROPFIRM       tranche conformi 21  finestra 2025-01-01 -> 2026-10-01  netto   +1569.56 EUR  giorni con operazioni  426
+                 DD di equita' per tranche (%): 3.32, 4.96, 4.77, 2.41, 3.39, 3.73, 5.32, 6.60, 6.33, 3.04, 1.05, 2.62, 2.33, 1.65, 1.05, 2.69, 2.01, 3.20, 2.05, 1.31, 1.79   -> peggiore 6.60
+                 expert Prop Firm Gold EA | simbolo XAUUSD
+  SMARTGH        tranche conformi 21  finestra 2025-01-01 -> 2026-10-01  netto    +281.33 EUR  giorni con operazioni  192
+                 DD di equita' per tranche (%): 0.28, 0.58, 0.36, 0.17, 0.11, 0.05, 0.22, 0.15, 0.07, 0.29, 0.19, 0.24, 0.50, 0.16, 0.26, 0.30, 0.17, 0.20, 0.18, 0.26, 0.14   -> peggiore 0.58
+                 expert Smart Gold Hunter | simbolo XAUUSD
+
+--- B5: CORRELAZIONE DEI RISULTATI GIORNALIERI (variante A, netto in EUR; gli zeri CONTANO) ---
+  coppia                            n  co-att.        r 95% bootstrap        r senza   esito
+                               giorni   giorni          (giorni interi)         zeri
+  PROPFIRM / SMARTGH              457      184    0.045 [-0.058; 0.147]     0.064   B5 REGGE
+
+--- B5 contro-prova (variante B: netto / equita' a inizio giornata) ---
+  PROPFIRM / SMARTGH           r 0.046  esito B5 REGGE
+
+--- B5 nei giorni che contano (il 10% peggiore del portafoglio: 47 giorni) ---
+  PROPFIRM / SMARTGH           r -0.123 su 47 giorni
+
+--- B6: DD DI PORTAFOGLIO (una tranche per volta: ogni mese riparte da un conto vuoto di 5.000) ---
+  TUTTO IN EUR, non in percentuale. Il DD% che il report scrive nella testa e' calcolato sul PICCO di
+  equita', non sul deposito: mescolarlo con un DD in % di deposito confronta due unita' diverse (cl. 1488).
+  mesi usati (tranche conforme per TUTTI gli EA): 21
+  mese                      pavimento EUR      tetto EUR pav<=tetto
+  2025-01-01 -> 2025-02-01          41.72          62.75         OK
+  2025-02-01 -> 2025-03-01          54.18          91.90         OK
+  2025-03-01 -> 2025-04-01          47.09          65.49         OK
+  2025-04-01 -> 2025-05-01          90.38         156.28         OK
+  2025-05-01 -> 2025-06-01          75.63         112.89         OK
+  2025-06-01 -> 2025-07-01         117.73         172.88         OK
+  2025-07-01 -> 2025-08-01          82.70         112.21         OK
+  2025-08-01 -> 2025-09-01          48.36          78.47         OK
+  2025-09-01 -> 2025-10-01          57.01          96.98         OK
+  2025-10-01 -> 2025-11-01         108.36         186.20         OK
+  2025-11-01 -> 2025-12-01         215.78         292.08         OK
+  2025-12-01 -> 2026-01-01         165.53         258.11         OK
+  2026-01-01 -> 2026-02-01          68.58         138.16         OK
+  2026-02-01 -> 2026-03-01         124.01         179.24         OK
+  2026-03-01 -> 2026-04-01         124.99         202.44         OK
+  2026-04-01 -> 2026-05-01         212.71         277.62         OK
+  2026-05-01 -> 2026-06-01         321.94         352.34         OK
+  2026-06-01 -> 2026-07-01         249.63         335.61         OK
+  2026-07-01 -> 2026-08-01         125.91         171.95         OK
+  2026-08-01 -> 2026-09-01          91.51         151.44         OK
+  2026-09-01 -> 2026-10-01          83.13         147.28         OK
+  DD di equita' del singolo PEGGIORE nei mesi usati (LETTO nel report, EUR): 344.59  -> limite B6 = 516.88
+  PAVIMENTO (peso 1, realizzi giornalieri, NON vede l'intraday): 321.94 EUR = 6.44% del deposito (mese 2026-05-01)
+  TETTO     (peso 1, i DD dello stesso mese tutti insieme)     : 352.34 EUR = 7.05% del deposito
+  CONTROLLO per mese, il pavimento deve stare <= il tetto: OK su tutti i mesi
+  (peso 1/2, DOMINATO e NON FALSIFICABILE: 160.97 EUR -- con quel peso il DD combinato non supera mai la
+   media dei DD, che e' <= il peggiore, che e' < 1.5 x il peggiore: l'ipotesi e' vera per costruzione)
+  ESITO B6: REGGE  (regge persino il TETTO: non serve nessuna compensazione fra gli EA)
+
+--- SOPRAVVIVENZA (il cancello che B6 NON e') ---
+  B6 e' RELATIVA: se un EA del gruppo ha un DD mostruoso, il limite 1,5 x diventa mostruoso con lui e
+  l'ipotesi 'regge' pur descrivendo un conto morto. Quindi accanto va SEMPRE il cancello ASSOLUTO:
+  tetto di DD totale 10.0% del deposito = 500.00 EUR (il Guardian sul reale, e FTMO).
+  pavimento del portafoglio: 321.94 EUR = 6.44% del deposito -> DENTRO
+
+--- COSA NON DICONO QUESTI NUMERI ---
+  - I quattro EA sono misurati OGNUNO sul suo conto da 5.000, non INSIEME su un conto solo: margine,
+    lotto sul saldo condiviso, stop-out e Guardian non sono simulati. E' una combinazione SINTETICA.
+  - Il giorno e' quello di CHIUSURA del deal: si misura la correlazione dei REALIZZI, non dell'esposizione.
+  - Un feed solo (BCM), nessuno slippage del reale oltre alla commissione del tester.
