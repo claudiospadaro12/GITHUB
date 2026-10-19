@@ -29,7 +29,7 @@
 | Night Scalper (NoCap FX) | **0** | 0 | - | - | - | - | 1,13 milioni di rifiuti "no money" |
 | Pac Man BTC | 185 (M15: 919) | -699 (M15 -319) | 22,2% | 38% | 0,01 | 2 | EA per BTC; dipende dal periodo |
 | PolyGold Scalper | 39 | -816 | 18,1% | 38% | 0,20-0,25 | 1 | usa un'API esterna (Polymarket) [non simulabile nel tester] |
-| Prop Firm Gold EA | 55 | +550 (M15 +524) | 3,3% | 58% | 0,01 | 2 | `InpDDProtection`/regole prop non lette |
+| Prop Firm Gold EA | 55 | +550 (M15 +524) | 3,3% | 58% | 0,01 | 2 | la pagina dichiara una randomizzazione: da ripetere 3 volte nel test a fondo (S-STAB) |
 | Quantum Commander | 9 | -267 | 6,7% | 44% | 0,01 | 1 | input US30, opera poco sull'oro |
 | Quantum Emperor | 139 | +189 | 14,6% | **95%** | 0,04-0,06 | 7 | recupero x1,6; vincita media 7, **perdita media -105** |
 | Quantum iGold | 201 | **-2.450** | **70,1%** | 53% | 0,10 | 2 | |
