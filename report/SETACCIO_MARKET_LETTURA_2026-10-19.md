@@ -55,3 +55,18 @@
 
 ## Prossimo passo (da confermare con Claudio)
 Test a fondo (21 mesi, mensili + corsa continua) per gli EA di gruppo A e, a parte, per quelli del gruppo B come classe di rischio diversa. Costo in tempo misurato qui: circa 1-2 minuti per due mesi per gli EA veloci (circa 13-20 minuti per 21 mesi), Scalping Robot Pro circa 15 minuti per due mesi. Gli input del giro lungo devono risultare **uguali a quelli del setaccio** (si controlla nel report). Periodo: H1 per gli EA che ignorano il periodo del grafico; per Institutional SMC, Pac Man BTC e Ultimate Breakout serve il periodo dichiarato dal venditore (da leggere sulla pagina).
+
+## AGGIUNTA 19/10 -- classificazione con gli EA GIA' MISURATI (stessa finestra gen-feb 2026 dove esiste)
+Finestra comune **01/01-01/03/2026**. Per gli EA gia' misurati (giri mensili indipendenti, ogni mese da 5.000 EUR) il valore e' la **somma delle due tranche mensili gen+feb 2026** (non una corsa unica da due mesi: leggera differenza di metodo). **Arena** non ha una misura sulla stessa finestra (tester: solo agosto 2026, tre giorni poi stop out).
+| EA | gruppo | op. | netto gen+feb 2026 | DD equita' max | profitto/DD (descrittivo) | evidenza lunga |
+|---|---|---|---|---|---|---|
+| Gold Reaper default (H1) | A* | 72 | +1.347 | 3,0% | 8,1 | 21 mesi indip.: +7.964, 89% mesi positivi, DD mensile max 9,4% |
+| Gold Reaper set di Claudio (H1) | A* | 55 | +581 | 1,5% | 7,8 | corsa continua 21 mesi: +3.970, DD 4,77%, 18/21 mesi positivi |
+| Gold Trade Pro (D1, ipotesi) | A* | 24 | +353 | 4,1% | 1,7 | 21 mesi: +2.554, 16/21 mesi positivi |
+| Goldbot One (H1, ipotesi) | A* | 32 | -201 | 7,0% | - | 21 mesi: +1.300, 16/21 mesi positivi |
+| The Gold Phantom (H1, ipotesi) | A* | 83 | +353 | 5,1% | 1,4 | 21 mesi: +5.293, 17/21 mesi positivi |
+| The Impossible Gold (TIG, M5) | B | 176 | -1.260 | 53% | - | 18+3 mesi: -28.558, 4/21 mesi positivi, vincenti 5% |
+| Arena Nexus Grid (griglia) | B | n/d | n/d (agosto 2026: -3.063 in 3 giorni) | stop out 67,8% (tester) | - | reale 16/10: cesto -455, poi -803 |
+(* i cinque gia' misurati sono "A" per struttura: lotto 0,01-0,04, 7-11 posizioni contemporanee di lotto minimo, nessun recupero dichiarato; Gold Reaper default ha lotto fino a 0,06 e 9 posizioni, Phantom fino a 11: leggermente sopra il tetto di S-NOSCALA, 10.)
+**Nello stesso periodo** i dati dei nuovi (profitto/DD): EA Super Trend 12,7; TitanForge 6,5; Smart Gold Hunter 3,4; Nebula 3,3; Prop Firm Gold EA 3,2; Institutional SMC 2,5; Ghost Scalper 2,4; Gold Beaver 2,1; Dynamic Liquidity 1,9; Quantum Titan 1,8; My AI Gold 1,1; Wave Rider 1,0; Drifter 0,8; Golden Mirage 0,8; AI Golden Life 0,4. **Non e' una classifica di merito**: il rapporto dipende dalla taglia dei lotti e da due mesi di mercato (gennaio 2026 fu il mese di DD piu' alto del Gold Reaper).
+**Lettura onesta**: i cinque EA gia' misurati hanno **21 mesi di evidenza**, i 25 del setaccio solo **2**. Nei due mesi comuni i nuovi mostrano numeri in euro piu' alti soprattutto perche' usano lotti 5-40 volte piu' grandi (Nebula 0,3-0,46, TitanForge 0,3-0,42, EA Super Trend 0,05-0,20 contro lotto 0,01-0,02 dei cinque): a pari rischio la differenza si riduce di molto, e questo non si puo' dire senza il test lungo.
