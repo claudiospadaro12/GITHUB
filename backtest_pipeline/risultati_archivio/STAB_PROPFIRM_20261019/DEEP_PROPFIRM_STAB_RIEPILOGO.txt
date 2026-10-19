@@ -1,0 +1,6 @@
+corsa;stato;operazioni;profitto_netto_EUR;PF;DD_equita
+run1;OK;673;1621.88;1.27;486.22(8.09%)
+run2;OK;673;1655.14;1.27;501.62(7.56%)
+run3;OK;673;1530.66;1.25;523.30(8.03%)
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. La lettura (S-STAB: le soglie valgono sul PEGGIORE delle corse; controllo degli input) la fa Claudio con me sui report dentro run1, run2, run3.

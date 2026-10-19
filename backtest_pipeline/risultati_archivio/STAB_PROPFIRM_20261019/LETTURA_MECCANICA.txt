@@ -1,0 +1,4 @@
+fondo input_identici=True n=673 net=1590.96 mesi_pos=14/21 (66.7%) gen25-mag26=1148.4 giu-set26=442.6 lotti=0.01-0.01 max_pos=3 media_op=2.36 rapporto_costo=13.1
+run1  input_identici=True n=673 net=1621.88 mesi_pos=14/21 (66.7%) gen25-mag26=1128.3 giu-set26=493.5 lotti=0.01-0.01 max_pos=3 media_op=2.41 rapporto_costo=13.4
+run2  input_identici=True n=673 net=1655.14 mesi_pos=15/21 (71.4%) gen25-mag26=1222.9 giu-set26=432.2 lotti=0.01-0.02 max_pos=3 media_op=2.46 rapporto_costo=13.7
+run3  input_identici=True n=673 net=1530.66 mesi_pos=13/21 (61.9%) gen25-mag26=1089.5 giu-set26=441.1 lotti=0.01-0.02 max_pos=3 media_op=2.27 rapporto_costo=12.6
