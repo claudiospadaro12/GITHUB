@@ -1,0 +1,8 @@
+== GR GTP: 9.24% del deposito 14.59% del deposito 
+== GR GB: 6.16% del deposito 8.44% del deposito 
+== GR PH: 8.55% del deposito 11.72% del deposito 
+== GTP GB: 12.35% del deposito 16.14% del deposito 
+== GTP PH: 13.06% del deposito 18.39% del deposito 
+== GB PH: 9.60% del deposito 12.49% del deposito 
+== GR GTP GB: 12.98% del deposito 19.28% del deposito 
+== GR GB PH: 10.03% del deposito 14.75% del deposito 

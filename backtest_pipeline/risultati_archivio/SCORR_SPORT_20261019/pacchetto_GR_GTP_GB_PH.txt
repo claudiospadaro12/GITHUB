@@ -1,0 +1,96 @@
+======================================================================================================================
+  B5 / B6 DEL PACCHETTO ORO -- metodo congelato in report/PACCHETTO_ORO_B5_B6_METODO_2026-10-17.md
+  SOLA LETTURA. Soglie: B5 regge <= 0.30, smentita > 0.50 | B6 <= 1.5 x il DD del singolo peggiore
+======================================================================================================================
+
+--- GLI EA LETTI ---
+  GRSET          tranche conformi 21  finestra 2025-01-01 -> 2026-10-01  netto   +3616.52 EUR  giorni con operazioni  214
+                 DD di equita' per tranche (%): 4.00, 0.99, 1.61, 1.30, 1.47, 1.34, 3.04, 1.70, 1.99, 3.02, 3.28, 2.19, 1.10, 4.53, 2.40, 1.17, 2.05, 1.53, 2.41, 1.80, 1.40   -> peggiore 4.53
+                 expert The Gold Reaper MT5 | simbolo XAUUSD
+  GTP            tranche conformi 21  finestra 2025-01-01 -> 2026-10-01  netto   +2553.69 EUR  giorni con operazioni  172
+                 DD di equita' per tranche (%): 2.43, 0.53, 3.43, 0.75, 4.06, 6.36, 11.02, 10.16, 4.98, 3.98, 2.59, 3.39, 4.80, 2.28, 3.55, 1.46, 1.03, 3.93, 2.14, 1.61, 1.32   -> peggiore 11.02
+                 expert Gold Trade Pro MT5 | simbolo XAUUSD
+  GOLDBOT        tranche conformi 21  finestra 2025-01-01 -> 2026-10-01  netto   +1300.17 EUR  giorni con operazioni  111
+                 DD di equita' per tranche (%): 0.93, 1.01, 3.74, 1.58, 6.96, 6.55, 4.54, 4.02, 3.92, 1.76, 1.87, 2.65, 2.33, 3.08, 1.25, 2.34, 0.64, 2.85, 1.82, 2.15, 2.75   -> peggiore 6.96
+                 expert Goldbot One MT5 | simbolo XAUUSD
+  PHANTOM        tranche conformi 21  finestra 2025-01-01 -> 2026-10-01  netto   +5292.90 EUR  giorni con operazioni  232
+                 DD di equita' per tranche (%): 7.71, 2.03, 3.48, 3.69, 5.11, 5.39, 6.57, 5.63, 3.49, 4.85, 3.11, 2.39, 1.79, 3.95, 2.30, 2.82, 2.52, 3.56, 3.94, 2.35, 3.22   -> peggiore 7.71
+                 expert The Gold Phantom | simbolo XAUUSD
+
+--- B5: CORRELAZIONE DEI RISULTATI GIORNALIERI (variante A, netto in EUR; gli zeri CONTANO) ---
+  coppia                            n  co-att.        r 95% bootstrap        r senza   esito
+                               giorni   giorni          (giorni interi)         zeri
+  GRSET / GTP                     459      139    0.508 [0.296; 0.682]     0.559   NON MISURATA
+      -> l'intervallo al 95% [0.296; 0.682] contiene la soglia di smentita 0.50
+  GRSET / GOLDBOT                 458       96    0.412 [0.263; 0.555]     0.554   NON MISURATA
+      -> l'intervallo al 95% [0.263; 0.555] contiene la soglia di smentita 0.50
+  GRSET / PHANTOM                 462      203    0.583 [0.447; 0.707]     0.612   NON MISURATA
+      -> l'intervallo al 95% [0.447; 0.707] contiene la soglia di smentita 0.50
+  GTP / GOLDBOT                   458      102    0.422 [0.039; 0.723]     0.456   NON MISURATA
+      -> l'intervallo al 95% [0.039; 0.723] contiene la soglia di smentita 0.50
+  GTP / PHANTOM                   459      146    0.522 [0.371; 0.663]     0.586   NON MISURATA
+      -> l'intervallo al 95% [0.371; 0.663] contiene la soglia di smentita 0.50
+  GOLDBOT / PHANTOM               458      108    0.599 [0.445; 0.724]     0.646   NON MISURATA
+      -> l'intervallo al 95% [0.445; 0.724] contiene la soglia di smentita 0.50
+
+--- B5 contro-prova (variante B: netto / equita' a inizio giornata) ---
+  GRSET / GTP                  r 0.513  esito NON MISURATA
+  GRSET / GOLDBOT              r 0.413  esito NON MISURATA
+  GRSET / PHANTOM              r 0.581  esito NON MISURATA
+  GTP / GOLDBOT                r 0.423  esito NON MISURATA
+  GTP / PHANTOM                r 0.526  esito NON MISURATA
+  GOLDBOT / PHANTOM            r 0.602  esito NON MISURATA
+
+--- B5 nei giorni che contano (il 10% peggiore del portafoglio: 48 giorni) ---
+  GOLDBOT / PHANTOM            r 0.227 su 45 giorni
+  GRSET / GOLDBOT              r -0.240 su 45 giorni
+  GRSET / GTP                  r -0.252 su 45 giorni
+  GRSET / PHANTOM              r 0.256 su 45 giorni
+  GTP / GOLDBOT                r 0.406 su 45 giorni
+  GTP / PHANTOM                r 0.142 su 45 giorni
+
+--- B6: DD DI PORTAFOGLIO (una tranche per volta: ogni mese riparte da un conto vuoto di 5.000) ---
+  TUTTO IN EUR, non in percentuale. Il DD% che il report scrive nella testa e' calcolato sul PICCO di
+  equita', non sul deposito: mescolarlo con un DD in % di deposito confronta due unita' diverse (cl. 1488).
+  mesi usati (tranche conforme per TUTTI gli EA): 21
+  mese                      pavimento EUR      tetto EUR pav<=tetto
+  2025-01-01 -> 2025-02-01         211.97         549.76         OK
+  2025-02-01 -> 2025-03-01         524.34         696.97         OK
+  2025-03-01 -> 2025-04-01         128.86         496.31         OK
+  2025-04-01 -> 2025-05-01         103.27         394.65         OK
+  2025-05-01 -> 2025-06-01          29.50         330.10         OK
+  2025-06-01 -> 2025-07-01         152.13         627.31         OK
+  2025-07-01 -> 2025-08-01         231.34         523.81         OK
+  2025-08-01 -> 2025-09-01         117.64         398.67         OK
+  2025-09-01 -> 2025-10-01         166.88         444.76         OK
+  2025-10-01 -> 2025-11-01         485.10         754.75         OK
+  2025-11-01 -> 2025-12-01         155.24         238.00         OK
+  2025-12-01 -> 2026-01-01         336.91         621.94         OK
+  2026-01-01 -> 2026-02-01           0.00         385.12         OK
+  2026-02-01 -> 2026-03-01         570.46         886.08         OK
+  2026-03-01 -> 2026-04-01          70.18        1021.75         OK
+  2026-04-01 -> 2026-05-01         878.55        1310.28         OK
+  2026-05-01 -> 2026-06-01         844.43        1093.06         OK
+  2026-06-01 -> 2026-07-01         261.23         773.71         OK
+  2026-07-01 -> 2026-08-01         283.43         702.47         OK
+  2026-08-01 -> 2026-09-01          93.67         567.24         OK
+  2026-09-01 -> 2026-10-01          66.13         514.29         OK
+  DD di equita' del singolo PEGGIORE nei mesi usati (LETTO nel report, EUR): 572.97  -> limite B6 = 859.46
+  PAVIMENTO (peso 1, realizzi giornalieri, NON vede l'intraday): 878.55 EUR = 17.57% del deposito (mese 2026-04-01)
+  TETTO     (peso 1, i DD dello stesso mese tutti insieme)     : 1310.28 EUR = 26.21% del deposito
+  CONTROLLO per mese, il pavimento deve stare <= il tetto: OK su tutti i mesi
+  (peso 1/4, DOMINATO e NON FALSIFICABILE: 219.64 EUR -- con quel peso il DD combinato non supera mai la
+   media dei DD, che e' <= il peggiore, che e' < 1.5 x il peggiore: l'ipotesi e' vera per costruzione)
+  ESITO B6: SMENTITA  (anche il pavimento 878.55 EUR supera il limite 859.46 EUR)
+
+--- SOPRAVVIVENZA (il cancello che B6 NON e') ---
+  B6 e' RELATIVA: se un EA del gruppo ha un DD mostruoso, il limite 1,5 x diventa mostruoso con lui e
+  l'ipotesi 'regge' pur descrivendo un conto morto. Quindi accanto va SEMPRE il cancello ASSOLUTO:
+  tetto di DD totale 10.0% del deposito = 500.00 EUR (il Guardian sul reale, e FTMO).
+  pavimento del portafoglio: 878.55 EUR = 17.57% del deposito -> SFONDATO: il conto sarebbe stato chiuso dal Guardian
+
+--- COSA NON DICONO QUESTI NUMERI ---
+  - I quattro EA sono misurati OGNUNO sul suo conto da 5.000, non INSIEME su un conto solo: margine,
+    lotto sul saldo condiviso, stop-out e Guardian non sono simulati. E' una combinazione SINTETICA.
+  - Il giorno e' quello di CHIUSURA del deal: si misura la correlazione dei REALIZZI, non dell'esposizione.
+  - Un feed solo (BCM), nessuno slippage del reale oltre alla commissione del tester.
