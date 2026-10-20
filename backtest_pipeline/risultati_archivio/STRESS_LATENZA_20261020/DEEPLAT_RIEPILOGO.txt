@@ -1,0 +1,5 @@
+EA;mesi_OK_su_21;somma_mensile_EUR;mesi_positivi;DD_peggiore_mese_pct;continua_stato;continua_netto_EUR;continua_DD
+Prop Firm Gold EA.ex5;2;2775.74;2;8.48;-;-;-
+Smart Gold Hunter.ex5;1;269.82;1;0.74;-;-;-
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. La lettura vera (netto e PF a 200 e 1000 ms contro il ritardo zero, controllo degli input) la fa Claudio con me sui report dentro le cartelle DEEPLAT_<nome>, secondo report/MARKET_STRESS_LATENZA_ATTESE_2026-10-20.md.
