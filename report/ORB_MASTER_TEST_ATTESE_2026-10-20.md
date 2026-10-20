@@ -12,7 +12,7 @@ Preset **prop firm** (`MaxRisk_Strategy=2`, `PropFirmMaxDailyDD=4.0`), finestra 
 **Previsioni dichiarate ORA**
 - **O-A**: in entrambe le passate l'EA apre almeno una operazione su ciascuno dei tre indici (SPXUSD, U30USD, NASUSD). Se uno non opera: simbolo o ticks non riconosciuti, misura mancante per quell'indice.
 - **O-B**: le passate T1 e T2 sono **DIVERSE** (operazioni e orari di ingresso non identici): gli offset agiscono nel tester come scrive la pagina. Se identiche al centesimo, gli offset sono inerti con questi input e la pagina e' fuorviante.
-- **O-C**: con offset 1/1 il primo ingresso di ogni giornata USA cade a ridosso della cash (14:30 server fino a domenica 02/11 compresa... fino al 01/11, 15:30 dal 03/11); con 2/3 gli ingressi sono spostati di 1-2 ore. Verificabile dall'ora dei deal.
+- **O-C**: con offset 1/1 il primo ingresso di ogni giornata USA cade a ridosso della cash USA: **14:30 server fino a venerdi' 31/10/2025, 15:30 server da lunedi' 03/11/2025** (gli USA tornano all'ora solare domenica 02/11; BCM e' UTC+1 fisso); con 2/3 gli ingressi sono spostati di 1-2 ore. Verificabile dall'ora dei deal.
 - **O-D**: nessun "INPUT NON APPLICATI" (tutti i 57+ valori imposti coincidono col report).
 - **O-E**: durata per passata (2 mesi) sotto 60 minuti [NON MISURATO: serve a decidere se la fase 2 e' fattibile].
 - **O-F**: nessuno stop-out e nessun "no money" nel giornale.
