@@ -23,3 +23,11 @@ Stesse regole, con queste differenze scritte PRIMA di vederlo:
 - **Giudizio di scorrelazione**: S-CORR <= 0,50 con Prop Firm e Gold Reaper come sempre; scorrelato dall'oro NON vuol dire che guadagni: l'edge si misura con le stesse soglie (S-M, S-H, S-DD, costo doppio).
 - **Valutazione bassa sul Market**: prima del test si leggono i commenti negativi (Claudio li incolla): se dicono "perde", "non apre", "serve il set del venditore" o "solo su un broker", lo scrivo come ipotesi da verificare, non come verdetto.
 - **Previsione D1**: DayTrade Pro passa meno soglie di The ORB Master; fiducia bassa.
+
+## Aggiunta (20/10): i file .set del venditore (dal rischio piu' basso al piu' alto)
+Regole scritte PRIMA di vedere un set:
+- Il test dei set serve a **misurare**, non a scegliere il piu' redditizio: ogni set e' valutato con le STESSE soglie S-*; fra quelli che le passano tutte non si sceglie per profitto. **Il livello di rischio da usare e' una decisione di Claudio** (taglia), non mia.
+- I set di uno stesso EA non sono prove indipendenti: cambiano soprattutto lotto/rischio e la stessa strategia produce gli stessi mesi. Che "passino tutti" dice poco di piu' di "passa il base".
+- Prima fase: **una corsa continua per set** (circa 3 minuti ciascuna); i set che non superano S-DD o il costo doppio si scartano senza test lungo; i superstiti fanno poi le 21 tranche mensili.
+- Gli input si IMPONGONO dal .ini e si **verificano valore per valore nel report** (un nome di input sbagliato il tester lo ignora in silenzio e si misura il default: errore GRC del 19/10). Per questo servono i file .set originali.
+- Previsione **S1**: aumentando il rischio il netto cresce quasi in proporzione ma il DD cresce piu' che in proporzione nei set alti; il set piu' alto non passa S-DD (<= 10% dal deposito).
