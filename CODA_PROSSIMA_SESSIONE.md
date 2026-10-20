@@ -1,5 +1,11 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # 🕑 20/10 — **LISTA TEST NASDAQ APERTURA (770260) PER IL PC DI BACKTEST** — 8 voci (T1-T8)
+>
+> ## 🚦 POSTO IN CODA: **dopo** le righe gia' pronte (Quantum iGold/PolyGold, continue GTP/Goldbot, Gold Reaper 80K). Una macchina, un lavoro.
+> ## 📄 `report/LISTA_TEST_NASDAQ_APERTURA_PC_BACKTEST_2026-10-20.md` (origine: `report/PROVA_SALA_CONSIGLIO_NASDAQ_APERTURA_2026-10-20.md`)
+> ## ⏰ **T2 (orologio R274a-d) prima di domenica 01/11**: serve il via di Claudio, il lettore e la riga di lancio (nessuna e' autorizzata da questo blocco).
+
 > # 🇯🇵 21/08 — **R95 (SWEEP + RECLAIM JPY) E' PREPARATO, CRITERI IN BOZZA** — 30 passate
 >
 > ## 🚦 POSTO IN CODA: **ultimo.** Dietro R92, R93, R94. Una macchina, un lavoro.
