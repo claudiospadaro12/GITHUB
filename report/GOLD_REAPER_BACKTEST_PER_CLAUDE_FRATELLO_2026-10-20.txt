@@ -1,0 +1,26 @@
+ISTRUZIONI PER UN BACKTEST DI "THE GOLD REAPER MT5" (EA di terzi dal MQL5 Market, versione demo, solo Strategy Tester)
+
+REGOLE: SOLO tester, nessun conto reale, nessun grafico con l'EA attaccato, AllowLiveTrading spento. Non modificare nulla del terminale oltre al test. Se un passo non e' chiaro o un numero non torna, FERMATI e chiedi: non indovinare e non ammorbidire i risultati.
+
+IMPOSTAZIONI DEL TESTER (uguali per tutti i giri)
+- Expert: The Gold Reaper MT5 (dal Market). Simbolo: XAUUSD (usa il nome esatto sul tuo broker, es. XAUUSD o GOLD).
+- Periodo del grafico: H1. Finestra: 2025.01.01 -> 2026.10.01 (UNA corsa continua).
+- Modello: "Ogni tick basato su tick reali" (qualita storico: deve risultare 100% o dillo). Ritardo esecuzione: nessuno. Ottimizzazione: spenta. Visual: spento.
+- Deposito iniziale: 5000 (nella valuta del tuo conto, dichiaralo). Leva 1:100.
+
+I DUE GIRI (cambiano SOLO questi quattro input; tutti gli altri restano ai valori di default dell'EA)
+- GIRO A "set Claudio":  TradeFrequency=2   MaxAllowedDD=9.0   PropFirmMaxDailyDD=4.0   OnlyUp=false
+- GIRO B "default":      TradeFrequency=5   MaxAllowedDD=30.0  PropFirmMaxDailyDD=0.0   OnlyUp=true
+ATTENZIONE (errore gia fatto): il tester RIUSA l'ultimo set di input salvato per quell'EA. Imposta i quattro input a mano o da file .set a OGNI giro e poi APRI il report e leggi la sezione "Dati in ingresso" / Inputs PRIMA di guardare qualunque numero: i quattro valori devono essere quelli del giro. Se non coincidono, il giro e' da scartare.
+
+COSA RIPORTARE PER OGNI GIRO (copia dal report, non a memoria)
+profitto netto; profit factor; numero operazioni; % vincenti; drawdown massimo di equity (assoluto e %) e drawdown dal deposito; lotto minimo e massimo usati; massimo di posizioni aperte insieme; quanti mesi di calendario chiudono in positivo; qualita storico; spread medio del simbolo sul tuo broker; i quattro input letti dal report.
+
+CON COSA CONFRONTARE (stesso EA, mio tester BCM Markets, ticks reali 100%, 5000 EUR, 21 mesi) -- NON si aspetta lo stesso numero, cambiano broker, feed e spread
+- GIRO A (set Claudio, continua): netto +3.969,57; 791 operazioni; PF 2,88; vincenti 74,72%; DD equity 4,77% dal picco (2,67% dal deposito); lotti 0,01-0,02; 18 mesi positivi su 21.
+- GIRO B (default): NON misurato in continua da me. A mesi indipendenti (21 mesi da 5000 ciascuno) il default ha dato +7.963,73 con 1.019 operazioni e lotti fino a 0,06.
+- Se i tuoi numeri sono molto diversi, dillo e prova a spiegare con broker/spread/feed, ma NON concludere che l'EA e' buono o cattivo da una sola corsa: e' un controllo incrociato, non una prova.
+
+NOTE DI ONESTA
+- Un backtest non e' un risultato dal vivo (nessuno slippage reale, nessun requote, spread del tester). L'EA e' di un venditore, la sua demo gira solo nel tester; la versione a pagamento potrebbe differire.
+- Il rendimento dichiarato dal venditore (+312% su Myfxbook) NON e' stato replicato da me con queste impostazioni: non assumerlo.
