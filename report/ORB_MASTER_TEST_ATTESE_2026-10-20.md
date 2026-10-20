@@ -17,3 +17,20 @@ Preset **prop firm** (`MaxRisk_Strategy=2`, `PropFirmMaxDailyDD=4.0`), finestra 
 - **O-E**: durata per passata (2 mesi) sotto 60 minuti [NON MISURATO: serve a decidere se la fase 2 e' fattibile].
 - **O-F**: nessuno stop-out e nessun "no money" nel giornale.
 ## Fase 2 (solo dopo la lettura della fase 1): corsa continua 01/01/2025 - 01/10/2026 con l'offset corretto dalla fase 1; poi soglie S-N, S-M, S-H, S-DD, S-NOSCALA, S-COSTO, costo doppio, S-ORA (+/-1 ora), S-CORR con Prop Firm e Gold Reaper, S-PORT (stesse soglie e basi gia' scritte). Non si sceglie il preset piu' redditizio.
+
+---
+# AGGIORNAMENTO 20/10 sera: decisione di Claudio e previsioni sulla corsa continua (scritte PRIMA dei numeri)
+
+**Decisione di Claudio**: "utilizziamo i set della Prop Firm cosi' vediamo come si e' comportato in passato, con tutti i simboli dell'EA", cioe' non aspettare la fase 2. La riga lancia in sequenza **T1 + T2 (sonda 2 mesi, offset 1/1 e 2/3) e T3 = corsa continua 01/01/2025-01/10/2026 con offset 1/1** (valore corretto per BCM UTC+1 fisso, dichiarato PRIMA di vedere la sonda). **T4 (continua con 2/3) NON parte**: solo se T1 e T2 risultano diverse e serve il confronto.
+**DAX non incluso in questo giro**: il nome dell'input del simbolo DAX nella v3.4 non e' noto (i set del 23/08 non lo hanno) e senza di esso non lo si puo' imporre; il suo preset prop non c'e'. Dal report T1 si leggono i nomi degli input v3.4; il DAX si prova in un secondo giro, **con i parametri di default del venditore e scritto cosi'**, NON come "preset prop firm". Questa e' una limitazione, non un risultato.
+**Confronto**: con la tabella memorizzata `CONFRONTO_DATI_MEMORIZZATI_80K_2026-10-20.md` (Prop Firm, Gold Reaper a 80K).
+
+## Previsioni sulla corsa continua T3 (3 indici, preset prop, offset 1/1, 80K)
+- **O-G**: operazioni >= 150 (S-N) e almeno 40 per ciascuno dei tre indici. Fiducia circa 70%.
+- **O-H**: PF fra 1,05 e 1,8; netto positivo. Fiducia circa 60% (nessun dato precedente: i set sono del venditore).
+- **O-I**: DD di equity in % degli 80.000 iniziali <= 10% e perdita dal deposito <= 10%. Fiducia circa 60% (`MaxRisk_Strategy=2` e' dimensionato dal DD, non so a quale base).
+- **O-J**: correlazione giornaliera dei realizzi con Prop Firm e con Gold Reaper <= 0,3 (valore assoluto); gli indici contro l'oro. Fiducia circa 75%. S-CORR sogli 0,5.
+- **O-K**: mesi positivi >= 60% (S-M). Fiducia circa 45%.
+- **O-L**: S-NOSCALA (lotto max/min <= 3, <= 10 posizioni): lotto sizing a rischio fisso da DD -> probabile rapporto > 3 [incerto, fiducia 40% che passi].
+- **O-M**: durata T3 sotto 16 ore. Fiducia 80%.
+Letture da fare sempre: DD sia dal picco sia come % degli 80.000 iniziali; confronto con tutta la tabella memorizzata; S-ORA e costo doppio solo se T3 passa i cancelli base.
