@@ -16,3 +16,10 @@ Nome esatto dell'EA, simbolo/i dichiarati, timeframe dichiarato, orari di sessio
 - **O1**: r (giornaliero) ORB / Prop Firm <= 0,30; ORB / Gold Reaper fra 0,20 e 0,50.
 - **O2**: meno di 400 operazioni in 21 mesi (circa una al giorno al massimo) e DD mensile < 15,2%.
 - **O3**: S-ORA fallisce per almeno una delle due direzioni (ORB sensibile all'orario).
+
+## Aggiunta (20/10): DayTrade Pro (stesso venditore, altri simboli, poco quotato)
+Stesse regole, con queste differenze scritte PRIMA di vederlo:
+- **Simboli diversi dall'oro**: gli script di test hanno XAUUSD scritto dentro; serve una variante per simbolo. Prima si verifica che il simbolo esista sul BCM, che il tester abbia i **ticks reali al 100%** su 21 mesi (altrimenti la tranche non conta) e il nome esatto (suffissi). **S-COSTO si rifa con lo spread di QUEL simbolo** letto dal report/giornale, non con i 0,18 EUR dell'oro.
+- **Giudizio di scorrelazione**: S-CORR <= 0,50 con Prop Firm e Gold Reaper come sempre; scorrelato dall'oro NON vuol dire che guadagni: l'edge si misura con le stesse soglie (S-M, S-H, S-DD, costo doppio).
+- **Valutazione bassa sul Market**: prima del test si leggono i commenti negativi (Claudio li incolla): se dicono "perde", "non apre", "serve il set del venditore" o "solo su un broker", lo scrivo come ipotesi da verificare, non come verdetto.
+- **Previsione D1**: DayTrade Pro passa meno soglie di The ORB Master; fiducia bassa.
