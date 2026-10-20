@@ -4,7 +4,7 @@
 >
 > ## 🚦 POSTO IN CODA: **dopo** le righe gia' pronte (Quantum iGold/PolyGold, continue GTP/Goldbot, Gold Reaper 80K). Una macchina, un lavoro.
 > ## 📄 `report/LISTA_TEST_NASDAQ_APERTURA_PC_BACKTEST_2026-10-20.md` (origine: `report/PROVA_SALA_CONSIGLIO_NASDAQ_APERTURA_2026-10-20.md`)
-> ## ⏰ **T2 (orologio R274a-d) prima di domenica 01/11**: serve il via di Claudio, il lettore e la riga di lancio (nessuna e' autorizzata da questo blocco).
+> ## ⏰ **T1+T2 (compilazione + orologio R274a-d) prima di domenica 01/11**: RIGA PRONTA `backtest_pipeline/righe/RIGA_R274_OROLOGIO_NASDAQ.txt` (20/10, solo cancello meccanico, non provata su Windows). **Manca il LETTORE dei per-trade** (R274a par. 4: va scritto e congelato PRIMA di aprire lo zip).
 
 > # 🇯🇵 21/08 — **R95 (SWEEP + RECLAIM JPY) E' PREPARATO, CRITERI IN BOZZA** — 30 passate
 >
