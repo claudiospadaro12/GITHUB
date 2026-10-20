@@ -1,0 +1,7 @@
+EA                              op     netto | netto / PF con costo extra K x spread per operazione (K=0 base; 1 = costo doppio; 2 = triplo; 4 = quintuplo) | K di pareggio
+PropFirm_5k                    673      1591 | K0      1591 / 1.26  K1      1470 / 1.24  K2      1349 / 1.22  K4      1106 / 1.17 | pareggio K=13.1
+PropFirm_80k                   673     34130 | K0     34130 / 1.25  K1     31254 / 1.22  K2     28378 / 1.20  K4     22627 / 1.16 | pareggio K=11.9
+SmartGoldHunter                237       276 | K0       276 / 1.75  K1       233 / 1.60  K2       190 / 1.46  K4       105 / 1.23 | pareggio K=6.5
+GhostScalper                  2651      1215 | K0      1215 / 1.47  K1       738 / 1.26  K2       261 / 1.08  K4      -694 / 0.81 | pareggio K=2.5
+QuantumTitan                   462     10987 | K0     10987 / 2.21  K1      9210 / 1.97  K2      7433 / 1.75  K4      3880 / 1.35 | pareggio K=6.2
+GoldReaper_set                 791      3970 | K0      3970 / 2.89  K1      3816 / 2.79  K2      3663 / 2.68  K4      3356 / 2.47 | pareggio K=25.9
