@@ -1,3 +1,6 @@
+## 20/10 sera - DATI MEMORIZZATI PER IL CONFRONTO
+Vedi `report/CONFRONTO_DATI_MEMORIZZATI_80K_2026-10-20.md` (Prop Firm / SGH / Gold Reaper a 80K, portafoglio, S-PORT). The ORB Master va confrontato con questa tabella.
+
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
 > # 🕑 20/10 — **LISTA TEST NASDAQ APERTURA (770260) PER IL PC DI BACKTEST** — 8 voci (T1-T8)
