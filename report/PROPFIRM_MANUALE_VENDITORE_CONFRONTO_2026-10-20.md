@@ -18,3 +18,11 @@ H1 (non M30), **ticks reali** (non OHLC 1 minuto), input NON imposti = default/u
 
 ## Prova proposta (non lanciata)
 Prop Firm, XAUUSD **M30**, 80K, 01/01/2025-01/10/2026, input del venditore imposti (basso rischio; protezione giornaliera 4% ON e OFF), in due modelli: ticks reali e OHLC 1 minuto. L'esecuzione costa pochi minuti (5K: 151 s). Prima servono i nomi/valori esatti degli enum di `InpRiskType/InpRiskLevel/InpBaseMoneyMode` (dal pannello input dell'EA o da un .set).
+
+---
+## Aggiunta (20/10 sera): pagina del Market del Prop Firm Gold EA (2 screenshot, terminale BCM demo 50503392)
+- "La strategia **non si basa su indicatori o timeframe fissi**" e ottimizzazione minima: il timeframe (H1 contro M30) conta probabilmente poco; **ridimensiono il punto 1 della nota sopra** [non misurato: lo dice il venditore, non lo abbiamo verificato].
+- Il rischio si sceglie con un livello **Basso / Medio / Alto** (poi % manuale o lotto fisso): `InpRiskLevel=0` e' verosimilmente il primo livello (Basso) [NON VERIFICATO, enum non letto]. Resta da sapere se il lotto 0,16-0,31 a 80K corrisponda a quel livello.
+- Funzioni per prop firm: randomizzazione di entrate/uscite, ritardo sulla prima operazione, protezione giornaliera (chiude tutte le posizioni), modalita' FIFO. Nei nostri test erano tutte spente/a zero.
+- Orario broker: "progettato per broker GMT+2/GMT+3; se non sei sicuro dell'orario del server contattami": BCM e' UTC+1 fisso, si puo' chiedere al venditore se l'EA usa l'orario del server.
+- Prezzo sul Market: "pochissime copie a questo prezzo, prezzo finale 999 USD" (frase di marketing, non una prova).
