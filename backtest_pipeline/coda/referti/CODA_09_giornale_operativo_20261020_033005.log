@@ -1,0 +1,254 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-20 03:32:55  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261019   (3581.5 KB, ultima scrittura 2026-10-19 23:44) ---
+    righe totali: 16324
+    RIGHE DI ORDINE / DEAL: 3904
+      HG000:06:00.636ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market buy 0.80 E50EUR sl: 6112.30 tp: 6194.81 [invalid stops]
+      IG000:10:00.160Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      KE000:10:00.160Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      CN000:10:01.255ABTG_PunteLarry (XAUUSD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      HM000:10:01.256Martingale Pulse (XAUUSD,M5)Daily profit limit of 1000.0 reached. Closing all positions and stopping for the day.
+      ES000:10:01.256Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=-115.168978490874 isSellhigh=false isBuylow=false countshiftback=-1
+      HG000:10:01.256Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=-34.779318993878405 isSellhigh=false isBuylow=true countshiftback=0
+      NO000:10:01.256Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=173.48045400403862 isSellhigh=false isBuylow=false countshiftback=0
+      NP000:10:01.256Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=204.32030266938455 isSellhigh=false isBuylow=false countshiftback=0
+      IS000:10:01.256Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=146.5468684462394 isSellhigh=false isBuylow=false countshiftback=0
+      FJ000:10:01.256Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=94.36457896417778 isSellhigh=true isBuylow=false countshiftback=0
+      QE000:10:01.256Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=6.909719309442153 isSellhigh=true isBuylow=false countshiftback=1
+      ME000:10:01.256Gold Zone EA (XAUUSD,M15)shift=4 emaStrength=64.27314620632387 isSellhigh=true isBuylow=false countshiftback=2
+      NO000:10:01.256Gold Zone EA (XAUUSD,M15)shift=3 emaStrength=21.515430804174684 isSellhigh=false isBuylow=false countshiftback=0
+      JE000:10:01.262Gold Zone EA (XAUUSD,M15)shift=2 emaStrength=-32.3230461305684 isSellhigh=false isBuylow=false countshiftback=0
+      MJ000:10:30.561Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      CF000:10:30.561Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      LL000:11:01.163Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      KS000:11:01.164Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      FO000:11:31.135Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      LM000:11:31.135Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      MI000:12:01.206Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      OF000:12:01.206Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      DL000:12:31.402Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      NP000:12:31.402Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      EF000:13:02.349Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      GE000:13:02.349Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      II000:13:32.443Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      OG000:13:32.443Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      KS000:14:03.130Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      QH000:14:03.130Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      NF000:14:33.149Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY blocked: broker trading session closed
+      LJ000:14:33.150Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL blocked: broker trading session closed
+      CP000:15:00.054Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=-34.779318993878405 isSellhigh=false isBuylow=true countshiftback=0
+      JE000:15:00.054Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=173.48045400403862 isSellhigh=false isBuylow=false countshiftback=0
+      OG000:15:00.054Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=204.32030266938455 isSellhigh=false isBuylow=false countshiftback=0
+      ND000:15:00.054Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=146.5468684462394 isSellhigh=false isBuylow=false countshiftback=0
+      KR000:15:00.054Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=94.36457896417778 isSellhigh=true isBuylow=false countshiftback=0
+      NR000:15:00.054Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=6.909719309442153 isSellhigh=true isBuylow=false countshiftback=1
+      LR000:15:00.054Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=64.27314620632387 isSellhigh=true isBuylow=false countshiftback=2
+      ... altre 3864 righe non stampate (tetto).
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261020   (521.6 KB, ultima scrittura 2026-10-20 03:30) ---
+    righe totali: 2374
+    RIGHE DI ORDINE / DEAL: 611
+      CI000:05:00.431Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=187857 | role=FLOW | active L0 | lot=0.0100 | entry=4141.14000
+      OE000:05:01.493Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=24.824520790025417 isSellhigh=false isBuylow=false countshiftback=-1
+      FR000:05:01.493Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=3.549680526703014 isSellhigh=false isBuylow=true countshiftback=0
+      MQ000:05:01.493Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=-52.6335463155192 isSellhigh=false isBuylow=false countshiftback=0
+      CE000:05:01.493Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=-59.75569754373282 isSellhigh=false isBuylow=false countshiftback=0
+      RE000:05:01.493Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=-78.83713169585462 isSellhigh=false isBuylow=false countshiftback=0
+      FG000:05:01.493Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=-40.891421130527306 isSellhigh=false isBuylow=false countshiftback=0
+      JD000:05:01.493Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=-131.26094742037822 isSellhigh=false isBuylow=false countshiftback=0
+      CD000:05:01.493Gold Zone EA (XAUUSD,M15)shift=4 emaStrength=-120.84063161355516 isSellhigh=false isBuylow=false countshiftback=0
+      KF000:05:01.493Gold Zone EA (XAUUSD,M15)shift=3 emaStrength=-83.89375440901858 isSellhigh=false isBuylow=false countshiftback=0
+      GI000:05:01.493Gold Zone EA (XAUUSD,M15)shift=2 emaStrength=-23.92916960598086 isSellhigh=false isBuylow=false countshiftback=0
+      HE000:05:45.374HedgingMartingale (XAUUSD,H1)TRADE ALLOWED: BUY trade permitted by magic number rules
+      JF000:05:45.374HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      LD000:05:45.374HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      MS000:05:45.456HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992452
+      GM000:05:45.457HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      GO000:05:45.482HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992453
+      NM000:05:45.482HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      HO000:05:45.482HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      CL000:05:45.519HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992454
+      FP000:05:45.520HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      LD000:05:45.557HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992455
+      EP000:05:45.557HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      OJ000:05:45.557HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      HI000:05:45.596HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992456
+      QG000:05:45.596HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      LI000:05:45.621HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992457
+      IG000:05:45.621HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      CE000:05:45.621HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      KR000:05:45.649HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992458
+      PJ000:05:45.649HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      KM000:05:45.675HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992459
+      PP000:07:01.750Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=187858 | role=FLOW | active L0 | lot=0.0100 | entry=4144.07000
+      HH000:07:23.488Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=187859 | role=FLOW | active L0 | lot=0.0100 | entry=4141.85000
+      HG000:10:35.988Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=187858 | role=FLOW | active L0 | lot=0.0100 | entry=4142.92000
+      LL000:15:01.189Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=3.549680526703014 isSellhigh=false isBuylow=true countshiftback=0
+      DH000:15:01.189Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=-52.6335463155192 isSellhigh=false isBuylow=false countshiftback=0
+      CH000:15:01.189Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=-59.75569754373282 isSellhigh=false isBuylow=false countshiftback=0
+      PK000:15:01.189Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=-78.83713169585462 isSellhigh=false isBuylow=false countshiftback=0
+      NI000:15:01.189Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=-40.891421130527306 isSellhigh=false isBuylow=false countshiftback=0
+      ... altre 571 righe non stampate (tetto).
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751
+=====================================================================
+
+--- GIORNO 20261017   (12.1 KB, ultima scrittura 2026-10-17 23:47) ---
+    righe totali: 48
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (7.6 KB, ultima scrittura 2026-10-18 14:47) ---
+    righe totali: 30
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261006   (1.7 KB, ultima scrittura 2026-10-06 20:42) ---
+    righe totali: 6
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QJ020:42:10.503ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20261017   (729 KB, ultima scrittura 2026-10-17 23:51) ---
+    righe totali: 1056
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (463.2 KB, ultima scrittura 2026-10-18 15:06) ---
+    righe totali: 671
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261019   (4508.8 KB, ultima scrittura 2026-10-19 23:56) ---
+    righe totali: 13440
+    RIGHE DI ORDINE / DEAL: 11805
+      GH009:47:48.488Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENV | phase=1 tester=0 login=10105439 server=BCMMarkets-Server symbol=XAUUSD currency=EUR base=0.0100 leverage=500 profit_probe_ok=1 loss_probe_ok=1 move1_gain=89.21000000 move1_loss=-89.21000000
+      DP009:59:34.406Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4173.06000
+      QK009:59:34.877Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4173.09000
+      PE009:59:35.880Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4173.14000
+      LO009:59:36.823Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.99000
+      OJ009:59:37.834Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.95000
+      CD009:59:38.879Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.95000
+      HN009:59:39.888Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4173.01000
+      HI009:59:40.874Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.70000
+      PS009:59:41.895Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.69000
+      IN009:59:42.896Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.68000
+      CH009:59:43.886Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.68000
+      IR009:59:44.808Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.30000
+      FM009:59:45.814Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.26000
+      DG009:59:46.878Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.27000
+      MQ009:59:47.898Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.07000
+      RL009:59:48.864Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.04000
+      GF009:59:49.865Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.10000
+      LQ009:59:50.895Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.01000
+      NK009:59:51.893Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4171.98000
+      QE009:59:52.811Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.15000
+      KG009:59:53.881Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.33000
+      GL009:59:54.817Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4174.47000
+      KL009:59:54.842Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.39000
+      MK009:59:55.894Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4174.45000
+      GQ009:59:55.920Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.37000
+      OF009:59:56.766Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4174.37000
+      NF009:59:56.795Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.28000
+      IM009:59:57.775Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4174.21000
+      NJ009:59:57.792Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.13000
+      QH009:59:58.882Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4174.10000
+      HO009:59:58.905Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.01000
+      FG009:59:59.787Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4174.01000
+      ND009:59:59.815Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4171.92000
+      CR010:00:00.829Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4173.73000
+      QI010:00:00.856Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4171.65000
+      DN010:00:01.778Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4173.76000
+      RN010:00:01.796Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4171.68000
+      DM010:00:02.882Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=158602 | role=FLOW | active L0 | lot=0.0100 | entry=4172.42000
+      JE010:00:03.824Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=158601 | role=FLOW | active L0 | lot=0.0100 | entry=4174.39000
+      ... altre 11765 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      CM023:55:06.228ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=6.70%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+--- GIORNO 20261020   (13.3 KB, ultima scrittura 2026-10-20 03:30) ---
+    righe totali: 46
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      EJ003:30:07.058ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=0.00%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
