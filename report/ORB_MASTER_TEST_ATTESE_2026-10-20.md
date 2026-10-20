@@ -34,3 +34,14 @@ Preset **prop firm** (`MaxRisk_Strategy=2`, `PropFirmMaxDailyDD=4.0`), finestra 
 - **O-L**: S-NOSCALA (lotto max/min <= 3, <= 10 posizioni): lotto sizing a rischio fisso da DD -> probabile rapporto > 3 [incerto, fiducia 40% che passi].
 - **O-M**: durata T3 sotto 16 ore. Fiducia 80%.
 Letture da fare sempre: DD sia dal picco sia come % degli 80.000 iniziali; confronto con tutta la tabella memorizzata; S-ORA e costo doppio solo se T3 passa i cancelli base.
+
+---
+# AGGIORNAMENTO V2 (20/10 notte): giro corretto dopo la lettura del V1 (previsioni scritte PRIMA dei numeri)
+Lettura del V1: `ORB_MASTER_V1_LETTURA_2026-10-20.md`. Errori miei corretti (offset duplicati nel .ini; due input inesistenti nella v3.4). Tre corse continue 01/01/2025-01/10/2026, EURUSD M15, 80K, preset prop (`MaxRisk_Strategy=2`, `PropFirmMaxDailyDD=4.0`), **DAX incluso con `DAX_Symbol=D30EUR`** (parametri DAX = default del venditore, NON preset prop): T1 `AutoGMT_Backtest=true` offset 2/3 (modo venditore); T2 `AutoGMT_Backtest=false` offset 1/1; T3 `AutoGMT_Backtest=false` offset 2/3.
+- **V2-1**: tutti gli input imposti applicati (nessun INPUT NON APPLICATO) nelle tre corse. Fiducia 80%.
+- **V2-2**: il DAX opera in T1 (>= 40 operazioni su D30EUR). Fiducia 65% (rischio: ticks D30EUR non disponibili o orari 09:00-10:30 non centrati).
+- **V2-3**: in T1 le operazioni sui tre indici USA sono entro +/-3% di quelle del V1 (345/340/447). Fiducia 80%.
+- **V2-4**: T1, T2 e T3 NON sono identiche (gli input d'orologio agiscono con `AutoGMT_Backtest=false`). Fiducia 65%. Se T2 = T3 al centesimo, gli offset sono inerti.
+- **V2-5**: T3 (offset 2/3 sbagliati per BCM) entra circa un'ora piu' tardi di T2 in estate. Fiducia 55%.
+- **V2-6**: PF di T1 totale fra 0,85 e 1,15; PF >= 1,3 improbabile (15%). Se confermato, si archivia il preset prop come "nessun vantaggio visibile" e non si prova il resto per scegliere il migliore.
+- Soglie invariate (S-N, S-M, S-H, S-DD, S-NOSCALA, S-COSTO, S-CORR, S-PORT) e confronto con `CONFRONTO_DATI_MEMORIZZATI_80K_2026-10-20.md`.

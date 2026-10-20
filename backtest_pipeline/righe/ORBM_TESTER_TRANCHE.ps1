@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_ORBM_TESTER_TRANCHE_v1
+#  MARCATORE_ORBM_TESTER_TRANCHE_v2
 #  ORBM_TESTER_TRANCHE.ps1 -Ex5Nome '<file>.ex5' -- TEST A FONDO di UN EA del MQL5 Market (demo, solo tester) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ.
 #  VARIANTE ORB MASTER del DEEP_TESTER_TRANCHE: grafico EURUSD M15, deposito 80000, preset imposto (57 input + simboli BCM + offset GMT per passata). T1/T2 = sonda 2 mesi (offset 1/1 e 2/3), T3/T4 = corsa continua 21 mesi. Previsioni: report/ORB_MASTER_TEST_ATTESE_2026-10-20.md.
 #  DERIVATO da SCREEN_TESTER_TRANCHE.ps1 (stesse guardie). Regole e soglie scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md.
@@ -45,6 +45,8 @@ $INPUT_IMPOSTI = @(
   @('ShowInfoPanel', 'true', 'b'),
   @('UpdateInfoTesting', 'false', 'b'),
   @('InfoPanelSizeAdjust', '1.0', 'd'),
+  @('RunDAX', 'true', 'b'),
+  @('DAX_Symbol', 'D30EUR', 's'),
   @('RunUS500', 'true', 'b'),
   @('US500_STRAT1', 'true', 'b'),
   @('US500_STRAT2', 'true', 'b'),
@@ -72,18 +74,14 @@ $INPUT_IMPOSTI = @(
   @('AdjustTrailSL', '0.0', 'd'),
   @('AdjustTrailTP', '0.0', 'd'),
   @('AdjustBreakEven', '0.0', 'd'),
-  @('ForceBalanceToUse', '0', 'i'),
   @('MaxLots', '99.0', 'd'),
   @('Risk', '1', 'i'),
-  @('LotPerBalance_step', '500', 'i'),
   @('StartLots', '0.01', 'd'),
   @('OnlyUp', 'true', 'b'),
   @('CheckMargin', 'true', 'b'),
   @('UseEquity', 'false', 'b'),
   @('AdjustLotsizeToVariableValues', 'true', 'b'),
   @('AutoGMT', 'true', 'b'),
-  @('Broker_GMT_OFFSET_Winter', '2', 'i'),
-  @('Broker_GMT_OFFSET_Summer', '3', 'i'),
   @('EnableNFP_Filter', 'true', 'b'),
   @('NFP_CloseOpenTrades', 'true', 'b'),
   @('NFP_ClosePendingOrders', 'true', 'b'),
@@ -120,10 +118,9 @@ if(@($TrScelte | Select-Object -Unique).Count -ne $TrScelte.Count){ throw ('-Tra
 # agosto, settembre 2026" sopra questo stesso elenco). 'A' e il primo giorno dopo l ultimo incluso (il report scrive l estremo 'A' come
 # data finale; l ultimo giorno incluso e quello prima).
 $SONDE = @(
-  [pscustomobject]@{ Nome = 'TRANCHE1'; Per = 'M15'; Da = '2025.10.01'; A = '2025.12.01'; Timeout = $TimeoutTrancheMin; Over = @(@('Broker_GMT_OFFSET_Winter', '1', 'i'), @('Broker_GMT_OFFSET_Summer', '1', 'i')); Cosa = 'sonda 2 mesi, offset GMT 1/1 (BCM UTC+1 fisso)' },
-  [pscustomobject]@{ Nome = 'TRANCHE2'; Per = 'M15'; Da = '2025.10.01'; A = '2025.12.01'; Timeout = $TimeoutTrancheMin; Over = @(@('Broker_GMT_OFFSET_Winter', '2', 'i'), @('Broker_GMT_OFFSET_Summer', '3', 'i')); Cosa = 'sonda 2 mesi, offset GMT 2/3 (valori del venditore)' },
-  [pscustomobject]@{ Nome = 'TRANCHE3'; Per = 'M15'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = ($TimeoutTrancheMin * 4); Over = @(@('Broker_GMT_OFFSET_Winter', '1', 'i'), @('Broker_GMT_OFFSET_Summer', '1', 'i')); Cosa = 'corsa CONTINUA 21 mesi, offset GMT 1/1' },
-  [pscustomobject]@{ Nome = 'TRANCHE4'; Per = 'M15'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = ($TimeoutTrancheMin * 4); Over = @(@('Broker_GMT_OFFSET_Winter', '2', 'i'), @('Broker_GMT_OFFSET_Summer', '3', 'i')); Cosa = 'corsa CONTINUA 21 mesi, offset GMT 2/3' }
+  [pscustomobject]@{ Nome = 'TRANCHE1'; Per = 'M15'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = $TimeoutTrancheMin; Over = @(@('AutoGMT_Backtest', 'true', 'b'), @('Broker_GMT_OFFSET_Winter', '2', 'i'), @('Broker_GMT_OFFSET_Summer', '3', 'i')); Cosa = 'corsa CONTINUA 21 mesi, modo venditore (AutoGMT_Backtest=true, offset 2/3), con DAX' },
+  [pscustomobject]@{ Nome = 'TRANCHE2'; Per = 'M15'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = $TimeoutTrancheMin; Over = @(@('AutoGMT_Backtest', 'false', 'b'), @('Broker_GMT_OFFSET_Winter', '1', 'i'), @('Broker_GMT_OFFSET_Summer', '1', 'i')); Cosa = 'corsa CONTINUA 21 mesi, AutoGMT_Backtest=false, offset manuali 1/1 (BCM UTC+1 fisso)' },
+  [pscustomobject]@{ Nome = 'TRANCHE3'; Per = 'M15'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = $TimeoutTrancheMin; Over = @(@('AutoGMT_Backtest', 'false', 'b'), @('Broker_GMT_OFFSET_Winter', '2', 'i'), @('Broker_GMT_OFFSET_Summer', '3', 'i')); Cosa = 'corsa CONTINUA 21 mesi, AutoGMT_Backtest=false, offset manuali 2/3 (valori del venditore)' }
 )
 $SONDE_TUTTE = $SONDE
 $SONDE = @($SONDE_TUTTE | Where-Object { $TrScelte -contains $_.Nome.Substring(7) })
@@ -610,7 +607,7 @@ foreach($s in $SONDE){
 # ---------------------------------------------------------------------
 Titolo '3 - RACCOLTA'
 $testa = @(
-  ('ORBM TESTER TRANCHE (' + $Ex5Nome + ') -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ORBM_TESTER_TRANCHE_v1, pin ' + $Pin),
+  ('ORBM TESTER TRANCHE (' + $Ex5Nome + ') -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ORBM_TESTER_TRANCHE_v2, pin ' + $Pin),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ',') + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
@@ -618,7 +615,7 @@ $testa = @(
   ('EA scelto (' + $Ex5Nome + '): EA di TERZI dal Market, scatola nera. TEST ORB MASTER: passate scelte da -Tranche (sonda 2 mesi o corsa continua), grafico EURUSD M15, deposito 80000, preset con MaxRisk_Strategy ' + $MaxRisk + ' e PropFirmMaxDailyDD ' + $DailyDD + ': TUTTI i 57 input del preset sono imposti nel .ini + i tre simboli BCM + gli offset GMT della singola passata, e verificati nel report; gli input che il preset NON contiene (DAX, filtro orari ecc.) restano a default/ultimo salvato e si leggono nel report. Regole scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md. Questo script RACCOGLIE, non giudica.'),
   ('tranche scelte: ' + $Tranche + ' (le altre: SALTATA, non lanciate per scelta)'),
   ('esiti: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + ' (' + $_.Per + ') ' + $esiti[$_.Nome] }) -join '   ')),
-  ('ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono ' + $SONDE_TUTTE.Count + ' passate INDIPENDENTI sulla STESSA finestra (' + $SONDE_TUTTE[0].Da + ' -> ' + $SONDE_TUTTE[0].A + '), ognuna a CONTO VUOTO (deposito ' + $DEPOSITO + ' ' + $VALUTA + '), e cambia SOLO il periodo del grafico: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).'),
+  ('ATTENZIONE: questo NON e un giro di tranche MENSILI: sono ' + $SONDE_TUTTE.Count + ' corse CONTINUE INDIPENDENTI sulla STESSA finestra (' + $SONDE_TUTTE[0].Da + ' -> ' + $SONDE_TUTTE[0].A + '), ognuna a CONTO VUOTO (deposito ' + $DEPOSITO + ' ' + $VALUTA + '), e cambiano SOLO le impostazioni dell orologio (AutoGMT_Backtest e offset GMT, vedi Cosa di ogni passata); la T1 include il DAX (D30EUR). ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + '=' + $_.Cosa }) -join ' | ') + '. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).'),
   ''
 )
 (($testa + $referto + @('', 'COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_ORBM_TRANCHE.txt') -Encoding ASCII

@@ -1,0 +1,6 @@
+EA;passata;stato;operazioni;netto_EUR;PF;DD_equity;DD_saldo
+The ORB Master.ex5;TRANCHE1;KO;107;115.53;1.25;156.95(0.20%);125.77(0.16%)
+The ORB Master.ex5;TRANCHE2;KO;107;115.53;1.25;156.95(0.20%);125.77(0.16%)
+The ORB Master.ex5;TRANCHE3;KO;1137;-407.26;0.93;1280.90(1.59%);1236.18(1.53%)
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. La lettura vera (operazioni per indice, ora dei primi ingressi con offset 1/1 contro 2/3, controllo degli input, corsa continua) la fa Claudio con me sui report dentro le cartelle ORBM_<nome>, secondo report/ORB_MASTER_TEST_ATTESE_2026-10-20.md.
