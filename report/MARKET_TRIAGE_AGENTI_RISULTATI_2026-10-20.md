@@ -1,0 +1,17 @@
+# Triage dei Market "popolari" con 4 agenti: risultati e verifica a campione (20/10/2026)
+
+**Non controllata da agenti (questo documento); le schede sono DICHIARAZIONI di 4 agenti che hanno letto le pagine pubbliche (WebFetch riassume con un modello piccolo).** Criteri scritti prima: `MARKET_TRIAGE_AGENTI_CRITERI_2026-10-20.md`. Schede integrali: `risultati_archivio/TRIAGE_AGENTI_20261020/agente_1..4.md`. 32 EA letti.
+## Verifica a campione del coordinatore (4 signal riletti direttamente il 20/10)
+SixtyNine EA (35 sett., 531 op., PF 1,84, DD balance 12,02% / relativo 23,29%, equity 10,34%, deposito 500, prelievi 2.316,90), SomaGold (22 sett., 296 op., PF 1,63, DD 17,62%, equity 14,29%, 23 perdite consecutive), Gold Snap (36 sett. sulla pagina, 123 op., PF 2,51, DD 15,20%, equity 3,61%, fermo da 9 giorni) e Mavrik Scalper (29 sett. sulla pagina, 1.023 op., PF 2,74, DD 17,22%, win 98,33%, media +1,16 / -24,99): **i numeri coincidono con i rapporti degli agenti.**
+**Ma "le settimane" della pagina non tornano con le date di inizio**: Mavrik e' partito il 16/06/2026 = 18 settimane reali, non 29; Gold Snap 5/03 = circa 33, non 36; SixtyNine 28/02 = circa 33-34, non 35. **Per Mavrik l'evidenza e' sotto le 20 settimane: scende da A-con-riserva a B.** I signal sono di conti da 400-500 USD (lotti minimi): la crescita % non dice nulla sulla taglia di 80K.
+## Classifica dopo la verifica
+| Classe | EA | Perche' |
+|---|---|---|
+| **A** | **SomaGold** (XAUUSD, 32 strategie breakout D1-H4) | 22 sett., DD 17,6%, DD equity < balance, pochi trade lunghi (S-COSTO facile); rischio: 23 perdite di fila, "un numero spaventoso di posizioni" (recensione), prezzo 600 USD incoerente |
+| **A** | **SixtyNine EA** (XAUUSD H1/H4) | 33-35 sett., DD 12% (relativo 23%), PF 1,84, nessun accumulo contro il prezzo; rischio: recensione "grandi perdite contro piccole vincite", crescita gonfiata da prelievi e lotto fisso |
+| **A** | **Gold Snap** (XAUUSD) | 33-36 sett., DD balance 15%, equity 3,6%, PF 2,5; scalper da 4 minuti (S-COSTO), 123 operazioni in 8 mesi (S-N da verificare), preset non pubblici, recensioni critiche |
+| A al limite | Aura Gold Pro Edition (XAUUSD H1, 4 strategie, Tomilov) | 33-39 sett., PF 1,3, DD relativo 25-35% su due signal: dipende da quale si legge; 816 voti, 4,4 stelle |
+| B | Mavrik Scalper (18 sett. reali; 98% vincenti, perdita media 21x la vincita media), Smart Gold Impulse (PF 1,05, 12 sett.), Morpheus Algo, GoldenShot, Atherion Zenith, Goldwave Ultra, Diamond Scalper, Cosmos Orion, Iron Stops, Lizard, MoonDog, ThunderGold, Scraper Gold, Pips Kicker, Kyora, Range Breakout (649; gia' misurato il 19/10: PF 0,73 su 2 mesi), "Gamma Nova" = non identificato (candidato Nova Range EA) | evidenza breve, opaca o contraddetta |
+| C | Osloma FlipPro, Vortex Gold, AI Gold Master, Impulse MT5, Scalping Index Pro, Aikon, Quantum King, Quantum Athena X, Lycan, Tokyo EA, Fornax Gold | griglia/recovery dichiarati, equity DD molto > balance DD, o niente di verificabile |
+## Cosa il triage NON dice
+**Non c'e' nessun candidato scorrelato dall'oro in classe A**: gli unici non-oro sono Kyora (USDJPY H1, signal di 1 settimana), Pips Kicker (forex, nessun signal), Lycan (opaco, 28 forex), Range Breakout (indici, PF 1,15 su 100 settimane con DD 25,5%). I quattro A sono tutti XAUUSD: la correlazione con Gold Reaper e Prop Firm (finora 0,42-0,60 fra gli EA oro) decide il tester. Nessun backtest del venditore e' stato verificato; "AI" resta senza meccanismo in molti. Il triage non misura: la soglia vera sono le S-* nel tester.
