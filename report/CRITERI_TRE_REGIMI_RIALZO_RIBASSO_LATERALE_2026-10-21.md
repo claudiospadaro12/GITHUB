@@ -31,3 +31,10 @@ Tre finestre sono tre campioni: poche per un giudizio statistico. Le date di ini
 
 ## 6. Da firmare (Claudio)
 1. Soglie R +15% / -15% / |8%| e C 25%. 2. Ampiezza 12 mesi. 3. Soglie n >= 60 e PF >= 1,0. 4. Quali EA (proposta: Gold Reaper, Goldbot One a StartLots, Prop Firm Gold EA; per gli indici la sedia Nasdaq 770260). 5. Primo passo senza backtest: una sonda dei dati sul PC (copertura per anno dell'oro e del Nasdaq, R e C per finestra candidata).
+
+## 7. Aggiornamento 21/10 sera (dopo la richiesta di Claudio: "prepara la riga per i tre regimi, poi facciamo la correlazione")
+- **Le soglie restano quelle della bozza** (R +15% / -15% / |8%|, C 25%, 12 mesi, n >= 60, PF >= 1,0) finche' Claudio non le firma; qui sono usate come proposta.
+- **Prima la misura dei prezzi, poi le finestre, poi la riga**: la classificazione dal prezzo non si fa a memoria. Passo 0 (Claudio, 2 minuti, zero rischio, nessuna riga): esportare dalla History Center di MT5 (F2) le barre D1 di XAUUSD dal 2004 in CSV. Le finestre candidate si calcolano da quel file e si scrivono QUI prima di qualunque backtest.
+- **Cosa gira nella riga**: i tre EA gia' misurati sul 2025-26, ognuno con gli input GIA' fissati, sulle tre finestre in OHLC 1 minuto (modello 1, i tick reali del broker partono nel 2024): Goldbot One (Risk 9999, step 3000 e 6000), Gold Reaper (set del venditore verificato), Prop Firm Gold EA (configurazione a 80K del test del 19/10). Nove-dodici passate.
+- **Correlazione per regime**: stessa regola S-CORR (<= 0,5 giornaliera, realizzi) calcolata DENTRO ogni finestra per le coppie Goldbot One-Gold Reaper, Goldbot One-Prop Firm, Gold Reaper-Prop Firm, piu' il DD combinato (S-PORT, <= 10% di 80.000). Nel 2025-26 la correlazione Goldbot One-Gold Reaper e' 0,52-0,54 (rialzo): la domanda e' se scende o sale fuori dal rialzo.
+- **Rischi noti prima di lanciare**: un EA del Market puo' dipendere dal calendario MQL5 o da dati che il tester non ha negli anni vecchi [NON VERIFICATO]; il filtro notizie di Goldbot One nel tester usa offset 2/3 (AutoGMT non funziona) [effetto NON misurato].
