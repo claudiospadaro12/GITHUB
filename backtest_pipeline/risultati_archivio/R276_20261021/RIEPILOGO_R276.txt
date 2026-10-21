@@ -1,0 +1,25 @@
+RIEPILOGO R276 -- T3 (lotto forzato al minimo: depositi 2000 e 500) e T5 (armo tardivo 19:00, flat 21:45), NASUSD M5, TICK REALI
+data: 2026-10-21 23:27:28
+fine: 2026-10-21 23:32:42   durata minuti: 5   (dichiarato circa 3-12 minuti, tetto largo 20: oltre 20 e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : bf00332af72a0c4333754fc02fbea0c10575e3a7
+depositi passati: R276a 2000, R276c 500, R276b 80000; modello 4; etichette R276a, R276b, R276c
+R276b (T5, un mese): CSV _IS vuoto = possibile, rc 2 possibile. Si legge il CSV _OOS e il suo per-trade.
+
+R276a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R276c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R276b  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS NON BUONO (righe 2, con Trades>0 0, attese 2 e 2) = GUASTO VERO
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, rc 2 su R276a o R276c, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 1 su 3
+ROUND PARTITI (rc diverso da 1): 3 su 3
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 3 round partiti
+CARTELLE ATTESE: 3   TROVATE: 3   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7986xx, scritti DOPO l avvio): 6 su 6
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic): R276a e R276c = OOS 2025.06.10 -> 2026.06.30 circa; R276b = seconda meta del mese 2026.05.01 -> 2026.06.01.
+
+I CRITERI, CONGELATI PRIMA (prove R276a/R276b/R276c par. 0-3, scritti il 21/10/2026):
+G1 DETERMINISMO (ogni file): le due gemelle identiche in Profit, PF, DD, Trades e per-trade, tolleranza di banco (Profit <= 1 EUR, PF/RF <= 0,0002, Trades e Equity DD% esatti, righe per-trade con |diff| > 0,01 elencate e somma <= 1 EUR). Se no, il file e NULLO.
+T3 (R276a e R276c): per posizione, rischio realizzato = |perdita| / saldo stimato all ingresso (deposito + somma cumulata delle posizioni chiuse). IL DIFETTO ESISTE se almeno una posizione ha rischio > 2,5% E volume uguale al volume minimo osservato (lotto forzato); se le perdite > 2,5% hanno volume sopra il minimo, la causa e il salto dello stop o lo spread. Base R274a a 80000: lotto minimo 2,8, peggiore perdita 2,46% di 80000, 0 posizioni oltre 2,5%. Attese: lotti scalano col deposito (+-35%) 65%; volume minimo sotto 0,10 e nessuna posizione oltre 2,5% a 2000: 60%; a 500: lotto minimo toccato in almeno il 20% delle posizioni e una oltre 2,5%: 50%; almeno 60 posizioni: 80%.
+T5 (R276b): uscite per-trade dell OOS fra le 19:35 e le 21:45 server >= 1 posizione = il difetto NESSUN TETTO ALL ORARIO DI ARMO e CONFERMATO nel tester (70%); zero posizioni = NON CONFERMATO nel tester (puo dipendere dal filtro volumi serale); uscite dopo le 21:45 si elencano per data; nessuna uscita prima delle 19:05 (90%).
+Nessun verdetto di merito (n < 150 per costruzione). Il DD si legge sempre (Emendamento B).

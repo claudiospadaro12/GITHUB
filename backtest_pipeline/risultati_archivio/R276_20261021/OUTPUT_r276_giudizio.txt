@@ -1,0 +1,56 @@
+==============================================================================
+R276 -- GIUDIZIO COI CRITERI CONGELATI (prove R276a/R276b/R276c par. 0-3)
+==============================================================================
+
+### R276a (T3, deposito 2000, magic 798611/798661)
+  G1 CSV IS: PASS []
+     magic 798611 Profit 96.64 PF 1.12657 DD 7.1744 Trades 132 PeggiorGiornata -2.0195
+     magic 798661 Profit 96.64 PF 1.12657 DD 7.1744 Trades 132 PeggiorGiornata -2.0195
+  G1 CSV OOS: PASS []
+     magic 798611 Profit 166.36 PF 1.18609 DD 7.3841 Trades 170 PeggiorGiornata -2.0396
+     magic 798661 Profit 166.36 PF 1.18609 DD 7.3841 Trades 170 PeggiorGiornata -2.0396
+  G1 per-trade: PASS []
+  coerenza per-trade/OOS: somma net 166.36 / 170 deal contro Profit 166.36 / Trades 170
+  T3: posizioni 102 (in perdita 24); volume per posizione min 0.100 / mediano 0.500 / max 2.000; posizioni al volume minimo 2 (2.0%)
+      peggiore rischio realizzato 2.04% del saldo stimato; posizioni oltre 2.5%: 0; di cui AL VOLUME MINIMO (lotto forzato): 0
+        204 vol 1.700 perdita 43.63 saldo 2139.16 rischio 2.04% (2026-01-07 15:30:00)
+        274 vol 0.300 perdita 44.84 saldo 2211.20 rischio 2.03% (2026-03-26 15:55:00)
+        272 vol 0.400 perdita 44.24 saldo 2255.44 rischio 1.96% (2026-03-16 15:50:21)
+        196 vol 1.700 perdita 41.77 saldo 2165.91 rischio 1.93% (2026-01-02 15:13:22)
+        44 vol 0.400 perdita 38.40 saldo 1999.06 rischio 1.92% (2025-07-23 16:54:32)
+  VERDETTO T3 (R276a): NESSUNA posizione oltre 2.5%: difetto NON osservato a questo deposito
+
+### R276c (T3, deposito 500, magic 798621/798671)
+  G1 CSV IS: PASS []
+     magic 798621 Profit 49.22 PF 1.28461 DD 6.2457 Trades 96 PeggiorGiornata -3.2473
+     magic 798671 Profit 49.22 PF 1.28461 DD 6.2457 Trades 96 PeggiorGiornata -3.2473
+  G1 CSV OOS: PASS []
+     magic 798621 Profit 53.88 PF 1.25444 DD 7.4815 Trades 122 PeggiorGiornata -2.6807
+     magic 798671 Profit 53.88 PF 1.25444 DD 7.4815 Trades 122 PeggiorGiornata -2.6807
+  G1 per-trade: PASS []
+  coerenza per-trade/OOS: somma net 53.88 / 122 deal contro Profit 53.88 / Trades 122
+  T3: posizioni 102 (in perdita 26); volume per posizione min 0.100 / mediano 0.100 / max 0.500; posizioni al volume minimo 75 (73.5%)
+      peggiore rischio realizzato 2.63% del saldo stimato; posizioni oltre 2.5%: 1; di cui AL VOLUME MINIMO (lotto forzato): 1
+        226 vol 0.100 perdita 14.95 saldo 568.83 rischio 2.63% (2026-03-26 15:55:00)
+        144 vol 0.100 perdita 13.17 saldo 558.67 rischio 2.36% (2025-12-16 16:25:05)
+        72 vol 0.100 perdita 10.71 saldo 520.83 rischio 2.06% (2025-09-04 16:27:28)
+        34 vol 0.100 perdita 9.60 saldo 497.88 rischio 1.93% (2025-07-23 16:54:32)
+        224 vol 0.100 perdita 11.06 saldo 579.89 rischio 1.91% (2026-03-16 15:50:21)
+  VERDETTO T3 (R276c): IL DIFETTO ESISTE a questo deposito (rischio > 2.5% con lotto al minimo)
+
+### R276b (T5, deposito 80000, magic 798631/798681)
+  G1 CSV IS: PASS []
+     magic 798631 Profit 0.00 PF 0.00000 DD 0.0000 Trades 0 PeggiorGiornata 0.0000
+     magic 798681 Profit 0.00 PF 0.00000 DD 0.0000 Trades 0 PeggiorGiornata 0.0000
+  G1 CSV OOS: PASS []
+     magic 798631 Profit 0.00 PF 0.00000 DD 0.0000 Trades 0 PeggiorGiornata 0.0000
+     magic 798681 Profit 0.00 PF 0.00000 DD 0.0000 Trades 0 PeggiorGiornata 0.0000
+  G1 per-trade: PASS []
+  coerenza per-trade/OOS: somma net 0.00 / 0 deal contro Profit 0.00 / Trades 0
+  T5: posizioni 0; uscite per ora: {}
+      uscite fra 19:35 e 21:45: 0 posizioni; prima delle 19:05: 0; dopo le 21:45: 0
+  VERDETTO T5: NON CONFERMATO nel tester (zero posizioni chiuse fra 19:35 e 21:45)
+
+### BASE 80000 (R274a OOS): posizioni 102, volume min 5.700 / med 20.600 / max 80.900, peggiore rischio 2.13% (su saldo stimato da 80000, senza IS), oltre 2,5%: 0
+
+Nessun verdetto di merito (n < 150). Limiti: tester, un solo periodo, saldo all ingresso STIMATO dal netto dei deal chiusi prima.
