@@ -27,3 +27,7 @@ G0 VERDE (R274a riproduce R199B IS e OOS entro la tolleranza; per-trade OOS 172 
 
 ## Limiti
 Merito SOSPESO (n < 150 per costruzione). Due inverni, un solo regime di mercato (Nasdaq al rialzo). NON MISURATO: spread e feed FTMO US100.cash, Guardian nel campo, commissione FTMO, settimana 26-30/10/2026, inverni prima del 2024. Il guadagno di d0 inverno e' quasi tutto long.
+
+## Aggiunta (21/10): T4 e T6 della lista test Nasdaq, letti dagli stessi file
+- **T4 giorni senza cash** (date di chiusura USA della lista, piu' quelle della finestra A: 28/11/2024, 25/12/2024, 01/01/2025, 09/01/2025, 20/01/2025, 17/02/2025, 18/04/2025, 26/05/2025; **da riverificare con il calendario ufficiale NYSE**): R274a 0, R274b 0, R274d 0, **R274c 2 deal il 20/01/2025** (posizione 115, uscite 15:30:00 e 15:50:41, +114,90 e +257,70). La previsione "almeno una operazione in un giorno di chiusura" e' confermata su un caso. Il filtro giorno/festivo manca (A7).
+- **T6 piazzamento rifiutato**: i giornali del tester NON contengono nessuna riga dell'EA (grep ABTG/BUY STOP/SELL STOP/fallito: 0). Il tester non lo prova; resta DA VERIFICARE su demo, non si conclude che non succede.
