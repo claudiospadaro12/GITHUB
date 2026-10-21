@@ -1,0 +1,15 @@
+EA;passata;stato;operazioni;netto_EUR;PF;DD_equity;DD_saldo
+Goldbot One MT5.ex5;TRANCHE1;OK;265;11632.36;1.68;5049.76(5.68%);4197.61(4.76%)
+Goldbot One MT5.ex5;TRANCHE2;OK;265;5632.87;1.70;2415.06(2.86%);2008.39(2.39%)
+Goldbot One MT5.ex5;TRANCHE3;OK;316;10978.67;1.55;6015.19(6.78%);4800.53(5.48%)
+Goldbot One MT5.ex5;TRANCHE4;OK;316;5295.14;1.55;2859.74(3.39%);2274.73(2.72%)
+Goldbot One MT5.ex5;TRANCHE5;OK;329;18062.40;2.04;6152.61(6.13%);4339.53(4.37%)
+Goldbot One MT5.ex5;TRANCHE6;OK;329;8488.07;2.05;2795.97(3.12%);1969.47(2.21%)
+The Gold Reaper MT5.ex5;TRANCHE7;OK;515;22363.65;1.91;6013.06(6.02%);4555.11(4.58%)
+The Gold Reaper MT5.ex5;TRANCHE8;OK;561;13313.87;1.52;5841.84(6.77%);4649.97(5.40%)
+The Gold Reaper MT5.ex5;TRANCHE9;OK;505;25664.41;1.77;6512.26(5.91%);4403.12(4.18%)
+Prop Firm Gold EA.ex5;TRANCHE10;OK;426;17981.29;1.29;7072.86(8.05%);6420.62(7.34%)
+Prop Firm Gold EA.ex5;TRANCHE11;OK;436;1437.28;1.02;8644.28(10.29%);7831.94(9.37%)
+Prop Firm Gold EA.ex5;TRANCHE12;OK;396;-5234.18;0.94;21934.24(23.25%);20956.07(22.39%)
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. La lettura vera (lotti, DD in percentuale degli 80000, operazioni e controllo degli input) la fa Claudio con me sui report dentro le cartelle RG3_<nome>, secondo report/REGIMI_ORO_TRE_EA_ATTESE_2026-10-21.md.
