@@ -49,3 +49,13 @@ Dati: `data/prezzi/XAUUSD_D1_BCM_2004-06-11_2026-10-21.csv` (export di Claudio d
 Per riferimento, la finestra GIA' usata dai nostri test (01/01/2025 - 01/10/2026) vale **R +59,2% e C 113,7%** (2.624 -> 4.179): e' il rialzo piu' forte della serie, un regime estremo oltre che unico.
 **Avvertenze di scelta (dichiarate prima dei numeri):** (1) il LATERALE e' sul bordo di entrambe le soglie (R +7,0% su 8; C 24,6% su 25); le alternative che passano sono 01/07/2021-30/06/2022 (R +2,1%, C 21,9%), 01/01/2022-31/12/2022 (R -0,3%, C 24,9%) e 01/04/2022-31/03/2023 (R +1,8%, C 20,4%); si tiene la regola, non si cambia dopo. (2) **Dopo il 2014 l'oro non ha avuto nessuna finestra a 12 mesi con R <= -15%** (il peggiore e' -14,6% da 01/08/2014): il RIBASSO e' vecchio di 12 anni, con prezzo 1.300-1.600 contro oltre 4.000 oggi e un'altra struttura di spread e volatilita' in punti; i numeri in euro non sono confrontabili 1:1 con il 2025-26. (3) Nel RIALZO 2024 una parte dei tick reali BCM esiste (da luglio 2024) ma il modello e' lo stesso per tutte le finestre: OHLC a 1 minuto.
 **Congelato:** finestre, modello 1 (OHLC 1 minuto), deposito 80.000 EUR, leva 1:100, gli stessi input gia' misurati per ogni EA (vedi riga di lancio), nessun ritocco dopo i numeri.
+
+## 9. FINESTRE DI CONTROLLO PER LO SPREAD (21/10 notte), scelte da regola PRIMA dei numeri
+Motivo: lo spread mediano delle barre D1 di Claudio vale 0 punti nel 2022-23 (191 barre su 310 a zero), 5 nel 2024, 23 nel 2013-14, 16 nel 2025-26 (par. 8 e `REGIMI_ORO_TRE_EA_LETTURA_2026-10-21.md`). Se il tester usa lo spread storico delle barre [NON VERIFICATO], il LATERALE 2022-23 e il RIALZO 2024 sono stati girati con costi troppo bassi. Il tester MT5 non ha un'impostazione di spread fisso: si cambia finestra.
+**Regola (meccanica, `backtest_pipeline/regimi_spread.py`, soglia 12 punti):** stessa classificazione del par. 1, in piu spread mediano D1 >= 12 punti; la finestra piu' recente per classe che finisce prima del 2025, non sovrapposta alle altre.
+| classe | finestra | R | C | spread mediano / medio / barre a zero |
+|---|---|---|---|---|
+| RIALZO-S | 01/08/2019 - 31/07/2020 | +39,6% | 41,2% | 14 / 11,4 / 3 |
+| LATERALE-S | 01/06/2018 - 31/05/2019 | +0,4% | 14,4% | 15 / 14,7 / 1 |
+| RIBASSO | 2013-14 | gia' misurato (spread 23): non si rifa | | |
+La finestra RIALZO-S contiene il crollo di marzo 2020 (volatilita' alta). Questo e' un controllo sul costo, non una sostituzione: le finestre del par. 8 restano; ogni conclusione sul laterale e sul rialzo si legge su ENTRAMBE le coppie di finestre. Non e' stato cambiato nessun criterio di lettura dopo i numeri.
