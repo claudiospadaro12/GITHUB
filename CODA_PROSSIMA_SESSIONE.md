@@ -1,3 +1,9 @@
+## 21/10 - PIANO PER QUANDO CLAUDIO E' AL PC (una riga alla volta, nell'ordine)
+1. `RIGA_LANCIA_GOLDREAPER_LATENZA.txt` (Gold Reaper 1000/200 ms a 80K, 6-18 h: e' la prova che manca prima di comprare) oppure, se serve tempo, prima le righe corte.
+2. `RIGA_LANCIA_TRE_EA_80K.txt` (SomaGold + SixtyNine + Gold Snap, demo gia' installate, 1-3 h, zip `EA3_80K.zip`).
+3. Corte da pochi minuti: `RIGA_LANCIA_PROPFIRM_RISCHIO.txt`, `RIGA_LANCIA_GOLDBOT_D1.txt` (consegnata), `RIGA_LANCIA_SUPERTREND_LOTTO_FISSO.txt`; `RIGA_LANCIA_DAYTRADE_PRO_FASE1.txt` (consegnata, serve il nome .ex5).
+4. TitanForge a livelli di rischio: da preparare. Letture previste in `report/*_ATTESE_2026-10-20.md`. Candidato acquisto oggi: solo The Gold Reaper (dopo la latenza). FTMO trial: verificare a mano il terminale sul VPS (giornali fermi dal 18/10).
+
 ## 20/10 sera - DATI MEMORIZZATI PER IL CONFRONTO
 Vedi `report/CONFRONTO_DATI_MEMORIZZATI_80K_2026-10-20.md` (Prop Firm / SGH / Gold Reaper a 80K, portafoglio, S-PORT). The ORB Master va confrontato con questa tabella.
 
