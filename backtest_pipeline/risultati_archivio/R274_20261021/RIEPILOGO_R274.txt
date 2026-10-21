@@ -1,0 +1,28 @@
+RIEPILOGO R274 -- OROLOGIO DELLA 770260 (4 file: d0 14:30/17:30 e d+1 15:30/18:30 x finestra B/A, NASUSD M5, TICK REALI, deposito 80000)
+data: 2026-10-21 17:27:36
+fine: 2026-10-21 17:35:13   durata minuti: 8   (dichiarato 5-24 minuti, tetto largo circa 24: oltre 24 e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 3e266b0ad676f2a8a3a216f797ab3c89de230b36
+deposito 80000 passato (= R199B), modello 4, etichette R274a ... R274d, una per file
+FINESTRE A (R274c e R274d): CSV _IS vuoto = FALSO ALLARME ATTESO, rc 2 atteso. Si legge il CSV _OOS e il suo per-trade.
+
+R274a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R274b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R274c  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R274d  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, rc 2 su una finestra B, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 4
+ROUND PARTITI (rc diverso da 1): 4 su 4
+T1 + CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 4 round partiti: l EA ha COMPILATO e il binario viene dal sorgente del pin
+CARTELLE ATTESE: 4   TROVATE: 4   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7982xx, scritti DOPO l avvio): 8 su 8
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic): sulle B = OOS 2025.06.10 -> 2026.06.30, sulle A = il primo inverno 2024/25 (2024.09.27 -> 2025.06.09).
+
+I CANCELLI, CONGELATI PRIMA (R274a par. 3-4, scritti il 03/10/2026). PRIMA di qualunque numero:
+TOLLERANZA DI BANCO: identico = Trades ed Equity DD % ESATTI; Profit |diff| <= 1,00 EUR; PF e RF |diff| <= 0,0002; per-trade stessi deal (numero, ora, tipo, volume).
+G1 DETERMINISMO (ogni file): le due gemelle (magic m e m+50) identiche in Profit, PF, DD, Trades in tutti e due i CSV, e i due per-trade identici RIGA PER RIGA tranne la colonna magic. Se no -> quel file e NULLO.
+G0 RIPRODUZIONE (solo R274a, d0 della finestra B = cella d archivio): le righe IS e OOS devono riprodurre R199B Pass=2 entro la TOLLERANZA DI BANCO: IS Profit 7014.20 PF 1.22116 RF 1.14977 Equity DD% 7.3069 Trades 135 | OOS Profit 8496.74 PF 1.21546 RF 1.29687 Equity DD% 7.8576 Trades 172 (102 posizioni). Se NO: il round e NON CONFRONTABILE, ci si ferma e si cerca cio che balla (binario, deposito, magic). Un CSV con InpSessionHour diverso da 14 (R274a/c) o da 15 (R274b/d) si CESTINA.
+G2 COERENZA FRA FINESTRE: numero di deal e somma net_profit del per-trade di R274c contro Trades e Profit della gamba IS del CSV di R274a; idem R274d contro la gamba IS di R274b; per OGNI file somma net_profit e deal del per-trade contro Profit e Trades della gamba OOS del suo CSV: IDENTICI. Unica causa ammessa di scarto il 26/09/2024 (l IS di R274a parte un giorno prima): si dichiara lo scarto e si usa il per-trade A.
+S1 SENTINELLA DELL OROLOGIO (la manopola deve MORDERE, classe 156): d0: NESSUNA uscita prima delle 15:05 BCM ne dopo le 17:31; d+1: nessuna prima delle 16:05 ne dopo le 18:31. Uscita fra flat+1 minuto e le 22:59 = ROSSO, file NULLO; uscita alle 23:00 o dopo (riapertura dopo la pausa di sessione) = GIALLO, si elenca per data e si legge a mano. Il per-trade di R274b NON deve essere identico a quello di R274a: se lo e, il pin d orario non e arrivato -> NULLO.
+VERDETTO (R274a par. 4, congelato): tassi in posizioni per feriale d inverno USA e d estate su A+B (180 feriali d inverno USA). Precondizione Df = r_w0 - r_s0 >= 0,15 pos/feriale, altrimenti DIVARIO NON RIPRODOTTO. Qf2 = (r_w0 - r_w1) / (r_w0 - r_s0): >= 0,70 OROLOGIO, <= 0,30 STAGIONE, in mezzo MISTO. Il PF si scrive e NON decide (n < 150 per costruzione). Serie COME FTMO (calendario UE, 458 feriali A+B): R2 frequenza r_FTMO < 0,25 pos/feriale = sotto il promesso 0,37 -> revisione di Claudio; R1 rischio: DD di saldo della serie FTMO > 10% -> revisione IMMEDIATA (contratto 7,31% IS / 7,86% OOS; zona grigia 7,86%-10% = SOPRA IL CONTRATTO). Merito SOSPESO (n < 150), il DD si legge sempre (Emendamento B).

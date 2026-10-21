@@ -1,0 +1,74 @@
+==============================================================================
+R274 -- OROLOGIO DELLA 770260 -- GIUDIZIO COI CRITERI CONGELATI (R274a par. 3-6)
+==============================================================================
+
+### 1. G1 DETERMINISMO (alla lettera) + colonna InpSessionHour
+  R274a d0 B magic 798201/798251: G1 NULLO | ora CSV OK
+        - CSV IS Profit: 7014.21 vs 7014.20
+  R274b d1 B magic 798211/798261: G1 PASS | ora CSV OK
+  R274c d0 A magic 798202/798252: G1 NULLO | ora CSV OK
+        - CSV OOS Profit: 7014.21 vs 7014.20
+        - per-trade riga 2: net_profit -1165.99 vs -1166.00
+        (CSV _IS VUOTO: ATTESO sulla finestra A, falso allarme)
+  R274d d1 A magic 798212/798262: G1 PASS | ora CSV OK
+        (CSV _IS VUOTO: ATTESO sulla finestra A, falso allarme)
+
+### 2. G0 RIPRODUZIONE (R274a contro R199B Pass=2, tolleranza di banco)
+  -> G0 VERDE
+        IS magic 798201: IN TOLLERANZA DI BANCO
+        IS magic 798251: IN TOLLERANZA DI BANCO
+        OOS magic 798201: IN TOLLERANZA DI BANCO
+        OOS magic 798251: IN TOLLERANZA DI BANCO
+        per-trade OOS magic 798201: 172 deal / 102 posizioni (R199B: 172 / 102) OK
+        per-trade OOS magic 798251: 172 deal / 102 posizioni (R199B: 172 / 102) OK
+
+### 3. G2 COERENZA FRA FINESTRE
+  R274a (+0) per-trade vs OOS proprio: somma 8496.74 / 172 deal contro 8496.74 / 172 -> IDENTICI
+  R274a (+50) per-trade vs OOS proprio: somma 8496.74 / 172 deal contro 8496.74 / 172 -> IDENTICI
+  R274b (+0) per-trade vs OOS proprio: somma 3908.43 / 55 deal contro 3908.43 / 55 -> IDENTICI
+  R274b (+50) per-trade vs OOS proprio: somma 3908.43 / 55 deal contro 3908.43 / 55 -> IDENTICI
+  R274c (+0) per-trade vs OOS proprio: somma 7014.21 / 135 deal contro 7014.21 / 135 -> IDENTICI
+  R274c (+50) per-trade vs OOS proprio: somma 7014.20 / 135 deal contro 7014.20 / 135 -> IDENTICI
+  R274d (+0) per-trade vs OOS proprio: somma 1093.47 / 81 deal contro 1093.47 / 81 -> IDENTICI
+  R274d (+50) per-trade vs OOS proprio: somma 1093.47 / 81 deal contro 1093.47 / 81 -> IDENTICI
+  R274c (+0) per-trade vs gamba IS di R274a: somma 7014.21 / 135 deal contro 7014.21 / 135 -> IDENTICI
+  R274c (+50) per-trade vs gamba IS di R274a: somma 7014.20 / 135 deal contro 7014.20 / 135 -> IDENTICI
+  R274d (+0) per-trade vs gamba IS di R274b: somma 1093.47 / 81 deal contro 1093.47 / 81 -> IDENTICI
+  R274d (+50) per-trade vs gamba IS di R274b: somma 1093.47 / 81 deal contro 1093.47 / 81 -> IDENTICI
+
+### 4. S1 SENTINELLA DELL'OROLOGIO (la manopola deve MORDERE)
+  R274a d0 B: S1 VERDE  | uscite prima delle 15:05: 0/172; fra 17:31 (escluso) e le 22:59: 0/172; alle 23:00 o dopo (riapertura): 0/172; min 15:08:39 max 17:30:00
+  R274b d1 B: S1 VERDE  | uscite prima delle 16:05: 0/55; fra 18:31 (escluso) e le 22:59: 0/55; alle 23:00 o dopo (riapertura): 0/55; min 16:12:37 max 18:30:00; per-trade identico a R274a (pin d'orario non arrivato): no
+  R274c d0 A: S1 ROSSO  | uscite prima delle 15:05: 2/135; fra 17:31 (escluso) e le 22:59: 0/135; alle 23:00 o dopo (riapertura): 0/135; min 00:20:58 max 17:30:00
+  R274d d1 A: S1 VERDE  | uscite prima delle 16:05: 0/81; fra 18:31 (escluso) e le 22:59: 0/81; alle 23:00 o dopo (riapertura): 0/81; min 16:07:29 max 18:30:00; per-trade identico a R274c (pin d'orario non arrivato): no
+  -> file NULLI (G1, ora CSV o S1 ROSSO): ['R274a', 'R274c']
+  *** LETTURA SOSPESA: almeno un file e' NULLO; si stampa con la prova di invarianza (gemella +50), la decisione e' di Claudio ***
+
+### 5. VERDETTI (aperti SOLO ora) -- posizioni per feriale, stagione USA della DATA DI CHIUSURA
+  feriali A+B (USA): estate 278, inverno 180  (attesi 278 / 180)
+  d0 estate : posizioni  81  deal 133  PF 1.187 [non decide]  netto    4158.11
+  d0 inverno: posizioni 103  deal 174  PF 1.232 [non decide]  netto   11352.84
+  d1 estate : posizioni   2  deal   3  PF 1.262 [non decide]  netto     169.24
+  d1 inverno: posizioni  85  deal 133  PF 1.228 [non decide]  netto    4832.66
+  inverno A separato: d0 51 pos, d+1 53 pos | estate: d0 31, d+1 1  [DESCRITTIVO]
+  inverno B separato: d0 52 pos, d+1 32 pos | estate: d0 50, d+1 1  [DESCRITTIVO]
+  TASSI: r_w0 0.5722  r_s0 0.2914  Df 0.2809 (soglia 0.15)  r_w1 0.4722  (r_s1 0.0072 descrittivo)
+  Qf2 = (r_w0 - r_w1) / Df = 0.356  -> MISTO / NON SEPARATO   (>= 0,70 OROLOGIO, <= 0,30 STAGIONE)
+  posizioni d+1 d'inverno 85: bande congelate H_STAGIONE (83, 166) / H_OROLOGIO (12, 65) -> dentro H_STAGIONE
+  attese RICALCOLATE dai tassi veri di d0: H_ORA = r_s0 x 180 = 52.4; H_STAGIONE = r_w0 x 180 = 103.0
+  fragilita' (jackknife, 271 posizioni): Qf2 [0.343 ; 0.376], verdetto cambia in 0  [DESCRITTIVO]
+  SERIE COME LA VEDREBBE FTMO [INFERITA] (d0 nei giorni UE d'estate + d+1 nei giorni UE d'inverno, 458 feriali): posizioni 157 (0.343/feriale)  deal 250  PF 1.233 [non decide]  netto 9253.72  DD di saldo 5762.67 EUR = 6.62% (lotti NON ricalcolati [DERIVATO])
+    R2: frequenza non sotto la soglia di 0,25
+    R1: DD di saldo entro il contratto (<= 7,86%; contratto 7,31% IS / 7,86% OOS); il DD di saldo e' un PAVIMENTO dell'Equity DD
+  PER LATO [DESCRITTIVO, nessun verdetto di lato] posizioni / netto, stagione USA:
+    d0 estate  LONG :  49 pos  netto    2272.18
+    d0 estate  SHORT:  32 pos  netto    1885.93
+    d0 inverno LONG :  50 pos  netto   12705.70
+    d0 inverno SHORT:  53 pos  netto   -1352.86
+    d1 estate  SHORT:   2 pos  netto     169.24
+    d1 inverno LONG :  41 pos  netto    1972.51
+    d1 inverno SHORT:  44 pos  netto    2860.15
+  invarianza gemella +50: Qf2 0.356055 -> MISTO / NON SEPARATO, posizioni d+1 inverno 85 -> INVARIATO
+
+PF: si scrive, NON decide (n < 150 per costruzione). Merito SOSPESO, il DD si legge sempre (Emendamento B).
+NON MISURATO: spread e feed FTMO US100.cash, Guardian nel campo, commissione FTMO, settimana 26-30/10/2026, inverni prima del 2024.
