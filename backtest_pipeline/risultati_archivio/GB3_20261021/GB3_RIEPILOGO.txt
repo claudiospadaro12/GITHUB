@@ -1,0 +1,9 @@
+EA;passata;stato;operazioni;netto_EUR;PF;DD_equity;DD_saldo
+Goldbot One MT5.ex5;TRANCHE1;OK;451;51745.04;1.83;10828.83(9.18%);7980.63(6.90%)
+Goldbot One MT5.ex5;TRANCHE2;OK;451;128666.19;1.78;31371.90(18.42%);23552.38(14.38%)
+Goldbot One MT5.ex5;TRANCHE3;OK;451;279477.55;1.74;80555.48(30.11%);61648.42(24.50%)
+Goldbot One MT5.ex5;TRANCHE4;OK;451;97008.96;1.76;34201.01(21.06%);28178.40(17.93%)
+Goldbot One MT5.ex5;TRANCHE5;OK;451;40427.48;1.82;12303.60(10.73%);10082.25(8.94%)
+Goldbot One MT5.ex5;TRANCHE6;OK;451;6107.97;1.88;1598.93(1.87%);1322.81(1.55%)
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. La lettura vera (lotti, DD in percentuale degli 80000, operazioni e controllo degli input) la fa Claudio con me sui report dentro le cartelle GB3_<nome>, secondo report/GOLDBOT_D1_SONDA3_ATTESE_2026-10-21.md.
