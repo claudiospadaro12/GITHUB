@@ -1,0 +1,214 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-21 03:32:51  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261020   (3603.6 KB, ultima scrittura 2026-10-20 23:45) ---
+    righe totali: 16264
+    RIGHE DI ORDINE / DEAL: 4008
+      CI000:05:00.431Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=187857 | role=FLOW | active L0 | lot=0.0100 | entry=4141.14000
+      OE000:05:01.493Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=24.824520790025417 isSellhigh=false isBuylow=false countshiftback=-1
+      FR000:05:01.493Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=3.549680526703014 isSellhigh=false isBuylow=true countshiftback=0
+      MQ000:05:01.493Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=-52.6335463155192 isSellhigh=false isBuylow=false countshiftback=0
+      CE000:05:01.493Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=-59.75569754373282 isSellhigh=false isBuylow=false countshiftback=0
+      RE000:05:01.493Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=-78.83713169585462 isSellhigh=false isBuylow=false countshiftback=0
+      FG000:05:01.493Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=-40.891421130527306 isSellhigh=false isBuylow=false countshiftback=0
+      JD000:05:01.493Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=-131.26094742037822 isSellhigh=false isBuylow=false countshiftback=0
+      CD000:05:01.493Gold Zone EA (XAUUSD,M15)shift=4 emaStrength=-120.84063161355516 isSellhigh=false isBuylow=false countshiftback=0
+      KF000:05:01.493Gold Zone EA (XAUUSD,M15)shift=3 emaStrength=-83.89375440901858 isSellhigh=false isBuylow=false countshiftback=0
+      GI000:05:01.493Gold Zone EA (XAUUSD,M15)shift=2 emaStrength=-23.92916960598086 isSellhigh=false isBuylow=false countshiftback=0
+      HE000:05:45.374HedgingMartingale (XAUUSD,H1)TRADE ALLOWED: BUY trade permitted by magic number rules
+      JF000:05:45.374HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      LD000:05:45.374HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      MS000:05:45.456HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992452
+      GM000:05:45.457HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      GO000:05:45.482HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992453
+      NM000:05:45.482HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      HO000:05:45.482HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      CL000:05:45.519HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992454
+      FP000:05:45.520HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      LD000:05:45.557HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992455
+      EP000:05:45.557HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      OJ000:05:45.557HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      HI000:05:45.596HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992456
+      QG000:05:45.596HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      LI000:05:45.621HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992457
+      IG000:05:45.621HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4142.48
+      CE000:05:45.621HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4147.21, Fake TP: 4148.11
+      KR000:05:45.649HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 3992458
+      PJ000:05:45.649HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4119.71, Fake TP: 4117.81
+      KM000:05:45.675HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 3992459
+      PP000:07:01.750Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=187858 | role=FLOW | active L0 | lot=0.0100 | entry=4144.07000
+      HH000:07:23.488Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=187859 | role=FLOW | active L0 | lot=0.0100 | entry=4141.85000
+      HG000:10:35.988Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=187858 | role=FLOW | active L0 | lot=0.0100 | entry=4142.92000
+      LL000:15:01.189Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=3.549680526703014 isSellhigh=false isBuylow=true countshiftback=0
+      DH000:15:01.189Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=-52.6335463155192 isSellhigh=false isBuylow=false countshiftback=0
+      CH000:15:01.189Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=-59.75569754373282 isSellhigh=false isBuylow=false countshiftback=0
+      PK000:15:01.189Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=-78.83713169585462 isSellhigh=false isBuylow=false countshiftback=0
+      NI000:15:01.189Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=-40.891421130527306 isSellhigh=false isBuylow=false countshiftback=0
+      ... altre 3968 righe non stampate (tetto).
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261021   (469.2 KB, ultima scrittura 2026-10-21 03:30) ---
+    righe totali: 2228
+    RIGHE DI ORDINE / DEAL: 494
+      RH000:05:00.947Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: SELL STOP | CID=188026 | role=RECOVERY | active L2 | lot=0.0300 | entry=4126.61000
+      PI000:05:49.386Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: portfolio reset paused safely | credit/actual 0.00 | positions 5 -> 5
+      MH000:05:49.444Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=188028 | role=FLOW | active L0 | lot=0.0100 | entry=4128.04000
+      EN000:05:49.474Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4127.60 tp: 4128.60 [invalid price]
+      MI000:05:49.569Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: COUNTER FLOW BUY | lot=0.0100 | entry=4127.65000 | TP=4128.65000
+      LH000:05:49.740Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=-106.09587931594433 isSellhigh=false isBuylow=false countshiftback=-1
+      EN000:05:49.740Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=9.269413789388636 isSellhigh=false isBuylow=false countshiftback=-1
+      LO000:05:49.740Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=-58.487057473757886 isSellhigh=false isBuylow=true countshiftback=0
+      NK000:05:49.740Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=-15.99137164912463 isSellhigh=false isBuylow=false countshiftback=0
+      RJ000:05:49.740Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=-65.99424776613887 isSellhigh=false isBuylow=false countshiftback=0
+      FM000:05:49.740Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=-59.32949851076046 isSellhigh=false isBuylow=true countshiftback=0
+      NP000:05:49.740Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=68.78033432622033 isSellhigh=false isBuylow=false countshiftback=1
+      CK000:05:49.740Gold Zone EA (XAUUSD,M15)shift=4 emaStrength=-35.47977711587009 isSellhigh=false isBuylow=false countshiftback=0
+      RO000:05:49.740Gold Zone EA (XAUUSD,M15)shift=3 emaStrength=27.346815256078116 isSellhigh=true isBuylow=false countshiftback=0
+      OM000:05:49.740HedgingMartingale (XAUUSD,H1)TRADE ALLOWED: BUY trade permitted by magic number rules
+      PN000:05:49.741HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4126.91
+      LL000:05:49.741HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4131.64, Fake TP: 4132.54
+      PI000:05:49.741Gold Zone EA (XAUUSD,M15)shift=2 emaStrength=75.89787683737086 isSellhigh=false isBuylow=false countshiftback=0
+      DK000:05:49.969HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 4074272
+      KE000:05:49.969HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4104.14, Fake TP: 4102.24
+      QK000:05:50.044Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=188029 | role=FLOW | active L0 | lot=0.0100 | entry=4128.09000
+      OQ000:05:50.064HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 4074275
+      OO000:05:50.065HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4126.91
+      KL000:05:50.065HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4131.64, Fake TP: 4132.54
+      HJ000:05:50.127HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 4074276
+      QE000:05:50.127HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4104.14, Fake TP: 4102.24
+      HF000:05:50.151HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 4074277
+      GE000:05:50.151HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4126.91
+      KG000:05:50.151HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4131.64, Fake TP: 4132.54
+      OD000:05:50.180HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 4074278
+      RH000:05:50.180HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4104.14, Fake TP: 4102.24
+      OK000:05:50.204HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 4074279
+      JH000:05:50.204HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4126.91
+      NR000:05:50.204HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4131.64, Fake TP: 4132.54
+      FQ000:05:50.230HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 4074280
+      IO000:05:50.231HedgingMartingale (XAUUSD,H1)Spoofing enabled for SELL STOP. Real TP: 4104.14, Fake TP: 4102.24
+      QP000:05:50.254HedgingMartingale (XAUUSD,H1)The sell stop order has been successfully placed. Order number: 4074281
+      GO000:05:50.254HedgingMartingale (XAUUSD,H1)buy_volume:0.01 normalize:0.01 price:4126.91
+      CM000:05:50.254HedgingMartingale (XAUUSD,H1)Spoofing enabled for BUY. Real TP: 4131.64, Fake TP: 4132.54
+      MJ000:05:50.282HedgingMartingale (XAUUSD,H1)The Buy order has been successfully placed. Order number: 4074282
+      ... altre 454 righe non stampate (tetto).
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751
+=====================================================================
+
+--- GIORNO 20261017   (12.1 KB, ultima scrittura 2026-10-17 23:47) ---
+    righe totali: 48
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (7.6 KB, ultima scrittura 2026-10-18 14:47) ---
+    righe totali: 30
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261006   (1.7 KB, ultima scrittura 2026-10-06 20:42) ---
+    righe totali: 6
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QJ020:42:10.503ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20261017   (729 KB, ultima scrittura 2026-10-17 23:51) ---
+    righe totali: 1056
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (463.2 KB, ultima scrittura 2026-10-18 15:06) ---
+    righe totali: 671
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261020   (118.2 KB, ultima scrittura 2026-10-20 23:55) ---
+    righe totali: 365
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      PS023:55:03.179ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=0.00%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+--- GIORNO 20261021   (13.3 KB, ultima scrittura 2026-10-21 03:30) ---
+    righe totali: 46
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      LJ003:30:07.017ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=0.00%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
