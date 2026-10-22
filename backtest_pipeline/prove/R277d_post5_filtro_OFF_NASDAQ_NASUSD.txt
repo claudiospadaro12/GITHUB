@@ -1,0 +1,159 @@
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+#  R277d -- REGOLA DI EMILIANO: candela 5 minuti DOPO l'apertura (14:30-14:35 server), FILTRO SPENTO (controllo di R277c)
+#  NASUSD M5 -- TICK REALI -- deposito 80000 -- rischio 2,00 -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40 (come R274a/R199B)
+#  magic gemelli 798841 / 798891 (vergini: zero occorrenze nel repo, git grep del 22/10/2026)
+#  Scritto il 22/10/2026. Attesa, soglie e contro-esempi CONGELATI PRIMA dei numeri, dentro questo file.
+#  Origine: webinar di Emiliano del 21/10 (report/ANALISI_LIVE_EMILIANO_2026-10-21_WEBINAR_LEZIONE3.md, voce N1): "alle 15:25 aspetto la
+#  candela a 5 minuti, due ordini pendenti a 10 punti, la candela deve essere fra 17 e 38 punti". [DICHIARATO DA LUI, non verificato.]
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca taglie, preset, sedie, forward.
+#  Deposito (80000) e modello (4 = tick reali) li passa la riga di lancio.
+# ==========================================================================
+#  0. LA DOMANDA: il FILTRO sull'ampiezza della candela da 5 minuti (17-38 punti) migliora la regola di apertura del Nasdaq?
+#  PERCHE' NON E' R274 CON IL FILTRO: R274 misura un range di 35 minuti (mediana dei primi 30' nel 2025: 116,6 punti, 2024: 86,8,
+#  report/AMPIEZZA_RANGE_NASDAQ_2026-09-21.md); un filtro 17-38 su quel range scarta il 100% delle giornate (misurato il 21/09).
+#  La regola di Emiliano e' un'altra: candela di 5 minuti, ordini PENDENTI a 10 punti, stop all'estremo opposto, niente filtro volumi.
+#  Si fa girare quella regola sul NOSTRO EA cambiando SOLO l'ingresso:
+#   - InpEntryMode=0 (breakout a pendenti BUY STOP / SELL STOP), InpBufferPoints=1000 (10,00 punti indice: 1 punto MT5 = 0,01 su NASUSD),
+#   - range di 5 minuti: InpRangeMode=0 (OPENING), InpRangeMinutes=5: massimo e minimo dei 5 minuti 14:30-14:35; gli ordini partono alle 14:35,
+#   - InpUseVolumeFilter=0 (la regola di Emiliano non ha filtro volumi; la cella R274a lo ha acceso),
+#   - filtro ampiezza: SPENTO: InpMinRangePts=0, InpMaxRangePts=0 (controllo).
+#  TUTTO IL RESTO e' la cella R274a: stop all'estremo opposto del range, TP1 0,5R con chiusura 50% e break-even, trailing M5, rischio 2%,
+#  UN trade al giorno, scadenza pendenti 120 minuti, flat 17:30 server, Guardian acceso. Dichiarate come DIFFERENZE dalla regola di Emiliano:
+#  (a) la sua uscita e' "50 punti in 1-2 minuti, meta' posizione, stop in pari" (qui TP1 in R, non in punti fissi); (b) il suo piano B
+#  (aggiungere un ordine uguale se si riempiono entrambi i pendenti) NON c'e': e' mediazione, contro le regole di casa; (c) niente 1/3 e 2/3.
+#  ORARI: 15:25-15:30 italiane = 14:25-14:30 SERVER BCM (CLAUDIO: server = ora italiana - 1). L'apertura cash e' alle 14:30 server (InpSessionHour=14, Min=30).
+#  [INCERTO] se la sua candela di 5 minuti e' quella PRIMA dell'apertura (14:25-14:30) o quella DOPO (14:30-14:35): a voce dice "alle 15:25 aspetto il
+#  formarsi della candela". Per questo ci sono DUE tempi (PRE e POST) e per ognuno la coppia filtro ACCESO / SPENTO: 4 file R277a-d.
+# ==========================================================================
+#  1. COSA SI LEGGE (CSV IS e OOS per file: Profit, Profit Factor, Equity DD %, Trades) e il cancello G1 (due gemelle identiche).
+#  BASE DI CONFRONTO GIA' MISURATA (cella R274a, retest, range 35', filtro volumi acceso, stessa finestra): IS PF 1,22116 DD 7,3069% /
+#  OOS PF 1,21546 DD 7,8576% (R199B Pass=2). Il confronto e' per ORIENTAMENTO: la geometria e' diversa.
+#  CRITERI CONGELATI (r277_giudizio.py, scritto prima di aprire gli zip):
+#   FILTRO UTILE (per ogni tempo PRE e POST) se e solo se, in IS E in OOS: PF_acceso - PF_spento >= 0,10 E DD_acceso <= 1,10 x DD_spento E
+#   Trades_acceso >= 0,40 x Trades_spento. Altrimenti "NON DIMOSTRATO" (anche se il PF sale: puo' essere campione piccolo).
+#   REGOLA DI EMILIANO "BATTE" la nostra cella solo se un file R277 ha PF_OOS > 1,21546 E DD_OOS <= 7,8576% E Trades_OOS >= 150.
+#   Con Trades < 150 non c'e' verdetto di merito (soglia S-N). Il DD si legge sempre.
+#  ATTESE (dichiarate ORA, fiducia bassa: 50% dove e' una stima della distribuzione, mai misurata sulla candela di 5 minuti):
+#   R1. G1 (gemelle identiche) in tutti e 4 i file: 90%.
+#   R2. PF dei file SPENTI fra 0,85 e 1,20 in IS e OOS (il breakout cieco sul Nasdaq ha PF ~1,00, report/AMPIEZZA_RANGE_NASDAQ par. 0): 65%.
+#   R3. Trades_acceso / Trades_spento: PRE fra 0,35 e 0,80, POST fra 0,15 e 0,50 (la candela dei primi 5 minuti e piu ampia di quella prima
+#       dell'apertura): 50% ciascuno.
+#   R4. FILTRO UTILE (criterio sopra) in PRE: 25%; in POST: 25%.
+#   R5. Nessun file supera la cella R274a (PF OOS > 1,21546 con DD <= 7,8576%): 70%.
+#  LIMITI: un solo percorso storico (2024-2026), una sola cella di uscita (quella di R274a); le soglie 17-38 vengono da una dichiarazione di Emiliano,
+#  non da una misura; la candela di 5 minuti e il filtro non sono ottimizzati; non e' la sedia 770260 ne' il preset vivo.
+# ==========================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpTP1_ClosePct=50||50||0||50||N
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=5||5||0||5||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=5||5||0||5||N
+InpBufferPoints=1000||1000||0||1000||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=1||1||0||1||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=2||2||0||2||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=0.5||0.5||0||0.5||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2||2||0||2||N
+InpTrailFixedPts=410||410||0||410||N
+InpRunnerTP_R=0||0||0||0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100||100||0||100||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpMinBreakoutRangeATR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20||20||0||20||N
+InpVolHighPct=80||80||0||80||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+
+# --- ASSE UNICO: IL MAGIC (asse TECNICO, cancello G1 di determinismo) ---
+#  Due celle GEMELLE, identiche in tutto tranne il magic: devono dare
+#  lo stesso identico CSV e lo stesso per-trade (classe 455: il file
+#  per-trade si chiama col MAGIC, quindi due magic = due file, ognuno
+#  l'ultima gamba, cioe' l'OOS). Il magic NON e' 770260: e' vergine.
+InpMagic=798841||798841||50||798891||Y
+# 2 celle -> 4 passate (2 celle x 2 finestre)
