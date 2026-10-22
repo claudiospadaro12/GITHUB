@@ -1,0 +1,3 @@
+sonda;da;a;timeout_min;t_avvio;durata_s;test_s;stato;report;trades;profitto;pf;dd_equita;dd_saldo;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;finestra;stop_out_log;no_money_log;input_ok;enum;motivi
+TRANCHE1;2025.01.01;2026.10.01;900;2026-10-21 23:38:35;10579;10557;OK;GRLAT_TRANCHE1_20261021_233834.htm;787;59067.85;2.82;4047.33(3.13%);2639.85(3.26%);100%ticksreali;10280;146152231;10280;146152231;EURUSD 2024.07.05 / XAUUSD 2024.07.10;2025.01.01-2026.10.01;0;0;si;;
+TRANCHE2;2025.01.01;2026.10.01;900;2026-10-22 02:34:57;10593;10567;OK;GRLAT_TRANCHE2_20261021_233834.htm;791;59620.09;2.88;3908.69(3.01%);2636.15(3.25%);100%ticksreali;10280;146152231;10280;146152231;EURUSD 2024.07.05 / XAUUSD 2024.07.10;2025.01.01-2026.10.01;0;0;si;;
