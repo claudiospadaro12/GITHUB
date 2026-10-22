@@ -1,0 +1,5 @@
+EA;passata;stato;operazioni;netto_EUR;PF;DD_equity;DD_saldo
+Goldbot One MT5.ex5;TRANCHE1;KO;0;0.00;0.00;0(0%);0(0%)
+Goldbot One MT5.ex5;TRANCHE2;OK;449;9536.74;1.69;3428.67(3.85%);2893.34(3.27%)
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. La lettura vera (lotti, DD in percentuale degli 80000, operazioni e controllo degli input) la fa Claudio con me sui report dentro le cartelle GB5_<nome>, secondo report/GOLDBOT_ONE_TICK_REALI_ATTESE_2026-10-22.md.
