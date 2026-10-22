@@ -1,0 +1,134 @@
+#  EA: ABTG_Dow_Apertura_US
+# ==========================================================================
+#  R278a -- DOW, regola di Emiliano: candela 5 minuti PRIMA dell'apertura (14:25-14:30 server), buffer 10 punti, FILTRO 17-38 ACCESO
+#  U30USD M5 -- TICK REALI -- deposito 80000 -- rischio 2,00 -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40 (come R277)
+#  magic gemelli 799011 / 799061 (vergini: zero occorrenze nel repo, git grep -w del 22/10/2026)
+#  Scritto il 22/10/2026. Attese, soglie e contro-esempi CONGELATI PRIMA dei numeri, dentro questo file.
+#  Origine: webinar di Emiliano del 22/10 (report/ANALISI_LIVE_EMILIANO_2026-10-22_WEBINAR_LEZIONE4.md): "questa strategia funziona sul Nasdaq e
+#  sull'US30; da domani passate all'US30". [DICHIARATO DA LUI, osservazione di due giorni, non verificata.] Per il Dow NON ha detto le soglie del filtro.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca taglie, preset, sedie, forward.
+#  Deposito (80000) e modello (4 = tick reali) li passa la riga di lancio.
+# ==========================================================================
+#  0. LA DOMANDA: la regola di Emiliano (candela di 5 minuti PRIMA dell'apertura, 14:25-14:30 server, ordini pendenti BUY STOP / SELL STOP, stop
+#  all'estremo opposto, filtro sull'ampiezza della candela) funziona anche sul Dow (U30USD)? Stessa cella di R277a/b cambiando SOLO simbolo ed EA
+#  (ABTG_Dow_Apertura_US, stesso motore d'apertura; il filtro EMA H4 di default del Dow e SPENTO come in R277).
+#  Digits=2: 1 punto indice = 100 punti MT5 (misurato, report/APERTURE_DOW_MAPPA_2026-10-03.md). Il Dow vale circa il doppio del Nasdaq (circa 44.000
+#  contro circa 22.000 nel 2025): le soglie 17-38 della regola sul Nasdaq sono PROBABILMENTE strette per il Dow.
+#   - InpBufferPoints=1000, filtro InpMinRangePts=1700 / InpMaxRangePts=3800 (17,00-38,00 punti indice)
+#  CELLE: R278a (buffer 10 punti, filtro 17-38 come dichiarato per il Nasdaq), R278b (buffer 10, filtro SPENTO = controllo), R278c (buffer 20, filtro
+#  34-76 = le stesse soglie scalate per il rapporto di prezzo Dow/Nasdaq circa 2: [DERIVATO, e una nostra ipotesi, non di Emiliano]).
+#  ORARI: apertura cash 14:30 server (UTC+1 fisso, USA in ora legale). D'INVERNO (3/11/2025-6/3/2026 nell'OOS, 4/11/2024-7/3/2025 nell'IS) l'apertura
+#  e alle 15:30 server: i mesi invernali di QUESTO file guardano la candela un'ora PRIMA dell'apertura. Si legge anche la divisione per stagione
+#  (r278_giudizio.py, esplorativa) ma il verdetto congelato e quello globale. La versione invernale del Dow e un'altra riga.
+# ==========================================================================
+#  1. COSA SI LEGGE (CSV IS e OOS per file: Profit, Profit Factor, Equity DD %, Trades) e il cancello G1 (due gemelle identiche).
+#  CRITERI CONGELATI (r278_giudizio.py, scritto prima di aprire gli zip):
+#   FILTRO UTILE (R278a contro R278b; R278c contro R278b) se e solo se, in IS E in OOS: PF_acceso - PF_spento >= 0,10 E DD_acceso <= 1,10 x DD_spento
+#   E Trades_acceso >= 0,40 x Trades_spento. Altrimenti "NON DIMOSTRATO".
+#   "PASSA" (cella singola, soglia di casa per le aperture del Dow): PF >= 1,10 in IS E in OOS E Trades >= 150 in IS E in OOS. Il DD si legge sempre
+#   (a rischio 2% nessuna cella d'apertura del Dow stava sotto il 10%, R263). Con Trades < 150 non c'e' verdetto di merito.
+#  ATTESE (dichiarate ORA, fiducia bassa):
+#   D1. G1 (gemelle identiche) in tutti e 3 i file: 90%.
+#   D2. Trades_acceso / Trades_spento di R278a < 0,40 (filtro 17-38 troppo stretto per il Dow): 70%. Di R278c fra 0,35 e 0,80: 50%.
+#   D3. PF del file SPENTO R278b fra 0,85 e 1,15 in IS e in OOS (breakout cieco): 65%.
+#   D4. FILTRO UTILE: R278c contro R278b 25%; R278a contro R278b 15%.
+#   D5. Nessuna cella PASSA (PF >= 1,10 con n >= 150 in IS e in OOS): 75%.
+#  LIMITI: un solo percorso storico (2024-2026), una sola cella d'uscita, una sola finestra; l'orologio invernale non e allineato (vedi sopra); soglie
+#  di R278c inventate da noi; non e la sedia 770202 ne' nessun preset vivo; non e un test del consiglio "da domani l'US30".
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpTP1_ClosePct=50||50||0||50||N
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=5||5||0||5||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=5||5||0||5||N
+InpBufferPoints=1000||1000||0||1000||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=1700||1700||0||1700||N
+InpMaxRangePts=3800||3800||0||3800||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=1||1||0||1||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=2||2||0||2||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=0.5||0.5||0||0.5||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2||2||0||2||N
+InpTrailFixedPts=410||410||0||410||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100||100||0||100||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+
+# --- ASSE UNICO: IL MAGIC (asse TECNICO, cancello G1 di determinismo) ---
+#  Due celle GEMELLE, identiche in tutto tranne il magic: devono dare
+#  lo stesso identico CSV e lo stesso per-trade (classe 455: il file
+#  per-trade si chiama col MAGIC, quindi due magic = due file, ognuno
+#  l'ultima gamba, cioe' l'OOS). Il magic NON e' 770260: e' vergine.
+InpMagic=799011||799011||50||799061||Y
+# 2 celle -> 4 passate (2 celle x 2 finestre)

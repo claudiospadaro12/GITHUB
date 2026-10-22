@@ -1,0 +1,149 @@
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+#  R279a -- INVERNO W1, regola di Emiliano con apertura 15:30 server, FILTRO 17-38 ACCESO
+#  NASUSD M5 -- TICK REALI -- deposito 80000 -- rischio 2,00 -- FINESTRA INVERNALE 2024.11.04 -> 2025.03.07, @FRAZIONEIS 0.001 (quasi tutta la finestra nella gamba OOS)
+#  magic gemelli 798911 / 798961 (vergini: zero occorrenze nel repo, git grep -w del 22/10/2026)
+#  Scritto il 22/10/2026. Attese, soglie e contro-esempi CONGELATI PRIMA dei numeri, dentro questo file.
+#  Origine: R277 (report/R277_EMILIANO_NASDAQ_LETTURA_2026-10-22.md): il test usava sempre le 14:30 server, giusto d'estate USA e un'ora PRIMA
+#  dell'apertura d'inverno. Qui si misura la STESSA regola con l'orologio GIUSTO d'inverno.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca taglie, preset, sedie, forward.
+#  Deposito (80000) e modello (4 = tick reali) li passa la riga di lancio.
+# ==========================================================================
+#  0. LA DOMANDA: la regola di Emiliano (candela 5 minuti PRIMA dell'apertura, pendenti a 10 punti, filtro 17-38) funziona anche d'INVERNO se
+#  l'orologio e quello giusto? Server BCM = UTC+1 fisso, USA in ora solare (apertura 9:30 New York = 14:30 UTC) => apertura cash alle 15:30 SERVER:
+#  InpSessionHour=15, InpSessionMin=30 (candela 15:25-15:30, ordini alle 15:30). Il flat passa da 17:30 a 18:30 (InpCloseHour=18, InpCloseMin=30)
+#  per tenere la stessa durata della sessione (3 ore dall'apertura). Tutto il resto = R277a/b.
+#   - InpSessionHour=15, InpSessionMin=30, InpCloseHour=18, InpCloseMin=30; filtro 1700/3800
+#  FINESTRE: invernali = USA in ora solare E server fisso UTC+1. W1 2024.11.04-2025.03.07 (USA solare dal 3/11/2024; ora legale dal 9/3/2025),
+#  W2 2025.11.03-2026.03.06 (solare dal 2/11/2025; legale dal 8/3/2026). Quattro file: W1/W2 x filtro ACCESO/SPENTO.
+#  Con @FRAZIONEIS 0.001 la gamba IS e una scheggia: il CSV _IS puo essere VUOTO (rc 2 della riga, gia visto in R276b): si legge l'_OOS, che e
+#  la finestra intera. Il per-trade e della gamba OOS.
+# ==========================================================================
+#  1. COSA SI LEGGE (CSV _OOS di ogni file: Profit, Profit Factor, Equity DD %, Trades) e il cancello G1 (due gemelle identiche).
+#  CRITERI CONGELATI (r279_giudizio.py, scritto prima di aprire gli zip), a livello di FINESTRA (W1 e W2 al posto di IS e OOS):
+#   FILTRO UTILE d'inverno se e solo se, in W1 E in W2: PF_acceso - PF_spento >= 0,10 E DD_acceso <= 1,10 x DD_spento E Trades_acceso >= 0,40 x
+#   Trades_spento. Altrimenti "NON DIMOSTRATO". Trades < 150 per gamba: nessun verdetto di merito (soglia S-N): e ATTESO che qui valga per tutte.
+#   Confronto di ORIENTAMENTO con l'estate (R277, mesi allineati, solo OOS): PRE acceso 95 posizioni PF 1,48; PRE spento 184 posizioni PF 1,11.
+#  ATTESE (dichiarate ORA, fiducia bassa: campioni piccoli, 4-5 mesi per finestra):
+#   W1. G1 (gemelle identiche) in tutti e 4 i file: 90%.
+#   W2. Trades_acceso < 150 in W1 e in W2 (nessun verdetto di merito): 90%.
+#   W3. PF del file SPENTO fra 0,85 e 1,15 in entrambe le finestre: 55%.
+#   W4. PF_acceso > PF_spento (di qualsiasi margine) in entrambe le finestre: 60%.
+#   W5. FILTRO UTILE d'inverno (criterio sopra) in entrambe: 20%.
+#   W6. PF acceso, messe insieme W1 e W2 dal per-trade (esplorativo): maggiore di 1,0: 55%.
+#  LIMITI: otto mesi in tutto, due inverni, un solo percorso storico; il fatto che l'ora "giusta" sia 15:30 e un ragionamento sull'orologio, non una
+#  misura sul tick; soglie 17-38 prese da una frase di Emiliano; non e la sedia 770260 ne' il preset vivo.
+# ==========================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.11.04
+@FINOA    2025.03.07
+@FRAZIONEIS 0.001
+
+InpTP1_ClosePct=50||50||0||50||N
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=15||15||0||15||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=5||5||0||5||N
+InpCloseHour=18||18||0||18||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=5||5||0||5||N
+InpBufferPoints=1000||1000||0||1000||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=1700||1700||0||1700||N
+InpMaxRangePts=3800||3800||0||3800||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=1||1||0||1||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=2||2||0||2||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=0.5||0.5||0||0.5||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2||2||0||2||N
+InpTrailFixedPts=410||410||0||410||N
+InpRunnerTP_R=0||0||0||0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100||100||0||100||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpMinBreakoutRangeATR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20||20||0||20||N
+InpVolHighPct=80||80||0||80||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+
+# --- ASSE UNICO: IL MAGIC (asse TECNICO, cancello G1 di determinismo) ---
+#  Due celle GEMELLE, identiche in tutto tranne il magic: devono dare
+#  lo stesso identico CSV e lo stesso per-trade (classe 455: il file
+#  per-trade si chiama col MAGIC, quindi due magic = due file, ognuno
+#  l'ultima gamba, cioe' l'OOS). Il magic NON e' 770260: e' vergine.
+InpMagic=798911||798911||50||798961||Y
+# 2 celle -> 4 passate (2 celle x 2 finestre)
