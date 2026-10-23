@@ -46,7 +46,7 @@
 # =====================================================================
 
 param(
-  [Parameter(Mandatory=$true)][ValidateSet('piccolo','100k')][string]$Terminale,
+  [Parameter(Mandatory=$true)][ValidateSet('piccolo','100k')][string]$Dove,
   [switch]$Esegui,
   [switch]$AccettaSconosciuti
 )
@@ -56,7 +56,7 @@ $INV = [Globalization.CultureInfo]::InvariantCulture
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch { }
 
 # COSTANTI DEL BERSAGLIO (non parametri: un bersaglio passato da fuori si puo' sbagliare da fuori)
-if($Terminale -eq 'piccolo'){
+if($Dove -eq 'piccolo'){
   $HASH_DATI    = '215D85D767A1C39E22D242C8114BF9F5'
   $CONTO        = '50503392'
   $PROG_ATTESO  = 'C:\Program Files\BCM Markets MT5 Terminal'
@@ -212,7 +212,7 @@ function Muori($msg) {
 
 Write-Host '====================================================================='
 Write-Host ' RICOMPILAZIONE DAX / DOW / ORB -- SOLO COPIA DI FILE, NESSUNA COMPILAZIONE'
-Write-Host (' bersaglio: ' + $Terminale + ' (conto ' + $CONTO + '), cartella dati ' + $HASH_DATI)
+Write-Host (' bersaglio: ' + $Dove + ' (conto ' + $CONTO + '), cartella dati ' + $HASH_DATI)
 Write-Host (' ora      : ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $INV) + '  (ora locale)')
 Write-Host '====================================================================='
 Write-Host ''
@@ -249,7 +249,7 @@ foreach($t in $trovati){ Write-Host ('      ' + $t.Path) }
 $stamp = (Get-Date).ToString('yyyy-MM-dd_HHmmss', $INV)
 $desk  = Join-Path $env:USERPROFILE 'Desktop'
 if(-not (Test-Path -LiteralPath $desk)){ $desk = $env:USERPROFILE }
-$cartBk = Join-Path $desk ('COMPILA_APERTURE_' + $Terminale + '_' + $stamp)
+$cartBk = Join-Path $desk ('COMPILA_APERTURE_' + $Dove + '_' + $stamp)
 $dirBk  = Join-Path $cartBk 'ORIGINALI'
 [void](New-Item -ItemType Directory -Path $dirBk -Force)
 foreach($t in $trovati){
@@ -257,7 +257,7 @@ foreach($t in $trovati){
   $ex = [IO.Path]::ChangeExtension($t.Path, '.ex5')
   if(Test-Path -LiteralPath $ex){ Copy-Item -LiteralPath $ex -Destination (Join-Path $dirBk ([IO.Path]::GetFileName($ex))) -Force }
 }
-$zipBk = Join-Path $desk ('COMPILA_APERTURE_' + $Terminale + '_' + $stamp + '_ORIGINALI.zip')
+$zipBk = Join-Path $desk ('COMPILA_APERTURE_' + $Dove + '_' + $stamp + '_ORIGINALI.zip')
 Compress-Archive -Path (Join-Path $dirBk '*') -DestinationPath $zipBk -Force
 Write-Host '[3/7] COPIA DI SICUREZZA fatta (.mq5 e .ex5 originali):' -ForegroundColor Green
 Write-Host ('      cartella: ' + $dirBk)
