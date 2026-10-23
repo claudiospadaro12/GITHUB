@@ -1,0 +1,44 @@
+#  EA: ABTG_ORB_Emiliano
+# ==========================================================================
+#  R287a -- cella VIVA dell'ORB (770611: range 14:30-14:45, solo long, SL meta' range, TP 1,5 x range, EMA200, max range 0,8%) sul Dow, ORA FISSA (InpAutoUSDST=0, la sedia com'e')
+#  U30USD M5 -- TICK REALI -- deposito 80000 -- rischio 1,00 (default dell'EA) -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40
+#  EA: ABTG_ORB_Emiliano v1.01 con TUTTE le novita' spente tranne InpAutoUSDST (come R283b, che e' uguale a R283a al centesimo). Scritto il 23/10/2026 PRIMA di aprire lo zip.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  DOMANDA (sala giro 1, Q1 dell'ORB): dal 02/11 la sedia con le ore invariate arma a 14:30 server = 08:30 ET (un'ora prima della cash USA, in pieno dato macro) e chiude alle 21:00 =
+#  15:00 ET. Con InpAutoUSDST=1 range e fine giornata si spostano di +60 minuti quando gli USA sono in ora SOLARE (server BCM = UTC+1 fisso): 15:30-15:45 e 22:00. Fuori dall'ora solare
+#  US i due bracci sono IDENTICI per costruzione.
+#   R287a  InpAutoUSDST=0 (la sedia com'e'), R287b  InpAutoUSDST=1. Nient'altro cambia. DIFFERENZA A PACCHETTO: l'orologio sposta INSIEME range, armo e fine giornata (non separabili).
+#  CRITERI CONGELATI (lettore backtest_pipeline/r287_giudizio.py):
+#   G1   gemelle identiche: Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001.
+#   G0   R287a = R283a (IS 7630,13 / 1,24678 / 8,2477 / 71; OOS 33442,57 / 1,67803 / 9,9897 / 119): Profit entro 1,01, PF entro 0,0002, DD entro 0,0001, Trades uguali. Se FALLISCE nessun altro numero si legge.
+#   S1   fuori dall'inverno US (per-trade OOS, chiusure fuori da 2025-11-03..2026-03-06) le posizioni dei due bracci sono IDENTICHE (stessa data, |diff netto| <= 0,02). Se non lo sono, l'orologio sposta anche altro: esito NON LEGGIBILE.
+#   INVERNO US (definito ORA): giorni di chiusura dal 2025-11-03 al 2026-03-06 (OOS) e, per la gamba IS, la sola differenza fra i due bracci (il per-trade IS non esiste).
+#   LETTURA (sempre DESCRITTIVA: le posizioni invernali OOS sono circa 46, molto sotto 150, il verdetto di merito e' escluso): per ogni braccio posizioni, netto, PF sui giorni d'inverno; differenza di netto (b - a)
+#     CON e SENZA gennaio-febbraio 2026 (che da soli valgono il 49% del netto OOS); giorni in cui il braccio b batte il braccio a. Direzione "b migliore" solo se la differenza e' > 0 sia con sia senza gen-feb.
+#  ATTESE dichiarate ORA: P1 i due round partono e compilano 95%; P2 G0 passa 90%; P3 S1 passa 90%; P4 differenza di netto invernale (b - a) > 0 nell'OOS: 50%;
+#   P5 stesso segno con e senza gen-feb: 60%; P6 posizioni invernali di b entro +-20% di quelle di a: 70%.
+#  LIMITI: un solo inverno nell'OOS (2025-26) e uno nell'IS (2024-25, solo come differenza aggregata); un solo regime toro; deposito 80000; non e' una misura del piccolo; non tara nulla.
+#  Per il binario in campo (v1.04, senza AutoUSDST) l'unico cambio possibile resta spostare a mano le ore: questo round dice solo cosa farebbe lo spostamento.
+# ==========================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpRangeStartMin=30||30||0||30||N
+InpRangeEndMin=45||45||0||45||N
+InpEndHour=21||21||0||21||N
+InpEndMin=0||0||0||0||N
+InpAllowShort=0||0||0||0||N
+InpSLMode=3||3||0||3||N
+InpTP_R=1.0||1.0||0||1.0||N
+InpTPMode=1||1||0||1||N
+InpTP1Pct=0.0||0.0||0||0.0||N
+InpExitOnEmaClose=0||0||0||0||N
+InpUseEma200Filter=1||1||0||1||N
+InpMaxRangePct=0.8||0.8||0||0.8||N
+InpAutoUSDST=0||0||0||0||N
+InpMagic=799951||799951||50||800001||Y
