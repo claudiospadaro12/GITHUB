@@ -57,3 +57,6 @@ Per ogni sedia: nuovo grafico del simbolo e TF in tabella, trascina l'EA, scheda
 - Rimettere tutte le sedie su indici insieme ricrea la correlazione di prima (DAX, Dow, Nasdaq, ORB, MaxMin): rischio sommato quello di allora.
 - Il Nasdaq 770250 era SOLO SHORT a 0,35%.
 - Nessuna taglia modificata. Il piccolo ha anche molti EA demo del Market attaccati: non cambiano.
+
+## 7. Aggiunta 23/10 sera: EMA200 771531 (scelta di Claudio)
+Sedia **ABTG_EMA200 U30USD H1 magic 771531**, sparita fra il 23/09 e il 24/09 (non fra le 15 del 25/09, non nel backup). Claudio: *"SI RIMETTILA CON LO 0,65"*. Set `mql5/Presets/RIPRISTINO_DEMO_20261023/ABTG_EMA200_U30USD_H1_771531_PICCOLO.set` (da `ABTG_EMA200_U30USD_H1_771531_VIVA.set`, rischio 0,65, due lati). Va attaccata a mano dopo il ripristino delle 15; non dipende dall'orologio. Nel campo era 1,0: la riduzione e decisione di Claudio.

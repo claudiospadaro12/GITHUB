@@ -1,0 +1,51 @@
+; ==========================================================================
+; RIPRISTINO DEMO -- ABTG_EMA200 su U30USD H1 -- conto PICCOLO 50503392 -- magic 771531
+; Sedia sparita fra il 23/09 e il 24/09 (non nella sospensione del 25/09, non nel backup). Valori = foto del campo, tranne il rischio.
+; RISCHIO 0,65: DECISIONE DI CLAUDIO del 23/10/2026 (nel campo era 1,0). Due lati (InpAllowLong e InpAllowShort true). H1 = InpTF 16385.
+; InpUsaGuardian: il binario del 06/08 sul demo NON ha questo input: MT5 lo ignora, finche non si ricompila non ha effetto.
+; ASCII. Nessun orario: non dipende dal cambio ora.
+; ==========================================================================
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=0.65
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=EMA200 DOW
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=771531
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
