@@ -14,8 +14,9 @@
 //|  e' nuovo e' OPT-IN, default spento (test di non-regressione:    |
 //|  stessa cella, stesso risultato al centesimo):                   |
 //|   1. InpAutoK        K per strumento come la tabella dell'indic.  |
-//|                      (cura l'ORB su forex/argento: K=1 su un     |
-//|                      cross a 1,6 = pendente a +10 UNITA' DI PREZZO)|
+//|                      (cura l'ORB su FOREX e petrolio: K=1 su un   |
+//|                      cross a 1,6 = pendente a +10 UNITA' DI PREZZO;|
+//|                      l'ARGENTO XAGUSD NON e' in tabella: usa InpK)|
 //|   2. InpMinRangeK /  filtro sull'AMPIEZZA del range in unita' K   |
 //|      InpMaxRangeK    (Emiliano, Nasdaq: 17-38 punti; per il Dow   |
 //|                      le soglie NON sono state dette: da misurare) |
@@ -30,6 +31,15 @@
 //|   6. InpAutoUSDST        range e fine giornata +60 min con USA in |
 //|                      ora solare (server BCM = UTC+1 fisso)        |
 //|   7. InpMaxMinLotRiskX   tetto al lotto forzato al minimo         |
+//|   8. InpRangeEndExcl     il range finisce all'ULTIMO minuto PRIMA |
+//|                      di InpRangeEnd (14:25:00-14:29:59 davvero);  |
+//|                      con 0 (v1.04) la barra M1 delle 14:30, cioe' |
+//|                      i primi secondi della cash, ENTRA nel range  |
+//|  Piano A: con InpPlanAUse spenti ManageTP1 (parziale al target e |
+//|  InpBreakeven/InpTP1Pct): il pareggio lo fa il Piano A stesso. Il|
+//|  trailing EMA9 e l'uscita su chiusura EMA restano SOSPESI finche'|
+//|  il Piano A non e' stato eseguito o dichiarato non applicabile.   |
+//|  Il Piano A e' per TICKET (gPlanATk), non per giorno.             |
 //|  NON IMPLEMENTATO (detto, non taciuto): Piano B (ordine aggiunto  |
 //|  se scattano entrambi i pendenti), stop a tempo di 6 minuti,      |
 //|  riarmo dopo rifiuto del broker, anti-duplicato "trade gia'       |
@@ -255,6 +265,7 @@ input int    InpPlanAMaxMin     = 0;      // 4) se >0 il Piano A scatta solo se 
 input bool   InpSkipUSHolidays  = false;  // 5) non opera nei giorni di chiusura NYSE
 input bool   InpAutoUSDST       = false;  // 6) server a UTC fisso: range e fine giornata +60 min con USA in ora SOLARE (orari impostati = ora legale USA)
 input double InpMaxMinLotRiskX  = 0.0;    // 7) lotto forzato al minimo: se il rischio effettivo supera X volte il nominale niente trade; 0 = off
+input bool   InpRangeEndExcl    = false;  // 8) il range NON include la barra M1 che inizia a InpRangeEnd (14:25:00-14:29:59 invece di ...-14:30:59)
 
 input group "=== Rischio ==="
 input double InpRiskPercent  = 1.0;    // Rischio per trade in %
@@ -310,7 +321,9 @@ ENUM_ORBPHASE gPhase=ORB_WAIT;
 int      gDay=-1;
 double   gRangeHigh=0, gRangeLow=0;
 bool     gPart1=false;
-bool     gPlanA=false;          // Piano A gia' scattato (o dichiarato non applicabile) per la posizione del giorno
+ulong    gPlanATk=0;            // ticket per cui il Piano A e' concluso (eseguito, o dichiarato non applicabile)
+ulong    gPlanAParzTk=0;        // ticket per cui il parziale e' gia' stato tentato (non si ripete mai)
+int      gPlanAFail=0;          // tentativi falliti di mettere lo stop in pari
 int      gHolidayLogDay=-1;     // una sola riga di log per festivo
 bool     gHadPos=false;
 datetime gLastExec=0;
@@ -364,6 +377,12 @@ int OnInit()
    if(InpAutoTest) Autotest();   // v1.04: verifica a tavolino del nucleo di selezione
    Log(StringFormat("avviato su %s. Range server %02d:%02d-%02d:%02d, ingresso %.1f x K(%.4f), fine %02d:%02d.",
        _Symbol,InpRangeStartHour,InpRangeStartMin,InpRangeEndHour,InpRangeEndMin,InpEntryPoints,KEff(),InpEndHour,InpEndMin));
+   if(InpAutoUSDST && !MQLInfoInteger(MQL_TESTER))
+     {
+      long off=(long)(TimeTradeServer()-TimeGMT());
+      if(off!=3600)
+         Log(StringFormat("ATTENZIONE InpAutoUSDST: server-GMT = %d s (atteso 3600 = UTC+1 fisso): lo spostamento di 60 minuti PUO' essere sbagliato.",(int)off));
+     }
    if(InpAutoK && KfromTable(_Symbol)<=0.0)
       Log(StringFormat("InpAutoK: %s NON e' nella tabella K dell'indicatore: uso InpK=%.4f.",_Symbol,InpK));
    return(INIT_SUCCEEDED);
@@ -497,7 +516,7 @@ int ABTG_ShiftMin()
   }
 
 int RangeEndMin(){ return(InpRangeEndHour*60+InpRangeEndMin+ABTG_ShiftMin()); }
-int DayEndMin()  { return(InpEndHour*60+InpEndMin+ABTG_ShiftMin()); }
+int DayEndMin()  { return(MathMin(1439,InpEndHour*60+InpEndMin+ABTG_ShiftMin())); }
 
 //+------------------------------------------------------------------+
 //| Filtro EMA lunga (utenti ABTG): long solo sopra, short solo sotto|
@@ -588,6 +607,12 @@ void OnTick()
      }
 
    //--- ToolKit: aspetto che una candela CHIUDA oltre il livello. Valuto a nuova barra.
+   if(gPhase==ORB_ARMED && InpMaxLateMin>0 && nowMin>RangeEndMin()+InpMaxLateMin)
+     {
+      Log(StringFormat("armato ma oltre %d minuti dalla fine del range: niente ingresso oggi.",InpMaxLateMin));
+      gPhase=ORB_DONE;
+      return;
+     }
    if(gPhase==ORB_ARMED && newBar)
      {
       if(newsBlk) return;
@@ -595,7 +620,7 @@ void OnTick()
      }
   }
 
-void ResetDay(){ gPhase=ORB_WAIT; gRangeHigh=0; gRangeLow=0; gPart1=false; gPlanA=false; gHadPos=false; Log("nuovo giorno."); }
+void ResetDay(){ gPhase=ORB_WAIT; gRangeHigh=0; gRangeLow=0; gPart1=false; gPlanATk=0; gPlanAParzTk=0; gPlanAFail=0; gHadPos=false; Log("nuovo giorno."); }
 
 //+------------------------------------------------------------------+
 //| Calcola max/min del range (finestra server, anche a cavallo mezzanotte)|
@@ -609,7 +634,7 @@ bool ComputeRange(double &hi,double &lo)
    int shDst=ABTG_ShiftMin();                       // v1.00: 0 con InpAutoUSDST=false (no-op)
    if(shDst!=0){ tStart+=shDst*60; tEnd+=shDst*60; }
    int iS=iBarShift(_Symbol,PERIOD_M1,tStart,false);
-   int iE=iBarShift(_Symbol,PERIOD_M1,tEnd,false);
+   int iE=iBarShift(_Symbol,PERIOD_M1,(InpRangeEndExcl ? tEnd-60 : tEnd),false);   // v1.00 opt-in: ultima barra = quella PRIMA di InpRangeEnd
    if(iS<0||iE<0) return(false);
    int start=MathMin(iS,iE);
    int count=MathAbs(iS-iE)+1;
@@ -653,6 +678,8 @@ bool TryPlace()
            { double sp=InpSlippagePts*_Point; sl=NormalizePrice(sl-sp); tp=NormalizePrice(tp-sp); }
          if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" BUY"))
             Log(StringFormat("BUY STOP @ %.5f SL %.5f TP %.5f lot %.2f",buyPx,sl,tp,lot));
+         else if(lot>0)
+            Log(StringFormat("BUY STOP @ %.5f RIFIUTATO: retcode %u (%s)",buyPx,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription()));
         }
      }
    if(InpAllowShort && Ema200SideOK(-1))
@@ -668,6 +695,8 @@ bool TryPlace()
            { double sp=InpSlippagePts*_Point; sl=NormalizePrice(sl+sp); tp=NormalizePrice(tp+sp); }
          if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" SELL"))
             Log(StringFormat("SELL STOP @ %.5f SL %.5f TP %.5f lot %.2f",sellPx,sl,tp,lot));
+         else if(lot>0)
+            Log(StringFormat("SELL STOP @ %.5f RIFIUTATO: retcode %u (%s)",sellPx,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription()));
         }
      }
    return(true);
@@ -695,22 +724,23 @@ bool ArmCloseConfirm()
 //+------------------------------------------------------------------+
 bool RangeWideEnough()
   {
-   double px=SymbolInfoDouble(_Symbol,SYMBOL_BID);
-   if(px<=0) return(true);
    double rng=gRangeHigh-gRangeLow;
    //--- v1.00 (opt-in): ampiezza in unita' K (indici: punti indice). Emiliano, Nasdaq: 17-38.
+   //    Prima del controllo sul prezzo: non dipende dal prezzo. Tolleranza 1e-9 sul confronto in virgola mobile.
    if(InpMinRangeK>0 || InpMaxRangeK>0)
      {
       double kk=KEff();
       if(kk>0)
         {
          double w=rng/kk;
-         if(InpMinRangeK>0 && w<InpMinRangeK)
+         if(InpMinRangeK>0 && w<InpMinRangeK-1e-9)
            { Log(StringFormat("range %.1f unita' K sotto il minimo %.1f: niente setup oggi.",w,InpMinRangeK)); return(false); }
-         if(InpMaxRangeK>0 && w>InpMaxRangeK)
+         if(InpMaxRangeK>0 && w>InpMaxRangeK+1e-9)
            { Log(StringFormat("range %.1f unita' K sopra il massimo %.1f (stop troppo ampio): niente setup oggi.",w,InpMaxRangeK)); return(false); }
         }
      }
+   double px=SymbolInfoDouble(_Symbol,SYMBOL_BID);
+   if(px<=0) return(true);
    if(InpMinRangePct>0 && rng < px*InpMinRangePct/100.0)
      { Log(StringFormat("range %.1f sotto la soglia %.2f%%: niente setup oggi.",rng,InpMinRangePct)); return(false); }
    if(InpMaxRangePct>0 && rng > px*InpMaxRangePct/100.0)
@@ -942,8 +972,10 @@ void ManageTP1()
 //+------------------------------------------------------------------+
 void ManagePlanA()
   {
-   if(!InpPlanAUse || gPlanA) return;
+   if(!InpPlanAUse) return;
    if(!SelPos()) return;
+   ulong ticket=gTicketMio;
+   if(gPlanATk==ticket) return;
    double k=KEff();
    if(k<=0.0) return;
    long type=PositionGetInteger(POSITION_TYPE);
@@ -951,42 +983,47 @@ void ManagePlanA()
    double openP=PositionGetDouble(POSITION_PRICE_OPEN);
    double sl=PositionGetDouble(POSITION_SL);
    double vol=PositionGetDouble(POSITION_VOLUME);
-   ulong ticket=PositionGetInteger(POSITION_TICKET);
-   //--- stop gia' in pari o oltre: Piano A gia' fatto (riavvio) oppure trailing gia' avanti
-   if((isLong && sl>=openP) || (!isLong && sl>0 && sl<=openP)){ gPlanA=true; return; }
+   //--- stop gia' in pari o oltre: Piano A gia' fatto (riavvio) oppure stop gia' avanti
+   if((isLong && sl>=openP) || (!isLong && sl>0 && sl<=openP)){ gPlanATk=ticket; return; }
    double bid=SymbolInfoDouble(_Symbol,SYMBOL_BID), ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
    double gain=isLong ? (bid-openP)/k : (openP-ask)/k;     // in unita' K
-   if(gain<InpPlanAPoints) return;
-   if(InpPlanAMaxMin>0)
+   bool parzOK=(gPlanAParzTk==ticket);                     // parziale gia' tentato: qui si riprova solo il pareggio
+   if(!parzOK)
      {
-      datetime tOpen=(datetime)PositionGetInteger(POSITION_TIME);
-      if((long)(TimeCurrent()-tOpen) > (long)InpPlanAMaxMin*60)
+      if(gain<InpPlanAPoints-1e-9) return;
+      if(InpPlanAMaxMin>0)
         {
-         gPlanA=true;
-         Log(StringFormat("Piano A: +%.1f unita' K raggiunti ma oltre i %d minuti dall'apertura: non scatta (resta la gestione normale).",gain,InpPlanAMaxMin));
-         return;
+         datetime tOpen=(datetime)PositionGetInteger(POSITION_TIME);
+         if((long)(TimeCurrent()-tOpen) > (long)InpPlanAMaxMin*60)
+           {
+            gPlanATk=ticket;
+            Log(StringFormat("Piano A: +%.1f unita' K raggiunti ma oltre i %d minuti dall'apertura: non scatta. Su questa posizione niente parziale ne' pareggio; restano SL/TP e il runner EMA.",gain,InpPlanAMaxMin));
+            return;
+           }
         }
+      double cv=NormVol(vol*InpPlanAClosePct/100.0);
+      parzOK=(cv>0 && cv<vol && InpPlanAClosePct>0 && gTrade.PositionClosePartial(ticket,cv));
+      gPlanAParzTk=ticket;                                 // mai due parziali sullo stesso ticket
+      Log(StringFormat("Piano A: +%.1f unita' K. Parziale %s.",gain,(parzOK?"eseguito":"NON eseguito (lotto minimo o errore)")));
+      if(!PositionSelectByTicket(ticket)) return;          // chiusa del tutto nel frattempo
      }
-   double cv=NormVol(vol*InpPlanAClosePct/100.0);
-   bool parzOK=(cv>0 && cv<vol && InpPlanAClosePct>0 && gTrade.PositionClosePartial(ticket,cv));
-   gPlanA=true;
-   if(!PositionSelectByTicket(ticket)) return;
    double bePari=NormalizePrice(openP);
    double slPrec=PositionGetDouble(POSITION_SL);
    bool dirLong=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY);
-   bool beFatto=((dirLong && bePari>slPrec) || (!dirLong && (slPrec==0 || bePari<slPrec)));
-   if(beFatto)
+   bool serveBE=((dirLong && bePari>slPrec) || (!dirLong && (slPrec==0 || bePari<slPrec)));
+   if(!serveBE){ gPlanATk=ticket; return; }
+   ResetLastError();
+   if(gTrade.PositionModify(ticket,bePari,PositionGetDouble(POSITION_TP)))
      {
-      ResetLastError();
-      if(!gTrade.PositionModify(gTicketMio,bePari,PositionGetDouble(POSITION_TP)))
-        {
-         beFatto=false;
-         PrintFormat("ORB PIANO A: stop in pari FALLITO sul ticket #%I64u (-> %s), retcode %u (%s), err=%d",
-                     gTicketMio,DoubleToString(bePari,_Digits),
-                     gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
-        }
+      gPlanATk=ticket;
+      Log(StringFormat("Piano A: stop in pari messo a %s sul ticket #%I64u.",DoubleToString(bePari,_Digits),ticket));
+      return;
      }
-   Log(StringFormat("Piano A: +%.1f unita' K. Parziale %s, stop in pari %s.",gain,(parzOK?"eseguito":"NON eseguito (lotto minimo o errore)"),(beFatto?"messo":"NON messo")));
+   gPlanAFail++;
+   PrintFormat("ORB PIANO A: stop in pari FALLITO sul ticket #%I64u (-> %s), retcode %u (%s), err=%d, tentativo %d/20",
+               ticket,DoubleToString(bePari,_Digits),
+               gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError(),gPlanAFail);
+   if(gPlanAFail>=20){ gPlanATk=ticket; Log("Piano A: 20 tentativi di pareggio falliti, rinuncio su questa posizione (il runner EMA riparte)."); }
   }
 
 //+------------------------------------------------------------------+
@@ -1060,6 +1097,8 @@ void ManageRunner()
                   InpEmaFast,hEmaF,copiati,GetLastError());
       return;
      }
+   //--- v1.00: col Piano A il runner (trailing EMA9, uscita su chiusura EMA) parte SOLO dopo il Piano A
+   if(InpPlanAUse && gPlanATk!=gTicketMio) return;
 
    long type=PositionGetInteger(POSITION_TYPE);
    bool isLong=(type==POSITION_TYPE_BUY);

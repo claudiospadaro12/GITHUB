@@ -1,0 +1,49 @@
+#  EA: ABTG_ORB_Emiliano
+# ==========================================================================
+#  R283b -- ORB_Emiliano v1.00, STESSI input di R283a, novita' spente (G0: deve essere = R283a)
+#  U30USD M5 -- TICK REALI -- deposito 80000 -- rischio 1,00 (default dell'EA, NON la taglia del 100k: e' un valore da tester) -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40
+#  magic gemelli: vedi la riga di lancio (799xxx, vergini). Scritto il 23/10/2026. Criteri e attese CONGELATI PRIMA dei numeri, dentro questo file.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  0. COSA SI MISURA (round R283, "ORB Emiliano", sala del consiglio 23/10/2026):
+#    a) R283a  ABTG_ORB_Ottimizzato v1.04 (EA in campo), cella VIVA del 100k su U30USD (range 14:30-14:45, solo long, SL meta' range, TP 1,0 x range, EMA200, max range 0,8%)
+#    b) R283b  ABTG_ORB_Emiliano v1.00, STESSI input di R283a, novita' tutte spente: prova di NON-REGRESSIONE (G0)
+#    c) R283c  ABTG_ORB_Emiliano, regola di Emiliano sul NASDAQ (candela M5 14:25-14:30, due lati, filtro 17-38, Piano A 50 punti, AutoUSDST acceso)
+#    d) R283d  ABTG_ORB_Emiliano, regola di Emiliano sul DOW (come c, filtro ampiezza SPENTO: le soglie del Dow non sono state dette)
+#  c e d NON sono un giudizio sulla regola: sono una PROVA DI IMPIANTO (l'EA nuova gira, le novita' fanno cio' che dicono) e il PRIMO numero a tick, in un solo regime (2024-26).
+#  STOP e TARGET FINALI di Emiliano NON SONO STATI DETTI: qui sono ASSUNTI (stop all'estremo opposto del range, TP 2R, trailing EMA9): da misurare, non da credere.
+# ==========================================================================
+#  1. CRITERI CONGELATI (lettore backtest_pipeline/r283_giudizio.py, scritto prima di aprire lo zip)
+#   G1  le due gemelle di ogni file identiche (Profit <= 1 EUR, PF <= 0,0002, Trades e DD% esatti).
+#   G0  R283b = R283a: in IS e OOS Profit entro 1,01 EUR, PF entro 0,0002, DD% entro 0,0001, Trades uguali. Se G0 FALLISCE (la variante non e' identica per default)
+#       NESSUN numero di R283c e R283d si legge come prova.
+#   IMPIANTO (R283c, R283d): rc diverso da 1 (parte), CSV OOS presente con 2 righe e Trades > 0 in IS e in OOS. Il numero di operazioni e il PF si RIPORTANO, non si giudicano.
+#  ATTESE (dichiarate ORA):
+#   P1  la variante compila e tutti i round partono (rc diverso da 1): 80%.
+#   P2  G0 passa (dato che compila): 85%.
+#   P3  R283c (Nasdaq): Trades IS+OOS > 0: 90%; PF OOS < 1,00: 55% (R277, regola simile con la nostra gestione: 0,97 IS / 1,31 OOS).
+#   P4  R283d (Dow): PF OOS < 1,00: 65% (R278, regola dei 5 minuti sul Dow con la nostra gestione: 0,64-0,71 in OOS, nessuna cella passa).
+#   P5  R283d ha piu' operazioni di R283c (nessun filtro sull'ampiezza): 80%.
+#  LIMITI: un solo percorso storico (2024-2026, toro); il per-trade esiste solo per la gamba OOS; il Piano A e la gestione sono ASSUNZIONI nostre; nessun risultato vale per il conto reale;
+#  lo storico esterno 2010-2026 NON e' usato qui (richiede la firma di perimetro del report MAPPA_LATI_APERTURE_STORICO_AMPIO).
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpRangeStartMin=30||30||0||30||N
+InpRangeEndMin=45||45||0||45||N
+InpEndHour=21||21||0||21||N
+InpEndMin=0||0||0||0||N
+InpAllowShort=0||0||0||0||N
+InpSLMode=3||3||0||3||N
+InpTP_R=1.0||1.0||0||1.0||N
+InpTPMode=1||1||0||1||N
+InpTP1Pct=0.0||0.0||0||0.0||N
+InpExitOnEmaClose=0||0||0||0||N
+InpUseEma200Filter=1||1||0||1||N
+InpMaxRangePct=0.8||0.8||0||0.8||N
