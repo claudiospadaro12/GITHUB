@@ -1,0 +1,23 @@
+RIEPILOGO R282 -- ABTG_Nasdaq_Apertura_US_Sicuro v1.03 (festivi NYSE, ora solare USA automatica, tetto lotto minimo), cella R274a, NASUSD M5, TICK REALI
+data: 2026-10-23 06:51:57
+fine: 2026-10-23 07:10:31   durata minuti: 19   (dichiarato circa 10-15 minuti, tetto largo 50)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 304dfa417173d49066302df9c4630d1cf278cc64
+deposito passato: 80000 (R282a, R282b, R282e) e 500 (R282c, R282d); modello 4; etichette R282a, R282b, R282c, R282d, R282e
+
+R282a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R282b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R282c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R282d  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R282e  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS NON BUONO (righe 5, con Trades>0 5, attese 2 e 2) = GUASTO VERO
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 1 su 5
+ROUND PARTITI (rc diverso da 1): 5 su 5
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 5 round partiti
+CARTELLE ATTESE: 5   TROVATE: 5   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7991xx, scritti DOPO l avvio): 10 su 10
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R282a-e par. 1, lettore backtest_pipeline/r282_giudizio.py, scritto il 23/10/2026):
+G1 gemelle identiche. G0: R282a tutto spento = R274a (IS 7014,21 / 1,22116 / 7,3069% / 135; OOS 8496,74 / 1,21546 / 7,8576% / 172), se fallisce nessun altro numero si legge. FESTIVI OK: nessuna posizione in un festivo NYSE e giorni non festivi identici a R282a. TETTO OK: Trades_d < Trades_c, DD_d <= DD_c, Trades_d > 0. DST OK: posizioni con USA in ora legale identiche a R282a; in ora solare nessuna chiusura prima delle 15:35 server.
