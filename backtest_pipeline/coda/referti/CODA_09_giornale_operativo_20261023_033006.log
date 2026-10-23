@@ -1,0 +1,176 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-23 03:32:55  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261022   (5628.2 KB, ultima scrittura 2026-10-22 23:44) ---
+    righe totali: 22445
+    RIGHE DI ORDINE / DEAL: 5039
+      EN000:05:02.784Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=46.09532395870701 isSellhigh=true isBuylow=false countshiftback=0
+      DJ000:05:02.784Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=-811.2697840275359 isSellhigh=false isBuylow=false countshiftback=0
+      EI000:05:02.784Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=-411.5131893517173 isSellhigh=false isBuylow=false countshiftback=0
+      FP000:05:02.784Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=38.991207098843006 isSellhigh=false isBuylow=false countshiftback=0
+      KP000:05:02.784Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=255.99413806594384 isSellhigh=false isBuylow=false countshiftback=0
+      GF000:05:02.784Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=212.32942537726558 isSellhigh=true isBuylow=false countshiftback=0
+      PQ000:05:02.784Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=156.21961691822435 isSellhigh=true isBuylow=false countshiftback=0
+      PR000:05:02.784Gold Zone EA (XAUUSD,M15)shift=4 emaStrength=48.14641127877621 isSellhigh=true isBuylow=false countshiftback=1
+      ON000:05:02.784Gold Zone EA (XAUUSD,M15)shift=3 emaStrength=194.76427418585445 isSellhigh=true isBuylow=false countshiftback=2
+      GG000:05:02.784Gold Zone EA (XAUUSD,M15)shift=2 emaStrength=155.50951612394783 isSellhigh=false isBuylow=false countshiftback=0
+      RN000:05:02.893Grid Scalper MA MT5 EA (XAUUSD,M1)-> [DailyPL] Deal #3348037 closed. PL = 9.31 EUR | Today Total = 91.83 EUR
+      LK000:09:52.646Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=188166 | role=RECOVERY | active L1 | lot=0.0200 | entry=4139.14000
+      PO000:15:00.094Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=-811.2697840275359 isSellhigh=false isBuylow=false countshiftback=0
+      JL000:15:00.094Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=-411.5131893517173 isSellhigh=false isBuylow=false countshiftback=0
+      LE000:15:00.094Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=38.991207098843006 isSellhigh=false isBuylow=false countshiftback=0
+      KF000:15:00.094Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=255.99413806594384 isSellhigh=false isBuylow=false countshiftback=0
+      QS000:15:00.094Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=212.32942537726558 isSellhigh=true isBuylow=false countshiftback=0
+      PK000:15:00.094Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=156.21961691822435 isSellhigh=true isBuylow=false countshiftback=0
+      RH000:15:00.094Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=48.14641127877621 isSellhigh=true isBuylow=false countshiftback=1
+      GK000:15:00.094Gold Zone EA (XAUUSD,M15)shift=4 emaStrength=194.76427418585445 isSellhigh=true isBuylow=false countshiftback=2
+      IM000:15:00.094Gold Zone EA (XAUUSD,M15)shift=3 emaStrength=155.50951612394783 isSellhigh=false isBuylow=false countshiftback=0
+      KJ000:15:00.094Gold Zone EA (XAUUSD,M15)shift=2 emaStrength=88.0063440826234 isSellhigh=true isBuylow=false countshiftback=0
+      IM000:18:24.755Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=188166 | role=RECOVERY | active L1 | lot=0.0200 | entry=4137.91000
+      LM000:30:04.513Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=-411.5131893517173 isSellhigh=false isBuylow=false countshiftback=-1
+      CF000:30:04.513Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=38.991207098843006 isSellhigh=false isBuylow=false countshiftback=0
+      IF000:30:04.513Gold Zone EA (XAUUSD,M15)shift=9 emaStrength=255.99413806594384 isSellhigh=false isBuylow=false countshiftback=0
+      ES000:30:04.513Gold Zone EA (XAUUSD,M15)shift=8 emaStrength=212.32942537726558 isSellhigh=true isBuylow=false countshiftback=0
+      RJ000:30:04.513Gold Zone EA (XAUUSD,M15)shift=7 emaStrength=156.21961691822435 isSellhigh=true isBuylow=false countshiftback=0
+      RH000:30:04.513Gold Zone EA (XAUUSD,M15)shift=6 emaStrength=48.14641127877621 isSellhigh=true isBuylow=false countshiftback=1
+      MK000:30:04.513Gold Zone EA (XAUUSD,M15)shift=5 emaStrength=194.76427418585445 isSellhigh=true isBuylow=false countshiftback=2
+      EL000:30:04.513Gold Zone EA (XAUUSD,M15)shift=4 emaStrength=155.50951612394783 isSellhigh=false isBuylow=false countshiftback=0
+      IJ000:30:04.513Gold Zone EA (XAUUSD,M15)shift=3 emaStrength=88.0063440826234 isSellhigh=true isBuylow=false countshiftback=0
+      OK000:30:04.513Gold Zone EA (XAUUSD,M15)shift=2 emaStrength=-3.329103944997769 isSellhigh=true isBuylow=false countshiftback=1
+      HE000:30:42.306Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=BUY allowed=0 factor=1.2608 basegap=0.850 required=1.0717 newest=4137.790 target=4136.930 tr5=0.8140 tr20=0.9205 er=-0.5215 pullback=0.0000 expansion=0.0000 pressure=0.5215 dislocation=0.0646 lastclosed=2026.10.21 23:29
+      QH000:30:53.080Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=BUY allowed=1 factor=1.2608 basegap=0.850 required=1.0717 newest=4137.790 target=4136.690 tr5=0.8140 tr20=0.9205 er=-0.5215 pullback=0.0000 expansion=0.0000 pressure=0.5215 dislocation=0.3254 lastclosed=2026.10.21 23:29
+      GS000:30:53.111Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)Arena Nexus Grid Smart XAU MT5: BUY STOP | CID=188166 | role=RECOVERY | active L2 | lot=0.0300 | entry=4136.69000
+      RM000:42:44.513Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=BUY allowed=0 factor=1.1867 basegap=0.850 required=1.0087 newest=4134.870 target=4134.010 tr5=0.6140 tr20=0.8780 er=-0.3733 pullback=0.0000 expansion=0.0000 pressure=0.3733 dislocation=0.1503 lastclosed=2026.10.21 23:41
+      GP000:43:55.302Arena Nexus Grid Smart XAU MT5 (XAUUSD,M1)R33 ENTRY | side=BUY allowed=0 factor=1.1272 basegap=0.850 required=0.9581 newest=4134.870 target=4134.010 tr5=0.6760 tr20=0.8920 er=-0.3562 pullback=0.1429 expansion=0.0000 pressure=0.2544 dislocation=0.0000 lastclosed=2026.10.21 23:42
+      LF000:45:00.045Gold Zone EA (XAUUSD,M15)shift=11 emaStrength=38.991207098843006 isSellhigh=false isBuylow=false countshiftback=0
+      IE000:45:00.045Gold Zone EA (XAUUSD,M15)shift=10 emaStrength=255.99413806594384 isSellhigh=false isBuylow=false countshiftback=0
+      ... altre 4999 righe non stampate (tetto).
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261023   (6.4 KB, ultima scrittura 2026-10-23 03:14) ---
+    righe totali: 24
+    RIGHE DI ORDINE / DEAL: 3
+      PQ001:00:02.385ABTG_PunteLarry (EURAUD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      GO001:05:06.118ABTG_PunteLarry (XAUUSD,H1)[LARRY] SETUP LONG [SMASH libro] del 2026.10.23: ingresso STOP @ 4131.07 (punta/gap 83.72 = 1.42 x ATR D1).
+      JQ001:05:06.143ABTG_PunteLarry (XAUUSD,H1)[LARRY] PENDENTE BUY STOP @ 4131.07  SL 4015.23  TP 4304.83  lot 0.01  (pattern SMASH libro, punta/gap 1.42 x ATR, scadenza 2026.10.23 23:59, ordine 4401682)
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751
+=====================================================================
+
+--- GIORNO 20261017   (12.1 KB, ultima scrittura 2026-10-17 23:47) ---
+    righe totali: 48
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (7.6 KB, ultima scrittura 2026-10-18 14:47) ---
+    righe totali: 30
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261006   (1.7 KB, ultima scrittura 2026-10-06 20:42) ---
+    righe totali: 6
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QJ020:42:10.503ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20261022   (352.9 KB, ultima scrittura 2026-10-22 23:50) ---
+    righe totali: 522
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261023   (106.7 KB, ultima scrittura 2026-10-23 03:19) ---
+    righe totali: 158
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261022   (118.2 KB, ultima scrittura 2026-10-22 23:55) ---
+    righe totali: 365
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      HS023:55:01.588ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=0.00%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+--- GIORNO 20261023   (13 KB, ultima scrittura 2026-10-23 03:25) ---
+    righe totali: 46
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      RJ003:30:01.446ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=0.00%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
