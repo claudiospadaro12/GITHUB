@@ -1,0 +1,80 @@
+#  EA: ABTG_MaxMinNotte_Ticket
+# ==========================================================================
+#  R292c -- MaxMinNotte ORO, VARIANTE A TICKET (difetto C9): variante con InpTicketSafe=1, senza vicino
+#  XAUUSD M15 -- TICK REALI -- deposito 5400 -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40. Cella = sedia 770402 in campo (CODA_08, chart27, letta il 23/10/2026), SENZA Guardian (la sedia del piccolo non ce l'ha). Scritto il 23/10/2026 PRIMA di aprire lo zip.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto. L'EA a ticket NON e' attaccato a nessun grafico.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  DOMANDA: la variante a ticket (EA NUOVA ABTG_MaxMinNotte_Ticket, magic 750402, mai in sostituzione della 770402) (1) con il flag spento e' identica all'originale al centesimo, (2) con il flag acceso e senza vicini e' identica, (3) con un VICINO a ticket basso l'originale si accieca e la variante no?
+#  BRACCI: a = originale ABTG_MaxMinNotte (HEAD); b = Ticket con InpTicketSafe=0; c = Ticket con InpTicketSafe=1; d = Ticket TicketSafe=0 + VICINO (InpTestVicino=1: ogni giorno, SOLO nel tester, un Buy 0,01 magic 999777 alle 06:50 server chiuso alle 20:00); e = Ticket TicketSafe=1 + VICINO.
+#  CRITERI CONGELATI (lettore backtest_pipeline/r292_giudizio.py):
+#   G1  gemelle identiche (g2 = g1+50): Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001.
+#   G0  b = a AL CENTESIMO e c = a AL CENTESIMO, in IS e OOS (Profit entro 1,01, PF entro 0,0002, DD entro 0,0001, Trades uguali). Se FALLISCE la variante cambia le decisioni: NON SI USA.
+#   PER-TRADE (solo gamba OOS, file abtg_trades_*): una chiusura e' TARDIVA se l'ora e' dopo le 17:30:30 o prima delle 07:00:00 server (posizione tenuta oltre la fine finestra); contano le POSIZIONI proprie (magic proprio, non 999777).
+#   VICINO PRESENTE: in d ed e almeno 100 chiusure del magic 999777; in a, b, c zero.
+#   DIFETTO RIPRODOTTO: posizioni proprie tardive in d >= 5 E >= (tardive in c) + 5. Se non si riproduce il test non ha misurato nulla: la variante NON e' provata ne' smentita.
+#   RIMEDIO: tardive in e <= tardive in c E almeno il 95% delle chiusure proprie di c ha una chiusura di e con lo STESSO secondo (confronto per istante, non per importo: il lotto segue il saldo).
+#   Meno di 100 chiusure proprie in c nella gamba OOS => solo DESCRITTIVO. Nessun p-value, un solo regime.
+#  ATTESE dichiarate ORA: P1 tutti i cinque bracci compilano e partono 85%; P2 G0 passa (b e c uguali ad a) 85%; P3 difetto riprodotto in d 85%; P4 rimedio in e 80%; P5 tutta la catena P1-P4 verde al primo colpo 70%.
+#  LIMITI: la variante non e' mai stata compilata prima di questo round; per-trade solo OOS (nell'ottimizzazione i Print non si conservano); il vicino agisce SOLO nel tester e non tocca la logica di trading; il lotto minimo 0,01 puo' coprire differenze di saldo; non dice nulla sul rischio vero a 0,01 lotti ne' sul forward; non promuove niente.
+# ==========================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false||false||0||false||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR292
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+InpTicketSafe=1||1||0||1||N
+InpTestVicino=0||0||0||0||N
+InpMagic=800043||800043||50||800093||Y
