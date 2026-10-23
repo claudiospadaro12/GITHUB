@@ -30,6 +30,23 @@ input int    InpIter     = 20;         // S1: iterazioni
 input int    InpEmaVeloce= 14;
 input int    InpEmaLenta = 100;
 input int    InpAttesaMs = 8000;       // S1: attesa massima che gli handle siano pronti
+input bool   InpChiudiTerminale = false; // true SOLO nel lancio automatico: a fine lavoro chiude il terminale
+
+//--- seleziona il simbolo e aspetta che la storia M1 sia caricata (richiesta dei dati piu vecchi)
+bool Prepara(const string sym)
+  {
+   if(!SymbolSelect(sym,true)) return(false);
+   datetime vecchio=TimeCurrent()-(datetime)InpGiorni*86400;
+   MqlRates tmp[];
+   for(int k=0;k<60;k++)
+     {
+      if(CopyRates(sym,PERIOD_M1,vecchio,vecchio+7200,tmp)>0) break;
+      if(Bars(sym,PERIOD_M1)>100000) break;
+      Sleep(500);
+     }
+   PrintFormat("PREPARA %s: barre M1 disponibili %d",sym,Bars(sym,PERIOD_M1));
+   return(true);
+  }
 
 //--- apre un CSV in Common\Files
 int ApriCsv(const string nome,const string intestazione)
@@ -45,7 +62,7 @@ int ApriCsv(const string nome,const string intestazione)
 //+------------------------------------------------------------------+
 void SondaOrb()
   {
-   if(!SymbolSelect(InpSymOrb,true)){ PrintFormat("S2: simbolo %s non selezionabile",InpSymOrb); return; }
+   if(!Prepara(InpSymOrb)){ PrintFormat("S2: simbolo %s non selezionabile",InpSymOrb); return; }
    int h=ApriCsv("ABTG_SONDA_ORB.csv","data;dow;n_barre;prima;ultima;hiR;loR;hiBarra;loBarra;ext_su;ext_giu;ampiezza;completo");
    if(h==INVALID_HANDLE) return;
    datetime oggi=TimeCurrent(); MqlDateTime t0; TimeToStruct(oggi,t0); t0.hour=0; t0.min=0; t0.sec=0;
@@ -81,7 +98,7 @@ void SondaOrb()
 //+------------------------------------------------------------------+
 void SondaBox()
   {
-   if(!SymbolSelect(InpSymBox,true)){ PrintFormat("S3: simbolo %s non selezionabile",InpSymBox); return; }
+   if(!Prepara(InpSymBox)){ PrintFormat("S3: simbolo %s non selezionabile",InpSymBox); return; }
    int h=ApriCsv("ABTG_SONDA_BOX.csv","data;dow;t_inizio_richiesto;t_barra_inizio;contaminato;n_barre;hi;lo;ampiezza");
    if(h==INVALID_HANDLE) return;
    datetime oggi=TimeCurrent(); MqlDateTime t0; TimeToStruct(oggi,t0); t0.hour=0; t0.min=0; t0.sec=0;
@@ -130,7 +147,7 @@ double EmaMano(const double &c[],const int n,const int periodo)
 //+------------------------------------------------------------------+
 void SondaSpx()
   {
-   if(!SymbolSelect(InpSymSpx,true)){ PrintFormat("S1: simbolo %s non selezionabile",InpSymSpx); return; }
+   if(!Prepara(InpSymSpx)){ PrintFormat("S1: simbolo %s non selezionabile",InpSymSpx); return; }
    int h=ApriCsv("ABTG_SONDA_SPX.csv","iter;handle_ok;imm_f;imm_s;imm_ok;ms_pronto;pronto_ok;f_pronto;s_pronto;bias_pronto;f_mano;s_mano;bias_mano;gap_rel");
    if(h==INVALID_HANDLE) return;
    // chiusure H1 per il calcolo a mano: barre CHIUSE (si scarta la barra in formazione, indice 0 della serie)
@@ -181,4 +198,7 @@ void OnStart()
    SondaOrb();
    SondaBox();
    Print("ABTG_SondeAperture: finito. File in Common\\Files: ABTG_SONDA_SPX.csv, ABTG_SONDA_ORB.csv, ABTG_SONDA_BOX.csv");
+   int hf=FileOpen("ABTG_SONDA_FINE.txt",FILE_WRITE|FILE_TXT|FILE_ANSI|FILE_COMMON);
+   if(hf!=INVALID_HANDLE){ FileWriteString(hf,"FINE "+TimeToString(TimeLocal(),TIME_DATE|TIME_SECONDS)+"\r\n"); FileClose(hf); }
+   if(InpChiudiTerminale){ Sleep(2000); TerminalClose(0); }
   }
