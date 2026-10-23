@@ -1,0 +1,20 @@
+RIEPILOGO R287 -- orologio dell ORB (ABTG_ORB_Emiliano v1.01, InpAutoUSDST 0 contro 1), U30USD M5, TICK REALI
+data: 2026-10-23 20:48:48
+fine: 2026-10-23 20:51:58   durata minuti: 3   (dichiarato circa 5-8 minuti, tetto largo 30)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 1367900f8d86ddb1abbd8b1c8060473f46bb5f8d
+deposito passato: 80000 per tutti; modello 4; etichette R287a, R287b
+
+R287a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R287b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 2
+ROUND PARTITI (rc diverso da 1): 2 su 2
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 2 round partiti
+CARTELLE ATTESE: 2   TROVATE: 2   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7999xx, scritti DOPO l avvio): 4 su 4
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R287a-b, lettore backtest_pipeline/r287_giudizio.py, scritto il 23/10/2026):
+G1 gemelle identiche. G0: R287a = R283a (IS 7630,13 / 1,24678 / 8,2477 / 71 op.; OOS 33442,57 / 1,67803 / 9,9897 / 119 op.), se fallisce nessun altro numero si legge. S1: fuori dall inverno US (chiusure fuori da 03/11/2025-06/03/2026) le posizioni dei due bracci sono identiche, altrimenti NON LEGGIBILE. Lettura SEMPRE descrittiva (posizioni invernali circa 46): differenza di netto b meno a CON e SENZA gen-feb 2026; b migliore solo se positiva in entrambe.

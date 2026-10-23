@@ -1,0 +1,13 @@
+round  leg        Profit        PF      DD%  Trades
+R287a  IS        7630.13   1.24678   8.2477      71
+R287a  OOS      33442.57   1.67803   9.9897     119
+R287b  IS        3210.82   1.13285  12.0029      63
+R287b  OOS      16061.68   1.50009   7.2394     105
+
+G0 R287a = R283a: IDENTICO
+dPF IS (b - a): -0.114 (a 1.247, b 1.133; operazioni a 71, b 63; netto a 7630, b 3211)
+dPF OOS (b - a): -0.178 (a 1.678, b 1.500; operazioni a 119, b 105; netto a 33443, b 16062)
+S1 fuori inverno identiche: NO (a 73, b 73 posizioni fuori inverno)
+ESITO: NON LEGGIBILE (S1 fallito)
+
+Non promuove niente. Un inverno nell'OOS. Un solo regime.
