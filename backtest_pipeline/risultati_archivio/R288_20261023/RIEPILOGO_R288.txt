@@ -1,0 +1,22 @@
+RIEPILOGO R288 -- DAX Apertura 770101, gestione a pezzi (trailing, parziale, pareggio), D30EUR M5, TICK REALI
+data: 2026-10-23 21:00:16
+fine: 2026-10-23 21:03:06   durata minuti: 3   (dichiarato circa 5-8 minuti, tetto largo 30)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 84a5c25f1b30fd2529a29acbc02b2ba3c7a51d86
+deposito passato: 100000 per tutti; modello 4; etichette R288a, R288b, R288c, R288d
+
+R288a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R288b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R288c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R288d  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 4
+ROUND PARTITI (rc diverso da 1): 4 su 4
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 4 round partiti
+CARTELLE ATTESE: 4   TROVATE: 4   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7999xx, scritti DOPO l avvio): 8 su 8
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R288a-d, lettore backtest_pipeline/r288_giudizio.py, scritto il 23/10/2026):
+G1 gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, DD <= 0,0001, Trades uguali). G0: R288a = R47a (IS 175 / 3789,36 / 1,12634 / 5,4362; OOS 270 / 18029,58 / 1,39709 / 7,2328), se fallisce nessun altro numero si legge. dPF = PF braccio meno PF R288a in IS e OOS: <= -0,10 in entrambe il pezzo AIUTA, >= +0,10 in entrambe PEGGIORA, altrimenti NON DISTINGUIBILE. Verdetto solo con >= 100 operazioni per gamba. Concentrazione descrittiva: PF OOS senza le 5 e senza le 10 posizioni migliori. Soglia arbitraria, non calibrata sul rumore.

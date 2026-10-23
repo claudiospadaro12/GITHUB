@@ -1,0 +1,20 @@
+round  leg        Profit        PF      DD%  Trades
+R288a  IS        3789.36   1.12634   5.4362     175
+R288a  OOS      18029.58   1.39709   7.2328     270
+R288b  IS       25764.82   1.39378   8.9899     198
+R288b  OOS       2281.37   1.02626   8.7386     278
+R288c  IS        5569.37   1.18323   4.9576     132
+R288c  OOS      23607.28   1.49140   6.2719     193
+R288d  IS        3789.36   1.12634   5.4362     175
+R288d  OOS      19243.28   1.41603   7.2248     270
+
+G0 R288a = R47a: IDENTICO
+R288b: tolto trailing: dPF IS +0.267, dPF OOS -0.371 (operazioni IS 198 / OOS 278; DD OOS 8.74 contro 7.23) -> NON DISTINGUIBILE o MISTO (nessuna conclusione)
+R288c: tolto parziale (e pareggio, annidato): dPF IS +0.057, dPF OOS +0.094 (operazioni IS 132 / OOS 193; DD OOS 6.27 contro 7.23) -> NON DISTINGUIBILE o MISTO (nessuna conclusione)
+R288d: tolto pareggio: dPF IS +0.000, dPF OOS +0.019 (operazioni IS 175 / OOS 270; DD OOS 7.22 contro 7.23) -> NON DISTINGUIBILE o MISTO (nessuna conclusione)
+concentrazione OOS R288a: PF 1.397, senza le 5 migliori 1.159, senza le 10 migliori 1.007 (193 posizioni)
+concentrazione OOS R288b: PF 1.026, senza le 5 migliori 0.906, senza le 10 migliori 0.790 (193 posizioni)
+concentrazione OOS R288c: PF 1.491, senza le 5 migliori 1.134, senza le 10 migliori 0.908 (193 posizioni)
+concentrazione OOS R288d: PF 1.421, senza le 5 migliori 1.180, senza le 10 migliori 1.012 (193 posizioni)
+
+Non promuove niente. Un solo regime (toro). Soglia 0,10 arbitraria, non calibrata sul rumore.
