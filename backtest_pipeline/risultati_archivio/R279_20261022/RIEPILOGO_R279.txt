@@ -1,0 +1,22 @@
+RIEPILOGO R279 -- regola di Emiliano sul Nasdaq D INVERNO con apertura 15:30 server (flat 18:30), candela PRE 15:25-15:30, W1 2024.11.04-2025.03.07 e W2 2025.11.03-2026.03.06, filtro 17-38 ACCESO e SPENTO, NASUSD M5, TICK REALI
+data: 2026-10-22 23:25:45
+fine: 2026-10-22 23:28:54   durata minuti: 3   (dichiarato circa 4-8 minuti, tetto largo 40)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : eec5e0f6aae2c4d22921e990bb5644b80711bddb
+deposito passato: 80000 per tutti e 4; modello 4; etichette R279a, R279b, R279c, R279d
+
+R279a  fin B   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R279b  fin B   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R279c  fin B   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R279d  fin B   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 4
+ROUND PARTITI (rc diverso da 1): 4 su 4
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 4 round partiti
+CARTELLE ATTESE: 4   TROVATE: 4   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7989xx, scritti DOPO l avvio): 8 su 8
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R279a-d par. 1, lettore backtest_pipeline/r279_giudizio.py, scritto il 22/10/2026):
+G1: le due gemelle di ogni file identiche (Profit <= 1 EUR, PF <= 0,0002, Trades e DD% esatti). FILTRO UTILE d inverno solo se in W1 E in W2: dPF >= 0,10 E DD_acceso <= 1,10 x DD_spento E Trades_acceso >= 0,40 x Trades_spento; altrimenti NON DIMOSTRATO. Trades < 150 per finestra: nessun verdetto di merito (atteso). Si legge l _OOS (la finestra intera); il _IS puo essere vuoto. Il DD si legge sempre.
