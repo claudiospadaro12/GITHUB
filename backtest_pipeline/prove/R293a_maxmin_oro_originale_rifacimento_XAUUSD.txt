@@ -6,13 +6,13 @@
 #  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
 #  Cella = sedia IN CAMPO sul piccolo (CODA_08, letta il 23/10/2026 dai .chr), senza Guardian (il piccolo non ce l'ha). Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 23/10/2026 PRIMA di aprire lo zip.
 # ==========================================================================
-#  PERCHE': in R292 l'EA originale e' risultato con SHA256 DIVERSO dal pin (causa NON VERIFICATA); i numeri di R292a non erano formalmente leggibili.
+#  PERCHE': in R292 il riepilogo ha segnato l'EA originale come SHA256 DIVERSO dal pin, ma lo SHA atteso nella riga era stato TRASCRITTO A MANO con una lettera in meno (63 caratteri, errore mio, VERIFICATO). Il motore di R292a e' quindi NON VERIFICATO e G0 di R292 non e' formalmente chiuso. Da R293 gli SHA li calcola lo script dal commit del pin.
 #  CRITERI CONGELATI (lettore backtest_pipeline/r293_giudizio.py):
-#   M   motore = pin (SHA256 dell'EA al pin, riga del RIEPILOGO). Se di nuovo DIVERSO: il problema e' sistematico (il riepilogo ora stampa lo SHA trovato e copia il sorgente usato in SORGENTI_USATI) e R293a NON si legge.
+#   M   motore = pin (SHA256 dell'EA al pin, riga del RIEPILOGO). Se DIVERSO: R293a NON si legge e il problema e' vero (il riepilogo stampa lo SHA trovato e copia il sorgente usato in SORGENTI_USATI).
 #   G1  gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001).
 #   G0  R293a = R292a = R292b AL CENTESIMO: IS 223,45 / PF 1,53877 / DD 2,1272 / 74; OOS 622,22 / 1,94266 / 3,8721 / 79 (tolleranza 1,01 / 0,0002 / 0,0001 / uguali).
 #   Se M e G0 passano: G0 di R292 CHIUSO (la variante a flag spento e' l'originale). Se M passa e G0 fallisce: il motore di R292a era DIVERSO e R292b/c non sono confrontabili con l'originale.
-#  ATTESE dichiarate ORA: M passa 70% (causa ignota); G0 passa se M passa 90%.
+#  ATTESE dichiarate ORA: M passa 92% (l'errore della riga R292 era mio); G0 passa se M passa 90%.
 #  LIMITI: un solo job; il per-trade resta solo OOS; non promuove niente.
 # ==========================================================================
 @SIMBOLO    XAUUSD

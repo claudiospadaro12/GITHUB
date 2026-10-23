@@ -4,8 +4,8 @@
 ## Esito del lettore congelato
 - Compilazione: `ABTG_MaxMinNotte` e `ABTG_MaxMinNotte_Ticket` 0 errori, 0 avvisi (log del MetaEditor). **P1 vera.**
 - Gemelle G1: OK su tutti e cinque.
-- **Motore: R292a (originale) ha SHA256 DIVERSO dal pin. Causa NON VERIFICATA.** Per il criterio scritto prima, i numeri di R292a non sono formalmente leggibili. b, c, d, e hanno motore = pin.
-- G0 (b e c = a al centesimo): IS 223,45 / PF 1,53877 / DD 2,1272 / 74 e OOS 622,22 / PF 1,94266 / DD 3,8721 / 79 in a, b e c. Identici, **ma** a ha motore diverso dal pin: G0 formalmente NON chiuso. Si rifa in R293a.
+- **Motore di R292a: il riepilogo dice "SHA256 DIVERSO DAL PIN", ma l'errore e' MIO.** Nella riga di lancio avevo trascritto a mano lo SHA256 atteso di `ABTG_MaxMinNotte.mq5` con una lettera in meno (63 caratteri invece di 64: `...4CAD4...` invece di `...4CAAD4...`, VERIFICATO sulla riga). Il confronto non poteva mai riuscire. Lo SHA del file scaricato non e' stato registrato, quindi **il motore di R292a e' NON VERIFICATO** (non "diverso"). Per b, c, d, e (SHA scritti giusti) il motore e' = pin. Rimedio: da R293 gli SHA li calcola lo script dal commit del pin, non a mano, e la riga rifiuta un hash che non sia di 64 caratteri esadecimali.
+- G0 (b e c = a al centesimo): IS 223,45 / PF 1,53877 / DD 2,1272 / 74 e OOS 622,22 / PF 1,94266 / DD 3,8721 / 79 in a, b e c. Identici; ma finche' il motore di a non e' verificato, G0 formalmente NON e' chiuso. Si chiude con R293a.
 - Vicino presente: 272 chiusure del magic 999777 in d ed e, zero in a/b/c.
 - **Difetto riprodotto (d, motore = pin):** 64 posizioni proprie su 78 chiuse fuori finestra (58 chiusure alle 20:00, l'ora in cui l'hook chiude il vicino). In c: 0 su 79.
 - **Rimedio (e):** 0 tardive; 79 chiusure proprie, 100% allo stesso secondo di c. Netto proprio e = c = 623,80.
