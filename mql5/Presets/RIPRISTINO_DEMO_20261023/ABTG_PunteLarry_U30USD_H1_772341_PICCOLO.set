@@ -1,0 +1,57 @@
+; ==========================================================================
+; RIPRISTINO DEMO -- ABTG_PunteLarry su U30USD H1 -- conto PICCOLO 50503392 -- magic 772341
+; Ricostruito da chart11.chr (ORO) il 25/09/2026 (CODA_08, LETTO dai grafici, non scritto): e' la configurazione che la sedia aveva PRIMA della sospensione del 25/09.
+; ORARI: sono quelli di allora, in ora server BCM d'ESTATE (UTC+1 fisso, italiana -1). Dal 26/10 (DAX/EU) e dal 02/11 (USA) vanno rivisti: vedi report/RIPRISTINO_DEMO_QUADRO_2026-10-23.md.
+; ASCII, nessun valore e stato modificato.
+; ==========================================================================
+InpTF=16385
+InpPatternMode=1
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=true
+InpAllowShort=true
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772341
+InpComment=LARRY DOW
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false

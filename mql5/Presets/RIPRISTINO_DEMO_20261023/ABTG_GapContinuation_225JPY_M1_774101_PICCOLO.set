@@ -1,0 +1,70 @@
+; ==========================================================================
+; RIPRISTINO DEMO -- ABTG_GapContinuation su 225JPY M1 -- conto PICCOLO 50503392 -- magic 774101
+; Ricostruito da chart23.chr (ORO) il 25/09/2026 (CODA_08, LETTO dai grafici, non scritto): e' la configurazione che la sedia aveva PRIMA della sospensione del 25/09.
+; ORARI: sono quelli di allora, in ora server BCM d'ESTATE (UTC+1 fisso, italiana -1). Dal 26/10 (DAX/EU) e dal 02/11 (USA) vanno rivisti: vedi report/RIPRISTINO_DEMO_QUADRO_2026-10-23.md.
+; ASCII, nessun valore e stato modificato.
+; ==========================================================================
+InpSessionTimeMode=1
+InpSessionOpenHour=1
+InpSessionOpenMinute=0
+InpSessionCloseHour=7
+InpSessionCloseMinute=30
+InpOpeningRangeMinutes=15
+InpMaxEntryMinutesFromOpen=90
+InpExitMinutesBeforeClose=5
+InpEnableBuyGaps=true
+InpMinimumBuyGapPercent=1.0
+InpEnableSellGaps=true
+InpMinimumSellGapPercent=1.0
+InpUseRealVolumeIfAvailable=true
+InpMaxSpreadPoints=0.0
+InpMaxSpreadToStopPercent=10.0
+InpStopBufferPoints=0.0
+InpBuyRiskPercent=1.0
+InpSellRiskPercent=1.0
+InpReduceRiskOnSmallSellGap=false
+InpSellFullRiskFromGapPct=1.25
+InpSmallSellRiskPercent=0.25
+InpFixedLots=0.0
+InpMaxLots=0.0
+InpPartialClosePercent=40.0
+InpPartialTargetR=1.0
+InpFinalTargetR=3.0
+InpMoveStopToBreakEven=true
+InpMagicNumber=774101
+InpMaxSlippagePoints=30
+InpShowStatusOnChart=true
+InpPrintDailyDiagnostics=false
+InpComment=GAPCONT
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
