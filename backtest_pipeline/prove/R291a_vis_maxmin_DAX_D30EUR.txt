@@ -1,0 +1,74 @@
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato_Vis
+# ==========================================================================
+#  R291a -- VARIANTE DI VISIBILITA' ABTG_MaxMinNotte_DAX_Short_Ottimizzato_Vis: MaxMin DAX short con log del bias S&P
+#  D30EUR M15 -- TICK REALI -- deposito 100000 -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40. Cella copiata da R246i (IS 20 deal / 4766,96 / 1,87803 / 3,0977; OOS 21 / 6143,38 / 2,15985 / 1,9213). Scritto il 23/10/2026 PRIMA di aprire lo zip.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  DOMANDA: la variante di visibilita' (EA NUOVA, magic diverso, mai in sostituzione) dice di piu' SENZA cambiare nessuna decisione di trading?
+#  CRITERI CONGELATI (lettore backtest_pipeline/r291_giudizio.py):
+#   G1  gemelle identiche: Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001.
+#   G0  ogni variante = la misura storica dell'ORIGINALE, AL CENTESIMO (Profit entro 1,01, PF entro 0,0002, DD entro 0,0001, Trades uguali): R246i (IS 20 deal / 4766,96 / 1,87803 / 3,0977; OOS 21 / 6143,38 / 2,15985 / 1,9213). Se FALLISCE la variante cambia le decisioni: NON SI USA.
+#   VISIBILITA'  (dai log degli agenti del tester, LOG_TESTER): MaxMin_Vis almeno 50 righe "[VIS] CorrBias"; Nasdaq_Vis almeno 50 righe "[VIS] gate EMA"; ORB_Vis: righe "[VIS] anti-duplicato" = 0 in
+#   entrambi i bracci (in un tester senza riavvii non deve mai scattare) e nessuna riga "[VIS] ... RIFIUTATO" non spiegata. Il riavvio a meta' giornata NON e' riproducibile nel tester: l'anti-duplicato
+#   resta NON TESTATO sul suo caso vero (da provare a mano su un demo vuoto).
+#  ATTESE dichiarate ORA: P1 le quattro varianti compilano e partono 85%; P2 G0 passa su tutte e quattro 85%; P3 righe [VIS] presenti (MaxMin, Nasdaq) 90%; P4 anti-duplicato mai scattato nei due bracci ORB 95%.
+#  LIMITI: nessuna variante e' stata compilata prima di questo round; il log degli agenti del tester puo' non conservare tutte le righe; un solo regime; non promuove niente.
+# ==========================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=800031||800031||50||800081||Y

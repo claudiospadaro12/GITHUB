@@ -1,0 +1,102 @@
+#  EA: ABTG_Nasdaq_Apertura_US_Vis
+# ==========================================================================
+#  R291b -- VARIANTE DI VISIBILITA' ABTG_Nasdaq_Apertura_US_Vis: sedia 770250 con log del gate EMA
+#  NASUSD M15 -- TICK REALI -- deposito 80000 -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40. Cella copiata da R286a (IS 57 / 1052,03 / 1,25328 / 2,4509; OOS 47 / -192,82 / 0,95527 / 1,9449). Scritto il 23/10/2026 PRIMA di aprire lo zip.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  DOMANDA: la variante di visibilita' (EA NUOVA, magic diverso, mai in sostituzione) dice di piu' SENZA cambiare nessuna decisione di trading?
+#  CRITERI CONGELATI (lettore backtest_pipeline/r291_giudizio.py):
+#   G1  gemelle identiche: Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001.
+#   G0  ogni variante = la misura storica dell'ORIGINALE, AL CENTESIMO (Profit entro 1,01, PF entro 0,0002, DD entro 0,0001, Trades uguali): R286a (IS 57 / 1052,03 / 1,25328 / 2,4509; OOS 47 / -192,82 / 0,95527 / 1,9449). Se FALLISCE la variante cambia le decisioni: NON SI USA.
+#   VISIBILITA'  (dai log degli agenti del tester, LOG_TESTER): MaxMin_Vis almeno 50 righe "[VIS] CorrBias"; Nasdaq_Vis almeno 50 righe "[VIS] gate EMA"; ORB_Vis: righe "[VIS] anti-duplicato" = 0 in
+#   entrambi i bracci (in un tester senza riavvii non deve mai scattare) e nessuna riga "[VIS] ... RIFIUTATO" non spiegata. Il riavvio a meta' giornata NON e' riproducibile nel tester: l'anti-duplicato
+#   resta NON TESTATO sul suo caso vero (da provare a mano su un demo vuoto).
+#  ATTESE dichiarate ORA: P1 le quattro varianti compilano e partono 85%; P2 G0 passa su tutte e quattro 85%; P3 righe [VIS] presenti (MaxMin, Nasdaq) 90%; P4 anti-duplicato mai scattato nei due bracci ORB 95%.
+#  LIMITI: nessuna variante e' stata compilata prima di questo round; il log degli agenti del tester puo' non conservare tutte le righe; un solo regime; non promuove niente.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=2||2||0||2||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=300.0||300.0||0||300.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=50||50||0||50||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=0.35||0.35||0||0.35||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpMagic=800032||800032||50||800082||Y

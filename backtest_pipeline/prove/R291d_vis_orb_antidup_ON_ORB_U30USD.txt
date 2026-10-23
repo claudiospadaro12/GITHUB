@@ -1,0 +1,37 @@
+#  EA: ABTG_ORB_Ottimizzato_Vis
+# ==========================================================================
+#  R291d -- VARIANTE DI VISIBILITA' ABTG_ORB_Ottimizzato_Vis: ORB con anti-duplicato ACCESO
+#  U30USD M5 -- TICK REALI -- deposito 80000 -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40. Cella copiata da R283a (IS 71 / 7630,13 / 1,24678 / 8,2477; OOS 119 / 33442,57 / 1,67803 / 9,9897). Scritto il 23/10/2026 PRIMA di aprire lo zip.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  DOMANDA: la variante di visibilita' (EA NUOVA, magic diverso, mai in sostituzione) dice di piu' SENZA cambiare nessuna decisione di trading?
+#  CRITERI CONGELATI (lettore backtest_pipeline/r291_giudizio.py):
+#   G1  gemelle identiche: Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001.
+#   G0  ogni variante = la misura storica dell'ORIGINALE, AL CENTESIMO (Profit entro 1,01, PF entro 0,0002, DD entro 0,0001, Trades uguali): R283a (IS 71 / 7630,13 / 1,24678 / 8,2477; OOS 119 / 33442,57 / 1,67803 / 9,9897). Se FALLISCE la variante cambia le decisioni: NON SI USA.
+#   VISIBILITA'  (dai log degli agenti del tester, LOG_TESTER): MaxMin_Vis almeno 50 righe "[VIS] CorrBias"; Nasdaq_Vis almeno 50 righe "[VIS] gate EMA"; ORB_Vis: righe "[VIS] anti-duplicato" = 0 in
+#   entrambi i bracci (in un tester senza riavvii non deve mai scattare) e nessuna riga "[VIS] ... RIFIUTATO" non spiegata. Il riavvio a meta' giornata NON e' riproducibile nel tester: l'anti-duplicato
+#   resta NON TESTATO sul suo caso vero (da provare a mano su un demo vuoto).
+#  ATTESE dichiarate ORA: P1 le quattro varianti compilano e partono 85%; P2 G0 passa su tutte e quattro 85%; P3 righe [VIS] presenti (MaxMin, Nasdaq) 90%; P4 anti-duplicato mai scattato nei due bracci ORB 95%.
+#  LIMITI: nessuna variante e' stata compilata prima di questo round; il log degli agenti del tester puo' non conservare tutte le righe; un solo regime; non promuove niente.
+# ==========================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpRangeStartMin=30||30||0||30||N
+InpRangeEndMin=45||45||0||45||N
+InpEndHour=21||21||0||21||N
+InpEndMin=0||0||0||0||N
+InpAllowShort=0||0||0||0||N
+InpSLMode=3||3||0||3||N
+InpTP_R=1.0||1.0||0||1.0||N
+InpTPMode=1||1||0||1||N
+InpTP1Pct=0.0||0.0||0||0.0||N
+InpExitOnEmaClose=0||0||0||0||N
+InpUseEma200Filter=1||1||0||1||N
+InpMaxRangePct=0.8||0.8||0||0.8||N
+InpAntiDuplicato=1||1||0||1||N
+InpMagic=800034||800034||50||800084||Y
