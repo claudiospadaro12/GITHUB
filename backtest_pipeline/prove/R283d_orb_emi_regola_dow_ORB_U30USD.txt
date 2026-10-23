@@ -58,3 +58,4 @@ InpRangeEndExcl=1||1||0||1||N
 InpSkipUSHolidays=1||1||0||1||N
 InpAutoUSDST=1||1||0||1||N
 InpOneTradePerDay=1||1||0||1||N
+InpMagic=799641||799641||50||799691||Y

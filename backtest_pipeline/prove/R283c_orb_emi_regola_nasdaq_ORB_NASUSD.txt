@@ -60,3 +60,4 @@ InpAutoUSDST=1||1||0||1||N
 InpOneTradePerDay=1||1||0||1||N
 InpMinRangeK=17.0||17.0||0||17.0||N
 InpMaxRangeK=38.0||38.0||0||38.0||N
+InpMagic=799631||799631||50||799681||Y

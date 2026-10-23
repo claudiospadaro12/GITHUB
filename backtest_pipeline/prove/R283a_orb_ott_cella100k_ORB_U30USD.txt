@@ -47,3 +47,4 @@ InpTP1Pct=0.0||0.0||0||0.0||N
 InpExitOnEmaClose=0||0||0||0||N
 InpUseEma200Filter=1||1||0||1||N
 InpMaxRangePct=0.8||0.8||0||0.8||N
+InpMagic=799611||799611||50||799661||Y
