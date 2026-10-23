@@ -1,0 +1,50 @@
+#  EA: ABTG_ORB_Emiliano
+# ==========================================================================
+#  R284e -- ORB_Emiliano v1.00, BRACCIO DI CONTROLLO: range CON la barra delle 14:30
+#  U30USD M5 -- TICK REALI -- deposito 80000 -- rischio 1,00 (default dell'EA) -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40
+#  Scritto il 23/10/2026 PRIMA di aprire lo zip. Gemello di R283d con UNA SOLA differenza: InpRangeEndExcl=0
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  COSA SI MISURA: R283 ha acceso INSIEME Piano A, filtro ampiezza 17-38 (solo Nasdaq) e range 14:25:00-14:29:59 (InpRangeEndExcl).
+#  Qui si toglie UNA novita' alla volta dalla cella R283c (Nasdaq) o R283d (Dow) e si guarda cosa cambia. Riferimento = i numeri di R283c/d
+#  (stesso EA, stesso SHA256 9F5C82BB..., stessa finestra: i valori sono congelati nel lettore backtest_pipeline/r284_giudizio.py).
+#  I CRITERI (soglia 0,10 di PF in ENTRAMBE le gambe, stesso segno; sotto 100 operazioni in una gamba = NON MISURATO) sono scritti nel lettore
+#  e qui sotto, e NON si cambiano dopo aver visto un numero. La soglia 0,10 NON e' calibrata sul rumore: e' dichiarata arbitraria.
+#  ATTESE dichiarate ORA: P1 tutti i round partono (rc diverso da 1) 95%; P2 senza Piano A il PF OOS Nasdaq scende (>= 0,10 in ENTRAMBE le gambe)
+#  45%; P3 senza filtro il Nasdaq NON si distingue (< 0,10 in almeno una gamba) 55%; P4 range con la barra delle 14:30 NON si distingue 60%;
+#  P5 il Dow resta negativo in IS (profit < 0) in TUTTI e due i bracci 75%.
+#  LIMITI: un solo regime (2024-26, toro); un solo percorso; stop/target/trailing assunti, non detti da Emiliano; NON spegne il sospeso del runner
+#  durante il Piano A (il braccio 'senza Piano A' toglie insieme il Piano A e la sospensione del trailing: sono la stessa cosa nell'EA);
+#  TP1 forzato a 0 nel braccio senza Piano A (altrimenti col target a 2R il parziale sarebbe un doppione del TP).
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+InpRangeStartHour=14||14||0||14||N
+InpRangeStartMin=25||25||0||25||N
+InpRangeEndHour=14||14||0||14||N
+InpRangeEndMin=30||30||0||30||N
+InpEndHour=22||22||0||22||N
+InpEndMin=59||59||0||59||N
+InpEntryPoints=10.0||10.0||0||10.0||N
+InpAutoK=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpSLMode=0||0||0||0||N
+InpTPMode=0||0||0||0||N
+InpTP_R=2.0||2.0||0||2.0||N
+InpUseEma200Filter=0||0||0||0||N
+InpPlanAUse=1||1||0||1||N
+InpPlanAPoints=50.0||50.0||0||50.0||N
+InpPlanAClosePct=50.0||50.0||0||50.0||N
+InpPlanAMaxMin=0||0||0||0||N
+InpMaxLateMin=5||5||0||5||N
+InpRangeEndExcl=0||0||0||0||N
+InpSkipUSHolidays=1||1||0||1||N
+InpAutoUSDST=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMagic=799915||799915||50||799965||Y
