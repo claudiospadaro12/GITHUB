@@ -1,0 +1,22 @@
+RIEPILOGO R291 -- varianti di visibilita (MaxMin_Vis, Nasdaq_Vis, ORB_Vis), TICK REALI
+data: 2026-10-23 21:38:23
+fine: 2026-10-23 21:44:32   durata minuti: 6   (dichiarato circa 8-12 minuti, tetto largo 45)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 1ceaaf3b5318826666b17bf45ba09cba01aa8e0a
+deposito passato: 100000 (R291a) e 80000 (R291b-d); modello 4; etichette R291a, R291b, R291c, R291d
+
+R291a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R291b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R291c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R291d  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 4
+ROUND PARTITI (rc diverso da 1): 4 su 4
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 4 round partiti
+CARTELLE ATTESE: 4   TROVATE: 4   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7999xx, scritti DOPO l avvio): 8 su 8
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R291a-d, lettore backtest_pipeline/r291_giudizio.py, scritto il 23/10/2026):
+G1 gemelle identiche. G0: ogni variante = la misura storica dell originale al centesimo (a = R246i, b = R286a, c e d = R283a); se fallisce la variante cambia le decisioni e non si usa. Visibilita dai log: MaxMin_Vis >= 50 righe [VIS] CorrBias, Nasdaq_Vis >= 50 righe [VIS] gate EMA, ORB_Vis anti-duplicato mai scattato (0 righe). Il riavvio a meta giornata e NON TESTATO.

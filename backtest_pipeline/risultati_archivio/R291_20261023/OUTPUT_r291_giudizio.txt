@@ -1,0 +1,11 @@
+R291a: G0 IDENTICO all'originale (IS 4766.96/1.87803/20, OOS 6143.38/2.15985/21)
+R291b: G0 IDENTICO all'originale (IS 1052.03/1.25328/57, OOS -192.82/0.95527/47)
+R291c: G0 IDENTICO all'originale (IS 7630.13/1.24678/71, OOS 33442.57/1.67803/119)
+R291d: G0 IDENTICO all'originale (IS 7630.13/1.24678/71, OOS 33442.57/1.67803/119)
+log: righe [VIS]: [VIS] CorrBias=0, [VIS] gate EMA=0, [VIS] anti-duplicato=0, RIFIUTATO=0, NON LETTO=0
+visibilita MaxMin_Vis (>=50 CorrBias): NO (0)
+visibilita Nasdaq_Vis (>=50 gate EMA): NO (0)
+anti-duplicato mai scattato nel tester (atteso 0): SI
+ESITO: VARIANTI IDENTICHE AGLI ORIGINALI (G0 su tutte e quattro) - la visibilita' va letta sopra
+
+Non promuove niente. Il riavvio a meta' giornata non e' nel tester.
