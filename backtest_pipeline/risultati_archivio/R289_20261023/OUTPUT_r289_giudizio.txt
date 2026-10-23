@@ -1,0 +1,21 @@
+round  leg        Profit        PF      DD%  Trades
+R289a  IS        2811.84   1.22247   5.6692      74
+R289a  OOS       6721.93   1.27013   4.3941     130
+R289b  IS        4174.35   1.32837   5.6730      56
+R289b  OOS       7342.99   1.25809   5.4280      96
+R289c  IS        7014.21   1.22116   7.3069     135
+R289c  OOS       8496.74   1.21546   7.8576     172
+R289d  IS        4549.93   1.11621  12.3568      82
+R289d  OOS       7689.12   1.14894   9.1244     102
+R289e  IS        1052.03   1.25328   2.4509      57
+R289e  OOS       -192.82   0.95527   1.9449      47
+R289f  IS        1155.10   1.26076   3.0286      39
+R289f  OOS        294.50   1.06794   1.5198      36
+
+Dow Apertura 770202: dPF IS +0.106, OOS -0.012; profit IS 2812->4174, OOS 6722->7343; DD IS 5.67->5.67, OOS 4.39->5.43; deal IS 74->56, OOS 130->96 -> DESCRITTIVO (meno di 100 deal in una gamba, minimo 56)
+Nasdaq 770260: dPF IS -0.105, OOS -0.067; profit IS 7014->4550, OOS 8497->7689; DD IS 7.31->12.36, OOS 7.86->9.12; deal IS 135->82, OOS 172->102 -> DESCRITTIVO (meno di 100 deal in una gamba, minimo 82)
+Nasdaq 770250: dPF IS +0.007, OOS +0.113; profit IS 1052->1155, OOS -193->294; DD IS 2.45->3.03, OOS 1.94->1.52; deal IS 57->39, OOS 47->36 -> DESCRITTIVO (meno di 100 deal in una gamba, minimo 36) [segno concorde positivo]
+DAX Apertura 770101 (R288): dPF IS +0.057, OOS +0.094 -> NON DISTINGUIBILE o MISTO [segno concorde positivo]
+CONGIUNTO: 2 celle su 4 con segno concorde positivo, 0 PEGGIO -> MISTO
+
+Non promuove niente. Stesso motore, stesso regime toro: le celle non sono indipendenti.

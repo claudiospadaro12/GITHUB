@@ -1,0 +1,24 @@
+RIEPILOGO R289 -- round congiunto sul parziale (Dow 770202, Nasdaq 770260, Nasdaq 770250; il DAX viene da R288), TICK REALI
+data: 2026-10-23 21:15:11
+fine: 2026-10-23 21:27:17   durata minuti: 12   (dichiarato circa 12-20 minuti, tetto largo 60)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 17d6e0cb68c8d7419393ef67a617ce339d11108c
+deposito passato: 100000 (R289a-b) e 80000 (R289c-f); modello 4; etichette R289a, R289b, R289c, R289d, R289e, R289f
+
+R289a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R289b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R289c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R289d  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R289e  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R289f  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 6
+ROUND PARTITI (rc diverso da 1): 6 su 6
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 6 round partiti
+CARTELLE ATTESE: 6   TROVATE: 6   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7999xx, scritti DOPO l avvio): 12 su 12
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R289a-f, lettore backtest_pipeline/r289_giudizio.py, scritto il 23/10/2026):
+G1 gemelle identiche. G0: ogni base = misura storica (Dow R246a, Nasdaq 770260 R274a, 770250 R286a); se una fallisce la cella non si legge. Per cella dPF = senza parziale meno base in IS e OOS (soglia 0,10 in entrambe, sotto 100 deal in una gamba solo descrittivo). Congiunto su 4 celle con il DAX (R288): segno concorde positivo in >= 3 e nessuna PEGGIO = INDIZIO COERENTE (non prova); <= 1 = NESSUN INDIZIO; altrimenti MISTO. Celle non indipendenti, nessun p-value.
