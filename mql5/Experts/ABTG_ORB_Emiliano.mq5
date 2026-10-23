@@ -1,6 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                          ABTG_ORB_Emiliano.mq5   |
 //|                                                                  |
+//|  v1.01 (23/10/2026): + InpPlanAHoldRunner, InpPlanABE (default =  |
+//|  comportamento v1.00, per i bracci di controllo R285).            |
 //|  v1.00 (23/10/2026) -- VARIANTE NUOVA, NON UNA SOSTITUZIONE.     |
 //|  Derivata riga per riga da ABTG_ORB_Ottimizzato v1.04 (che resta |
 //|  INTATTA e in campo, regola della flotta: magic diverso, mai al  |
@@ -140,7 +142,7 @@
 //|        InpOneTradePerDay.                                        |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 //--- v1.04: QUANTI BLOCCHI E QUANTI CASI deve eseguire l'autotest.
@@ -265,6 +267,8 @@ input int    InpPlanAMaxMin     = 0;      // 4) se >0 il Piano A scatta solo se 
 input bool   InpSkipUSHolidays  = false;  // 5) non opera nei giorni di chiusura NYSE
 input bool   InpAutoUSDST       = false;  // 6) server a UTC fisso: range e fine giornata +60 min con USA in ora SOLARE (orari impostati = ora legale USA)
 input double InpMaxMinLotRiskX  = 0.0;    // 7) lotto forzato al minimo: se il rischio effettivo supera X volte il nominale niente trade; 0 = off
+input bool   InpPlanAHoldRunner = true;   // 4) col Piano A attivo il trailing/uscita EMA9 restano sospesi finche' il Piano A non e' concluso (true = v1.00)
+input bool   InpPlanABE         = true;   // 4) il Piano A mette lo stop in pari dopo il parziale (true = v1.00)
 input bool   InpRangeEndExcl    = false;  // 8) il range NON include la barra M1 che inizia a InpRangeEnd (14:25:00-14:29:59 invece di ...-14:30:59)
 
 input group "=== Rischio ==="
@@ -1011,7 +1015,7 @@ void ManagePlanA()
    double slPrec=PositionGetDouble(POSITION_SL);
    bool dirLong=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY);
    bool serveBE=((dirLong && bePari>slPrec) || (!dirLong && (slPrec==0 || bePari<slPrec)));
-   if(!serveBE){ gPlanATk=ticket; return; }
+   if(!serveBE || !InpPlanABE){ gPlanATk=ticket; return; }
    ResetLastError();
    if(gTrade.PositionModify(ticket,bePari,PositionGetDouble(POSITION_TP)))
      {
@@ -1098,7 +1102,7 @@ void ManageRunner()
       return;
      }
    //--- v1.00: col Piano A il runner (trailing EMA9, uscita su chiusura EMA) parte SOLO dopo il Piano A
-   if(InpPlanAUse && gPlanATk!=gTicketMio) return;
+   if(InpPlanAUse && InpPlanAHoldRunner && gPlanATk!=gTicketMio) return;
 
    long type=PositionGetInteger(POSITION_TYPE);
    bool isLong=(type==POSITION_TYPE_BUY);

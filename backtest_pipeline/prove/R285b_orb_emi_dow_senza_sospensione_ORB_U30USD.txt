@@ -1,0 +1,58 @@
+#  EA: ABTG_ORB_Emiliano
+# ==========================================================================
+#  R285b -- ORB_Emiliano v1.01, DOW (U30USD M5), SCOMPOSIZIONE DEL PIANO A: senza SOSPENSIONE del trailing
+#  TICK REALI -- deposito 80000 -- rischio 1,00 (default dell'EA) -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40
+#  Scritto il 23/10/2026 PRIMA di aprire lo zip. Parte dalla cella R283d (Dow, regola di Emiliano). Differenza: InpPlanAHoldRunner=0
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  COSA SI MISURA: R284d ha mostrato che sul Dow togliere il Piano A fa salire il PF in IS (+0,14) e in OOS (+0,09, 0,012 sotto la soglia 0,10),
+#  ma il Piano A e' fatto di TRE pezzi: (1) il parziale a 50 punti, (2) lo stop in pari, (3) la SOSPENSIONE del trailing EMA9 e dell'uscita su
+#  chiusura EMA finche' il Piano A non e' concluso. R285 toglie UN pezzo alla volta dalla cella R283d (EA v1.01: due nuovi input, default = v1.00):
+#   a) R285a  riferimento: v1.01 con i default = R283d. Deve essere IDENTICO a R283d (G0a).
+#   b) R285b  InpPlanAHoldRunner=0: trailing/uscita EMA attivi dall'ingresso, parziale + pareggio restano.
+#   c) R285c  InpPlanAClosePct=0: niente parziale, resta il pareggio + la sospensione.
+#   d) R285d  InpPlanABE=0: niente pareggio, resta il parziale + la sospensione.
+#   e) R285e  Piano A spento e TP1=0: deve essere IDENTICO a R284d (G0b).
+#  CRITERI (lettore backtest_pipeline/r285_giudizio.py, congelato): G1 gemelle identiche (profit <= 1 EUR, PF <= 0,0002, DD% <= 0,0001, Trades uguali);
+#  G0a R285a = R283d e G0b R285e = R284d in IS e OOS (profit entro 1,01, PF entro 0,0002, DD entro 0,0001, Trades uguali): se UNO fallisce nessun
+#  altro numero si legge. Per b, c, d: dPF = PF(braccio) - PF(R285a) in IS e OOS. <= -0,10 in ENTRAMBE: il pezzo AIUTA; >= +0,10 in entrambe:
+#  PEGGIORA; altrimenti NON DISTINGUIBILE o MISTO. Una gamba con meno di 100 operazioni: NON MISURATO. La soglia 0,10 NON e' calibrata sul rumore.
+#  ATTESE dichiarate ORA: P1 tutti partono 95%; P2 G0a passa 90%; P3 G0b passa 90%; P4 togliere la sospensione (b) e' distinguibile 35%;
+#  P5 togliere il parziale (c) distinguibile 30%; P6 togliere il pareggio (d) distinguibile 35%; P7 almeno uno fra b, c, d distinguibile 55%;
+#  P8 il Dow resta negativo in IS in TUTTI i bracci 70%.
+#  LIMITI: un solo regime (2024-26, toro); nel braccio b se il trailing porta lo stop oltre il pari PRIMA di +50, il Piano A si dichiara gia' fatto
+#  e il parziale NON avviene (e' il comportamento del codice, parte del braccio); stop/target assunti; la soglia dei 50 punti NON si varia (sarebbe tarare).
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+InpRangeStartHour=14||14||0||14||N
+InpRangeStartMin=25||25||0||25||N
+InpRangeEndHour=14||14||0||14||N
+InpRangeEndMin=30||30||0||30||N
+InpEndHour=22||22||0||22||N
+InpEndMin=59||59||0||59||N
+InpEntryPoints=10.0||10.0||0||10.0||N
+InpAutoK=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpSLMode=0||0||0||0||N
+InpTPMode=0||0||0||0||N
+InpTP_R=2.0||2.0||0||2.0||N
+InpUseEma200Filter=0||0||0||0||N
+InpPlanAUse=1||1||0||1||N
+InpPlanAPoints=50.0||50.0||0||50.0||N
+InpPlanAClosePct=50.0||50.0||0||50.0||N
+InpPlanAMaxMin=0||0||0||0||N
+InpPlanAHoldRunner=0||0||0||0||N
+InpPlanABE=1||1||0||1||N
+InpMaxLateMin=5||5||0||5||N
+InpRangeEndExcl=1||1||0||1||N
+InpSkipUSHolidays=1||1||0||1||N
+InpAutoUSDST=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMagic=799922||799922||50||799982||Y
