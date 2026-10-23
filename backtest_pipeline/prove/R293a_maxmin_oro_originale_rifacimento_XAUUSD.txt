@@ -1,0 +1,74 @@
+#  EA: ABTG_MaxMinNotte
+# ==========================================================================
+#  R293a -- RIFACIMENTO DI R292a (MaxMin oro, EA ORIGINALE ABTG_MaxMinNotte, HEAD)
+#  XAUUSD M15 -- TICK REALI -- deposito 5400 -- FINESTRA B. Stessa cella e stesso EA di R292a.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+#  Cella = sedia IN CAMPO sul piccolo (CODA_08, letta il 23/10/2026 dai .chr), senza Guardian (il piccolo non ce l'ha). Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 23/10/2026 PRIMA di aprire lo zip.
+# ==========================================================================
+#  PERCHE': in R292 l'EA originale e' risultato con SHA256 DIVERSO dal pin (causa NON VERIFICATA); i numeri di R292a non erano formalmente leggibili.
+#  CRITERI CONGELATI (lettore backtest_pipeline/r293_giudizio.py):
+#   M   motore = pin (SHA256 dell'EA al pin, riga del RIEPILOGO). Se di nuovo DIVERSO: il problema e' sistematico (il riepilogo ora stampa lo SHA trovato e copia il sorgente usato in SORGENTI_USATI) e R293a NON si legge.
+#   G1  gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001).
+#   G0  R293a = R292a = R292b AL CENTESIMO: IS 223,45 / PF 1,53877 / DD 2,1272 / 74; OOS 622,22 / 1,94266 / 3,8721 / 79 (tolleranza 1,01 / 0,0002 / 0,0001 / uguali).
+#   Se M e G0 passano: G0 di R292 CHIUSO (la variante a flag spento e' l'originale). Se M passa e G0 fallisce: il motore di R292a era DIVERSO e R292b/c non sono confrontabili con l'originale.
+#  ATTESE dichiarate ORA: M passa 70% (causa ignota); G0 passa se M passa 90%.
+#  LIMITI: un solo job; il per-trade resta solo OOS; non promuove niente.
+# ==========================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+InpUsaGuardian=false||false||0||false||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR293
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+InpMagic=800101||800101||50||800151||Y

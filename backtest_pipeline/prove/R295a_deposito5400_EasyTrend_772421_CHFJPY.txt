@@ -1,0 +1,52 @@
+#  EA: ABTG_EasyTrend
+# ==========================================================================
+#  R295a -- DEPOSITO REALE CONTRO TAGLIA PROP: EasyTrend 772421 CHFJPY
+#  CHFJPY H1 -- TICK REALI -- deposito 5400 -- stessa cella in campo (rischio di campo), braccio 5400.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+#  Cella = sedia IN CAMPO sul piccolo (CODA_08, letta il 23/10/2026 dai .chr), senza Guardian (il piccolo non ce l'ha). Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 23/10/2026 PRIMA di aprire lo zip.
+# ==========================================================================
+#  DOMANDA (quesito 7 del giro 2): lo stesso EA, con la stessa cella e lo stesso rischio %, si comporta allo stesso modo con un deposito da circa 5.400 e con 100.000? Misura l'ESECUZIONE (arrotondamento dei lotti al passo e al minimo, ordini rifiutati), NON il merito dell'EA.
+#  BRACCI: il 5400 e il 100000 stanno in due file della stessa riga, stessa cella. Il deposito del piccolo (circa 5.400) e' DICHIARATO ma il suo saldo non e' verificato.
+#  CRITERI CONGELATI (lettore backtest_pipeline/r295_giudizio.py), per ogni cella e per ogni gamba IS/OOS:
+#   G1  gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001), per ogni job.
+#   dPF = PF(5400) - PF(100000); rapporto trade = Trades(5400) / Trades(100000).
+#   REGGE: |dPF| < 0,10 e rapporto trade fra 0,95 e 1,05 in ENTRAMBE le gambe.  DEGRADA: dPF <= -0,10 in entrambe.  MIGLIORA: dPF >= +0,10 in entrambe.  Altrimenti MISTO.
+#   Con meno di 100 deal in una gamba di uno dei due bracci: etichetta DESCRITTIVO (la soglia 0,10 e' arbitraria, NON tarata sul rumore).
+#   Si stampa anche Profit/deposito (%) dei due bracci: NON e' un criterio.
+#  ATTESE dichiarate ORA: per cella REGGE 55%, DEGRADA 25%, MISTO 15%, MIGLIORA 5%; EasyTrend CHFJPY (lotti minimi dichiarati) REGGE 40%.
+#  LIMITI: nessun per-trade assicurato (non tutti gli EA esportano); i lotti realizzati NON sono misurati direttamente; un solo regime; cinque celle non indipendenti; non promuove niente e non consiglia nessuna taglia (la taglia e' di Claudio).
+# ==========================================================================
+@SIMBOLO    CHFJPY
+@PERIODO    H1
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false||false||0||false||N
+InpTF=16385||16385||0||16385||N
+InpLinRegLen=11||11||0||11||N
+InpPlotMode=0||0||0||0||N
+InpPlotLen=11||11||0||11||N
+InpCciPeriod=20||20||0||20||N
+InpPivotL=5||5||0||5||N
+InpPivotR=3||3||0||3||N
+InpPivotSource=0||0||0||0||N
+InpMaxPivotDist=60||60||0||60||N
+InpDivMaxBars=0||0||0||0||N
+InpDivDieOnFail=false||false||0||false||N
+InpHourStart=8||8||0||8||N
+InpHourEnd=18||18||0||18||N
+InpPrevBars=3||3||0||3||N
+InpEntryWindowBars=3||3||0||3||N
+InpMarketIfTooClose=true||true||0||true||N
+InpSLBufferPts=30||30||0||30||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpWarmupBars=500||500||0||500||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpMaxSpreadPts=30||30||0||30||N
+InpRiskPercent=0.3||0.3||0||0.3||N
+InpComment=EASYTREND CHFJPY
+InpVerbose=true||true||0||true||N
+InpMagic=800104||800104||50||800154||Y

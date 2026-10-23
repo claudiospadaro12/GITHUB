@@ -1,0 +1,64 @@
+#  EA: ABTG_EMA200_Ottimizzato
+# ==========================================================================
+#  R294b -- EMA200_Ottimizzato 971501 su XAUUSD H4: la STESSA cella sull'oro (termine di confronto, non G0)
+#  XAUUSD H4 -- TICK REALI -- deposito 5400 -- cella della sedia 971501 in campo (chart28: rischio 0,25, TF 16388).
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+#  Cella = sedia IN CAMPO sul piccolo (CODA_08, letta il 23/10/2026 dai .chr), senza Guardian (il piccolo non ce l'ha). Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 23/10/2026 PRIMA di aprire lo zip.
+# ==========================================================================
+#  DOMANDA: sul simbolo su cui la sedia 971501 gira oggi (AUDCHF dal 30/09) esiste una misura a tick? Nessuna esisteva (VERIFICATO nel giro 2).
+#  CRITERI CONGELATI (lettore backtest_pipeline/r294_giudizio.py):
+#   G1  gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001).
+#   AUDCHF (R294a): PF in IS e OOS: POSITIVA se PF > 1,00 in entrambe, NEGATIVA se < 1,00 in entrambe, altrimenti MISTA. Con meno di 100 deal in una gamba il verdetto e' solo DESCRITTIVO (sara' quasi certamente il caso). Nessuna soglia di merito.
+#   ORO (R294b): STESSA cella, stesso motore, stesso periodo: serve solo come termine di confronto. NON E' UN G0: lo scan storico (IS 0,65795 / 39 deal; OOS 1,49468 / 67 deal, rischio 1%, deposito non dichiarato, EA prima del fix del lotto del 19/09) non e' riproducibile a parita' di condizioni. Il confronto con quei numeri e' INDICATIVO: coerente se PF entro 0,10 e deal entro +-20% in entrambe le gambe, altrimenti DIVERSO (senza dedurne altro).
+#  ATTESE dichiarate ORA: P1 partono 90%; P2 AUDCHF fa meno di 100 deal per gamba 90%; P3 AUDCHF POSITIVA in entrambe le gambe 35%; P4 oro coerente col vecchio scan 40%.
+#  LIMITI: un solo regime; AUDCHF a tick con storico del broker NON verificato; rischio 0,25% su 5400 = lotto minimo probabile (non misurato qui); non promuove niente.
+# ==========================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H4
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false||false||0||false||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.05||0.05||0||0.05||N
+InpOrder2Atr=0.6||0.6||0||0.6||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=0.25||0.25||0||0.25||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=EMA200 OTT
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=800103||800103||50||800153||Y

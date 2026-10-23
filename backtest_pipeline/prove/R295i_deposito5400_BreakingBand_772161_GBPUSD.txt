@@ -1,0 +1,95 @@
+#  EA: ABTG_BreakingBand
+# ==========================================================================
+#  R295i -- DEPOSITO REALE CONTRO TAGLIA PROP: BreakingBand 772161 GBPUSD
+#  GBPUSD H1 -- TICK REALI -- deposito 5400 -- stessa cella in campo (rischio di campo), braccio 5400.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+#  Cella = sedia IN CAMPO sul piccolo (CODA_08, letta il 23/10/2026 dai .chr), senza Guardian (il piccolo non ce l'ha). Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 23/10/2026 PRIMA di aprire lo zip.
+# ==========================================================================
+#  DOMANDA (quesito 7 del giro 2): lo stesso EA, con la stessa cella e lo stesso rischio %, si comporta allo stesso modo con un deposito da circa 5.400 e con 100.000? Misura l'ESECUZIONE (arrotondamento dei lotti al passo e al minimo, ordini rifiutati), NON il merito dell'EA.
+#  BRACCI: il 5400 e il 100000 stanno in due file della stessa riga, stessa cella. Il deposito del piccolo (circa 5.400) e' DICHIARATO ma il suo saldo non e' verificato.
+#  CRITERI CONGELATI (lettore backtest_pipeline/r295_giudizio.py), per ogni cella e per ogni gamba IS/OOS:
+#   G1  gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001), per ogni job.
+#   dPF = PF(5400) - PF(100000); rapporto trade = Trades(5400) / Trades(100000).
+#   REGGE: |dPF| < 0,10 e rapporto trade fra 0,95 e 1,05 in ENTRAMBE le gambe.  DEGRADA: dPF <= -0,10 in entrambe.  MIGLIORA: dPF >= +0,10 in entrambe.  Altrimenti MISTO.
+#   Con meno di 100 deal in una gamba di uno dei due bracci: etichetta DESCRITTIVO (la soglia 0,10 e' arbitraria, NON tarata sul rumore).
+#   Si stampa anche Profit/deposito (%) dei due bracci: NON e' un criterio.
+#  ATTESE dichiarate ORA: per cella REGGE 55%, DEGRADA 25%, MISTO 15%, MIGLIORA 5%; EasyTrend CHFJPY (lotti minimi dichiarati) REGGE 40%.
+#  LIMITI: nessun per-trade assicurato (non tutti gli EA esportano); i lotti realizzati NON sono misurati direttamente; un solo regime; cinque celle non indipendenti; non promuove niente e non consiglia nessuna taglia (la taglia e' di Claudio).
+# ==========================================================================
+@SIMBOLO    GBPUSD
+@PERIODO    H1
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false||false||0||false||N
+InpTF=16385||16385||0||16385||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpStdPeriod=20||20||0||20||N
+InpStdSmaPeriod=50||50||0||50||N
+InpAtrPeriod=14||14||0||14||N
+InpPatternMode=2||2||0||2||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeRefBars=20||20||0||20||N
+InpBulgeMinBars=3||3||0||3||N
+InpBulgeMaxBars=20||20||0||20||N
+InpBulgeMinImpBars=1||1||0||1||N
+InpBulgeCandleMaxATR=0.0||0.0||0||0.0||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+InpBulgeMedianDistPct=0.75||0.75||0||0.75||N
+InpBulgeEndMode=1||1||0||1||N
+InpBulgeDirMode=1||1||0||1||N
+InpImpulseATR=1.5||1.5||0||1.5||N
+InpRientroMaxATR=1.5||1.5||0||1.5||N
+InpInvViolentBars=3||3||0||3||N
+InpZigZagATR=1.5||1.5||0||1.5||N
+InpDeepSpikeATR=1.5||1.5||0||1.5||N
+InpPostATRRef=1||1||0||1||N
+InpBandRidingMaxBars=20||20||0||20||N
+InpPostBulgeMaxBars=30||30||0||30||N
+InpReinflateTolPct=1.05||1.05||0||1.05||N
+InpUseShadowFilter=false||false||0||false||N
+InpShadowBodyMult=1.5||1.5||0||1.5||N
+InpUseRangeReduction=false||false||0||false||N
+InpRangeReductionPct=30.0||30.0||0||30.0||N
+InpContNoImpulseBandReturn=false||false||0||false||N
+InpNarrowBars=2||2||0||2||N
+InpStdDownMode=0||0||0||0||N
+InpFlatSlopeATR=0.05||0.05||0||0.05||N
+InpSlopeSource=0||0||0||0||N
+InpRetestBufferATR=0.15||0.15||0||0.15||N
+InpContRequireNarrow=true||true||0||true||N
+InpContRequireStdDown=true||true||0||true||N
+InpUseReversalCandle=false||false||0||false||N
+InpRevBodyMaxPct=33.0||33.0||0||33.0||N
+InpRevShadowMinPct=50.0||50.0||0||50.0||N
+InpMinSolidita=0.0||0.0||0||0.0||N
+InpSL_ATRmult=3.0||3.0||0||3.0||N
+InpTPMode=0||0||0||0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpTPRefreshBars=1||1||0||1||N
+InpBEatATR=1.0||1.0||0||1.0||N
+InpBEMode=0||0||0||0||N
+InpMinTPatATR=0.0||0.0||0||0.0||N
+InpMinRR=0.0||0.0||0||0.0||N
+InpUseCongestionFilter=false||false||0||false||N
+InpCongBars=15||15||0||15||N
+InpCongCSMin=4||4||0||4||N
+InpCongCDAStdBars=10||10||0||10||N
+InpCongWidthDropPct=15.0||15.0||0||15.0||N
+InpCongLateralATR=1.0||1.0||0||1.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=BB GBPUSD
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=800112||800112||50||800162||Y

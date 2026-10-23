@@ -1,0 +1,17 @@
+G1 a                                                         OK
+G1 b                                                         OK
+G1 c                                                         OK
+G1 d                                                         OK
+G1 e                                                         OK
+G0 b = a                                                     IDENTICO al centesimo (IS 223.45/1.53877/74, OOS 622.22/1.94266/79)
+G0 c = a                                                     IDENTICO al centesimo (IS 223.45/1.53877/74, OOS 622.22/1.94266/79)
+per-trade a                                                  79 chiusure proprie, 0 posizioni tardive, 0 chiusure del vicino
+per-trade b                                                  79 chiusure proprie, 0 posizioni tardive, 0 chiusure del vicino
+per-trade c                                                  79 chiusure proprie, 0 posizioni tardive, 0 chiusure del vicino
+per-trade d                                                  78 chiusure proprie, 64 posizioni tardive, 272 chiusure del vicino
+per-trade e                                                  79 chiusure proprie, 0 posizioni tardive, 272 chiusure del vicino
+VICINO PRESENTE (>=100 in d/e, 0 in a/b/c)                   SI
+DIFETTO RIPRODOTTO (tardive d=64, c=0)                       SI
+RIMEDIO (tardive e=0 <= c=0; stesso secondo 100.0%)          SI
+campione                                                     DESCRITTIVO: 79 chiusure proprie in c (< 100)
+ESITO                                                        G0 OK; difetto RIPRODOTTO in d; RIMEDIO riuscito in e (DESCRITTIVO)

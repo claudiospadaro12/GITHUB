@@ -1,0 +1,23 @@
+RIEPILOGO R292 -- MaxMin ORO, variante a ticket (originale, Ticket spento/acceso, con vicino), XAUUSD M15 TICK REALI
+data: 2026-10-23 22:10:33
+fine: 2026-10-23 22:25:11   durata minuti: 15   (dichiarato circa 12-20 minuti, tetto largo 60)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : ea21c019ba4fe94755a32bc09f13765e5fda6ba4
+deposito passato: 5400 per tutti; modello 4; etichette R292a, R292b, R292c, R292d, R292e
+
+R292a  fin B   rc 0   MOTORE DIVERSO DAL PIN: ABTG_MaxMinNotte.mq5 SHA256 DIVERSO DAL PIN   _OOS fresco 2 righe, Trades>0 su 2
+R292b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R292c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R292d  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R292e  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 5
+ROUND PARTITI (rc diverso da 1): 5 su 5
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE DIVERSO DAL PIN in 1 round: nessun numero si legge, si rifa il pin sul ramo e si rilancia
+CARTELLE ATTESE: 5   TROVATE: 5   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 8000xx, scritti DOPO l avvio): 10 su 10
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R292a-e, lettore backtest_pipeline/r292_giudizio.py, scritto il 23/10/2026):
+G1 gemelle identiche. G0: b = a e c = a al centesimo (se fallisce la variante cambia le decisioni e non si usa). Chiusura TARDIVA = dopo le 17:30:30 o prima delle 07:00:00 server, solo posizioni proprie (non il vicino 999777). Vicino presente: >= 100 chiusure in d ed e, zero in a/b/c. Difetto riprodotto: tardive(d) >= 5 e >= tardive(c)+5. Rimedio: tardive(e) <= tardive(c) e >= 95% delle chiusure di c allo stesso secondo in e. Il vicino agisce solo nel tester. Per-trade solo OOS.
