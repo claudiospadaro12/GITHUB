@@ -55,7 +55,7 @@ Note di lettura: "Binario" = data del `.ex5` compilato (CODA_06); **"Guardian ne
 
 ## 2. Cosa dicono i numeri forward (e quanto poco)
 - **Campione minuscolo:** su 42 sedie, **solo 3 hanno almeno 30 posizioni** dal 29/07 (DAX Apertura 33, Bulge viola 139, Azzurra 36); **29 ne hanno meno di 10**, 2 nessuna. Con questi numeri il forward **non permette di dire che un EA e' migliore o peggiore di un altro**; serve solo a trovare comportamenti anomali.
-- **Anomalie da guardare, non verdetti:** CostToCost EURJPY 772361 (14 posizioni, circa -282, PF 0,10); DAX Apertura 770101 (33 posizioni, circa -400, PF 0,41, fino al 22/09); ORB sul Dow 770611 (8 posizioni, circa -209, PF 0,27, fino al 03/09); EMA200 Dow 771531 (23 posizioni, circa -55, PF 0,68); GapCont 774101 (4 posizioni, -138); le due Bulge in perdita (-316 su 139; -104 su 36).
+- **Anomalie da guardare, non verdetti:** CostToCost EURJPY 772361 (14 posizioni, circa -282, PF 0,10); DAX Apertura 770101 (33 posizioni, circa -400, PF 0,41, fino al 22/09: **CORREZIONE del giro 1 - sono 17 posizioni del vecchio BREAKOUT ritirato il 14/08, circa -575, e 16 RETEST BUY, circa +175, PF 13,5; il 0,41 non misura la sedia attuale**, vedi `report/SALA_GIRO1_APERTURE_INDICI_2026-10-23.md`); ORB sul Dow 770611 (8 posizioni, circa -209, PF 0,27, fino al 03/09) [precedono il binario v1.04 del 03/09]; EMA200 Dow 771531 (23 posizioni, circa -55, PF 0,68); GapCont 774101 (4 posizioni, -138); le due Bulge in perdita (-316 su 139; -104 su 36).
 - **Positive con campione minimo:** SuperWave Dow H1 770511 (14 posizioni, circa +334), EasyTrend GBPUSD 772422 (9, circa +219), MaxMin DAX 770411 (5, +156): troppo poche per concludere.
 - **La mano pesa piu' degli EA:** nel file le posizioni a magic 0 (manuali) del 01-08/10 sono 16 e circa -961, contro qualche centinaio degli EA nostri (gia' segnalato in `PIANO_SCHIERAMENTO` r.3).
 
@@ -69,7 +69,7 @@ Note di lettura: "Binario" = data del `.ex5` compilato (CODA_06); **"Guardian ne
 ## 4. Ordine proposto per la sala (per Claudio da approvare)
 | Giro | Gruppo | Perche' prima | Domanda tipo (criteri scritti PRIMA) |
 |---|---|---|---|
-| 1 | **Aperture indici** (DAX, Dow, Nasdaq, MaxMin DAX, ORB Dow) | orologio che cambia fra 3 e 10 giorni; gia' revisionate il 23/10 (sala DAX/Dow/ORB), ORB gia' misurato (R283-R285); binari da ricompilare | quali pezzi servono davvero (come R284/R285) e cosa non ha prova |
+| 1 | **Aperture indici** (DAX, Dow, Nasdaq, MaxMin DAX, ORB Dow) | orologio che cambia fra 3 e 10 giorni; gia' revisionate il 23/10 (sala DAX/Dow/ORB), ORB: R283-R285 hanno misurato la regola di EMILIANO, NON la cella in campo (correzione del giro 1); binari da ricompilare | quali pezzi servono davvero (come R284/R285) e cosa non ha prova |
 | 2 | **Forex e oro in campo** (BreakingBand, GapFill, PunteLarry, CostToCost, EasyTrend, PTE, MaxMin oro, EMA200 Ott., SupertrendReversal oro) | sono le sedie con piu' posizioni vive; tutte con binario vecchio e senza Guardian; CostToCost EURJPY da spiegare | il codice fa quello che l'intestazione promette? c'e' un difetto come quello hedging? |
 | 3 | **Trend/swing su indici e 225JPY** (SuperWave x2, SupRev x2, SupertrendReversal 225JPY, EMA200 Dow, PTE Dow) | non dipendono dall'orologio; base dati OHLC lunga disponibile solo per alcuni | una modifica alla volta, nessuna taratura di soglia sul solo regime 2024-26 |
 | 4 | **Gap e punte** (GapFill x2, PunteLarry Dow, GapContinuation) | campione forward minuscolo | che cosa misurare prima di toccare |
