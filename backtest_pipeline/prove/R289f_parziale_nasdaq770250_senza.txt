@@ -1,0 +1,108 @@
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+#  R289f -- ROUND CONGIUNTO SUL PARZIALE: Nasdaq 770250 (breakdown solo short con gate) NASUSD M15, deposito 80000 -- SENZA PARZIALE
+#  TICK REALI -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40. Cella copiata da R286a (IS 57 / 1052,03 / 1,25328 / 2,4509; OOS 47 / -192,82 / 0,95527 / 1,9449). Scritto il 23/10/2026 PRIMA di aprire lo zip.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  DOMANDA: togliere il parziale (InpTP1_ClosePct=0) migliora il risultato su PIU' strumenti? Finora: DAX R288c (PF +0,057 IS / +0,094 OOS, profit e DD nella stessa direzione, sotto la soglia 0,10).
+#  Qui si aggiungono tre celle con lo stesso pezzo: Dow Apertura 770202, Nasdaq 770260, Nasdaq 770250. Per CELLA due bracci: base (controllo G0) e senza parziale. Nel codice il pareggio a TP1 e' annidato nel parziale
+#  (DAX e Dow, e il motore e' lo stesso del Nasdaq): ClosePct=0 toglie ANCHE il pareggio a TP1. Nessun altro parametro cambia.
+#  CRITERI CONGELATI (lettore backtest_pipeline/r289_giudizio.py):
+#   G1  gemelle di ogni file identiche: Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001.
+#   G0  ogni BASE = la misura storica della sua cella (tolleranza 1,01 / 0,0002 / 0,0001 / uguali): se UNA base fallisce, la cella non si legge.
+#   PER CELLA  dPF = PF(senza parziale) - PF(base), IS e OOS: >= +0,10 in entrambe: senza parziale MEGLIO; <= -0,10 in entrambe: PEGGIO; altrimenti NON DISTINGUIBILE o MISTO. Verdetto di cella solo se base e braccio hanno >= 100 deal
+#     in ogni gamba (Dow IS ha 74 e Nasdaq 770250 ne ha 57/47 nella base: per costruzione DESCRITTIVE; contano come indizio di segno, non come verdetto).
+#   SEGNO CONCORDE POSITIVO di una cella: dPF > 0 in IS E in OOS (a prescindere dalla soglia). Si conta anche con il DAX (R288c: IS +0,05689, OOS +0,09431 -> concorde positivo).
+#   VERDETTO CONGIUNTO (4 celle: DAX, Dow, Nasdaq 770260, Nasdaq 770250): >= 3 celle con segno concorde positivo E nessuna cella PEGGIO => "INDIZIO COERENTE che il parziale non aiuta (NON una prova)";
+#     <= 1 cella concorde positiva => "NESSUN INDIZIO"; altrimenti "MISTO". Le 4 celle condividono il motore e il regime (toro): NON sono indipendenti e non si calcola nessun p-value.
+#  ATTESE dichiarate ORA: P1 i sei round partono 95%; P2 le tre basi passano G0 85%; P3 Dow concorde positivo 50%; P4 Nasdaq 770260 concorde positivo 45%; P5 Nasdaq 770250 concorde positivo 45%;
+#   P6 verdetto congiunto = INDIZIO COERENTE 35%; P7 nessuna cella PEGGIO 85%.
+#  LIMITI: tutte le celle sono nello STESSO regime (toro 2024-26): in un toro togliere un parziale lascia correre i vincitori, quindi l'esito e' atteso a favore del senza-parziale PER COSTRUZIONE; il round non dice niente sull'orso,
+#  dove il parziale potrebbe proteggere. Soglia 0,10 non calibrata. Nessun parametro variato, nessuna promozione, nessuna taglia.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=2||2||0||2||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=300.0||300.0||0||300.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=50||50||0||50||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=0.35||0.35||0||0.35||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=0||0||0||0||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpMagic=800026||800026||50||800076||Y
