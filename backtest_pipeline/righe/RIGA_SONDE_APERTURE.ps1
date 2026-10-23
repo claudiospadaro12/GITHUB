@@ -191,7 +191,7 @@ Write-Host '      compilato: 0 errori.' -ForegroundColor Green
 # PASSO 5 -- esecuzione
 $cf = Join-Path $env:APPDATA 'MetaQuotes\Terminal\Common\Files'
 [void](New-Item -ItemType Directory -Force -Path $cf)
-foreach($f in @('ABTG_SONDA_SPX.csv','ABTG_SONDA_ORB.csv','ABTG_SONDA_BOX.csv','ABTG_SONDA_FINE.txt')){
+foreach($f in @('ABTG_SONDA_SPX.csv','ABTG_SONDA_ORB.csv','ABTG_SONDA_BOX.csv','ABTG_SONDA_BOX2.csv','ABTG_SONDA_FINE.txt')){
   Remove-Item -LiteralPath (Join-Path $cf $f) -Force -ErrorAction SilentlyContinue
 }
 $iniRun = Join-Path $W ('sonde_' + $stamp + '.ini')
@@ -219,7 +219,7 @@ $desk = [Environment]::GetFolderPath('Desktop')
 $out = Join-Path $desk ('SONDE_APERTURE_' + $stamp)
 [void](New-Item -ItemType Directory -Force -Path $out)
 $n = 0
-foreach($f in @('ABTG_SONDA_SPX.csv','ABTG_SONDA_ORB.csv','ABTG_SONDA_BOX.csv','ABTG_SONDA_FINE.txt')){
+foreach($f in @('ABTG_SONDA_SPX.csv','ABTG_SONDA_ORB.csv','ABTG_SONDA_BOX.csv','ABTG_SONDA_BOX2.csv','ABTG_SONDA_FINE.txt')){
   $fp = Join-Path $cf $f
   if((Test-Path -LiteralPath $fp) -and ((Get-Item -LiteralPath $fp).LastWriteTime -ge $t0)){ Copy-Item -LiteralPath $fp -Destination $out -Force; $n++ }
   else { Write-Host ('      MANCA (o non fresco): ' + $f) -ForegroundColor Red }
@@ -231,7 +231,7 @@ $zip = Join-Path $desk ('SONDE_APERTURE_' + $stamp + '.zip')
 Compress-Archive -Path (Join-Path $out '*') -DestinationPath $zip -Force
 Write-Host ''
 Write-Host ('RACCOLTA: ' + $zip) -ForegroundColor Green
-Write-Host ('   file prodotti freschi: ' + $n.ToString($INV) + ' su 4')
-if($n -eq 4 -and $fatto){ Write-Host 'STATO: ESEGUITO_OK' ; exit 0 }
+Write-Host ('   file prodotti freschi: ' + $n.ToString($INV) + ' su 5')
+if($n -eq 5 -and $fatto){ Write-Host 'STATO: ESEGUITO_OK' ; exit 0 }
 Write-Host 'STATO: ESEGUITO_CON_RILIEVI'
 exit 2

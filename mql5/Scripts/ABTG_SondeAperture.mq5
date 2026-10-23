@@ -8,6 +8,7 @@
 //|   S1  filtro S&P del MaxMin (CorrBias) : ABTG_SONDA_SPX.csv      |
 //|   S2  barra di fine range dell'ORB     : ABTG_SONDA_ORB.csv      |
 //|   S3  box notturno del MaxMin          : ABTG_SONDA_BOX.csv      |
+//|   S3b la barra della sera cambia il box? : ABTG_SONDA_BOX2.csv     |
 //|  Si lancia a mano: trascinare lo script su un grafico QUALSIASI  |
 //|  (non attaccare EA, non toccare Algo Trading). Orari = SERVER.   |
 //+------------------------------------------------------------------+
@@ -130,6 +131,69 @@ void SondaBox()
    PrintFormat("S3: %d giorni scritti in ABTG_SONDA_BOX.csv",scritti);
   }
 
+//+------------------------------------------------------------------+
+//| S3b: come S3, ma separa le barre "contaminanti" (prima di inizio) |
+//+------------------------------------------------------------------+
+void SondaBox2()
+  {
+   if(!Prepara(InpSymBox)){ PrintFormat("S3b: simbolo %s non selezionabile",InpSymBox); return; }
+   int h=ApriCsv("ABTG_SONDA_BOX2.csv","data;dow;n_cont;t_cont;hi_cont;lo_cont;n_nom;hi_box;lo_box;hi_nom;lo_nom;cambia_alto;cambia_basso;delta_alto;delta_basso;ampiezza_nom");
+   if(h==INVALID_HANDLE) return;
+   datetime oggi=TimeCurrent(); MqlDateTime t0; TimeToStruct(oggi,t0); t0.hour=0; t0.min=0; t0.sec=0;
+   datetime base=StructToTime(t0);
+   int scritti=0;
+   for(int g=InpGiorni; g>=1; g--)
+     {
+      datetime d0=base-(datetime)g*86400;
+      MqlDateTime d; TimeToStruct(d0,d);
+      if(d.day_of_week==0 || d.day_of_week==6) continue;
+      datetime tEnd=d0+InpBoxFinH*3600+InpBoxFinM*60;
+      datetime tStart=d0+InpBoxIniH*3600+InpBoxIniM*60-86400;
+      int iS=iBarShift(InpSymBox,PERIOD_M1,tStart,false);
+      int iE=iBarShift(InpSymBox,PERIOD_M1,tEnd,false);
+      if(iS<0 || iE<0) continue;
+      int start=MathMin(iS,iE);
+      int count=MathAbs(iS-iE)+1;
+      int hIdx=iHighest(InpSymBox,PERIOD_M1,MODE_HIGH,count,start);
+      int lIdx=iLowest (InpSymBox,PERIOD_M1,MODE_LOW, count,start);
+      if(hIdx<0 || lIdx<0) continue;
+      double hiBox=iHigh(InpSymBox,PERIOD_M1,hIdx), loBox=iLow(InpSymBox,PERIOD_M1,lIdx);
+      // barre contaminanti: dall'indice iS (la piu vecchia) verso le piu nuove, finche' il tempo e' prima di tStart
+      int nCont=0; double hiC=-1e18, loC=1e18; datetime tC=0;
+      int j=iS;
+      while(j>=iE && j>=0 && iTime(InpSymBox,PERIOD_M1,j)<tStart)
+        {
+         double hh=iHigh(InpSymBox,PERIOD_M1,j), ll=iLow(InpSymBox,PERIOD_M1,j);
+         if(hh>hiC) hiC=hh;
+         if(ll<loC) loC=ll;
+         if(nCont==0) tC=iTime(InpSymBox,PERIOD_M1,j);
+         nCont++;
+         j--;
+        }
+      int nNom=0; double hiN=0, loN=0;
+      if(j>=iE && j>=0)
+        {
+         nNom=j-iE+1;
+         int hN=iHighest(InpSymBox,PERIOD_M1,MODE_HIGH,nNom,iE);
+         int lN=iLowest (InpSymBox,PERIOD_M1,MODE_LOW, nNom,iE);
+         if(hN>=0 && lN>=0){ hiN=iHigh(InpSymBox,PERIOD_M1,hN); loN=iLow(InpSymBox,PERIOD_M1,lN); }
+         else nNom=0;
+        }
+      int cAlto=0, cBasso=0; double dAlto=0, dBasso=0;
+      if(nNom>0)
+        {
+         if(hiBox>hiN){ cAlto=1; dAlto=hiBox-hiN; }
+         if(loBox<loN){ cBasso=1; dBasso=loN-loBox; }
+        }
+      FileWriteString(h,StringFormat("%s;%d;%d;%s;%.2f;%.2f;%d;%.2f;%.2f;%.2f;%.2f;%d;%d;%.2f;%.2f;%.2f\r\n",
+         TimeToString(d0,TIME_DATE),d.day_of_week,nCont,(nCont>0?TimeToString(tC,TIME_DATE|TIME_MINUTES):""),
+         (nCont>0?hiC:0.0),(nCont>0?loC:0.0),nNom,hiBox,loBox,hiN,loN,cAlto,cBasso,dAlto,dBasso,(nNom>0?hiN-loN:0.0)));
+      scritti++;
+     }
+   FileClose(h);
+   PrintFormat("S3b: %d giorni scritti in ABTG_SONDA_BOX2.csv",scritti);
+  }
+
 //--- bias dal confronto fra le due EMA (+1 se veloce>lenta, -1 se minore, 0 uguali)
 int Segno(const double f,const double s){ return((f>s)?+1:((f<s)?-1:0)); }
 
@@ -197,7 +261,8 @@ void OnStart()
    SondaSpx();
    SondaOrb();
    SondaBox();
-   Print("ABTG_SondeAperture: finito. File in Common\\Files: ABTG_SONDA_SPX.csv, ABTG_SONDA_ORB.csv, ABTG_SONDA_BOX.csv");
+   SondaBox2();
+   Print("ABTG_SondeAperture: finito. File in Common\\Files: ABTG_SONDA_SPX.csv, ABTG_SONDA_ORB.csv, ABTG_SONDA_BOX.csv, ABTG_SONDA_BOX2.csv");
    int hf=FileOpen("ABTG_SONDA_FINE.txt",FILE_WRITE|FILE_TXT|FILE_ANSI|FILE_COMMON);
    if(hf!=INVALID_HANDLE){ FileWriteString(hf,"FINE "+TimeToString(TimeLocal(),TIME_DATE|TIME_SECONDS)+"\r\n"); FileClose(hf); }
    if(InpChiudiTerminale){ Sleep(2000); TerminalClose(0); }
