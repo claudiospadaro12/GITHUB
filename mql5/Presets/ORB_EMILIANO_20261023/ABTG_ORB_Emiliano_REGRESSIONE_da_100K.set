@@ -1,0 +1,70 @@
+; ==========================================================================
+; ABTG_ORB_Emiliano v1.00 -- SET DI NON-REGRESSIONE (cella viva del 100k, U30USD M5).
+; Identico al set 100K di ABTG_ORB_Ottimizzato v1.04 (range 14:30-14:45, solo long, SL meta range, TP range 1,5, EMA200), solo magic 770631.
+; Tutte le novita' sono spente. Test: stessa finestra, stessi dati: ORB_Ottimizzato (set 100K) e ORB_Emiliano (questo set) devono dare lo stesso risultato al centesimo.
+; ASCII. Rischio 0,3 come nel set 100K: per i test cambiare solo se serve, deciderlo prima.
+; ==========================================================================
+InpUsaGuardian=true
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+InpSLBufferPts=0.0
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=0.3
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB OTT
+InpMagic=770631
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0.0
+InpAutoK=false
+InpMinRangeK=0.0
+InpMaxRangeK=0.0
+InpMaxLateMin=0
+InpPlanAUse=false
+InpPlanAPoints=50.0
+InpPlanAClosePct=50.0
+InpPlanAMaxMin=0
+InpSkipUSHolidays=false
+InpAutoUSDST=false
+InpMaxMinLotRiskX=0.0

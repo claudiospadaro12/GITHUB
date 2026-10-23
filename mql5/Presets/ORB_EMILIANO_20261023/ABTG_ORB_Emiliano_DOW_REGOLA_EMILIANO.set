@@ -1,0 +1,74 @@
+; ==========================================================================
+; ABTG_ORB_Emiliano v1.00 -- DOW (U30USD M5): filtro SPENTO. Le soglie per il Dow NON sono state dette da Emiliano.
+; Il 23/10 la candela 14:25 del Dow era di circa 120 punti, molto oltre 38: applicare 17-38 al Dow lo escluderebbe quasi sempre. Soglie scalate (es. per il rapporto di prezzo) = INFERENZA da misurare.
+; Regola di Emiliano (webinar 21-22/10/2026) letta dalle trascrizioni e dall'indicatore ORB_V15: candela M5 14:25-14:30 server, due pendenti a +/-10 punti,
+; filtro sull'ampiezza del range, Piano A (50 punti -> stop in pari, meta chiusa, resto in trailing).
+; NON DETTI da Emiliano e quindi ASSUNTI qui (da misurare, non da credere): stop = estremo opposto del range (InpSLMode 0), target finale 2R, trailing EMA9, fine giornata 22:59,
+; condizione di velocita' del Piano A spenta (InpPlanAMaxMin 0), Piano B non implementato.
+; InpAutoUSDST=true: range e fine giornata +60 min con gli USA in ora solare (server BCM UTC+1 fisso): la candela resta quella pre-apertura tutto l'anno.
+; Rischio 1,0: valore da tester, NON una taglia per il demo (decisione di Claudio).
+; ==========================================================================
+InpUsaGuardian=true
+InpRangeStartHour=14
+InpRangeStartMin=25
+InpRangeEndHour=14
+InpRangeEndMin=30
+InpEndHour=22
+InpEndMin=59
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=0
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=2.0
+InpTPMode=0
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=true
+InpSLBufferPts=0.0
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=false
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.0
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB OTT
+InpMagic=770631
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0.0
+InpAutoK=true
+InpMinRangeK=0.0
+InpMaxRangeK=0.0
+InpMaxLateMin=0
+InpPlanAUse=true
+InpPlanAPoints=50.0
+InpPlanAClosePct=50.0
+InpPlanAMaxMin=0
+InpSkipUSHolidays=true
+InpAutoUSDST=true
+InpMaxMinLotRiskX=0.0
