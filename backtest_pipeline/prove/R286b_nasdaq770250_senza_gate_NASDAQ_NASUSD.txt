@@ -1,0 +1,111 @@
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+#  R286b -- sedia 770250 (Nasdaq Apertura, breakdown SOLO SHORT, livelli H1 precedente), SENZA gate (InpUseEmaFilter=0)
+#  NASUSD M15 -- TICK REALI -- deposito 80000 -- rischio 0,35 (come la sedia) -- FINESTRA B 2024.09.26 -> 2026.06.30, taglio 0.40
+#  Scritto il 23/10/2026 PRIMA di aprire lo zip. Cella = mql5/presets/ABTG_GatedShort_NASUSD_770250_LIVE.set (tutti gli input esplicitati; stringhe vuote e abtg_news.csv a default).
+#  Differenza fra R286a e R286b: SOLO InpUseEmaFilter (1 = gate EMA 50x200 su H4 acceso, 0 = spento). Tutto il resto identico.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie.
+# ==========================================================================
+#  DOMANDA (sala giro 1, Q1 del Nasdaq): il gate EMA serve? Il controllo "senza gate" non e' mai stato fatto. Sul feed BCM (un solo regime toro) il gate non puo' dire
+#  nulla sull'orso: la domanda e' solo "nel toro il gate toglie o aggiunge qualcosa?". Nessuna taratura: 50 e 200 NON si variano.
+#  CRITERI CONGELATI (lettore backtest_pipeline/r286_giudizio.py):
+#   G1  gemelle di ogni file identiche: Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001.
+#   IMPIANTO  rc non 1, _OOS con 2 righe, Trades > 0 in IS e in OOS in entrambi i bracci.
+#   dPF = PF(R286b senza gate) - PF(R286a con gate), in IS e in OOS.
+#     >= +0,10 in ENTRAMBE le gambe: il gate PEGGIORA (senza va meglio); <= -0,10 in entrambe: il gate AIUTA; altrimenti NON DISTINGUIBILE o MISTO.
+#   MISURATO  il verdetto vale solo se ENTRAMBI i bracci hanno almeno 100 operazioni (deal) in OGNI gamba; sotto, l'esito e' DESCRITTIVO (si riportano i numeri, nessun verdetto).
+#             Sapendo che il braccio con gate ha circa 104 operazioni in tutto: l'esito DESCRITTIVO e' atteso.
+#   COERENZA con la misura storica (NON bloccante): operazioni IS+OOS del braccio con gate entro +-25% di 104 e PF vicino a 1,097; la misura storica (30/08, pin b4c625e6)
+#             non e' riproducibile oggi, e' un controllo di buon senso e non un G0.
+#  ATTESE dichiarate ORA: P1 i due round partono e compilano 95%; P2 operazioni con gate nel +-25% di 104: 60%; P3 senza gate piu' operazioni che con gate, in entrambe le gambe: 95%;
+#   P4 PF senza gate < PF con gate in entrambe le gambe (il gate AIUTA come numero): 45%; P5 esito DESCRITTIVO (meno di 100 operazioni nel braccio con gate in una gamba): 85%;
+#   P6 DD senza gate > DD con gate in entrambe le gambe: 80%.
+#  LIMITI: un solo regime (2024-26, toro): il gate nasce per l'orso e qui non e' provato; deposito 80000 (la sedia gira su un conto da circa 5.000: lotti e parziali non misurati qui);
+#  soglia 0,10 non calibrata sul rumore; il binario in campo e' vecchio (08/08), qui si misura il sorgente a HEAD.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=2||2||0||2||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=300.0||300.0||0||300.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=50||50||0||50||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=0.35||0.35||0||0.35||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpMagic=799932||799932||50||799982||Y
