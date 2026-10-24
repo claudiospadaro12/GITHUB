@@ -1,0 +1,17 @@
+=== A1: il pendente a 20 pip ===
+U30USD     AMMESSO (StopsLevel 5, distanza pendente 20 punti, FreezeLevel 0)
+NASUSD     RIFIUTATO (StopsLevel 100, distanza pendente 20 punti, FreezeLevel 20)
+D30EUR     AMMESSO (StopsLevel 0, distanza pendente 20 punti, FreezeLevel 0)
+225JPY     RIFIUTATO (StopsLevel 100, distanza pendente 20 punti, FreezeLevel 20)
+XAUUSD     RIFIUTATO (StopsLevel 50, distanza pendente 20 punti, FreezeLevel 20)
+ESITO A1   COERENTE coi dati: NASUSD e 225JPY rifiutano il pendente, D30EUR lo ammette
+=== A2: soglia del pavimento del lotto ===
+U30USD: vol_min 0.1 step 0.1, 0.0100 EUR/punto/lotto, swap L/S -1.4/-1.15 | stop_soglia (punti): S=5344 R1.00%=53440 R0.65%=34736 R0.50%=26720 R0.30%=16032 R0.25%=13360 | S=5000 R1.00%=50000 R0.65%=32500 R0.50%=25000 R0.30%=15000 R0.25%=12500
+NASUSD: vol_min 0.1 step 0.1, 0.0100 EUR/punto/lotto, swap L/S -1.4/-1.15 | stop_soglia (punti): S=5344 R1.00%=53440 R0.65%=34736 R0.50%=26720 R0.30%=16032 R0.25%=13360 | S=5000 R1.00%=50000 R0.65%=32500 R0.50%=25000 R0.30%=15000 R0.25%=12500
+D30EUR: vol_min 0.1 step 0.1, 0.0100 EUR/punto/lotto, swap L/S -1.15/-0.95 | stop_soglia (punti): S=5344 R1.00%=53440 R0.65%=34736 R0.50%=26720 R0.30%=16032 R0.25%=13360 | S=5000 R1.00%=50000 R0.65%=32500 R0.50%=25000 R0.30%=15000 R0.25%=12500
+225JPY: vol_min 0.1 step 0.1, 10.0000 EUR/punto/lotto, swap L/S -0.98/-0.98 | stop_soglia (punti): S=5344 R1.00%=53 R0.65%=35 R0.50%=27 R0.30%=16 R0.25%=13 | S=5000 R1.00%=50 R0.65%=32 R0.50%=25 R0.30%=15 R0.25%=12
+XAUUSD: vol_min 0.01 step 0.01, 0.8927 EUR/punto/lotto, swap L/S -98.78/19.28 | stop_soglia (punti): S=5344 R1.00%=5986 R0.65%=3891 R0.50%=2993 R0.30%=1796 R0.25%=1497 | S=5000 R1.00%=5601 R0.65%=3640 R0.50%=2800 R0.30%=1680 R0.25%=1400
+AUDCHF: vol_min 0.01 step 0.01, 1.0818 EUR/punto/lotto, swap L/S 1.32/-15.61 | stop_soglia (punti): S=5344 R1.00%=4940 R0.65%=3211 R0.50%=2470 R0.30%=1482 R0.25%=1235 | S=5000 R1.00%=4622 R0.65%=3004 R0.50%=2311 R0.30%=1387 R0.25%=1155
+CHFJPY: vol_min 0.01 step 0.01, 0.5692 EUR/punto/lotto, swap L/S -8.94/-1.11 | stop_soglia (punti): S=5344 R1.00%=9389 R0.65%=6103 R0.50%=4694 R0.30%=2817 R0.25%=2347 | S=5000 R1.00%=8785 R0.65%=5710 R0.50%=4392 R0.30%=2635 R0.25%=2196
+GBPUSD: vol_min 0.01 step 0.01, 0.8927 EUR/punto/lotto, swap L/S -4.29/-1.98 | stop_soglia (punti): S=5344 R1.00%=5986 R0.65%=3891 R0.50%=2993 R0.30%=1796 R0.25%=1497 | S=5000 R1.00%=5601 R0.65%=3640 R0.50%=2800 R0.30%=1680 R0.25%=1400
+EURJPY: vol_min 0.01 step 0.01, 0.5692 EUR/punto/lotto, swap L/S 2.06/-14.98 | stop_soglia (punti): S=5344 R1.00%=9389 R0.65%=6103 R0.50%=4694 R0.30%=2817 R0.25%=2347 | S=5000 R1.00%=8785 R0.65%=5710 R0.50%=4392 R0.30%=2635 R0.25%=2196

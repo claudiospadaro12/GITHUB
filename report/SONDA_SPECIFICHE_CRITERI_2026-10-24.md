@@ -16,3 +16,6 @@ P1 la sonda compila e parte 85%. NASUSD StopsLevel > 20: 45%. 225JPY StopsLevel 
 
 ## Limiti
 Un solo terminale e un solo momento (sabato, mercato chiuso: bid/ask possono essere a zero, non serve qui). Non misura gli ordini veri: dice cosa il server dichiara, non cosa accade. Non promuove niente, non tocca sedie, preset, conti, taglie.
+
+## ERRATA del 24/10/2026, scritta DOPO aver visto i numeri (il criterio A1 non cambia)
+Il criterio A2 qui sopra ha due errori, scoperti leggendo il CSV: (1) la frase sul pavimento e' al contrario: `lotto_calcolato = rischio / (stop * vpp)`, quindi il pavimento MORDE con uno stop **sopra** `stop_soglia`, non sotto; (2) per gli indici il server riporta `tick_value` nella valuta del simbolo (USD, EUR, JPY), non in EUR. La tabella A2 del lettore congelato (`sonda_spec_giudizio.py`) e' quindi valida solo per XAUUSD e le coppie forex (valore gia' in EUR, unita' = point di MT5) e NON per gli indici. Il ricalcolo corretto e' a posteriori: `backtest_pipeline/sonda_spec_a2_post.py`.
