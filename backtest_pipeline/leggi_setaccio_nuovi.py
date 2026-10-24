@@ -31,7 +31,7 @@ def leggi_htm(path):
     deals = re.findall(r'\d{4}\.\d\d\.\d\d \d\d:\d\d:\d\d\|\d+\|([A-Za-z0-9._#]+)\|(?:buy|sell)\|', flat)
     return dict(expert=exp.group(1) if exp else '?', simbolo=sym.group(1) if sym else '?', inputs=inputs, ops=int(ops.group(1)) if ops else 0, simboli_operati=sorted(set(deals)))
 def un_ea(d):
-    nome = os.path.basename(d.rstrip('/\\'))[7:]
+    nome = re.sub(r'^SCREEN(80K)?_', '', os.path.basename(d.rstrip('/\\')))
     man = []
     mp = os.path.join(d, 'MANIFEST_SCREEN.csv')
     if os.path.exists(mp): man = list(csv.DictReader(open(mp, newline=''), delimiter=';'))
@@ -49,7 +49,7 @@ def valuta(rep, nomoney):
     for t in ('TRANCHE1', 'TRANCHE2'): inp.update({k: v for k, v in rep[t]['inputs'].items() if k not in inp})
     reg = []; note = []
     if max(ops) == 0 and nomoney == 0: reg.append('R1 non opera (0 operazioni in H1 e M15, nessun no money)')
-    if max(ops) < 10 and nomoney >= 100: reg.append('R2 lotto troppo grande per 5.000 EUR (%d righe no money, %d/%d operazioni)' % (nomoney, ops[0], ops[1]))
+    if max(ops) < 10 and nomoney >= 100: reg.append('R2 lotto troppo grande per il deposito del test (%d righe no money, %d/%d operazioni)' % (nomoney, ops[0], ops[1]))
     altri = set()
     for t in ('TRANCHE1', 'TRANCHE2'):
         altri |= {x for x in rep[t]['simboli_operati'] if x.upper() != 'XAUUSD'}
@@ -75,7 +75,7 @@ def valuta(rep, nomoney):
     return v, reg, s5
 def giudica(cart):
     out = []
-    for d in sorted(glob.glob(os.path.join(cart, 'SCREEN_*'))):
+    for d in sorted(glob.glob(os.path.join(cart, 'SCREEN_*')) + glob.glob(os.path.join(cart, 'SCREEN80K_*'))):
         if not os.path.isdir(d): continue
         nome, rep, nm, stato = un_ea(d); v, reg, s5 = valuta(rep, nm)
         out.append((nome, v, reg, s5, stato, nm))
