@@ -1,0 +1,31 @@
+RIEPILOGO R293-R295 -- superstringa notturna (rifacimento MaxMin oro, EMA200_Ott su AUDCHF e oro, deposito 5400 contro 100000), TICK REALI
+data: 2026-10-23 22:34:30
+fine: 2026-10-23 22:59:57   durata minuti: 25   (dichiarato circa 40-70 minuti, tetto largo 150)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 20243263f9bd5644daad7bbb88dce8b67e29751a
+deposito passato: 5400 (R293a, R294a-b, R295 a/c/e/g/i) e 100000 (R295 b/d/f/h/j); modello 4; etichette R293a, R294a, R294b, R295a-j
+
+R293a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R294a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R294b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295d  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295e  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295f  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295g  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295h  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295i  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R295j  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 13
+ROUND PARTITI (rc diverso da 1): 13 su 13
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 13 round partiti
+CARTELLE ATTESE: 13   TROVATE: 13   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 8001xx, scritti DOPO l avvio): 22 su 26   MANCANO: R294a/800102, R294a/800152, R294b/800103, R294b/800153
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R293a, R294a-b, R295a-j, lettore backtest_pipeline/r293_giudizio.py, scritto il 23/10/2026):
+G1 gemelle identiche; motore = pin richiesto per leggere un job. R293a: G0 = R292a = R292b al centesimo. R294a AUDCHF: POSITIVA/NEGATIVA/MISTA (descrittivo sotto 100 deal); R294b oro: confronto indicativo, NON G0. R295: dPF = PF(5400)-PF(100000) e rapporto trade; REGGE se |dPF|<0,10 e rapporto 0,95-1,05 in entrambe le gambe, DEGRADA/MIGLIORA se dPF <= -0,10 / >= +0,10 in entrambe, altrimenti MISTO; sotto 100 deal DESCRITTIVO.

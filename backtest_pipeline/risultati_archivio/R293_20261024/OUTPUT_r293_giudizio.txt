@@ -1,0 +1,8 @@
+R293a (G0 di R292)             MOTORE = PIN e IDENTICA a R292a/R292b al centesimo: G0 DI R292 CHIUSO (IS 223.45/1.53877/74, OOS 622.22/1.94266/79)
+R294a AUDCHF                   NEGATIVA: IS PF 0.91448 / 103 deal / DD 1.16; OOS PF 0.66270 / 136 deal / DD 1.81
+R294b oro (confronto)          DIVERSO col vecchio scan (INDICATIVO, non G0): IS PF 0.79773 / 29 deal; OOS PF 2.14601 / 56 deal
+R295 EasyTrend 772421 CHFJPY   REGGE (DESCRITTIVO: <100 deal in una gamba) | dPF IS +0.04188 OOS -0.04438 | trade 5400/100k IS 31/31 OOS 53/53 | rendimento% 5400: IS 0.97 OOS 1.78; 100k: IS 0.89 OOS 2.36
+R295 EasyTrend 772422 GBPUSD   REGGE (DESCRITTIVO: <100 deal in una gamba) | dPF IS -0.00172 OOS -0.00925 | trade 5400/100k IS 26/26 OOS 41/41 | rendimento% 5400: IS 1.59 OOS 4.53; 100k: IS 1.79 OOS 4.97
+R295 PTE 771322 GBPUSD         MISTO (DESCRITTIVO: <100 deal in una gamba) | dPF IS +1.31443 OOS -0.04109 | trade 5400/100k IS 20/20 OOS 49/49 | rendimento% 5400: IS 2.33 OOS 0.91; 100k: IS 2.39 OOS 1.04
+R295 PTE 771332 GBPUSD         MISTO (DESCRITTIVO: <100 deal in una gamba) | dPF IS +0.53285 OOS -0.03795 | trade 5400/100k IS 20/20 OOS 51/51 | rendimento% 5400: IS 1.27 OOS 0.50; 100k: IS 1.32 OOS 0.58
+R295 BreakingBand 772161 GBPUSD REGGE (DESCRITTIVO: <100 deal in una gamba) | dPF IS +0.05193 OOS +0.03581 | trade 5400/100k IS 13/13 OOS 26/26 | rendimento% 5400: IS 2.61 OOS 3.16; 100k: IS 2.67 OOS 3.16
