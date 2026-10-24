@@ -1,0 +1,138 @@
+CENSIMENTO DEGLI EA DEL MARKET  2026-10-24 12:29:41   pc DESKTOP-H4D7CAJ   pin 93099342ed01ab175d8611785c57b030254cb2f2
+cartella letta: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\Market
+.ex5 trovati (nomi unici): 81   da setacciare: 19   saltati: 62
+Un EA SALTATO non e un EA bocciato: e un EA NON MISURATO. I pattern di esclusione sono JOLLY, quindi piu larghi dei sei nomi che intendono (Arena, Gold Trade Pro, Goldbot One, The Gold Phantom, The Gold Reaper, The Impossible Gold): se qui sotto un SALTATO non e uno di quei sei, va setacciato a parte: manda questo file e si prepara la riga apposta (passa dal cancello come tutte le altre).
+
+stato;ea;motivo;rc
+GIA FATTO;Aetheris Gold Stack.ex5;cartella SCREEN80K_AETHERISGOLDSTACK gia completa nel giro di oggi, non rifatto;
+SALTATO;AI Golden Life MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern AI Golden Life MT5.ex5;
+SALTATO;Arena Nexus Grid Smart XAU MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern *Arena*;
+GIA FATTO;Artemis NAS100 Orb Edge EA MT5.ex5;cartella SCREEN80K_ARTEMISNAS100ORBEDGEEAMT gia completa nel giro di oggi, non rifatto;
+GIA FATTO;ArtQuant Gold.ex5;cartella SCREEN80K_ARTQUANTGOLD gia completa nel giro di oggi, non rifatto;
+GIA FATTO;AW Double Grids MT5.ex5;cartella SCREEN80K_AWDOUBLEGRIDSMT5 gia completa nel giro di oggi, non rifatto;
+GIA FATTO;BROKK intraday.ex5;cartella SCREEN80K_BROKKINTRADAY gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Cent Guardian.ex5;cartella SCREEN80K_CENTGUARDIAN gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Challenge Edge.ex5;cartella SCREEN80K_CHALLENGEEDGE gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Cross Hedge EA MT5.ex5;cartella SCREEN80K_CROSSHEDGEEAMT5 gia completa nel giro di oggi, non rifatto;
+GIA FATTO;DAX Robot MT5.ex5;cartella SCREEN80K_DAXROBOTMT5 gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Dax30 Ea Mt5 Hk.ex5;cartella SCREEN80K_DAX30EAMT5HK gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Daytrade Pro Algo MT5.ex5;cartella SCREEN80K_DAYTRADEPROALGOMT5 gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Diagonal Resistance EA.ex5;cartella SCREEN80K_DIAGONALRESISTANCEEA gia completa nel giro di oggi, non rifatto;
+SALTATO;Drifter EA.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Drifter EA.ex5;
+SALTATO;Dynamic Liquidity Intelligence.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Dynamic Liquidity Intelligence.ex5;
+SALTATO;EA Super Trend XAUUSD.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern EA Super Trend XAUUSD.ex5;
+GIA FATTO;Easy Funded MT5.ex5;cartella SCREEN80K_EASYFUNDEDMT5 gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Entry Points Pro Robot.ex5;cartella SCREEN80K_ENTRYPOINTSPROROBOT gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Epicus Prime MT5 EA.ex5;cartella SCREEN80K_EPICUSPRIMEMT5EA gia completa nel giro di oggi, non rifatto;
+GIA FATTO;FundedBridge EA for Prop Firms.ex5;cartella SCREEN80K_FUNDEDBRIDGEEAFORPROPFIR gia completa nel giro di oggi, non rifatto;
+SALTATO;Ghost Scalper MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Ghost Scalper MT5.ex5;
+SALTATO;Gold Beaver.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Gold Beaver.ex5;
+GIA FATTO;Gold Snap.ex5;cartella SCREEN80K_GOLDSNAP gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Gold Sniper Alpha AI Robot MT5.ex5;cartella SCREEN80K_GOLDSNIPERALPHAAIROBOTMT gia completa nel giro di oggi, non rifatto;
+SALTATO;Gold Trade Pro MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern *Gold*Trade*Pro*;
+SALTATO;Goldbot One MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern *Goldbot*;
+SALTATO;Golden Mirage mt5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Golden Mirage mt5.ex5;
+GIA FATTO;Grabber Bot.ex5;cartella SCREEN80K_GRABBERBOT gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Index Bender EA.ex5;cartella SCREEN80K_INDEXBENDEREA gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Index Sniper Pro MT5.ex5;cartella SCREEN80K_INDEXSNIPERPROMT5 gia completa nel giro di oggi, non rifatto;
+SALTATO;Institutional SMC Robot.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Institutional SMC Robot.ex5;
+GIA FATTO;Karat Killer.ex5;cartella SCREEN80K_KARATKILLER gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Mad Turtle.ex5;cartella SCREEN80K_MADTURTLE gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Master Nasdaq FTMO MT5.ex5;cartella SCREEN80K_MASTERNASDAQFTMOMT5 gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Microedge Neural Matrix EA.ex5;cartella SCREEN80K_MICROEDGENEURALMATRIXEA gia completa nel giro di oggi, non rifatto;
+SALTATO;My AI Gold.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern My AI Gold.ex5;
+GIA FATTO;Nasadaq rsi macd.ex5;cartella SCREEN80K_NASADAQRSIMACD gia completa nel giro di oggi, non rifatto;
+GIA FATTO;Nasdaq Hacking Pro.ex5;cartella SCREEN80K_NASDAQHACKINGPRO gia completa nel giro di oggi, non rifatto;
+GIA FATTO;NBX Killer EA.ex5;cartella SCREEN80K_NBXKILLEREA gia completa nel giro di oggi, non rifatto;
+SALTATO;Nebula Cartographer AI EA.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Nebula Cartographer AI EA.ex5;
+GIA FATTO;New Era Gold.ex5;cartella SCREEN80K_NEWERAGOLD gia completa nel giro di oggi, non rifatto;
+GIA FATTO;New York Bull.ex5;cartella SCREEN80K_NEWYORKBULL gia completa nel giro di oggi, non rifatto;
+SALTATO;Night Scalper by NoCap FX.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Night Scalper by NoCap FX.ex5;
+SALTATO;Opening Range Breakout MT5.ex5;ha BLOCCATO il tester il 24/10 12:11 (TRANCHE1 oltre 9 minuti senza fine): NON MISURATO, da rivedere a parte;
+DA SETACCIARE;ORB Revolution.ex5;;
+SALTATO;Pac Man BTC.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Pac Man BTC.ex5;
+DA SETACCIARE;PatternCore.ex5;;
+SALTATO;PolyGold Scalper.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern PolyGold Scalper.ex5;
+SALTATO;Prop Firm Gold EA.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Prop Firm Gold EA.ex5;
+DA SETACCIARE;Prop Firm RM EA.ex5;;
+DA SETACCIARE;PropGuardian Pro.ex5;;
+DA SETACCIARE;Prophet EA MT5.ex5;;
+SALTATO;Quantum Commander.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Quantum Commander.ex5;
+SALTATO;Quantum Emperor MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Quantum Emperor MT5.ex5;
+SALTATO;Quantum iGold MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Quantum iGold MT5.ex5;
+SALTATO;Quantum Titan MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Quantum Titan MT5.ex5;
+SALTATO;Range Breakout EA with Range Filters.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Range Breakout EA with Range Filters.ex5;
+DA SETACCIARE;Rocket Breakout EA.ex5;;
+SALTATO;Scalping Robot Pro MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Scalping Robot Pro MT5.ex5;
+DA SETACCIARE;SixtyNine EA.ex5;;
+SALTATO;Smart Gold Hunter.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Smart Gold Hunter.ex5;
+DA SETACCIARE;SNeox AI MT5.ex5;;
+DA SETACCIARE;SomaBTC.ex5;;
+DA SETACCIARE;SomaGold.ex5;;
+DA SETACCIARE;SomaOil.ex5;;
+DA SETACCIARE;Squid X.ex5;;
+DA SETACCIARE;The DAX Morning Scalp.ex5;;
+SALTATO;The Gold Phantom.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern *Phantom*;
+SALTATO;The Gold Reaper MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern *Reaper*;
+SALTATO;The Impossible Gold.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern *Impossible*;
+DA SETACCIARE;The ORB Master.ex5;;
+SALTATO;TitanForge EA MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern TitanForge EA MT5.ex5;
+DA SETACCIARE;Trend DCA.ex5;;
+SALTATO;Ultimate Breakout System.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Ultimate Breakout System.ex5;
+DA SETACCIARE;Umbra Vault AI EA.ex5;;
+DA SETACCIARE;US100 Nasdaq EA.ex5;;
+DA SETACCIARE;USTEC Dynamics Pro.ex5;;
+DA SETACCIARE;Vortex Turbo EA.ex5;;
+SALTATO;Waka Waka EA MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Waka Waka EA MT5.ex5;
+SALTATO;Wave Rider EA MT5.ex5;GIA CONOSCIUTO (setacciato il 19/10 o con giro dedicato), saltato dal pattern Wave Rider EA MT5.ex5;
+
+ESITO DEI LANCIATI (0 = le due passate sono OK; 3 = almeno una KO o non lanciata, lo zip esce lo stesso; 1 = fermato PRIMA del tester)
+LANCIATO;ORB Revolution.ex5;;rc 0
+LANCIATO;PatternCore.ex5;;rc 0
+LANCIATO;Prop Firm RM EA.ex5;;rc 0
+LANCIATO;PropGuardian Pro.ex5;;rc 0
+LANCIATO;Prophet EA MT5.ex5;;rc 3
+LANCIATO;Rocket Breakout EA.ex5;;rc 0
+LANCIATO;SixtyNine EA.ex5;;rc 0
+LANCIATO;SNeox AI MT5.ex5;;rc 3
+LANCIATO;SomaBTC.ex5;;rc 3
+LANCIATO;SomaGold.ex5;;rc 3
+LANCIATO;SomaOil.ex5;;rc 3
+LANCIATO;Squid X.ex5;;rc 0
+LANCIATO;The DAX Morning Scalp.ex5;;rc 0
+LANCIATO;The ORB Master.ex5;;rc 0
+LANCIATO;Trend DCA.ex5;;rc 3
+LANCIATO;Umbra Vault AI EA.ex5;;rc 0
+LANCIATO;US100 Nasdaq EA.ex5;;rc 0
+LANCIATO;USTEC Dynamics Pro.ex5;;rc 0
+LANCIATO;Vortex Turbo EA.ex5;;rc 0
+LANCIATO;Aetheris Gold Stack.ex5;;rc precedente
+LANCIATO;Artemis NAS100 Orb Edge EA MT5.ex5;;rc precedente
+LANCIATO;ArtQuant Gold.ex5;;rc precedente
+LANCIATO;AW Double Grids MT5.ex5;;rc precedente
+LANCIATO;BROKK intraday.ex5;;rc precedente
+LANCIATO;Cent Guardian.ex5;;rc precedente
+LANCIATO;Challenge Edge.ex5;;rc precedente
+LANCIATO;Cross Hedge EA MT5.ex5;;rc precedente
+LANCIATO;DAX Robot MT5.ex5;;rc precedente
+LANCIATO;Dax30 Ea Mt5 Hk.ex5;;rc precedente
+LANCIATO;Daytrade Pro Algo MT5.ex5;;rc precedente
+LANCIATO;Diagonal Resistance EA.ex5;;rc precedente
+LANCIATO;Easy Funded MT5.ex5;;rc precedente
+LANCIATO;Entry Points Pro Robot.ex5;;rc precedente
+LANCIATO;Epicus Prime MT5 EA.ex5;;rc precedente
+LANCIATO;FundedBridge EA for Prop Firms.ex5;;rc precedente
+LANCIATO;Gold Snap.ex5;;rc precedente
+LANCIATO;Gold Sniper Alpha AI Robot MT5.ex5;;rc precedente
+LANCIATO;Grabber Bot.ex5;;rc precedente
+LANCIATO;Index Bender EA.ex5;;rc precedente
+LANCIATO;Index Sniper Pro MT5.ex5;;rc precedente
+LANCIATO;Karat Killer.ex5;;rc precedente
+LANCIATO;Mad Turtle.ex5;;rc precedente
+LANCIATO;Master Nasdaq FTMO MT5.ex5;;rc precedente
+LANCIATO;Microedge Neural Matrix EA.ex5;;rc precedente
+LANCIATO;Nasadaq rsi macd.ex5;;rc precedente
+LANCIATO;Nasdaq Hacking Pro.ex5;;rc precedente
+LANCIATO;NBX Killer EA.ex5;;rc precedente
+LANCIATO;New Era Gold.ex5;;rc precedente
+LANCIATO;New York Bull.ex5;;rc precedente

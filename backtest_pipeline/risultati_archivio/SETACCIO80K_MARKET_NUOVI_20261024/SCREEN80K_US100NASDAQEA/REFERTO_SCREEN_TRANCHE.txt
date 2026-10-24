@@ -1,0 +1,62 @@
+SCREEN TESTER TRANCHE (US100 Nasdaq EA.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_SCREEN80K_TESTER_TRANCHE_v1, pin 93099342ed01ab175d8611785c57b030254cb2f2
+data: 2026-10-24 14:20:45   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\US100 Nasdaq EA.ex5   byte 305904   data file 2026-10-22 15:07:18   SHA256 8A8F5A43A91CC2F381F044248B3EE1E94F9395151E8FBC5ACAE3A34899DE54BF   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1,M15, Modello 4 (ticks reali), deposito 80000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (US100 Nasdaq EA.ex5): EA di TERZI dal Market, scatola nera. SETACCIO: 2 passate, una per periodo del grafico (H1, M15), sulla STESSA finestra 2026.01.01 -> 2026.03.01, default dell EA. Serve a vedere SE opera (regola S1) e SE il risultato dipende dal periodo del grafico (regola S2): NON a giudicare il profitto, NON a scegliere il periodo, NON a decidere un acquisto (regole scritte PRIMA dei numeri: report/SETACCIO_MARKET_ATTESE_2026-10-18.md). NESSUN EA si archivia con questi numeri: zero operazioni qui e una MISURA MANCANTE, non una bocciatura (certificato di morte del 09/09/2026).
+tranche scelte: 1,2 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE1 (H1) OK   TRANCHE2 (M15) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 2 passate INDIPENDENTI sulla STESSA finestra (2026.01.01 -> 2026.03.01), ognuna a CONTO VUOTO (deposito 80000 EUR), e cambia SOLO il periodo del grafico: TRANCHE1=H1, TRANCHE2=M15. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE1 (gennaio-febbraio 2026 su H1)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE1: 8A8F5A43A91CC2F381F044248B3EE1E94F9395151E8FBC5ACAE3A34899DE54BF UGUALE
+   durata 214 s (orologio), test 190 s (riga Test passed del giornale; -1 = non letta)   giornali letti 9, righe 1187333
+   report SCREEN80K_US100NASDAQEA_TRANCHE1_20261024_140953.htm   operazioni 4766   netto -74748.54   PF 0.85   DD equita 78101.70(93.70%)   DD saldo 78101.00(93.70%)
+   qualita 100%ticksreali   barre report 540   ticks report 9016825   barre generate 540   ticks generati 9016825   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: NASDAQ===== NASDAQ ==== ; Swing_st=true ; Comment_for_Swing_st=US100_Swing ; Scalping_st=true ; Comment_for_Scalping_st=US100_Scalping ; News_st=false ; Comment_for_News_st=US100_News ; Magics_used=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; GMT_and_DST===== GMT and DST ==== ; GMT_Offset_AUTO=true ; GMT_Offset=2 ; Adjust_DST_for_Tester=only for the strategy tester ; Adjust_DST_select=1 ; Lot_and_MM===== Lot and MM ==== ; Funds_for_001_Lots=20 ; Consider_CONTRACT_SIZE=true ; use_MM_recovery=true ; Lot_calculation_with_rounding=true ; Lot_calculation_based_on=0 ; Use_FixLots=false ; Fix_Lots=0.1 ; Common_parameters===== Common parameters ==== ; Limitation_setting=false ; Limitation_of_Positions=13 ; including_pending_orders=false ; Limitation_by_Magics=0 ; Line_for_Magics=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; Limitation_by_Symbols=0 ; Line_for_Symbols=USTEC
+   input stampati dal giornale (dopo started with inputs): Adjust_DST_for_Tester=only for the strategy tester ; Adjust_DST_select=1 ; Comment_for_News_st=US100_News ; Comment_for_Scalping_st=US100_Scalping ; Comment_for_Swing_st=US100_Swing ; Common_parameters===== Common parameters ==== ; Consider_CONTRACT_SIZE=true ; Fix_Lots=0.1 ; Funds_for_001_Lots=20 ; GMT_and_DST===== GMT and DST ==== ; GMT_Offset=2 ; GMT_Offset_AUTO=true ; including_pending_orders=false ; Limitation_by_Magics=0 ; Limitation_by_Symbols=0 ; Limitation_of_Positions=13 ; Limitation_setting=false ; Line_for_Magics=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; Line_for_Symbols=USTEC ; Lot_and_MM===== Lot and MM ==== ; Lot_calculation_based_on=0 ; Lot_calculation_with_rounding=true ; Magics_used=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; NASDAQ===== NASDAQ ==== ; News_st=false ; Scalping_st=true ; Swing_st=true ; Use_FixLots=false ; use_MM_recovery=true
+   righe stop out nei giornali 6, no money 20 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 5251.46 EUR
+   giornale: 2026.01.06 22:11:00   failed market buy 0.41 XAUUSD, close #400 sell 0.41 XAUUSD 4488.19 [Market closed]
+   giornale: 2026.01.06 22:11:00   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:00   failed market buy 0.41 XAUUSD, close #398 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:00   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:00   failed market buy 0.41 XAUUSD, close #399 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:00   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:01   failed market buy 0.41 XAUUSD, close #400 sell 0.41 XAUUSD 4488.19 [Market closed]
+   giornale: 2026.01.06 22:11:01   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:01   failed market buy 0.41 XAUUSD, close #398 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:01   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:01   failed market buy 0.41 XAUUSD, close #399 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:01   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:02   failed market buy 0.41 XAUUSD, close #400 sell 0.41 XAUUSD 4488.19 [Market closed]
+   giornale: 2026.01.06 22:11:02   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:02   failed market buy 0.41 XAUUSD, close #398 sell 0.41 XAUUSD 4486.85 [Market closed]
+TRANCHE2 (gennaio-febbraio 2026 su M15)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE2: 8A8F5A43A91CC2F381F044248B3EE1E94F9395151E8FBC5ACAE3A34899DE54BF UGUALE
+   durata 223 s (orologio), test 195 s (riga Test passed del giornale; -1 = non letta)   giornali letti 9, righe 1187337
+   report SCREEN80K_US100NASDAQEA_TRANCHE2_20261024_140953.htm   operazioni 4766   netto -74748.54   PF 0.85   DD equita 78101.70(93.70%)   DD saldo 78101.00(93.70%)
+   qualita 100%ticksreali   barre report 2155   ticks report 9016825   barre generate 2155   ticks generati 9016825   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: NASDAQ===== NASDAQ ==== ; Swing_st=true ; Comment_for_Swing_st=US100_Swing ; Scalping_st=true ; Comment_for_Scalping_st=US100_Scalping ; News_st=false ; Comment_for_News_st=US100_News ; Magics_used=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; GMT_and_DST===== GMT and DST ==== ; GMT_Offset_AUTO=true ; GMT_Offset=2 ; Adjust_DST_for_Tester=only for the strategy tester ; Adjust_DST_select=1 ; Lot_and_MM===== Lot and MM ==== ; Funds_for_001_Lots=20 ; Consider_CONTRACT_SIZE=true ; use_MM_recovery=true ; Lot_calculation_with_rounding=true ; Lot_calculation_based_on=0 ; Use_FixLots=false ; Fix_Lots=0.1 ; Common_parameters===== Common parameters ==== ; Limitation_setting=false ; Limitation_of_Positions=13 ; including_pending_orders=false ; Limitation_by_Magics=0 ; Line_for_Magics=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; Limitation_by_Symbols=0 ; Line_for_Symbols=USTEC
+   input stampati dal giornale (dopo started with inputs): Adjust_DST_for_Tester=only for the strategy tester ; Adjust_DST_select=1 ; Comment_for_News_st=US100_News ; Comment_for_Scalping_st=US100_Scalping ; Comment_for_Swing_st=US100_Swing ; Common_parameters===== Common parameters ==== ; Consider_CONTRACT_SIZE=true ; Fix_Lots=0.1 ; Funds_for_001_Lots=20 ; GMT_and_DST===== GMT and DST ==== ; GMT_Offset=2 ; GMT_Offset_AUTO=true ; including_pending_orders=false ; Limitation_by_Magics=0 ; Limitation_by_Symbols=0 ; Limitation_of_Positions=13 ; Limitation_setting=false ; Line_for_Magics=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; Line_for_Symbols=USTEC ; Lot_and_MM===== Lot and MM ==== ; Lot_calculation_based_on=0 ; Lot_calculation_with_rounding=true ; Magics_used=10666, 22222, 33333, 44444, 50777, 66666, 77777, 88888, 99999, 10777, 11777, 12777, 13777 ; NASDAQ===== NASDAQ ==== ; News_st=false ; Scalping_st=true ; Swing_st=true ; Use_FixLots=false ; use_MM_recovery=true
+   righe stop out nei giornali 6, no money 20 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 5251.46 EUR
+   giornale: 2026.01.06 22:11:00   failed market buy 0.41 XAUUSD, close #400 sell 0.41 XAUUSD 4488.19 [Market closed]
+   giornale: 2026.01.06 22:11:00   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:00   failed market buy 0.41 XAUUSD, close #398 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:00   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:00   failed market buy 0.41 XAUUSD, close #399 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:00   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:01   failed market buy 0.41 XAUUSD, close #400 sell 0.41 XAUUSD 4488.19 [Market closed]
+   giornale: 2026.01.06 22:11:01   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:01   failed market buy 0.41 XAUUSD, close #398 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:01   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:01   failed market buy 0.41 XAUUSD, close #399 sell 0.41 XAUUSD 4486.85 [Market closed]
+   giornale: 2026.01.06 22:11:01   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:02   failed market buy 0.41 XAUUSD, close #400 sell 0.41 XAUUSD 4488.19 [Market closed]
+   giornale: 2026.01.06 22:11:02   TradeLog: Trade request failed. Error = 4756
+   giornale: 2026.01.06 22:11:02   failed market buy 0.41 XAUUSD, close #398 sell 0.41 XAUUSD 4486.85 [Market closed]
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.

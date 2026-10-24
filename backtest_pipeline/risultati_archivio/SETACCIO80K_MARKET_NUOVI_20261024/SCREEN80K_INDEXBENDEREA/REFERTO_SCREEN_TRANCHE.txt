@@ -1,0 +1,62 @@
+SCREEN TESTER TRANCHE (Index Bender EA.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_SCREEN80K_TESTER_TRANCHE_v1, pin 93099342ed01ab175d8611785c57b030254cb2f2
+data: 2026-10-24 11:56:40   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\Index Bender EA.ex5   byte 103876   data file 2026-10-22 16:25:53   SHA256 C153DF75DD2E6C6466E397E4F24C1714F7CF2CD25F48B2EF2A11C63DD4EE21E0   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1,M15, Modello 4 (ticks reali), deposito 80000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (Index Bender EA.ex5): EA di TERZI dal Market, scatola nera. SETACCIO: 2 passate, una per periodo del grafico (H1, M15), sulla STESSA finestra 2026.01.01 -> 2026.03.01, default dell EA. Serve a vedere SE opera (regola S1) e SE il risultato dipende dal periodo del grafico (regola S2): NON a giudicare il profitto, NON a scegliere il periodo, NON a decidere un acquisto (regole scritte PRIMA dei numeri: report/SETACCIO_MARKET_ATTESE_2026-10-18.md). NESSUN EA si archivia con questi numeri: zero operazioni qui e una MISURA MANCANTE, non una bocciatura (certificato di morte del 09/09/2026).
+tranche scelte: 1,2 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE1 (H1) OK   TRANCHE2 (M15) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 2 passate INDIPENDENTI sulla STESSA finestra (2026.01.01 -> 2026.03.01), ognuna a CONTO VUOTO (deposito 80000 EUR), e cambia SOLO il periodo del grafico: TRANCHE1=H1, TRANCHE2=M15. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE1 (gennaio-febbraio 2026 su H1)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE1: C153DF75DD2E6C6466E397E4F24C1714F7CF2CD25F48B2EF2A11C63DD4EE21E0 UGUALE
+   durata 78 s (orologio), test 57 s (riga Test passed del giornale; -1 = non letta)   giornali letti 9, righe 24208
+   report SCREEN80K_INDEXBENDEREA_TRANCHE1_20261024_115400.htm   operazioni 91   netto 4493.59   PF 1.32   DD equita 5624.53(6.45%)   DD saldo 4680.03(5.43%)
+   qualita 100%ticksreali   barre report 931   ticks report 15389728   barre generate 931   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: InpGates=true ; InpB_AddBoost=1.5 ; InpR2_On=true ; InpR2_Level=15.0 ; InpR2_Lot=0.5 ; InpLotMultiplier=0.1 ; InpAutoLotBalance=0.0 ; InpMaxLot=10.0 ; InpMaxSpreadPoints=400 ; InpMagic=270100 ; InpDailyLossPct=5.0 ; InpUseModuleB=true ; InpFixedLot=1.0 ; InpB_AddLot=1.0 ; InpB_MaxAdds=4 ; InpUseDaily=true ; InpD_FixedLot=0.5 ; InpUseDayTrend=true ; InpT_Lot=1.0 ; InpT_OpenHHMM=1630 ; InpT_CloseHHMM=2245 ; InpUseMonday=true ; InpM6_Lot=1.0 ; InpUseGap=true ; InpG7_Lot=1.0 ; InpUseStrong=true ; InpS8_Lot=1.0 ; InpUsePWH=true ; InpP9_Lot=1.0 ; InpUseZ50=true ; InpZ10_Lot=1.0 ; InpZ10_AllowSell=true ; InpUseNight=true ; InpN11_Lot=1.0 ; InpSellMirrors=true ; InpHeartbeat=true ; InpSkipHolidays=true ; InpT_PullbackFrac=0.25 ; InpT_PullbackWaitMin=60 ; InpX_CutBarATR=1.0
+   input stampati dal giornale (dopo started with inputs): InpAutoLotBalance=0.0 ; InpB_AddBoost=1.5 ; InpB_AddLot=1.0 ; InpB_MaxAdds=4 ; InpD_FixedLot=0.5 ; InpDailyLossPct=5.0 ; InpFixedLot=1.0 ; InpG7_Lot=1.0 ; InpGates=true ; InpHeartbeat=true ; InpLotMultiplier=0.1 ; InpM6_Lot=1.0 ; InpMagic=270100 ; InpMaxLot=10.0 ; InpMaxSpreadPoints=400 ; InpN11_Lot=1.0 ; InpP9_Lot=1.0 ; InpR2_Level=15.0 ; InpR2_Lot=0.5 ; InpR2_On=true ; InpS8_Lot=1.0 ; InpSellMirrors=true ; InpSkipHolidays=true ; InpT_CloseHHMM=2245 ; InpT_Lot=1.0 ; InpT_OpenHHMM=1630 ; InpT_PullbackFrac=0.25 ; InpT_PullbackWaitMin=60 ; InpUseDaily=true ; InpUseDayTrend=true ; InpUseGap=true ; InpUseModuleB=true ; InpUseMonday=true ; InpUseNight=true ; InpUsePWH=true ; InpUseStrong=true ; InpUseZ50=true ; InpX_CutBarATR=1.0 ; InpZ10_AllowSell=true ; InpZ10_Lot=1.0
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 84493.59 EUR
+   giornale: 2026.01.22 22:45:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:46:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:47:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:48:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:49:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:50:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:51:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:52:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:53:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:54:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.27 22:00:00   failed market buy 0.1 XAUUSD sl: 5123.15 [Market closed]
+   giornale: 2026.01.27 22:00:00   Z50 order failed: 10018 market closed
+   giornale: 2026.01.27 22:45:00   failed market sell 0.1 XAUUSD, close #86 buy 0.1 XAUUSD 5091.52 [Market closed]
+   giornale: 2026.01.27 22:46:00   failed market sell 0.1 XAUUSD, close #86 buy 0.1 XAUUSD 5091.52 [Market closed]
+   giornale: 2026.01.27 22:47:00   failed market sell 0.1 XAUUSD, close #86 buy 0.1 XAUUSD 5091.52 [Market closed]
+TRANCHE2 (gennaio-febbraio 2026 su M15)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE2: C153DF75DD2E6C6466E397E4F24C1714F7CF2CD25F48B2EF2A11C63DD4EE21E0 UGUALE
+   durata 78 s (orologio), test 59 s (riga Test passed del giornale; -1 = non letta)   giornali letti 9, righe 24216
+   report SCREEN80K_INDEXBENDEREA_TRANCHE2_20261024_115400.htm   operazioni 91   netto 4493.59   PF 1.32   DD equita 5624.53(6.45%)   DD saldo 4680.03(5.43%)
+   qualita 100%ticksreali   barre report 3719   ticks report 15389728   barre generate 3719   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: InpGates=true ; InpB_AddBoost=1.5 ; InpR2_On=true ; InpR2_Level=15.0 ; InpR2_Lot=0.5 ; InpLotMultiplier=0.1 ; InpAutoLotBalance=0.0 ; InpMaxLot=10.0 ; InpMaxSpreadPoints=400 ; InpMagic=270100 ; InpDailyLossPct=5.0 ; InpUseModuleB=true ; InpFixedLot=1.0 ; InpB_AddLot=1.0 ; InpB_MaxAdds=4 ; InpUseDaily=true ; InpD_FixedLot=0.5 ; InpUseDayTrend=true ; InpT_Lot=1.0 ; InpT_OpenHHMM=1630 ; InpT_CloseHHMM=2245 ; InpUseMonday=true ; InpM6_Lot=1.0 ; InpUseGap=true ; InpG7_Lot=1.0 ; InpUseStrong=true ; InpS8_Lot=1.0 ; InpUsePWH=true ; InpP9_Lot=1.0 ; InpUseZ50=true ; InpZ10_Lot=1.0 ; InpZ10_AllowSell=true ; InpUseNight=true ; InpN11_Lot=1.0 ; InpSellMirrors=true ; InpHeartbeat=true ; InpSkipHolidays=true ; InpT_PullbackFrac=0.25 ; InpT_PullbackWaitMin=60 ; InpX_CutBarATR=1.0
+   input stampati dal giornale (dopo started with inputs): InpAutoLotBalance=0.0 ; InpB_AddBoost=1.5 ; InpB_AddLot=1.0 ; InpB_MaxAdds=4 ; InpD_FixedLot=0.5 ; InpDailyLossPct=5.0 ; InpFixedLot=1.0 ; InpG7_Lot=1.0 ; InpGates=true ; InpHeartbeat=true ; InpLotMultiplier=0.1 ; InpM6_Lot=1.0 ; InpMagic=270100 ; InpMaxLot=10.0 ; InpMaxSpreadPoints=400 ; InpN11_Lot=1.0 ; InpP9_Lot=1.0 ; InpR2_Level=15.0 ; InpR2_Lot=0.5 ; InpR2_On=true ; InpS8_Lot=1.0 ; InpSellMirrors=true ; InpSkipHolidays=true ; InpT_CloseHHMM=2245 ; InpT_Lot=1.0 ; InpT_OpenHHMM=1630 ; InpT_PullbackFrac=0.25 ; InpT_PullbackWaitMin=60 ; InpUseDaily=true ; InpUseDayTrend=true ; InpUseGap=true ; InpUseModuleB=true ; InpUseMonday=true ; InpUseNight=true ; InpUsePWH=true ; InpUseStrong=true ; InpUseZ50=true ; InpX_CutBarATR=1.0 ; InpZ10_AllowSell=true ; InpZ10_Lot=1.0
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 84493.59 EUR
+   giornale: 2026.01.22 22:45:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:46:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:47:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:48:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:49:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:50:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:51:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:52:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:53:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.22 22:54:00   failed market sell 0.1 XAUUSD, close #68 buy 0.1 XAUUSD 4870.02 [Market closed]
+   giornale: 2026.01.27 22:00:00   failed market buy 0.1 XAUUSD sl: 5123.15 [Market closed]
+   giornale: 2026.01.27 22:00:00   Z50 order failed: 10018 market closed
+   giornale: 2026.01.27 22:45:00   failed market sell 0.1 XAUUSD, close #86 buy 0.1 XAUUSD 5091.52 [Market closed]
+   giornale: 2026.01.27 22:46:00   failed market sell 0.1 XAUUSD, close #86 buy 0.1 XAUUSD 5091.52 [Market closed]
+   giornale: 2026.01.27 22:47:00   failed market sell 0.1 XAUUSD, close #86 buy 0.1 XAUUSD 5091.52 [Market closed]
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.

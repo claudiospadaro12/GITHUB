@@ -1,0 +1,62 @@
+SCREEN TESTER TRANCHE (Prop Firm RM EA.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_SCREEN80K_TESTER_TRANCHE_v1, pin 93099342ed01ab175d8611785c57b030254cb2f2
+data: 2026-10-24 12:50:30   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\Prop Firm RM EA.ex5   byte 66708   data file 2026-10-22 16:50:40   SHA256 B79ED1D01AEE63E62A7F37AC90CCCB48A182F8BADB7985087C8FC307C8EB328F   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1,M15, Modello 4 (ticks reali), deposito 80000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (Prop Firm RM EA.ex5): EA di TERZI dal Market, scatola nera. SETACCIO: 2 passate, una per periodo del grafico (H1, M15), sulla STESSA finestra 2026.01.01 -> 2026.03.01, default dell EA. Serve a vedere SE opera (regola S1) e SE il risultato dipende dal periodo del grafico (regola S2): NON a giudicare il profitto, NON a scegliere il periodo, NON a decidere un acquisto (regole scritte PRIMA dei numeri: report/SETACCIO_MARKET_ATTESE_2026-10-18.md). NESSUN EA si archivia con questi numeri: zero operazioni qui e una MISURA MANCANTE, non una bocciatura (certificato di morte del 09/09/2026).
+tranche scelte: 1,2 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE1 (H1) OK   TRANCHE2 (M15) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 2 passate INDIPENDENTI sulla STESSA finestra (2026.01.01 -> 2026.03.01), ognuna a CONTO VUOTO (deposito 80000 EUR), e cambia SOLO il periodo del grafico: TRANCHE1=H1, TRANCHE2=M15. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE1 (gennaio-febbraio 2026 su H1)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE1: B79ED1D01AEE63E62A7F37AC90CCCB48A182F8BADB7985087C8FC307C8EB328F UGUALE
+   durata 63 s (orologio), test 45 s (riga Test passed del giornale; -1 = non letta)   giornali letti 8, righe 603
+   report SCREEN80K_PROPFIRMRMEA_TRANCHE1_20261024_124822.htm   operazioni 11   netto 1581.14   PF 1.51   DD equita 2257.35(2.69%)   DD saldo 1351.65(1.63%)
+   qualita 100%ticksreali   barre report 931   ticks report 15389728   barre generate 931   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: ATR_Period=14 ; EntryBufferPips=10 ; MaxSpread=20 ; Use_Relaxed_BoS=false ; __PROP_INFO__=Prop Rules (Locked) - Risk 0.50% ; RiskReward=5 ; AllowNewsTrading=true ; NewsBlockMinutes=30 ; NewsWindows=12:25-12:45;13:25-13:45;15:25-15:45 ; CandleExpiryMinutes=30 ; UseTrendFilter=false ; TrendEMA=200 ; UseCandleBodyFilter=false ; BodyStrength=25 ; Enable_Broker_BE_Backup_After_2R=true ; Close_Retry_Max_Attempts=3 ; Close_Retry_Delay_Seconds=2
+   input stampati dal giornale (dopo started with inputs): __PROP_INFO__=Prop Rules (Locked) - Risk 0.50% | Daily DD 2% | Overall DD 6% ; AllowNewsTrading=true ; ATR_Period=14 ; BodyStrength=25 ; CandleExpiryMinutes=30 ; Close_Retry_Delay_Seconds=2 ; Close_Retry_Max_Attempts=3 ; Enable_Broker_BE_Backup_After_2R=true ; EntryBufferPips=10 ; MaxSpread=20 ; NewsBlockMinutes=30 ; NewsWindows=12:25-12:45;13:25-13:45;15:25-15:45 ; RiskReward=5 ; TrendEMA=200 ; Use_Relaxed_BoS=false ; UseCandleBodyFilter=false ; UseTrendFilter=false
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 81581.14 EUR
+   giornale: 2026.01.07 15:30:00   order expired [#6 sell stop 0.81 XAUUSD at 4427.78]
+   giornale: 2026.01.13 16:30:00   order expired [#11 buy stop 0.81 XAUUSD at 4634.61]
+   giornale: 2026.01.15 15:30:00   order expired [#14 sell stop 1.23 XAUUSD at 4581.98]
+   giornale: 2026.01.20 16:30:00   order expired [#15 buy stop 0.91 XAUUSD at 4751.09]
+   giornale: 2026.01.21 16:30:00   order expired [#16 buy stop 0.53 XAUUSD at 4880.99]
+   giornale: 2026.01.22 15:30:00   order expired [#17 sell stop 1.17 XAUUSD at 4810.67]
+   giornale: 2026.01.27 15:30:00   order expired [#20 buy stop 0.84 XAUUSD at 5092.90]
+   giornale: 2026.01.27 16:35:00   order expired [#21 sell stop 0.66 XAUUSD at 5046.52]
+   giornale: 2026.01.28 15:30:00   order expired [#22 buy stop 0.68 XAUUSD at 5289.47]
+   giornale: 2026.02.03 15:41:00   order expired [#23 buy stop 0.46 XAUUSD at 4951.06]
+   giornale: 2026.02.04 15:30:00   order expired [#24 buy stop 0.49 XAUUSD at 5063.48]
+   giornale: 2026.02.05 15:57:00   order expired [#27 sell stop 0.28 XAUUSD at 4801.82]
+   giornale: 2026.02.10 16:43:00   order expired [#28 buy stop 0.56 XAUUSD at 5078.74]
+   giornale: 2026.02.11 15:30:00   order expired [#29 sell stop 0.4 XAUUSD at 5018.62]
+   giornale: 2026.02.12 15:58:00   order expired [#30 buy stop 0.99 XAUUSD at 5083.73]
+TRANCHE2 (gennaio-febbraio 2026 su M15)  2026.01.01 -> 2026.03.01   STATO OK
+EX5_DOPO TRANCHE2: B79ED1D01AEE63E62A7F37AC90CCCB48A182F8BADB7985087C8FC307C8EB328F UGUALE
+   durata 63 s (orologio), test 44 s (riga Test passed del giornale; -1 = non letta)   giornali letti 8, righe 957
+   report SCREEN80K_PROPFIRMRMEA_TRANCHE2_20261024_124822.htm   operazioni 24   netto -6110.26   PF 0.27   DD equita 8052.52(9.83%)   DD saldo 7133.80(8.80%)
+   qualita 100%ticksreali   barre report 3719   ticks report 15389728   barre generate 3719   ticks generati 15389728   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2026.01.01-2026.03.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: ATR_Period=14 ; EntryBufferPips=10 ; MaxSpread=20 ; Use_Relaxed_BoS=false ; __PROP_INFO__=Prop Rules (Locked) - Risk 0.50% ; RiskReward=5 ; AllowNewsTrading=true ; NewsBlockMinutes=30 ; NewsWindows=12:25-12:45;13:25-13:45;15:25-15:45 ; CandleExpiryMinutes=30 ; UseTrendFilter=false ; TrendEMA=200 ; UseCandleBodyFilter=false ; BodyStrength=25 ; Enable_Broker_BE_Backup_After_2R=true ; Close_Retry_Max_Attempts=3 ; Close_Retry_Delay_Seconds=2
+   input stampati dal giornale (dopo started with inputs): __PROP_INFO__=Prop Rules (Locked) - Risk 0.50% | Daily DD 2% | Overall DD 6% ; AllowNewsTrading=true ; ATR_Period=14 ; BodyStrength=25 ; CandleExpiryMinutes=30 ; Close_Retry_Delay_Seconds=2 ; Close_Retry_Max_Attempts=3 ; Enable_Broker_BE_Backup_After_2R=true ; EntryBufferPips=10 ; MaxSpread=20 ; NewsBlockMinutes=30 ; NewsWindows=12:25-12:45;13:25-13:45;15:25-15:45 ; RiskReward=5 ; TrendEMA=200 ; Use_Relaxed_BoS=false ; UseCandleBodyFilter=false ; UseTrendFilter=false
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 73889.74 EUR
+   giornale: 2026.01.06 15:30:00   order expired [#2 sell stop 1.2 XAUUSD at 4454.11]
+   giornale: 2026.01.06 16:32:00   order expired [#5 buy stop 1.05 XAUUSD at 4489.71]
+   giornale: 2026.01.07 15:45:00   order expired [#6 buy stop 0.83 XAUUSD at 4454.37]
+   giornale: 2026.01.07 17:00:00   order expired [#9 sell stop 0.72 XAUUSD at 4423.38]
+   giornale: 2026.01.08 15:45:00   order expired [#10 sell stop 1 XAUUSD at 4419.12]
+   giornale: 2026.01.13 16:30:00   order expired [#17 buy stop 0.82 XAUUSD at 4634.61]
+   giornale: 2026.01.13 17:00:00   order expired [#18 sell stop 0.82 XAUUSD at 4600.77]
+   giornale: 2026.01.14 16:45:00   order expired [#21 sell stop 0.93 XAUUSD at 4599.32]
+   giornale: 2026.01.15 15:30:00   order expired [#22 sell stop 1.25 XAUUSD at 4581.98]
+   giornale: 2026.01.20 16:00:00   order expired [#33 buy stop 0.99 XAUUSD at 4750.75]
+   giornale: 2026.01.21 15:45:00   order expired [#36 buy stop 0.74 XAUUSD at 4880.99]
+   giornale: 2026.01.22 15:30:00   order expired [#37 sell stop 1.15 XAUUSD at 4810.67]
+   giornale: 2026.01.22 16:15:00   order expired [#40 buy stop 0.82 XAUUSD at 4847.72]
+   giornale: 2026.01.27 16:00:00   order expired [#41 sell stop 0.65 XAUUSD at 5046.52]
+   giornale: 2026.01.27 16:47:00   order expired [#42 sell stop 0.57 XAUUSD at 5047.38]
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.
