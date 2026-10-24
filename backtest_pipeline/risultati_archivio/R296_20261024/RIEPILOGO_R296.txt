@@ -1,0 +1,28 @@
+RIEPILOGO R296-R300 -- giro 3 della sala (EMA200 Dow deposito, pendente ON/OFF, SuperWave 770531, SupRev DAX, SupertrendReversal 225JPY), TICK REALI
+data: 2026-10-24 07:37:59
+fine: 2026-10-24 08:51:29   durata minuti: 74   (dichiarato circa 30-60 minuti, tetto largo 120)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : e9820bfe17bbc36f34e057e610653ce769ed36c5
+deposito passato: 100000 (R296a) e 5400 (gli altri nove); modello 4; etichette R296a-c, R297a-d, R298a, R299a, R300a
+
+R296a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R296b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R296c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R297a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R297b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R297c  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R297d  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R298a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R299a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R300a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 10
+ROUND PARTITI (rc diverso da 1): 10 su 10
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh): MOTORE = PIN in tutti i 10 round partiti
+CARTELLE ATTESE: 10   TROVATE: 10   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 8002xx, scritti DOPO l avvio): 18 su 20   MANCANO: R299a/800209, R299a/800259
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic).
+
+I CRITERI, CONGELATI PRIMA (prove R296a-c, R297a-d, R298a, R299a, R300a, lettore backtest_pipeline/r296_giudizio.py, scritto il 24/10/2026):
+G1 gemelle identiche; motore = pin per leggere un job. R296: G0 sentinella = R112 00_metro al centesimo, poi b e c contro a (REGGE/DEGRADA/MIGLIORA/MISTO con soglia 0,10 e rapporto trade 0,95-1,05) e quota di chiusure a lotto <= 0,20. R297: INERTE se ON = OFF al centesimo (pendente mai eseguito), ESEGUITO se piu deal. R298: correlazione settimanale di Pearson >= 0,50 quasi una sedia sola, <= 0,20 indipendenti. R299: ritmo dei deal OOS contro le 7 settimane di silenzio (ANOMALO se P0 con il ritmo piu basso < 5%). R300: il job parte = HEAD compila; segno descrittivo.
