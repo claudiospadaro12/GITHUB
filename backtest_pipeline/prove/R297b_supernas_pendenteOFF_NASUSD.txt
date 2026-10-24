@@ -1,0 +1,65 @@
+#  EA: ABTG_SupRev_NAS_H1_Ottimizzato
+# ==========================================================================
+#  R297b -- SupRev NAS H1 970913, pendente SPENTO
+#  NASUSD H1 -- TICK REALI -- deposito 5400.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie, e non consiglia nessuna taglia.
+#  Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 24/10/2026 PRIMA di aprire lo zip. Giro 3 della sala (report/SALA_GIRO3_TREND_SWING_INDICI_2026-10-24.md).
+# ==========================================================================
+#  DOMANDA (B6 + A1 nel tester): la gamba 2/3 su ordine pendente stop (+20 "pip" = 0,20 punti sugli indici) viene mai eseguita nel tester? InpUsePending=true contro false, stessa cella in campo, deposito 5400.
+#  BRACCI: ON = cella in campo (InpUsePending=true); OFF = stessa cella con InpUsePending=false (resta solo la quota a mercato).
+#  CRITERI CONGELATI (lettore backtest_pipeline/r296_giudizio.py (sezione R297)), per ogni EA:
+#   G1  gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001), per ogni job; motore = pin per leggere un job.
+#   INERTE: ON e OFF IDENTICI al centesimo (Profit entro 1,01, PF entro 0,0002, DD entro 0,0001, Trades uguali) in IS e OOS => il pendente NON viene mai eseguito nel tester (rifiutato o mai raggiunto).
+#   ESEGUITO: Trades(ON) > Trades(OFF) in entrambe le gambe => la gamba 2/3 viene riempita nel tester; si riporta il rapporto Trades ON/OFF e dPF = PF(ON) - PF(OFF).
+#   Altrimenti ANOMALO (si descrive). Per-trade (gamba OOS): posizioni distinte ON contro OFF, riportate.
+#  ATTESE dichiarate ORA: INERTE 40%, ESEGUITO 55%, ANOMALO 5% (per EA; il forward mostra la gamba 2/3 assente su NAS, e presente a +0,20 sul gemello DAX).
+#  LIMITI: il tester usa le specifiche di simbolo del server: se il pendente e' rifiutato in campo per StopsLevel lo e' anche qui, ma lo spread/slippage reali no; un solo regime; non promuove niente.
+# ==========================================================================
+@SIMBOLO    NASUSD
+@PERIODO    H1
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false||false||0||false||N
+InpTF=16385||16385||0||16385||N
+InpStMult=3.0||3.0||0||3.0||N
+InpStAtrPeriod=10||10||0||10||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseConfluence=true||true||0||true||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=false||false||0||false||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+InpSLBufferPips=3.0||3.0||0||3.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=3.0||3.0||0||3.0||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=STREV NAS H1
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=800205||800205||50||800255||Y

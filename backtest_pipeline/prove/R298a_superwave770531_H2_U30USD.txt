@@ -1,0 +1,66 @@
+#  EA: ABTG_SuperWave
+# ==========================================================================
+#  R298a -- SuperWave 770531 (grafico H4, InpTF H2) per-trade OOS
+#  U30USD H4 -- TICK REALI -- deposito 5400.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie, e non consiglia nessuna taglia.
+#  Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 24/10/2026 PRIMA di aprire lo zip. Giro 3 della sala (report/SALA_GIRO3_TREND_SWING_INDICI_2026-10-24.md).
+# ==========================================================================
+#  DOMANDA (B7 del giro 3): le due SuperWave sul Dow (770511 H1 e 770531 H2) si comportano come una sedia sola? Qui gira 770531 (per-trade OOS); 770511 e' R297c.
+#  CRITERI CONGELATI (lettore backtest_pipeline/r296_giudizio.py (sezione R298)), SOLO descrittivi, sulla gamba OOS dei due file per-trade (chiusure proprie, netto per giorno e per settimana):
+#   G1  gemelle identiche per ogni job; motore = pin per leggere un job.
+#   CORRELAZIONE SETTIMANALE di Pearson del netto per settimana di chiusura (settimane ISO, unione delle settimane OOS, zero dove una sedia non chiude): >= 0,50 QUASI UNA SEDIA SOLA; <= 0,20 INDIPENDENTI; fra 0,20 e 0,50 INTERMEDIA.
+#   GIORNI IN COMUNE: quota dei giorni di chiusura di 770531 in cui chiude anche 770511. DD combinato: drawdown massimo sulle sole chiusure (cumulato in ordine di tempo) della coppia contro la somma dei due DD individuali; si riportano senza soglia.
+#   Meno di 30 settimane con almeno una chiusura nell'unione => DESCRITTIVO.
+#  ATTESE dichiarate ORA: correlazione settimanale >= 0,50: 50%; <= 0,20: 15%; DD combinato >= 80% della somma dei due DD: 60%.
+#  LIMITI: solo le chiusure (non c'e' l'apertura nel per-trade); un solo regime; non dice nulla sul merito.
+# ==========================================================================
+@SIMBOLO    U30USD
+@PERIODO    H4
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false||false||0||false||N
+InpTF=16386||16386||0||16386||N
+InpStMult=3.5||3.5||0||3.5||N
+InpStAtrPeriod=10||10||0||10||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseConfluence=false||false||0||false||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20||20||0||20||N
+InpPendingAtr=0||0||0||0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+InpSLBufferPips=3||3||0||3||N
+InpSLBufferAtr=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=SW DOW H2
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=800208||800208||50||800258||Y

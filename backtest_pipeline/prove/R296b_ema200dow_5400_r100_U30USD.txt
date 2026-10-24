@@ -1,0 +1,66 @@
+#  EA: ABTG_EMA200
+# ==========================================================================
+#  R296b -- deposito 5400, rischio 1,0
+#  U30USD H1 -- TICK REALI -- deposito 5400.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun terminale di conto.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non promuove niente. Non tocca sedie, preset, conti, taglie, e non consiglia nessuna taglia.
+#  Finestra B 2024.09.26 -> 2026.06.30, taglio 0.40, TICK REALI. Scritto il 24/10/2026 PRIMA di aprire lo zip. Giro 3 della sala (report/SALA_GIRO3_TREND_SWING_INDICI_2026-10-24.md).
+# ==========================================================================
+#  DOMANDA (B5 del giro 3): EMA200 sul Dow (cella R112 00_metro, L+S, 100k) a deposito reale con lotto minimo e passo 0,10: cosa cambia?
+#  BRACCI: a = SENTINELLA a 100000 e rischio 1,0 (la cella di R112); b = deposito 5400 e rischio 1,0 (isola il deposito); c = deposito 5400 e rischio 0,65 (la sedia come e' stata rimessa il 23/10, DICHIARATO).
+#  CRITERI CONGELATI (lettore backtest_pipeline/r296_giudizio.py, sezione R296):
+#   G1  gemelle identiche (Profit <= 1 EUR, PF <= 0,0002, Trades uguali, DD% <= 0,0001), per ogni job; motore = pin (RIEPILOGO) per leggere un job.
+#   G0  SENTINELLA: a = R112 00_metro AL CENTESIMO: IS 4585,40 / PF 1,20110 / DD 5,7325 / 237; OOS 23321,47 / PF 1,52365 / DD 7,8323 / 517 (tolleranza 1,01 / 0,0002 / 0,0001 / uguali). Se FALLISCE il round B5 NON SI LEGGE.
+#   Se G0 passa: per b e c confronto con a: dPF = PF(b o c) - PF(a), rapporto trade = Trades(b o c) / Trades(a). REGGE: |dPF| < 0,10 e rapporto fra 0,95 e 1,05 in ENTRAMBE le gambe; DEGRADA: dPF <= -0,10 in entrambe; MIGLIORA: dPF >= +0,10 in entrambe; altrimenti MISTO. Sotto 100 deal in una gamba di uno dei due bracci: DESCRITTIVO.
+#   PAVIMENTO (per-trade, gamba OOS): quota delle chiusure proprie a lotto <= 0,20 in a, b e c. Si riporta; nessuna soglia. Rendimento sul deposito (Profit/deposito) riportato, non e' un criterio.
+#  ATTESE dichiarate ORA: G0 della sentinella passa 60% (R112 e' del 26/08: il sorgente HEAD di ABTG_EMA200 ha poi cambiato Guardian, imbuto e dimensionamento con OrderCalcProfit, DICHIARATO dal revisore); b DEGRADA 35%, REGGE 25%, MISTO 35%, MIGLIORA 5%; la quota di chiusure a lotto <= 0,20 in b e' piu' alta che in a: 90%.
+#  LIMITI: un solo regime (rialzo); non misura i lotti realizzati in campo ne' il saldo vero del piccolo (5.344 DICHIARATO); Guardian acceso nei file ma fail-open senza Guardian, come in R112.
+# ==========================================================================
+@SIMBOLO    U30USD
+@PERIODO    H1
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=EMA200 DOW
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=800202||800202||50||800252||Y
