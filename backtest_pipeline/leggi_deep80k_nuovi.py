@@ -159,6 +159,8 @@ def leggi_cartella(c, cs=None):
         print('  CORSA NON VALIDA: non si legge un numero')
         return None
     rep = os.path.join(c, mf['report'])
+    if not os.path.exists(rep):
+        rep = os.path.join(c, 'report', mf['report'])  # lo zip del 25/10 ha i report in report\\ (correzione di PERCORSO, nessun criterio cambiato)
     D = affari(righe(leggi(rep)))
     if not D:
         print('  nessun affare letto dal report')

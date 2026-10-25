@@ -1,0 +1,122 @@
+====================================================================================================
+DEEP80K_ENTRYPOINTSPROROBOT
+  stato OK  durata 153 s  report DEEP80K_ENTRYPOINTSPROROBOT_TRANCHE22_20261025_080950.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest 3038.21  operazioni 224  PF 1.06  DD equity 8635.94(9.68%)
+  S-N        OK           224 operazioni
+  S-M        NO           10/21 mesi positivi, somma 3038
+  S-H        NO           gen25-mag26 5380 / giu-set26 -2342   (2026 da solo 1068)
+  S-DD       NO           DD equity dal picco 8636 EUR = 10.79% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -3.16% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 31.50, posizioni insieme max 1, lotto dopo perdita / dopo vincita 0.95
+  S-COSTO    OK           media per operazione 13.56 EUR = 3.8 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 0.20)
+  mesi: 25.01=2259 25.02=574 25.03=3251 25.04=1742 25.05=-111 25.06=-361 25.07=-2411 25.08=-1701 25.09=1807 25.10=-1154 25.11=598 25.12=-2524 26.01=197 26.02=569 26.03=1985 26.04=-2040 26.05=2700 26.06=-305 26.07=-422 26.08=-1043 26.09=-571
+  ESITO: NON PASSA: S-M, S-H, S-DD, S-NOSCALA
+  INPUT contro il setaccio: IDENTICI (6 input)
+====================================================================================================
+DEEP80K_GOLDSNAP
+  stato OK  durata 2061 s  report DEEP80K_GOLDSNAP_TRANCHE22_20261025_094218.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest 1021632.46  operazioni 209  PF 3.09  DD equity 117936.81(12.43%)
+  S-N        OK           209 operazioni
+  S-M        OK           21/21 mesi positivi, somma 1021632
+  S-H        OK           gen25-mag26 655914 / giu-set26 365718   (2026 da solo 751804)
+  S-DD       NO           DD equity dal picco 117937 EUR = 147.42% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato 4.03% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 9.79, posizioni insieme max 1, lotto dopo perdita / dopo vincita 1.26
+  S-COSTO    OK           media per operazione 4888.19 EUR = 13.0 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 21.12)
+  mesi: 25.01=3228 25.02=14587 25.03=11751 25.04=6075 25.05=14653 25.06=26717 25.07=32537 25.08=27963 25.09=50697 25.10=22675 25.11=41555 25.12=17392 26.01=47767 26.02=74131 26.03=80797 26.04=18402 26.05=164990 26.06=123742 26.07=8233 26.08=125693 26.09=108050
+  ESITO: NON PASSA: S-DD, S-NOSCALA
+  INPUT contro il setaccio: IDENTICI (38 input)
+====================================================================================================
+DEEP80K_MICROEDGENEURALMATRIXEA
+  stato OK  durata 239 s  report DEEP80K_MICROEDGENEURALMATRIXEA_TRANCHE22_20261025_080547.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest 112198.66  operazioni 304  PF 2.81  DD equity 27755.49(13.71%)
+  S-N        OK           304 operazioni
+  S-M        OK           17/21 mesi positivi, somma 112199
+  S-H        OK           gen25-mag26 98691 / giu-set26 13508   (2026 da solo 30745)
+  S-DD       NO           DD equity dal picco 27755 EUR = 34.69% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -9.55% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  OK           lotto max/min 2.52, posizioni insieme max 1, lotto dopo perdita / dopo vincita 1.00
+  S-COSTO    OK           media per operazione 369.07 EUR = 5.0 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 4.14)
+  mesi: 25.01=5135 25.02=9921 25.03=6196 25.04=-389 25.05=10476 25.06=-3 25.07=9451 25.08=7397 25.09=4340 25.10=8887 25.11=8303 25.12=11739 26.01=10110 26.02=11695 26.03=-7642 26.04=2439 26.05=634 26.06=2114 26.07=8962 26.08=9614 26.09=-7182
+  ESITO: NON PASSA: S-DD
+  INPUT contro il setaccio: IDENTICI (31 input)
+====================================================================================================
+DEEP80K_ORBREVOLUTION
+  stato OK  durata 93 s  report DEEP80K_ORBREVOLUTION_TRANCHE22_20261025_081338.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest -6413.54  operazioni 147  PF 0.88  DD equity 10754.52(13.32%)
+  S-N        NON MISURATO NON MISURATO: 147 operazioni < 150
+  S-M        NO           7/21 mesi positivi, somma -6414
+  S-H        NO           gen25-mag26 -1679 / giu-set26 -4735   (2026 da solo 1286)
+  S-DD       NO           DD equity dal picco 10755 EUR = 13.44% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -5.42% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 18.40, posizioni insieme max 1, lotto dopo perdita / dopo vincita 1.17
+  S-COSTO    NO           media per operazione -43.63 EUR = -3.7 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 0.67)
+  mesi: 25.01=-1793 25.02=-1731 25.03=-1267 25.04=1344 25.05=2960 25.06=-1383 25.07=-1027 25.08=-2250 25.09=600 25.10=-567 25.11=-2516 25.12=-69 26.01=1008 26.02=-285 26.03=-974 26.04=4731 26.05=1541 26.06=-233 26.07=2318 26.08=-4335 26.09=-2485
+  ESITO: NON MISURATO (poche operazioni)
+  INPUT contro il setaccio: IDENTICI (219 input)
+====================================================================================================
+DEEP80K_ROCKETBREAKOUTEA
+  stato OK  durata 68 s  report DEEP80K_ROCKETBREAKOUTEA_TRANCHE22_20261025_081227.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest 60498.73  operazioni 232  PF 1.40  DD equity 13104.84(8.91%)
+  S-N        OK           232 operazioni
+  S-M        OK           16/21 mesi positivi, somma 60499
+  S-H        OK           gen25-mag26 53824 / giu-set26 6675   (2026 da solo 22256)
+  S-DD       NO           DD equity dal picco 13105 EUR = 16.38% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -11.84% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 9.89, posizioni insieme max 1, lotto dopo perdita / dopo vincita 0.92
+  S-COSTO    OK           media per operazione 260.77 EUR = 10.5 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 1.39)
+  mesi: 25.01=-3559 25.02=-1115 25.03=5768 25.04=7395 25.05=5981 25.06=-1194 25.07=4151 25.08=877 25.09=9404 25.10=1819 25.11=3208 25.12=5509 26.01=4303 26.02=-4395 26.03=12441 26.04=656 26.05=2576 26.06=3995 26.07=7946 26.08=-9473 26.09=4206
+  ESITO: NON PASSA: S-DD, S-NOSCALA
+  INPUT contro il setaccio: IDENTICI (7 input)
+====================================================================================================
+DEEP80K_SIXTYNINEEA
+  stato OK  durata 5181 s  report DEEP80K_SIXTYNINEEA_TRANCHE22_20261025_081516.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest 302346.13  operazioni 1127  PF 1.99  DD equity 42898.71(12.05%)
+  S-N        OK           1127 operazioni
+  S-M        OK           16/21 mesi positivi, somma 302346
+  S-H        OK           gen25-mag26 180866 / giu-set26 121480   (2026 da solo 256036)
+  S-DD       NO           DD equity dal picco 42899 EUR = 53.62% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -3.89% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 5.16, posizioni insieme max 7, lotto dopo perdita / dopo vincita 0.94
+  S-COSTO    OK           media per operazione 268.28 EUR = 8.8 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 1.71)
+  mesi: 25.01=-2880 25.02=964 25.03=-405 25.04=-162 25.05=9693 25.06=46 25.07=11206 25.08=-3116 25.09=8745 25.10=-1747 25.11=11853 25.12=12114 26.01=14853 26.02=20697 26.03=16170 26.04=37187 26.05=45648 26.06=37869 26.07=16970 26.08=25010 26.09=41631
+  ESITO: NON PASSA: S-DD, S-NOSCALA
+  INPUT contro il setaccio: IDENTICI (28 input)
+====================================================================================================
+DEEP80K_UMBRAVAULTAIEA
+  stato OK  durata 264 s  report DEEP80K_UMBRAVAULTAIEA_TRANCHE22_20261025_075535.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest 195101.11  operazioni 434  PF 6.20  DD equity 21195.17(11.23%)
+  S-N        OK           434 operazioni
+  S-M        OK           19/21 mesi positivi, somma 195101
+  S-H        OK           gen25-mag26 139630 / giu-set26 55471   (2026 da solo 120390)
+  S-DD       NO           DD equity dal picco 21195 EUR = 26.49% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -2.86% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 3.49, posizioni insieme max 1, lotto dopo perdita / dopo vincita 0.96
+  S-COSTO    OK           media per operazione 449.54 EUR = 5.6 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 4.47)
+  mesi: 25.01=3368 25.02=-2290 25.03=5110 25.04=-1005 25.05=10614 25.06=7206 25.07=4760 25.08=5557 25.09=10714 25.10=8143 25.11=10206 25.12=12328 26.01=7113 26.02=9787 26.03=10830 26.04=15863 26.05=21325 26.06=22790 26.07=13596 26.08=4777 26.09=14308
+  ESITO: NON PASSA: S-DD, S-NOSCALA
+  INPUT contro il setaccio: IDENTICI (33 input)
+====================================================================================================
+DEEP80K_VORTEXTURBOEA
+  stato OK  durata 339 s  report DEEP80K_VORTEXTURBOEA_TRANCHE22_20261025_080003.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  profitto del manifest 55348.47  operazioni 940  PF 1.48  DD equity 48522.10(29.69%)
+  S-N        OK           940 operazioni
+  S-M        OK           19/21 mesi positivi, somma 55348
+  S-H        NO           gen25-mag26 79838 / giu-set26 -24490   (2026 da solo 6061)
+  S-DD       NO           DD equity dal picco 48522 EUR = 60.65% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -33.48% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 16.40, posizioni insieme max 4, lotto dopo perdita / dopo vincita 1.05
+  S-COSTO    NO           media per operazione 58.88 EUR = 2.7 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 1.22)
+  mesi: 25.01=2566 25.02=3383 25.03=3274 25.04=2963 25.05=5336 25.06=4501 25.07=3172 25.08=2629 25.09=5069 25.10=6050 25.11=5264 25.12=5081 26.01=5882 26.02=3121 26.03=8698 26.04=4796 26.05=8054 26.06=-11244 26.07=-26780 26.08=5890 26.09=7645
+  ESITO: NON PASSA: S-H, S-DD, S-NOSCALA, S-COSTO
+  INPUT contro il setaccio: IDENTICI (39 input)
+====================================================================================================
+RIEPILOGO
+  DEEP80K_ENTRYPOINTSPROROBOT              NON PASSA: S-M, S-H, S-DD, S-NOSCALA
+  DEEP80K_GOLDSNAP                         NON PASSA: S-DD, S-NOSCALA
+  DEEP80K_MICROEDGENEURALMATRIXEA          NON PASSA: S-DD
+  DEEP80K_ORBREVOLUTION                    NON MISURATO (poche operazioni)
+  DEEP80K_ROCKETBREAKOUTEA                 NON PASSA: S-DD, S-NOSCALA
+  DEEP80K_SIXTYNINEEA                      NON PASSA: S-DD, S-NOSCALA
+  DEEP80K_UMBRAVAULTAIEA                   NON PASSA: S-DD, S-NOSCALA
+  DEEP80K_VORTEXTURBOEA                    NON PASSA: S-H, S-DD, S-NOSCALA, S-COSTO

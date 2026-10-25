@@ -1,0 +1,37 @@
+DEEP80K TESTER TRANCHE (SixtyNine EA.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_DEEP80K_TESTER_TRANCHE_v1, pin 9d2608e7e6b46051d98a60e51fc535c0734e9e8a
+data: 2026-10-25 09:42:15   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\SixtyNine EA.ex5   byte 175546   data file 2026-10-20 22:20:42   SHA256 31FAEAE12F5FC1734F8B9D4E2A7753ECCCD666775F347DDD5CF59ABB817A8127   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1,H1, Modello 4 (ticks reali), deposito 80000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (SixtyNine EA.ex5): EA di TERZI dal Market, scatola nera. TEST A FONDO: 22 passate (21 mesi mensili + 1 corsa continua), H1, input NON imposti: restano quelli salvati dal tester per questo EA su questo PC (quelli del setaccio) e si CONFRONTANO nel report prima di leggere i numeri. Regole scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md. Questo script RACCOGLIE, non giudica.
+tranche scelte: 22 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE1 (H1) SALTATA   TRANCHE2 (H1) SALTATA   TRANCHE3 (H1) SALTATA   TRANCHE4 (H1) SALTATA   TRANCHE5 (H1) SALTATA   TRANCHE6 (H1) SALTATA   TRANCHE7 (H1) SALTATA   TRANCHE8 (H1) SALTATA   TRANCHE9 (H1) SALTATA   TRANCHE10 (H1) SALTATA   TRANCHE11 (H1) SALTATA   TRANCHE12 (H1) SALTATA   TRANCHE13 (H1) SALTATA   TRANCHE14 (H1) SALTATA   TRANCHE15 (H1) SALTATA   TRANCHE16 (H1) SALTATA   TRANCHE17 (H1) SALTATA   TRANCHE18 (H1) SALTATA   TRANCHE19 (H1) SALTATA   TRANCHE20 (H1) SALTATA   TRANCHE21 (H1) SALTATA   TRANCHE22 (H1) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 22 passate INDIPENDENTI sulla STESSA finestra (2025.01.01 -> 2025.02.01), ognuna a CONTO VUOTO (deposito 80000 EUR), e cambia SOLO il periodo del grafico: TRANCHE1=H1, TRANCHE2=H1, TRANCHE3=H1, TRANCHE4=H1, TRANCHE5=H1, TRANCHE6=H1, TRANCHE7=H1, TRANCHE8=H1, TRANCHE9=H1, TRANCHE10=H1, TRANCHE11=H1, TRANCHE12=H1, TRANCHE13=H1, TRANCHE14=H1, TRANCHE15=H1, TRANCHE16=H1, TRANCHE17=H1, TRANCHE18=H1, TRANCHE19=H1, TRANCHE20=H1, TRANCHE21=H1, TRANCHE22=H1. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE22 (corsa CONTINUA 21 mesi, H1)  2025.01.01 -> 2026.10.01   STATO OK
+EX5_DOPO TRANCHE22: 31FAEAE12F5FC1734F8B9D4E2A7753ECCCD666775F347DDD5CF59ABB817A8127 UGUALE
+   durata 5181 s (orologio), test 5152 s (riga Test passed del giornale; -1 = non letta)   giornali letti 9, righe 1038948
+   report DEEP80K_SIXTYNINEEA_TRANCHE22_20261025_081516.htm   operazioni 1127   netto 302346.13   PF 1.99   DD equita 42898.71(12.05%)   DD saldo 36766.98(10.49%)
+   qualita 100%ticksreali   barre report 10280   ticks report 146152231   barre generate 10280   ticks generati 146152231   inizio tick EURUSD 2024.07.05 / XAUUSD 2024.07.10   finestra 2025.01.01-2026.10.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: LotsMode=0 ; Lots=0.01 ; Risk=1.0 ; BalanceStart=1000.0 ; MaxSpread=0 ; MaxDrawdown=0.0 ; BuyTrade=0 ; SellTrade=0 ; UseCustomTPSL=1 ; TP=3000 ; SL=1000 ; UseAutoPM=0 ; Monday=0 ; Tuesday=0 ; Wednesday=0 ; Thursday=0 ; Friday=0 ; UseTradingTime=1 ; StartTime=01:00 ; EndTime=23:00 ; DOBeforeWeekend=0 ; UseNewsFilter=1 ; ShowPanel=0 ; UIScale=100 ; FontUIScale=90 ; MagicNumber=6969 ; CommentOrder=SixtyNine EA ; DebugMode=1
+   input stampati dal giornale (dopo started with inputs): BalanceStart=1000.0 ; BuyTrade=0 ; CommentOrder=SixtyNine EA ; DebugMode=1 ; DOBeforeWeekend=0 ; EndTime=23:00 ; FontUIScale=90 ; Friday=0 ; Lots=0.01 ; LotsMode=0 ; MagicNumber=6969 ; MaxDrawdown=0.0 ; MaxSpread=0 ; Monday=0 ; Risk=1.0 ; SellTrade=0 ; ShowPanel=0 ; SL=1000 ; StartTime=01:00 ; Thursday=0 ; TP=3000 ; Tuesday=0 ; UIScale=100 ; UseAutoPM=0 ; UseCustomTPSL=1 ; UseNewsFilter=1 ; UseTradingTime=1 ; Wednesday=0
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 382346.13 EUR
+   giornale: 2025.01.02 22:00:00   failed cancel order #219 sell stop 0.8 XAUUSD at 2600.36 sl: 2625.36 tp: 2581.36 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #218 buy stop 0.8 XAUUSD at 2664.47 sl: 2639.47 tp: 2683.47 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed sell stop 0.8 XAUUSD at 2615.87 sl: 2640.87 tp: 2596.87 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #221 sell stop 0.8 XAUUSD at 2596.56 sl: 2608.56 tp: 2578.56 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #220 buy stop 0.8 XAUUSD at 2723.34 sl: 2711.34 tp: 2741.34 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #223 sell stop 0.8 XAUUSD at 2597.36 sl: 2603.36 tp: 2580.36 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #222 buy stop 0.8 XAUUSD at 2722.54 sl: 2716.54 tp: 2739.54 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed buy stop 0.8 XAUUSD at 2672.96 sl: 2666.96 tp: 2689.96 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #224 sell stop 0.8 XAUUSD at 2597.16 sl: 2607.16 tp: 2578.16 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #226 sell stop 0.8 XAUUSD at 2598.76 sl: 2610.76 tp: 2582.76 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #225 buy stop 0.8 XAUUSD at 2725.14 sl: 2713.14 tp: 2741.14 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed buy stop 0.8 XAUUSD at 2703.47 sl: 2691.47 tp: 2719.47 [Market closed]
+   giornale: 2025.01.02 22:00:00   failed cancel order #227 sell stop 0.8 XAUUSD at 2598.36 sl: 2604.36 tp: 2549.36 [Market closed]
+   giornale: 2025.01.06 22:00:00   failed cancel order #672 sell stop 0.8 XAUUSD at 2600.36 sl: 2625.36 tp: 2581.36 [Market closed]
+   giornale: 2025.01.06 22:00:00   failed cancel order #671 buy stop 0.8 XAUUSD at 2665.36 sl: 2640.36 tp: 2684.36 [Market closed]
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.
