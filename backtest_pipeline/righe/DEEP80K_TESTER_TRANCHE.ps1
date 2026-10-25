@@ -11,6 +11,7 @@ param(
   [Parameter(Mandatory=$true)][string]$Ex5Nome,
   [int]$TimeoutTrancheMin = 600,
   [string]$Tranche = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22',
+  [string]$Imposti = '',
   [string]$Base = ''
 )
 
@@ -39,6 +40,8 @@ $AVVISO_BARRE = 95000
 # ATTENZIONE: il referto NON scrive a mano "input imposti: NESSUNO", COSTRUISCE la riga da $INPUT_IMPOSTI (classe 1480,
 # recidiva 1497): se un giorno questa lista si riempie, il referto lo dice da solo invece di mentire.
 $INPUT_IMPOSTI = @()
+# v5 (25/10/2026): -Imposti 'Nome=valore:tipo;Nome=valore:tipo' (tipo b = bool, i = intero, d = decimale) per imporre il SET del venditore. Il referto lo riporta e il report lo conferma o la passata e KO. Senza -Imposti: nessun input imposto come prima.
+if($Imposti -ne ''){ foreach($p in ($Imposti -split ';')){ $m = [regex]::Match($p, '^([A-Za-z0-9_]+)=([^:;]+):([bid])$'); if(-not $m.Success){ throw ('-Imposti: voce non valida "' + $p + '" (attesa Nome=valore:tipo, tipo b, i o d)') }; $INPUT_IMPOSTI += ,@($m.Groups[1].Value, $m.Groups[2].Value, $m.Groups[3].Value) } }
 $INPUT_ENUM = @()
 
 if($Pin -notmatch '^[0-9a-fA-F]{40}$' -or $Pin -match '^0{40}$'){ throw '-Pin obbligatorio, di 40 caratteri esadecimali e NON fatto di zeri: il pin di zeri e il segnaposto della BOZZA, non un commit.' }
@@ -568,7 +571,7 @@ $testa = @(
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ',') + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
   ('input imposti dal .ini (' + $INPUT_IMPOSTI.Count + '): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ') + '   (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).'),
-  ('EA scelto (' + $Ex5Nome + '): EA di TERZI dal Market, scatola nera. TEST A FONDO: ' + $SONDE_TUTTE.Count + ' passate (21 mesi mensili + 1 corsa continua), H1, input NON imposti: restano quelli salvati dal tester per questo EA su questo PC (quelli del setaccio) e si CONFRONTANO nel report prima di leggere i numeri. Regole scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md. Questo script RACCOGLIE, non giudica.'),
+  ('EA scelto (' + $Ex5Nome + '): EA di TERZI dal Market, scatola nera. TEST A FONDO: ' + $SONDE_TUTTE.Count + ' passate (21 mesi mensili + 1 corsa continua), H1, input imposti dal .ini: ' + $INPUT_IMPOSTI.Count + ' (0 = NESSUNO imposto: restano quelli salvati dal tester per questo EA su questo PC, e si CONFRONTANO nel report prima di leggere i numeri). Regole scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md. Questo script RACCOGLIE, non giudica.'),
   ('tranche scelte: ' + $Tranche + ' (le altre: SALTATA, non lanciate per scelta)'),
   ('esiti: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + ' (' + $_.Per + ') ' + $esiti[$_.Nome] }) -join '   ')),
   ('ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono ' + $SONDE_TUTTE.Count + ' passate INDIPENDENTI sulla STESSA finestra (' + $SONDE_TUTTE[0].Da + ' -> ' + $SONDE_TUTTE[0].A + '), ognuna a CONTO VUOTO (deposito ' + $DEPOSITO + ' ' + $VALUTA + '), e cambia SOLO il periodo del grafico: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).'),
