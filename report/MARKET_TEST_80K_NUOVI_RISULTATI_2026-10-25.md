@@ -32,5 +32,5 @@ P1 corse valide >= 6 su 8: **SI** (8/8). P2 almeno 4 EA sotto 150 operazioni: **
 - Nessun acquisto, nessuna taglia, nessun lotto: **sono tue decisioni**. Questo test dice solo come si comportano i default a 80.000 e che cosa li rende "NO" per le soglie scritte.
 - Il test e' sul default (dimensionamento automatico). **Un test con lotto fisso o rischio piu basso sarebbe una misura diversa** (i lotti li scegli tu, non io): finche' non esiste, "NO" per S-DD/S-NOSCALA significa "con i default compone", non "l'EA perde".
 - S-CORR e S-PORT non sono stati calcolati: nessun EA arriva a quella fase.
-- Sono 21 mesi con default del venditore (possibile ottimizzazione sul periodo): il 2026 da solo e' positivo per tutti tranne ORB (+1.286 anche lui) e Entry Points (+1.068), cioe' non c'e' nessun EA con il 2026 negativo; Vortex 2026 +6.061 ma con -24.490 nella seconda meta'.
+- Sono 21 mesi con default del venditore (possibile ottimizzazione sul periodo): il 2026 da solo (gen-set) e' positivo per tutti e 8, ma per ORB (+1.286), Entry Points (+1.068) e Vortex (+6.061) e' poco, e Vortex ha -24.490 nella seconda meta'.
 - SomaGold e' a parte (seconda ipotesi in attesa), come Aetheris e Diagonal Resistance.
