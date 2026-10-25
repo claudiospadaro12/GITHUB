@@ -174,6 +174,8 @@ def leggi_cartella(c, cs=None):
     for k in ('S-N', 'S-M', 'S-H', 'S-DD', 'S-NOSCALA', 'S-COSTO'):
         v = r[k]
         print('  %-10s %-12s %s' % (k, {True: 'OK', False: 'NO', None: 'NON MISURATO'}[v[0]], v[1]))
+    # v2 (25/10/2026): riga informativa, NON entra in nessuna soglia (serve a vedere se una guardia interna ha fermato l EA)
+    print('  ultimo affare %s   mesi con almeno un affare: %d/21' % (max(x['t'] for x in D), sum(1 for k in mesi21() if any(x['t'][:7] == k for x in D))))
     print('  mesi:', ' '.join('%s=%.0f' % (a[2:], b) for a, b in sorted(m['mon'].items())))
     print('  ESITO:', esito(r))
     if cs:
