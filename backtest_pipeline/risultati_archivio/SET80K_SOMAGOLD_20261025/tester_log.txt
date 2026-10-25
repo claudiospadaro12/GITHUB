@@ -1,0 +1,137 @@
+# giornale C:\Users\Master\AppData\Roaming\MetaQuotes\Tester\215D85D767A1C39E22D242C8114BF9F5\Agent-127.0.0.1-3000\logs\20261025.log   offset 0   righe lette dopo la fotografia 135
+# === TUTTE LE RIGHE (135) ===
+CS	0	07:45:04.083	Startup	MetaTester 5 build 6230, 25 Sep 2026
+CS	0	07:45:04.084	Startup	Windows 11 build 26200, 8 x Intel Core i7-8550U  @ 1.80GHz, AVX2, 4 / 15 Gb memory, 252 / 475 Gb disk, UAC, GMT+1
+CS	0	07:45:04.084	Server	MetaTester 5 started on 127.0.0.1:3000
+CS	0	07:45:04.086	Startup	cloud network mode is off
+CS	0	07:45:04.086	Startup	initialization finished
+CS	0	07:45:04.265	127.0.0.1	login (build 6230)
+CS	0	07:45:04.278	Network	11292 bytes of account info loaded
+CS	0	07:45:04.278	Network	1478 bytes of tester parameters loaded
+CS	0	07:45:04.278	Network	33476 bytes of input parameters loaded
+CS	0	07:45:04.279	Network	418 bytes of symbols list loaded (62 symbols)
+CS	0	07:45:04.279	Tester	expert file added: Experts\Market\SomaGold.ex5. 301833 bytes loaded
+CS	0	07:45:04.283	Tester	4490 Mb available, 56 blocks set for ticks generating
+CS	0	07:45:04.283	Tester	initial deposit 80000.00 EUR, leverage 1:100
+CS	0	07:45:04.283	Tester	successfully initialized
+CS	0	07:45:04.283	Network	297 Kb of total initialization data received
+CS	0	07:45:04.283	Tester	Intel Core i7-8550U  @ 1.80GHz, 16218 MB
+CS	0	07:45:04.290	Symbols	XAUUSD: symbol to be synchronized
+CS	0	07:45:04.291	Symbols	XAUUSD: symbol synchronized, 4120 bytes of symbol info received
+CS	0	07:45:04.298	History	XAUUSD: load 27 bytes of history data to synchronize in 0:00:00.002
+CS	0	07:45:04.298	History	XAUUSD: history synchronized from 2004.06.11 to 2026.10.09
+CS	0	07:45:04.299	Ticks	XAUUSD: ticks synchronization started
+CS	0	07:45:04.300	Ticks	XAUUSD: load 34 bytes of tick data to synchronize in 0:00:00.000
+CS	0	07:45:04.300	Ticks	XAUUSD: history ticks synchronized from 2024.07.10 to 2026.09.30
+CS	0	07:45:04.331	History	XAUUSD,H1: history cache allocated for 6876 bars and contains 5864 bars from 2025.01.02 00:00 to 2025.12.31 22:00
+CS	0	07:45:04.331	History	XAUUSD,H1: history begins from 2025.01.02 00:00
+CS	0	07:45:04.359	Tester	XAUUSD,H1 (BCMMarkets-Server): generating based on real ticks
+CS	0	07:45:04.359	Tester	XAUUSD,H1: testing of Experts\Market\SomaGold.ex5 from 2026.01.01 00:00 to 2026.03.01 00:00 started with inputs:
+CS	0	07:45:04.359	Tester	  PortfolioSettings_=----- Portfolio Settings -----
+CS	0	07:45:04.359	Tester	  StrategiesToRun=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
+CS	0	07:45:04.359	Tester	  OverrideSettings_=----- Overrides (magic/comment) -----
+CS	0	07:45:04.359	Tester	  EnableMagicOverride=false
+CS	0	07:45:04.359	Tester	  OverrideMagicBase=1000
+CS	0	07:45:04.359	Tester	  EnableCommentOverride=false
+CS	0	07:45:04.359	Tester	  OverrideComment=SomaGold
+CS	0	07:45:04.359	Tester	  TradeDirection_=----- Trade Direction -----
+CS	0	07:45:04.359	Tester	  AllowBuyTrades=true
+CS	0	07:45:04.359	Tester	  AllowSellTrades=true
+CS	0	07:45:04.359	Tester	  LotSizeSettings_=----- LotSize Settings -----
+CS	0	07:45:04.359	Tester	  LotsAdjustMinChangePercent=5.0
+CS	0	07:45:04.359	Tester	  Risk=1
+CS	0	07:45:04.359	Tester	  AdjustLotsizeToVariableValues=true
+CS	0	07:45:04.359	Tester	  StartLots=0.01
+CS	0	07:45:04.359	Tester	  MaxLots=0.0
+CS	0	07:45:04.359	Tester	  UseEquity=false
+CS	0	07:45:04.359	Tester	  OnlyUp=true
+CS	0	07:45:04.359	Tester	  RestorePeakFromHistory=true
+CS	0	07:45:04.359	Tester	  RestorePeakLookbackDays=30
+CS	0	07:45:04.359	Tester	  ManualBalanceForLotSizing=0.0
+CS	0	07:45:04.359	Tester	  RiskMultiplier=1.0
+CS	0	07:45:04.359	Tester	  MarginCallProtection=true
+CS	0	07:45:04.359	Tester	  McpRiskMultiplier=1.0
+CS	0	07:45:04.359	Tester	  BaseCurrency=0
+CS	0	07:45:04.359	Tester	  CustomBaseCurrencyPair=e.g. USDJPY or EURUSD - broker ticker containing USD
+CS	0	07:45:04.359	Tester	  GMT_Settings_=----- GMT settings -----
+CS	0	07:45:04.359	Tester	  Broker_GMT_OFFSET_Summer=1
+CS	0	07:45:04.359	Tester	  Broker_GMT_OFFSET_Winter=1
+CS	0	07:45:04.359	Tester	  AutoGMT=false
+CS	0	07:45:04.359	Tester	  NFP_FILTER_=----- NFP Filter -----
+CS	0	07:45:04.359	Tester	  EnableNFP_Filter=true
+CS	0	07:45:04.359	Tester	  NFP_CloseOpenTrades=true
+CS	0	07:45:04.359	Tester	  NFP_ClosePendingOrders=true
+CS	0	07:45:04.359	Tester	  IR_FILTER_=----- IR Filter -----
+CS	0	07:45:04.359	Tester	  EnableIR_Filter=true
+CS	0	07:45:04.359	Tester	  IR_CloseOpenTrades=true
+CS	0	07:45:04.359	Tester	  IR_ClosePendingOrders=true
+CS	0	07:45:04.359	Tester	  CPI_FILTER_=----- CPI Filter -----
+CS	0	07:45:04.359	Tester	  EnableCPI_Filter=true
+CS	0	07:45:04.359	Tester	  CPI_CloseOpenTrades=true
+CS	0	07:45:04.359	Tester	  CPI_ClosePendingOrders=true
+CS	0	07:45:04.359	Tester	  timefilter_=----- Trading hours -----
+CS	0	07:45:04.359	Tester	  UseTradingTimeZones=true
+CS	0	07:45:04.359	Tester	  KillPending=true
+CS	0	07:45:04.359	Tester	  KillOpen=true
+CS	0	07:45:04.359	Tester	  MondayOpenHour=1
+CS	0	07:45:04.359	Tester	  MondayOpenMinute=10
+CS	0	07:45:04.359	Tester	  FridayCloseHour=22
+CS	0	07:45:04.359	Tester	  FridayCloseMinute=50
+CS	0	07:45:04.359	Tester	  DashboardSettings_=----- Dashboard -----
+CS	0	07:45:04.359	Tester	  DisableDashboardInTesting=true
+CS	0	07:45:04.359	Tester	  DisableDashboardInLive=false
+CS	0	07:45:04.359	Tester	  DashboardUpdateSeconds=1
+CS	0	07:45:04.359	Tester	  PropFirmSettings_=----- Prop Firm Compliance -----
+CS	0	07:45:04.359	Tester	  MaxRandomizationPips=0.0
+CS	0	07:45:04.359	Tester	  EnablePropFirmCompliance=false
+CS	0	07:45:04.359	Tester	  PF_MaxDailyDrawdownPercent=0.0
+CS	0	07:45:04.359	Tester	  PF_MaxDailyDrawdownMoney=0.0
+CS	0	07:45:04.359	Tester	  PF_DailyResetHour=0
+CS	0	07:45:04.359	Tester	  PF_DailyLossBufferPercent=10.0
+CS	0	07:45:04.359	Tester	  PF_DisallowHedging=false
+CS	0	07:45:04.359	Tester	  PF_MaxTotalPendingOrders=0
+CS	0	07:45:04.359	Tester	  TradeExecutionSettings_=----- Trades Execution and Management -----
+CS	0	07:45:04.359	Tester	  UseInternalTrailingExitLevels=false
+CS	0	07:45:04.374	SomaGold (XAUUSD,H1)	2026.01.01 00:00:00   [PORTFOLIO] StrategiesToRun active: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32 (32 of 32)
+CS	0	07:45:04.374	SomaGold (XAUUSD,H1)	2026.01.01 00:00:00   [PORTFOLIO] Loaded built-in preset. Strategies=32 | enabled=32
+CS	0	07:45:05.745	Ticks	XAUUSD : real ticks begin from 2024.07.10 00:00:00
+CS	0	07:45:05.837	History	XAUUSD,M1: history cache allocated for 409558 bars and contains 348826 bars from 2025.01.02 00:05 to 2025.12.31 22:54
+CS	0	07:45:05.858	History	XAUUSD,M1: 1 bar from 2026.01.02 00:05 added
+CS	0	07:45:05.858	History	XAUUSD,M1: history begins from 2025.01.02 00:05
+CS	0	07:45:05.888	History	XAUUSD,H4: history cache allocated for 1830 bars and contains 1577 bars from 2025.01.02 00:00 to 2025.12.31 20:00
+CS	0	07:45:05.888	History	XAUUSD,H4: 1 bar from 2026.01.02 00:00 added
+CS	0	07:45:05.888	History	XAUUSD,H4: history begins from 2025.01.02 00:00
+CS	0	07:45:05.916	History	XAUUSD,Daily: history cache allocated for 331 bars and contains 289 bars from 2025.01.02 00:00 to 2025.12.31 00:00
+CS	0	07:45:05.917	History	XAUUSD,Daily: 1 bar from 2026.01.02 00:00 added
+CS	0	07:45:05.917	History	XAUUSD,Daily: history begins from 2025.01.02 00:00
+CS	0	07:45:05.917	Symbols	EURUSD: symbol to be synchronized
+CS	0	07:45:05.917	Symbols	EURUSD: symbol synchronized, 4120 bytes of symbol info received
+CS	0	07:45:05.959	History	EURUSD: load 27 bytes of history data to synchronize in 0:00:00.004
+CS	0	07:45:05.959	History	EURUSD: history synchronized from 1971.01.03 to 2026.10.09
+CS	0	07:45:05.961	Ticks	EURUSD: ticks synchronization started
+CS	0	07:45:05.961	Ticks	EURUSD: load 34 bytes of tick data to synchronize in 0:00:00.000
+CS	0	07:45:05.961	Ticks	EURUSD: history ticks synchronized from 2024.07.05 to 2026.09.30
+CS	0	07:45:05.998	History	XAUUSD,H12: history cache allocated for 632 bars and contains 547 bars from 2025.01.02 00:00 to 2025.12.31 12:00
+CS	0	07:45:05.998	History	XAUUSD,H12: 1 bar from 2026.01.02 00:00 added
+CS	0	07:45:05.998	History	XAUUSD,H12: history begins from 2025.01.02 00:00
+CS	0	07:45:06.028	History	XAUUSD,H8: history cache allocated for 932 bars and contains 805 bars from 2025.01.02 00:00 to 2025.12.31 16:00
+CS	0	07:45:06.028	History	XAUUSD,H8: 1 bar from 2026.01.02 00:00 added
+CS	0	07:45:06.028	History	XAUUSD,H8: history begins from 2025.01.02 00:00
+CS	0	07:45:06.058	History	XAUUSD,M15: history cache allocated for 27493 bars and contains 23444 bars from 2025.01.02 00:00 to 2025.12.31 22:45
+CS	0	07:45:06.059	History	XAUUSD,M15: 1 bar from 2026.01.02 00:00 added
+CS	0	07:45:06.059	History	XAUUSD,M15: history begins from 2025.01.02 00:00
+CS	0	07:45:06.472	Ticks	EURUSD : real ticks begin from 2024.07.05 00:00:00
+CS	0	07:46:53.139	Tester	final balance 80000.00 EUR
+CS	0	07:46:53.161	Tester	XAUUSD,H1: 15389728 ticks, 931 bars generated. Environment synchronized in 0:00:00.021. Test passed in 0:01:48.874 (including ticks preprocessing 0:00:01.765).
+CS	0	07:46:53.161	Tester	XAUUSD,H1: total time from login to stop testing 0:01:48.895 (including 0:00:00.025 for history data synchronization)
+CS	0	07:46:53.161	Tester	19896854 total ticks for all symbols
+CS	0	07:46:53.161	Tester	EURUSD: generate 4507279 ticks in 0:00:00.406, passed to tester 4507126 ticks
+CS	0	07:46:53.161	Tester	XAUUSD: generate 15389728 ticks in 0:00:01.359, passed to tester 15389728 ticks
+CS	0	07:46:53.161	Tester	670 Mb memory used including 27 Mb of history data, 448 Mb of tick data
+CS	0	07:46:53.161	Tester	log file "C:\Users\Master\AppData\Roaming\MetaQuotes\Tester\215D85D767A1C39E22D242C8114BF9F5\Agent-127.0.0.1-3000\logs\20261025.log" written
+CS	0	07:46:53.161	Tester	test Experts\Market\SomaGold.ex5 on XAUUSD,H1 thread finished
+CS	0	07:46:53.222	127.0.0.1	tester forced to close
+CS	0	07:46:53.222	127.0.0.1	prepare for shutdown
+CS	0	07:46:53.222	127.0.0.1	stop immediately
+CS	0	07:46:53.222	127.0.0.1	shutdown finished
+CS	0	07:46:53.518	Server	MetaTester 5 stopped

@@ -18,7 +18,9 @@ param(
   [Parameter(Mandatory=$true)][string]$Ex5Nome,
   [int]$TimeoutTrancheMin = 600,
   [string]$Tranche = '1,2',
-  [string]$Imposti = ''
+  [string]$Imposti = '',
+  [int]$Leva = 100,
+  [string]$Etichetta = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -32,14 +34,16 @@ if($TOK.Length -lt 1){ throw ('-Ex5Nome "' + $Ex5Nome + '": nessun carattere alf
 if($TOK.Length -gt 24){ $TOK = $TOK.Substring(0, 24) }
 $TOKU = $TOK.ToUpper(); $TOKL = $TOK.ToLower()
 $TOKEXP = [regex]::Replace([IO.Path]::GetFileNameWithoutExtension($Ex5Nome), '[^A-Za-z0-9]', '').ToLower()
-$NOME_D   = 'SET80K_' + $TOKU
+if($Etichetta -notmatch '^[A-Za-z0-9]{0,8}$'){ throw ('-Etichetta "' + $Etichetta + '" non valida: al massimo 8 lettere o cifre.') }
+if($Leva -ne 100 -and $Leva -ne 200 -and $Leva -ne 500){ throw ('-Leva ' + $Leva + ' non ammessa: 100, 200 o 500 (la leva del tester serve solo alla DIAGNOSI, 100 e quella di riferimento).') }
+$NOME_D   = 'SET80K_' + $TOKU + $Etichetta.ToUpper()
 $SIMBOLO  = 'XAUUSD'
 # NIENTE $PERIODO qui: questo giro ha DUE periodi del grafico e li porta ognuna la sua voce di $SONDE ($s.Per). Una variabile
 # unica di periodo sarebbe falsa e finirebbe nei titoli e nel referto (classe 1499: i conteggi e le etichette si COSTRUISCONO).
 $MODELLO  = 4
 $DEPOSITO = 80000
 $VALUTA   = 'EUR'
-$LEVA     = 100
+$LEVA     = $Leva
 $TETTO_BARRE  = 100000
 $AVVISO_BARRE = 95000
 # NESSUN input imposto: si prova coi default dell'EA, fa fede il report (G1). Tipo: b = bool, i = intero, d = decimale.
