@@ -1,0 +1,34 @@
+====================================================================================================
+DEEP80K_MICROEDGENEURALMATRIXEA
+  stato OK  durata 257 s  report DEEP80K_MICROEDGENEURALMATRIXEA_TRANCHE22_20261025_200750.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok si  motivi: -
+  profitto del manifest 66708.66  operazioni 277  PF 1.94  DD equity 15182.81(9.50%)
+  S-N        OK           277 operazioni
+  S-M        OK           18/21 mesi positivi, somma 66709
+  S-H        NO           gen25-mag26 72475 / giu-set26 -5766   (2026 da solo 10114)
+  S-DD       NO           DD equity dal picco 15183 EUR = 18.98% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -12.74% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  OK           lotto max/min 1.99, posizioni insieme max 1, lotto dopo perdita / dopo vincita 1.00
+  S-COSTO    OK           media per operazione 240.83 EUR = 3.8 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 3.58)
+  ultimo affare 2026.09.30 14:46:57   mesi con almeno un affare: 21/21
+  mesi: 25.01=5135 25.02=4874 25.03=5430 25.04=1656 25.05=3777 25.06=2569 25.07=3170 25.08=6266 25.09=7093 25.10=6961 25.11=154 25.12=9510 26.01=7869 26.02=9325 26.03=-3939 26.04=2083 26.05=542 26.06=567 26.07=5894 26.08=-2035 26.09=-10193
+  ESITO: NON PASSA: S-H, S-DD
+  INPUT contro il setaccio: DIVERSI (1): propGuard: setaccio false -> test true
+====================================================================================================
+DEEP80K_UMBRAVAULTAIEA
+  stato OK  durata 274 s  report DEEP80K_UMBRAVAULTAIEA_TRANCHE22_20261025_201211.htm
+  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok si  motivi: -
+  profitto del manifest 60784.95  operazioni 347  PF 1.90  DD equity 15051.63(11.89%)
+  S-N        OK           347 operazioni
+  S-M        OK           15/21 mesi positivi, somma 60785
+  S-H        OK           gen25-mag26 47102 / giu-set26 13683   (2026 da solo 25121)
+  S-DD       NO           DD equity dal picco 15052 EUR = 18.81% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -10.29% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  OK           lotto max/min 1.83, posizioni insieme max 1, lotto dopo perdita / dopo vincita 0.98
+  S-COSTO    OK           media per operazione 175.17 EUR = 3.1 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 3.15)
+  ultimo affare 2026.09.30 05:40:42   mesi con almeno un affare: 21/21
+  mesi: 25.01=3212 25.02=-3781 25.03=4470 25.04=-3602 25.05=8207 25.06=-3881 25.07=3278 25.08=4534 25.09=8185 25.10=6068 25.11=6538 25.12=2436 26.01=4229 26.02=4712 26.03=-8230 26.04=-123 26.05=10851 26.06=9751 26.07=4069 26.08=-4659 26.09=4522
+  ESITO: NON PASSA: S-DD
+  INPUT contro il setaccio: DIVERSI (1): EquityGuardEnabled: setaccio false -> test true
+====================================================================================================
+RIEPILOGO
+  DEEP80K_MICROEDGENEURALMATRIXEA          NON PASSA: S-H, S-DD
+  DEEP80K_UMBRAVAULTAIEA                   NON PASSA: S-DD
