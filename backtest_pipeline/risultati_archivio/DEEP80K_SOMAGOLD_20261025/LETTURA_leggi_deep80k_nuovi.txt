@@ -1,0 +1,17 @@
+====================================================================================================
+DEEP80K_SOMAGOLD
+  stato OK  durata 4327 s  report DEEP80K_SOMAGOLD_TRANCHE22_20261025_180021.htm
+  qualita 100%ticksreali  stop_out 0  no_money 92  input_ok si  motivi: -
+  profitto del manifest 680162.33  operazioni 1067  PF 3.66  DD equity 78658.21(21.66%)
+  S-N        OK           1067 operazioni
+  S-M        OK           16/21 mesi positivi, somma 680162
+  S-H        OK           gen25-mag26 323628 / giu-set26 356534   (2026 da solo 477328)
+  S-DD       NO           DD equity dal picco 78658 EUR = 98.32% di 80.000 (tetto 10%; dal picco: SOVRASTIMA la perdita dal deposito); peggior mese realizzato -26.71% (PROXY del DD mensile: sottostima)
+  S-NOSCALA  NO           lotto max/min 172.57, posizioni insieme max 31, lotto dopo perdita / dopo vincita 0.79
+  S-COSTO    OK           media per operazione 637.45 EUR = 29.3 x lo spread (INFERITO: 20 punti, 17.85 EUR/lotto, lotto medio 1.22)
+  mesi: 25.01=416 25.02=-2673 25.03=29741 25.04=26104 25.05=14793 25.06=12718 25.07=-657 25.08=-1615 25.09=29649 25.10=-3902 25.11=32420 25.12=65842 26.01=77052 26.02=-21369 26.03=16552 26.04=20236 26.05=28323 26.06=168780 26.07=8944 26.08=100012 26.09=78798
+  ESITO: NON PASSA: S-DD, S-NOSCALA
+  INPUT contro il setaccio: DIVERSI (4): AutoGMT: setaccio true -> test false | Broker_GMT_OFFSET_Summer: setaccio 3 -> test 1 | Broker_GMT_OFFSET_Winter: setaccio 2 -> test 1 | MarginCallProtection: setaccio true -> test false
+====================================================================================================
+RIEPILOGO
+  DEEP80K_SOMAGOLD                         NON PASSA: S-DD, S-NOSCALA
