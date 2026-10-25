@@ -28,3 +28,7 @@ Le soglie 50% e 25% sono scelte mie, ordinarie e arbitrarie; servono a ordinare 
 
 ## Cosa NON misura
 Slippage, spread in news, gap di weekend, liquidita', margine reale del broker personale, differenze fra demo del Market e versione a pagamento, termini di licenza, qualunque conto reale. Il capitale di Claudio e' 5.000 EUR; il tester usa la leva 1:100.
+
+## Aggiunta (25/10 sera): variante Umbra Vault con il filtro orario 21-23 del venditore, scritta prima dei numeri
+Richiesta di Claudio: "aggiungi la variante 21-23". Dalla pagina degli aggiornamenti di Umbra Vault (v1.1, `MARKET_PRESET_PROP_8EA_2026-10-25.md`): `trading_hours=true`, `trade_hours=21`, `trade_hour=23` (ora del SERVER, il server BCM e UTC+1 fisso: 21-23 server = 22:00-00:00 italiane): l'EA non apre nuove posizioni in quella finestra. **I valori sono quelli dell'esempio del venditore, non una scelta mia.** Una sola corsa a **5.000 EUR**, stessa finestra, tick reali, leva 1:100, guardia del venditore SPENTA (`EquityGuardEnabled=false` imposta esplicitamente), cartella `ABTG_RISULTATI\DEEP5K_UMBRA2123_<data>`. Stesso lettore e stesse etichette; il confronto e' con la corsa di Umbra a 5.000 senza filtro (stesso giro, riga `DEEP5K_PERSONALE`) e, come sempre, con 80.000.
+**Previsioni dichiarate ORA:** meno operazioni della corsa senza filtro: 85%. Netto % piu basso di quello senza filtro: 55%. DD relativo piu basso o uguale: 50%. Etichetta diversa da quella senza filtro: 25%. Nessuna ottimizzazione e nessuna scelta dei valori dopo i numeri: se non migliora, lo scrivo.
