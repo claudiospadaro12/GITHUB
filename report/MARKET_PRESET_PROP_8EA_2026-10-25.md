@@ -20,3 +20,9 @@
 
 ## Cosa serve da Claudio
 Le pagine (o i set) di Gold Snap, Umbra Vault, Rocket Breakout e ORB Revolution, e per SixtyNine e Entry Points la richiesta dei set/guida al venditore. Taglie e lotti restano decisioni sue.
+
+## Aggiunta del 25/10 sera: Umbra Vault AI EA (prodotto 189730), da screenshot "Cosa c'e di nuovo" di Claudio + pagina
+DICHIARATO dal venditore (Valentina Zhuchkova). Prezzo 299 USD o 199 USD al mese; pubblicato 18/08/2026; versione attuale 1.2; demo scaricata 190 volte; recensioni 2, commenti 4.
+- **v1.2 (13/10/2026):** "il problema della licenza e' stato risolto". **v1.1 (10/10/2026):** nuovo filtro orario (`trading_hours=false`, `trade_hours=21`, `trade_hour=23`, ora del SERVER; con `true` blocca le nuove posizioni dalle 21 alle 23): **gli stessi tre input e gli stessi valori li abbiamo letti nei nostri referti (VERIFICATO)**, quindi la demo testata e' almeno la 1.1. Il file `.ex5` testato e' datato 22/10 (dopo la 1.2): probabilmente la 1.2, ma la versione non sta nel file (INFERITO).
+- **v1.1: "Ri-ottimizzazione dell'EA"** - il venditore ha ri-ottimizzato i parametri: i default che abbiamo provato sono quindi ottimizzati dal venditore, su un periodo che non dichiara (la pagina "non fa nessuna affermazione sull'ottimizzazione"). I nostri 21 mesi possono essere in parte in-sample: motivo in piu per leggere con cautela il +195.101 senza guardia.
+- Pagina: XAUUSD, "da conservative ad aggressive", "nessuna martingala, griglia o mediazione", backtest 2020-oggi con tick reali (dichiarato), segnale live collegato; **nessun set file, nessun preset, nessuna parola su prop firm o FTMO**. Il titolo del prodotto e' "Umbra Vault AI EA" ma il testo parla di "KineticEdge Vault EA" (l'immagine dice KineticEdge Vault EA): il venditore non spiega.
