@@ -16,7 +16,8 @@ param(
   [Parameter(Mandatory=$true)][string]$Pin,
   [Parameter(Mandatory=$true)][string]$Ex5Nome,
   [int]$TimeoutTrancheMin = 600,
-  [string]$Tranche = '1,2'
+  [string]$Tranche = '1,2',
+  [string]$Base = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -280,6 +281,8 @@ $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $Work = Join-Path $env:USERPROFILE ('abtg_screen_' + $TOKL)
 New-Item -ItemType Directory -Force -Path $Work | Out-Null
 $dsk  = [Environment]::GetFolderPath('Desktop')
+# v4 (25/10/2026): -Base = cartella UNICA dei risultati di questo giro, ammessa SOLO sotto Desktop\ABTG_RISULTATI (richiesta di Claudio: niente cartelle sparse sul Desktop). Senza -Base: Desktop come prima.
+if($Base -ne ''){ $radR = Join-Path $dsk 'ABTG_RISULTATI'; $bn = [IO.Path]::GetFullPath($Base).TrimEnd([IO.Path]::DirectorySeparatorChar); if(-not $bn.StartsWith($radR + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)){ throw ('-Base ' + $Base + ' non ammessa: deve stare sotto ' + $radR) }; New-Item -ItemType Directory -Force -Path $bn | Out-Null; $dsk = $bn }
 $Cart = Join-Path $dsk $NOME_D
 $zip  = Join-Path $dsk ($NOME_D + '.zip')
 if(Test-Path -LiteralPath $Cart){ Move-Item -LiteralPath $Cart -Destination ($Cart + '_VECCHIA_' + $Stamp); Dico ('cartella di un giro PRECEDENTE rinominata: ' + $Cart + '_VECCHIA_' + $Stamp) 'Yellow' }
