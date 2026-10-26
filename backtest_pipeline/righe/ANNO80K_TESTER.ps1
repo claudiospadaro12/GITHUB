@@ -2,6 +2,7 @@
 #  MARCATORE_ANNO80K_TESTER_TRANCHE_v1
 #  ANNO80K_TESTER_TRANCHE.ps1 -Ex5Nome '<file>.ex5' -- TEST A FONDO di UN EA del MQL5 Market (demo, solo tester) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ.
 #  VARIANTE di ARENA5K_MESE (conto prop 80.000 EUR, 26/10/2026): UN SOLO ANNO scelto con -Anno AAAA (e -Modello, default 1, -Periodo, default H1) a conto vuoto; stesse guardie. Previsioni: report/MARKET_TEST_80K_ATTESE_2026-10-19.md. Originale: 21 tranche MENSILI (ognuna a conto vuoto) piu UNA corsa CONTINUA 2025.01.01 -> 2026.10.01, XAUUSD H1, ticks reali, nessun input imposto.
+#  v5 ANNO80K (26/10/2026, notte): -Fine AAAA.MM.GG (data esclusa) per una corsa continua piu lunga di un anno (da 01/01/-Anno a -Fine), es. 21 mesi: -Anno 2025 -Fine 2026.10.01.
 #  v4 ANNO80K (26/10/2026, notte): -Imposti ammette il tipo s (stringa; i separatori del valore sono +, nel .ini diventano ; con ; finale) per OneChartSetup_Pairs.
 #  v3 ANNO80K (26/10/2026, sera): -Simbolo (default XAUUSD) per gli EA da forex con OneChartSetup (Luna AI Pro: grafico EURUSD M5 e le 8 coppie negli input). Cambia SOLO il simbolo del grafico e il testo.
 #  v2 ANNO80K (26/10/2026, 15:00): -Periodo ammette D1 (il report del tester lo scrive Daily: campo Ril), correzione dopo che le 5 passate di Goldbot One si sono fermate sul controllo del periodo.
@@ -20,6 +21,7 @@ param(
   [int]$Modello = 1,
   [string]$Periodo = 'H1',
   [string]$Simbolo = 'XAUUSD',
+  [string]$Fine = '',
   [string]$Base = ''
 )
 
@@ -92,8 +94,9 @@ $SONDE = @(
 # v1 (26/10/2026): UN SOLO ANNO SOLARE a conto vuoto (80000 EUR), scelto con -Anno AAAA, -Modello (default 1 = OHLC 1 minuto; 0 = tutti i tick generati; 4 = tick reali) e -Periodo (default H1). La passata si chiama ancora TRANCHE22 per il lettore.
 if($Anno -notmatch '^20(0[5-9]|1[0-9]|2[0-5])$'){ throw ('-Anno "' + $Anno + '" non valido: serve un anno fra 2005 e 2025, per esempio 2013') }
 if($Modello -notin @(0,1,4)){ throw ('-Modello ' + $Modello + ' non ammesso (0, 1 o 4)') }
+if($Fine -ne '' -and $Fine -notmatch '^\d{4}\.\d\d\.\d\d$'){ throw ('-Fine "' + $Fine + '" non valida (attesa AAAA.MM.GG, data esclusa)') }
 if($Periodo -notmatch '^(M1|M5|M15|M30|H1|H4|D1)$'){ throw ('-Periodo "' + $Periodo + '" non ammesso (M1, M5, M15, M30, H1, H4, D1)') }
-$SONDE_TUTTE = @([pscustomobject]@{ Nome = 'TRANCHE22'; Per = $Periodo; Ril = $(if($Periodo -eq 'D1'){ 'Daily' } else { $Periodo }); Da = ($Anno + '.01.01'); A = ((([int]$Anno) + 1).ToString() + '.01.01'); Timeout = $TimeoutTrancheMin; Cosa = ('anno ' + $Anno + ' ' + $Periodo + ' Modello ' + $Modello) })
+$SONDE_TUTTE = @([pscustomobject]@{ Nome = 'TRANCHE22'; Per = $Periodo; Ril = $(if($Periodo -eq 'D1'){ 'Daily' } else { $Periodo }); Da = ($Anno + '.01.01'); A = $(if($Fine -ne ''){ $Fine } else { ((([int]$Anno) + 1).ToString() + '.01.01') }); Timeout = $TimeoutTrancheMin; Cosa = ('anno ' + $Anno + ' ' + $Periodo + ' Modello ' + $Modello) })
 $Tranche = '22'
 $TrScelte = @('22')
 $SONDE = @($SONDE_TUTTE | Where-Object { $TrScelte -contains $_.Nome.Substring(7) })
