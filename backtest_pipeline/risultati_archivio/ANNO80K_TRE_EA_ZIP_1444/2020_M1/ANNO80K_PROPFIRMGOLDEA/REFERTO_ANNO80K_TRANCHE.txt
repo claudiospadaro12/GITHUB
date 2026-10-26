@@ -1,0 +1,37 @@
+ANNO80K TESTER TRANCHE (Prop Firm Gold EA.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ANNO80K_TESTER_TRANCHE_v1, pin 83a8365d585f9298d1a3180a9db28f81b760ab91
+data: 2026-10-26 14:44:03   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\Prop Firm Gold EA.ex5   byte 103426   data file 2026-10-18 22:30:08   SHA256 108DCCB01D510C02DF2C7080C2D41F703E7FD6086C729F75EDDCAFF3E399DDDF   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1, Modello 1 (NON tick reali: barre o tick generati dal tester, qualita dello storico quella scritta nel report), deposito 80000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (Prop Firm Gold EA.ex5): EA di TERZI dal Market, scatola nera. UN MESE a conto vuoto: anno 2020 H1 Modello 1, input imposti dal .ini: 0 (0 = NESSUNO imposto: restano quelli salvati dal tester per questo EA su questo PC, e si CONFRONTANO nel report prima di leggere i numeri). Regole scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md. Questo script RACCOGLIE, non giudica.
+tranche scelte: 22 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE22 (H1) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 1 passate INDIPENDENTI sulla STESSA finestra (2020.01.01 -> 2021.01.01), ognuna a CONTO VUOTO (deposito 80000 EUR), e cambia SOLO il periodo del grafico: TRANCHE22=H1. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE22 (anno 2020 H1 Modello 1)  2020.01.01 -> 2021.01.01   STATO OK
+EX5_DOPO TRANCHE22: 108DCCB01D510C02DF2C7080C2D41F703E7FD6086C729F75EDDCAFF3E399DDDF UGUALE
+   durata 43 s (orologio), test 22 s (riga Test passed del giornale; -1 = non letta)   giornali letti 8, righe 11049
+   report ANNO80K_PROPFIRMGOLDEA_TRANCHE22_20261026_144318.htm   operazioni 431   netto 10321.36   PF 1.28   DD equita 5093.07(5.78%)   DD saldo 4412.16(5.04%)
+   qualita 100%   barre report 5904   ticks report 1400424   barre generate 5904   ticks generati 1400424   inizio tick    finestra 2020.01.01-2021.01.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: generalinputs=------------------------General Inputs------------------------ ; InpTradeComment=XXXXXXX ; InpMagicNumber=12345 ; InpEnableInfoPanel=false ; InpPanelScale=1.0 ; riskmanagement=------------------------Risk Management------------------------ ; InpBaseMoneyMode=0 ; InpCustomBalance=0 ; InpRiskType=1 ; InpRiskLevel=0 ; InpRiskPercent=0.75 ; InpLots=0.0 ; spreadfilter=---------------------------Spread Filter--------------------------- ; InpSpreadFilter=false ; InpMaxSpreadPoints=100.0 ; propfirmsettings=------------------------Prop Firm Settings------------------------ ; InpCloseTradesOnEquityDrawdown=true ; InpMaxEquityDrawdown=4.0 ; InpFirstTradeDelay=0 ; fifomode=------------------------FIFO-Compatible Mode------------------------ ; InpAllowOnlyOnePosition=false ; propfirmtester=------------------------Prop Firm Simulation Mode------------------------ ; InpActivateTester=false ; InpProfitTarget=15.0 ; InpMaxLoss=10.0
+   input stampati dal giornale (dopo started with inputs): fifomode=------------------------FIFO-Compatible Mode------------------------ ; generalinputs=------------------------General Inputs------------------------ ; InpActivateTester=false ; InpAllowOnlyOnePosition=false ; InpBaseMoneyMode=0 ; InpCloseTradesOnEquityDrawdown=true ; InpCustomBalance=0 ; InpEnableInfoPanel=false ; InpFirstTradeDelay=0 ; InpLots=0.0 ; InpMagicNumber=12345 ; InpMaxEquityDrawdown=4.0 ; InpMaxLoss=10.0 ; InpMaxSpreadPoints=100.0 ; InpPanelScale=1.0 ; InpProfitTarget=15.0 ; InpRiskLevel=0 ; InpRiskPercent=0.75 ; InpRiskType=1 ; InpSpreadFilter=false ; InpTradeComment=XXXXXXX ; propfirmsettings=------------------------Prop Firm Settings------------------------ ; propfirmtester=------------------------Prop Firm Simulation Mode------------------------ ; riskmanagement=------------------------Risk Management------------------------ ; spreadfilter=---------------------------Spread Filter---------------------------
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 90321.36 EUR
+   giornale: 2020.07.05 23:05:05   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:06:08   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:07:11   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:08:13   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:09:07   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:05:05   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:06:08   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:07:11   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:08:13   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: 2020.07.05 23:09:07   failed market sell 0.24 XAUUSD, close #434 buy 0.24 XAUUSD 1777.01 [Market closed]
+   giornale: {"logTime": "1026/134323", "level": "INFO", "message": "UserPrefStore loaded: error=NONE (0)"}
+   giornale: {"logTime": "1026/134323", "level": "INFO", "message": "Preference changed: name=resolve_navigation_errors_use_web_service.enabled, new_value=false, source=unknown"}
+   giornale: {"logTime": "1026/134323", "level": "INFO", "message": "Preference changed: name=alternate_error_pages.enabled, new_value=false, source=unknown"}
+   giornale: custom indicator ORB_Indicator_V17 (NASUSD_EXT,M15) removed
+   giornale: custom indicator DASHBOARD GOLDEN_CROSS_V03 (NASUSD,M15) removed
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.
