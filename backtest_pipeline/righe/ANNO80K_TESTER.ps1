@@ -2,6 +2,7 @@
 #  MARCATORE_ANNO80K_TESTER_TRANCHE_v1
 #  ANNO80K_TESTER_TRANCHE.ps1 -Ex5Nome '<file>.ex5' -- TEST A FONDO di UN EA del MQL5 Market (demo, solo tester) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ.
 #  VARIANTE di ARENA5K_MESE (conto prop 80.000 EUR, 26/10/2026): UN SOLO ANNO scelto con -Anno AAAA (e -Modello, default 1, -Periodo, default H1) a conto vuoto; stesse guardie. Previsioni: report/MARKET_TEST_80K_ATTESE_2026-10-19.md. Originale: 21 tranche MENSILI (ognuna a conto vuoto) piu UNA corsa CONTINUA 2025.01.01 -> 2026.10.01, XAUUSD H1, ticks reali, nessun input imposto.
+#  v4 ANNO80K (26/10/2026, notte): -Imposti ammette il tipo s (stringa; i separatori del valore sono +, nel .ini diventano ; con ; finale) per OneChartSetup_Pairs.
 #  v3 ANNO80K (26/10/2026, sera): -Simbolo (default XAUUSD) per gli EA da forex con OneChartSetup (Luna AI Pro: grafico EURUSD M5 e le 8 coppie negli input). Cambia SOLO il simbolo del grafico e il testo.
 #  v2 ANNO80K (26/10/2026, 15:00): -Periodo ammette D1 (il report del tester lo scrive Daily: campo Ril), correzione dopo che le 5 passate di Goldbot One si sono fermate sul controllo del periodo.
 #  v1 ANNO80K (26/10/2026): copia di ANNO5K_TESTER.ps1 con DEPOSITO 80.000 EUR (prop FTMO). Serve per Gold Reaper, Goldbot One, Prop Firm Gold sui tre anni 2013/2018/2020 + calibrazione 2025 (Modello 1 contro Modello 4). Stesse guardie, stesso -Imposti, -Modello (4 = tick reali) e -Periodo (D1 per Goldbot One). v3: la finestra del giornale si confronta con Ril (Daily per D1), cosi D1 non da piu KO di etichetta.
@@ -49,7 +50,7 @@ $AVVISO_BARRE = 95000
 # recidiva 1497): se un giorno questa lista si riempie, il referto lo dice da solo invece di mentire.
 $INPUT_IMPOSTI = @()
 # v5 (25/10/2026): -Imposti 'Nome=valore:tipo;Nome=valore:tipo' (tipo b = bool, i = intero, d = decimale) per imporre il SET del venditore. Il referto lo riporta e il report lo conferma o la passata e KO. Senza -Imposti: nessun input imposto come prima.
-if($Imposti -ne ''){ foreach($p in ($Imposti -split ';')){ $m = [regex]::Match($p, '^([A-Za-z0-9_]+)=([^:;]+):([bid])$'); if(-not $m.Success){ throw ('-Imposti: voce non valida "' + $p + '" (attesa Nome=valore:tipo, tipo b, i o d)') }; $INPUT_IMPOSTI += ,@($m.Groups[1].Value, $m.Groups[2].Value, $m.Groups[3].Value) } }
+if($Imposti -ne ''){ foreach($p in ($Imposti -split ';')){ $m = [regex]::Match($p, '^([A-Za-z0-9_]+)=([^:;]+):([bids])$'); if(-not $m.Success){ throw ('-Imposti: voce non valida "' + $p + '" (attesa Nome=valore:tipo, tipo b, i, d o s; per s i separatori del valore sono +)') }; $INPUT_IMPOSTI += ,@($m.Groups[1].Value, $m.Groups[2].Value, $m.Groups[3].Value) } }
 $INPUT_ENUM = @()
 
 if($Pin -notmatch '^[0-9a-fA-F]{40}$' -or $Pin -match '^0{40}$'){ throw '-Pin obbligatorio, di 40 caratteri esadecimali e NON fatto di zeri: il pin di zeri e il segnaposto della BOZZA, non un commit.' }
@@ -180,6 +181,7 @@ function LeggiReport($path){
 # un valore imposto contro quello che il report dice: '' se coincide, altrimenti il motivo
 function InputDiverso($nome, $atteso, $tipo, $visto){
   if($null -eq $visto){ return ($nome + ' ASSENTE dai Dati in ingresso del report') }
+  if($tipo -eq 's'){ $va = ($atteso -replace '\+', ';').TrimEnd(';'); $vs = $visto.Trim().TrimEnd(';'); if($vs -ne $va){ return ($nome + '=' + $visto + ' invece di ' + $va) }; return '' }
   if($tipo -eq 'b'){ if($visto.ToLower() -ne $atteso){ return ($nome + '=' + $visto + ' invece di ' + $atteso) }; return '' }
   $v = 0.0
   if(-not [double]::TryParse($visto, [Globalization.NumberStyles]::Float, $IC, [ref]$v)){ return ($nome + '=' + $visto + ': non numerico (atteso ' + $atteso + ')') }
@@ -418,7 +420,7 @@ function EstraiLog($f, $offset, $dest, $st){
 function TestoIni($s, $nomeRep){
   $r = New-Object System.Collections.ArrayList
   foreach($x in @('[Experts]', 'AllowLiveTrading=false', 'AllowDllImport=false', '', '[Tester]', ('Expert=' + $RelEx5), ('Symbol=' + $SIMBOLO), ('Period=' + $s.Per), ('Model=' + $MODELLO), 'Optimization=0', ('FromDate=' + $s.Da), ('ToDate=' + $s.A), 'ForwardMode=0', ('Deposit=' + $DEPOSITO), ('Currency=' + $VALUTA), ('Leverage=' + $LEVA), 'ExecutionMode=0', 'Visual=0', 'ReplaceReport=1', 'ShutdownTerminal=1', ('Report=' + $nomeRep), '', '[TesterInputs]')){ [void]$r.Add($x) }
-  foreach($ip in $INPUT_IMPOSTI){ [void]$r.Add($ip[0] + '=' + $ip[1]) }
+  foreach($ip in $INPUT_IMPOSTI){ if($ip[2] -eq 's'){ [void]$r.Add($ip[0] + '=' + (($ip[1] -replace '\+', ';') + ';')) } else { [void]$r.Add($ip[0] + '=' + $ip[1]) } }
   return (($r -join "`r`n") + "`r`n")
 }
 
