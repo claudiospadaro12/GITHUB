@@ -2,23 +2,179 @@
  "project_id": "SALA-BIAS-001",
  "project_name": "Replica del MULTI TF BIAS DASHBOARD e studio del segnale",
  "mode": "MISTA",
- "state_version": 1,
- "updated_at": "2026-10-26T09:15:10Z",
+ "state_version": 2,
+ "updated_at": "2026-10-26T09:16:42Z",
  "candidate_version": "nessuna (ciclo 0 non iniziato)",
- "phase": "CONFIGURAZIONE",
+ "phase": "CICLO 0 - ANALISI INDIPENDENTI IN CORSO",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
   "available_parallel_slots": null,
-  "active_processes": null
+  "active_processes": 4
  },
- "agents": [],
- "tasks": [],
- "requirements": [],
+ "agents": [
+  {
+   "id": "C0",
+   "role": "Presidente e coordinatore",
+   "kind": "SINTETICO",
+   "status": "IN_CORSO",
+   "current_task_id": "T000",
+   "last_event_id": null
+  },
+  {
+   "id": "A1",
+   "role": "Vicecoordinatore e integratore",
+   "kind": "SINTETICO",
+   "status": "IN_ATTESA",
+   "current_task_id": null,
+   "last_event_id": null
+  },
+  {
+   "id": "A2",
+   "role": "Strategia e dominio (specifica della replica)",
+   "kind": "REALE",
+   "status": "IN_CORSO",
+   "current_task_id": "T001",
+   "last_event_id": null
+  },
+  {
+   "id": "A3",
+   "role": "Ricerca ed evidenze (qualita dei dati)",
+   "kind": "REALE",
+   "status": "IN_CORSO",
+   "current_task_id": "T002",
+   "last_event_id": null
+  },
+  {
+   "id": "A4",
+   "role": "Progettazione ed esecuzione (implementazione e studio S1)",
+   "kind": "REALE",
+   "status": "IN_ATTESA",
+   "current_task_id": "T004",
+   "last_event_id": null
+  },
+  {
+   "id": "A5",
+   "role": "Utilizzo, adozione ed economia",
+   "kind": "SINTETICO",
+   "status": "IN_ATTESA",
+   "current_task_id": null,
+   "last_event_id": null
+  },
+  {
+   "id": "A6",
+   "role": "Revisore critico indipendente",
+   "kind": "REALE",
+   "status": "IN_CORSO",
+   "current_task_id": "T003",
+   "last_event_id": null
+  },
+  {
+   "id": "A7",
+   "role": "Verificatore (implementazione indipendente)",
+   "kind": "REALE",
+   "status": "IN_CORSO",
+   "current_task_id": "T005",
+   "last_event_id": null
+  }
+ ],
+ "tasks": [
+  {
+   "id": "T001",
+   "agent_id": "A2",
+   "requirement_ids": [
+    "R001"
+   ],
+   "status": "IN_CORSO",
+   "artifact_ids": [],
+   "check_ids": []
+  },
+  {
+   "id": "T002",
+   "agent_id": "A3",
+   "requirement_ids": [
+    "R003"
+   ],
+   "status": "IN_CORSO",
+   "artifact_ids": [],
+   "check_ids": []
+  },
+  {
+   "id": "T003",
+   "agent_id": "A6",
+   "requirement_ids": [
+    "R005"
+   ],
+   "status": "IN_CORSO",
+   "artifact_ids": [],
+   "check_ids": []
+  },
+  {
+   "id": "T005",
+   "agent_id": "A7",
+   "requirement_ids": [
+    "R004"
+   ],
+   "status": "IN_CORSO",
+   "artifact_ids": [],
+   "check_ids": []
+  }
+ ],
+ "requirements": [
+  {
+   "id": "R001",
+   "priority": "Essenziale",
+   "owner_id": "A2",
+   "acceptance_criterion": "specifica formale con ogni scelta dichiarata e distinta da cio che dice la guida",
+   "status": "In corso"
+  },
+  {
+   "id": "R002",
+   "priority": "Essenziale",
+   "owner_id": "A4",
+   "acceptance_criterion": "implementazione Python con autotest (no lookahead, simmetria, range)",
+   "status": "Aperto"
+  },
+  {
+   "id": "R003",
+   "priority": "Essenziale",
+   "owner_id": "A4",
+   "acceptance_criterion": "studio S1 eseguito esattamente come pre-registrato",
+   "status": "Aperto"
+  },
+  {
+   "id": "R004",
+   "priority": "Essenziale",
+   "owner_id": "A7",
+   "acceptance_criterion": "seconda implementazione indipendente e accordo sul segno >= 85%",
+   "status": "In corso"
+  },
+  {
+   "id": "R005",
+   "priority": "Essenziale",
+   "owner_id": "A6",
+   "acceptance_criterion": "critica del disegno dello studio PRIMA dei numeri e dei risultati dopo",
+   "status": "In corso"
+  },
+  {
+   "id": "R006",
+   "priority": "Utile",
+   "owner_id": "A4",
+   "acceptance_criterion": "proposta EA con regole dichiarate SOLO se S1 mostra un vantaggio; altrimenti 'no motivato'",
+   "status": "Aperto"
+  }
+ ],
  "assumptions": [],
  "evidence": [],
  "messages": [],
- "decisions": [],
+ "decisions": [
+  {
+   "id": "D001",
+   "questione": "Griglia di qualita: pesi di default (20/20/15/15/10/10/10), soglia 90",
+   "scelta": "adottata invariata",
+   "motivo": "nessun motivo di dominio per cambiarla, registrata prima del ciclo 0"
+  }
+ ],
  "issues": [],
  "checks": [],
  "scores": [],
