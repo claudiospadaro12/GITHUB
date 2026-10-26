@@ -2,8 +2,9 @@
 #  MARCATORE_ANNO80K_TESTER_TRANCHE_v1
 #  ANNO80K_TESTER_TRANCHE.ps1 -Ex5Nome '<file>.ex5' -- TEST A FONDO di UN EA del MQL5 Market (demo, solo tester) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ.
 #  VARIANTE di ARENA5K_MESE (conto prop 80.000 EUR, 26/10/2026): UN SOLO ANNO scelto con -Anno AAAA (e -Modello, default 1, -Periodo, default H1) a conto vuoto; stesse guardie. Previsioni: report/MARKET_TEST_80K_ATTESE_2026-10-19.md. Originale: 21 tranche MENSILI (ognuna a conto vuoto) piu UNA corsa CONTINUA 2025.01.01 -> 2026.10.01, XAUUSD H1, ticks reali, nessun input imposto.
+#  v3 ANNO80K (26/10/2026, sera): -Simbolo (default XAUUSD) per gli EA da forex con OneChartSetup (Luna AI Pro: grafico EURUSD M5 e le 8 coppie negli input). Cambia SOLO il simbolo del grafico e il testo.
 #  v2 ANNO80K (26/10/2026, 15:00): -Periodo ammette D1 (il report del tester lo scrive Daily: campo Ril), correzione dopo che le 5 passate di Goldbot One si sono fermate sul controllo del periodo.
-#  v1 ANNO80K (26/10/2026): copia di ANNO5K_TESTER.ps1 con DEPOSITO 80.000 EUR (prop FTMO). Serve per Gold Reaper, Goldbot One, Prop Firm Gold sui tre anni 2013/2018/2020 + calibrazione 2025 (Modello 1 contro Modello 4). Stesse guardie, stesso -Imposti, -Modello (4 = tick reali) e -Periodo (D1 per Goldbot One).
+#  v1 ANNO80K (26/10/2026): copia di ANNO5K_TESTER.ps1 con DEPOSITO 80.000 EUR (prop FTMO). Serve per Gold Reaper, Goldbot One, Prop Firm Gold sui tre anni 2013/2018/2020 + calibrazione 2025 (Modello 1 contro Modello 4). Stesse guardie, stesso -Imposti, -Modello (4 = tick reali) e -Periodo (D1 per Goldbot One). v3: la finestra del giornale si confronta con Ril (Daily per D1), cosi D1 non da piu KO di etichetta.
 #  DERIVATO da SCREEN_TESTER_TRANCHE.ps1 (stesse guardie). Regole e soglie scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md.
 #  E' UN BACKTEST: AllowLiveTrading=false. NON TOCCA C:\MT5_Backtest, C:\FundedNext_Manuale, il VPS. NIENTE EMOJI QUI DENTRO (regola del 17/08).
 # =====================================================================
@@ -17,6 +18,7 @@ param(
   [string]$Anno = '',
   [int]$Modello = 1,
   [string]$Periodo = 'H1',
+  [string]$Simbolo = 'XAUUSD',
   [string]$Base = ''
 )
 
@@ -32,7 +34,8 @@ if($TOK.Length -gt 24){ $TOK = $TOK.Substring(0, 24) }
 $TOKU = $TOK.ToUpper(); $TOKL = $TOK.ToLower()
 $TOKEXP = [regex]::Replace([IO.Path]::GetFileNameWithoutExtension($Ex5Nome), '[^A-Za-z0-9]', '').ToLower()
 $NOME_D   = 'ANNO80K_' + $TOKU
-$SIMBOLO  = 'XAUUSD'
+if($Simbolo -notmatch '^[A-Za-z0-9._]{3,14}$'){ throw ('-Simbolo "' + $Simbolo + '" non valido') }
+$SIMBOLO  = $Simbolo
 # NIENTE $PERIODO qui: questo giro ha DUE periodi del grafico e li porta ognuna la sua voce di $SONDE ($s.Per). Una variabile
 # unica di periodo sarebbe falsa e finirebbe nei titoli e nel referto (classe 1499: i conteggi e le etichette si COSTRUISCONO).
 $MODELLO  = $Modello
@@ -425,7 +428,7 @@ $referto = New-Object System.Collections.ArrayList
 $esiti = @{}; foreach($sx in $SONDE_TUTTE){ $esiti[$sx.Nome] = 'SALTATA' }
 $fermaEx5 = ''
 foreach($s in $SONDE){
-  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', XAUUSD ' + $s.Per + ', Modello ' + $MODELLO + ', deposito ' + $DEPOSITO + ' EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
+  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', ' + $SIMBOLO + ' ' + $s.Per + ', Modello ' + $MODELLO + ', deposito ' + $DEPOSITO + ' EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
   $esiti[$s.Nome] = 'NON_LANCIATA'
   if($fermaEx5 -ne ''){
     # v2 (classe 1438): niente ore di tester su un binario che non e' quello dell'impronta
@@ -489,7 +492,7 @@ foreach($s in $SONDE){
   $finest = 'non letta'
   if($st.Fin.Count -ge 1){
     $kk = @($st.Fin.Keys)
-    $giuste = @($kk | Where-Object { $_ -eq ($SIMBOLO + '|' + $s.Per + '|' + $s.Da + '|00:00|' + $s.A + '|00:00') })
+    $giuste = @($kk | Where-Object { $_ -eq ($SIMBOLO + '|' + $s.Ril + '|' + $s.Da + '|00:00|' + $s.A + '|00:00') })
     if($giuste.Count -eq $kk.Count){ $finest = $s.Da + '-' + $s.A } else { $finest = 'DIVERSA: ' + ($kk -join ' / '); [void]$motivi.Add('finestra girata ' + ($kk -join ' / ') + ' invece di ' + $SIMBOLO + ',' + $s.Per + ' ' + $s.Da + '-' + $s.A) }
   }
   if($null -ne $st.Barre){
