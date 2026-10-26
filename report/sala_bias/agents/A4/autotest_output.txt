@@ -1,0 +1,35 @@
+PASS  T1a EMA(3) seme SMA su 1..6 = [-,-,2,3,4,5]
+PASS  T1b RSI(14) di serie strettamente crescente = 100
+PASS  T1c RSI(14) con up/down alternati di pari ampiezza e vicino a 50  | RSI=51.918
+PASS  T1d ATR(14) con range costante 2 = 2
+PASS  T1e ATR Wilder: (2*13+16)/14 = 3.0  | ATR=3.000000
+PASS  T2 componenti in [-1,1] e score in [-100,100] (D1 e W1 reali, tutte le barre)  | violazioni=0, barre con score D1=5750/5763, W1=1153/1166, max|S| D1=95.5 W1=90.5
+PASS  T2b score in [-100,100] su 2500 barre sintetiche
+PASS  T3a simmetria specchio su 2500 barre sintetiche (componenti e score: s(specchio) = -s; tolleranza 1e-7 per l'arrotondamento di K-P)  | max|s+s'|=8.25e-10 su 2487 score
+PASS  T3b simmetria specchio su D1 reale (informativa: eventuali differenze solo da pareggi esatti, I7)  | barre con |S+S'|>1e-6: 0 su 5750 (max 1.02e-10)
+PASS  T4a invarianza: prezzi x7,3 e volume x100 => stesso score (volume normalizzato su media mobile corta a 20 barre)  | max diff=1.14e-12
+PASS  T4b invarianza per traslazione dei prezzi (+5000)  | max diff=3.72e-10
+PASS  T5 volumi tutti 0 -> componente VO N/A e pesi rinormalizzati a 100
+PASS  T5b storico corto (60 barre): Trend (EMA200) e Momentum (<100 barre) N/A, nessun valore inventato
+PASS  T6a zigzag ascendente (massimi e minimi crescenti) -> HH/HL, P=+1  | (1, 'HH/HL')
+PASS  T6b zigzag discendente -> LH/LL, P=-1
+PASS  T6c chiusura oltre l'ultimo swing high entro 5 barre -> BOS▲ (pattern concorde)  | {'label': 'HH/HL', 'rottura': 'BOS▲'}
+PASS  T6d sMS = 0.6*P + 0.4*B = 1.0 con HH/HL+BOS  | 1.0
+PASS  T7a quadro: Overall pesato, allineamento "2/3 BULLISH – 1/3 BEARISH", H4 CONTRO-TREND  | {'S': 29.333333333333332, 'bias': 'BULLISH', 'mostrato': 29, 'forza': 'DEBOLE', 'allineamento': '2/3 BULLISH – 1/3 BEARISH', 'conf': 33.03333333333333, 'contro_trend': {'W1': False, 'D1': False, 'H4': True}, 'htf': 'BULLISH', 'htf_S': 29.333333333333332}
+PASS  T7b forza: 0-9 MOLTO DEBOLE, 10-29 DEBOLE, 30-69 NEUTRO, 70-89 FORTE, 90-100 MOLTO FORTE
+PASS  T7c bias: |S|<15 NEUTRAL, -75 -> BEARISH 75, arrotondamento half-up
+PASS  T7d alert BIAS CHANGING (picco-S0>=20, 2 cali, >=2 componenti contrari)
+PASS  T7e WEAKENING se 1+2 vere ma 3 falsa; nessun alert con una sola candela contraria
+PASS  T8a fusione: nessuna barra di domenica/sabato, tickvol e conteggio barre conservati  | barre fuse=5766, domeniche fuse=1084
+PASS  T8b fusione puntuale 2026-10-18(dom)+2026-10-19(lun): open dom, high/low estremi, close lun, tickvol sommato
+PASS  T8c fusione causale: fusione del troncato = prefisso della fusione intera
+PASS  T9 regola W1: il venerdi' t non vede la settimana k (S_W1 invariato se si altera il close di venerdi'), il lunedi' la vede  | ven 2018-03-09: sW 16.1589->16.1589 | lun 2018-03-12: sW 12.7439->-36.1494
+PASS  T10 buffer limitato alle ultime 5000 barre (S17) vs storico intero: differenza S_D1 trascurabile  | max diff S_D1=0.00e+00 su 6 date
+PASS  T11a rendimento sintetico: t=1,h=3: close[4]/open[2]-1 = 14.5/12-1 = 0.208333..
+PASS  T11b rendimento reale t=2020-03-02, h=5: entrata open 2020-03-03 (1591.91), uscita close 2020-03-09 (1666.36)  | r=0.046768
+PASS  T11c stesso esempio letto dal CSV grezzo: open(2020.03.03)=1591.91 close(2020.03.09)=1666.36 -> 0.046768
+PASS  T12 CAUSALITA' (i) prefisso: score a t su dati troncati a t identico a quello sull'intera serie, 327 date  | max |diff|=0.000e+00
+PASS  T13 CAUSALITA' (ii) serie sporcata: barre future sostituite da rumore, 40 date  | max |diff|=0.000e+00
+PASS  T13b controllo di sensibilita': sporcare le barre PASSATE cambia lo score (il test e' capace di fallire)  | diff=23.892
+
+ESITO COMPLESSIVO: TUTTI PASSATI

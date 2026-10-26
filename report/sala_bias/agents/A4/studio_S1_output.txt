@@ -1,0 +1,256 @@
+STUDIO S1 - criteri v2 (D002). Eseguito 2026-10-26 09:41
+Sorgente score: replica A4 interna (bias_replica.py) | EMA valida da 2*n barre | D1 fuso: D1_fuso.csv
+  * verdetto sulla replica, non validata contro l'originale
+  * solo oro, W1+D1, orizzonte giornaliero, 5 e 20 giorni
+  * nessun vantaggio dimostrato non significa nessun vantaggio (si riporta l'MDE)
+  * nessuna regola EA tarabile su questi dati
+
+=== 0. GATE: AUTOTEST (lo studio non parte se uno fallisce) ===
+PASS  T1a EMA(3) seme SMA su 1..6 = [-,-,2,3,4,5]
+PASS  T1b RSI(14) di serie strettamente crescente = 100
+PASS  T1c RSI(14) con up/down alternati di pari ampiezza e vicino a 50  | RSI=51.918
+PASS  T1d ATR(14) con range costante 2 = 2
+PASS  T1e ATR Wilder: (2*13+16)/14 = 3.0  | ATR=3.000000
+PASS  T2 componenti in [-1,1] e score in [-100,100] (D1 e W1 reali, tutte le barre)  | violazioni=0, barre con score D1=5750/5763, W1=1153/1166, max|S| D1=95.5 W1=90.5
+PASS  T2b score in [-100,100] su 2500 barre sintetiche
+PASS  T3a simmetria specchio su 2500 barre sintetiche (componenti e score: s(specchio) = -s; tolleranza 1e-7 per l'arrotondamento di K-P)  | max|s+s'|=8.25e-10 su 2487 score
+PASS  T3b simmetria specchio su D1 reale (informativa: eventuali differenze solo da pareggi esatti, I7)  | barre con |S+S'|>1e-6: 0 su 5750 (max 1.02e-10)
+PASS  T4a invarianza: prezzi x7,3 e volume x100 => stesso score (volume normalizzato su media mobile corta a 20 barre)  | max diff=1.14e-12
+PASS  T4b invarianza per traslazione dei prezzi (+5000)  | max diff=3.72e-10
+PASS  T5 volumi tutti 0 -> componente VO N/A e pesi rinormalizzati a 100
+PASS  T5b storico corto (60 barre): Trend (EMA200) e Momentum (<100 barre) N/A, nessun valore inventato
+PASS  T6a zigzag ascendente (massimi e minimi crescenti) -> HH/HL, P=+1  | (1, 'HH/HL')
+PASS  T6b zigzag discendente -> LH/LL, P=-1
+PASS  T6c chiusura oltre l'ultimo swing high entro 5 barre -> BOS▲ (pattern concorde)  | {'label': 'HH/HL', 'rottura': 'BOS▲'}
+PASS  T6d sMS = 0.6*P + 0.4*B = 1.0 con HH/HL+BOS  | 1.0
+PASS  T7a quadro: Overall pesato, allineamento "2/3 BULLISH – 1/3 BEARISH", H4 CONTRO-TREND  | {'S': 29.333333333333332, 'bias': 'BULLISH', 'mostrato': 29, 'forza': 'DEBOLE', 'allineamento': '2/3 BULLISH – 1/3 BEARISH', 'conf': 33.03333333333333, 'contro_trend': {'W1': False, 'D1': False, 'H4': True}, 'htf': 'BULLISH', 'htf_S': 29.333333333333332}
+PASS  T7b forza: 0-9 MOLTO DEBOLE, 10-29 DEBOLE, 30-69 NEUTRO, 70-89 FORTE, 90-100 MOLTO FORTE
+PASS  T7c bias: |S|<15 NEUTRAL, -75 -> BEARISH 75, arrotondamento half-up
+PASS  T7d alert BIAS CHANGING (picco-S0>=20, 2 cali, >=2 componenti contrari)
+PASS  T7e WEAKENING se 1+2 vere ma 3 falsa; nessun alert con una sola candela contraria
+PASS  T8a fusione: nessuna barra di domenica/sabato, tickvol e conteggio barre conservati  | barre fuse=5766, domeniche fuse=1084
+PASS  T8b fusione puntuale 2026-10-18(dom)+2026-10-19(lun): open dom, high/low estremi, close lun, tickvol sommato
+PASS  T8c fusione causale: fusione del troncato = prefisso della fusione intera
+PASS  T9 regola W1: il venerdi' t non vede la settimana k (S_W1 invariato se si altera il close di venerdi'), il lunedi' la vede  | ven 2018-03-09: sW 16.1589->16.1589 | lun 2018-03-12: sW 12.7439->-36.1494
+PASS  T10 buffer limitato alle ultime 5000 barre (S17) vs storico intero: differenza S_D1 trascurabile  | max diff S_D1=0.00e+00 su 6 date
+PASS  T11a rendimento sintetico: t=1,h=3: close[4]/open[2]-1 = 14.5/12-1 = 0.208333..
+PASS  T11b rendimento reale t=2020-03-02, h=5: entrata open 2020-03-03 (1591.91), uscita close 2020-03-09 (1666.36)  | r=0.046768
+PASS  T11c stesso esempio letto dal CSV grezzo: open(2020.03.03)=1591.91 close(2020.03.09)=1666.36 -> 0.046768
+PASS  T12 CAUSALITA' (i) prefisso: score a t su dati troncati a t identico a quello sull'intera serie, 327 date  | max |diff|=0.000e+00
+PASS  T13 CAUSALITA' (ii) serie sporcata: barre future sostituite da rumore, 40 date  | max |diff|=0.000e+00
+PASS  T13b controllo di sensibilita': sporcare le barre PASSATE cambia lo score (il test e' capace di fallire)  | diff=23.892
+PASS  S1 Welch a mano: [1,2,3] vs [2,4,6] -> t=-2/sqrt(5/3)=-1.5492  | df=2.9412
+PASS  S2 mediana pari/dispari
+PASS  S3 episodi: [1,1,0,1,-1,-1,1] -> BULL 3 episodi (2,1,1), BEAR 1
+PASS  S4 ceil(0,6 x anni): 17 -> 11, 10 -> 6
+PASS  S5 permutazione: effetto piantato (+-1%) -> p piccolo (<0,01); nullo -> p non estremo  | p_piantato=0.0020 p_nullo=0.8483
+PASS  S6 calibrazione del test di permutazione sotto H0: 3/40 simulazioni con p<=0,05 (atteso ~5%, accetto <=8)
+GATE: TUTTI I TEST PASSATI
+
+D1 fuso: 5763 barre 2004-06-14 .. 2026-10-16 (ultima settimana 2026-10-19 e barra 2026-10-21 ESCLUSE)
+
+=== 1. FREQUENZE ED EPISODI PER STATO (prima di qualunque rendimento) ===
+--- lettura primaria dal 2008-07-01: 4732 giorni con score (senza score: 0)
+  (a) soglia 15
+    BULL     giorni  2240   47.3%  episodi  122  lunghezza media 18.4 mediana 6.0 max 145
+    BEAR     giorni  1177   24.9%  episodi  100  lunghezza media 11.8 mediana 4.5 max 110
+    NEUTRAL  giorni  1315   27.8%  episodi  221  lunghezza media 6.0 mediana 4.0 max 32
+  (b) segnale deciso |S|>=50
+    BULL     giorni   695   14.7%  episodi   84  lunghezza media 8.3 mediana 4.0 max 43
+    BEAR     giorni   177    3.7%  episodi   35  lunghezza media 5.1 mediana 4.0 max 29
+    NEUTRAL  giorni  3860   81.6%  episodi  120  lunghezza media 32.2 mediana 10.5 max 224
+  lettura |S|>=70 (solo lettura)
+    BULL     giorni   117    2.5%  episodi   26  lunghezza media 4.5 mediana 3.0 max 22
+    BEAR     giorni     7    0.1%  episodi    6  lunghezza media 1.2 mediana 1.0 max 2
+    NEUTRAL  giorni  4608   97.4%  episodi   33  lunghezza media 139.6 mediana 9.0 max 820
+--- lettura robustezza dal 2010-04-01: 4280 giorni con score (senza score: 0)
+  (a) soglia 15
+    BULL     giorni  2036   47.6%  episodi  108  lunghezza media 18.9 mediana 6.0 max 145
+    BEAR     giorni  1086   25.4%  episodi   90  lunghezza media 12.1 mediana 4.5 max 110
+    NEUTRAL  giorni  1158   27.1%  episodi  198  lunghezza media 5.8 mediana 4.0 max 32
+  (b) segnale deciso |S|>=50
+    BULL     giorni   663   15.5%  episodi   75  lunghezza media 8.8 mediana 5.0 max 43
+    BEAR     giorni   162    3.8%  episodi   31  lunghezza media 5.2 mediana 4.0 max 29
+    NEUTRAL  giorni  3455   80.7%  episodi  107  lunghezza media 32.3 mediana 11.0 max 224
+  lettura |S|>=70 (solo lettura)
+    BULL     giorni   117    2.7%  episodi   26  lunghezza media 4.5 mediana 3.0 max 22
+    BEAR     giorni     7    0.2%  episodi    6  lunghezza media 1.2 mediana 1.0 max 2
+    NEUTRAL  giorni  4156   97.1%  episodi   33  lunghezza media 125.9 mediana 9.0 max 820
+  (S_W1 e S_D1 dal 2008-07-01: giorni con S_W1 4732, S_D1 4732 su 4732)
+
+=== 2. RENDIMENTI close[t+h]/open[t+1]-1 (ingresso open t+1, uscita close t+h; nessun costo) ===
+
+--- LETTURA PRIMARIA (t da 2008-07-01) ---
+  [h5_a] ultimo t incluso 2026-10-09 | giorni 4727 | media tutti i giorni 0.174%
+      BULL     n= 2240 media   0.199%  %positivi 54.6%  mediana   0.245%  episodi 122
+      BEAR     n= 1172 media   0.177%  %positivi 53.8%  mediana   0.173%  episodi 100
+      NEUTRAL  n= 1315 media   0.131%  %positivi 55.4%  mediana   0.231%  episodi 221
+      spread BULL-BEAR 0.021% | eccesso BULL 0.024% | eccesso BEAR 0.003%
+      Welch t (non sovrapposti, offset [0, 1, 2, 3, 4]): mediana 0.13 min -0.07 max 0.30 | n minimi BULL/BEAR 440/229 | episodi 122/100 | valutabile SI
+      MDE (80% potenza) 0.586% | t eccesso BULL-vs-resto: mediana 0.20
+  [h5_b] ultimo t incluso 2026-10-09 | giorni 4727 | media tutti i giorni 0.174%
+      BULL     n=  695 media   0.357%  %positivi 57.3%  mediana   0.395%  episodi 84
+      BEAR     n=  177 media   1.038%  %positivi 63.3%  mediana   0.664%  episodi 35
+      NEUTRAL  n= 3855 media   0.102%  %positivi 53.7%  mediana   0.180%  episodi 120
+      spread BULL-BEAR -0.681% | eccesso BULL 0.182% | eccesso BEAR 0.863%
+      Welch t (non sovrapposti, offset [0, 1, 2, 3, 4]): mediana -1.15 min -1.82 max -0.64 | n minimi BULL/BEAR 136/34 | episodi 84/35 | valutabile SI
+      MDE (80% potenza) 1.540% | t eccesso BULL-vs-resto: mediana 0.97
+  [h20_a] ultimo t incluso 2026-09-18 | giorni 4712 | media tutti i giorni 0.733%
+      BULL     n= 2240 media   0.847%  %positivi 54.8%  mediana   0.529%  episodi 122
+      BEAR     n= 1162 media   0.632%  %positivi 55.9%  mediana   0.645%  episodi 99
+      NEUTRAL  n= 1310 media   0.627%  %positivi 55.0%  mediana   0.468%  episodi 221
+      spread BULL-BEAR 0.214% | eccesso BULL 0.114% | eccesso BEAR -0.100%
+      Welch t (non sovrapposti, offset [0, 4, 8, 12, 16]): mediana 0.49 min -0.33 max 0.86 | n minimi BULL/BEAR 107/56 | episodi 122/99 | valutabile SI
+      MDE (80% potenza) 2.208% | t eccesso BULL-vs-resto: mediana 0.32
+  [h20_b] ultimo t incluso 2026-09-18 | giorni 4712 | media tutti i giorni 0.733%
+      BULL     n=  695 media   1.309%  %positivi 59.1%  mediana   0.971%  episodi 84
+      BEAR     n=  177 media   1.992%  %positivi 67.2%  mediana   1.367%  episodi 35
+      NEUTRAL  n= 3840 media   0.571%  %positivi 53.9%  mediana   0.394%  episodi 120
+      spread BULL-BEAR -0.683% | eccesso BULL 0.576% | eccesso BEAR 1.259%
+      Welch t (non sovrapposti, offset [0, 4, 8, 12, 16]): mediana -0.73 min -1.05 max -0.18 | n minimi BULL/BEAR 32/8 | episodi 84/35 | valutabile NO (stato non valutabile)
+      MDE (80% potenza) 5.930% | t eccesso BULL-vs-resto: mediana 0.73
+  Permutazione circolare h=20 (a): T oss (t mediano) 0.49, p unilaterale 0.2666 (n perm 3000, shift disponibili 4593)
+  Permutazione (descrittiva) spread su tutti i giorni h=20 (a): spread oss 0.214%, p 0.3359
+  Due meta: prima 2008-07-01..2016-12-30 spread -0.396% (BULL 798, BEAR 742) | seconda 2017-01-02..2026-09-18 spread 0.396% (BULL 1442, BEAR 420)
+  Anni (h=20, a): valutabili 12, spread>0 in 3, soglia ceil(0,6 x 12) = 8
+      2008  BULL   25 BEAR   70  spread   -13.33%  
+      2009  BULL  166 BEAR   10  spread    -8.04%  (non valutabile)
+      2010  BULL  183 BEAR   12  spread    -2.89%  (non valutabile)
+      2011  BULL  170 BEAR   20  spread    -4.45%  
+      2012  BULL   80 BEAR   81  spread    -1.18%  
+      2013  BULL    5 BEAR  211  spread    -3.95%  (non valutabile)
+      2014  BULL   26 BEAR  142  spread    -2.29%  
+      2015  BULL   22 BEAR  151  spread    -7.03%  
+      2016  BULL  121 BEAR   45  spread     0.24%  
+      2017  BULL   96 BEAR   41  spread    -4.93%  
+      2018  BULL   73 BEAR  113  spread     0.19%  
+      2019  BULL  174 BEAR    4  spread     0.72%  (non valutabile)
+      2020  BULL  210 BEAR    2  spread    -3.84%  (non valutabile)
+      2021  BULL   70 BEAR   74  spread    -3.09%  
+      2022  BULL  109 BEAR  105  spread     1.05%  
+      2023  BULL  160 BEAR   23  spread    -4.46%  
+      2024  BULL  241 BEAR    0  spread       n/d  (non valutabile)
+      2025  BULL  244 BEAR    0  spread       n/d  (non valutabile)
+      2026  BULL   65 BEAR   58  spread    -1.91%  
+  Potenza: MDE h=20(a) 2.208% vs deriva incondizionata 20 gg 0.733% -> potenza INSUFFICIENTE
+  Criterio 1 dettaglio: {'h5_a': 'OK', 'h5_b': 'FAIL', 'h20_a': 'OK', 'h20_b': 'FAIL'}
+  Criterio 5 dettaglio: {'exc_bull': 0.00114, 't_exc_med': 0.32008, 'exc_bear': -0.001, 'exc_bull_pos': True, 't_ok': False, 'bear_sotto_media': True}
+  CRITERI (primaria): 1=FAIL | 2=FAIL | 3=FAIL | 4=FAIL | 5=FAIL
+
+--- LETTURA ROBUSTEZZA (t da 2010-04-01) ---
+  [h5_a] ultimo t incluso 2026-10-09 | giorni 4275 | media tutti i giorni 0.167%
+      BULL     n= 2036 media   0.208%  %positivi 54.9%  mediana   0.264%  episodi 108
+      BEAR     n= 1081 media   0.053%  %positivi 53.0%  mediana   0.126%  episodi 90
+      NEUTRAL  n= 1158 media   0.202%  %positivi 55.6%  mediana   0.243%  episodi 198
+      spread BULL-BEAR 0.156% | eccesso BULL 0.041% | eccesso BEAR -0.115%
+      Welch t (non sovrapposti, offset [0, 1, 2, 3, 4]): mediana 0.88 min 0.55 max 1.07 | n minimi BULL/BEAR 400/212 | episodi 108/90 | valutabile SI
+      MDE (80% potenza) 0.536% | t eccesso BULL-vs-resto: mediana 0.34
+  [h5_b] ultimo t incluso 2026-10-09 | giorni 4275 | media tutti i giorni 0.167%
+      BULL     n=  663 media   0.414%  %positivi 58.2%  mediana   0.476%  episodi 75
+      BEAR     n=  162 media   0.633%  %positivi 61.7%  mediana   0.625%  episodi 31
+      NEUTRAL  n= 3450 media   0.098%  %positivi 53.6%  mediana   0.175%  episodi 107
+      spread BULL-BEAR -0.219% | eccesso BULL 0.247% | eccesso BEAR 0.466%
+      Welch t (non sovrapposti, offset [0, 1, 2, 3, 4]): mediana -0.39 min -1.33 max 0.15 | n minimi BULL/BEAR 131/31 | episodi 75/31 | valutabile SI
+      MDE (80% potenza) 1.186% | t eccesso BULL-vs-resto: mediana 1.16
+  [h20_a] ultimo t incluso 2026-09-18 | giorni 4260 | media tutti i giorni 0.697%
+      BULL     n= 2036 media   0.971%  %positivi 55.5%  mediana   0.572%  episodi 108
+      BEAR     n= 1071 media   0.231%  %positivi 53.8%  mediana   0.315%  episodi 89
+      NEUTRAL  n= 1153 media   0.646%  %positivi 53.7%  mediana   0.374%  episodi 198
+      spread BULL-BEAR 0.740% | eccesso BULL 0.274% | eccesso BEAR -0.466%
+      Welch t (non sovrapposti, offset [0, 4, 8, 12, 16]): mediana 1.22 min 0.58 max 1.63 | n minimi BULL/BEAR 95/52 | episodi 108/89 | valutabile SI
+      MDE (80% potenza) 2.100% | t eccesso BULL-vs-resto: mediana 0.76
+  [h20_b] ultimo t incluso 2026-09-18 | giorni 4260 | media tutti i giorni 0.697%
+      BULL     n=  663 media   1.453%  %positivi 59.9%  mediana   1.016%  episodi 75
+      BEAR     n=  162 media   1.157%  %positivi 64.2%  mediana   1.138%  episodi 31
+      NEUTRAL  n= 3435 media   0.530%  %positivi 53.1%  mediana   0.296%  episodi 107
+      spread BULL-BEAR 0.296% | eccesso BULL 0.756% | eccesso BEAR 0.460%
+      Welch t (non sovrapposti, offset [0, 4, 8, 12, 16]): mediana 0.06 min -1.09 max 0.95 | n minimi BULL/BEAR 32/7 | episodi 75/31 | valutabile NO (stato non valutabile)
+      MDE (80% potenza) 4.180% | t eccesso BULL-vs-resto: mediana 0.76
+  Permutazione circolare h=20 (a): T oss (t mediano) 1.22, p unilaterale 0.0913 (n perm 3000, shift disponibili 4141)
+  Permutazione (descrittiva) spread su tutti i giorni h=20 (a): spread oss 0.740%, p 0.1283
+  Due meta: prima 2010-04-01..2016-12-30 spread 0.456% (BULL 594, BEAR 651) | seconda 2017-01-02..2026-09-18 spread 0.396% (BULL 1442, BEAR 420)
+  Anni (h=20, a): valutabili 11, spread>0 in 3, soglia ceil(0,6 x 11) = 7
+      2010  BULL  170 BEAR    1  spread    -4.20%  (non valutabile)
+      2011  BULL  170 BEAR   20  spread    -4.45%  
+      2012  BULL   80 BEAR   81  spread    -1.18%  
+      2013  BULL    5 BEAR  211  spread    -3.95%  (non valutabile)
+      2014  BULL   26 BEAR  142  spread    -2.29%  
+      2015  BULL   22 BEAR  151  spread    -7.03%  
+      2016  BULL  121 BEAR   45  spread     0.24%  
+      2017  BULL   96 BEAR   41  spread    -4.93%  
+      2018  BULL   73 BEAR  113  spread     0.19%  
+      2019  BULL  174 BEAR    4  spread     0.72%  (non valutabile)
+      2020  BULL  210 BEAR    2  spread    -3.84%  (non valutabile)
+      2021  BULL   70 BEAR   74  spread    -3.09%  
+      2022  BULL  109 BEAR  105  spread     1.05%  
+      2023  BULL  160 BEAR   23  spread    -4.46%  
+      2024  BULL  241 BEAR    0  spread       n/d  (non valutabile)
+      2025  BULL  244 BEAR    0  spread       n/d  (non valutabile)
+      2026  BULL   65 BEAR   58  spread    -1.91%  
+  Potenza: MDE h=20(a) 2.100% vs deriva incondizionata 20 gg 0.697% -> potenza INSUFFICIENTE
+  Criterio 1 dettaglio: {'h5_a': 'OK', 'h5_b': 'FAIL', 'h20_a': 'OK', 'h20_b': 'NV'}
+  Criterio 5 dettaglio: {'exc_bull': 0.00274, 't_exc_med': 0.75991, 'exc_bear': -0.00466, 'exc_bull_pos': True, 't_ok': False, 'bear_sotto_media': True}
+  CRITERI (robustezza): 1=FAIL | 2=FAIL | 3=OK | 4=FAIL | 5=FAIL
+
+=== 3. BENCHMARK BANALI (stessa macchina) ===
+--- B1 (segno close D1 - EMA200 D1), lettura primaria
+    h= 5  media BULL 0.206% (n 3131) | media BEAR 0.112% (n 1596) | media tutti 0.174% | spread 0.094% | t mediano 0.64 [0.05..0.92]
+    h=20  media BULL 0.776% (n 3129) | media BEAR 0.647% (n 1583) | media tutti 0.733% | spread 0.129% | t mediano 0.42 [-0.39..0.83]
+    p permutazione h=20: 0.2649 | criteri: 1=OK 2=FAIL 3=FAIL 4=FAIL 5=FAIL
+--- B1 (segno close D1 - EMA200 D1), lettura robustezza
+    h= 5  media BULL 0.221% (n 2761) | media BEAR 0.069% (n 1514) | media tutti 0.167% | spread 0.153% | t mediano 1.03 [0.45..1.26]
+    h=20  media BULL 0.849% (n 2759) | media BEAR 0.417% (n 1501) | media tutti 0.697% | spread 0.432% | t mediano 0.81 [0.42..1.22]
+    p permutazione h=20: 0.2079 | criteri: 1=OK 2=FAIL 3=FAIL 4=FAIL 5=FAIL
+--- B2 (segno rendimento 250 giorni), lettura primaria
+    h= 5  media BULL 0.183% (n 3128) | media BEAR 0.157% (n 1598) | media tutti 0.174% | spread 0.026% | t mediano 0.19 [-0.21..0.39]
+    h=20  media BULL 0.746% (n 3118) | media BEAR 0.709% (n 1593) | media tutti 0.733% | spread 0.037% | t mediano -0.20 [-0.29..0.15]
+    p permutazione h=20: 0.5548 | criteri: 1=OK 2=FAIL 3=FAIL 4=FAIL 5=FAIL
+--- B2 (segno rendimento 250 giorni), lettura robustezza
+    h= 5  media BULL 0.213% (n 2788) | media BEAR 0.082% (n 1487) | media tutti 0.167% | spread 0.131% | t mediano 0.87 [0.61..1.08]
+    h=20  media BULL 0.842% (n 2778) | media BEAR 0.425% (n 1482) | media tutti 0.697% | spread 0.418% | t mediano 0.60 [0.19..1.11]
+    p permutazione h=20: 0.2286 | criteri: 1=OK 2=FAIL 3=FAIL 4=NV 5=FAIL
+  Medie ASSOLUTE a confronto (h=20, lettura primaria): replica BULL 0.847% BEAR 0.632% | B1 BULL 0.776% BEAR 0.647% | B2 BULL 0.746% BEAR 0.709% | tutti i giorni 0.733%
+
+=== 4. SOLO DESCRITTIVO: h=60, leave-out, regimi EX-POST (non utilizzabili come filtro), taglio EX-ANTE ===
+--- lettura primaria
+  h=60 (a): spread 1.613% | BULL n 2229 media 3.294% | BEAR n 1154 media 1.682% | tutti 2.366% | t mediano 0.89 [0.34..1.82] (offset [0, 12, 24, 36, 48]) ultimo t 2026-07-24
+  leave-out senza_2008             h=20 (a): spread 0.600% (BULL 2215, BEAR 1092) media tutti 0.783%
+  leave-out senza_2025_2026        h=20 (a): spread -0.161% (BULL 1931, BEAR 1104) media tutti 0.584%
+  leave-out senza_2008_2025_2026   h=20 (a): spread 0.252% (BULL 1906, BEAR 1034) media tutti 0.635%
+  REGIMI EX-POST (anni 2009-2025; etichetta: EX-POST, non utilizzabile come filtro). Rendimenti annui:
+     2009 +26.8% LONG, 2010 +29.1% LONG, 2011 +10.3% LONG, 2012 +7.2% LATERALE, 2013 -28.0% SHORT, 2014 -1.5% LATERALE, 2015 -10.7% SHORT, 2016 +8.6% LATERALE, 2017 +13.1% LONG, 2018 -1.7% LATERALE, 2019 +18.7% LONG, 2020 +24.6% LONG, 2021 -3.5% LATERALE, 2022 -0.3% LATERALE, 2023 +13.1% LONG, 2024 +27.2% LONG, 2025 +64.5% LONG
+    LONG      anni  9 (2009,2010,2011,2017,2019,2020,2023,2024,2025) giorni 2328 BULL 1644 (ep  78, media 1.481%) BEAR  112 (ep  27, media 4.574%) spread -3.093%
+    SHORT     anni  2 (2013,2015) giorni  518 BULL   27 (ep   4, media -6.401%) BEAR  362 (ep  23, media -0.911%) spread -5.490%
+    LATERALE  anni  6 (2012,2014,2016,2018,2021,2022) giorni 1551 BULL  479 (ep  37, media -0.123%) BEAR  560 (ep  47, media 0.317%) spread -0.440%
+  TAGLIO EX-ANTE (terzili espansivi ATR14/close; segno rend. 250 gg), h=20 (a):
+    ATR_alto     giorni 1062 BULL  511 (ep  52, media -0.593%) BEAR  310 (ep  34, media 1.826%) spread -2.419%
+    ATR_basso    giorni 1919 BULL  874 (ep 105, media 1.198%) BEAR  435 (ep  55, media -0.335%) spread 1.532%
+    ATR_medio    giorni 1731 BULL  855 (ep 111, media 1.348%) BEAR  417 (ep  71, media 0.754%) spread 0.594%
+    rend250_giu  giorni 1594 BULL  301 (ep  69, media 0.528%) BEAR  781 (ep  63, media 0.509%) spread 0.020%
+    rend250_su   giorni 3118 BULL 1939 (ep 126, media 0.896%) BEAR  381 (ep  51, media 0.886%) spread 0.010%
+--- lettura robustezza
+  h=60 (a): spread 2.282% | BULL n 2025 media 3.370% | BEAR n 1063 media 1.088% | tutti 2.116% | t mediano 1.44 [0.58..1.68] (offset [0, 12, 24, 36, 48]) ultimo t 2026-07-24
+  leave-out senza_2008             h=20 (a): spread 0.740% (BULL 2036, BEAR 1071) media tutti 0.697%
+  leave-out senza_2025_2026        h=20 (a): spread 0.367% (BULL 1727, BEAR 1013) media tutti 0.526%
+  leave-out senza_2008_2025_2026   h=20 (a): spread 0.367% (BULL 1727, BEAR 1013) media tutti 0.526%
+  TAGLIO EX-ANTE (terzili espansivi ATR14/close; segno rend. 250 gg), h=20 (a):
+    ATR_alto     giorni  834 BULL  437 (ep  42, media -0.025%) BEAR  233 (ep  26, media 0.581%) spread -0.606%
+    ATR_basso    giorni 1893 BULL  861 (ep  99, media 1.163%) BEAR  435 (ep  55, media -0.335%) spread 1.498%
+    ATR_medio    giorni 1533 BULL  738 (ep 102, media 1.337%) BEAR  403 (ep  68, media 0.638%) spread 0.699%
+    rend250_giu  giorni 1482 BULL  268 (ep  57, media 0.640%) BEAR  740 (ep  57, media 0.074%) spread 0.565%
+    rend250_su   giorni 2778 BULL 1768 (ep 109, media 1.021%) BEAR  331 (ep  45, media 0.581%) spread 0.441%
+
+=== 5. ESITO SUI 5 CRITERI (lato A4, regole operative R1-R10) ===
+criterio   primaria     robustezza  
+1          FAIL         FAIL        
+2          FAIL         FAIL        
+3          FAIL         OK          
+4          FAIL         FAIL        
+5          FAIL         FAIL        
+ESITO: C  | criteri non soddisfatti o non valutabili con potenza insufficiente: [('primaria', 1, 'FAIL'), ('primaria', 2, 'FAIL'), ('primaria', 3, 'FAIL'), ('primaria', 4, 'FAIL'), ('primaria', 5, 'FAIL'), ('robustezza', 1, 'FAIL'), ('robustezza', 2, 'FAIL'), ('robustezza', 4, 'FAIL'), ('robustezza', 5, 'FAIL')]
+(C) NON CONCLUSIVO (potenza)
+  * verdetto sulla replica, non validata contro l'originale
+  * solo oro, W1+D1, orizzonte giornaliero, 5 e 20 giorni
+  * nessun vantaggio dimostrato non significa nessun vantaggio (si riporta l'MDE)
+  * nessuna regola EA tarabile su questi dati
+  * nessuna regola EA da proporre sulla base di questo studio

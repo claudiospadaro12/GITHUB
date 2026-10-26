@@ -1,0 +1,13 @@
+PREPARA_DATI (A4)
+barre raw: 6851 (da 2004-06-11 a 2026-10-21) | domeniche raw: 1084
+barre fuse totali (dal 2004-06-14): 5766, di cui con domenica fusa: 1084
+ESCLUSE dalle uscite le barre con data >= 2026-10-19 (ultima settimana; incl. 2026-10-21): 3 barre
+D1_fuso.csv: 5763 barre, da 2004-06-14 a 2026-10-16
+W1_fuso.csv: 1166 settimane, da 2004-06-14 a 2026-10-12 (ultima settimana inclusa: 2026-10-12, 5 barre)
+
+CONFRONTO CON agents/A3/weekly_W1.csv (A3 parte dal 2004-06-11 e include l'ultima settimana):
+W1 mie: 1166 (da 2004-06-14 a 2026-10-12) | W1 A3: 1168 (da 2004-06-07 a 2026-10-19)
+settimane solo in A3: ['2004-06-07', '2026-10-19']
+settimane solo mie: []
+settimane in comune: 1166 | differenze di valore/conteggio: 0
+NOTA: la settimana 2004-06-07 di A3 ha 1 sola barra (venerdi 2004-06-11) ed e' esclusa dalla mia serie; la settimana 2026-10-19 e' esclusa per criteri v2 punto 11.

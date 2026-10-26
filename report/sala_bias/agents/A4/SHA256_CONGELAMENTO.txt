@@ -1,0 +1,11 @@
+CONGELAMENTO SHA256 - A4, SALA-BIAS-001 (criteri v2 punto 9)
+Scritto il 2026-10-26 09:38:30 PRIMA di eseguire studio_S1.py sui rendimenti (nessun rendimento reale e' stato calcolato finora: lo studio e' stato provato solo su dati sintetici, poi cancellati).
+Verifica: sha256sum <file> deve dare lo stesso valore. Percorsi relativi alla cartella agents/A4/ (specifica: ../A2/).
+
+87a07c90e2582fde5da9e29731741a5f71c4409b90106855ea3e7a39d067cbe2  ../A2/specifica_replica.md
+b36ea1f1c1fdf15f10b05d2af6d74641e107c7b8d06b82f819867dabad3a9b09  bias_replica.py
+11ef2e8795f1e0edeeb541194d5c86b2211cb7901415037ff11280826d79c31b  D1_fuso.csv
+48a2304de65ccbba6ee5dfd63286aaabaf846e194ca6b3d58fc7ac58e42f8299  studio_S1.py
+--- file ausiliari (non richiesti dal punto 9, riportati per completezza) ---
+9a2a484251aff5ef6fcd1e0e41e9c7bbbe2cf1b08868e53dc8241f8cc2ae1c97  prepara_dati.py
+83a158ca792ad5c1c6628090bcc42d1fd7b07702afcb4a50fc00ab4dfb301d7f  W1_fuso.csv

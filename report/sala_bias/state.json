@@ -2,15 +2,15 @@
  "project_id": "SALA-BIAS-001",
  "project_name": "Replica del MULTI TF BIAS DASHBOARD e studio del segnale",
  "mode": "MISTA",
- "state_version": 4,
- "updated_at": "2026-10-26T09:25:00Z",
+ "state_version": 5,
+ "updated_at": "2026-10-26T09:42:16Z",
  "candidate_version": "nessuna (ciclo 0 non iniziato)",
- "phase": "CICLO 0 - ESECUZIONE (A4)",
+ "phase": "CICLO 0 - VERIFICA E CRITICA DEI RISULTATI",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
   "available_parallel_slots": null,
-  "active_processes": 1
+  "active_processes": 2
  },
  "agents": [
   {
@@ -49,7 +49,7 @@
    "id": "A4",
    "role": "Progettazione ed esecuzione (implementazione e studio S1)",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": "T004",
    "last_event_id": null
   },
@@ -65,7 +65,7 @@
    "id": "A6",
    "role": "Revisore critico indipendente",
    "kind": "REALE",
-   "status": "COMPLETATO",
+   "status": "IN_REVISIONE",
    "current_task_id": "T003",
    "last_event_id": null
   },
@@ -73,7 +73,7 @@
    "id": "A7",
    "role": "Verificatore (implementazione indipendente)",
    "kind": "REALE",
-   "status": "COMPLETATO",
+   "status": "IN_REVISIONE",
    "current_task_id": "T005",
    "last_event_id": null
   }
@@ -131,6 +131,31 @@
    "requirement_ids": [
     "R002",
     "R003"
+   ],
+   "status": "COMPLETATO",
+   "artifact_ids": [
+    "agents/A4/bias_replica.py",
+    "agents/A4/studio_S1.py",
+    "agents/A4/studio_S1_output.txt",
+    "agents/A4/SHA256_CONGELAMENTO.txt"
+   ],
+   "check_ids": []
+  },
+  {
+   "id": "T006",
+   "agent_id": "A7",
+   "requirement_ids": [
+    "R004"
+   ],
+   "status": "IN_CORSO",
+   "artifact_ids": [],
+   "check_ids": []
+  },
+  {
+   "id": "T007",
+   "agent_id": "A6",
+   "requirement_ids": [
+    "R005"
    ],
    "status": "IN_CORSO",
    "artifact_ids": [],
@@ -230,7 +255,68 @@
    "status": "Aperto (test obbligatori in v2; chiusura dopo l'esecuzione)"
   }
  ],
- "checks": [],
+ "checks": [
+  {
+   "id": "C001",
+   "type": "ricalcolo",
+   "requirement_ids": [
+    "R004"
+   ],
+   "outcome": "SUPERATO",
+   "executed_by": "C0",
+   "evidence_ref": "sha256sum -c su 6 file di agents/A4: OK; autotest bias_replica 'TUTTI PASSATI' (rieseguito)"
+  },
+  {
+   "id": "C002",
+   "type": "riesecuzione",
+   "requirement_ids": [
+    "R003"
+   ],
+   "outcome": "SUPERATO",
+   "executed_by": "C0",
+   "evidence_ref": "studio_S1.py rieseguito: stessi numeri dell'esecuzione di A4 (15 s)"
+  },
+  {
+   "id": "C003",
+   "type": "confronto repliche",
+   "requirement_ids": [
+    "R004"
+   ],
+   "outcome": "SUPERATO",
+   "executed_by": "C0",
+   "evidence_ref": "accordo_score.py A4 vs A7 su 4.732 giorni: segno concorde 95,5% (>=85), kappa 0,866 (>=0,70), correlazione 0,982 (>=0,90)"
+  },
+  {
+   "id": "C004",
+   "type": "riuso studio su replica A7",
+   "requirement_ids": [
+    "R003"
+   ],
+   "outcome": "SUPERATO",
+   "executed_by": "C0",
+   "evidence_ref": "studio_S1.py --score-csv A7: stesso esito C"
+  },
+  {
+   "id": "C005",
+   "type": "ricalcolo indipendente dei rendimenti e della fusione",
+   "requirement_ids": [
+    "R003"
+   ],
+   "outcome": "NON_ESEGUITO",
+   "executed_by": "A7",
+   "evidence_ref": "T006 in corso"
+  },
+  {
+   "id": "C006",
+   "type": "critica dei risultati e del codice",
+   "requirement_ids": [
+    "R005"
+   ],
+   "outcome": "NON_ESEGUITO",
+   "executed_by": "A6",
+   "evidence_ref": "T007 in corso"
+  }
+ ],
  "scores": [],
  "artifacts": [],
  "last_event_id": null
