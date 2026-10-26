@@ -16,6 +16,22 @@ ANNI = {'2013': 'SHORT', '2018': 'LATERALE', '2020': 'LONG'}
 # riferimento Modello 4 gia in repo (primi 12 mesi di una corsa continua da 80.000 il 01/01/2025); Goldbot One: dalla corsa 2025_M4 di questa riga
 REF_M4 = {'GOLDREAPER': ('GR80K_20261020', None), 'PROPFIRM': ('TEST80K_20261019/DEEP80K_PROPFIRMGOLDEA', None)}
 
+ETICHETTA = re.compile(r'^finestra girata XAUUSD\|Daily\|(\d{4}\.\d\d\.\d\d)\|00:00\|(\d{4}\.\d\d\.\d\d)\|00:00 invece di XAUUSD,D1 (\d{4}\.\d\d\.\d\d)-(\d{4}\.\d\d\.\d\d)$')
+
+def solo_etichetta_daily(motivi):
+    """Correzione DICHIARATA del 26/10 (errore di etichetta dello script v1: il tester scrive Daily, lo script cercava D1): la corsa si legge solo se l'UNICO motivo del KO e questo e le date coincidono. Nessun altro criterio e toccato."""
+    m = ETICHETTA.match((motivi or '').strip())
+    return bool(m) and m.group(1) == m.group(3) and m.group(2) == m.group(4)
+
+def carica(c, prefisso):
+    mf, D = T.carica(c, prefisso)
+    if D is not None or not mf or mf.get('stato') != 'KO' or not solo_etichetta_daily(mf.get('motivi')): return mf, D
+    mf2 = dict(mf); mf2['stato'] = 'OK'; mf2['_etichetta_daily'] = '1'
+    for cand in (os.path.join(c, 'report', mf['report']), os.path.join(c, mf['report'])):
+        if os.path.exists(cand): return mf2, B.affari(B.righe(B.leggi(cand)))
+        if os.path.exists(cand + '.gz'): return mf2, G.carica_htm(cand + '.gz')
+    return mf, None
+
 def dd_eur(s):
     mm = re.match(r'\s*([0-9.]+)', s or ''); return float(mm.group(1)) if mm else 0.0
 
@@ -46,7 +62,7 @@ def riferimento_m4(tok, base):
             if f: return G.carica_htm(f[0])
     m4 = glob.glob(os.path.join(base, '2025_M4', 'ANNO80K_' + tok))
     if m4:
-        mf, D = T.carica(m4[0], 'ANNO80K'); return D
+        mf, D = carica(m4[0], 'ANNO80K'); return D
     return None
 
 def main(base):
@@ -55,7 +71,7 @@ def main(base):
         if not os.path.isdir(c): continue
         sub = os.path.basename(os.path.dirname(c)); a = re.match(r'(20\d\d)_M(\d)', sub)
         if not a: continue
-        mf, D = T.carica(c, 'ANNO80K'); per[os.path.basename(c).replace('ANNO80K_', '')][(a.group(1), a.group(2))] = (mf, D)
+        mf, D = carica(c, 'ANNO80K'); per[os.path.basename(c).replace('ANNO80K_', '')][(a.group(1), a.group(2))] = (mf, D)
     ris = {}
     for tok in sorted(per):
         print('=' * 110); print(tok); anni = {}; mm25 = None
@@ -85,6 +101,8 @@ def autotest():
     for k, vv in (('2013', v(-1, 0, 0, 0)), ('2018', v(5, 8001, 0, 0)), ('2020', v(5, 0, 1, 0)), ('2020', v(5, 0, 0, 1))):
         t = dict(ok); t[k] = vv; assert prop_anni(t, 'CALIBRAZIONE OK')[0] == 'NON PROP-ANNI', k
     assert dd_eur('3854.00(3.13%)') == 3854.0
+    assert solo_etichetta_daily('finestra girata XAUUSD|Daily|2013.01.01|00:00|2014.01.01|00:00 invece di XAUUSD,D1 2013.01.01-2014.01.01')
+    assert not solo_etichetta_daily('finestra girata XAUUSD|Daily|2013.01.01|00:00|2014.01.01|00:00 invece di XAUUSD,D1 2014.01.01-2015.01.01') and not solo_etichetta_daily('qualita 80%') and not solo_etichetta_daily('')
     print('AUTOTEST OK')
 if __name__ == '__main__':
     if len(sys.argv) >= 2 and sys.argv[1] == '--autotest': autotest(); sys.exit(0)

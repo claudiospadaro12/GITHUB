@@ -19,3 +19,19 @@ T1 (calibrazione OK per >= 2 EA su 3, 60%): per ora **2 su 2 misurati OK** (Gold
 
 ## Cosa NON dice
 Tre anni sono tre campioni; Modello 1; realizzato = limite inferiore (FTMO misura sull'equita); nessun merito di acquisto, lotto o taglia.
+
+---
+## AGGIORNAMENTO (26/10, dopo lo zip `ANNO80K_GOLDBOT_20261026_1608`): Goldbot One (D1, step 6000, 80.000 EUR)
+**Correzione DICHIARATA al lettore (mia, di etichetta, nessun criterio toccato):** le 5 corse risultano KO nel MANIFEST solo perche lo script ANNO80K v2 confronta la finestra del giornale con `D1` mentre il tester scrive `Daily` (stesso difetto gia visto il 19/10 con il Gold Trade Pro). Finestra, simbolo, deposito, input (`input_ok = si`) e qualita (99-100%; la 2025 a Modello 4 a tick reali) sono giusti. Il lettore `leggi_tre_anni_80k.py` ora legge una corsa KO SOLO se l'unico motivo e questa etichetta e le date coincidono (autotest). Archivio `risultati_archivio/ANNO80K_GOLDBOT_ZIP_1608`.
+
+| Goldbot One | Netto / PF / DD equity (EUR) | gg >=3/4/5% | peggior giorno / mese |
+|---|---|---|---|
+| 2013 SHORT | +10.196 (+12,7%) / 2,38 / 1.918 | 0/0/0 | -1,2% / -0,8% |
+| 2018 LATERALE | **+2.356 (+2,9%)** / 1,27 / 2.853 | 0/0/0 | -0,8% / -2,3% |
+| 2020 LONG | +9.658 (+12,1%) / 2,38 / 1.342 | 0/0/0 | -1,0% / -1,0% |
+| 2025 M1 (calibrazione) | +8.544 (+10,7%) / 2,57 / 1.319 | 0 | -0,9% / -1,2% |
+| 2025 M4 tick reali | +7.844 (+9,8%) / 2,37 / 1.343 | 0 | -0,9% / -1,2% |
+Calibrazione 2025: **OK** (rapporto M1/M4 1,08, correlazione mensile 0,99). **Esito: PROP-ANNI = SI.**
+
+**Lettura:** profilo molto piatto: DD equity massimo 2.853 EUR (3,6% di 80K), nessun giorno oltre -1,2%, nessuno stop out, positivo in tutti gli anni. **Ma guadagna poco**: +12,7%, +2,9%, +12,1% all'anno; nel laterale 2018 +2,9% non arriva al +10% di una fase 1 FTMO in un anno (FTMO non ha limite di tempo per la fase, secondo il regolamento in repo, ma il profitto per anno e basso). Anche per lui il 2018 laterale e l'anno peggiore.
+**Previsioni (aggiornate):** T1 (calibrazione OK per >= 2 su 3): **centrata, 3 su 3**. T4 Goldbot One PROP-ANNI (40%): **SI**. T5 (2018 anno peggiore per >= 2 su 3): **centrata, 3 su 3**.
