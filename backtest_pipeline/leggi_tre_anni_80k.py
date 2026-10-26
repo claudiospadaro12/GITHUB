@@ -55,6 +55,12 @@ def prop_anni(anni, cal):
     return ('PROP-ANNI' if not mot else 'NON PROP-ANNI'), mot
 
 def riferimento_m4(tok, base):
+    suf = tok.split('|', 1)[1] if '|' in tok else ''
+    if suf:
+        m4 = glob.glob(os.path.join(base, '2025_M4_' + suf, 'ANNO80K_*'))
+        if m4:
+            mf, D = carica(m4[0], 'ANNO80K'); return D
+        return None
     for k, (path, _) in REF_M4.items():
         if k in tok:
             c = os.path.join(ARCH, path)
@@ -71,7 +77,8 @@ def main(base):
         if not os.path.isdir(c): continue
         sub = os.path.basename(os.path.dirname(c)); a = re.match(r'(20\d\d)_M(\d)', sub)
         if not a: continue
-        mf, D = carica(c, 'ANNO80K'); per[os.path.basename(c).replace('ANNO80K_', '')][(a.group(1), a.group(2))] = (mf, D)
+        mf, D = carica(c, 'ANNO80K'); suf = re.sub(r'^20\d\d_M\d_?', '', sub)  # corse con piu set per EA (My AI Gold): la cartella porta il nome del set
+        per[os.path.basename(c).replace('ANNO80K_', '') + ('|' + suf if suf else '')][(a.group(1), a.group(2))] = (mf, D)
     ris = {}
     for tok in sorted(per):
         print('=' * 110); print(tok); anni = {}; mm25 = None
