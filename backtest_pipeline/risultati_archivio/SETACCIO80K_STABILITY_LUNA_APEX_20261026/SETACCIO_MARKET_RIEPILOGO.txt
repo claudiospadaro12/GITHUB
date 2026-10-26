@@ -1,0 +1,9 @@
+EA;passata;periodo;stato;operazioni;profitto_netto_EUR;PF;DD_equity
+Apex Trader MT5.ex5;TRANCHE1;H1;KO;0;0.00;0.00;0.00(0.00%)
+Apex Trader MT5.ex5;TRANCHE2;M15;KO;0;0.00;0.00;0.00(0.00%)
+Luna AI Pro MT5.ex5;TRANCHE1;H1;KO;0;0.00;0.00;0.00(0.00%)
+Luna AI Pro MT5.ex5;TRANCHE2;M15;KO;0;0.00;0.00;0.00(0.00%)
+Stability Pro MT5.ex5;TRANCHE1;H1;KO;0;0.00;0.00;0.00(0.00%)
+Stability Pro MT5.ex5;TRANCHE2;M15;KO;0;0.00;0.00;0.00(0.00%)
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. Un EA con 0 operazioni NON e un EA cattivo: puo dipendere dal simbolo, dal periodo o dagli input; il motivo si cerca nel REFERTO e nei log dentro la cartella SCREEN_<nome>. Gli EA SALTATI, con il motivo e il pattern che li ha saltati, stanno in SETACCIO_MARKET_ELENCO.txt: un EA saltato e NON MISURATO, non bocciato. E nessun EA si archivia con questi numeri: due mesi fanno decine di operazioni e il pavimento di casa per giudicare e 150.
