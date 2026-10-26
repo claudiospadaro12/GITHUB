@@ -1,0 +1,12 @@
+EA;mesi_OK_su_21;somma_mensile_EUR;mesi_positivi;DD_peggiore_mese_pct;continua_stato;continua_netto_EUR;continua_DD
+Rocket Breakout EA.ex5;0;0.00;0;0.00;OK;3385.69;686.22(7.89%)
+Entry Points Pro Robot.ex5;0;0.00;0;0.00;OK;199.24;575.14(10.15%)
+ORB Revolution.ex5;0;0.00;0;0.00;OK;-476.89;626.29(12.41%)
+Umbra Vault AI EA.ex5;0;0.00;0;0.00;OK;12248.64;1323.24(11.20%)
+Microedge Neural Matrix EA.ex5;0;0.00;0;0.00;OK;6955.75;1733.07(13.75%)
+Vortex Turbo EA.ex5;0;0.00;0;0.00;OK;3584.96;3048.27(29.54%)
+Gold Snap.ex5;0;0.00;0;0.00;OK;64036.89;7391.06(12.43%)
+SomaGold.ex5;0;0.00;0;0.00;OK;38230.76;4313.68(20.30%)
+SixtyNine EA.ex5;0;0.00;0;0.00;OK;19229.85;2708.38(12.00%)
+
+Riepilogo MECCANICO: copia dei numeri dei MANIFEST, nessun giudizio. La lettura vera (soglie S-N, S-M, S-H, S-DD, S-NOSCALA, S-COSTO e controllo degli input contro il setaccio) la fa Claudio con me sui report dentro le cartelle DEEP5K_<nome>, secondo report/MARKET_CONTO_PERSONALE_5K_CRITERI_2026-10-25.md e backtest_pipeline/leggi_deep5k_personale.py.

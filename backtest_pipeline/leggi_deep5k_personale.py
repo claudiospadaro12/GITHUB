@@ -63,14 +63,15 @@ def dd_rel(s):
     return float(mm.group(1)) if mm else 0.0
 
 def leggi_rep(c, mf):
-    rep = os.path.join(c, 'report', mf['report'])
-    if not os.path.exists(rep):
-        rep = os.path.join(c, mf['report'])
-    if os.path.exists(rep + '.gz'):
-        import tempfile
-        b = gzip.open(rep + '.gz', 'rb').read()
-        t = tempfile.NamedTemporaryFile(delete=False); t.write(b); t.close(); rep = t.name
-    return B.affari(B.righe(B.leggi(rep)))
+    for rep in (os.path.join(c, 'report', mf['report']), os.path.join(c, mf['report'])):
+        if os.path.exists(rep):
+            return B.affari(B.righe(B.leggi(rep)))
+        if os.path.exists(rep + '.gz'):  # archivio: report compresso (correzione di PERCORSO del 26/10, nessun criterio toccato)
+            import tempfile
+            b = gzip.open(rep + '.gz', 'rb').read()
+            t = tempfile.NamedTemporaryFile(delete=False); t.write(b); t.close()
+            return B.affari(B.righe(B.leggi(t.name)))
+    raise FileNotFoundError(mf['report'])
 
 def confronto80k(tok):
     for base in CONFRONTO_80K:

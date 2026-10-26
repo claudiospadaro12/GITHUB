@@ -1,0 +1,92 @@
+====================================================================================================
+DEEP5K_ENTRYPOINTSPROROBOT
+  stato OK  durata 128 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  operazioni 142 (manifest 142)  netto +199 EUR = +4.0% del deposito  saldo 1.04x  PF 1.08
+  DD equity dal picco 575.14(10.15%)   DD relativo sul realizzato 7.0%   saldo realizzato minimo 100% del deposito
+  peggior giorno -1.5%   peggior mese -2.5%   perdite di fila 7   posizioni insieme max 1
+  ingressi al lotto minimo 0,01: primi 3 mesi 50%, tutto il periodo 80%   lotto medio primi 3 mesi 0.017, ultimi 3 mesi 0.010
+  CONFRONTO 80.000: netto +3.8% (a 5.000: +4.0%)   DD relativo 9.7% (a 5.000: 10.2%)
+  ETICHETTA: REGGE
+====================================================================================================
+DEEP5K_GOLDSNAP
+  stato OK  durata 2062 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  operazioni 209 (manifest 209)  netto +64037 EUR = +1280.7% del deposito  saldo 13.81x  PF 3.09
+  DD equity dal picco 7391.06(12.43%)   DD relativo sul realizzato 10.9%   saldo realizzato minimo 98% del deposito
+  peggior giorno -6.1%   peggior mese 1.0%   perdite di fila 3   posizioni insieme max 1
+  ingressi al lotto minimo 0,01: primi 3 mesi 0%, tutto il periodo 0%   lotto medio primi 3 mesi 0.373, ultimi 3 mesi 2.826
+  CONFRONTO 80.000: netto +1277.0% (a 5.000: +1280.7%)   DD relativo 12.4% (a 5.000: 12.4%)
+  ETICHETTA: REGGE
+====================================================================================================
+DEEP5K_MICROEDGENEURALMATRIXEA
+  stato OK  durata 239 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok si  motivi: -
+  operazioni 304 (manifest 304)  netto +6956 EUR = +139.1% del deposito  saldo 2.39x  PF 2.78
+  DD equity dal picco 1733.07(13.75%)   DD relativo sul realizzato 8.1%   saldo realizzato minimo 100% del deposito
+  peggior giorno -8.1%   peggior mese -4.3%   perdite di fila 3   posizioni insieme max 1
+  ingressi al lotto minimo 0,01: primi 3 mesi 0%, tutto il periodo 0%   lotto medio primi 3 mesi 0.170, ultimi 3 mesi 0.355
+  CONFRONTO 80.000: netto +140.2% (a 5.000: +139.1%)   DD relativo 13.7% (a 5.000: 13.8%)
+  ETICHETTA: REGGE
+====================================================================================================
+DEEP5K_ORBREVOLUTION
+  stato OK  durata 93 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  operazioni 147 (manifest 147)  netto -477 EUR = -9.5% del deposito  saldo 0.90x  PF 0.86
+  DD equity dal picco 626.29(12.41%)   DD relativo sul realizzato 11.4%   saldo realizzato minimo 89% del deposito
+  peggior giorno -2.4%   peggior mese -5.7%   perdite di fila 11   posizioni insieme max 1
+  ingressi al lotto minimo 0,01: primi 3 mesi 0%, tutto il periodo 5%   lotto medio primi 3 mesi 0.066, ultimi 3 mesi 0.035
+  CONFRONTO 80.000: netto -8.0% (a 5.000: -9.5%)   DD relativo 13.3% (a 5.000: 12.4%)
+  ETICHETTA: REGGE + PERDE
+====================================================================================================
+DEEP5K_ROCKETBREAKOUTEA
+  stato OK  durata 68 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  operazioni 232 (manifest 232)  netto +3386 EUR = +67.7% del deposito  saldo 1.68x  PF 1.40
+  DD equity dal picco 686.22(7.89%)   DD relativo sul realizzato 7.7%   saldo realizzato minimo 94% del deposito
+  peggior giorno -3.6%   peggior mese -5.7%   perdite di fila 7   posizioni insieme max 1
+  ingressi al lotto minimo 0,01: primi 3 mesi 0%, tutto il periodo 0%   lotto medio primi 3 mesi 0.074, ultimi 3 mesi 0.080
+  CONFRONTO 80.000: netto +75.6% (a 5.000: +67.7%)   DD relativo 8.9% (a 5.000: 7.9%)
+  ETICHETTA: REGGE
+====================================================================================================
+DEEP5K_SIXTYNINEEA
+  stato OK  durata 5574 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  operazioni 1127 (manifest 1127)  netto +19230 EUR = +384.6% del deposito  saldo 4.85x  PF 1.99
+  DD equity dal picco 2708.38(12.00%)   DD relativo sul realizzato 11.5%   saldo realizzato minimo 93% del deposito
+  peggior giorno -4.6%   peggior mese -3.6%   perdite di fila 8   posizioni insieme max 7
+  ingressi al lotto minimo 0,01: primi 3 mesi 0%, tutto il periodo 0%   lotto medio primi 3 mesi 0.050, ultimi 3 mesi 0.212
+  CONFRONTO 80.000: netto +377.9% (a 5.000: +384.6%)   DD relativo 12.1% (a 5.000: 12.0%)
+  ETICHETTA: REGGE
+====================================================================================================
+DEEP5K_SOMAGOLD
+  stato OK  durata 4504 s  qualita 100%ticksreali  stop_out 0  no_money 84  input_ok si  motivi: -
+  operazioni 1071 (manifest 1071)  netto +38231 EUR = +764.6% del deposito  saldo 8.65x  PF 3.63
+  DD equity dal picco 4313.68(20.30%)   DD relativo sul realizzato 13.7%   saldo realizzato minimo 90% del deposito
+  peggior giorno -6.9%   peggior mese -5.5%   perdite di fila 16   posizioni insieme max 32
+  ingressi al lotto minimo 0,01: primi 3 mesi 73%, tutto il periodo 43%   lotto medio primi 3 mesi 0.026, ultimi 3 mesi 0.151
+  CONFRONTO 80.000: netto +850.2% (a 5.000: +764.6%)   DD relativo 21.7% (a 5.000: 20.3%)
+  ETICHETTA: SCOSSO
+====================================================================================================
+DEEP5K_UMBRAVAULTAIEA
+  stato OK  durata 264 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok si  motivi: -
+  operazioni 434 (manifest 434)  netto +12249 EUR = +245.0% del deposito  saldo 3.45x  PF 6.27
+  DD equity dal picco 1323.24(11.20%)   DD relativo sul realizzato 8.6%   saldo realizzato minimo 98% del deposito
+  peggior giorno -8.3%   peggior mese -2.6%   perdite di fila 3   posizioni insieme max 1
+  ingressi al lotto minimo 0,01: primi 3 mesi 0%, tutto il periodo 0%   lotto medio primi 3 mesi 0.153, ultimi 3 mesi 0.486
+  CONFRONTO 80.000: netto +243.9% (a 5.000: +245.0%)   DD relativo 11.2% (a 5.000: 11.2%)
+  ETICHETTA: REGGE
+====================================================================================================
+DEEP5K_VORTEXTURBOEA
+  stato OK  durata 394 s  qualita 100%ticksreali  stop_out 0  no_money 0  input_ok nessuno_imposto  motivi: -
+  operazioni 940 (manifest 940)  netto +3585 EUR = +71.7% del deposito  saldo 1.72x  PF 1.50
+  DD equity dal picco 3048.27(29.54%)   DD relativo sul realizzato 28.6%   saldo realizzato minimo 100% del deposito
+  peggior giorno -12.5%   peggior mese -18.1%   perdite di fila 7   posizioni insieme max 4
+  ingressi al lotto minimo 0,01: primi 3 mesi 0%, tutto il periodo 0%   lotto medio primi 3 mesi 0.058, ultimi 3 mesi 0.079
+  CONFRONTO 80.000: netto +69.2% (a 5.000: +71.7%)   DD relativo 29.7% (a 5.000: 29.5%)
+  ETICHETTA: SCOSSO
+====================================================================================================
+RIEPILOGO
+  DEEP5K_ENTRYPOINTSPROROBOT           REGGE  netto +4%  DDrel 10.2%
+  DEEP5K_GOLDSNAP                      REGGE  netto +1281%  DDrel 12.4%
+  DEEP5K_MICROEDGENEURALMATRIXEA       REGGE  netto +139%  DDrel 13.8%
+  DEEP5K_ORBREVOLUTION                 REGGE + PERDE  netto -10%  DDrel 12.4%
+  DEEP5K_ROCKETBREAKOUTEA              REGGE  netto +68%  DDrel 7.9%
+  DEEP5K_SIXTYNINEEA                   REGGE  netto +385%  DDrel 12.0%
+  DEEP5K_SOMAGOLD                      SCOSSO  netto +765%  DDrel 20.3%
+  DEEP5K_UMBRAVAULTAIEA                REGGE  netto +245%  DDrel 11.2%
+  DEEP5K_VORTEXTURBOEA                 SCOSSO  netto +72%  DDrel 29.5%
