@@ -1,0 +1,38 @@
+MIEI NUMERI - A7 verifica T006 (lettura PRIMARIA dal 2008-07-01, definizione (a): BULL>=+15, BEAR<=-15)
+prima barra t primaria: 2008-07-01 indice 1031 ; ultima barra dati: 2026-10-16 ; barre fuse totali: 5763
+giorni senza score nel periodo primario: 0 []
+[tutti i giorni t da 2008-07-01 a 2026-10-16] N giorni 4732 | freq: {'BULL': '2240 (47.34%)', 'BEAR': '1177 (24.87%)', 'NEU': '1315 (27.79%)'} | episodi: {'BULL': 122, 'BEAR': 100, 'NEU': 221}
+
+===== h = 20 =====
+osservazioni valide: 4712 primo t 2008-07-01 ultimo t 2026-09-18 (close t+h 2026-10-16 )
+[giorni validi h=20] N giorni 4712 | freq: {'BULL': '2240 (47.54%)', 'BEAR': '1162 (24.66%)', 'NEU': '1310 (27.80%)'} | episodi: {'BULL': 122, 'BEAR': 99, 'NEU': 221}
+  BULL: N=2240 media rendimento=0.8466%  (sd 4.684)
+  BEAR: N=1162 media rendimento=0.6324%  (sd 4.884)
+  NEU: N=1310 media rendimento=0.6272%  (sd 4.648)
+  TUTTI i giorni: N=4712 media=0.7328%
+  spread BULL-BEAR = 0.2142 punti %
+  eccesso BULL sul drift (media tutti) = 0.1138% ; eccesso BEAR = -0.1004% ; NEU = -0.1056%
+  non sovrapposte offset 0: n totale=236 nBULL=107 nBEAR=58 mediaBULL=1.1532 mediaBEAR=0.5209 spread=0.6324 t Welch=0.8595
+  non sovrapposte offset 4: n totale=236 nBULL=114 nBEAR=56 mediaBULL=0.8505 mediaBEAR=0.5311 spread=0.3194 t Welch=0.4051
+  non sovrapposte offset 8: n totale=236 nBULL=110 nBEAR=57 mediaBULL=0.8908 mediaBEAR=0.2079 spread=0.6828 t Welch=0.8590
+  non sovrapposte offset 12: n totale=235 nBULL=113 nBEAR=60 mediaBULL=0.7524 mediaBEAR=1.0258 spread=-0.2735 t Welch=-0.3259
+  non sovrapposte offset 16: n totale=235 nBULL=112 nBEAR=58 mediaBULL=0.7645 mediaBEAR=0.3852 spread=0.3792 t Welch=0.4894
+  t Welch offset (mediana, min, max) = 0.4894, -0.3259, 0.8595
+
+===== h = 5 =====
+osservazioni valide: 4727 primo t 2008-07-01 ultimo t 2026-10-09 (close t+h 2026-10-16 )
+[giorni validi h=5] N giorni 4727 | freq: {'BULL': '2240 (47.39%)', 'BEAR': '1172 (24.79%)', 'NEU': '1315 (27.82%)'} | episodi: {'BULL': 122, 'BEAR': 100, 'NEU': 221}
+  BULL: N=2240 media rendimento=0.1985%  (sd 2.396)
+  BEAR: N=1172 media rendimento=0.1772%  (sd 2.672)
+  NEU: N=1315 media rendimento=0.1308%  (sd 2.282)
+  TUTTI i giorni: N=4727 media=0.1744%
+  spread BULL-BEAR = 0.0214 punti %
+  eccesso BULL sul drift (media tutti) = 0.0241% ; eccesso BEAR = 0.0028% ; NEU = -0.0436%
+  non sovrapposte offset 0: n totale=946 nBULL=459 nBEAR=229 mediaBULL=0.2118 mediaBEAR=0.1526 spread=0.0592 t Welch=0.2952
+  non sovrapposte offset 1: n totale=946 nBULL=445 nBEAR=235 mediaBULL=0.2004 mediaBEAR=0.2158 spread=-0.0154 t Welch=-0.0730
+  non sovrapposte offset 2: n totale=945 nBULL=444 nBEAR=240 mediaBULL=0.2078 mediaBEAR=0.2035 spread=0.0043 t Welch=0.0206
+  non sovrapposte offset 3: n totale=945 nBULL=440 nBEAR=232 mediaBULL=0.1746 mediaBEAR=0.1479 spread=0.0267 t Welch=0.1262
+  non sovrapposte offset 4: n totale=945 nBULL=452 nBEAR=236 mediaBULL=0.1973 mediaBEAR=0.1645 spread=0.0328 t Welch=0.1578
+  t Welch offset (mediana, min, max) = 0.1262, -0.0730, 0.2952
+
+ESEMPIO a mano (t=2008-07-01, h=20): open[t+1]=2008-07-02 938.7; close[t+20]=2008-07-29 918.6; rendimento=-2.1413%

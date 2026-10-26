@@ -2,10 +2,10 @@
  "project_id": "SALA-BIAS-001",
  "project_name": "Replica del MULTI TF BIAS DASHBOARD e studio del segnale",
  "mode": "MISTA",
- "state_version": 5,
- "updated_at": "2026-10-26T09:42:16Z",
- "candidate_version": "nessuna (ciclo 0 non iniziato)",
- "phase": "CICLO 0 - VERIFICA E CRITICA DEI RISULTATI",
+ "state_version": 7,
+ "updated_at": "2026-10-26T09:54:47Z",
+ "candidate_version": "v1 (A4: replica + studio S1)",
+ "phase": "CONSEGNATO",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
@@ -25,7 +25,7 @@
    "id": "A1",
    "role": "Vicecoordinatore e integratore",
    "kind": "SINTETICO",
-   "status": "IN_ATTESA",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -57,7 +57,7 @@
    "id": "A5",
    "role": "Utilizzo, adozione ed economia",
    "kind": "SINTETICO",
-   "status": "IN_ATTESA",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -65,7 +65,7 @@
    "id": "A6",
    "role": "Revisore critico indipendente",
    "kind": "REALE",
-   "status": "IN_REVISIONE",
+   "status": "COMPLETATO",
    "current_task_id": "T003",
    "last_event_id": null
   },
@@ -73,7 +73,7 @@
    "id": "A7",
    "role": "Verificatore (implementazione indipendente)",
    "kind": "REALE",
-   "status": "IN_REVISIONE",
+   "status": "COMPLETATO",
    "current_task_id": "T005",
    "last_event_id": null
   }
@@ -147,7 +147,7 @@
    "requirement_ids": [
     "R004"
    ],
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "artifact_ids": [],
    "check_ids": []
   },
@@ -157,7 +157,7 @@
    "requirement_ids": [
     "R005"
    ],
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "artifact_ids": [],
    "check_ids": []
   }
@@ -233,26 +233,62 @@
    "riserve": "A6 e un agente: le stime di potenza sono sue ipotesi",
    "responsabile": "C0",
    "condizione_di_riesame": "un errore nei dati o una modifica della specifica dopo i numeri"
+  },
+  {
+   "id": "D003",
+   "questione": "EMA valida da 2n (spec S17) o da n (v2)",
+   "scelta": "n (v2 prevale), 2n riportata come corsa equivalente",
+   "motivo": "coerenza con i criteri congelati; esito C in entrambe"
+  },
+  {
+   "id": "D004",
+   "questione": "Ratifica R1-R10 di A4",
+   "scelta": "ratificate; R7 riscritta (B irraggiungibile per costruzione)",
+   "motivo": "obiezione A6-1"
   }
  ],
  "issues": [
   {
    "id": "I001",
    "severity": "Bloccante",
-   "description": "barre di domenica non trattate",
-   "requirement_id": "R003",
-   "owner_id": "C0",
-   "closure_check_id": null,
-   "status": "Risolto senza verifica indipendente (regola 1 della v2, da verificare da A7 sui dati fusi)"
+   "description": "barre di domenica",
+   "status": "Risolto (A7 ha rifatto la fusione: 0 differenze)"
   },
   {
    "id": "I002",
    "severity": "Bloccante",
-   "description": "nessun test di causalita",
-   "requirement_id": "R002",
-   "owner_id": "C0",
-   "closure_check_id": null,
-   "status": "Aperto (test obbligatori in v2; chiusura dopo l'esecuzione)"
+   "description": "test di causalita",
+   "status": "Risolto (test di A4 + prefisso su 980 date di A6)"
+  },
+  {
+   "id": "I003",
+   "severity": "Alta",
+   "description": "R7 rende B irraggiungibile: C e del disegno",
+   "status": "Accettato con riserva: motivazione riscritta (D004); per una v3 effetto minimo dichiarato in anticipo"
+  },
+  {
+   "id": "I004",
+   "severity": "Media",
+   "description": "i test di causalita percorrono il ramo only=lista, non quello di produzione only=None",
+   "status": "Accettato con riserva: A6 ha verificato l'equivalenza su 824 date (diff 0); test di equivalenza da aggiungere prima di un eventuale esito A"
+  },
+  {
+   "id": "I005",
+   "severity": "Media",
+   "description": "EMA 2n contro n",
+   "status": "Risolto (D003)"
+  },
+  {
+   "id": "I006",
+   "severity": "Media",
+   "description": "verdetto: frase sull'MDE e benchmark mancanti",
+   "status": "Risolto nella consegna"
+  },
+  {
+   "id": "I007",
+   "severity": "Bassa",
+   "description": "criterio 1: FAIL ha precedenza su non valutabile per h20_b",
+   "status": "Accettato (nessun effetto sull'esito)"
   }
  ],
  "checks": [
@@ -302,9 +338,9 @@
    "requirement_ids": [
     "R003"
    ],
-   "outcome": "NON_ESEGUITO",
+   "outcome": "SUPERATO",
    "executed_by": "A7",
-   "evidence_ref": "T006 in corso"
+   "evidence_ref": "A7 ha ricalcolato fusione (5.763 barre, 0 differenze) e lettura primaria h=20/h=5: tutto CONCORDA con A4"
   },
   {
    "id": "C006",
@@ -312,12 +348,78 @@
    "requirement_ids": [
     "R005"
    ],
-   "outcome": "NON_ESEGUITO",
+   "outcome": "SUPERATO",
    "executed_by": "A6",
-   "evidence_ref": "T007 in corso"
+   "evidence_ref": "A6: 33/33 autotest, studio rieseguito identico, test del prefisso su 980 date (5e-11), mutanti; 7 obiezioni (1 alta, 3 medie, 3 basse)"
+  },
+  {
+   "id": "C007",
+   "type": "ricalcolo",
+   "requirement_ids": [
+    "R003"
+   ],
+   "outcome": "SUPERATO",
+   "executed_by": "A6",
+   "evidence_ref": "permutazione circolare ricalcolata con altro seme: p 0,249/0,081 contro 0,267/0,091 di A4 (errore Monte Carlo)"
   }
  ],
- "scores": [],
+ "scores": [
+  {
+   "cycle": 0,
+   "dimension": "Aderenza all'obiettivo",
+   "weight": 20,
+   "value": 80,
+   "rationale": "replica dichiarata, verdetto sul valore del bias (C) e risposta sull'EA (nessun EA proposto); mancano fedelta all'originale e quadro a 5 timeframe"
+  },
+  {
+   "cycle": 0,
+   "dimension": "Correttezza ed evidenze",
+   "weight": 20,
+   "value": 85,
+   "rationale": "ricalcolo indipendente (A7), mutazione e prefisso (A6), SHA, 33 autotest; limite: replica non validata"
+  },
+  {
+   "cycle": 0,
+   "dimension": "Completezza",
+   "weight": 15,
+   "value": 80,
+   "rationale": "requisiti essenziali coperti; 5 timeframe e MQL5 non fatti"
+  },
+  {
+   "cycle": 0,
+   "dimension": "Fattibilita e robustezza",
+   "weight": 15,
+   "value": 80,
+   "rationale": "funziona e si riesegue in 16 s; buco nei test del ramo di produzione accettato con riserva"
+  },
+  {
+   "cycle": 0,
+   "dimension": "Utilizzabilita",
+   "weight": 10,
+   "value": 85,
+   "rationale": "report e comandi di riesecuzione"
+  },
+  {
+   "cycle": 0,
+   "dimension": "Verificabilita",
+   "weight": 10,
+   "value": 92,
+   "rationale": "SHA256, comandi, file di output"
+  },
+  {
+   "cycle": 0,
+   "dimension": "Qualita espositiva e visiva",
+   "weight": 10,
+   "value": 85,
+   "rationale": "documento di consegna; nessuna dashboard HTML"
+  },
+  {
+   "cycle": 0,
+   "dimension": "TOTALE",
+   "weight": 100,
+   "value": 83.2
+  }
+ ],
  "artifacts": [],
  "last_event_id": null
 }

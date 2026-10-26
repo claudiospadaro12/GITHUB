@@ -1,0 +1,4 @@
+CONFRONTO A7 vs A4 (T006). I numeri di A7 sono stati scritti in MIEI_NUMERI.txt PRIMA di leggere gli output di A4.
+(1) Fusione domeniche: CONCORDA. 5763 barre fuse in entrambe (2004-06-14..2026-10-16), stesse date nello stesso ordine, 0 differenze su open/high/low/close/tickvol/n_raw/domenica_fusa (tol 1e-9), 1083 domeniche fuse (le domeniche raw sono 1084: la 2026-10-18 resta fuori perche il suo lunedi 2026-10-19 e escluso). Nessuna domenica non seguita da lunedi.
+(2) Studio h=20 (a): CONCORDA in tutte le cifre (N, medie, spread, eccessi, t per ogni offset, mediana/min/max, n minimi, episodi, frequenze). h=5 idem.
+Nessuna differenza rilevata. Unica nota: il JSON di A4 usa frazioni (0.00847) e l'output testo percentuali; stessa quantita. Nel JSON la colonna "n_altro" dell'offset coincide con n BEAR (58, 56, ...).
