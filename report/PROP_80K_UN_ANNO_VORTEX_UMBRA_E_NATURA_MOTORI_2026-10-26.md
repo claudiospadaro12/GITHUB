@@ -13,7 +13,7 @@
 
 ## Finestre di 12 mesi con partenza ogni mese (letta in % del saldo di partenza; NON ricalcolo a 80K esatti)
 Sfida superata = +10% toccato prima di qualunque violazione.
-- **Umbra senza guardia:** superata 6 su 10 (partenze mag-ott 2025), fallita 4 (gen, feb, apr, ... con giorno >= 5% prima dell'obiettivo). Tutte le finestre contengono almeno un giorno >= 5%; il 19/03/2026 (-8,1%, -15.324) rompe qualunque conto ancora aperto.
+- **Umbra senza guardia:** superata 7 su 10 (partenze mar e mag-ott 2025), fallita 3 (partenze gen, feb, apr 2025: giorno >= 5% prima dell'obiettivo). Tutte le finestre contengono almeno un giorno >= 5%; il 19/03/2026 (-8,1%, -15.324) rompe qualunque conto ancora aperto.
 - **Umbra con guardia:** superata 5 su 10, fallita 5; ogni finestra ha 5-8 giorni a -5%: la guardia chiude al limite e trasforma il flottante in perdita.
 - **Vortex:** 6 finestre su 6 con partenza gen-giu 2025 senza nessuna violazione, +61-65%, DD realizzato 1,1%. Le finestre con partenza lug-ott 2025 includono giugno 2026 (-11.244) e luglio 2026 (-26.780; giorno 01/07/2026 -11,8%, -17.481): DD realizzato 19-45% del conto di partenza, 1-3 giorni >= 5%.
 - **Vortex: il realizzato non vede il flottante.** E una griglia con raddoppio: l'equita in questi 12 mesi e' NON MISURATA (serve l'export M1). DD equity sull'intera corsa: 48.522 EUR (29,7% del picco).
