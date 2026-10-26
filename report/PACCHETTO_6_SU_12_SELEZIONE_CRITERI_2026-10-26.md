@@ -28,3 +28,8 @@ Il pacchetto da 1.599 costa 650 USD piu del solo Gold Reaper (949). Un EA conta 
 
 ## Cosa NON dice
 Tester, tick reali solo dal 10/07/2024 per l'oro, Modello 1 prima; slippage non misurato; le prove sul pacchetto non dicono come l'EA va dal vivo; nessun merito d'acquisto, lotto o taglia.
+
+---
+## AGGIORNAMENTO (26/10, sera): fatti confermati da Claudio
+- **BCM NON ha Bitcoin tra i simboli** (confermato da Claudio guardando la lista dei simboli del terminale). P6 (BTCUSD non disponibile): **centrata**. Bitcoin Scalp Pro e Bitcoin Reaper sono NON VALUTABILI sul broker (ne promossi ne bocciati, fuori dal confronto): restano 10 EA candidati.
+- Claudio ha installato in demo gli EA mancanti (nomi file da riconfermare con la riga dell'inventario). Simbolo e timeframe dichiarati dalle pagine di Stability Pro, Luna AI Pro, Apex Trader, Gold Trade Pro, Goldbot One, Phantom e il nome inglese di "Incendio": DA RICEVERE da Claudio; la ricerca web non ha trovato le pagine del venditore (nomi diversi o non indicizzate).
