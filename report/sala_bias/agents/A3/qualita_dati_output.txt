@@ -1,0 +1,295 @@
+
+==============================================================================
+0. FILE
+==============================================================================
+file: /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/lavoro_wt/data/prezzi/XAUUSD_D1_BCM_2004-06-11_2026-10-21.csv
+header: ['<DATE>', '<OPEN>', '<HIGH>', '<LOW>', '<CLOSE>', '<TICKVOL>', '<VOL>', '<SPREAD>']
+righe dati lette: 6851 | righe non parsabili: 0
+
+==============================================================================
+1. STRUTTURA: righe, date, duplicati, ordine
+==============================================================================
+righe totali: 6851
+prima data: 2004-06-11 Ven | ultima data: 2026-10-21 Mer
+date duplicate: 0 []
+coppie non in ordine crescente stretto: 0 []
+giorni della settimana (conteggio barre): {'Lun': 1152, 'Mar': 1162, 'Mer': 1161, 'Gio': 1157, 'Ven': 1135, 'Dom': 1084}
+
+==============================================================================
+2. COERENZA OHLC
+==============================================================================
+barre con OHLC incoerente: 0
+barre piatte (high==low): 16 ['2004-07-11', '2004-08-22', '2004-09-26', '2004-10-03', '2004-10-17', '2005-03-27', '2005-07-10', '2005-09-11', '2005-09-18', '2005-09-25']
+range giornaliero (H-L)/C: mediana 1.158%, p99 5.25%
+5 range piu' ampi: [('2026-02-02', '10.3%', 482.5), ('2008-09-17', '10.6%', 92.4), ('2013-04-15', '11.7%', 158.48), ('2008-10-10', '12.3%', 104.5), ('2026-01-30', '15.8%', 765.43)]
+gap open/close precedente: mediana |g| 0.004%; top5: [('2006-11-26', '+2.01%'), ('2008-11-09', '+2.01%'), ('2026-06-14', '+2.13%'), ('2009-11-03', '+2.16%'), ('2010-11-14', '-2.76%')]
+
+==============================================================================
+3. SALTI DI CHIUSURA GIORNO SU GIORNO > 8%
+==============================================================================
+salti > 8%: 3
+  2008-09-17 (prec 2008-09-16) close 782.70 -> 869.10  +11.04%  | O 782.80 H 869.40 L 777.00 tickvol 10744
+  2013-04-15 (prec 2013-04-14) close 1483.29 -> 1350.23  -8.97%  | O 1483.28 H 1495.57 L 1337.09 tickvol 678330
+  2026-01-30 (prec 2026-01-29) close 5378.52 -> 4837.99  -10.05%  | O 5420.16 H 5450.62 L 4685.19 tickvol 889035
+per riferimento, i 12 maggiori |var| giornaliere:
+    2009-01-23 +5.35%
+    2008-10-16 -5.47%
+    2025-10-21 -5.59%
+    2026-02-03 +5.99%
+    2008-10-22 -6.51%
+    2006-06-13 -6.58%
+    2008-03-19 -6.78%
+    2008-11-21 +7.45%
+    2008-10-10 -7.46%
+    2013-04-15 -8.97%
+    2026-01-30 -10.05%
+    2008-09-17 +11.04%
+var >5%: 17  var >4%: 44
+
+==============================================================================
+4. GIORNI MANCANTI, GAP DI CALENDARIO, DOMENICHE
+==============================================================================
+gap di calendario > 4 giorni: 1
+  da 2005-11-23 (Mer) a 2005-11-28 (Lun): 5 giorni
+
+anno | barre | feriali(L-V) presenti | feriali mancanti | barre domenica | barre sabato
+ 2004 |   166 |   140 |    6 |   26 | 0
+ 2005 |   298 |   253 |    7 |   45 | 0
+ 2006 |   298 |   252 |    8 |   46 | 0
+ 2007 |   310 |   259 |    2 |   51 | 0
+ 2008 |   310 |   258 |    4 |   52 | 0
+ 2009 |   311 |   259 |    2 |   52 | 0
+ 2010 |   307 |   258 |    3 |   49 | 0
+ 2011 |   306 |   259 |    1 |   47 | 0
+ 2012 |   309 |   259 |    2 |   50 | 0
+ 2013 |   311 |   259 |    2 |   52 | 0
+ 2014 |   310 |   258 |    3 |   52 | 0
+ 2015 |   310 |   259 |    2 |   51 | 0
+ 2016 |   309 |   259 |    2 |   50 | 0
+ 2017 |   308 |   258 |    2 |   50 | 0
+ 2018 |   310 |   258 |    3 |   52 | 0
+ 2019 |   310 |   258 |    3 |   52 | 0
+ 2020 |   311 |   259 |    3 |   52 | 0
+ 2021 |   310 |   258 |    3 |   52 | 0
+ 2022 |   310 |   259 |    1 |   51 | 0
+ 2023 |   309 |   259 |    1 |   50 | 0
+ 2024 |   301 |   260 |    2 |   41 | 0
+ 2025 |   289 |   258 |    3 |   31 | 0
+ 2026 |   238 |   208 |    2 |   30 | 0
+TOTALE feriali mancanti: 67 | barre domenica: 1084 | barre sabato: 0
+
+feriali mancanti per anno (date; ricorrenze tipo 25/12 e 1/1 evidenziate):
+ 2004: 6  07-05, 09-06, 11-25, 12-03, 12-24, 12-31
+ 2005: 7  02-21, 03-25, 05-30, 09-05, 11-24, 11-25, 12-26
+ 2006: 8  01-16, 02-20, 04-14, 05-29, 09-04, 11-23, 11-24, 12-25
+ 2007: 2  01-01, 12-25
+ 2008: 4  01-01, 06-13, 11-28, 12-25
+ 2009: 2  01-01, 12-25
+ 2010: 3  01-01, 11-12, 12-13
+ 2011: 1  04-22
+ 2012: 2  04-06, 12-25
+ 2013: 2  03-29, 12-25
+ 2014: 3  01-01, 04-18, 12-25
+ 2015: 2  01-01, 12-25
+ 2016: 2  01-01, 03-25
+ 2017: 2  04-14, 12-25
+ 2018: 3  01-01, 03-30, 12-25
+ 2019: 3  01-01, 04-19, 12-25
+ 2020: 3  01-01, 04-10, 12-25
+ 2021: 3  01-01, 04-02, 12-24
+ 2022: 1  04-15
+ 2023: 1  04-07
+ 2024: 2  03-29, 12-25
+ 2025: 3  01-01, 04-18, 12-25
+ 2026: 2  01-01, 04-03
+mancanze su 25/12 e 1/1 (feste: normali): {(12, 25): 14, (1, 1): 13}
+
+domeniche: n=1084, tickvol mediana 1313, min 1, max 27798
+feriali>=2010 tickvol mediana: 97776
+prima domenica: 2004-06-13 | ultima domenica: 2026-10-18
+domeniche per anno: {2004: 26, 2005: 45, 2006: 46, 2007: 51, 2008: 52, 2009: 52, 2010: 49, 2011: 47, 2012: 50, 2013: 52, 2014: 52, 2015: 51, 2016: 50, 2017: 50, 2018: 52, 2019: 52, 2020: 52, 2021: 52, 2022: 51, 2023: 50, 2024: 41, 2025: 31, 2026: 30}
+domeniche senza barra del lunedi' successivo: 0 []
+range medio domenica 0.214% vs lunedi' seguente 1.153%
+barre di sabato: []
+
+classificazione dei 67 feriali mancanti: {'altro': 23, 'Venerdi Santo': 17, 'Natale/Capodanno': 27}
+  'altro' fino al 2006 (18; quasi tutte festivita' USA: Thanksgiving, Presidents/Memorial/Labor Day, 4 luglio...): ['2004-07-05', '2004-09-06', '2004-11-25', '2004-12-03', '2004-12-24', '2004-12-31', '2005-02-21', '2005-05-30', '2005-09-05', '2005-11-24', '2005-11-25', '2005-12-26', '2006-01-16', '2006-02-20', '2006-05-29', '2006-09-04', '2006-11-23', '2006-11-24']
+  'altro' dal 2007 (5, da considerare buchi/chiusure non spiegate): ['2008-06-13', '2008-11-28', '2010-11-12', '2010-12-13', '2021-12-24']
+
+BARRE DI DOMENICA, struttura nel tempo
+domeniche 'fantasma' (tickvol<=50, quasi sempre piatte H=L): 98 per anno {2004: 26, 2005: 38, 2006: 26, 2007: 5, 2009: 1, 2011: 1, 2014: 1}
+   su queste: |open domenica / close venerdi' -1| mediano 0.091% ; |open lunedi' / close domenica -1| mediano 0.046%
+   => il gap del weekend sta nel LUNEDI' (non nella domenica): per quegli anni 'open della settimana' = prezzo del venerdi', non il vero open di lunedi'
+domeniche ASSENTI (con lunedi' presente) dal 2007: 63, raggruppate in blocchi (inizio, fine, n):
+   2007-05-20 -> 2007-05-20  n=1
+   2010-12-19 -> 2011-01-09  n=4
+   2011-04-24 -> 2011-04-24  n=1
+   2011-07-03 -> 2011-07-03  n=1
+   2011-12-25 -> 2012-01-01  n=2
+   2012-03-11 -> 2012-03-18  n=2
+   2015-01-18 -> 2015-01-18  n=1
+   2016-04-24 -> 2016-04-24  n=1
+   2016-12-25 -> 2017-01-01  n=2
+   2022-12-25 -> 2023-01-01  n=2
+   2023-12-24 -> 2023-12-31  n=2
+   2024-10-20 -> 2025-03-23  n=23
+   2025-11-02 -> 2026-03-22  n=21
+   (blocchi corti = per lo piu festivita (Natale/Capodanno/Pasqua) ma anche buchi isolati (2007-05-20, 2012-03-11/18, 2015-01-18); blocco 2010-12-19..2011-01-09 = 4 domeniche; i due blocchi lunghi 2024-10..2025-03 e 2025-11..2026-03 sono invernali: ROTTURA STRUTTURALE
+    compatibile con server UTC+1 fisso: riapertura oro 22:00 UTC (estate) = 23:00 server domenica -> barra domenica; 23:00 UTC (inverno) = 00:00 lunedi' -> nessuna barra.
+    Prima di ott-2024 la domenica c'era tutto l'anno => in quel periodo il feed/orario del server era diverso. Ipotesi non verificabile dal solo file.)
+gap |open prima barra post-weekend / close venerdi' -1| per periodo:
+   2004-2009: n=268 mediana 0.147% p90 0.520%
+   2010-2019: n=507 mediana 0.093% p90 0.363%
+   2020-2023: n=201 mediana 0.074% p90 0.316%
+   2024-2026: n=144 mediana 0.124% p90 0.663%
+last bar: 2026-10-21 | il file e' stato salvato il 2026-10-21 20:01 (ora locale macchina): se la barra dell'ultimo giorno e' stata scaricata prima della chiusura D1 del server, e' PARZIALE.
+feriali con tickvol < 100: 9 [('2005-01-17', 74), ('2005-11-30', 36), ('2006-01-02', 1), ('2006-07-04', 16), ('2006-09-27', 37), ('2007-05-21', 46), ('2007-12-27', 93), ('2008-03-21', 38), ('2015-04-03', 76)]
+
+==============================================================================
+5. TICKVOL
+==============================================================================
+tickvol == 0: 0 []
+tickvol < 0: 0
+colonna VOL: valori distinti [0, 76200, 124700, 135300, 148350, 156743, 180400, 183700, 187130, 196550]
+anno | mediana tickvol | min | max  (solo L-V)
+ 2004 |     1649 |     303 |     4523
+ 2005 |     1215 |      36 |     3040
+ 2006 |     1487 |       1 |     4396
+ 2007 |     3839 |      46 |    17633
+ 2008 |     9164 |      38 |    18832
+ 2009 |    29927 |     321 |    63261
+ 2010 |    44245 |    1967 |    90622
+ 2011 |    53485 |     494 |   113745
+ 2012 |   110565 |     835 |   215618
+ 2013 |   162120 |    2144 |   678330
+ 2014 |    59989 |   16197 |   173257
+ 2015 |    80396 |      76 |   174470
+ 2016 |   110616 |    1499 |   337951
+ 2017 |    83583 |    3850 |   217773
+ 2018 |    98886 |   29374 |   350078
+ 2019 |    51607 |   15663 |   134916
+ 2020 |    97676 |   29311 |   216057
+ 2021 |    99354 |   29896 |   239324
+ 2022 |   115300 |    1736 |   210179
+ 2023 |   134826 |    2516 |   375660
+ 2024 |   148891 |    4278 |   590803
+ 2025 |   236389 |   79752 |   539447
+ 2026 |   387212 |  152857 |  1061255
+barre con tickvol < 5% della mediana annua (feriali):
+  n = 31 [('2005-11-30', 36), ('2006-01-02', 1), ('2006-07-04', 16), ('2006-09-27', 37), ('2007-04-06', 101), ('2007-05-21', 46), ('2007-12-27', 93), ('2008-03-21', 38), ('2009-05-19', 321), ('2009-11-03', 1270), ('2010-04-22', 2044), ('2010-10-07', 2184), ('2010-12-24', 1967), ('2011-04-19', 2302), ('2011-04-20', 2330), ('2011-04-21', 905), ('2011-04-25', 1242), ('2011-05-10', 494), ('2011-07-04', 1273), ('2011-12-26', 1206)]
+barre con tickvol <= 3: 22 [('2004-07-11', 2), ('2004-08-22', 2), ('2004-09-26', 1), ('2004-10-03', 2), ('2004-10-17', 3), ('2005-03-27', 1), ('2005-07-10', 2), ('2005-08-14', 2), ('2005-08-28', 2), ('2005-09-11', 1)]
+
+==============================================================================
+6. SPREAD DEL FILE
+==============================================================================
+valori distinti di spread: 89 | top 15 (valore:conteggio): [(0, 2409), (5, 759), (24, 569), (15, 326), (14, 306), (50, 179), (16, 142), (18, 122), (17, 120), (40, 115), (4, 102), (29, 93), (35, 88), (13, 69), (25, 68)]
+anno | n | spread min | mediana | max | n con spread=0
+ 2004 | 166 |   0 |   0 |    0 | 166
+ 2005 | 298 |   0 |   0 |    0 | 298
+ 2006 | 298 |   0 |   0 |    0 | 298
+ 2007 | 310 |   0 |   0 |    0 | 310
+ 2008 | 310 |   0 |   0 |    0 | 310
+ 2009 | 311 |   0 |   0 |    0 | 311
+ 2010 | 307 |   0 |   0 |   63 | 265
+ 2011 | 306 |   0 |  50 |  250 | 38
+ 2012 | 309 |   0 |  35 |  100 | 22
+ 2013 | 311 |   0 |  19 |   58 | 10
+ 2014 | 310 |   0 |  32 |  237 | 16
+ 2015 | 310 |   0 |  28 |   76 | 3
+ 2016 | 309 |   0 |  24 |   48 | 10
+ 2017 | 308 |   0 |  24 |   38 | 1
+ 2018 | 310 |   0 |  15 |   42 | 2
+ 2019 | 310 |   0 |  14 |   22 | 1
+ 2020 | 311 |   0 |   5 |   46 | 3
+ 2021 | 310 |   0 |   5 |   11 | 65
+ 2022 | 310 |   0 |   1 |   25 | 154
+ 2023 | 309 |   0 |   2 |   20 | 118
+ 2024 | 301 |   0 |   5 |   21 | 8
+ 2025 | 289 |   4 |  15 |   32 | 0
+ 2026 | 238 |   4 |  16 |   33 | 0
+barre con spread == 0: 2409 | ultima: 2024-04-17
+cambi di valore dello spread tra barre consecutive: 2345
+unita': spread in 'points' MT5; XAUUSD 2 decimali -> 16 = 0.16 USD se point=0.01 (da confermare sul broker)
+NB: e' lo spread dell'ULTIMA barra/ora di chiusura, non uno spread medio storico: non usarlo per costi di backtest storici.
+
+==============================================================================
+7. COSTRUZIONE W1 DA D1
+==============================================================================
+REGOLA: settimana ISO-like = barre con data da lunedi a venerdi della stessa settimana;
+una barra di DOMENICA (D1 del server UTC+1 con la sera di domenica) e' attribuita alla settimana
+che INIZIA il lunedi' successivo (data +1 giorno). Motivo: la sessione dell'oro riapre la domenica sera
+(~22:00 UTC = 23:00 server), quindi quelle ore sono l'inizio della settimana di trading successiva;
+la barra di domenica contiene solo il gap/apertura (ore), non appartiene alla settimana precedente che
+si e' chiusa venerdi'. Una barra di SABATO (se esistesse) sarebbe attribuita al lunedi' successivo come
+la domenica. Etichetta della settimana = data del lunedi' (week_start).
+Open = open della prima barra, close = close dell'ultima, high/low = estremi, tickvol = somma.
+settimane scritte in weekly_W1.csv: 1168
+prima settimana: 2004-06-07 (n_barre 1) | ultima: 2026-10-19 (n_barre 4, ultima barra 2026-10-21)
+distribuzione n. feriali per settimana: {1: 1, 3: 3, 4: 63, 5: 1101}
+settimane con 5 feriali: 1101 | con <5: 67 | con 0 feriali: 0
+settimane con barra di domenica: 1084
+settimane con 0 domeniche per anno (post-2010 per capire il regime): {2004: 4, 2005: 7, 2006: 6, 2007: 2, 2010: 3, 2011: 5, 2012: 3, 2015: 1, 2016: 2, 2017: 2, 2018: 1, 2022: 1, 2023: 2, 2024: 12, 2025: 21, 2026: 12}
+W1 con OHLC incoerente: 0
+settimane con meno di 5 feriali (elenco primi 25): [('2004-06-07', 1), ('2004-07-05', 4), ('2004-09-06', 4), ('2004-11-22', 4), ('2004-11-29', 4), ('2004-12-20', 4), ('2004-12-27', 4), ('2005-02-21', 4), ('2005-03-21', 4), ('2005-05-30', 4), ('2005-09-05', 4), ('2005-11-21', 3), ('2005-12-26', 4), ('2006-01-16', 4), ('2006-02-20', 4), ('2006-04-10', 4), ('2006-05-29', 4), ('2006-09-04', 4), ('2006-11-20', 3), ('2006-12-25', 4), ('2007-01-01', 4), ('2007-12-24', 4), ('2007-12-31', 4), ('2008-06-09', 4), ('2008-11-24', 4)]
+5 maggiori |var| settimanali di chiusura: [('2011-09-19', '-8.6%'), ('2020-03-09', '-8.6%'), ('2008-12-08', '+8.7%'), ('2026-03-16', '-10.5%'), ('2008-09-15', '+14.1%')]
+ULTIMA settimana (2026-10-19) puo' essere incompleta: ultima barra 2026-10-21 (Mer)
+
+==============================================================================
+8. RENDIMENTI ANNUALI 2005-2025 E REGIME
+==============================================================================
+rendimento = close ultima barra dell'anno / close ultima barra anno precedente - 1
+regime: LONG se >= +10%; SHORT se <= -5%; altrimenti LATERALE
+
+anno | close prec (data)         | close fine (data)         | rend %  | regime
+ 2005 |    437.50 (2004-12-30 Gio) |    516.50 (2005-12-30 Ven) |  +18.06 | LONG
+ 2006 |    516.50 (2005-12-30 Ven) |    636.10 (2006-12-29 Ven) |  +23.16 | LONG
+ 2007 |    636.10 (2006-12-29 Ven) |    831.50 (2007-12-31 Lun) |  +30.72 | LONG
+ 2008 |    831.50 (2007-12-31 Lun) |    865.90 (2008-12-31 Mer) |   +4.14 | LATERALE
+ 2009 |    865.90 (2008-12-31 Mer) |   1098.30 (2009-12-31 Gio) |  +26.84 | LONG
+ 2010 |   1098.30 (2009-12-31 Gio) |   1418.19 (2010-12-31 Ven) |  +29.13 | LONG
+ 2011 |   1418.19 (2010-12-31 Ven) |   1563.95 (2011-12-30 Ven) |  +10.28 | LONG
+ 2012 |   1563.95 (2011-12-30 Ven) |   1676.12 (2012-12-31 Lun) |   +7.17 | LATERALE
+ 2013 |   1676.12 (2012-12-31 Lun) |   1206.79 (2013-12-31 Mar) |  -28.00 | SHORT
+ 2014 |   1206.79 (2013-12-31 Mar) |   1188.37 (2014-12-31 Mer) |   -1.53 | LATERALE
+ 2015 |   1188.37 (2014-12-31 Mer) |   1060.91 (2015-12-31 Gio) |  -10.73 | SHORT
+ 2016 |   1060.91 (2015-12-31 Gio) |   1152.12 (2016-12-30 Ven) |   +8.60 | LATERALE
+ 2017 |   1152.12 (2016-12-30 Ven) |   1302.54 (2017-12-29 Ven) |  +13.06 | LONG
+ 2018 |   1302.54 (2017-12-29 Ven) |   1280.23 (2018-12-31 Lun) |   -1.71 | LATERALE
+ 2019 |   1280.23 (2018-12-31 Lun) |   1520.21 (2019-12-31 Mar) |  +18.75 | LONG
+ 2020 |   1520.21 (2019-12-31 Mar) |   1893.68 (2020-12-31 Gio) |  +24.57 | LONG
+ 2021 |   1893.68 (2020-12-31 Gio) |   1828.27 (2021-12-31 Ven) |   -3.45 | LATERALE
+ 2022 |   1828.27 (2021-12-31 Ven) |   1823.55 (2022-12-30 Ven) |   -0.26 | LATERALE
+ 2023 |   1823.55 (2022-12-30 Ven) |   2063.03 (2023-12-29 Ven) |  +13.13 | LONG
+ 2024 |   2063.03 (2023-12-29 Ven) |   2624.14 (2024-12-31 Mar) |  +27.20 | LONG
+ 2025 |   2624.14 (2024-12-31 Mar) |   4317.36 (2025-12-31 Mer) |  +64.52 | LONG
+conteggio regimi: {'LONG': 12, 'LATERALE': 7, 'SHORT': 2}
+anni con ultima barra non-feriale o prima del 28/12 (data di fine anno 'anomala'): []
+anni con rendimento entro 1.5 pt% da una soglia (sensibili a +/-1 barra): [(2011, '+10.28'), (2016, '+8.60')]
+ultimo anno disponibile nel file: 2026 (parziale: 2026 non e' classificato; close fine 2025 = 4317.36 , ultimo close = 4134.70 , YTD -4.2%)
+
+Sensibilita' del regime alla scelta della barra di fine anno (stessa soglia):
+   2005: base +18.06% LONG | spostando di +/-1 barra fine/inizio: da +17.28% a +18.64% -> regimi possibili ['LONG']
+   2006: base +23.16% LONG | spostando di +/-1 barra fine/inizio: da +22.43% a +24.75% -> regimi possibili ['LONG']
+   2007: base +30.72% LONG | spostando di +/-1 barra fine/inizio: da +29.90% a +35.23% -> regimi possibili ['LONG']
+   2008: base +4.14% LATERALE | spostando di +/-1 barra fine/inizio: da +1.20% a +5.18% -> regimi possibili ['LATERALE']
+   2009: base +26.84% LONG | spostando di +/-1 barra fine/inizio: da +25.10% a +26.40% -> regimi possibili ['LONG']
+   2010: base +29.13% LONG | spostando di +/-1 barra fine/inizio: da +27.87% a +29.62% -> regimi possibili ['LONG']
+   2011: base +10.28% LONG | spostando di +/-1 barra fine/inizio: da +9.23% a +11.92% -> regimi possibili ['LATERALE', 'LONG']
+   2012: base +7.17% LATERALE | spostando di +/-1 barra fine/inizio: da +5.43% a +8.20% -> regimi possibili ['LATERALE']
+   2013: base -28.00% SHORT | spostando di +/-1 barra fine/inizio: da -28.50% a -26.15% -> regimi possibili ['SHORT']
+   2014: base -1.53% LATERALE | spostando di +/-1 barra fine/inizio: da -2.89% a +0.08% -> regimi possibili ['LATERALE']
+   2015: base -10.73% SHORT | spostando di +/-1 barra fine/inizio: da -11.55% a -10.55% -> regimi possibili ['SHORT']
+   2016: base +8.60% LATERALE | spostando di +/-1 barra fine/inizio: da +8.21% a +9.36% -> regimi possibili ['LATERALE']
+   2017: base +13.06% LONG | spostando di +/-1 barra fine/inizio: da +11.53% a +14.77% -> regimi possibili ['LONG']
+   2018: base -1.71% LATERALE | spostando di +/-1 barra fine/inizio: da -3.06% a -0.63% -> regimi possibili ['LATERALE']
+   2019: base +18.75% LONG | spostando di +/-1 barra fine/inizio: da +17.81% a +19.47% -> regimi possibili ['LONG']
+   2020: base +24.57% LONG | spostando di +/-1 barra fine/inizio: da +23.86% a +26.29% -> regimi possibili ['LONG']
+   2021: base -3.45% LATERALE | spostando di +/-1 barra fine/inizio: da -5.09% a -3.44% -> regimi possibili ['LATERALE', 'SHORT']
+   2022: base -0.26% LATERALE | spostando di +/-1 barra fine/inizio: da -0.73% a +0.76% -> regimi possibili ['LATERALE']
+   2023: base +13.13% LONG | spostando di +/-1 barra fine/inizio: da +12.77% a +13.86% -> regimi possibili ['LONG']
+   2024: base +27.20% LONG | spostando di +/-1 barra fine/inizio: da +26.07% a +28.80% -> regimi possibili ['LONG']
+   2025: base +64.52% LONG | spostando di +/-1 barra fine/inizio: da +62.48% a +66.51% -> regimi possibili ['LONG']
+anni il cui regime cambia con +/-1 barra: [2011, 2021]
+anni 'LONG' per soglia: la soglia +10% e' superata da 12 anni su 21; mediana rendimento +13.1%
+
+FINE

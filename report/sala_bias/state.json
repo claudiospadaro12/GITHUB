@@ -2,15 +2,15 @@
  "project_id": "SALA-BIAS-001",
  "project_name": "Replica del MULTI TF BIAS DASHBOARD e studio del segnale",
  "mode": "MISTA",
- "state_version": 2,
- "updated_at": "2026-10-26T09:16:42Z",
+ "state_version": 4,
+ "updated_at": "2026-10-26T09:25:00Z",
  "candidate_version": "nessuna (ciclo 0 non iniziato)",
- "phase": "CICLO 0 - ANALISI INDIPENDENTI IN CORSO",
+ "phase": "CICLO 0 - ESECUZIONE (A4)",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
   "available_parallel_slots": null,
-  "active_processes": 4
+  "active_processes": 1
  },
  "agents": [
   {
@@ -33,7 +33,7 @@
    "id": "A2",
    "role": "Strategia e dominio (specifica della replica)",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": "T001",
    "last_event_id": null
   },
@@ -41,7 +41,7 @@
    "id": "A3",
    "role": "Ricerca ed evidenze (qualita dei dati)",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": "T002",
    "last_event_id": null
   },
@@ -49,7 +49,7 @@
    "id": "A4",
    "role": "Progettazione ed esecuzione (implementazione e studio S1)",
    "kind": "REALE",
-   "status": "IN_ATTESA",
+   "status": "IN_CORSO",
    "current_task_id": "T004",
    "last_event_id": null
   },
@@ -65,7 +65,7 @@
    "id": "A6",
    "role": "Revisore critico indipendente",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": "T003",
    "last_event_id": null
   },
@@ -73,7 +73,7 @@
    "id": "A7",
    "role": "Verificatore (implementazione indipendente)",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": "T005",
    "last_event_id": null
   }
@@ -85,8 +85,10 @@
    "requirement_ids": [
     "R001"
    ],
-   "status": "IN_CORSO",
-   "artifact_ids": [],
+   "status": "COMPLETATO",
+   "artifact_ids": [
+    "agents/A2/specifica_replica.md"
+   ],
    "check_ids": []
   },
   {
@@ -95,8 +97,12 @@
    "requirement_ids": [
     "R003"
    ],
-   "status": "IN_CORSO",
-   "artifact_ids": [],
+   "status": "COMPLETATO",
+   "artifact_ids": [
+    "agents/A3/qualita_dati.py",
+    "agents/A3/weekly_W1.csv",
+    "agents/A3/anni_regimi.csv"
+   ],
    "check_ids": []
   },
   {
@@ -105,7 +111,7 @@
    "requirement_ids": [
     "R005"
    ],
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "artifact_ids": [],
    "check_ids": []
   },
@@ -114,6 +120,17 @@
    "agent_id": "A7",
    "requirement_ids": [
     "R004"
+   ],
+   "status": "COMPLETATO",
+   "artifact_ids": [],
+   "check_ids": []
+  },
+  {
+   "id": "T004",
+   "agent_id": "A4",
+   "requirement_ids": [
+    "R002",
+    "R003"
    ],
    "status": "IN_CORSO",
    "artifact_ids": [],
@@ -173,9 +190,46 @@
    "questione": "Griglia di qualita: pesi di default (20/20/15/15/10/10/10), soglia 90",
    "scelta": "adottata invariata",
    "motivo": "nessun motivo di dominio per cambiarla, registrata prima del ciclo 0"
+  },
+  {
+   "id": "D002",
+   "questione": "Criteri dello studio S1 dopo la critica di A6",
+   "alternative": [
+    "tenere la v1",
+    "adottare tutte le 16 modifiche",
+    "adottarne alcune"
+   ],
+   "scelta": "v2: adottate tutte le 16 (la 10 adattata)",
+   "motivo": "obiezioni bloccanti verificate sul CSV (1.084 barre di domenica) e disegno senza test di causalita; potenza insufficiente per due soli esiti",
+   "evidenze": [
+    "reviews/A6_critica_criteri.md",
+    "agents/A3/qualita_dati_output.txt"
+   ],
+   "riserve": "A6 e un agente: le stime di potenza sono sue ipotesi",
+   "responsabile": "C0",
+   "condizione_di_riesame": "un errore nei dati o una modifica della specifica dopo i numeri"
   }
  ],
- "issues": [],
+ "issues": [
+  {
+   "id": "I001",
+   "severity": "Bloccante",
+   "description": "barre di domenica non trattate",
+   "requirement_id": "R003",
+   "owner_id": "C0",
+   "closure_check_id": null,
+   "status": "Risolto senza verifica indipendente (regola 1 della v2, da verificare da A7 sui dati fusi)"
+  },
+  {
+   "id": "I002",
+   "severity": "Bloccante",
+   "description": "nessun test di causalita",
+   "requirement_id": "R002",
+   "owner_id": "C0",
+   "closure_check_id": null,
+   "status": "Aperto (test obbligatori in v2; chiusura dopo l'esecuzione)"
+  }
+ ],
  "checks": [],
  "scores": [],
  "artifacts": [],

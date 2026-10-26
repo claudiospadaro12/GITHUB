@@ -1,0 +1,3 @@
+# Decisioni - SALA-BIAS-001
+**D001** (prima del ciclo 0): griglia di qualita invariata (20/20/15/15/10/10/10, soglia 90). Motivo: nessuna ragione di dominio per cambiarla.
+**D002** (26/10/2026): criteri dello studio S1 = v2 (`criteri_studio_S1_v2.md`), tutte le 16 modifiche di A6 adottate (la 10 adattata). Alternative: tenere la v1 o adottarne alcune. Motivo: due obiezioni bloccanti verificate sui dati (1.084 barre di domenica; nessun test di causalita), potenza insufficiente per due soli esiti. Riserva: le stime di potenza sono ipotesi di A6. Riesame: errore nei dati o modifica della specifica dopo i numeri.
