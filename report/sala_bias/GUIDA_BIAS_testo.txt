@@ -1,0 +1,276 @@
+ MULTI TF BIAS DASHBOARD
+ Guida semplice per il team · indicatore per MetaTrader 5
+
+
+  In una frase: l'indicatore ci dice, per ogni timeframe da W1 a M15, se il mercato è
+  rialzista, ribassista o neutro, quanto è forte questa direzione e se i timeframe sono
+  d'accordo tra loro.
+
+
+
+ A cosa serve
+ Prima di cercare un'operazione vogliamo rispondere in pochi secondi a cinque domande:
+ • Qual è la direzione prevalente del mercato?
+ • Quanto è forte questa direzione?
+ • I timeframe sono allineati o in conflitto?
+ • Il trend si sta indebolendo?
+ • C'è un possibile cambio di bias in arrivo?
+ Funziona su qualsiasi simbolo: lo mettiamo sul grafico di XAUUSD, GER40/DAX o
+ US100/Nasdaq e analizza automaticamente quel simbolo.
+
+ Cosa NON fa
+  Non è un sistema di trading. Non apre e non chiude posizioni, non dice COMPRA o
+  VENDI, non suggerisce entry, stop loss o take profit. È solo una lettura informativa del
+  contesto: la decisione resta sempre nostra.
+
+
+
+ Tre regole che lo rendono affidabile
+ Regola                       Cosa significa per noi
+
+                              W1 usa solo dati W1, D1 solo dati D1, e così via. M15 non copia il trend del
+ Ogni timeframe fa da sé
+                              Daily: se sono d'accordo è perché lo dicono i dati di entrambi.
+
+                              Il calcolo usa solo candele già chiuse. Quello che vediamo oggi su una
+ Niente repaint
+                              candela passata non cambia domani.
+
+                              Se un dato manca (volume, storico, news) compare N/A o DATA NOT
+ Niente dati inventati
+                              AVAILABLE, mai un valore stimato.
+
+
+
+
+MULTI TF BIAS DASHBOARD – Guida per il team                                                         Pagina 1
+ Come si legge la dashboard
+ Esempio illustrativo (valori di fantasia, solo per mostrare la lettura):
+
+      MULTI TF BIAS DASHBOARD                                                                                   −    +
+
+      Symbol: XAUUSD                                                                 Chart M5 · closed bars (no repaint)
+
+        TF      BIAS           SCORE       FORZA            CONF      STRUCT             Δ     NOTE
+
+        W1        BULLISH      88/100      FORTE            86%       HH/HL BOS▲
+
+        D1        BULLISH      81/100      FORTE            82%       HH/HL
+
+        H4        BULLISH      93/100      MOLTO FORTE      91%       HH/HL BOS▲
+
+        H1        BULLISH      76/100      FORTE            74%       HH/LL
+
+        M15       BEARISH      38/100      NEUTRO           63%       LH/LL CHoCH▼             CONTRO-TREND
+
+
+
+      OVERALL BIAS          BULLISH
+
+      Overall Score: 72/100                                  Strength: FORTE
+      TIMEFRAME ALIGNMENT:     4/5 BULLISH – 1/5 BEARISH
+      CONFIDENCE: 84%                                                                          Confidence ≠ probability
+
+      HTF (W1·D1·H4): BULLISH | M15 = CONTRO-TREND / CORREZIONE
+
+
+        W1 ON          D1 ON     H4 ON        H1 ON        M15 ON           ALL ON   RESET
+
+      LAST UPDATE 21:48:03                                                             INFO ONLY · NO BUY/SELL SIGNALS
+
+
+
+
+ Colonna           Significato
+
+ TF                Timeframe. L'ordine dall'alto in basso è la gerarchia: W1 → D1 → H4 → H1 → M15.
+
+ BIAS              Direzione: ● BULLISH, ● BEARISH o ● NEUTRAL.
+
+ SCORE             Forza della direzione da 0 a 100. Più è alto, più la direzione è netta.
+
+ FORZA             Lo score tradotto in parole (vedi tabella a pagina 3).
+
+ CONF              Quanto gli strumenti di analisi sono d'accordo tra loro. Non è una probabilità.
+
+                   Struttura del prezzo: HH/HL (massimi e minimi crescenti), LH/LL (decrescenti), BOS =
+ STRUCT
+                   rottura di struttura, CHoCH = cambio di struttura. ▲ al rialzo, ▼ al ribasso.
+
+                   Come è cambiato lo score rispetto alla candela precedente: ▲ verso rialzo, ▼ verso
+ Δ
+                   ribasso.
+
+ NOTE              Avvisi brevi: CONTRO-TREND, WEAKENING, BIAS CHANGING, → BEARISH ecc.
+
+
+
+
+MULTI TF BIAS DASHBOARD – Guida per il team                                                                    Pagina 2
+ Come nasce lo score
+ Per ogni timeframe l'indicatore guarda cinque aspetti del grafico. Ognuno dà un voto da
+ −100 (molto ribassista) a +100 (molto rialzista). Poi fa una media pesata.
+
+ Aspetto                  Peso     Cosa guarda, in parole semplici
+
+                                   Massimi e minimi stanno salendo (HH + HL) o scendendo (LH + LL)? Il
+ Market Structure         30%      prezzo ha rotto in chiusura l'ultimo massimo o minimo importante (BOS
+                                   / CHoCH)?
+
+ Trend (EMA                        Il prezzo è sopra o sotto le medie? Le medie sono in ordine (20 > 50 >
+                          25%
+ 20/50/200)                        200 = rialzo)? Sono inclinate o piatte? Si stanno allargando?
+
+                                   La spinta va nella stessa direzione? RSI sopra 55 = spinta rialzista,
+ Momentum (RSI,
+                          20%      sotto 45 = ribassista. Conta anche se RSI e MACD stanno salendo o
+ MACD)
+                                   scendendo.
+
+                                   Le ultime candele chiudono vicino ai massimi o ai minimi? Corpi pieni,
+ Price Action             15%
+                                   accelerazioni, ombre di rifiuto.
+
+                                   Solo conferma: i volumi crescono nella direzione del movimento? Non
+ Volume (tick)            10%
+                                   decide mai il bias da solo.
+
+ I pesi sono modificabili dalle impostazioni e vengono sempre riportati a 100%.
+
+ Dal numero alla lettura
+ Il risultato interno va da −100 a +100. Il segno dà la direzione, il valore assoluto è lo SCORE
+ che vediamo (0–100). Esempio: −75 diventa BEARISH 75/100 FORTE. Sotto 15 punti (soglia
+ regolabile) il timeframe è considerato NEUTRAL.
+
+ Score              Forza                     Come leggerlo
+
+ 0–9                MOLTO DEBOLE              Nessuna direzione
+
+ 10 – 29            DEBOLE                    Direzione appena accennata
+
+ 30 – 69            NEUTRO                    Direzione presente ma non convincente
+
+ 70 – 89            FORTE                     Direzione chiara
+
+ 90 – 100           MOLTO FORTE               Direzione molto netta, quasi tutti gli elementi d'accordo
+
+
+
+  Come usarla in pratica: guardiamo prima i timeframe alti per capire il contesto, poi quelli
+  bassi per capire se siamo in fase di continuazione o di correzione. La dashboard ci aiuta a
+  leggere il mercato; le decisioni operative e la gestione del rischio restano nostre.
+
+
+
+
+MULTI TF BIAS DASHBOARD – Guida per il team                                                           Pagina 3
+ La parte bassa: il quadro d'insieme
+ Overall Bias
+ È la sintesi dei cinque timeframe. I timeframe alti contano di più: W1 30% · D1 25% · H4
+ 20% · H1 15% · M15 10%. Se spegniamo un timeframe, il calcolo si ridistribuisce sugli altri.
+
+ Timeframe Alignment
+ Conta quanti timeframe vanno nella stessa direzione: per esempio 4/5 BULLISH oppure 3/5
+ BULLISH – 2/5 BEARISH.
+
+ Confidence
+
+  Confidence ≠ probabilità. 84% non significa "84% di probabilità che salga". Significa che
+  gli strumenti di analisi e i timeframe sono in gran parte d'accordo tra loro. Alta concordanza
+  = lettura più pulita, non garanzia di risultato.
+
+
+ Contro-trend
+ Ogni timeframe viene confrontato con quelli sopra di lui. Se va nella direzione opposta
+ compare CONTRO-TREND. Tipico caso: W1, D1, H4 e H1 rialzisti e M15 ribassista → il quadro
+ grande è rialzista e M15 sta probabilmente facendo una correzione. L'indicatore lo segnala,
+ ma non lo trasforma in un segnale di ingresso.
+
+ Bias Alert – possibile cambio di bias
+ Questa sezione è normalmente nascosta. Compare solo quando un timeframe mostra un
+ deterioramento confermato, cioè quando tutte queste condizioni sono vere:
+ • lo score è sceso in modo significativo rispetto al picco recente;
+ • la debolezza dura da almeno due candele chiuse;
+ • almeno due elementi su quattro (struttura, medie, momentum, price action) vanno
+   contro la direzione precedente.
+ Una sola candela contraria non basta. Esempio di messaggio: "H1: possibile passaggio da
+ BULLISH a NEUTRAL". È un avviso informativo, non un ordine.
+
+ External Market Information (opzionale)
+ Se attivata, mostra le news ad alto impatto delle valute del simbolo (es. USD per l'oro) prese
+ dal calendario economico integrato in MT5. Le news non modificano mai lo score
+ tecnico. Se il calendario non è disponibile compare DATA NOT AVAILABLE.
+
+
+
+
+MULTI TF BIAS DASHBOARD – Guida per il team                                               Pagina 4
+ Installazione e uso
+ #     Passo
+
+       In MT5: File → Apri cartella dati → MQL5 → Indicators e copiare dentro
+ 1
+       MULTI_TF_BIAS_DASHBOARD.mq5.
+
+ 2     Aprire il file con MetaEditor e premere F7 (Compila).
+
+ 3     In MT5, nel Navigatore, trascinare l'indicatore sul grafico (qualsiasi timeframe).
+
+       Alla prima apertura alcune righe possono mostrare LOADING DATA... per qualche secondo,
+ 4
+       mentre MT5 scarica lo storico.
+
+ Pulsanti sulla dashboard
+ Pulsante                             Funzione
+
+                                      Accende o spegne un timeframe. Se spento sparisce dalla tabella e
+ W1 / D1 / H4 / H1 / M15 ON-OFF
+                                      non conta nell'Overall.
+
+ ALL ON                               Riaccende tutti i timeframe.
+
+ RESET                                Torna alle impostazioni iniziali (timeframe, dimensione, posizione).
+
+ −/+                                  Rimpicciolisce o ingrandisce la dashboard.
+
+ Barra del titolo                     Tenendo premuto con il mouse si sposta la dashboard sul grafico.
+
+ Le impostazioni più utili
+ Impostazione                 Default             Quando cambiarla
+
+                                                  Lasciare true (no repaint). Con false vede anche la
+ Solo candele chiuse          true
+                                                  candela in corso, ma i valori si muovono.
+
+                                                  Più alta = l'indicatore dichiara una direzione solo quando
+ Soglia NEUTRAL               15
+                                                  è più netta.
+
+                                                  Per dare più importanza, per esempio, alla struttura o
+ Pesi componenti              30/25/20/15/10
+                                                  alle medie.
+
+ Pesi timeframe               30/25/20/15/10      Per chi lavora più sui timeframe bassi.
+
+                                                  Ricalcolo periodico; in più ricalcola subito a ogni nuova
+ Update Interval              60 sec
+                                                  candela.
+
+ External Information         false               true per vedere le news dal calendario MT5.
+
+ Posizione / font /
+                              –                   Per adattarla al proprio monitor.
+ trasparenza
+
+ Da sapere
+ • Con le sole candele chiuse, W1 cambia a fine settimana e M15 ogni 15 minuti: è
+   normale.
+ • Se un broker non fornisce abbastanza storico, l'EMA 200 o un intero timeframe possono
+   comparire come N/A.
+ • Le news funzionano solo nel terminale collegato, non nello Strategy Tester.
+
+
+
+
+MULTI TF BIAS DASHBOARD – Guida per il team                                                             Pagina 5
+

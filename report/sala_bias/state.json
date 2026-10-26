@@ -1,0 +1,27 @@
+{
+ "project_id": "SALA-BIAS-001",
+ "project_name": "Replica del MULTI TF BIAS DASHBOARD e studio del segnale",
+ "mode": "MISTA",
+ "state_version": 1,
+ "updated_at": "2026-10-26T09:15:10Z",
+ "candidate_version": "nessuna (ciclo 0 non iniziato)",
+ "phase": "CONFIGURAZIONE",
+ "cycle": 0,
+ "concurrency": {
+  "requested_roles": 8,
+  "available_parallel_slots": null,
+  "active_processes": null
+ },
+ "agents": [],
+ "tasks": [],
+ "requirements": [],
+ "assumptions": [],
+ "evidence": [],
+ "messages": [],
+ "decisions": [],
+ "issues": [],
+ "checks": [],
+ "scores": [],
+ "artifacts": [],
+ "last_event_id": null
+}
