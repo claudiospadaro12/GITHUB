@@ -1,0 +1,37 @@
+ANNO5K TESTER TRANCHE (SixtyNine EA.ex5) -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ANNO5K_TESTER_TRANCHE_v1, pin c8bd4683978a769fc409fcc0e626dcf06e1cd592
+data: 2026-10-26 13:34:35   pc: DESKTOP-H4D7CAJ   terminale: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392 di questo PC)   cartella dati 215D85D767A1C39E22D242C8114BF9F5
+EX5: Market\SixtyNine EA.ex5   byte 175546   data file 2026-10-20 22:20:42   SHA256 31FAEAE12F5FC1734F8B9D4E2A7753ECCCD666775F347DDD5CF59ABB817A8127   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)
+tester: XAUUSD H1, Modello 1 (NON tick reali: barre o tick generati dal tester, qualita dello storico quella scritta nel report), deposito 5000 EUR, leva 1:100 (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0
+input imposti dal .ini (0):    (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).
+EA scelto (SixtyNine EA.ex5): EA di TERZI dal Market, scatola nera. UN MESE a conto vuoto: anno 2018 H1 Modello 1, input imposti dal .ini: 0 (0 = NESSUNO imposto: restano quelli salvati dal tester per questo EA su questo PC, e si CONFRONTANO nel report prima di leggere i numeri). Regole scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md. Questo script RACCOGLIE, non giudica.
+tranche scelte: 22 (le altre: SALTATA, non lanciate per scelta)
+esiti: TRANCHE22 (H1) OK
+ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono 1 passate INDIPENDENTI sulla STESSA finestra (2018.01.01 -> 2019.01.01), ognuna a CONTO VUOTO (deposito 5000 EUR), e cambia SOLO il periodo del grafico: TRANCHE22=H1. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).
+
+TRANCHE22 (anno 2018 H1 Modello 1)  2018.01.01 -> 2019.01.01   STATO OK
+EX5_DOPO TRANCHE22: 31FAEAE12F5FC1734F8B9D4E2A7753ECCCD666775F347DDD5CF59ABB817A8127 UGUALE
+   durata 83 s (orologio), test 62 s (riga Test passed del giornale; -1 = non letta)   giornali letti 9, righe 287708
+   report ANNO5K_SIXTYNINEEA_TRANCHE22_20261026_133301.htm   operazioni 358   netto -1171.89   PF 0.69   DD equita 1203.46(23.99%)   DD saldo 1171.89(23.44%)
+   qualita 100%   barre report 5873   ticks report 1395197   barre generate 5873   ticks generati 1395197   inizio tick    finestra 2018.01.01-2019.01.01
+   input imposti confermati dal report: nessuno_imposto   ENUM (NON imposti: il tester usa il default dell EA o l ultimo valore salvato nel tester, NON VERIFICATO quale; fa fede il report): 
+   TUTTI gli input del report: LotsMode=0 ; Lots=0.01 ; Risk=1.0 ; BalanceStart=1000.0 ; MaxSpread=0 ; MaxDrawdown=0.0 ; BuyTrade=0 ; SellTrade=0 ; UseCustomTPSL=1 ; TP=3000 ; SL=1000 ; UseAutoPM=0 ; Monday=0 ; Tuesday=0 ; Wednesday=0 ; Thursday=0 ; Friday=0 ; UseTradingTime=1 ; StartTime=01:00 ; EndTime=23:00 ; DOBeforeWeekend=0 ; UseNewsFilter=1 ; ShowPanel=0 ; UIScale=100 ; FontUIScale=90 ; MagicNumber=6969 ; CommentOrder=SixtyNine EA ; DebugMode=1
+   input stampati dal giornale (dopo started with inputs): BalanceStart=1000.0 ; BuyTrade=0 ; CommentOrder=SixtyNine EA ; DebugMode=1 ; DOBeforeWeekend=0 ; EndTime=23:00 ; FontUIScale=90 ; Friday=0 ; Lots=0.01 ; LotsMode=0 ; MagicNumber=6969 ; MaxDrawdown=0.0 ; MaxSpread=0 ; Monday=0 ; Risk=1.0 ; SellTrade=0 ; ShowPanel=0 ; SL=1000 ; StartTime=01:00 ; Thursday=0 ; TP=3000 ; Tuesday=0 ; UIScale=100 ; UseAutoPM=0 ; UseCustomTPSL=1 ; UseNewsFilter=1 ; UseTradingTime=1 ; Wednesday=0
+   righe stop out nei giornali 0, no money 0 (somma sui giornali: la stessa riga puo stare in due giornali). Lo STOP OUT NON e un KO: e la coda cercata (D4)
+   final balance 3828.11 EUR
+   giornale: 2018.01.07 23:05:00   failed sell stop 0.05 XAUUSD at 1313.48 sl: 1338.48 tp: 1294.48 [Market closed]
+   giornale: 2018.01.07 23:05:00   failed sell stop 0.05 XAUUSD at 1307.10 sl: 1313.10 tp: 1290.10 [Market closed]
+   giornale: 2018.01.07 23:05:00   failed sell stop 0.05 XAUUSD at 1306.90 sl: 1316.90 tp: 1287.90 [Market closed]
+   giornale: 2018.01.07 23:05:00   failed buy stop 0.05 XAUUSD at 1325.04 sl: 1313.04 tp: 1341.04 [Market closed]
+   giornale: 2018.01.07 23:05:00   failed sell stop 0.05 XAUUSD at 1316.35 sl: 1328.35 tp: 1300.35 [Market closed]
+   giornale: 2018.01.07 23:05:00   failed sell stop 0.05 XAUUSD at 1315.95 sl: 1321.95 tp: 1266.95 [Market closed]
+   giornale: 2018.01.10 08:00:00   failed sell stop 0.05 XAUUSD at 1310.76 sl: 1322.76 tp: 1294.76 [Invalid price]
+   giornale: 2018.01.10 08:00:00   CTrade::OrderSend: sell stop 0.05 XAUUSD at 1310.76 sl: 1322.76 tp: 1294.76 [invalid price]
+   giornale: 2018.01.14 23:05:00   failed sell stop 0.05 XAUUSD at 1326.48 sl: 1351.48 tp: 1307.48 [Market closed]
+   giornale: 2018.01.14 23:05:00   failed sell stop 0.05 XAUUSD at 1308.56 sl: 1320.56 tp: 1290.56 [Market closed]
+   giornale: 2018.01.14 23:05:00   failed sell stop 0.05 XAUUSD at 1309.36 sl: 1315.36 tp: 1292.36 [Market closed]
+   giornale: 2018.01.14 23:05:00   failed sell stop 0.05 XAUUSD at 1316.78 sl: 1326.78 tp: 1297.78 [Market closed]
+   giornale: 2018.01.14 23:05:00   failed sell stop 0.05 XAUUSD at 1310.76 sl: 1322.76 tp: 1294.76 [Market closed]
+   giornale: 2018.01.14 23:05:00   failed sell stop 0.05 XAUUSD at 1324.48 sl: 1330.48 tp: 1275.48 [Market closed]
+   giornale: 2018.01.16 05:00:00   failed sell stop 0.05 XAUUSD at 1340.82 sl: 1352.82 tp: 1324.82 [Invalid price]
+
+COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.
