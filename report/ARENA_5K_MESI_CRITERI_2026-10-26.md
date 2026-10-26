@@ -23,3 +23,11 @@ Lettore: `backtest_pipeline/leggi_arena5k_mesi.py`, congelato prima degli zip, c
 
 ## Cosa NON dice
 Un mese non e un anno; il tester ha margine di circa 10.000 USD a lotto sull'oro (DERIVATO) e il margine reale BCM non e visto; niente slippage, latenza ne gap veri; il conto reale e il demo dove Arena ha sofferto sono dati reali che il tester non riproduce. Non decide se tenerla o spegnerla: lo decide Claudio.
+
+## Aggiunta (26/10, 09:15): corsa troppo lenta, si passa al Modello 1 con calibrazione (scritta prima dei numeri)
+Claudio (26/10): "troppo tempo ci vuole". I primi mesi a tick reali (giugno, maggio 2026: circa 35 minuti l'uno; aprile in corso da oltre 80 minuti) dicono che 15 mesi restanti costerebbero 10-40 ore. **Per i mesi che mancano si usa il Modello 1 (OHLC 1 minuto, il tester genera i tick), molto piu veloce, e lo si CALIBRA sui mesi che hanno entrambi i modelli.**
+- **Calibrazione:** si rifanno col Modello 1 i mesi di aprile, maggio, giugno, luglio, agosto e settembre 2026 (di cui si ha il Modello 4: luglio, agosto, settembre del 15-16/10; giugno, maggio e, se finito, aprile del 26/10). **Calibrazione OK** se, sui mesi in comune (minimo 4): lo **stesso segno del netto** in almeno l'80% dei mesi **e** la **stessa presenza di stop out** in almeno l'80%. Altrimenti i mesi nuovi a Modello 1 sono NON ATTENDIBILI e lo scrivo; restano allora solo i mesi a tick reali.
+- **Mesi nuovi a Modello 1:** gennaio-marzo 2026 e tutto il 2025 (15 mesi), stessa configurazione (5.000 EUR, M1, 14 input imposti, leva 1:100, nessun guardiano).
+- **Cosa vuol dire:** Arena e una griglia con trigger a prezzo (0,2) e centinaia di operazioni al giorno: con soli quattro punti per barra il comportamento puo differire (INFERITO). La calibrazione serve a saperlo.
+- Lettore: `leggi_arena5k_mesi.py` (con `--calibra <cartella Modello 4> <cartella Modello 1>`, congelato prima dei dati).
+**Previsioni dichiarate ORA:** calibrazione OK 55%. Con calibrazione OK: stop out in almeno 3 dei 15 mesi nuovi 55%. Durata media del Modello 1: sotto 20 minuti a mese 65%.

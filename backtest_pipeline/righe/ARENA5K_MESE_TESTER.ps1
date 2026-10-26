@@ -14,6 +14,7 @@ param(
   [string]$Imposti = '',
   [string]$Mese = '',
   [string]$Periodo = 'M1',
+  [int]$Modello = 4,
   [string]$Base = ''
 )
 
@@ -32,7 +33,7 @@ $NOME_D   = 'ARENA5K_' + $TOKU
 $SIMBOLO  = 'XAUUSD'
 # NIENTE $PERIODO qui: questo giro ha DUE periodi del grafico e li porta ognuna la sua voce di $SONDE ($s.Per). Una variabile
 # unica di periodo sarebbe falsa e finirebbe nei titoli e nel referto (classe 1499: i conteggi e le etichette si COSTRUISCONO).
-$MODELLO  = 4
+$MODELLO  = $Modello
 $DEPOSITO = 5000
 $VALUTA   = 'EUR'
 $LEVA     = 100
@@ -84,6 +85,7 @@ $SONDE = @(
 )
 # v1 (26/10/2026): UN SOLO MESE a conto vuoto (5000 EUR), scelto con -Mese AAAA.MM e periodo -Periodo (default M1, quello dell Arena). La passata si chiama ancora TRANCHE22 per il lettore.
 if($Mese -notmatch '^20(2[4-9])\.(0[1-9]|1[0-2])$'){ throw ('-Mese "' + $Mese + '" non valido: serve AAAA.MM, per esempio 2026.06') }
+if($Modello -notin @(1,4)){ throw ('-Modello ' + $Modello + ' non ammesso (1 o 4)') }
 if($Periodo -notmatch '^(M1|M5|M15|M30|H1)$'){ throw ('-Periodo "' + $Periodo + '" non ammesso (M1, M5, M15, M30, H1)') }
 $dm = [datetime]::ParseExact(($Mese + '.01'), 'yyyy.MM.dd', $IC)
 $SONDE_TUTTE = @([pscustomobject]@{ Nome = 'TRANCHE22'; Per = $Periodo; Da = $dm.ToString('yyyy.MM.dd', $IC); A = $dm.AddMonths(1).ToString('yyyy.MM.dd', $IC); Timeout = $TimeoutTrancheMin; Cosa = ('mese ' + $Mese + ' ' + $Periodo) })
@@ -422,7 +424,7 @@ $referto = New-Object System.Collections.ArrayList
 $esiti = @{}; foreach($sx in $SONDE_TUTTE){ $esiti[$sx.Nome] = 'SALTATA' }
 $fermaEx5 = ''
 foreach($s in $SONDE){
-  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', XAUUSD ' + $s.Per + ', Modello 4, deposito ' + $DEPOSITO + ' EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
+  Titolo ('2 - ' + $s.Nome + ' (' + $s.Cosa + '): ' + $s.Da + ' -> ' + $s.A + ', XAUUSD ' + $s.Per + ', Modello ' + $MODELLO + ', deposito ' + $DEPOSITO + ' EUR, leva 1:100, timeout ' + $s.Timeout + ' minuti')
   $esiti[$s.Nome] = 'NON_LANCIATA'
   if($fermaEx5 -ne ''){
     # v2 (classe 1438): niente ore di tester su un binario che non e' quello dell'impronta
@@ -496,7 +498,7 @@ foreach($s in $SONDE){
   $tickIniTxt = (($st.TickIni.Keys | Sort-Object) -join ' / ')
   $okTick = $false; $nTickSim = 0
   foreach($tk in @($st.TickIni.Keys)){ $pz2 = $tk -split ' '; if($pz2[0] -eq $SIMBOLO){ $nTickSim = $nTickSim + 1; if([string]::CompareOrdinal($pz2[1], $s.Da) -le 0){ $okTick = $true } } }
-  if($nTickSim -gt 0 -and -not $okTick){ [void]$motivi.Add('ticks data begins from ' + $tickIniTxt + ': DOPO l inizio della finestra ' + $s.Da + ' (prima di quella data MT5 GENERA i tick: non sono reali)') }
+  if($MODELLO -eq 4 -and $nTickSim -gt 0 -and -not $okTick){ [void]$motivi.Add('ticks data begins from ' + $tickIniTxt + ': DOPO l inizio della finestra ' + $s.Da + ' (prima di quella data MT5 GENERA i tick: non sono reali)') }
 
   # --- il report
   $rep = $null
@@ -528,7 +530,7 @@ foreach($s in $SONDE){
         }
         if(-not $okP){ [void]$motivi.Add('il periodo del report e "' + $lr.Periodo + '" invece di ' + $s.Per + ' (' + $s.Da + ' - ' + $s.A + ')') }
       } else { [void]$motivi.Add('periodo del report non letto') }
-      if($lr.Qualita -notmatch '^100%'){ [void]$motivi.Add('qualita dello storico "' + $lr.Qualita + '" invece di 100% ticks reali') }
+      if($MODELLO -eq 4 -and $lr.Qualita -notmatch '^100%'){ [void]$motivi.Add('qualita dello storico "' + $lr.Qualita + '" invece di 100% ticks reali') }
       $depN = $null; if($null -ne $lr.Deposito){ $dd0 = 0.0; if([double]::TryParse($lr.Deposito, [Globalization.NumberStyles]::Float, $IC, [ref]$dd0)){ $depN = $dd0 } }
       if($null -eq $depN -or [math]::Abs($depN - $DEPOSITO) -gt 0.005){ [void]$motivi.Add('deposito del report "' + $lr.Deposito + '" invece di ' + $DEPOSITO + ': il .ini non e stato applicato come dichiarato') }
       if($lr.Leva -ne ('1:' + $LEVA)){ [void]$motivi.Add('leva del report "' + $lr.Leva + '" invece di 1:' + $LEVA) }
@@ -577,7 +579,7 @@ $testa = @(
   ('ARENA5K TESTER TRANCHE (' + $Ex5Nome + ') -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ARENA5K_TESTER_TRANCHE_v1, pin ' + $Pin),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
-  ('tester: ' + $SIMBOLO + ' ' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ',') + ', Modello ' + $MODELLO + ' (ticks reali), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
+  ('tester: ' + $SIMBOLO + ' ' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ',') + ', Modello ' + $MODELLO + ' (' + $(if($MODELLO -eq 4){ 'ticks reali' } else { 'NON tick reali: barre da 1 minuto, il tester genera i tick' }) + '), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
   ('input imposti dal .ini (' + $INPUT_IMPOSTI.Count + '): ' + (@($INPUT_IMPOSTI | ForEach-Object { $_[0] + '=' + $_[1] }) -join ' ; ') + '   (lista vuota = NESSUNO imposto: default dell EA, o ultimo valore salvato nel tester per questo EA su questo PC [NON VERIFICATO quale]). Tutti gli ALTRI input NON sono imposti. Fanno fede gli input del REPORT: vedi la riga TUTTI gli input del report e, per ogni passata, la riga input imposti confermati dal report (si = il tester li ha applicati davvero; se un nome non esiste nell EA la passata va KO).'),
   ('EA scelto (' + $Ex5Nome + '): EA di TERZI dal Market, scatola nera. UN MESE a conto vuoto: ' + $SONDE_TUTTE[0].Cosa + ', input imposti dal .ini: ' + $INPUT_IMPOSTI.Count + ' (0 = NESSUNO imposto: restano quelli salvati dal tester per questo EA su questo PC, e si CONFRONTANO nel report prima di leggere i numeri). Regole scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md. Questo script RACCOGLIE, non giudica.'),
   ('tranche scelte: ' + $Tranche + ' (le altre: SALTATA, non lanciate per scelta)'),

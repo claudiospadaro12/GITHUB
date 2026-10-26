@@ -58,6 +58,23 @@ def sintesi(nuovi_ok, nuovi_so, nuovi_pos):
     print('NUOVI mesi validi %d: con stop out %d, positivi %d' % (nuovi_ok, nuovi_so, nuovi_pos))
     print('CON I 3 MESI DEL 15-16/10 (luglio +4.800 senza stop out; agosto -3.063 e settembre -2.505 con stop out): %d mesi, stop out in %d (%.0f%%), mesi positivi %d' % (n, so, 100.0 * so / n if n else 0, pos))
 
+def calibra_arena(m4, m1):
+    """m4, m1: {mese: (netto, stop_out_bool)}. OK se almeno 4 mesi in comune e >= 80% di accordo sul segno del netto E sulla presenza di stop out."""
+    comuni = sorted(set(m4) & set(m1))
+    if len(comuni) < 4: return 'NON POSSIBILE: meno di 4 mesi in comune (%d)' % len(comuni), comuni, 0, 0
+    segno = sum(1 for m in comuni if (m4[m][0] > 0) == (m1[m][0] > 0)); so = sum(1 for m in comuni if m4[m][1] == m1[m][1])
+    ok = segno >= 0.8 * len(comuni) and so >= 0.8 * len(comuni)
+    return ('CALIBRAZIONE OK' if ok else 'NON ATTENDIBILE'), comuni, segno, so
+
+def raccogli(base):
+    out = {}
+    for c in sorted(glob.glob(os.path.join(base, '*', 'ARENA5K_*')) + glob.glob(os.path.join(base, 'ARENA5K_*'))):
+        r = leggi_mese(c) if os.path.isdir(c) else None
+        if r and r.get('m') and r.get('finestra'):
+            mf_ = re.match(r'(\d{4}\.\d\d)', r['finestra'])
+            if mf_: out[mf_.group(1)] = (r['m']['tot'], r['stop_out'] > 0)
+    return out
+
 def autotest():
     ok = 0
     z = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'risultati_archivio', 'ARENA_TESTER_TRANCHE_20261015_SETTEMBRE', 'ARENA_TESTER_TRANCHE.zip')
@@ -75,18 +92,34 @@ def autotest():
     n, so, pos = 3, 1, 2
     print('(autotest: sintesi di prova)'); sintesi(n, so, pos)
     ok += 1
+    a = {'2026.04': (100, False), '2026.05': (-50, True), '2026.06': (30, False), '2026.07': (4800, False), '2026.08': (-3063, True), '2026.09': (-2505, True)}
+    b = {'2026.04': (80, False), '2026.05': (-20, True), '2026.06': (10, False), '2026.07': (3000, False), '2026.08': (-2000, True), '2026.09': (400, False)}
+    e, c, sg, so = calibra_arena(a, b); assert e == 'CALIBRAZIONE OK' and sg == 5 and so == 5, (e, sg, so)
+    b2 = dict(b); b2['2026.05'] = (50, False); b2['2026.08'] = (500, False)
+    assert calibra_arena(a, b2)[0] == 'NON ATTENDIBILE' and calibra_arena(a, {'2026.04': (1, False)})[0].startswith('NON POSSIBILE')
+    ok += 1
     print('AUTOTEST OK (%d gruppi)' % ok)
 
 if __name__ == '__main__':
     if len(sys.argv) >= 2 and sys.argv[1] == '--autotest':
         autotest(); sys.exit(0)
     if len(sys.argv) < 2: print(__doc__); sys.exit(2)
+    if sys.argv[1] == '--calibra':
+        m4 = {m: (n, so) for m, n, so, _ in [(x[0], x[1], x[2], x[3]) for x in NOTI]}
+        m4.update(raccogli(sys.argv[2])); m1 = raccogli(sys.argv[3])
+        e, comuni, sg, so = calibra_arena(m4, m1)
+        print('mese     netto M4  stopout M4   netto M1  stopout M1')
+        for m in sorted(set(m4) | set(m1)): print('%s  %9s  %-9s  %9s  %-9s' % (m, '%.0f' % m4[m][0] if m in m4 else '-', m4[m][1] if m in m4 else '-', '%.0f' % m1[m][0] if m in m1 else '-', m1[m][1] if m in m1 else '-'))
+        print('mesi in comune %d: stesso segno %d, stessa presenza di stop out %d -> %s' % (len(comuni), sg, so, e)); sys.exit(0)
     mesi = {}
     for c in sorted(glob.glob(os.path.join(sys.argv[1], '*', 'ARENA5K_*')) + glob.glob(os.path.join(sys.argv[1], 'ARENA5K_*'))):
         if not os.path.isdir(c): continue
         mm = re.search(r'(20\d\d)[_.]?(\d\d)', c.replace(os.path.basename(c), ''))
         chiave = (mm.group(1) + '.' + mm.group(2)) if mm else os.path.basename(c)
         r = leggi_mese(c)
+        if r and r.get('finestra'):   # la finestra del manifest vale piu del nome della cartella (correzione di percorso del 26/10)
+            mf_ = re.match(r'(\d{4}\.\d\d)', r['finestra'])
+            if mf_: chiave = mf_.group(1)
         mesi[chiave] = r if r else dict(stato='NESSUN MANIFEST')
     if not mesi: print('nessuna cartella ARENA5K_* trovata in', sys.argv[1]); sys.exit(1)
     n, so, pos = stampa(mesi); sintesi(n, so, pos)
