@@ -36,6 +36,9 @@ def leggi_mese(c):
         rep = None
         for cand in (os.path.join(c, 'report', mf['report']), os.path.join(c, mf['report'])):
             if os.path.exists(cand): rep = cand; break
+            if os.path.exists(cand + '.gz'):   # archivio: report compresso (correzione di PERCORSO del 26/10)
+                import gzip
+                t_ = tempfile.NamedTemporaryFile(delete=False); t_.write(gzip.open(cand + '.gz', 'rb').read()); t_.close(); rep = t_.name; break
         if rep is None: r['stato'] = 'REPORT ASSENTE'; return r
         r['m'] = metriche(B.affari(B.righe(B.leggi(rep))))
     return r
