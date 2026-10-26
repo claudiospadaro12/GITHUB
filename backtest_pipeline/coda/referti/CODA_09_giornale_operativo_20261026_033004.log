@@ -1,0 +1,146 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-26 03:32:33  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261025   (21.3 KB, ultima scrittura 2026-10-25 23:59) ---
+    righe totali: 82
+    RIGHE DI ORDINE / DEAL: 6
+      RJ022:10:02.337ABTG_GapFill (EURUSD,H1)[GAP] GAP VALIDO UP alle 2026.10.25 22:00: venClose 1.12008 -> weekOpen 1.12199 (gap 0.00191 = 0.35 x ATR D1). Direzione: SELL (contro il gap).
+      EN022:10:02.390ABTG_GapFill (EURUSD,H1)[GAP] GAP-FILL SELL @ 1.12198  SL 1.12390  TP 1.12103  lot 0.02  (gap 0.00191 = 0.35 x ATR D1, spread 32 pts, barra 1 della settimana, ordine 4616535)
+      HI022:10:03.148ABTG_PunteLarry (EURAUD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      QD023:10:03.978ABTG_PunteLarry (XAUUSD,H1)[LARRY] SETUP LONG [SMASH libro] del 2026.10.25: ingresso STOP @ 4034.13 (punta/gap 45.53 = 0.82 x ATR D1).
+      NJ023:10:03.999ABTG_PunteLarry (XAUUSD,H1)[LARRY] PENDENTE BUY STOP @ 4034.13  SL 3970.02  TP 4130.30  lot 0.01  (pattern SMASH libro, punta/gap 0.82 x ATR, scadenza 2026.10.25 23:59, ordine 4616706)
+      JQ023:59:00.128ABTG_PunteLarry (XAUUSD,H1)[LARRY] pendente non piu' attivo (scaduto o cancellato): giornata chiusa.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261026   (8.5 KB, ultima scrittura 2026-10-26 03:15) ---
+    righe totali: 33
+    RIGHE DI ORDINE / DEAL: 1
+      OO001:00:00.701ABTG_SupRev_NAS_H1_Ottimizzato (NASUSD,H1)CTrade::OrderSend: sell stop 0.10 NASUSD at 28973.20 sl: 29176.00 tp: 28365.40 [invalid price]
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751
+=====================================================================
+
+--- GIORNO 20261017   (12.1 KB, ultima scrittura 2026-10-17 23:47) ---
+    righe totali: 48
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261018   (7.6 KB, ultima scrittura 2026-10-18 14:47) ---
+    righe totali: 30
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261025   (20 KB, ultima scrittura 2026-10-25 23:55) ---
+    righe totali: 77
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      KH023:55:01.273ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=99824.95  dayLoss=0.00%  totDD=0.18%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261026   (14.7 KB, ultima scrittura 2026-10-26 03:30) ---
+    righe totali: 53
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QI003:30:01.111ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=99824.95  dayLoss=0.00%  totDD=0.18%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20261025   (729.7 KB, ultima scrittura 2026-10-25 23:49) ---
+    righe totali: 1058
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261026   (106.8 KB, ultima scrittura 2026-10-26 03:19) ---
+    righe totali: 158
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261025   (7.6 KB, ultima scrittura 2026-10-25 23:55) ---
+    righe totali: 27
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      NR023:55:01.382ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=0.00%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+--- GIORNO 20261026   (12.5 KB, ultima scrittura 2026-10-26 03:25) ---
+    righe totali: 44
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      GI003:30:01.205ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=6245.38  dayLoss=0.00%  totDD=16.73%  rischioAperto=0.00%  stato=FAILED  pausa=ON  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
