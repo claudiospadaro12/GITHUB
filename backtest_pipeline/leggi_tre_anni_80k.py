@@ -57,7 +57,7 @@ def prop_anni(anni, cal):
 def riferimento_m4(tok, base):
     suf = tok.split('|', 1)[1] if '|' in tok else ''
     if suf:
-        m4 = glob.glob(os.path.join(base, '2025_M4_' + suf, 'ANNO80K_*'))
+        m4 = [x for x in glob.glob(os.path.join(base, '2025_M4_' + suf, 'ANNO80K_*')) if os.path.isdir(x)]
         if m4:
             mf, D = carica(m4[0], 'ANNO80K'); return D
         return None
