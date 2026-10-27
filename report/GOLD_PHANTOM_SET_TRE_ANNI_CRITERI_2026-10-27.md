@@ -1,0 +1,32 @@
+# The Gold Phantom (Profalgo) con i set del venditore nei tre mercati: CRITERI e PREVISIONI (27/10/2026, scritti PRIMA dei numeri)
+**Natura: CRITERI. Non controllata da agenti.** Materiale di Claudio (27/10): pagina del Market (prezzo 649 USD; affitto 349 / 399 / 499 USD per 3 / 6 / 12 mesi; versione 2.4, pubblicato il 23/01/2026; 4.785 demo scaricate; 4,68 su 57 recensioni), 7 file .set del venditore con readMe, 13 report del tester del venditore (.html) con grafici, grafici del segnale live e una recensione di un acquirente con un test indipendente.
+
+## Fatti letti
+- **XAUUSD, timeframe H1** (confermato dalla pagina; il test da 5K del 19/10 era a H1: ipotesi confermata). 9 strategie indipendenti su H1, H4 e D1, tutte breakout di supporti e resistenze, SL e TP fissi piu trailing. Saldo minimo assoluto 300 $, consigliato 1.000 $. Venditore: "stesso DNA" del Gold Reaper, nota agli utenti Reaper/Goldbot/Gold Trade Pro: la correlazione con gli altri suoi EA oro sarebbe "molto bassa" (dichiarazione: la nostra misura a lotto fisso del 19/10 dava 0,55 col Reaper).
+- **MaxAllowedDD decide anche il lotto**: la pagina dice che l'EA "determina il lotto in base al DD massimo storico dell'EA" e che TradeFrequency in "auto" usa saldo e MaxAllowedDD per decidere la frequenza. Cio spiega quanto misurato il 27/10 sul Reaper (MaxAllowedDD=0 -> lotto minimo 0,01 su tutte le operazioni) ed e il motivo per cui un conto da 80.000 puo far girare piu strategie delle tranche da 5.000.
+- **Set (readMe: "combo" per girare con altri EA a rischio minore, "prop firm" per le prop, il set live e quello del conto del venditore con Intense e 30% di DD)**: cambiano solo `MaxAllowedDD` (low 10, medium 30, high 60, prop 9, prop combo 4, combo 7, live 30), `OnlyUp` (falso solo nei due prop), `PropFirmMaxDailyDD` (4 nei due prop), `Randomization` (50 nei due prop) e `TradeFrequency` (5 ovunque, 3 nel live). `FridayStopHour=25` in tutti: nessuna chiusura del venerdi. `Risk=1234` in tutti (codice interno, come nel Reaper). Filtro NFP acceso (100 minuti prima, 60 dopo, chiude le posizioni); AutoGMT acceso con offset 2/3.
+- **Report del venditore (NON misurati da noi)**: default su 10.000, 2020-2025: +141.589, PF 2,47, DD equity 7,56%, 5.309 operazioni; prop firm su 100.000: +210.270, PF 2,22, DD equity 4,63%, 3.509 operazioni; high risk 5.000 -> 3,6 milioni con DD 17-20% (curva esponenziale per rischio composto); 2025 a tick reali "Intense" da 3.000: +3.919, PF 3,12, DD 8,88%; minimo lotto su 100.000: +3.307 con DD 0,15%; prova di lungo periodo 2004-2026 a 100.000 con saldo/lotti FISSI: +815.974, PF 1,87, DD equity 5,12%, 19.786 operazioni, qualita storico 97%. **Il venditore dichiara che 2012-2024 sono i dati "in-sample usati per le ottimizzazioni"; fuori campione solo 2004-2012 e 2024-2026.**
+- **Segnale live del venditore**: +17,41% da gennaio ad aprile 2026 (mensili 2,54 / 2,44 / 6,49 / 4,96), poche settimane: troppo breve per un giudizio.
+- **Recensione indipendente (Ahmed Aangour, 26/09/2026, 5 stelle, strumento proprio, lotto fisso 1,00 su 100.000, 2019-2026, nessun interesse composto)**: tutte e 9 insieme: media 140% l'anno, 11,7% al mese, **DD massimo 54%, peggior giorno -36%**; la strategia 5 e la piu redditizia (191% nel periodo) ma da sola arriva a DD 77%, mentre le altre otto stanno tra 9% e 20%; spenta la 5: media 116% l'anno, **DD 54% -> 31%, peggior giorno -36% -> -21%**; a lotto 0,50 su 100.000: circa 58% l'anno per DD 15%. E una dichiarazione di terzi (non verificata da noi), ma coerente con il fatto che il rischio dipende dal lotto scelto.
+- **Cosa sapevamo prima (19/10)**: 21 tranche mensili da 5.000 a default (MaxAllowedDD=30, TradeFrequency=5, OnlyUp=true): +5.293 in totale, 1.199 operazioni, DD peggiore di mese 7,7%. Mai a 80.000, mai sui tre anni vecchi, mai con i set prop.
+
+## Passate (riga `RIGA_LANCIA_PHANTOM_80K.txt`, script ANNO80K v5, pin 3e43646d)
+21 passate, 80.000 EUR, XAUUSD H1, dal piu corto al piu lungo. 20 a Modello 1: 5 set (PROPFIRM D9, PROPCOMBO D4, LOWRISK D10, MEDIUM D30, HIGHRISK D60) x (2013, 2018, 2020, 2025). Una a tick reali di 21 mesi (01/01/2025-01/10/2026) col PROPFIRM: e il riferimento Modello 4 del set prop (il lettore usa solo i mesi 2025) e la prova lunga. Imposti: `TradeFrequency=5`, `MaxAllowedDD`, `OnlyUp`, `PropFirmMaxDailyDD`, `Randomization=0` (deviazione dichiarata dal set prop, che ha 50: la randomizzazione rende la corsa non ripetibile). Fuori: combo (7) e live (30, TradeFrequency 3).
+
+## Criteri
+PROP-ANNI come per gli altri EA: netto > 0 in 2013, 2018 e 2020; DD equity <= 8.000 EUR; nessuno stop out; nessun giorno con perdita realizzata >= 5%; calibrazione 2025 OK (stesso segno, rapporto Modello 1 / tick reali fra 0,5 e 2,0, correlazione mensile >= 0,5). **La calibrazione e misurata solo sul PROPFIRM** (unico con tick reali): per gli altri 4 set il lettore scrivera "calibrazione non possibile -> NON PROP-ANNI": **significa non valutabile, non bocciato**; di quei set si leggono a mano netto, DD e giorni per anno come indicativi e con la riserva che il Modello 1 puo sbagliare la grandezza. Sulla corsa lunga del PROPFIRM: mesi positivi, giorni >= 3% / 4% / 5%, peggior giorno e mese, numero di operazioni (confronto con 1.199 delle tranche da 5.000: se molto piu alto, a 80.000 girano piu strategie) e lotto massimo.
+Non misurati in questa riga: correlazione giornaliera col Reaper (serve la serie giornaliera del PROPFIRM; la dichiarata "molto bassa" del venditore contro 0,55 nostra a lotto fisso), classifica con costi, equity da barre M1, forward.
+
+## Previsioni dichiarate ORA
+- H1: il PROPFIRM supera PROP-ANNI: 45%.
+- H2: il PROPFIRM ha netto > 0 in tutti e tre gli anni vecchi: 70%.
+- H3: HIGHRISK ha DD equity > 8.000 o stop out in almeno un anno: 90%.
+- H4: MEDIUM ha DD equity > 8.000 in almeno un anno: 70%.
+- H5: calibrazione OK per il PROPFIRM: 65%.
+- H6: corsa lunga PROPFIRM: netto > +20% di 80.000 e DD equity <= 8.000 (insieme): 55%.
+- H7: corsa lunga PROPFIRM: al massimo 1 giorno con perdita realizzata >= 3%: 65%.
+- H8: le operazioni del PROPFIRM nei 21 mesi a 80.000 superano le 1.199 delle tranche da 5.000: 65%.
+- H9: l'anno peggiore del PROPFIRM e il 2018 laterale: 50%.
+
+## Cosa NON dice
+Un percorso per anno; Modello 1 sui tre anni vecchi; il periodo ottimizzato dichiarato dal venditore copre quasi tutto il 2012-2024; nessuna slippage; filtro news non simulato (usa le date interne); AutoGMT con offset 2/3 non verificato su BCM; Randomization a 0; nessun giudizio su acquisto, lotto o taglia.
