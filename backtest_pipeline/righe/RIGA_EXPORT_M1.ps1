@@ -1,6 +1,6 @@
 # =====================================================================
-#  MARCATORE_EXPORT_M1_v1
-#
+#  MARCATORE_EXPORT_M1_v2
+#  v2 (27/10/2026): due finestre -- 21 mesi 2025-2026 e anno 2013 -- tre file; timeout 60 minuti.
 #  EXPORT DELLE BARRE M1 DELL ORO SUL PC DI BACKTEST (DESKTOP-H4D7CAJ), sola lettura.
 #  Criteri congeliati PRIMA dei numeri:
 #    report/EQUITA_GIORNALIERA_PROP_CRITERI_2026-10-26.md
@@ -46,7 +46,7 @@ $CONTO      = '50503392'
 $REPO_RAW   = 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB'
 $NOME       = 'ABTG_ExportM1'
 $SET_AUTO   = 'ABTG_ExportM1_AUTO.set'
-$TIMEOUT_MIN = 40
+$TIMEOUT_MIN = 60
 
 function Leggi-Testo($path) {
   $fs = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
@@ -191,7 +191,7 @@ Write-Host '      compilato: 0 errori.' -ForegroundColor Green
 # PASSO 5 -- esecuzione
 $cf = Join-Path $env:APPDATA 'MetaQuotes\Terminal\Common\Files'
 [void](New-Item -ItemType Directory -Force -Path $cf)
-foreach($f in @('ABTG_M1_XAUUSD.csv','ABTG_M1_FINE.txt')){
+foreach($f in @('ABTG_M1_XAUUSD.csv','ABTG_M1_XAUUSD_2013.csv','ABTG_M1_FINE.txt')){
   Remove-Item -LiteralPath (Join-Path $cf $f) -Force -ErrorAction SilentlyContinue
 }
 $iniRun = Join-Path $W ('sonde_' + $stamp + '.ini')
@@ -219,7 +219,7 @@ $desk = [Environment]::GetFolderPath('Desktop')
 $out = Join-Path (Join-Path $desk 'ABTG_RISULTATI') ('EXPORT_M1_ORO_' + $stamp)
 [void](New-Item -ItemType Directory -Force -Path $out)
 $n = 0
-foreach($f in @('ABTG_M1_XAUUSD.csv','ABTG_M1_FINE.txt')){
+foreach($f in @('ABTG_M1_XAUUSD.csv','ABTG_M1_XAUUSD_2013.csv','ABTG_M1_FINE.txt')){
   $fp = Join-Path $cf $f
   if((Test-Path -LiteralPath $fp) -and ((Get-Item -LiteralPath $fp).LastWriteTime -ge $t0)){ Copy-Item -LiteralPath $fp -Destination $out -Force; $n++ }
   else { Write-Host ('      MANCA (o non fresco): ' + $f) -ForegroundColor Red }
@@ -231,7 +231,7 @@ $zip = Join-Path (Join-Path $desk 'ABTG_RISULTATI') ('EXPORT_M1_ORO_' + $stamp +
 Compress-Archive -Path (Join-Path $out '*') -DestinationPath $zip -Force
 Write-Host ''
 Write-Host ('RACCOLTA: ' + $zip) -ForegroundColor Green
-Write-Host ('   file prodotti freschi: ' + $n.ToString($INV) + ' su 2')
-if($n -eq 2 -and $fatto){ Write-Host 'STATO: ESEGUITO_OK' ; exit 0 }
+Write-Host ('   file prodotti freschi: ' + $n.ToString($INV) + ' su 3')
+if($n -eq 3 -and $fatto){ Write-Host 'STATO: ESEGUITO_OK' ; exit 0 }
 Write-Host 'STATO: ESEGUITO_CON_RILIEVI'
 exit 2

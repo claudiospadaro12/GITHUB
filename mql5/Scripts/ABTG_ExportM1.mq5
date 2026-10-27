@@ -1,26 +1,32 @@
 //+------------------------------------------------------------------+
 //|                                          ABTG_ExportM1.mq5       |
-//|  v1.00 (26/10/2026) -- SOLA LETTURA. NON COMPILATA.              |
+//|  v1.01 (27/10/2026) -- SOLA LETTURA. NON COMPILATA.              |
 //|  NESSUNA funzione di trading: esporta le barre M1 di un simbolo  |
-//|  fra due date (ora del SERVER) in Common\Files\ABTG_M1_<sim>.csv |
+//|  su DUE finestre (ora del SERVER), ognuna in un suo file:        |
+//|   1) InpDa..InpA   -> Common\Files\ABTG_M1_<sim>.csv             |
+//|   2) InpDa2..InpA2 -> Common\Files\ABTG_M1_<sim>_2013.csv        |
+//|      (la seconda si salta se InpDa2 e vuoto)                     |
 //|  Serve a ricostruire l'EQUITA intraday dalle operazioni chiuse   |
 //|  del tester (analisi del DD giornaliero prop).                   |
 //|  Criteri: report/EQUITA_GIORNALIERA_PROP_CRITERI_2026-10-26.md   |
+//|  v1.01: la funzione Esporta() e chiamata due volte; il file di   |
+//|  fine riporta una riga per finestra. Il resto e identico a v1.00.|
 //+------------------------------------------------------------------+
 #property script_show_inputs
-#property version "1.00"
+#property version "1.01"
 
 input string InpSimbolo = "XAUUSD";        // simbolo
-input string InpDa      = "2025.01.01";    // dalla data (ora del server)
-input string InpA       = "2026.10.01";    // alla data esclusa
+input string InpDa      = "2025.01.01";    // finestra 1: dalla data (ora del server)
+input string InpA       = "2026.10.01";    // finestra 1: alla data esclusa
+input string InpDa2     = "2013.01.01";    // finestra 2 (vuoto = salta): dalla data
+input string InpA2      = "2014.01.01";    // finestra 2: alla data esclusa
 input bool   InpChiudiTerminale = false;   // true SOLO nel lancio automatico
 
-void OnStart()
+// esporta le barre M1 fra due date nel file `nome`; ritorna la riga di riepilogo
+string Esporta(const string da,const string a,const string nome)
   {
-   Print("ABTG_ExportM1 v1.00: SOLA LETTURA, nessun ordine.");
-   datetime d0=StringToTime(InpDa+" 00:00");
-   datetime d1=StringToTime(InpA+" 00:00");
-   string nome="ABTG_M1_"+InpSimbolo+".csv";
+   datetime d0=StringToTime(da+" 00:00");
+   datetime d1=StringToTime(a+" 00:00");
    SymbolSelect(InpSimbolo,true);
    int dig=(int)SymbolInfoInteger(InpSimbolo,SYMBOL_DIGITS);
    int h=FileOpen(nome,FILE_WRITE|FILE_TXT|FILE_ANSI|FILE_COMMON);
@@ -65,11 +71,21 @@ void OnStart()
         }
       FileClose(h);
      }
-   PrintFormat("EXPORT %s: barre=%I64d primo=%s ultimo=%s settimane_vuote=%d errori=%d",InpSimbolo,totale,TimeToString(primo),TimeToString(ultimo),settimane_vuote,errori);
+   string s=StringFormat("%s finestra %s..%s barre=%I64d primo=%s ultimo=%s settimane_vuote=%d errori=%d",nome,da,a,totale,TimeToString(primo),TimeToString(ultimo),settimane_vuote,errori);
+   PrintFormat("EXPORT %s",s);
+   return s;
+  }
+
+void OnStart()
+  {
+   Print("ABTG_ExportM1 v1.01: SOLA LETTURA, nessun ordine.");
+   string r1=Esporta(InpDa,InpA,"ABTG_M1_"+InpSimbolo+".csv");
+   string r2="finestra 2 saltata";
+   if(StringLen(InpDa2)>0) r2=Esporta(InpDa2,InpA2,"ABTG_M1_"+InpSimbolo+"_2013.csv");
    int hf=FileOpen("ABTG_M1_FINE.txt",FILE_WRITE|FILE_TXT|FILE_ANSI|FILE_COMMON);
    if(hf!=INVALID_HANDLE)
      {
-      FileWriteString(hf,StringFormat("FINE %s barre=%I64d primo=%s ultimo=%s settimane_vuote=%d errori=%d\r\n",TimeToString(TimeLocal(),TIME_DATE|TIME_SECONDS),totale,TimeToString(primo),TimeToString(ultimo),settimane_vuote,errori));
+      FileWriteString(hf,"FINE "+TimeToString(TimeLocal(),TIME_DATE|TIME_SECONDS)+"\r\n"+r1+"\r\n"+r2+"\r\n");
       FileClose(hf);
      }
    if(InpChiudiTerminale){ Sleep(2000); TerminalClose(0); }
