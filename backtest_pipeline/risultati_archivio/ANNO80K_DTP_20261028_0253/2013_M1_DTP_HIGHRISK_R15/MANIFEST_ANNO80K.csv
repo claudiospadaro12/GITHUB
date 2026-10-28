@@ -1,0 +1,2 @@
+sonda;da;a;timeout_min;t_avvio;durata_s;test_s;stato;report;trades;profitto;pf;dd_equita;dd_saldo;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;finestra;stop_out_log;no_money_log;input_ok;enum;motivi
+TRANCHE22;2013.01.01;2014.01.01;420;2026-10-27 18:00:06;559;540;OK;ANNO80K_DAYTRADEPROALGOMT5_TRANCHE22_20261027_180005.htm;384;56167.77;1.48;33239.81(29.45%);25622.07(23.20%);100%;312;1464941;312;1464941;;2013.01.01-2014.01.01;0;0;si;;
