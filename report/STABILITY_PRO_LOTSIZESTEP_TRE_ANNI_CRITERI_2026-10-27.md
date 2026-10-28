@@ -24,3 +24,14 @@ PROP-ANNI come per gli altri EA (netto > 0 in 2013, 2018, 2020; DD equity <= 8.0
 
 ## Cosa NON dice
 Un percorso per anno; Modello 1 sui tre anni vecchi (le coppie AUD sono poco liquide: slippage non misurata); un solo broker (BCM) contro l'Alpari del venditore; nessun filtro news (non ce n'e); AutoGMT/orologio non verificato; MaxAllowedDD come stop di sicurezza (che il venditore usa nel test a lotto fisso) non provato; nessun giudizio su acquisto, lotto o taglia.
+
+## CORREZIONE DEL 28/10/2026 (scritta PRIMA dei numeri della riga corretta)
+**Errore mio:** nella superriga le 20 passate erano KO (`input_ok = no`): imponevo `MaxAllowedDD` e `LotsizeStep`, nomi del report del venditore, che in questo EA **non esistono**. Nomi veri dal report del tester: **`MaxAllowedDD_`** e **`LotsizeStep_manually`** (default 0). Le quattro corse erano la stessa corsa (default: AutoLotMode=3, passo 0, lotti 0,41-0,53 a 80.000 EUR; 458 operazioni nel 2025, netto +14.026, DD equity 17.731 = 21,3%, DD saldo 2.703; `report/SUPERRIGA_QUATTRO_EA_RISULTATI_2026-10-28.md`). Riga corretta: `RIGA_LANCIA_STAB_80K.txt` (stesse 20 passate, nomi giusti, pin 3e43646d). Validita: il report deve elencare `LotsizeStep_manually=<valore imposto>` e i volumi devono cambiare da un livello all'altro.
+**Previsioni nuove (lineare dal default, che vale circa un passo di 1.600-2.000):**
+- Z1: i volumi crescono al calare del passo; lotto medio al livello 10000 fra 0,06 e 0,12: 60%.
+- Z2: il livello 10000 supera PROP-ANNI (netto > 0 nei tre anni, DD equity <= 8.000, nessun giorno >= 5%, calibrazione OK): 60%.
+- Z3: il livello 5000 supera PROP-ANNI: 45%.
+- Z4: il livello 2000 ha DD equity > 8.000 in almeno un anno: 80%; il livello 1000 in almeno due anni: 90%.
+- Z5: nel livello 10000 il DD equity del 2025 sta fra 2.000 e 5.000: 55%.
+- Z6: DD equity almeno 3 volte il DD di saldo in almeno un livello (flottante): 85% (sul default e 6,6 volte).
+- Z7: calibrazione OK (rapporto M1/M4 fra 0,5 e 2,0, correlazione mensile >= 0,5) per almeno 3 livelli su 4: 65% (sul default il rapporto e 1,16).
