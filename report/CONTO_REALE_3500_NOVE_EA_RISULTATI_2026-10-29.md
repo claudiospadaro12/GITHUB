@@ -11,7 +11,7 @@ Criteri e previsioni scritti prima: `CONTO_REALE_3500_NOVE_EA_CRITERI_2026-10-29
 | Microedge | +4.869 | +3.442 (-29%) | 362 / 425 | 11,7% | 3.461 | -8,1% |
 | Vortex Turbo | +2.509 | +1.190 | 507 / mai | 5,8% (ma 29% in tutto il periodo) | 3.479 | -12,7% |
 | Rocket Breakout | +2.370 | +2.033 | mai | 8,2% | 3.269 | -3,6% |
-| Entry Points Pro | +139 | +110 | mai | - | 3.492 | -1,9% |
+| Entry Points Pro | +139 | +110 | mai | 6,4% (255 EUR) | 3.492 | -1,9% |
 | ORB Revolution | -334 | -444 | mai | 8,6% | 3.093 | -2,4% |
 Equity minima, DD e giorno peggiore sono misurati con il flottante pessimistico dalle barre M1. I giorni peggiori cadono spesso a conto gia cresciuto: nei primi mesi la dimensione e piccola, il peso del giorno peggiore cresce col saldo.
 
