@@ -1,0 +1,89 @@
+  [2013] Reaper9: posizioni accoppiate 509, non accoppiate 0, netto +21757
+  [2013] Reaper6: posizioni accoppiate 509, non accoppiate 0, netto +12704
+  [2013] Goldbot: posizioni accoppiate 290, non accoppiate 0, netto +10196
+  [2013] PhD9: posizioni accoppiate 860, non accoppiate 0, netto +9137
+  [2013] PhD4: posizioni accoppiate 860, non accoppiate 0, netto +3759
+  [2013] PhD10: posizioni accoppiate 860, non accoppiate 0, netto +9997
+  [2013] GTP: posizioni accoppiate 325, non accoppiate 0, netto +32907
+2013 | C1 Reaper9+Goldbot                     netto  +35304 (+44.1%) | equity min 75462 (perdita dal deposito 5.67%; pess. 5.68%) | DD dal picco: 6403 (pess. 6413) | peggior giorno -4.72% (pess. -4.72%) | gg>=3/4/5%: 3/2/0 | lotti max insieme 9.65 (margine 1:9 ~131397 USD)
+2013 | C2 +PhD4                               netto  +39527 (+49.4%) | equity min 74559 (perdita dal deposito 6.80%; pess. 6.81%) | DD dal picco: 7282 (pess. 7292) | peggior giorno -5.16% (pess. -5.20%) | gg>=3/4/5%: 3/2/1 | lotti max insieme 10.31 (margine 1:9 ~140476 USD)
+2013 | C3 +PhD10                              netto  +46701 (+58.4%) | equity min 72898 (perdita dal deposito 8.88%; pess. 8.89%) | DD dal picco: 8932 (pess. 8944) | peggior giorno -5.98% (pess. -6.08%) | gg>=3/4/5%: 4/3/1 | lotti max insieme 11.83 (margine 1:9 ~161186 USD)
+2013 | C4 +GTP                                netto  +71621 (+89.5%) | equity min 71223 (perdita dal deposito 10.97%; pess. 11.00%) | DD dal picco: 12540 (pess. 12561) | peggior giorno -9.50% (pess. -9.51%) | gg>=3/4/5%: 4/3/1 | lotti max insieme 18.55 (margine 1:9 ~349290 USD)
+2013 | C5 +PhD4+GTP                           netto  +75843 (+94.8%) | equity min 70320 (perdita dal deposito 12.10%; pess. 12.11%) | DD dal picco: 13419 (pess. 13431) | peggior giorno -9.95% (pess. -9.99%) | gg>=3/4/5%: 4/3/2 | lotti max insieme 18.95 (margine 1:9 ~356822 USD)
+2013 | C6 R6+Gb+PhD9+GTP                      netto  +71991 (+90.0%) | equity min 69058 (perdita dal deposito 13.68%; pess. 13.69%) | DD dal picco: 14044 (pess. 14054) | peggior giorno -10.50% (pess. -10.58%) | gg>=3/4/5%: 4/2/1 | lotti max insieme 16.27 (margine 1:9 ~306359 USD)
+2013 | C7 R6+Gb+PhD4+GTP                      netto  +65892 (+82.4%) | equity min 70360 (perdita dal deposito 12.05%; pess. 12.06%) | DD dal picco: 12781 (pess. 12790) | peggior giorno -9.85% (pess. -9.89%) | gg>=3/4/5%: 3/2/1 | lotti max insieme 15.68 (margine 1:9 ~295249 USD)
+2013 | C8 R9+PhD9                             netto  +34322 (+42.9%) | equity min 74302 (perdita dal deposito 7.12%; pess. 7.13%) | DD dal picco: 7357 (pess. 7365) | peggior giorno -5.64% (pess. -5.72%) | gg>=3/4/5%: 3/2/1 | lotti max insieme 10.42 (margine 1:9 ~196205 USD)
+2013 | C9 R9+GTP                              netto  +60316 (+75.4%) | equity min 72268 (perdita dal deposito 9.66%; pess. 10.03%) | DD dal picco: 11356 (pess. 11650) | peggior giorno -9.33% (pess. -9.33%) | gg>=3/4/5%: 4/2/1 | lotti max insieme 18.45 (margine 1:9 ~347407 USD)
+2013 | X1 R9+Gb+PhD9 (rif.)                   netto  +45627 (+57.0%) | equity min 73257 (perdita dal deposito 8.43%; pess. 8.44%) | DD dal picco: 8545 (pess. 8557) | peggior giorno -5.79% (pess. -5.87%) | gg>=3/4/5%: 3/3/1 | lotti max insieme 11.48 (margine 1:9 ~156418 USD)
+2013 | X2 R6+Gb                               netto  +25353 (+31.7%) | equity min 75501 (perdita dal deposito 5.62%; pess. 5.63%) | DD dal picco: 5765 (pess. 5773) | peggior giorno -4.60% (pess. -4.60%) | gg>=3/4/5%: 1/1/0 | lotti max insieme 6.44 (margine 1:9 ~87688 USD)
+2013 | X3 R9 solo                             netto  +24000 (+30.0%) | equity min 76507 (perdita dal deposito 4.37%; pess. 4.37%) | DD dal picco: 5219 (pess. 5358) | peggior giorno -4.57% (pess. -4.57%) | gg>=3/4/5%: 3/1/0 | lotti max insieme 9.43 (margine 1:9 ~177564 USD)
+  [2018] Reaper9: posizioni accoppiate 548, non accoppiate 0, netto +13535
+  [2018] Reaper6: posizioni accoppiate 548, non accoppiate 0, netto +8952
+  [2018] Goldbot: posizioni accoppiate 294, non accoppiate 0, netto +2356
+  [2018] PhD9: posizioni accoppiate 886, non accoppiate 0, netto +4859
+  [2018] PhD4: posizioni accoppiate 886, non accoppiate 0, netto +2034
+  [2018] PhD10: posizioni accoppiate 886, non accoppiate 0, netto +5426
+  [2018] GTP: posizioni accoppiate 330, non accoppiate 0, netto +18666
+2018 | C1 Reaper9+Goldbot                     netto  +15880 (+19.8%) | equity min 77403 (perdita dal deposito 3.25%; pess. 3.34%) | DD dal picco: 5069 (pess. 5091) | peggior giorno -3.79% (pess. -3.91%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 7.65 (margine 1:9 ~102370 USD)
+2018 | C2 +PhD4                               netto  +17915 (+22.4%) | equity min 76967 (perdita dal deposito 3.79%; pess. 3.88%) | DD dal picco: 5626 (pess. 5658) | peggior giorno -4.24% (pess. -4.38%) | gg>=3/4/5%: 2/1/0 | lotti max insieme 8.33 (margine 1:9 ~111414 USD)
+2018 | C3 +PhD10                              netto  +21309 (+26.6%) | equity min 76228 (perdita dal deposito 4.71%; pess. 4.83%) | DD dal picco: 6670 (pess. 6714) | peggior giorno -4.93% (pess. -5.09%) | gg>=3/4/5%: 2/1/0 | lotti max insieme 9.49 (margine 1:9 ~126929 USD)
+2018 | C4 +GTP                                netto  +34546 (+43.2%) | equity min 75645 (perdita dal deposito 5.44%; pess. 5.52%) | DD dal picco: 7338 (pess. 7384) | peggior giorno -7.14% (pess. -7.26%) | gg>=3/4/5%: 5/2/1 | lotti max insieme 16.12 (margine 1:9 ~215712 USD)
+2018 | C5 +PhD4+GTP                           netto  +36581 (+45.7%) | equity min 75209 (perdita dal deposito 5.99%; pess. 6.08%) | DD dal picco: 7487 (pess. 7535) | peggior giorno -7.59% (pess. -7.72%) | gg>=3/4/5%: 5/2/1 | lotti max insieme 16.80 (margine 1:9 ~224700 USD)
+2018 | C6 R6+Gb+PhD9+GTP                      netto  +34826 (+43.5%) | equity min 75322 (perdita dal deposito 5.85%; pess. 5.93%) | DD dal picco: 7331 (pess. 7374) | peggior giorno -7.30% (pess. -7.42%) | gg>=3/4/5%: 4/2/1 | lotti max insieme 15.55 (margine 1:9 ~207981 USD)
+2018 | C7 R6+Gb+PhD4+GTP                      netto  +32002 (+40.0%) | equity min 75877 (perdita dal deposito 5.15%; pess. 5.22%) | DD dal picco: 7146 (pess. 7185) | peggior giorno -6.71% (pess. -6.81%) | gg>=3/4/5%: 4/1/1 | lotti max insieme 14.58 (margine 1:9 ~199974 USD)
+2018 | C8 R9+PhD9                             netto  +18383 (+23.0%) | equity min 77068 (perdita dal deposito 3.66%; pess. 3.77%) | DD dal picco: 5917 (pess. 5926) | peggior giorno -3.64% (pess. -3.76%) | gg>=3/4/5%: 2/0/0 | lotti max insieme 8.33 (margine 1:9 ~115755 USD)
+2018 | C9 R9+GTP                              netto  +32190 (+40.2%) | equity min 76301 (perdita dal deposito 4.62%; pess. 4.70%) | DD dal picco: 6734 (pess. 6779) | peggior giorno -5.95% (pess. -6.04%) | gg>=3/4/5%: 5/1/1 | lotti max insieme 15.38 (margine 1:9 ~213722 USD)
+2018 | X1 R9+Gb+PhD9 (rif.)                   netto  +20739 (+25.9%) | equity min 76413 (perdita dal deposito 4.48%; pess. 4.59%) | DD dal picco: 6524 (pess. 6566) | peggior giorno -4.84% (pess. -4.99%) | gg>=3/4/5%: 2/1/0 | lotti max insieme 9.35 (margine 1:9 ~125056 USD)
+2018 | X2 R6+Gb                               netto  +11301 (+14.1%) | equity min 77996 (perdita dal deposito 2.50%; pess. 2.59%) | DD dal picco: 3984 (pess. 4009) | peggior giorno -2.89% (pess. -2.98%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 5.38 (margine 1:9 ~71993 USD)
+2018 | X3 R9 solo                             netto  +13524 (+16.9%) | equity min 78059 (perdita dal deposito 2.43%; pess. 2.51%) | DD dal picco: 4894 (pess. 4898) | peggior giorno -2.86% (pess. -2.97%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 7.18 (margine 1:9 ~99658 USD)
+  [2020] Reaper9: posizioni accoppiate 460, non accoppiate 0, netto +20388
+  [2020] Reaper6: posizioni accoppiate 460, non accoppiate 0, netto +13132
+  [2020] Goldbot: posizioni accoppiate 259, non accoppiate 0, netto +9658
+  [2020] PhD9: posizioni accoppiate 780, non accoppiate 0, netto +9540
+  [2020] PhD4: posizioni accoppiate 780, non accoppiate 0, netto +3926
+  [2020] PhD10: posizioni accoppiate 780, non accoppiate 0, netto +11037
+  [2020] GTP: posizioni accoppiate 288, non accoppiate 0, netto +14585
+2020 | C1 Reaper9+Goldbot                     netto  +30893 (+38.6%) | equity min 80060 (perdita dal deposito -0.08%; pess. -0.00%) | DD dal picco: 3632 (pess. 3717) | peggior giorno -1.88% (pess. -1.95%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 4.32 (margine 1:9 ~85973 USD)
+2020 | C2 +PhD4                               netto  +35047 (+43.8%) | equity min 80074 (perdita dal deposito -0.09%; pess. -0.01%) | DD dal picco: 3943 (pess. 4083) | peggior giorno -1.90% (pess. -1.97%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 4.66 (margine 1:9 ~92739 USD)
+2020 | C3 +PhD10                              netto  +42488 (+53.1%) | equity min 80096 (perdita dal deposito -0.12%; pess. -0.03%) | DD dal picco: 4537 (pess. 4724) | peggior giorno -2.40% (pess. -2.43%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 5.32 (margine 1:9 ~105874 USD)
+2020 | C4 +GTP                                netto  +46309 (+57.9%) | equity min 79783 (perdita dal deposito 0.27%; pess. 0.58%) | DD dal picco: 6669 (pess. 6936) | peggior giorno -3.40% (pess. -3.68%) | gg>=3/4/5%: 2/0/0 | lotti max insieme 7.72 (margine 1:9 ~138349 USD)
+2020 | C5 +PhD4+GTP                           netto  +50463 (+63.1%) | equity min 79797 (perdita dal deposito 0.25%; pess. 0.57%) | DD dal picco: 6980 (pess. 7380) | peggior giorno -3.43% (pess. -3.72%) | gg>=3/4/5%: 4/0/0 | lotti max insieme 8.02 (margine 1:9 ~143726 USD)
+2020 | C6 R6+Gb+PhD9+GTP                      netto  +48826 (+61.0%) | equity min 79795 (perdita dal deposito 0.26%; pess. 0.55%) | DD dal picco: 6854 (pess. 7393) | peggior giorno -3.63% (pess. -3.67%) | gg>=3/4/5%: 3/0/0 | lotti max insieme 7.85 (margine 1:9 ~138931 USD)
+2020 | C7 R6+Gb+PhD4+GTP                      netto  +42882 (+53.6%) | equity min 79779 (perdita dal deposito 0.28%; pess. 0.56%) | DD dal picco: 5991 (pess. 6526) | peggior giorno -3.26% (pess. -3.55%) | gg>=3/4/5%: 2/0/0 | lotti max insieme 7.35 (margine 1:9 ~130082 USD)
+2020 | C8 R9+PhD9                             netto  +31333 (+39.2%) | equity min 80091 (perdita dal deposito -0.11%; pess. -0.03%) | DD dal picco: 3697 (pess. 4184) | peggior giorno -1.98% (pess. -2.05%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 4.16 (margine 1:9 ~82720 USD)
+2020 | C9 R9+GTP                              netto  +36651 (+45.8%) | equity min 79783 (perdita dal deposito 0.27%; pess. 0.58%) | DD dal picco: 5864 (pess. 5944) | peggior giorno -3.08% (pess. -3.18%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 6.89 (margine 1:9 ~121870 USD)
+2020 | X1 R9+Gb+PhD9 (rif.)                   netto  +40991 (+51.2%) | equity min 80091 (perdita dal deposito -0.11%; pess. -0.03%) | DD dal picco: 4488 (pess. 4607) | peggior giorno -2.37% (pess. -2.40%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 5.18 (margine 1:9 ~103088 USD)
+2020 | X2 R6+Gb                               netto  +23312 (+29.1%) | equity min 80028 (perdita dal deposito -0.03%; pess. 0.04%) | DD dal picco: 2629 (pess. 2660) | peggior giorno -1.44% (pess. -1.52%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 3.14 (margine 1:9 ~62489 USD)
+2020 | X3 R9 solo                             netto  +21235 (+26.5%) | equity min 80060 (perdita dal deposito -0.08%; pess. -0.00%) | DD dal picco: 2980 (pess. 3275) | peggior giorno -1.98% (pess. -2.05%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 3.30 (margine 1:9 ~65587 USD)
+  [2025] Reaper9: posizioni accoppiate 497, non accoppiate 0, netto +30457
+  [2025] Reaper6: posizioni accoppiate 497, non accoppiate 0, netto +18903
+  [2025] Goldbot: posizioni accoppiate 236, non accoppiate 0, netto +7844
+  [2025] PhD9: posizioni accoppiate 707, non accoppiate 0, netto +13607
+  [2025] PhD4: posizioni accoppiate 707, non accoppiate 0, netto +5560
+  [2025] PhD10: posizioni accoppiate 707, non accoppiate 0, netto +15164
+  [2025] GTP: posizioni accoppiate 276, non accoppiate 0, netto +19645
+2025 | C1 Reaper9+Goldbot                     netto  +37662 (+47.1%) | equity min 77742 (perdita dal deposito 2.82%; pess. 2.89%) | DD dal picco: 3542 (pess. 3559) | peggior giorno -2.51% (pess. -2.59%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 2.43 (margine 1:9 ~82556 USD)
+2025 | C2 +PhD4                               netto  +43179 (+54.0%) | equity min 77761 (perdita dal deposito 2.80%; pess. 2.88%) | DD dal picco: 3780 (pess. 3798) | peggior giorno -2.62% (pess. -2.70%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 2.60 (margine 1:9 ~88332 USD)
+2025 | C3 +PhD10                              netto  +52710 (+65.9%) | equity min 77791 (perdita dal deposito 2.76%; pess. 2.87%) | DD dal picco: 4360 (pess. 4419) | peggior giorno -3.00% (pess. -3.01%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 2.90 (margine 1:9 ~98524 USD)
+2025 | C4 +GTP                                netto  +57452 (+71.8%) | equity min 75734 (perdita dal deposito 5.33%; pess. 5.33%) | DD dal picco: 5353 (pess. 5468) | peggior giorno -6.03% (pess. -6.17%) | gg>=3/4/5%: 3/1/1 | lotti max insieme 4.16 (margine 1:9 ~141330 USD)
+2025 | C5 +PhD4+GTP                           netto  +62970 (+78.7%) | equity min 75792 (perdita dal deposito 5.26%; pess. 5.26%) | DD dal picco: 5471 (pess. 5590) | peggior giorno -6.09% (pess. -6.23%) | gg>=3/4/5%: 3/1/1 | lotti max insieme 4.33 (margine 1:9 ~147106 USD)
+2025 | C6 R6+Gb+PhD9+GTP                      netto  +59656 (+74.6%) | equity min 76618 (perdita dal deposito 4.23%; pess. 4.23%) | DD dal picco: 4914 (pess. 5018) | peggior giorno -5.48% (pess. -5.60%) | gg>=3/4/5%: 3/1/1 | lotti max insieme 3.94 (margine 1:9 ~166166 USD)
+2025 | C7 R6+Gb+PhD4+GTP                      netto  +51683 (+64.6%) | equity min 76542 (perdita dal deposito 4.32%; pess. 4.32%) | DD dal picco: 4751 (pess. 4850) | peggior giorno -5.39% (pess. -5.51%) | gg>=3/4/5%: 2/1/1 | lotti max insieme 3.68 (margine 1:9 ~155200 USD)
+2025 | C8 R9+PhD9                             netto  +43309 (+54.1%) | equity min 78048 (perdita dal deposito 2.44%; pess. 2.44%) | DD dal picco: 3995 (pess. 4052) | peggior giorno -2.56% (pess. -2.61%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 2.38 (margine 1:9 ~80807 USD)
+2025 | C9 R9+GTP                              netto  +49609 (+62.0%) | equity min 75820 (perdita dal deposito 5.22%; pess. 5.22%) | DD dal picco: 5023 (pess. 5132) | peggior giorno -5.75% (pess. -5.88%) | gg>=3/4/5%: 2/1/1 | lotti max insieme 3.68 (margine 1:9 ~124945 USD)
+2025 | X1 R9+Gb+PhD9 (rif.)                   netto  +51153 (+63.9%) | equity min 77777 (perdita dal deposito 2.78%; pess. 2.88%) | DD dal picco: 4138 (pess. 4195) | peggior giorno -2.85% (pess. -2.86%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 2.84 (margine 1:9 ~96485 USD)
+2025 | X2 R6+Gb                               netto  +26375 (+33.0%) | equity min 78445 (perdita dal deposito 1.94%; pess. 2.00%) | DD dal picco: 2569 (pess. 2580) | peggior giorno -1.82% (pess. -1.84%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 1.75 (margine 1:9 ~59454 USD)
+2025 | X3 R9 solo                             netto  +29818 (+37.3%) | equity min 77914 (perdita dal deposito 2.61%; pess. 2.61%) | DD dal picco: 2552 (pess. 2593) | peggior giorno -2.27% (pess. -2.40%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 1.95 (margine 1:9 ~66207 USD)
+
+PORT-OK SI   C1 Reaper9+Goldbot           netto medio +29935 2013: loss 5.7/5.7% day 4.72/4.72% | 2018: loss 3.2/3.3% day 3.79/3.91% | 2020: loss -0.1/-0.0% day 1.88/1.95% | 2025: loss 2.8/2.9% day 2.51/2.59%
+PORT-OK NO   C2 +PhD4                     netto medio +33917 2013: loss 6.8/6.8% day 5.16/5.20% | 2018: loss 3.8/3.9% day 4.24/4.38% | 2020: loss -0.1/-0.0% day 1.90/1.97% | 2025: loss 2.8/2.9% day 2.62/2.70%
+PORT-OK NO   C3 +PhD10                    netto medio +40802 2013: loss 8.9/8.9% day 5.98/6.08% | 2018: loss 4.7/4.8% day 4.93/5.09% | 2020: loss -0.1/-0.0% day 2.40/2.43% | 2025: loss 2.8/2.9% day 3.00/3.01%
+PORT-OK NO   C4 +GTP                      netto medio +52482 2013: loss 11.0/11.0% day 9.50/9.51% | 2018: loss 5.4/5.5% day 7.14/7.26% | 2020: loss 0.3/0.6% day 3.40/3.68% | 2025: loss 5.3/5.3% day 6.03/6.17%
+PORT-OK NO   C5 +PhD4+GTP                 netto medio +56464 2013: loss 12.1/12.1% day 9.95/9.99% | 2018: loss 6.0/6.1% day 7.59/7.72% | 2020: loss 0.3/0.6% day 3.43/3.72% | 2025: loss 5.3/5.3% day 6.09/6.23%
+PORT-OK NO   C6 R6+Gb+PhD9+GTP            netto medio +53825 2013: loss 13.7/13.7% day 10.50/10.58% | 2018: loss 5.8/5.9% day 7.30/7.42% | 2020: loss 0.3/0.5% day 3.63/3.67% | 2025: loss 4.2/4.2% day 5.48/5.60%
+PORT-OK NO   C7 R6+Gb+PhD4+GTP            netto medio +48115 2013: loss 12.1/12.1% day 9.85/9.89% | 2018: loss 5.2/5.2% day 6.71/6.81% | 2020: loss 0.3/0.6% day 3.26/3.55% | 2025: loss 4.3/4.3% day 5.39/5.51%
+PORT-OK NO   C8 R9+PhD9                   netto medio +31837 2013: loss 7.1/7.1% day 5.64/5.72% | 2018: loss 3.7/3.8% day 3.64/3.76% | 2020: loss -0.1/-0.0% day 1.98/2.05% | 2025: loss 2.4/2.4% day 2.56/2.61%
+PORT-OK NO   C9 R9+GTP                    netto medio +44691 2013: loss 9.7/10.0% day 9.33/9.33% | 2018: loss 4.6/4.7% day 5.95/6.04% | 2020: loss 0.3/0.6% day 3.08/3.18% | 2025: loss 5.2/5.2% day 5.75/5.88%
+PORT-OK NO   X1 R9+Gb+PhD9 (rif.)         netto medio +39627 2013: loss 8.4/8.4% day 5.79/5.87% | 2018: loss 4.5/4.6% day 4.84/4.99% | 2020: loss -0.1/-0.0% day 2.37/2.40% | 2025: loss 2.8/2.9% day 2.85/2.86%
+PORT-OK SI   X2 R6+Gb                     netto medio +21585 2013: loss 5.6/5.6% day 4.60/4.60% | 2018: loss 2.5/2.6% day 2.89/2.98% | 2020: loss -0.0/0.0% day 1.44/1.52% | 2025: loss 1.9/2.0% day 1.82/1.84%
+PORT-OK SI   X3 R9 solo                   netto medio +22144 2013: loss 4.4/4.4% day 4.57/4.57% | 2018: loss 2.4/2.5% day 2.86/2.97% | 2020: loss -0.1/-0.0% day 1.98/2.05% | 2025: loss 2.6/2.6% day 2.27/2.40%
