@@ -52,3 +52,24 @@ Passate: P1 controllo (modo 3, rischio 1, stop 2000); P2 rischio 0,25; P3 rischi
 - Q7: P8 o P9 chiudono posizioni prima (meno operazioni di P1, o DD equity piu basso): 50%.
 - Q8: tutte le 9 passate valide (`input_ok = si`): 70% (rischio: un input intero invece di decimale).
 Esito = quale input fa cambiare il volume. Poi si rifa la griglia dei tre anni con quell'input.
+
+## RISULTATI DELLA SONDA (29/10/2026, zip `ANNO80K_STABSONDA_20261029_0819`, 9 passate del 2025 a Modello 1, 80.000 EUR)
+**ERRORE MIO, scoperto leggendo gli input dei report:** nella riga della sonda ho imposto solo gli input che cambiavano e non tutti. Gli input non imposti **tengono l'ultimo valore usato nel tester**: in TUTTE le 9 corse `LotsizeStep_manually=1000` (residuo del giro del 28/10); `ManualBalance=20000` resta da P4 a P9; `StartLots=0,1` da P7 a P9; `MaxAllowedDDPerc=3` in P9. **Contaminate: P5, P6, P7, P8, P9** (P6 e P7 valgono solo come modo 1). Validi: P1, P2, P3, P4.
+| Passata | Input (veri dal report) | Operazioni | Netto | DD equity | Lotto min / medio / max |
+|---|---|---|---|---|---|
+| P1 controllo | modo 3, rischio 1 | 458 | +14.026,26 (identico al default) | 17.731 (21,3%) | 0,41 / 0,629 / 4,24 |
+| P2 | modo 3, rischio 0,25 | 458 | +12.363 | 15.842 (19,1%) | 0,40 / 0,553 / 3,60 |
+| P3 | modo 3, rischio 2 | 458 | +16.318 | 20.074 (24,0%) | 0,46 / 0,726 / 4,96 |
+| **P4** | modo 3, rischio 1, **ManualBalance 20.000** | 458 | +2.986 | **4.207 (5,2%)** | **0,10 / 0,138 / 0,88** |
+| P5 (contaminata) | come P4 + HardSLDistance 4000 | 458 | +2.986 (identico a P4) | 4.207 | 0,10 / 0,138 / 0,88 |
+| P6 (modo 1, contaminata da ManualBalance) | modo 1, StartLots 0,01 | 458 | +280 | 386 (0,48%) | 0,01 / 0,013 / 0,08 |
+| P7 (idem) | modo 1, StartLots 0,10 | 458 | +2.825 | 3.864 (4,8%) | 0,10 / 0,129 / 0,80 |
+| P8 (contaminata) | modo 3, MaxAllowedDDPerc 3 | 470 | +676 (PF 1,13) | 2.527 (3,1%) | 0,10 / 0,136 / 0,88 |
+| P9 (contaminata) | come P8 + MaxAllowedDD_ 2000 | 470 | +676 (identico a P8) | 2.527 | idem |
+**Lettura (solo dalle passate valide):**
+- **Il lotto in modo 3 e proporzionale al saldo usato per il calcolo:** con `ManualBalance` 20.000 su un conto da 80.000 i lotti sono circa un quinto-un quarto (0,138 contro 0,629 di media; netto 2.986 contro 14.026; DD 5,2% contro 21,3%). Il lotto base di partenza e circa 0,0051 per 1.000 di saldo (0,41 a 80.000). **`ManualBalance` e la leva per ridurre il rischio.**
+- **`AutoLotsizeRisk` e `LotsizeStep_manually` quasi non contano** (rischio 0,25 -> 2 cambia il lotto medio fra -12% e +15%, non in proporzione; gli step 0 e 1000 danno lo stesso lotto di partenza).
+- **Modo 1 (lotto fisso):** `StartLots` x10 da 0,01 a 0,10 fa netto x10 (+280 / +2.825); la griglia moltiplica il lotto fino a x8 (0,01 -> 0,08). Il lotto fisso 0,01 su 80.000 vale +280 EUR l'anno con DD equity 386 EUR: su un conto da 3.745 EUR sarebbe circa +7,5% e DD 10%.
+- **`HardSLDistance` 4000 contro 2000:** nessuna differenza in questo anno (P5 = P4 alla cifra); il DD stop di `MaxAllowedDDPerc` taglia il netto (P8 +676 contro P4 +2.986, ma P8 e contaminata): un DD stop interno non migliora il rapporto.
+**Previsioni:** Q1 SI (P1 riproduce 458 / +14.026,26). Q2 NO (P2 0,88x, P3 1,15x: ne 0,2-0,3x ne 1,7-2,2x). Q3 SI (P4 0,22x). Q4 NON MISURABILE come scritto (P5 = P4, contaminata, ma HardSLDistance non cambia nulla). Q5 NO (il lotto fisso 0,01 diventa 0,01-0,08 per i livelli della griglia). Q6 SI (P4). Q7 NON MISURABILE (contaminate). Q8 NO: nominalmente 9 su 9 con `input_ok = si`, ma 5 su 9 contaminate dagli input non imposti.
+**Da fare:** riga a livelli di `ManualBalance` (per esempio 40.000 / 20.000 / 10.000 / 5.000) su 2013, 2018, 2020, 2025 con **TUTTI gli input imposti** (anche `LotsizeStep_manually=0`, `StartLots=0,01`, `AutoLotsizeRisk=1`, `ManualBalance`, `HardSLDistance`, `MaxAllowedDD_`, `MaxAllowedDDPerc`).
