@@ -10,3 +10,8 @@ File di Claudio (`The_Gold_Reaper.zip` e `live_signal_settings.set`); copie cons
 | `gold_reaper_live_signal_settings.set` | 2 | 30 | 0 | true | 0 | `FakeOutFilter=2`, `UseVariableValues` e `AdjustLotsizeToVariableValues` true, `UseHL_TrailingSL` true, `Virtual_expiration` false, NFP 100 prima / 60 dopo |
 Tutti: `StartLots=0,01`, `MaxSpread=500`, `FridayStopHour=25`, `AutoGMT` con offset 2 (inverno) / 3 (estate), `MaxRiskPerStrategy_=1,0`, strategie 1-9 accese (dove presenti).
 Il nostro set prop dei test a 80.000 (`TradeFrequency=2`, `MaxAllowedDD=9`, `PropFirmMaxDailyDD=4`, `OnlyUp=false`) coincide con `gold_reaper_propfirm.set` tranne `Randomization` (noi 0, il set 50, per rendere ripetibili le corse).
+
+## Aggiunta 2026-10-29 (zip "Gold-Reaper-Set-Files" riscaricato dal sito di Wim)
+Nuovi: gold_reaper_15%maxrisk.set (TF5, MaxAllowedDD 15, daily 0, OnlyUp 1, Randomization 0) e gold_reaper_default.set
+(differisce dal default gia' salvato solo per sezioni omesse). Live signal, propfirm, 10% e 60% senza differenze sugli input chiave.
+Il manuale PDF caricato da Claudio il 2026-10-29 ha testo identico a Gold_Reaper_V5.1.pdf gia' in cartella.
