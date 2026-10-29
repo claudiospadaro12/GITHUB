@@ -34,3 +34,22 @@ Il DD di saldo e solo realizzato (sottostima l'equita). Per 2018 e 2020 **l'equi
 - 2013, 2018 e 2020 a Modello 1; un percorso per anno; probabilmente dentro l'ottimizzazione del venditore; nessuna slippage; filtro news non simulato.
 - Equita solo per 2013 e 2025; 2018 e 2020 serve un export M1 (finestre 2018 e 2020) per completare. Il Goldbot 2025 e a 12 mesi (tick reali), non 21.
 - Nessun giudizio su acquisto, lotto o taglia.
+
+## AGGIORNAMENTO 29/10/2026: equita ricostruita anche per 2018 e 2020
+Fonte: zip `EXPORT_M1_ORO_V3_2018_2020_20261029_064758` (riga `RIGA_LANCIA_EXPORT_M1_ORO_V3.txt`): 349.730 barre M1 per il 2018 e 351.258 per il 2020, 0 settimane vuote, 0 errori. Stesso metodo e stesso script (`leggi_portafoglio_prop_oro.py --barre <cartella>`). **Sostituisce la frase "per 2018 e 2020 l'equita NON e ricostruibile" e i limiti superiori scritti sopra.**
+| Anno | Combinazione | Netto | Equity min (perdita dal deposito) | DD dal picco | Peggior giorno | giorni >= 3/4/5% | Lotti max insieme |
+|---|---|---|---|---|---|---|---|
+| 2018 | Reaper | +13.524 (+16,9%) | -2,43% | 4.894 | -2,86% | 0/0/0 | 7,18 |
+| 2018 | Reaper + Goldbot | +15.880 | -3,25% | 5.069 | -3,79% | 1/0/0 | 7,65 |
+| 2018 | + Phantom | +20.739 | -4,48% | 6.524 | **-4,84%** (pess. -4,99%) | 2/1/0 | 9,35 |
+| 2018 | i 4 | +39.405 (+49,3%) | -6,68% | 8.338 | **-8,17%** | 6/2/1 | 17,82 |
+| 2020 | Reaper | +21.235 (+26,5%) | mai sotto il deposito | 2.980 | -1,98% | 0/0/0 | 3,30 |
+| 2020 | Reaper + Goldbot | +30.893 | mai sotto il deposito | 3.632 | -1,88% | 0/0/0 | 4,32 |
+| 2020 | + Phantom | +40.991 | mai sotto il deposito | 4.488 | -2,37% | 0/0/0 | 5,18 |
+| 2020 | i 4 | +56.407 (+70,5%) | -0,23% (pess. -0,55%) | 7.544 (pess. 8.070) | -3,77% | 4/0/0 | 8,51 |
+**Lettura sui tre anni vecchi + 2025 (equita completa):**
+- **Reaper + Goldbot One** resta dentro i limiti FTMO in tutti e quattro gli anni: perdita massima dal deposito 5,7% (2013), 3,3% (2018), 0% (2020), 3,0% (2025); peggior giorno -4,72% (2013), -3,79%, -1,88%, -2,57%.
+- **Reaper + Goldbot + Phantom**: giorno peggiore -5,79% nel 2013 (oltre il 5% FTMO) e -4,84% nel 2018 (pessimistica -4,99%, sul bordo); equity minima -8,4% nel 2013 (sopra la soglia di progetto dell'8%).
+- **I quattro insieme**: giorno oltre il 5% in 2013 (-10,6%), 2018 (-8,17%) e 2025 (-6,32%); perdita dal deposito -13,7% nel 2013 (oltre il 10%). Nel 2020 regge (-3,77%, DD dal picco 7.544 / 8.070 pessimistica).
+- **Margine a leva 1:9 (derivato, nozionale lotti x 100 x prezzo / 9):** supera 80.000 USD gia col Reaper da solo nel 2013 e nel 2018 (circa 177.600 e 99.700) e con tutte le combinazioni piu larghe; solo nel 2020 e nel 2025 il Reaper da solo sta sotto o vicino al conto. Non simulato dal tester.
+Limiti invariati: somma di corse indipendenti, lotti sul proprio saldo, limiti giornalieri interni che non si vedono fra EA, Modello 1 nei tre anni vecchi, nessuna slippage, un percorso per anno.

@@ -29,7 +29,7 @@ SRC = {
           'Phantom': f1(S + 'PHANTOM/2025_M4_PHANTOM_PROPFIRM_D9/report/*.htm*')}}
 # barre M1 dall'export EXPORT_M1_ORO_V2_TUTTO (27/10/2026), NON nel repo: passare la cartella con --barre <cartella> (default: exp/in)
 BD = sys.argv[sys.argv.index('--barre') + 1] if '--barre' in sys.argv else 'exp/in'
-BARS = {'2013': BD + '/ABTG_M1_XAUUSD_2013.csv', '2025': BD + '/ABTG_M1_XAUUSD.csv'}
+BARS = {'2013': BD + '/ABTG_M1_XAUUSD_2013.csv', '2018': BD + '/ABTG_M1_XAUUSD_2018.csv', '2020': BD + '/ABTG_M1_XAUUSD_2020.csv', '2025': BD + '/ABTG_M1_XAUUSD.csv'}
 RANGE = {'2013': ('2013.01.03', '2013.12.31'), '2018': ('2018.01.03', '2018.12.31'), '2020': ('2020.01.03', '2020.12.31'), '2025': ('2025.01.03', '2025.12.31')}
 COMBI = [('Reaper da solo', ['Reaper']), ('Reaper+Goldbot', ['Reaper', 'Goldbot']), ('Reaper+Goldbot+Phantom', ['Reaper', 'Goldbot', 'Phantom']), ('Reaper+Goldbot+Phantom+GTP (i 4)', ['Reaper', 'Goldbot', 'Phantom', 'GTP'])]
 def serie(D, ks, bars):
@@ -56,7 +56,7 @@ def giorni_ftmo(ks):
         if G.cest(dt): dt += datetime.timedelta(hours=1)
         out.append(dt.date())
     return out
-for anno in ('2013', '2025'):
+for anno in [a_ for a_ in ('2013', '2018', '2020', '2025') if os.path.exists(BARS[a_])]:
     ks, bars = E.carica_m1(glob.glob(BARS[anno]))
     gg = giorni_ftmo(ks); da, a = RANGE[anno]
     dmin = G.giorno_ftmo(da + ' 00:00:00'); dmax = G.giorno_ftmo(a + ' 00:00:00')
