@@ -50,3 +50,7 @@ P1 (Reaper 9 + Goldbot passa): SI. P2 (+Phantom D4 passa, 60%): NO, di 0,16 punt
 
 ## 6. Cose NON misurate che decidono i set caricati sul demo
 1. Goldbot One con `PropFirm_10_5` (Risk=3, MaxRisk 2): mai misurato su 2013/2018/2020. 2. Reaper col set prop e Randomization 50 (come nel file). 3. GTP combo 0,5. 4. Phantom con D4 nel portafoglio col Guardian. 5. Reaper con TF 5.
+
+## 7. Aggiunta 29/10: set "combo" e Gold Trade Pro dimezzato (STIMA)
+Wim (readMe Gold Phantom): "the Combo Set files are for running the EA together with other EAs on the same account (lower risk per EA...)". Differenze dai set non combo: GTP prop 1 -> combo 0,5 (MaxRisk); Phantom prop D9 -> prop combo D4; Phantom low D10 -> combo D7. Reaper e Goldbot One non hanno set combo.
+Sensibilita DERIVATA (non misurata): serie del GTP prop R1 moltiplicate per 0,5 (previsione scritta prima: non passa, 70%). Esito, 2013 perdita dal deposito / giorno peggiore: Reaper 9 + Goldbot + GTP0,5 = 8,3% / -7,12% ; + Phantom D4 = 9,5% / -7,60% ; Reaper 9 + GTP0,5 = 7,0% / -6,96%. Nessuna passa PORT-OK (giorno >= 5% nel 2013, e anche nel 2018 per le combinazioni a 3 e 4). Il lotto non e certo che scali in proporzione al MaxRisk: serve la corsa vera.
