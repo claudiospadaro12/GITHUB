@@ -1,0 +1,7 @@
+bc59bff39ea7f392  Gold_Reaper_V5.1.pdf
+8cd736da9b4589f8  gold_reaper_default_mediumRisk.set
+f44f3aac7a51650d  gold_reaper_live_signal_settings.set
+406c1f2d65bed164  gold_reaper_maxrisk10.set
+56a89080be431780  gold_reaper_maxrisk15_LowRisk.set
+118e288df91123cd  gold_reaper_maxrisk60_HighRisk.set
+29aa6b1c3319d9f0  gold_reaper_propfirm.set
