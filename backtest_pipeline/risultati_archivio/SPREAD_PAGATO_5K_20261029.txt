@@ -1,0 +1,22 @@
+spread M1 XAUUSD 2025-26 (punti, 1 punto = 0,01 USD): mediana 21, media 22.5, P95 32, P99 44
+EA                  pos    lotti     sp_in    sp_out   mediana   costo EUR   % lordo   % netto
+Gold Snap           209    276.5      23.8      24.7        24        5653      5.9%      8.8%
+SomaGold           1071     73.9      23.5      24.7        23        1529      2.9%      4.0%
+SixtyNine          1127    121.5      23.8      24.4        23        2507      6.5%     13.0%
+Umbra Vault         434    121.5      23.2      23.4        22        2421     16.4%     19.8%
+Microedge           304     78.4      22.8      23.3        22        1547     14.1%     22.2%
+Vortex Turbo        940     72.5      22.2      22.5        22        1408     13.0%     39.3%
+Rocket Breakout     232     18.5      20.6      23.0        21         347      2.9%     10.2%
+Entry Points Pro    142      1.6      23.0      22.3        23          33      1.2%     16.3%
+ORB Revolution      147      6.1      21.3      24.4        22         125      4.4%      nan%
+
+Mediana dello spread all INGRESSO per ora SERVER (punti):
+Gold Snap        ore con piu ingressi caldi: 05:00=31, 02:00=28, 23:00=28
+SomaGold         ore con piu ingressi caldi: 05:00=31, 03:00=30, 02:00=29
+SixtyNine        ore con piu ingressi caldi: 05:00=31, 04:00=29, 00:00=28
+Umbra Vault      ore con piu ingressi caldi: 02:00=29, 01:00=27, 00:00=25
+Microedge        ore con piu ingressi caldi: 01:00=27, 03:00=26, 23:00=26
+Vortex Turbo     ore con piu ingressi caldi: 03:00=27, 01:00=26, 05:00=26
+Rocket Breakout  ore con piu ingressi caldi: 02:00=35, 04:00=28, 05:00=26
+Entry Points Pro ore con piu ingressi caldi: 05:00=32, 16:00=29, 07:00=28
+ORB Revolution   ore con piu ingressi caldi: 19:00=22, 16:00=21, 17:00=20
