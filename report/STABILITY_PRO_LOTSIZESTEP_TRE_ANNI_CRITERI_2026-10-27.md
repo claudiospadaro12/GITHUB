@@ -84,3 +84,16 @@ Riga `RIGA_LANCIA_STAB_MB_80K.txt` (generatore `gen_riga_stab_mb_80k.py`, pin 3e
 - Z6: lotto medio quasi proporzionale a ManualBalance (a 40.000 fra 0,25 e 0,38, a 20.000 fra 0,11 e 0,17): 60%.
 - Z7: tutte le 20 passate valide (`input_ok = si`): 80%.
 **Nota:** il rendimento a livelli bassi e piccolo (a 20.000 la sonda ha dato +3,7% nel 2025 su 80.000): se i DD passano ma il netto e esiguo, e una misura utile per dire che lo Stability Pro non serve a una challenge in tempi ragionevoli.
+
+## RISULTATI DELLA RIGA CON ManualBalance (29/10/2026, zip `ANNO80K_STABMB_20261029_1453`)
+20 passate OK, `input_ok = si` (tutti gli input imposti; archivio `backtest_pipeline/risultati_archivio/ANNO80K_STABMB_20261029_1453`). **Il livello 20.000 riproduce P4 della sonda** (2025 M1: 458 operazioni, +2.986,47, DD equity 4.206,70). Calibrazione 2025 OK per tutti e 4 i livelli (rapporto 1,16-1,17, correlazione 0,99).
+| ManualBalance | 2013 | 2018 | 2020 | 2025 M1 (M4) | Lotto medio 2025 |
+|---|---|---|---|---|---|
+| 10.000 | +4.499 / DD 1.431 | +1.585 / 767 | +2.772 / 646 | +1.403 / 1.932 (+1.203 / 1.803) | 0,065 |
+| 20.000 | +9.655 / 3.101 | +3.380 / 1.687 | +5.886 / 1.292 | +2.986 / 4.207 (+2.554 / 3.928) | 0,138 |
+| 30.000 | +14.626 / 4.532 | +5.195 / 2.607 | +8.990 / 2.067 | +4.621 / 6.182 (+3.958 / 5.768) | 0,212 |
+| 40.000 | +19.630 / 6.202 | +7.009 / 3.525 | +12.085 / 2.713 | +6.200 / **8.457** (+5.316 / 7.893) | 0,283 |
+(netto EUR / DD equity EUR, su un conto da 80.000; PF 1,71-1,96; nessun giorno realizzato oltre -0,2%.) **PROP-ANNI: tutti e quattro i livelli passano i tre anni vecchi** (DD <= 8.000, nessuno stop out); il 40.000 sfora 8.000 nel 2025 (M1 8.457). DD equity del 2025 pari a 6,6 volte il DD di saldo (20.000: 4.207 contro 631; 40.000: 8.457 contro 1.284).
+**Tempi da conto nuovo per +8.000 / +4.000 (giorni):** 40.000: 2013 176 / 126, 2018 non raggiunto / 170, 2020 119 / 73, 2025 non raggiunto / 138; 30.000: 2013 210 / 145, 2018 non raggiunto / 239, 2020 260 / 80, 2025 non raggiunto / 276; 20.000: raggiunge +8.000 solo nel 2013 (299 giorni). Quindi **per una challenge il rendimento e troppo basso**: il +10% non arriva in un anno in 2018 e 2025 nemmeno al livello 40.000.
+**Equita giornaliera NON misurabile:** le barre M1 esportate sono dell'oro; lo Stability Pro opera su coppie AUD (il DD di equity del tester e quello del report, il giorno FTMO sull'equity non e ricostruibile). Per una prop il flottante della griglia (6-7 volte il DD di saldo) resta il punto debole.
+**Previsioni:** Z1 SI (40.000 8.457 / 7.893; 30.000 6.182; 20.000 riproduce P4; 10.000 1.932). Z2 (passa i tre anni): 40.000 **SI** (prevista al 30%: il 2013 e a 6.202, meno del lineare 8.200), 30.000 SI, 20.000 SI, 10.000 SI. Z3 SI (6,6 volte). Z4 SI (4 livelli su 4). Z5 SI (netto 2025 a 20.000 / 40.000 = 0,48). Z6 SI (lotti 0,283 e 0,138). Z7 SI (20 su 20).
