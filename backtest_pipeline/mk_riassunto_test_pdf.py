@@ -18,15 +18,15 @@ def T(rows, w):
     return t
 def foot(c, d):
     c.saveState(); c.setFont('Helvetica', 7); c.setFillColor(colors.grey)
-    c.drawString(15 * mm, 8 * mm, 'Riassunto dei test - EA oro per prop FTMO - aggiornato 29/10/2026'); c.drawRightString(195 * mm, 8 * mm, 'pagina %d' % d.page); c.restoreState()
+    c.drawString(15 * mm, 8 * mm, 'Riassunto dei test - EA oro per prop FTMO - aggiornato 29/10/2026 (equity 2018 e 2020)'); c.drawRightString(195 * mm, 8 * mm, 'pagina %d' % d.page); c.restoreState()
 
 doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm, topMargin=14 * mm, bottomMargin=14 * mm, title='Riassunto dei test - EA oro per prop FTMO', author='Claudio Spadaro')
 E = []
 E.append(P('Riassunto dei test sugli EA oro per una prop FTMO', TT))
-E.append(P('Preparato il 28/10/2026 e aggiornato il 29/10/2026 (test MaxAllowedDD del Reaper) per Massimo e per il suo Claude. Tutti i numeri sono del Strategy Tester MetaTrader 5 (server BCM, conto virtuale da 80.000 EUR, XAUUSD salvo dove indicato), un EA alla volta; Modello 1 = barre da 1 minuto, Modello 4 = tick reali. Criteri e previsioni sono stati scritti prima dei numeri e sono nel repo (cartella report/). Nessuna slippage, filtro news non simulato, un solo percorso storico per anno. Questo documento non dà giudizi su acquisti, lotti o taglie.', B))
+E.append(P('Preparato il 28/10/2026 e aggiornato il 29/10/2026 (test MaxAllowedDD del Reaper, equity del portafoglio 2018 e 2020) per Massimo e per il suo Claude. Tutti i numeri sono del Strategy Tester MetaTrader 5 (server BCM, conto virtuale da 80.000 EUR, XAUUSD salvo dove indicato), un EA alla volta; Modello 1 = barre da 1 minuto, Modello 4 = tick reali. Criteri e previsioni sono stati scritti prima dei numeri e sono nel repo (cartella report/). Nessuna slippage, filtro news non simulato, un solo percorso storico per anno. Questo documento non dà giudizi su acquisti, lotti o taglie.', B))
 
 E.append(P('In breve', H1))
-E.append(P('<b>Tre dei quattro EA del pacchetto di Wim superano il nostro criterio sui tre anni vecchi</b> (Gold Reaper, Goldbot One, The Gold Phantom con il set PROPFIRM); il Gold Trade Pro lo manca per il solo drawdown del 2020. <b>Il Reaper è l\'unico veloce</b>: gli altri sono molto più lenti. Sommati nello stesso conto, i risultati sono molto correlati (0,5-0,63) e già con tre EA nel 2013 si rompe il limite giornaliero del 5%; con quattro EA nel 2013 la perdita dal deposito arriva al 13,7%. <b>Provando MaxAllowedDD 6, 9, 12 e 15 sul Reaper, il 9 resta il valore più alto sotto gli 8.000 EUR di DD in tutti e tre gli anni</b>; il 12 e il 15 sforano e non accorciano in proporzione i tempi. Sulla leva 1:9 che FTMO indica per i metalli sul conto Swing, il margine del Reaper supera già il conto: il tester non lo simula.', BX))
+E.append(P('<b>Tre dei quattro EA del pacchetto di Wim superano il nostro criterio sui tre anni vecchi</b> (Gold Reaper, Goldbot One, The Gold Phantom con il set PROPFIRM); il Gold Trade Pro lo manca per il solo drawdown del 2020. <b>Il Reaper è l\'unico veloce</b>: gli altri sono molto più lenti. Sommati nello stesso conto, i risultati sono molto correlati (0,5-0,63): <b>Reaper + Goldbot One resta dentro i limiti FTMO in tutti e quattro gli anni testati</b>; con il Phantom il giorno peggiore sfiora o supera il 5% (2013 -5,79%, 2018 -4,84%); con quattro EA ci sono giorni oltre il 5% in 2013, 2018 e 2025 e nel 2013 la perdita dal deposito arriva al 13,7%. <b>Provando MaxAllowedDD 6, 9, 12 e 15 sul Reaper, il 9 resta il valore più alto sotto gli 8.000 EUR di DD in tutti e tre gli anni</b>; il 12 e il 15 sforano e non accorciano in proporzione i tempi. Sulla leva 1:9 che FTMO indica per i metalli sul conto Swing, il margine del Reaper supera già il conto: il tester non lo simula.', BX))
 
 E.append(P('Il criterio usato (PROP-ANNI)', H1))
 E.append(P('Corse a 80.000 EUR sul 2013 (ribasso), 2018 (laterale) e 2020 (rialzo) a Modello 1, più una calibrazione sul 2025. Si passa se: netto positivo in tutti e tre gli anni; drawdown di equity massimo 8.000 EUR; nessuno stop out; nessun giorno con perdita realizzata pari o superiore al 5%; calibrazione OK (rapporto Modello 1 / tick reali fra 0,5 e 2,0 e correlazione mensile almeno 0,5). Il tetto di 8.000 EUR è più stretto del 10% di FTMO. Gli anni 2013, 2018 e 2020 sono probabilmente dentro la finestra di ottimizzazione del venditore (non verificato).', B))
@@ -65,17 +65,26 @@ E.append(T([['MaxAllowedDD', 'DD equity 2013 / 2018 / 2020 / 2025 (EUR)', 'Netto
 ['15', '<b>11.622 / 9.928</b> / 7.391 / 5.491', '+38.600 / +13.104 / +36.414', '0,81', 'NON passa (anche un giorno a -6,1% nel 2013)']], [24, 50, 44, 22, 40]))
 E.append(P('Il lotto scala quasi in proporzione a MaxAllowedDD (x0,62 a 6, x1,4 a 12, x1,8 a 15 rispetto al 9), ma il netto si ferma: nel 2018 il 15 rende meno del 9 (+13.104 contro +13.535) e nel 2025 il 15 rende meno del 12. A tick reali sui 21 mesi: 9 +59.796 (DD 3.854), 12 +89.611 (DD 6.074), 15 +102.211 (DD 7.968, un giorno a -4,0%). Giorni da conto nuovo per +8.000 nel 2025: 139 (6), 110 (9), 105 (12), 133 (15): i lotti più grandi non accorciano in proporzione la challenge. Il controllo a 9 ha riprodotto i risultati del 26/10. Il 2018 a 15 è limitato anche dal margine del tester (484 ordini rifiutati): non si separa dal limite giornaliero.', B))
 E.append(P('Più EA nello stesso conto: somma delle corse indipendenti', H1))
-E.append(P('Il tester non esegue più EA insieme: abbiamo sommato le liste affari delle corse già fatte (ogni EA dimensiona sul proprio saldo da 80.000; limiti giornalieri interni, margine e interazioni non simulati). Equity dalle barre M1 (esportate solo per 2013 e 2025).', B))
-E.append(T([['Anno', 'Combinazione', 'Netto', 'Perdita max dal deposito', 'Peggior giorno'],
+E.append(P('Il tester non esegue più EA insieme: abbiamo sommato le liste affari delle corse già fatte (ogni EA dimensiona sul proprio saldo da 80.000; limiti giornalieri interni, margine e interazioni non simulati). Equity ricostruita da barre M1 esportate per tutti e quattro gli anni (2013, 2018, 2020, 2025).', B))
+rows=[['Anno', 'Combinazione', 'Netto', 'Perdita max dal deposito', 'Peggior giorno'],
 ['2013', 'Reaper', '+24.000 (+30%)', '4,4%', '-4,57%'],
 ['2013', 'Reaper + Goldbot', '+35.304', '5,7%', '-4,72%'],
 ['2013', '+ Phantom', '+45.627', '<b>8,4%</b>', '<b>-5,79%</b> (oltre il 5% FTMO)'],
 ['2013', 'tutti e 4 (+ Gold Trade Pro)', '+81.943', '<b>13,7%</b> (oltre il 10% FTMO)', '<b>-10,6%</b>'],
+['2018', 'Reaper', '+13.524 (+17%)', '2,4%', '-2,86%'],
+['2018', 'Reaper + Goldbot', '+15.880', '3,3%', '-3,79%'],
+['2018', '+ Phantom', '+20.739', '4,5%', '<b>-4,84%</b> (pessimistica -4,99%)'],
+['2018', 'tutti e 4', '+39.405 (+49%)', '6,7%', '<b>-8,17%</b>'],
+['2020', 'Reaper', '+21.235 (+27%)', 'mai sotto il deposito', '-1,98%'],
+['2020', 'Reaper + Goldbot', '+30.893', 'mai sotto il deposito', '-1,88%'],
+['2020', '+ Phantom', '+40.991', 'mai sotto il deposito', '-2,37%'],
+['2020', 'tutti e 4', '+56.407 (+71%)', '0,2%', '-3,77%'],
 ['2025', 'Reaper', '+27.460 (+34%)', '2,8%', '-2,32%'],
 ['2025', 'Reaper + Goldbot', '+35.303', '3,0%', '-2,57%'],
 ['2025', '+ Phantom', '+48.393', '3,0%', '-2,94%'],
-['2025', 'tutti e 4', '+67.762', '6,0%', '<b>-6,32%</b>']], [15, 55, 35, 40, 35]))
-E.append(P('Correlazione dei risultati giornalieri (21 mesi, set prop): Reaper/Gold Trade Pro 0,63; Reaper/Phantom 0,55; Gold Trade Pro/Phantom 0,50; Reaper/Goldbot One 0,49-0,53. Per il 2018 e il 2020 l\'equity non è ancora ricostruibile (barre M1 non esportate): la riga di export è pronta. Solo realizzato, i quattro insieme arrivano a +8.000 molto prima (2018: 134 giorni contro 236 del Reaper), ma il peggior giorno realizzato va a -6,3% nel 2018 e -10,0% nel 2013.', B))
+['2025', 'tutti e 4', '+67.762', '6,0%', '<b>-6,32%</b>']]
+E.append(T(rows, [15, 55, 35, 40, 35]))
+E.append(P('Correlazione dei risultati giornalieri (21 mesi, set prop): Reaper/Gold Trade Pro 0,63; Reaper/Phantom 0,55; Gold Trade Pro/Phantom 0,50; Reaper/Goldbot One 0,49-0,53. <b>Reaper + Goldbot One</b> resta dentro i limiti FTMO in tutti e quattro gli anni; con il Phantom il giorno peggiore sfiora o supera il 5% nel 2013 e nel 2018; con tutti e quattro ci sono giorni oltre il 5% in 2013, 2018 e 2025 (il 2020 regge). Solo realizzato, i quattro insieme arrivano a +8.000 molto prima (2018: 134 giorni contro 236 del Reaper), ma il peggior giorno realizzato va a -6,3% nel 2018 e -10,0% nel 2013. Margine a leva 1:9 sull\'oro (derivato): supera gli 80.000 USD già col Reaper da solo nel 2013 e nel 2018.', B))
 
 E.append(P('Cosa abbiamo imparato sulle regole FTMO (risposte scritte del supporto, 24-29/09/2026)', H1))
 for t in [
@@ -86,7 +95,6 @@ for t in [
 
 E.append(P('In corso e da fare', H1))
 E.append(T([['Cosa', 'Stato'],
-['Barre M1 del 2018 e 2020 per completare l\'equity del portafoglio', 'Riga pronta (circa 1-2 minuti di esecuzione), da lanciare sul PC di backtest.'],
 ['Stability Pro con un input che davvero comandi il lotto', 'Aperto: non sappiamo quale input comanda il lotto; mancano i set del venditore.'],
 ['Forward su demo di almeno 4 settimane e scelta Standard o Swing', 'Non iniziato; decisione di Claudio.'],
 ['Mail a FTMO su più conti con lo stesso EA e posizioni opposte tra conti', 'Da inviare per iscritto prima di qualsiasi uso su più conti.']], [80, 100]))
