@@ -35,7 +35,7 @@ Non controllata da agenti. Fonti: set in `backtest_pipeline/set_venditore/` (con
 | Reaper 9 + Phantom D9 (senza Goldbot) | 7,1% / -5,72% | 3,8% / -3,76% | 0 / -2,05% | 2,4% / -2,61% | +31.837 | NO |
 | + Gold Trade Pro prop | 11,0% / **-9,51%** | 5,5% / -7,26% | 0,6% / -3,68% | 5,3% / -6,17% | +52.482 | NO |
 | Reaper 9 + GTP prop | 10,0% / -9,33% | 4,7% / -6,04% | 0,6% / -3,18% | 5,2% / -5,88% | +44.691 | NO |
-| Tutti e 4, qualunque combinazione di set provata (D4 o D9, Reaper 6 o 9) | 12-14% / -9,9 / -10,6% | 5-6% / -6,7 / -7,6% | 0,5% / -3,7% | 4-5% / -5,4 / -6,2% | +48-56 mila | NO |
+| Tutti e 4, qualunque combinazione di set provata (D4 o D9, Reaper 6 o 9) | 12-14% / -9,9 / -10,6% | 5-6% / -6,8 / -7,7% | 0,5% / -3,7% | 4-5% / -5,4 / -6,2% | +48-56 mila | NO |
 (netto da conti da 80.000, 2025 a Modello 1 per tutti tranne Goldbot a tick reali. Perdita = equity minima dal deposito, pessimistica; giorno = peggiore sulla misura pessimistica. Il Guardian NON e' incluso.)
 
 ## 4. Previsioni contro esito
