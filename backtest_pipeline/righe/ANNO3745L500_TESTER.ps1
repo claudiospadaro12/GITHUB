@@ -1,14 +1,14 @@
 # =====================================================================
-#  v1 ANNO3500L500 (29/10/2026): copia di ANNO80K_TESTER.ps1 con DEPOSITO 3.500 EUR (conto reale personale di Claudio). Cambia SOLO il deposito e i nomi (ANNO3500L500, cartella e marcatore). Stesse guardie.
-#  v1.1 (29/10/2026): LEVA 1:500 (conto reale personale di Claudio, 1:500). Cambia SOLO la leva del .ini e i nomi; il report la deve confermare (1:500) o la passata e KO.
-#  MARCATORE_ANNO3500L500_TESTER_TRANCHE_v1
-#  ANNO3500L500_TESTER_TRANCHE.ps1 -Ex5Nome '<file>.ex5' -- TEST A FONDO di UN EA del MQL5 Market (demo, solo tester) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ.
+#  v1 ANNO3745L500 (29/10/2026): copia di ANNO80K_TESTER.ps1 con DEPOSITO 3.500 EUR (conto reale personale di Claudio). Cambia SOLO il deposito e i nomi (ANNO3745L500, cartella e marcatore). Stesse guardie.
+#  v1.2 (30/10/2026): DEPOSITO 3745 EUR (saldo reale di Claudio 3.745,38; i 2.500 di bonus non sono saldo: gli EA dimensionano sul saldo, il bonus conta solo per equity e margine e il tester non lo simula). LEVA 1:500 (conto reale personale di Claudio, 1:500). Cambia SOLO la leva del .ini e i nomi; il report la deve confermare (1:500) o la passata e KO.
+#  MARCATORE_ANNO3745L500_TESTER_TRANCHE_v1
+#  ANNO3745L500_TESTER_TRANCHE.ps1 -Ex5Nome '<file>.ex5' -- TEST A FONDO di UN EA del MQL5 Market (demo, solo tester) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ.
 #  VARIANTE di ARENA5K_MESE (conto prop 80.000 EUR, 26/10/2026): UN SOLO ANNO scelto con -Anno AAAA (e -Modello, default 1, -Periodo, default H1) a conto vuoto; stesse guardie. Previsioni: report/MARKET_TEST_80K_ATTESE_2026-10-19.md. Originale: 21 tranche MENSILI (ognuna a conto vuoto) piu UNA corsa CONTINUA 2025.01.01 -> 2026.10.01, XAUUSD H1, ticks reali, nessun input imposto.
-#  v5 ANNO3500L500 (26/10/2026, notte): -Fine AAAA.MM.GG (data esclusa) per una corsa continua piu lunga di un anno (da 01/01/-Anno a -Fine), es. 21 mesi: -Anno 2025 -Fine 2026.10.01.
-#  v4 ANNO3500L500 (26/10/2026, notte): -Imposti ammette il tipo s (stringa; i separatori del valore sono +, nel .ini diventano ; con ; finale) per OneChartSetup_Pairs.
-#  v3 ANNO3500L500 (26/10/2026, sera): -Simbolo (default XAUUSD) per gli EA da forex con OneChartSetup (Luna AI Pro: grafico EURUSD M5 e le 8 coppie negli input). Cambia SOLO il simbolo del grafico e il testo.
-#  v2 ANNO3500L500 (26/10/2026, 15:00): -Periodo ammette D1 (il report del tester lo scrive Daily: campo Ril), correzione dopo che le 5 passate di Goldbot One si sono fermate sul controllo del periodo.
-#  v1 ANNO3500L500 (26/10/2026): copia di ANNO5K_TESTER.ps1 con DEPOSITO 80.000 EUR (prop FTMO). Serve per Gold Reaper, Goldbot One, Prop Firm Gold sui tre anni 2013/2018/2020 + calibrazione 2025 (Modello 1 contro Modello 4). Stesse guardie, stesso -Imposti, -Modello (4 = tick reali) e -Periodo (D1 per Goldbot One). v3: la finestra del giornale si confronta con Ril (Daily per D1), cosi D1 non da piu KO di etichetta.
+#  v5 ANNO3745L500 (26/10/2026, notte): -Fine AAAA.MM.GG (data esclusa) per una corsa continua piu lunga di un anno (da 01/01/-Anno a -Fine), es. 21 mesi: -Anno 2025 -Fine 2026.10.01.
+#  v4 ANNO3745L500 (26/10/2026, notte): -Imposti ammette il tipo s (stringa; i separatori del valore sono +, nel .ini diventano ; con ; finale) per OneChartSetup_Pairs.
+#  v3 ANNO3745L500 (26/10/2026, sera): -Simbolo (default XAUUSD) per gli EA da forex con OneChartSetup (Luna AI Pro: grafico EURUSD M5 e le 8 coppie negli input). Cambia SOLO il simbolo del grafico e il testo.
+#  v2 ANNO3745L500 (26/10/2026, 15:00): -Periodo ammette D1 (il report del tester lo scrive Daily: campo Ril), correzione dopo che le 5 passate di Goldbot One si sono fermate sul controllo del periodo.
+#  v1 ANNO3745L500 (26/10/2026): copia di ANNO5K_TESTER.ps1 con DEPOSITO 80.000 EUR (prop FTMO). Serve per Gold Reaper, Goldbot One, Prop Firm Gold sui tre anni 2013/2018/2020 + calibrazione 2025 (Modello 1 contro Modello 4). Stesse guardie, stesso -Imposti, -Modello (4 = tick reali) e -Periodo (D1 per Goldbot One). v3: la finestra del giornale si confronta con Ril (Daily per D1), cosi D1 non da piu KO di etichetta.
 #  DERIVATO da SCREEN_TESTER_TRANCHE.ps1 (stesse guardie). Regole e soglie scritte PRIMA dei numeri: report/MARKET_SELEZIONE_PER_ACQUISTO_ATTESE_2026-10-19.md.
 #  E' UN BACKTEST: AllowLiveTrading=false. NON TOCCA C:\MT5_Backtest, C:\FundedNext_Manuale, il VPS. NIENTE EMOJI QUI DENTRO (regola del 17/08).
 # =====================================================================
@@ -38,13 +38,13 @@ if($TOK.Length -lt 1){ throw ('-Ex5Nome "' + $Ex5Nome + '": nessun carattere alf
 if($TOK.Length -gt 24){ $TOK = $TOK.Substring(0, 24) }
 $TOKU = $TOK.ToUpper(); $TOKL = $TOK.ToLower()
 $TOKEXP = [regex]::Replace([IO.Path]::GetFileNameWithoutExtension($Ex5Nome), '[^A-Za-z0-9]', '').ToLower()
-$NOME_D   = 'ANNO3500L500_' + $TOKU
+$NOME_D   = 'ANNO3745L500_' + $TOKU
 if($Simbolo -notmatch '^[A-Za-z0-9._]{3,14}$'){ throw ('-Simbolo "' + $Simbolo + '" non valido') }
 $SIMBOLO  = $Simbolo
 # NIENTE $PERIODO qui: questo giro ha DUE periodi del grafico e li porta ognuna la sua voce di $SONDE ($s.Per). Una variabile
 # unica di periodo sarebbe falsa e finirebbe nei titoli e nel referto (classe 1499: i conteggi e le etichette si COSTRUISCONO).
 $MODELLO  = $Modello
-$DEPOSITO = 3500
+$DEPOSITO = 3745
 $VALUTA   = 'EUR'
 $LEVA     = 500
 $TETTO_BARRE  = 100000
@@ -63,7 +63,7 @@ if($TimeoutTrancheMin -lt 1 -or $TimeoutTrancheMin -gt 900){ throw '-TimeoutTran
 if($Tranche -notmatch '^[0-9]{1,2}(,[0-9]{1,2})*$'){ throw ('-Tranche ' + $Tranche + ' non valido: servono numeri da 1 a 22 separati da virgola.') }
 $TrScelte = @($Tranche -split ',')
 if(@($TrScelte | Select-Object -Unique).Count -ne $TrScelte.Count){ throw ('-Tranche ' + $Tranche + ' ha una tranche ripetuta.') }
-# DUE passate sulla STESSA finestra (2026.01.01 -> 2026.03.01, cioe gennaio e febbraio 2026), ognuna a CONTO VUOTO (deposito 3500 EUR), che
+# DUE passate sulla STESSA finestra (2026.01.01 -> 2026.03.01, cioe gennaio e febbraio 2026), ognuna a CONTO VUOTO (deposito 3745 EUR), che
 # differiscono SOLO per il periodo del grafico: H1 e M15. NON sono tranche mensili e non sono in sequenza: non si sommano, si CONFRONTANO.
 # QUANTE e QUALI passate le dice l elenco qui sotto, non questo commento; e le frasi del REFERTO che descrivono la natura del giro si
 # COSTRUISCONO da $SONDE_TUTTE (classi 1498 e 1499: la prosa ereditata da un altro giro aveva scritto "TRE tranche MENSILI ... luglio,
@@ -93,7 +93,7 @@ $SONDE = @(
   [pscustomobject]@{ Nome = 'TRANCHE21'; Per = 'H1'; Da = '2026.09.01'; A = '2026.10.01'; Timeout = $TimeoutTrancheMin; Cosa = 'mese 2026-09, H1' },
   [pscustomobject]@{ Nome = 'TRANCHE22'; Per = 'H1'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = ($TimeoutTrancheMin * 4); Cosa = 'corsa CONTINUA 21 mesi, H1' }
 )
-# v1 (26/10/2026): UN SOLO ANNO SOLARE a conto vuoto (3500 EUR), scelto con -Anno AAAA, -Modello (default 1 = OHLC 1 minuto; 0 = tutti i tick generati; 4 = tick reali) e -Periodo (default H1). La passata si chiama ancora TRANCHE22 per il lettore.
+# v1 (26/10/2026): UN SOLO ANNO SOLARE a conto vuoto (3745 EUR), scelto con -Anno AAAA, -Modello (default 1 = OHLC 1 minuto; 0 = tutti i tick generati; 4 = tick reali) e -Periodo (default H1). La passata si chiama ancora TRANCHE22 per il lettore.
 if($Anno -notmatch '^20(0[5-9]|1[0-9]|2[0-5])$'){ throw ('-Anno "' + $Anno + '" non valido: serve un anno fra 2005 e 2025, per esempio 2013') }
 if($Modello -notin @(0,1,4)){ throw ('-Modello ' + $Modello + ' non ammesso (0, 1 o 4)') }
 if($Fine -ne '' -and $Fine -notmatch '^\d{4}\.\d\d\.\d\d$'){ throw ('-Fine "' + $Fine + '" non valida (attesa AAAA.MM.GG, data esclusa)') }
@@ -199,7 +199,7 @@ function InputDiverso($nome, $atteso, $tipo, $visto){
 # ---------------------------------------------------------------------
 Titolo '0 - MACCHINA E TERMINALE'
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){
-  throw ('ANNO3500L500_TESTER_TRANCHE gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia: la challenge FTMO sta operando (firma del 21/09/2026: i giri del tester stanno sul PC di backtest).')
+  throw ('ANNO3745L500_TESTER_TRANCHE gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia: la challenge FTMO sta operando (firma del 21/09/2026: i giri del tester stanno sul PC di backtest).')
 }
 Dico ('pc   : ' + $env:COMPUTERNAME) 'Green'
 Dico ('pin  : ' + $Pin) 'Green'
@@ -452,7 +452,7 @@ foreach($s in $SONDE){
     [void]$referto.Add($s.Nome + ': NON LANCIATA -- ' + $why)
     continue
   }
-  $nomeRep = 'ANNO3500L500_' + $TOKU + '_' + $s.Nome + '_' + $Stamp
+  $nomeRep = 'ANNO3745L500_' + $TOKU + '_' + $s.Nome + '_' + $Stamp
   $iniF = Join-Path $Work ('anno80k_' + $TOKL + '_' + $s.Nome + '_' + $Stamp + '.ini')
   Set-Content -LiteralPath $iniF -Value (TestoIni $s $nomeRep) -Encoding ASCII -NoNewline
   Copy-Item -LiteralPath $iniF -Destination (Join-Path (Join-Path $Cart 'ini') ('anno80k_' + $TOKL + '_' + $s.Nome + '.ini'))
@@ -587,7 +587,7 @@ foreach($s in $SONDE){
 # ---------------------------------------------------------------------
 Titolo '3 - RACCOLTA'
 $testa = @(
-  ('ANNO3500L500 TESTER TRANCHE (' + $Ex5Nome + ') -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ANNO3500L500_TESTER_TRANCHE_v1, pin ' + $Pin),
+  ('ANNO3745L500 TESTER TRANCHE (' + $Ex5Nome + ') -- EA di TERZI dal MQL5 Market, scatola nera, NESSUN sorgente. Script MARCATORE_ANNO3745L500_TESTER_TRANCHE_v1, pin ' + $Pin),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pc: ' + $env:COMPUTERNAME + '   terminale: ' + $InstAttesa + ' (demo 50503392 di questo PC)   cartella dati ' + (Split-Path -Leaf $DataFolder)),
   ('EX5: ' + $RelEx5 + '   byte ' + $Ex5.Length + '   data file ' + $DataEx5 + '   SHA256 ' + $ShaEx5 + '   (binario di terzi: NON nello zip; impronta presa PRIMA delle passate e ricontrollata DOPO ognuna: righe EX5_DOPO)'),
   ('tester: ' + $SIMBOLO + ' ' + (@($SONDE_TUTTE | ForEach-Object { $_.Per }) -join ',') + ', Modello ' + $MODELLO + ' (' + $(if($MODELLO -eq 4){ 'ticks reali' } else { 'NON tick reali: barre o tick generati dal tester, qualita dello storico quella scritta nel report' }) + '), deposito ' + $DEPOSITO + ' ' + $VALUTA + ', leva 1:' + $LEVA + ' (leva che il tester ha STAMPATO il 14/10 nella SONDA1 con 500 nel .ini; il MARGINE dell oro nel tester NON e prezzo x contratto / 100: R114 del 27/08 ha letto 8580,52 EUR per 1 lotto = 10000 USD fissi a lotto, circa 1:45 sul nozionale [DERIVATO, non riletto oggi]; la leva del conto demo e [NON VISTA]), ExecutionMode=0 (nessun ritardo di esecuzione: nessuno slippage di latenza), Optimization=0, Visual=0'),
@@ -598,14 +598,14 @@ $testa = @(
   ('ATTENZIONE: questo NON e un giro di tranche MENSILI e non e una corsa continua. Sono ' + $SONDE_TUTTE.Count + ' passate INDIPENDENTI sulla STESSA finestra (' + $SONDE_TUTTE[0].Da + ' -> ' + $SONDE_TUTTE[0].A + '), ognuna a CONTO VUOTO (deposito ' + $DEPOSITO + ' ' + $VALUTA + '), e cambia SOLO il periodo del grafico: ' + (@($SONDE_TUTTE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '. Nessuna passata eredita il conto dell altra e uno stop out in una non fa morire le altre: i loro numeri NON si sommano, si CONFRONTANO fra loro. Se il .ex5 cambia in una passata, le passate dopo NON partono (v2).'),
   ''
 )
-(($testa + $referto + @('', 'COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_ANNO3500L500_TRANCHE.txt') -Encoding ASCII
-(($manifest) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'MANIFEST_ANNO3500L500.csv') -Encoding ASCII
+(($testa + $referto + @('', 'COME SI LEGGE: il lettore lo scrivo io quando lo zip torna (report, MANIFEST e REFERTO sono il materiale). Questo script RACCOGLIE: non giudica, non promuove, non archivia niente.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'REFERTO_ANNO3745L500_TRANCHE.txt') -Encoding ASCII
+(($manifest) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'MANIFEST_ANNO3745L500.csv') -Encoding ASCII
 Compress-Archive -Path (Join-Path $Cart '*') -DestinationPath $zip
 Write-Host ''
 foreach($x in $testa){ if($x -ne ''){ Write-Host ('   ' + $x) } }
 Write-Host ''
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
-Write-Host ('FILE ATTESI NELLO ZIP: REFERTO_ANNO3500L500_TRANCHE.txt + MANIFEST_ANNO3500L500.csv + per ognuna delle passate LANCIATE (' + (@($SONDE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '): ini\anno80k_' + $TOKL + '_<passata>.ini, report\SCREEN_' + $TOKU + '_<passata>_<data>.htm (+ le .png) se il tester li ha scritti, log\<passata>_*.txt') -ForegroundColor Gray
+Write-Host ('FILE ATTESI NELLO ZIP: REFERTO_ANNO3745L500_TRANCHE.txt + MANIFEST_ANNO3745L500.csv + per ognuna delle passate LANCIATE (' + (@($SONDE | ForEach-Object { $_.Nome + '=' + $_.Per }) -join ', ') + '): ini\anno80k_' + $TOKL + '_<passata>.ini, report\SCREEN_' + $TOKU + '_<passata>_<data>.htm (+ le .png) se il tester li ha scritti, log\<passata>_*.txt') -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
 $nSc = @($TrScelte | Where-Object { $esiti['TRANCHE' + $_] -eq 'OK' }).Count
 if($nSc -eq $TrScelte.Count){ Write-Host ('ESITO DEEP TRANCHE: le ' + $TrScelte.Count + ' tranche scelte (' + $Tranche + ') sono OK (rc 0)') -ForegroundColor Green; exit 0 }
