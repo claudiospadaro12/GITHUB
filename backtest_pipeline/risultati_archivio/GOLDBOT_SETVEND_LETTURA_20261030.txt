@@ -1,0 +1,22 @@
+passata                netto    PF            DD equity   peggior giorno real.        gg >=3/4/5%
+2013_M1_GB_LOW3     61766.00  2.40      14926.81(9.53%)  -6.95% (2013-12-31)         2/2/2  stato OK input_ok si stop_out 0 no_money 1
+2013_M1_GB_PF105    38132.51  2.50       7607.70(6.05%)  -4.25% (2013-12-31)         2/1/0  stato OK input_ok si stop_out 0 no_money 0
+2013_M1_GB_PF525    17444.75  2.59       3062.38(3.05%)  -2.11% (2013-12-31)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+2018_M1_GB_LOW3     14062.33  1.40     10990.42(11.20%)  -3.42% (2018-01-10)         1/0/0  stato OK input_ok si stop_out 0 no_money 0
+2018_M1_GB_PF105     9349.15  1.41       6996.84(7.62%)  -2.26% (2018-01-10)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+2018_M1_GB_PF525     4637.61  1.42       3269.79(3.81%)  -1.12% (2018-01-10)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+2020_M1_GB_LOW3     40280.93  2.41       6337.44(5.85%)  -3.35% (2020-03-12)         2/0/0  stato OK input_ok si stop_out 0 no_money 0
+2020_M1_GB_PF105    25236.82  2.42       3854.01(3.93%)  -2.23% (2020-03-12)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+2020_M1_GB_PF525    11839.94  2.44       1749.17(2.06%)  -1.07% (2020-03-12)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+2025_M1_GB_LOW3     31205.99  2.27       6145.81(5.64%)  -3.38% (2025-02-19)         2/0/0  stato OK input_ok si stop_out 0 no_money 0
+2025_M1_GB_PF105    19571.33  2.26       3684.57(3.75%)  -2.25% (2025-02-19)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+2025_M1_GB_PF525     8999.35  2.25       1636.67(1.85%)  -1.08% (2025-02-19)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+21M_M1_GB_LOW3      51745.04  1.83      10828.83(9.18%)  -3.89% (2026-04-15)         6/0/0  stato OK input_ok si stop_out 0 no_money 0
+21M_M1_GB_PF105     31696.93  1.84       6265.71(6.05%)  -2.57% (2026-04-15)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+21M_M1_GB_PF525     14405.78  1.87       2478.81(2.73%)  -1.21% (2026-04-15)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+21M_M4_GB_PF105     26410.12  1.66       7769.01(7.62%)  -2.96% (2026-04-15)         0/0/0  stato OK input_ok si stop_out 0 no_money 0
+
+PROP-ANNI PF105  SI (sui tre anni)  [2013 ok; 2018 ok; 2020 ok]
+PROP-ANNI PF525  SI (sui tre anni)  [2013 ok; 2018 ok; 2020 ok]
+PROP-ANNI LOW3   NO  [2013 FALLISCE(net +61766 DD 14927 giorno -6.95%); 2018 FALLISCE(net +14062 DD 10990 giorno -3.42%); 2020 ok]
+calibrazione PF105 21 mesi: netto M1 31697 / M4 26410 = rapporto 1.20; correlazione mensile 0.99 (21 mesi)

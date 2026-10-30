@@ -1,0 +1,91 @@
+  [2013] Reaper9: posizioni accoppiate 509, non accoppiate 0, netto +21757
+  [2013] Reaper6: posizioni accoppiate 509, non accoppiate 0, netto +12704
+  [2013] Goldbot: posizioni accoppiate 290, non accoppiate 0, netto +10196
+  [2013] PhD9: posizioni accoppiate 860, non accoppiate 0, netto +9137
+  [2013] PhD4: posizioni accoppiate 860, non accoppiate 0, netto +3759
+  [2013] PhD10: posizioni accoppiate 860, non accoppiate 0, netto +9997
+  [2013] GTP: posizioni accoppiate 325, non accoppiate 0, netto +32907
+  [2013] GbPF105: posizioni accoppiate 290, non accoppiate 0, netto +38133
+  [2013] GbPF525: posizioni accoppiate 290, non accoppiate 0, netto +17445
+  [2013] GbLOW3: posizioni accoppiate 290, non accoppiate 0, netto +61766
+2013 | Reaper9+Goldbot(test 26/10)            netto  +35304 (+44.1%) | equity min 75462 (perdita dal deposito 5.67%; pess. 5.68%) | DD dal picco: 6403 (pess. 6413) | peggior giorno -4.72% (pess. -4.72%) | gg>=3/4/5%: 3/2/0 | lotti max insieme 9.65 (margine 1:9 ~131397 USD)
+2013 | Reaper9+GbPF105                        netto  +67380 (+84.2%) | equity min 73875 (perdita dal deposito 7.66%; pess. 7.68%) | DD dal picco: 8209 (pess. 9889) | peggior giorno -5.63% (pess. -5.69%) | gg>=3/4/5%: 3/2/1 | lotti max insieme 15.58 (margine 1:9 ~212141 USD)
+2013 | Reaper9+GbPF525                        netto  +43543 (+54.4%) | equity min 75220 (perdita dal deposito 5.97%; pess. 5.99%) | DD dal picco: 6680 (pess. 6691) | peggior giorno -4.73% (pess. -4.73%) | gg>=3/4/5%: 3/2/0 | lotti max insieme 11.17 (margine 1:9 ~152093 USD)
+2013 | Reaper9+GbLOW3                         netto  +96347 (+120.4%) | equity min 72517 (perdita dal deposito 9.35%; pess. 9.41%) | DD dal picco: 10601 (pess. 15090) | peggior giorno -6.92% (pess. -6.98%) | gg>=3/4/5%: 7/3/2 | lotti max insieme 21.68 (margine 1:9 ~295200 USD)
+2013 | Reaper6+GbPF105                        netto  +57428 (+71.8%) | equity min 73899 (perdita dal deposito 7.63%; pess. 7.66%) | DD dal picco: 7586 (pess. 8472) | peggior giorno -4.85% (pess. -4.88%) | gg>=3/4/5%: 2/2/0 | lotti max insieme 12.37 (margine 1:9 ~168433 USD)
+2013 | R9+GbPF105+PhD4                        netto  +71603 (+89.5%) | equity min 72972 (perdita dal deposito 8.78%; pess. 8.81%) | DD dal picco: 9088 (pess. 10547) | peggior giorno -5.66% (pess. -5.73%) | gg>=3/4/5%: 3/2/2 | lotti max insieme 16.13 (margine 1:9 ~219630 USD)
+2013 | R9+GbPF525+PhD4                        netto  +47765 (+59.7%) | equity min 74317 (perdita dal deposito 7.10%; pess. 7.12%) | DD dal picco: 7558 (pess. 7571) | peggior giorno -5.16% (pess. -5.21%) | gg>=3/4/5%: 3/2/1 | lotti max insieme 11.72 (margine 1:9 ~159582 USD)
+2013 | R9+GbPF105+PhD9                        netto  +77702 (+97.1%) | equity min 71670 (perdita dal deposito 10.41%; pess. 10.45%) | DD dal picco: 10351 (pess. 11517) | peggior giorno -5.97% (pess. -6.06%) | gg>=3/4/5%: 6/2/2 | lotti max insieme 16.98 (margine 1:9 ~231203 USD)
+2013 | R9+GbPF105+GTP                         netto +103696 (+129.6%) | equity min 69637 (perdita dal deposito 12.95%; pess. 12.99%) | DD dal picco: 14346 (pess. 14630) | peggior giorno -9.72% (pess. -9.73%) | gg>=3/4/5%: 8/3/3 | lotti max insieme 22.35 (margine 1:9 ~304323 USD)
+2013 | GbPF105 solo                           netto  +43380 (+54.2%) | equity min 77291 (perdita dal deposito 3.39%; pess. 3.42%) | DD dal picco: 5122 (pess. 6340) | peggior giorno -3.41% (pess. -4.21%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 7.89 (margine 1:9 ~106011 USD)
+  [2018] Reaper9: posizioni accoppiate 548, non accoppiate 0, netto +13535
+  [2018] Reaper6: posizioni accoppiate 548, non accoppiate 0, netto +8952
+  [2018] Goldbot: posizioni accoppiate 294, non accoppiate 0, netto +2356
+  [2018] PhD9: posizioni accoppiate 886, non accoppiate 0, netto +4859
+  [2018] PhD4: posizioni accoppiate 886, non accoppiate 0, netto +2034
+  [2018] PhD10: posizioni accoppiate 886, non accoppiate 0, netto +5426
+  [2018] GTP: posizioni accoppiate 330, non accoppiate 0, netto +18666
+  [2018] GbPF105: posizioni accoppiate 294, non accoppiate 0, netto +9349
+  [2018] GbPF525: posizioni accoppiate 294, non accoppiate 0, netto +4638
+  [2018] GbLOW3: posizioni accoppiate 294, non accoppiate 0, netto +14062
+2018 | Reaper9+Goldbot(test 26/10)            netto  +15880 (+19.8%) | equity min 77403 (perdita dal deposito 3.25%; pess. 3.34%) | DD dal picco: 5069 (pess. 5091) | peggior giorno -3.79% (pess. -3.91%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 7.65 (margine 1:9 ~102370 USD)
+2018 | Reaper9+GbPF105                        netto  +22873 (+28.6%) | equity min 75430 (perdita dal deposito 5.71%; pess. 5.91%) | DD dal picco: 8085 (pess. 8129) | peggior giorno -6.31% (pess. -6.51%) | gg>=3/4/5%: 2/1/1 | lotti max insieme 10.47 (margine 1:9 ~140106 USD)
+2018 | Reaper9+GbPF525                        netto  +18161 (+22.7%) | equity min 76919 (perdita dal deposito 3.85%; pess. 3.99%) | DD dal picco: 5414 (pess. 5440) | peggior giorno -4.42% (pess. -4.56%) | gg>=3/4/5%: 2/1/0 | lotti max insieme 8.22 (margine 1:9 ~109997 USD)
+2018 | Reaper9+GbLOW3                         netto  +27586 (+34.5%) | equity min 73944 (perdita dal deposito 7.57%; pess. 7.82%) | DD dal picco: 10951 (pess. 11019) | peggior giorno -8.20% (pess. -8.45%) | gg>=3/4/5%: 5/1/1 | lotti max insieme 12.92 (margine 1:9 ~172891 USD)
+2018 | Reaper6+GbPF105                        netto  +18294 (+22.9%) | equity min 76004 (perdita dal deposito 5.00%; pess. 5.16%) | DD dal picco: 7005 (pess. 7049) | peggior giorno -5.42% (pess. -5.59%) | gg>=3/4/5%: 1/1/1 | lotti max insieme 8.20 (margine 1:9 ~109730 USD)
+2018 | R9+GbPF105+PhD4                        netto  +24908 (+31.1%) | equity min 75128 (perdita dal deposito 6.09%; pess. 6.30%) | DD dal picco: 8647 (pess. 8691) | peggior giorno -6.76% (pess. -6.98%) | gg>=3/4/5%: 2/1/1 | lotti max insieme 11.15 (margine 1:9 ~149131 USD)
+2018 | R9+GbPF525+PhD4                        netto  +20196 (+25.2%) | equity min 76618 (perdita dal deposito 4.23%; pess. 4.39%) | DD dal picco: 5976 (pess. 6008) | peggior giorno -4.87% (pess. -5.03%) | gg>=3/4/5%: 2/1/0 | lotti max insieme 8.90 (margine 1:9 ~119038 USD)
+2018 | R9+GbPF105+PhD9                        netto  +27732 (+34.7%) | equity min 74737 (perdita dal deposito 6.58%; pess. 6.81%) | DD dal picco: 9545 (pess. 9589) | peggior giorno -7.36% (pess. -7.59%) | gg>=3/4/5%: 2/1/1 | lotti max insieme 12.17 (margine 1:9 ~162774 USD)
+2018 | R9+GbPF105+GTP                         netto  +41539 (+51.9%) | equity min 73813 (perdita dal deposito 7.73%; pess. 7.93%) | DD dal picco: 9900 (pess. 9943) | peggior giorno -9.63% (pess. -9.82%) | gg>=3/4/5%: 7/3/1 | lotti max insieme 19.19 (margine 1:9 ~263204 USD)
+2018 | GbPF105 solo                           netto   +9349 (+11.7%) | equity min 77063 (perdita dal deposito 3.67%; pess. 3.78%) | DD dal picco: 5569 (pess. 5599) | peggior giorno -3.75% (pess. -3.86%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 4.91 (margine 1:9 ~65630 USD)
+  [2020] Reaper9: posizioni accoppiate 460, non accoppiate 0, netto +20388
+  [2020] Reaper6: posizioni accoppiate 460, non accoppiate 0, netto +13132
+  [2020] Goldbot: posizioni accoppiate 259, non accoppiate 0, netto +9658
+  [2020] PhD9: posizioni accoppiate 780, non accoppiate 0, netto +9540
+  [2020] PhD4: posizioni accoppiate 780, non accoppiate 0, netto +3926
+  [2020] PhD10: posizioni accoppiate 780, non accoppiate 0, netto +11037
+  [2020] GTP: posizioni accoppiate 288, non accoppiate 0, netto +14585
+  [2020] GbPF105: posizioni accoppiate 259, non accoppiate 0, netto +25237
+  [2020] GbPF525: posizioni accoppiate 259, non accoppiate 0, netto +11840
+  [2020] GbLOW3: posizioni accoppiate 259, non accoppiate 0, netto +40281
+2020 | Reaper9+Goldbot(test 26/10)            netto  +30893 (+38.6%) | equity min 80060 (perdita dal deposito -0.08%; pess. -0.00%) | DD dal picco: 3632 (pess. 3717) | peggior giorno -1.88% (pess. -1.95%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 4.32 (margine 1:9 ~85973 USD)
+2020 | Reaper9+GbPF105                        netto  +46472 (+58.1%) | equity min 79974 (perdita dal deposito 0.03%; pess. 0.21%) | DD dal picco: 4726 (pess. 4949) | peggior giorno -2.80% (pess. -2.97%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 6.56 (margine 1:9 ~130551 USD)
+2020 | Reaper9+GbPF525                        netto  +33075 (+41.3%) | equity min 80060 (perdita dal deposito -0.08%; pess. 0.01%) | DD dal picco: 3704 (pess. 4001) | peggior giorno -1.93% (pess. -2.03%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 4.83 (margine 1:9 ~96122 USD)
+2020 | Reaper9+GbLOW3                         netto  +61516 (+76.9%) | equity min 79877 (perdita dal deposito 0.15%; pess. 0.42%) | DD dal picco: 5789 (pess. 6330) | peggior giorno -3.72% (pess. -3.94%) | gg>=3/4/5%: 3/0/0 | lotti max insieme 8.80 (margine 1:9 ~180862 USD)
+2020 | Reaper6+GbPF105                        netto  +38891 (+48.6%) | equity min 79921 (perdita dal deposito 0.10%; pess. 0.27%) | DD dal picco: 3723 (pess. 4080) | peggior giorno -2.59% (pess. -2.76%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 5.38 (margine 1:9 ~107068 USD)
+2020 | R9+GbPF105+PhD4                        netto  +50626 (+63.3%) | equity min 79995 (perdita dal deposito 0.01%; pess. 0.18%) | DD dal picco: 5037 (pess. 5393) | peggior giorno -2.91% (pess. -3.04%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 6.90 (margine 1:9 ~137318 USD)
+2020 | R9+GbPF525+PhD4                        netto  +37229 (+46.5%) | equity min 80074 (perdita dal deposito -0.09%; pess. -0.01%) | DD dal picco: 4015 (pess. 4367) | peggior giorno -2.01% (pess. -2.25%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 5.17 (margine 1:9 ~102889 USD)
+2020 | R9+GbPF105+PhD9                        netto  +56570 (+70.7%) | equity min 80022 (perdita dal deposito -0.03%; pess. 0.16%) | DD dal picco: 5604 (pess. 6064) | peggior giorno -3.41% (pess. -3.44%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 7.43 (margine 1:9 ~152705 USD)
+2020 | R9+GbPF105+GTP                         netto  +61887 (+77.4%) | equity min 79783 (perdita dal deposito 0.27%; pess. 0.58%) | DD dal picco: 7763 (pess. 8443) | peggior giorno -4.25% (pess. -4.59%) | gg>=3/4/5%: 4/2/0 | lotti max insieme 9.42 (margine 1:9 ~187468 USD)
+2020 | GbPF105 solo                           netto  +25237 (+31.5%) | equity min 79812 (perdita dal deposito 0.24%; pess. 0.41%) | DD dal picco: 2647 (pess. 2880) | peggior giorno -2.23% (pess. -2.37%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 3.54 (margine 1:9 ~72756 USD)
+  [2025] Reaper9: posizioni accoppiate 497, non accoppiate 0, netto +30457
+  [2025] Reaper6: posizioni accoppiate 497, non accoppiate 0, netto +18903
+  [2025] Goldbot: posizioni accoppiate 236, non accoppiate 0, netto +7844
+  [2025] PhD9: posizioni accoppiate 707, non accoppiate 0, netto +13607
+  [2025] PhD4: posizioni accoppiate 707, non accoppiate 0, netto +5560
+  [2025] PhD10: posizioni accoppiate 707, non accoppiate 0, netto +15164
+  [2025] GTP: posizioni accoppiate 276, non accoppiate 0, netto +19645
+  [2025] GbPF105: posizioni accoppiate 237, non accoppiate 0, netto +19571
+  [2025] GbPF525: posizioni accoppiate 237, non accoppiate 0, netto +8999
+  [2025] GbLOW3: posizioni accoppiate 237, non accoppiate 0, netto +31206
+2025 | Reaper9+Goldbot(test 26/10)            netto  +37662 (+47.1%) | equity min 77742 (perdita dal deposito 2.82%; pess. 2.89%) | DD dal picco: 3542 (pess. 3559) | peggior giorno -2.51% (pess. -2.59%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 2.43 (margine 1:9 ~82556 USD)
+2025 | Reaper9+GbPF105                        netto  +49390 (+61.7%) | equity min 76845 (perdita dal deposito 3.94%; pess. 4.05%) | DD dal picco: 4908 (pess. 4925) | peggior giorno -3.82% (pess. -3.83%) | gg>=3/4/5%: 2/0/0 | lotti max insieme 3.33 (margine 1:9 ~113132 USD)
+2025 | Reaper9+GbPF525                        netto  +38818 (+48.5%) | equity min 77472 (perdita dal deposito 3.16%; pess. 3.23%) | DD dal picco: 3677 (pess. 3694) | peggior giorno -2.71% (pess. -2.79%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 2.61 (margine 1:9 ~88671 USD)
+2025 | Reaper9+GbLOW3                         netto  +61024 (+76.3%) | equity min 76252 (perdita dal deposito 4.69%; pess. 4.82%) | DD dal picco: 6092 (pess. 6109) | peggior giorno -5.07% (pess. -5.08%) | gg>=3/4/5%: 4/1/1 | lotti max insieme 4.36 (margine 1:9 ~183879 USD)
+2025 | Reaper6+GbPF105                        netto  +38102 (+47.6%) | equity min 77548 (perdita dal deposito 3.06%; pess. 3.16%) | DD dal picco: 3936 (pess. 3946) | peggior giorno -3.43% (pess. -3.44%) | gg>=3/4/5%: 1/0/0 | lotti max insieme 2.68 (margine 1:9 ~94414 USD)
+2025 | R9+GbPF105+PhD4                        netto  +54907 (+68.6%) | equity min 76864 (perdita dal deposito 3.92%; pess. 4.04%) | DD dal picco: 5146 (pess. 5164) | peggior giorno -4.09% (pess. -4.10%) | gg>=3/4/5%: 2/1/0 | lotti max insieme 3.50 (margine 1:9 ~118908 USD)
+2025 | R9+GbPF525+PhD4                        netto  +44335 (+55.4%) | equity min 77491 (perdita dal deposito 3.14%; pess. 3.22%) | DD dal picco: 3915 (pess. 3933) | peggior giorno -2.81% (pess. -2.89%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 2.78 (margine 1:9 ~94447 USD)
+2025 | R9+GbPF105+PhD9                        netto  +62880 (+78.6%) | equity min 76881 (perdita dal deposito 3.90%; pess. 4.04%) | DD dal picco: 5458 (pess. 5477) | peggior giorno -4.42% (pess. -4.43%) | gg>=3/4/5%: 2/1/0 | lotti max insieme 3.74 (margine 1:9 ~127062 USD)
+2025 | R9+GbPF105+GTP                         netto  +69180 (+86.5%) | equity min 75010 (perdita dal deposito 6.24%; pess. 6.24%) | DD dal picco: 6031 (pess. 6158) | peggior giorno -6.75% (pess. -6.90%) | gg>=3/4/5%: 2/2/2 | lotti max insieme 5.33 (margine 1:9 ~224787 USD)
+2025 | GbPF105 solo                           netto  +19571 (+24.5%) | equity min 78429 (perdita dal deposito 1.96%; pess. 2.14%) | DD dal picco: 2863 (pess. 3338) | peggior giorno -2.69% (pess. -2.69%) | gg>=3/4/5%: 0/0/0 | lotti max insieme 1.79 (margine 1:9 ~63060 USD)
+
+PORT-OK SI   Reaper9+Goldbot(test 26/10)  netto medio +29935 2013: loss 5.7/5.7% day 4.72/4.72% | 2018: loss 3.2/3.3% day 3.79/3.91% | 2020: loss -0.1/-0.0% day 1.88/1.95% | 2025: loss 2.8/2.9% day 2.51/2.59%
+PORT-OK NO   Reaper9+GbPF105              netto medio +46529 2013: loss 7.7/7.7% day 5.63/5.69% | 2018: loss 5.7/5.9% day 6.31/6.51% | 2020: loss 0.0/0.2% day 2.80/2.97% | 2025: loss 3.9/4.0% day 3.82/3.83%
+PORT-OK SI   Reaper9+GbPF525              netto medio +33399 2013: loss 6.0/6.0% day 4.73/4.73% | 2018: loss 3.9/4.0% day 4.42/4.56% | 2020: loss -0.1/0.0% day 1.93/2.03% | 2025: loss 3.2/3.2% day 2.71/2.79%
+PORT-OK NO   Reaper9+GbLOW3               netto medio +61618 2013: loss 9.4/9.4% day 6.92/6.98% | 2018: loss 7.6/7.8% day 8.20/8.45% | 2020: loss 0.2/0.4% day 3.72/3.94% | 2025: loss 4.7/4.8% day 5.07/5.08%
+PORT-OK NO   Reaper6+GbPF105              netto medio +38179 2013: loss 7.6/7.7% day 4.85/4.88% | 2018: loss 5.0/5.2% day 5.42/5.59% | 2020: loss 0.1/0.3% day 2.59/2.76% | 2025: loss 3.1/3.2% day 3.43/3.44%
+PORT-OK NO   R9+GbPF105+PhD4              netto medio +50511 2013: loss 8.8/8.8% day 5.66/5.73% | 2018: loss 6.1/6.3% day 6.76/6.98% | 2020: loss 0.0/0.2% day 2.91/3.04% | 2025: loss 3.9/4.0% day 4.09/4.10%
+PORT-OK NO   R9+GbPF525+PhD4              netto medio +37381 2013: loss 7.1/7.1% day 5.16/5.21% | 2018: loss 4.2/4.4% day 4.87/5.03% | 2020: loss -0.1/-0.0% day 2.01/2.25% | 2025: loss 3.1/3.2% day 2.81/2.89%
+PORT-OK NO   R9+GbPF105+PhD9              netto medio +56221 2013: loss 10.4/10.4% day 5.97/6.06% | 2018: loss 6.6/6.8% day 7.36/7.59% | 2020: loss -0.0/0.2% day 3.41/3.44% | 2025: loss 3.9/4.0% day 4.42/4.43%
+PORT-OK NO   R9+GbPF105+GTP               netto medio +69076 2013: loss 13.0/13.0% day 9.72/9.73% | 2018: loss 7.7/7.9% day 9.63/9.82% | 2020: loss 0.3/0.6% day 4.25/4.59% | 2025: loss 6.2/6.2% day 6.75/6.90%
+PORT-OK SI   GbPF105 solo                 netto medio +24384 2013: loss 3.4/3.4% day 3.41/4.21% | 2018: loss 3.7/3.8% day 3.75/3.86% | 2020: loss 0.2/0.4% day 2.23/2.37% | 2025: loss 2.0/2.1% day 2.69/2.69%
