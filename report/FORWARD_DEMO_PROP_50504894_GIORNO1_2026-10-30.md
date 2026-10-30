@@ -25,3 +25,6 @@ Per EA (netto): Goldbot One -2.730 (8 pos, 8,04 lotti, peggiore -894 con 2,19 lo
 | Netto della giornata | +3.907,68 (+3,9%) | -4.864,22 (-4,9%) |
 | Guardian | non e scattato | chiusura di 21 posizioni alle 09:01:53 (probabile) |
 Stessi segnali, stesso oro: i sell sono scattati intorno a 3.975-3.978 e alle 09:01:53 l oro era a circa 3.979,7 (rimbalzo di 2-4 USD); poi e sceso a 3.875. Sul conto alto rischio la chiusura del Guardian ha tagliato le posizioni sul rimbalzo, mentre sul conto prop le stesse (con meno lotti) sono rimaste aperte e hanno chiuso a profitto (per esempio +433 alle 14:01). Previsione P3 (rapporto di profitto Reaper alto/prop fra 1,6 e 2,4): NO (segno opposto: -313 contro +1.803). Una giornata sola; due conti con leve diverse: il confronto NON e a parita di condizioni.
+
+## Leva confermata da Claudio (30/10)
+50504263 (alto rischio): leva 1:500; 50504894 (prop): leva 1:10. Margine di 25,8 lotti a 3.978 a 1:500: circa 20.500 USD (nessun rifiuto, coerente); a 1:10 il margine per lotto e circa 39.780 USD e la capacita del conto da 100.000 EUR e circa 2,9 lotti. I due conti hanno quindi limiti di margine molto diversi: la differenza dei lotti aperti (2,70 contro 25,80) non e solo il set.
