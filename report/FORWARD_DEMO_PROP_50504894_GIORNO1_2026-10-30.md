@@ -28,3 +28,12 @@ Stessi segnali, stesso oro: i sell sono scattati intorno a 3.975-3.978 e alle 09
 
 ## Leva confermata da Claudio (30/10)
 50504263 (alto rischio): leva 1:500; 50504894 (prop): leva 1:10. Margine di 25,8 lotti a 3.978 a 1:500: circa 20.500 USD (nessun rifiuto, coerente); a 1:10 il margine per lotto e circa 39.780 USD e la capacita del conto da 100.000 EUR e circa 2,9 lotti. I due conti hanno quindi limiti di margine molto diversi: la differenza dei lotti aperti (2,70 contro 25,80) non e solo il set.
+
+## Giornale Esperti del conto alto rischio 50504263 (screenshot di Claudio, 30/10 20:53): il Guardian
+Righe `[GUARDIAN]` (ora server) lette dallo screenshot:
+- 08:35 eq 99.094 (dayLoss 0,42%, rischio aperto 2,17%); 08:48:50 "CAP RISCHIO APERTO attivo: 12,99% >= 4,00% (nuovi ingressi sospesi)".
+- **08:50 eq 106.935 (+7,4% sul giorno), rischio aperto 66,06%; 08:55 eq 116.153 (+16,6%); 09:00 eq 104.148 (+4,6%).**
+- 09:01:51 "PAUSA NUOVI INGRESSI attiva: perdita giornaliera 3,79% >= 3,50%".
+- **09:01:56 "PERDITA GIORNALIERA SFONDATA: 4.837,07 (4,84%) >= 4.500,00. CHIUSO TUTTO, BLOCCATO PER OGGI (63 ordini)"**; poi eq 94.651,47, dayLoss 4,86%, totDD 5,35%, stato BLOCKED, pausa ON, ogni 5 minuti; qualche "CTrade::OrderSend: cancel #... [invalid request]" (cancellazione di ordini gia spariti).
+Lettura: l equity e passata da circa +16.650 (116.153 alle 08:55) a -4.837 (alle 09:01:56) in sei minuti; il Guardian ha chiuso a 4.837 contro il limite di 4.500 (+337, 0,34% del conto): fra la pausa (3,79% alle 09:01:51) e la chiusura (4,84%) sono passati circa 5 secondi con un peggioramento di circa 1.066 EUR. Margine rimasto sotto il 5% di FTMO: 136 EUR (saldo -4.864 contro 5.000). Il rischio aperto misurato dal Guardian dall ingresso agli stop era 66% dell equity alle 08:50: con tutti gli stop colpiti la perdita sarebbe stata di quell ordine.
+Questo dato reale (superamento di 0,34% in una mossa veloce) conferma la riserva scritta il 29/10 nella simulazione del Guardian: la chiusura non e esattamente alla soglia. Blocco fino al reset del 31/10 00:00 server (sabato: mercato chiuso).
