@@ -22,6 +22,7 @@ $n = 0
 foreach($u in $Url){
   $n++
   $d = Join-Path $B ('video{0:00}' -f $n)
+  if(Test-Path $d){ Rename-Item -LiteralPath $d -NewName ('video{0:00}_vecchio_' -f $n + (Get-Date).ToString('yyyyMMdd_HHmmss')) }
   New-Item -ItemType Directory -Force -Path $d | Out-Null
   $ck = @()
   if($Browser -ne ''){ $ck = @('--cookies-from-browser', $Browser) }
