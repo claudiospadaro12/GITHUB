@@ -1,0 +1,18 @@
+# Live di Paolo del 29/10/2026 (21:30): concetti
+Fonte: trascrizione `LIVE_PAOLO_29.10.26` (241 righe, una parte con punteggiatura persa). Non e consulenza e non e una nostra misura.
+
+## Concetti
+1. **Correlazione = rischio raddoppiato.** Paolo ha evitato di fare lo stesso trade su due coppie perche "EURUSD e correlato al 76% con EURGBP: e come aver raddoppiato il rischio". [Stesso concetto dei nostri numeri: Reaper e Gold Trade Pro hanno correlazione giornaliera 0,63.]
+2. **Dimensione piccola.** Entrare con misure piccole permette di reggere il drawdown e non perdere fiducia nella strategia; con 2 lotti ci si preoccupa subito. Il suo obiettivo e circa 50 euro al giorno (quel giorno 84); "l avidita la metto da parte".
+3. **Oro:** per lui e uno strumento da fare quando si e bravi (volatile; guardato in correlazione col petrolio); partire da pattern facili e da strumenti studiati. Quel giorno l oro non si e mosso mentre DAX, S&P e Nasdaq si, con il Nasdaq a -480 punti in 6 minuti.
+4. **Gestione dell operazione:** chiusura parziale (da 0,3 a 0,2 lotti), stop in pari quando il prezzo e avanti 100+ punti, rientro con un altra misura, chiusura quando l imbalance si riempie; se il mercato e vicino a massimi storici, niente riferimenti: non fare long.
+5. **Livelli pivot** (modulo di oggi): pivot centrale = (massimo + minimo + chiusura del giorno precedente) / 3; supporti e resistenze dai calcoli classici (R1 = 2P - minimo, S1 = 2P - massimo). Prezzo sopra il pivot = pressione rialzista, sotto = ribassista, intorno = laterale. Un pivot che si alza giorno su giorno indica pressione rialzista. Tre tipi: **Classic B** (il piu usato dagli operatori mondiali), Fibonacci (trend forti), Custom (percentuali dal prezzo di apertura); Camarilla per lo scalping, DeMark meno usato. **Statistici, non punti di ingresso**: servono in confluenza con livelli tecnici (resistenze, SuperTrend, medie). Si usano su time frame bassi (fino a M15-H1).
+6. **Conferma di una rottura:** la candela chiude fuori e la successiva conferma; se la rottura e lontana, attendere il retest.
+7. **Volumi.** Volumi tick (numero di scambi, "scontrini") e volume profile (volumi per livello di prezzo); sui CFD sono i volumi del broker, non del mercato. Un **picco di volume isolato** segnala inversione o falsa rottura; volume costante = partecipazione e continuazione; il colore della barra volume in MT5 indica solo "piu o meno contrattazioni della barra precedente", non long o short. Il volume non vale in assoluto, solo in relativo. Il confronto con i future (volumi reali) aiuta; su TradingView il Session Volume Profile HD e a pagamento.
+8. **Spread e ore.** Non entrare a mercato quando lo spread e largo: su AUDNZD a tarda sera lo spread era circa 12 punti (e arrivava a 30-35 con poca liquidita); entrare vuol dire partire gia in perdita. Aspettare le ore liquide o usare ordini pendenti.
+9. **Strumenti:** indicatore SMC (order block, zone premium e discount: non entrate automatiche); una IA integrata nella piattaforma puo dare analisi tecnica e fondamentale, ma "usare sempre il supporto del cervello" e non fidarsi di una risposta di cui non si sa come nasce.
+10. **Eventi:** giornata BCE (conferenza stampa) e giovedi 29: lui ha fatto le operazioni sul rilascio; l orario provvisorio sul calendario Forex Factory va controllato.
+
+## Cosa ci riguarda
+- **Spread di notte.** Coincide con la nostra misura dello spread dell oro: i nostri ingressi notturni (01-05 ora server) hanno spread mediano 26-35 punti contro 21 di media. Il calcolo e in `risultati_archivio/SPREAD_PAGATO_5K_20261029.txt`.
+- **Correlazione e dimensione piccola:** sono gli stessi principi con cui abbiamo tolto il Gold Trade Pro dal demo prop e messo Phantom D4 / Goldbot PF525.
