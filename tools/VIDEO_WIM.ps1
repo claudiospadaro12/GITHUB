@@ -26,7 +26,7 @@ foreach($u in $Url){
   $ck = @()
   if($Browser -ne ''){ $ck = @('--cookies-from-browser', $Browser) }
   Write-Host ('[' + $n + '/' + $Url.Count + '] scarico ' + $u) -ForegroundColor Cyan
-  & yt-dlp @ck --no-playlist -f 'bv*[height<=720]+ba/b[height<=720]' --merge-output-format mp4 --write-subs --write-auto-subs --sub-langs 'en,en-orig,it' --convert-subs srt --write-info-json -o ($d + '\video.%(ext)s') $u
+  & yt-dlp @ck --no-playlist -f 'bv*[height<=720]+ba/b[height<=720]' --merge-output-format mp4 --ignore-errors --write-subs --write-auto-subs --sub-langs 'en' --convert-subs srt --write-info-json -o ($d + '\video.%(ext)s') $u
   $v = Join-Path $d 'video.mp4'
   if(-not (Test-Path $v)){ Write-Host ('VIDEO ' + $n + ' NON SCARICATO: ' + $u) -ForegroundColor Red; continue }
   $f = Join-Path $d 'frames'
