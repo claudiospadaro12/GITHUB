@@ -1,5 +1,5 @@
 # Cinque video di Wim sull'Ultimate Breakout System: sintesi dalle trascrizioni (31/10/2026)
-Fonte: i sottotitoli automatici in inglese (`.vtt`) dei 5 video YouTube incorporati nel commento #95 di Wim sulla pagina MQL5 del prodotto 133653 (zip `video03.zip` di Claudio). **Mancano i frame**: il download del video non e riuscito, quindi niente immagini: i valori mostrati a schermo non sono letti. I titoli sono dedotti dal contenuto (non in elenco); durate dai sottotitoli. Non controllata da agenti.
+Fonte: i sottotitoli automatici in inglese (`.vtt`) dei 5 video YouTube incorporati nel commento #95 di Wim sulla pagina MQL5 del prodotto 133653 (zip `video03.zip` di Claudio). Aggiunta 31/10 sera: con gli zip dei frame (un frame ogni 20 s) ho letto anche cio che si vede a schermo in alcuni punti chiave; sono in fondo, sezione IMMAGINI. I titoli dedotti sono risultati giusti (info.json). Non controllata da agenti.
 
 | File | Contenuto (titolo dedotto) | Durata |
 |---|---|---|
@@ -41,3 +41,12 @@ Fonte: i sottotitoli automatici in inglese (`.vtt`) dei 5 video YouTube incorpor
 
 ## Cosa NON dice
 Solo sottotitoli automatici: possono sbagliare i termini; niente immagini; il video 4 e dedotto e non confrontato con un titolo; nessun numero di Wim e stato riprodotto da noi.
+
+## IMMAGINI (frame ogni 20 s, letti dopo le trascrizioni)
+Titoli ufficiali: 1 "Ultimate Breakout System Video Guide" (35:01, 16/05/2025); 2 "Risk settings and portfolio creation" (13:33, 16/05/2025); 3 "V1.2 Overview new features" (22:30, 26/05/2025); 4 "Creating balanced portfolio's: a more detailed overview" (15:30, 09/06/2025); 5 "V5.0 Tutorial" (12:16, 28/04/2026).
+- **Tester (video01, 02:20 e 04:20):** EA `Ultimate_Breakout_EA_WSC_V1.0`, XAUUSD, **Daily**, periodo personalizzato **2013.01.01 - 2023.12.21**, forward No, ritardo "zero latency", modellazione **1 minute OHLC**, deposito **100000 USD**, leva **1:500**, ottimizzazione **Fast genetic**, criterio **Custom max**. Terminale MetaQuotes-Demo.
+- **Intervalli dell ottimizzazione (video01, 11:20):** prezzo di riferimento per i valori variabili 1000-3000 passo 1000; candele a sinistra/destra del massimo-minimo 2-30 passo 1; massimo di candele nello storico 20-250 passo 10; distanza minima dal massimo/minimo 10-1000 passo 10; pips extra sopra il massimo / sotto il minimo per l ingresso 0-200 passo 5. Totale stimato: **10.496 passate**, con il genetico (1.022 dopo 6 minuti).
+- **Risultati (video01, 25:00):** in Quant Analyzer le tre strategie a, b, c su XAUUSD (2004.11-2025.04, 0,01 lot): netto 1.364 / 1.484 / 2.177 USD; operazioni 767 / 390 / 866; profit factor 1,99 / 2,73 / 1,77; DD massimo 63 / 55 / 84 USD; rendimento/DD 21,6 / 27,1 / 25,8. Il DD e in dollari a 0,01 lot: per questo si usa per calcolare il lotto.
+- **Grid (video03):** inputs: grid start 50 pips, step 20, Total profit for TP 50, Total pips TP 100, GridMultiplier 1,5 nell esempio. **Impostazioni prop (video03, 09:00):** "Close all trades/stop trading at min equity", "... at max equity", "Max Daily Drawdown", tutte a 0 per default.
+- **OneChartSetup (video05, 03:00 e 08:20):** Risk = "use Max Risk Per Strategy", MaxRiskPerStrategy_Value 5.0, "max historical drawdown (in $) at 0.01 lots" 50.0, LotsizeStep 500, maximum lotsize per trade 99, OnlyUp true; presente "Max Randomization for entry and exit". Pannello: 20 set su un solo grafico, **tutti a MaxRiskStrat 5,00%**: Bitcoin Reaper 1-4 (BTCUSD H1, magic 4501-4504), DAX_M15_f, Daytrade Pro su 5 coppie (Daily, 50501-50508), **Gold Reaper 3 (XAUUSD Daily, magic 2003), 4 (H4, 2004), 5 (H1, 2005)**, US30_M15 c/f/h, US500_M15 a/c; i lotti vanno da 0,01 a 2,10 (US500) e l oro ha 0,02-0,06.
+- **Conferma:** il Gold Reaper e un insieme di strategie UBS (stessi set e magic nello zip dei set); i nostri EA del bundle sono costruiti col metodo mostrato.
