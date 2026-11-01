@@ -1,0 +1,1 @@
+OK /home/user/GITHUB/sala-del-consiglio/breaking_band/final/run_forex/EURUSD.json / .md  sha256_risultati=7e5fe46edc2ff64b1af1fa584552612127fcad00c9962b83f1abf35e45506ae5  (47.9 s)

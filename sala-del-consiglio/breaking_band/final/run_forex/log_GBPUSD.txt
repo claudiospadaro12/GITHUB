@@ -1,0 +1,1 @@
+OK /home/user/GITHUB/sala-del-consiglio/breaking_band/final/run_forex/GBPUSD.json / .md  sha256_risultati=b2e2dd33a3da71012202eaefcd0d712d635c2a505d296ecf5d8c74670634a35a  (48.6 s)

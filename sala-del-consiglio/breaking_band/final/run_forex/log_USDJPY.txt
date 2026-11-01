@@ -1,0 +1,1 @@
+OK /home/user/GITHUB/sala-del-consiglio/breaking_band/final/run_forex/USDJPY.json / .md  sha256_risultati=68c3c4045aa7092fe86eff3c42f97aaf1940b038cb92e3fb3775784ec2126773  (48.8 s)
