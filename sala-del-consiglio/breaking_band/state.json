@@ -2,10 +2,10 @@
  "project_id": "BB-2026-11-01",
  "project_name": "Breaking Band sull'oro",
  "mode": "REALE",
- "state_version": 3,
- "updated_at": "2026-11-01T08:03:15+00:00",
+ "state_version": 4,
+ "updated_at": "2026-11-01T08:16:39+00:00",
  "candidate_version": null,
- "phase": "Ciclo 0 - fase 2: integrazione (A1)",
+ "phase": "Ciclo 0 - fase 3: implementazione segnali (A4) e verifica indipendente (A7), solo dati sintetici",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
@@ -25,7 +25,7 @@
    "id": "A1",
    "role": "Vicecoordinatore e integratore",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -148,6 +148,15 @@
   {
    "id": "D001",
    "text": "Griglia di qualita adattata al dominio: Aderenza 15, Correttezza 25, Completezza 15, Fattibilita 10, Utilizzabilita 10, Verificabilita 15, Espositiva 10; soglia 90; MAX_CICLI 3"
+  },
+  {
+   "id": "D003"
+  },
+  {
+   "id": "D004"
+  },
+  {
+   "id": "D005"
   }
  ],
  "issues": [],
@@ -175,5 +184,5 @@
  ],
  "scores": [],
  "artifacts": [],
- "last_event_id": "E007"
+ "last_event_id": "E008"
 }
