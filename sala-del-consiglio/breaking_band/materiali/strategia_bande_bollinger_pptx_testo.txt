@@ -1,0 +1,45 @@
+=== slide1.xml
+STRATEGIA BANDE DI BOLLINGER
+=== slide2.xml
+PER DEFINIZIONE!
+Le bande di Bollinger sono un indicatore tecnico utilizzato comunemente per rappresentare la volatilità di uno strumento. Questo indicatore è composto da due bande, una superiore e una inferiore, che vengono tracciate intorno al prezzo dello strumento in base alla sua volatilità e da una mediana.
+
+=== slide3.xml
+Setup indicatore
+
+=== slide4.xml
+SETUP
+GRAFICO: Candele giapponesi
+TIME FRAME OPERATIVO : su ogni time frame
+SETUP OPERATIVO :
+I prezzi toccano o escono dalle bande 
+Presenza di supporti e resistenze
+Dobbiamo essere in eccesso di volatilità 
+
+=== slide5.xml
+Strategia
+La strategia prevede di individuare il seguente setup di ingresso:Il prezzo esce dalle bande e in concomitanza ho un livello importante di supporti e resistenze in D1- W –M 
+Non si lavorano le bande di Bollinger dopo il rilascio di un dato.Questa strategia viene utilizzata in condizioni normali, dove il mercato, non ha avuto un’alterazione dovuta al rilascio di un dato.
+
+=== slide6.xml
+Strategia
+Nel momento in cui la banda e’ stata violata e corrisponde un livello importante di D1- W- M,
+Posiziono il mio ordine sopra e sotto il livello di supporto o resistenza fuori dalle bande.
+Posiziono Ordini pendenti sui livelli di supporti e resistenza.
+Più il time frame e’ importante, più importante e’ il segnale
+
+=== slide7.xml
+Strategia
+Lo stop loss
+Lo stop e‘ molto stretto, quindi la condizione rischio rendimento e’ a mio favore. 
+Andrò a posizionare lo stop a circa 5/10 pip sotto al minimo o al massimo della candela che e’ uscita dalle bande di bollinger.
+Stop in base al time frame:M1-M5-M15  5/10 pip
+H1  15 pip
+Take Profit
+La mediana interna delle bande
+Posso scendere in time frame inferiore e valutare se ci sono livelli che possono ostacolare
+Livelli di supporti e resistenza
+Media 14
+
+=== slide8.xml
+Visualizzazione a grafico
