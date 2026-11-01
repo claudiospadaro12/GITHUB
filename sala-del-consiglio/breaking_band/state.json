@@ -2,8 +2,8 @@
  "project_id": "BB-2026-11-01",
  "project_name": "Breaking Band sull'oro",
  "mode": "REALE",
- "state_version": 4,
- "updated_at": "2026-11-01T08:16:39+00:00",
+ "state_version": 5,
+ "updated_at": "2026-11-01T08:18:35+00:00",
  "candidate_version": null,
  "phase": "Ciclo 0 - fase 3: implementazione segnali (A4) e verifica indipendente (A7), solo dati sintetici",
  "cycle": 0,
@@ -157,6 +157,9 @@
   },
   {
    "id": "D005"
+  },
+  {
+   "id": "D006"
   }
  ],
  "issues": [],
@@ -184,5 +187,5 @@
  ],
  "scores": [],
  "artifacts": [],
- "last_event_id": "E008"
+ "last_event_id": "E009"
 }
