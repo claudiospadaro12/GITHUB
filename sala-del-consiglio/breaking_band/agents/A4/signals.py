@@ -245,6 +245,7 @@ class _Ep:
         self.n_prev = 0
         self.reset_fase()
         self.opp_toccata = False          # banda opposta toccata in [s, ...]
+        self.opp_rientro = False          # banda opposta toccata da p (picco corrente) in poi (sensibilita Sg)
         self.consumato = False            # segnale gia' emesso (per questa variante)
         self.precoce = False              # CONT: tocco opposto a tau-p < MIN_RETR
         self.stadio = 0
@@ -319,6 +320,8 @@ class _Macchina:
         for u in range(s, t + 1):                                  # scansione retroattiva (nessun segnale)
             if c.tocco_opposta(v, u):
                 ep.opp_toccata = True
+                if u >= p:
+                    ep.opp_rientro = True
                 if u > p and u - p >= self.prm["MIN_RETR"]:
                     self.cont["tocchi_banda_opposta_prima_armamento"] += 1
             if u > p:
@@ -349,6 +352,9 @@ class _Macchina:
             ep.p = u
             self.last_p[ep.d] = u
             ep.reset_fase()
+            ep.opp_rientro = False
+        if c.tocco_opposta(v, u):
+            ep.opp_rientro = True
         if ep.p - ep.s > prm["B6_BARRE"]:
             self._chiudi(ep, "BAND_RIDING", u)
             return
@@ -367,6 +373,10 @@ class _Macchina:
                 if not ep.consumato:
                     self._valuta(ep, v, u)
             self._aggiorna_fase(ep, v, u)
+
+    def _opp(self, ep: _Ep) -> bool:
+        """Banda opposta toccata per la condizione I1: in [s, tau] (primaria) o solo da p a tau (Sg, D007)."""
+        return ep.opp_rientro if self.prm["I1_SOLO_RIENTRO"] else ep.opp_toccata
 
     # ---------------------------------------------------------------- valutazione del test
     def _gates(self, u: int):
@@ -396,7 +406,7 @@ class _Macchina:
         else:
             band = prm["BANDA_FINESTRA"]
             i0 = ep.r_first is not None
-            i1 = not ep.opp_toccata
+            i1 = not self._opp(ep)
             ret = c.tocco_impulso(v, u)
             i2 = max(ep.zmax, zt) <= self.z_imp
             pend = v.U[u - 1] - v.U[u - 1 - band]
@@ -446,7 +456,7 @@ class _Macchina:
         B1r = bool(not np.any((corpo[R_] > 0) & (corpo[R_] >= DA["B1_CORPO_ATR"] * atr_prev)))
         B3r = bool(A2 and B1r)
         if inv:
-            B2r = bool(ep.r_first is not None and not ep.opp_toccata)
+            B2r = bool(ep.r_first is not None and not self._opp(ep))
         else:
             den = float(np.abs(np.diff(v.cl[p:u + 1])).sum())
             B2r = bool(den > 0 and abs(float(v.cl[u] - v.cl[p])) / den >= DA["B2C_ER"])
@@ -462,7 +472,7 @@ class _Macchina:
         # ---- test
         if inv:
             T5 = bool(C2i or c.W[u] <= c.W[u - DA["T5_LAG"]])
-            test = [True, not ep.opp_toccata, T5]
+            test = [True, not self._opp(ep), T5]
         else:
             test = [True, bool(c.ztr[u] < DA["T2_Z"])]
         # ---- conferme K1..K3 (K4 news esclusa)
@@ -494,7 +504,7 @@ class _Macchina:
                 inval.append("X3")
             if c.sd[u] >= DA["X4_SD"] * c.sd[u - 1]:
                 inval.append("X4")
-            if ep.opp_toccata:
+            if self._opp(ep):
                 inval.append("X6")
         if (not A4) or (not B1r):
             inval.append("X5")

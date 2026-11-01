@@ -356,6 +356,35 @@ class TestPianificati(unittest.TestCase):
         a["l"][P + 3] = a["c"][P + 3] - 2.5
         self.assertEqual(js(segnali(a, "CONT", parametri(IMPULSIVA_ATR_INV=1.0))), [(P + 10, 1)])
 
+    def test_sensibilita_Sg_I1_solo_rientro(self):
+        # la barra s (minimo dell'impulso) tocca la banda bassa: la lettura primaria (I1 su [s, tau]) scarta l'INV,
+        # Sg (I1 solo da p a tau) lo accetta. Il primario resta invariato.
+        a = scen_inv(15)
+        a["l"][S0] = 98.9                       # <= L_s = 99.0
+        r = segnali(a, "INV")
+        self.assertEqual(js(r), [])
+        self.assertEqual(r["imbuto_episodi"]["conteggi"][2], 1)          # I0 si'
+        self.assertEqual(r["imbuto_episodi"]["conteggi"][3], 0)          # I1 primaria no
+        rg = segnali(a, "INV", parametri(I1_SOLO_RIENTRO=True))
+        self.assertEqual(js(rg), [(P + 15, -1)])
+        self.assertEqual(js(segnali(specchio(a), "INV", parametri(I1_SOLO_RIENTRO=True))), [(P + 15, +1)])
+        # senza il tocco su s il risultato e identico con e senza Sg
+        b = scen_inv(15)
+        self.assertEqual(js(segnali(b, "INV")), js(segnali(b, "INV", parametri(I1_SOLO_RIENTRO=True))))
+        self.assertEqual(segnali(b, "INV")["segnali"][0]["solidita"],
+                         segnali(b, "INV", parametri(I1_SOLO_RIENTRO=True))["segnali"][0]["solidita"])
+        # un tocco DURANTE il rientro (dopo p) scarta l'INV anche con Sg
+        c = scen_inv(15)
+        c["l"][P + 7] = 114.0
+        self.assertEqual(js(segnali(c, "INV", parametri(I1_SOLO_RIENTRO=True))), [])
+        # un tocco tra s e p (durante l'impulso) e' escluso da Sg
+        d = scen_inv(15)
+        d["l"][S0 + 3] = d["L"][S0 + 3] - 0.1
+        self.assertEqual(js(segnali(d, "INV")), [])
+        self.assertEqual(js(segnali(d, "INV", parametri(I1_SOLO_RIENTRO=True))), [(P + 15, -1)])
+        # il picco si aggiorna dopo il tocco: le barre prima del nuovo picco sono escluse; la CONT non cambia
+        self.assertEqual(js(segnali(scen_cont(10), "CONT")), js(segnali(scen_cont(10), "CONT", parametri(I1_SOLO_RIENTRO=True))))
+
     def test_sensibilita_Sf_penetrazione(self):
         # il test tocca la banda per 0,05; con spread di barra 0,10 (> penetrazione) Sf lo scarta
         a = scen_cont(10)

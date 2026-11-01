@@ -88,7 +88,7 @@ class TestPipeline(unittest.TestCase):
         tot = sum(tab["TOTALE"]["segnali_e_trade"]["eseguiti"] for tab in T["T1_imbuto"].values())
         self.assertEqual(tot, N)
         # sensibilita: tutte presenti
-        self.assertEqual(sorted(T["T6_sensibilita"]), sorted(["Sa", "Sb", "Sc", "Sd", "Se20", "Se50", "Sf"]))
+        self.assertEqual(sorted(T["T6_sensibilita"]), sorted(["Sa", "Sb", "Sc", "Sd", "Se20", "Se50", "Sf", "Sg"]))
         # Sc: con maxhold 150 compaiono le uscite TF oppure nessuna differenza di segnali
         self.assertEqual(T["T6_sensibilita"]["Sc"]["segnali"], T["T6_sensibilita"]["Sd"]["segnali"])
         # linea di base: p in (0,1], 4 sezioni

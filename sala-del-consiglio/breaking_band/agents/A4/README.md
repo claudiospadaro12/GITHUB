@@ -4,11 +4,11 @@ Solo libreria standard + numpy. Esecuzione di tutto con `python3 -I <file>` (i f
 
 | File | Contenuto |
 |---|---|
-| `params.py` | UNICA fonte dei valori: `PARAMS` (= tabella di specifica_v1.md sez. 9), `SENSIBILITA` (Sa-Sf), `DESCRITTORI_A2` (soglie A2 dei soli descrittori), `DISEGNO` (linee di base, bootstrap, verdetto, placebo) |
+| `params.py` | UNICA fonte dei valori: `PARAMS` (= tabella di specifica_v1.md sez. 9), `SENSIBILITA` (Sa-Sg), `DESCRITTORI_A2` (soglie A2 dei soli descrittori), `DISEGNO` (linee di base, bootstrap, verdetto, placebo) |
 | `engine.py` | dati M1, barre H1/M30, indicatori, simulazione del trade, filtro una posizione, statistiche |
 | `signals.py` | macchina a stati CONT / INV (`rileva`), imbuto per stadi, descrittori, `signal_fn_factory` per A7 |
 | `run_test.py` | produce T1-T9 + verdetto (JSON + markdown) con parametri e sha256 dei file letti nell'intestazione |
-| `test_engine.py` (30 test), `test_signals.py` (30), `test_run.py` (11) | test su dati SINTETICI |
+| `test_engine.py` (30 test), `test_signals.py` (31), `test_run.py` (11) | test su dati SINTETICI |
 | `domande.md` | punti ambigui della specifica e letture implementate (da leggere PRIMA dell'hash) |
 
 ## Uso
@@ -36,7 +36,7 @@ python3 -I run_test.py --dir <cartella 4 CSV> --out <prefisso> --congelati <.../
 - Test automatico: nessun numero di soglia sparso in `signals.py` (scansione AST).
 
 ## Tabelle di run_test.py
-T1 imbuto (per variante x TF x periodo + TOTALE, con causa di morte e segnalazione >90%), T2 risultati (16 celle + totali + pooled), T3 fasce (solidita, n_prev, congestione, Checklist-stretta, lato, periodo, ora; sotto-gruppi: n<10 solo n, n<30 solo descrittivo, n>=30 Wilson 90% e PF), T4 linee di base B1 (primaria), B0, B2 (H1), T5 robustezza (bootstrap per settimane, PF senza i 3 migliori, leave-one-period-out, quota di profitto, spread x1,5, senza spread 0), T6 sensibilita Sa-Sf (H1 pooled), T7 placebo, T8 deriva, T9 dati/esecuzione, VERDETTO (criteri_previsioni_v1.md Parte B + clausole Parte C), LOG_TRADE (schedule completa dei target).
+T1 imbuto (per variante x TF x periodo + TOTALE, con causa di morte e segnalazione >90%), T2 risultati (16 celle + totali + pooled), T3 fasce (solidita, n_prev, congestione, Checklist-stretta, lato, periodo, ora; sotto-gruppi: n<10 solo n, n<30 solo descrittivo, n>=30 Wilson 90% e PF), T4 linee di base B1 (primaria), B0, B2 (H1), T5 robustezza (bootstrap per settimane, PF senza i 3 migliori, leave-one-period-out, quota di profitto, spread x1,5, senza spread 0), T6 sensibilita Sa-Sg (H1 pooled; Sg = I1 solo da p a tau, D007, esplorativa), T7 placebo, T8 deriva, T9 dati/esecuzione, VERDETTO (criteri_previsioni_v1.md Parte B + clausole Parte C), LOG_TRADE (schedule completa dei target).
 
 ## Limiti noti
 Non modellati commissioni, swap, slippage oltre il gap. Lo spread di una M1 e quello della riga CSV (non si sa se di apertura o chiusura: DA_VERIFICARE). Il motore e le regole sono verificati solo su dati sintetici; nessuna esecuzione sui 4 CSV reali. La Parte A del verdetto (controlli A7) non e valutata da `run_test.py`. Punti ambigui della specifica: `domande.md`.

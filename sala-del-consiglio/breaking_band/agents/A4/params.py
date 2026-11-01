@@ -25,6 +25,7 @@ PARAMS = {
     # --- esecuzione
     "STOP_ATR": 3.0, "MAXHOLD": 1000, "MAX_GAP_INGRESSO_MIN": 180, "FILL_TARGET_MIGLIORE": False,
     "SPREAD_MOLT": 1.0, "TOCCO_PEN_SPREAD": 0.0, "PUNTO": 0.01,
+    "I1_SOLO_RIENTRO": False,
     "UN_SEGNALE_PER_EPISODIO": True, "UNA_POSIZIONE_PER_VARIANTE": True,
 }
 
@@ -37,6 +38,7 @@ SENSIBILITA = {
     "Se20": {"T_MAX": 20},
     "Se50": {"T_MAX": 50},
     "Sf": {"TOCCO_PEN_SPREAD": 1.0},          # tocco di banda valido solo con penetrazione >= 1 spread
+    "Sg": {"I1_SOLO_RIENTRO": True},          # D007: INV, I1 valutata solo da p a tau (esplorativa)
 }
 
 # Soglie A2 per i soli descrittori (agents/A2/specifica.md sez. 1.1, 1.4, 1.5, 1.6, 1.7, 1.9; sez. 7 della specifica)
