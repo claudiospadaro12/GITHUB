@@ -13,9 +13,14 @@ Convenzioni (tutte dichiarate, vedi README.md):
   ricalcolata alla chiusura delle barre j+r, j+2r, ... (r = ricalcolo_ogni, default 3) e attiva
   dalla M1 successiva.
 - Minuto per minuto: SL controllato PRIMA di TP nello stesso minuto.
-- Fill: se l'apertura del minuto e gia oltre il livello (gap), il fill e all'apertura (peggiore
-  per lo SL, migliore per il TP); altrimenti al livello.
-- Chiusura forzata dopo maxhold barre (default 150): motivo 'TF'. Se i dati finiscono prima: 'FINE_DATI'.
+- Fill (specifica_v1 sez. 6.7): lo STOP si riempie all'apertura del minuto se questa e' gia oltre il
+  livello (gap, peggiore); il TARGET si riempie SEMPRE AL LIVELLO (nessun miglioramento di prezzo;
+  opzione target_gap_improve=True solo per confronto con il vecchio comportamento).
+- Target ricalcolato che risulta GIA superato dal prezzo all'apertura della M1 successiva al ricalcolo:
+  uscita a mercato a quell'apertura, motivo 'MKT' (specifica sez. 6.4b), classificata dal P&L.
+- Chiusura forzata dopo maxhold barre (da params.MAXHOLD = 1000; 150 e' la sensibilita Sc): motivo 'TF'.
+  Se i dati finiscono prima: 'FINE_DATI'.
+- Tutti i valori di default vengono da params.py (unica fonte).
 """
 from __future__ import annotations
 
@@ -25,7 +30,9 @@ from dataclasses import dataclass, field
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
-PUNTO_DEFAULT = 0.01
+from params import PARAMS as _P, ricalcolo_barre as _ricalcolo_barre
+
+PUNTO_DEFAULT = _P["PUNTO"]
 COLONNE = ["time", "open", "high", "low", "close", "tickvol", "spread"]
 
 
@@ -41,6 +48,7 @@ class M1:
     tv: np.ndarray   # int64
     sp: np.ndarray   # float64, spread in PUNTI
     info: dict = field(default_factory=dict)
+    sp_sost: np.ndarray | None = None   # bool: True dove lo spread 0 e' stato sostituito (sostituisci_spread_zero)
 
     @property
     def n(self) -> int:
@@ -130,6 +138,34 @@ def carica(path: str) -> M1:
     return M1(t=tm, o=o_, h=h_, l=l_, c=c_, tv=tvv, sp=spv, info=info)
 
 
+def sostituisci_spread_zero(m1: M1) -> M1:
+    """Specifica sez. 6.9: spread == 0 -> MEDIANA degli spread non nulli dello STESSO periodo (il file) e
+    della STESSA ora server (ora = (t // 60) % 24). Se per un'ora non esiste nessuno spread non nullo
+    si usa la mediana di tutti gli spread non nulli del periodo. Ritorna un NUOVO M1 (l'originale non
+    cambia) con la maschera `sp_sost`; il conteggio e' in info['spread0_sostituiti']."""
+    sp = m1.sp.copy()
+    zero = sp == 0
+    ore = ((m1.t // 60) % 24).astype(np.int64)
+    nz = ~zero
+    mediana_tot = float(np.median(sp[nz])) if nz.any() else 0.0
+    if zero.any():
+        for h in range(24):
+            sel = zero & (ore == h)
+            if not sel.any():
+                continue
+            ok = nz & (ore == h)
+            sp[sel] = float(np.median(m1.sp[ok])) if ok.any() else mediana_tot
+    info = dict(m1.info)
+    info["spread0_sostituiti"] = int(zero.sum())
+    return M1(t=m1.t, o=m1.o, h=m1.h, l=m1.l, c=m1.c, tv=m1.tv, sp=sp, info=info, sp_sost=zero)
+
+
+def scala_spread(m1: M1, k: float) -> M1:
+    """Copia di m1 con spread moltiplicato per k (sensibilita Sd: x1,5)."""
+    return M1(t=m1.t, o=m1.o, h=m1.h, l=m1.l, c=m1.c, tv=m1.tv, sp=m1.sp * k, info=dict(m1.info),
+              sp_sost=m1.sp_sost)
+
+
 # --------------------------------------------------------------------------- barre
 
 @dataclass
@@ -188,13 +224,13 @@ class Indicatori:
     params: dict = field(default_factory=dict)
 
 
-def _rolling_mean_std(x: np.ndarray, n: int):
+def _rolling_mean_std(x: np.ndarray, n: int, ddof: int = 0):
     out_m = np.full(x.size, np.nan)
     out_s = np.full(x.size, np.nan)
     if x.size >= n:
         w = sliding_window_view(x, n)
         out_m[n - 1:] = w.mean(axis=1)
-        out_s[n - 1:] = w.std(axis=1)  # ddof=0
+        out_s[n - 1:] = w.std(axis=1, ddof=ddof)  # ddof=0: popolazione (params.SD_DDOF)
     return out_m, out_s
 
 
@@ -206,7 +242,7 @@ def true_range(barre: Barre) -> np.ndarray:
     return tr
 
 
-def atr(barre: Barre, n: int = 14, metodo: str = "wilder") -> np.ndarray:
+def atr(barre: Barre, n: int = _P["ATR_N"], metodo: str = _P["ATR_METODO"]) -> np.ndarray:
     """ATR. metodo='wilder' (default): seme = media semplice di TR[1..n] all'indice n, poi
     ATR[i] = (ATR[i-1]*(n-1) + TR[i]) / n. metodo='semplice': media mobile semplice di TR[i-n+1..i]
     (primo valore valido all'indice n, per coerenza con Wilder). TR[0] (senza chiusura
@@ -229,9 +265,9 @@ def atr(barre: Barre, n: int = 14, metodo: str = "wilder") -> np.ndarray:
     return out
 
 
-def indicatori(barre: Barre, bb_n: int = 20, bb_k: float = 2.0, std_sma_n: int = 50,
-               atr_n: int = 14, atr_metodo: str = "wilder") -> Indicatori:
-    sma, sd = _rolling_mean_std(barre.c, bb_n)
+def indicatori(barre: Barre, bb_n: int = _P["BB_N"], bb_k: float = _P["BB_K"], std_sma_n: int = _P["S50_N"],
+               atr_n: int = _P["ATR_N"], atr_metodo: str = _P["ATR_METODO"], ddof: int = _P["SD_DDOF"]) -> Indicatori:
+    sma, sd = _rolling_mean_std(barre.c, bb_n, ddof)
     sd_sma = np.full(barre.n, np.nan)
     ok = barre.n - (bb_n - 1)
     if ok >= std_sma_n:
@@ -258,17 +294,24 @@ def _scarto(j, s, codice):
     return {"eseguito": False, "scarto": codice, "j": int(j), "side": s}
 
 
-def simula_trade(m1: M1, barre: Barre, ind: Indicatori, j: int, side, stop_atr: float = 3.0,
-                 maxhold: int = 150, ricalcolo_ogni: int | None = 3, punto: float = PUNTO_DEFAULT,
-                 max_gap_ingresso_min: float | None = None) -> dict:
+def simula_trade(m1: M1, barre: Barre, ind: Indicatori, j: int, side, stop_atr: float = _P["STOP_ATR"],
+                 maxhold: int = _P["MAXHOLD"], ricalcolo_ogni="auto", punto: float = PUNTO_DEFAULT,
+                 max_gap_ingresso_min: float | None = _P["MAX_GAP_INGRESSO_MIN"],
+                 target_gap_improve: bool = _P["FILL_TARGET_MIGLIORE"]) -> dict:
     """Simula UN trade da un segnale alla chiusura della barra j. Vedi docstring del modulo.
+
+    ricalcolo_ogni: 'auto' = params.RICALCOLO_ORE ore (H1 -> 3 barre, M30 -> 6); intero = barre;
+    None/0 = target fisso.
 
     Ritorna un dict. Se non eseguito: {'eseguito': False, 'scarto': CODICE, ...} con CODICE in
     NO_BARRA_SUCCESSIVA, INDICATORI_NON_PRONTI, GAP_INGRESSO, TARGET_OLTRE_INGRESSO.
     Se eseguito: eseguito=True, j, side, entry_m1, entry_time, entry, stop, target0, target_finale,
-    n_agg_target, rischio (D in USD), exit_m1, exit_time, exit, motivo ('SL'|'TP'|'TF'|'FINE_DATI'),
-    R (netto), R_lordo (senza spread), costo_spread_R, durata_barre, durata_minuti, bar_ingresso,
-    bar_uscita, gap_ingresso_min.
+    n_agg_target, targets (SCHEDULE completa [(minuto_da_cui_vale, livello), ...], la prima voce e il
+    target iniziale valido dalla M1 di ingresso), rischio (D in USD), exit_m1, exit_time, exit,
+    motivo ('SL'|'TP'|'MKT'|'TF'|'FINE_DATI'), R (netto), R_lordo (senza spread), costo_spread_R,
+    durata_barre, durata_minuti, bar_ingresso, bar_uscita, gap_ingresso_min, sl_e_tp_stesso_minuto,
+    spread0_ingresso / spread0_uscita (spread sostituito da sostituisci_spread_zero), spread_ingresso
+    (USD), atr (ATR della barra segnale).
     """
     s = _lato(side)
     if maxhold < 1:
@@ -293,28 +336,44 @@ def simula_trade(m1: M1, barre: Barre, ind: Indicatori, j: int, side, stop_atr: 
     D = stop_atr * atr_j
     stop = entry - s * D
     target = sma_j
+    targets = [(int(m1.t[e]), float(target))]
     kend = min(j + maxhold, nb - 1)
-    r = int(ricalcolo_ogni) if ricalcolo_ogni else 0
+    if ricalcolo_ogni == "auto":
+        r = _ricalcolo_barre(barre.periodo)
+    else:
+        r = int(ricalcolo_ogni) if ricalcolo_ogni else 0
 
     x = None          # indice M1 di uscita
     fill = None
     motivo = None
     sp_x = 0.0        # spread (USD) alla M1 di uscita
+    both = False
     n_agg = 0
     bar_a = j + 1
     while bar_a <= kend:
+        m = 0
         if r:
             m = (bar_a - 1 - j) // r
             bar_b = min(j + r * (m + 1), kend)
-            if m > 0:
-                v = float(ind.sma20[j + r * m])
-                if math.isfinite(v):
-                    target = v
-                    n_agg += 1
         else:
             bar_b = kend
         a = int(barre.i0[bar_a])
         b = int(barre.i1[bar_b])
+        if m > 0:
+            v = float(ind.sma20[j + r * m])
+            if math.isfinite(v):
+                target = v
+                n_agg += 1
+                targets.append((int(m1.t[a]), float(target)))
+                # target ricalcolato gia superato dal prezzo all'apertura: uscita a mercato (sez. 6.4b)
+                sp_a = float(m1.sp[a]) * punto
+                passato = (float(m1.o[a]) >= target) if s == 1 else (float(m1.o[a]) + sp_a <= target)
+                if passato:
+                    x = a
+                    sp_x = sp_a
+                    motivo = "MKT"
+                    fill = float(m1.o[a]) + (0.0 if s == 1 else sp_a)
+                    break
         o_s, h_s, l_s = m1.o[a:b], m1.h[a:b], m1.l[a:b]
         sp_s = m1.sp[a:b] * punto
         if s == 1:
@@ -330,10 +389,14 @@ def simula_trade(m1: M1, barre: Barre, ind: Indicatori, j: int, side, stop_atr: 
             sp_x = float(sp_s[k])
             if sl_hit[k]:                       # SL prima di TP nello stesso minuto
                 motivo = "SL"
+                both = bool(tp_hit[k])
                 fill = min(stop, float(o_s[k])) if s == 1 else max(stop, float(o_s[k] + sp_s[k]))
             else:
                 motivo = "TP"
-                fill = max(target, float(o_s[k])) if s == 1 else min(target, float(o_s[k] + sp_s[k]))
+                if target_gap_improve:
+                    fill = max(target, float(o_s[k])) if s == 1 else min(target, float(o_s[k] + sp_s[k]))
+                else:
+                    fill = float(target)         # AL LIVELLO (sez. 6.7)
             break
         bar_a = bar_b + 1
 
@@ -346,15 +409,19 @@ def simula_trade(m1: M1, barre: Barre, ind: Indicatori, j: int, side, stop_atr: 
     R = s * (fill - entry) / D
     costo = (sp_e if s == 1 else sp_x) / D
     bar_x = int(np.searchsorted(barre.i0, x, side="right") - 1)
+    z0 = m1.sp_sost
     return {
         "eseguito": True, "j": int(j), "side": s,
         "entry_m1": e, "entry_time": int(m1.t[e]), "entry": entry, "stop": stop,
-        "target0": sma_j, "target_finale": target, "n_agg_target": n_agg, "rischio": D,
+        "target0": sma_j, "target_finale": target, "n_agg_target": n_agg, "targets": targets,
+        "rischio": D, "atr": atr_j, "spread_ingresso": sp_e,
         "exit_m1": int(x), "exit_time": int(m1.t[x]), "exit": float(fill), "motivo": motivo,
         "R": float(R), "R_lordo": float(R + costo), "costo_spread_R": float(costo),
         "bar_ingresso": j + 1, "bar_uscita": bar_x,
         "durata_barre": bar_x - (j + 1) + 1, "durata_minuti": int(m1.t[x] - m1.t[e]),
-        "gap_ingresso_min": gap,
+        "gap_ingresso_min": gap, "sl_e_tp_stesso_minuto": both,
+        "spread0_ingresso": bool(z0[e]) if z0 is not None else False,
+        "spread0_uscita": bool(z0[x]) if z0 is not None else False,
     }
 
 

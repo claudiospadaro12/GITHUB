@@ -343,17 +343,103 @@ class TestSimulazione(unittest.TestCase):
                 self.assertAlmostEqual(t["R"], (2000.0 - 2001.0) / 6)
                 self.assertAlmostEqual(t["costo_spread_R"], 0.50 / 6)
 
-    def test_maxhold_default_150_e_fine_dati(self):
+    def test_maxhold_default_1000_sensibilita_150_e_fine_dati(self):
         m, b = setup(160)
         ind = ind_manuale(b.n, 3, {3: 2010.0})
-        t = E.simula_trade(m, b, ind, 3, "long")             # default: 150
+        t = E.simula_trade(m, b, ind, 3, "long")             # default params: MAXHOLD = 1000 -> mai TF qui
+        self.assertEqual(t["motivo"], "FINE_DATI")
+        self.assertEqual(t["bar_uscita"], 159)
+        t = E.simula_trade(m, b, ind, 3, "long", maxhold=150)  # sensibilita Sc: 150 -> TF
         self.assertEqual(t["motivo"], "TF")
         self.assertEqual(t["durata_barre"], 150)
         self.assertEqual(t["bar_uscita"], 153)
-        m2, b2 = setup(60)                                    # i dati finiscono prima di 150 barre
-        t2 = E.simula_trade(m2, b2, ind_manuale(b2.n, 3, {3: 2010.0}), 3, "long")
+        m2, b2 = setup(60)                                    # i dati finiscono prima di maxhold
+        t2 = E.simula_trade(m2, b2, ind_manuale(b2.n, 3, {3: 2010.0}), 3, "long", maxhold=150)
         self.assertEqual(t2["motivo"], "FINE_DATI")           # mai etichettato TF
         self.assertEqual(t2["bar_uscita"], 59)
+
+    def test_target_in_gap_riempito_al_livello(self):
+        m, b = setup(12)
+        # apertura del minuto sopra il target 2003: il fill resta 2003 (non 2010)
+        set_min(m, 4, 10, o=2010.0, h=2010.5, l=2009.5, c=2010.0)
+        ind = ind_manuale(b.n, 3, {3: 2003.0})
+        t = E.simula_trade(m, b, ind, 3, "long")
+        self.assertEqual(t["motivo"], "TP")
+        self.assertAlmostEqual(t["exit"], 2003.0)
+        t = E.simula_trade(m, b, ind, 3, "long", target_gap_improve=True)   # vecchio comportamento
+        self.assertAlmostEqual(t["exit"], 2010.0)
+        # short: apertura (ask) sotto il target 1997 -> fill 1997
+        m, b = setup(12)
+        set_min(m, 4, 10, o=1990.0, h=1990.5, l=1989.5, c=1990.0)
+        t = E.simula_trade(m, b, ind_manuale(b.n, 3, {3: 1997.0}), 3, "short")
+        self.assertEqual(t["motivo"], "TP")
+        self.assertAlmostEqual(t["exit"], 1997.0)
+
+    def test_schedule_completa_dei_target(self):
+        m, b = setup(14)
+        set_min(m, 8, 5, h=2001.5)           # TP con il target ricalcolato a j+6 = 9? no: barra 8 usa sma(6)
+        ind = ind_manuale(b.n, 3, {3: 2003.0, 6: 2001.0, 9: 2000.9})
+        t = E.simula_trade(m, b, ind, 3, "long")
+        self.assertEqual(t["motivo"], "TP")
+        # schedule: iniziale valido dall'ingresso (barra 4), poi dalla M1 successiva alla chiusura della barra 6
+        self.assertEqual(t["targets"], [(T0 + 4 * 60, 2003.0), (T0 + 7 * 60, 2001.0)])
+        self.assertEqual(t["n_agg_target"], 1)
+        self.assertEqual(len(t["targets"]), t["n_agg_target"] + 1)
+
+    def test_target_ricalcolato_gia_superato_uscita_a_mercato(self):
+        m, b = setup(14)
+        # prezzo sale a 2002 nella barra 5 senza toccare il target 2003; poi resta a 2002.
+        for bar in range(5, 14):
+            for k in range(60):
+                set_min(m, bar, k, o=2002.0, h=2002.0, l=2002.0, c=2002.0)
+        # a j+3 = 6 la SMA20 scende a 2001: nuovo target gia sotto il prezzo (bid 2002 >= 2001)
+        ind = ind_manuale(b.n, 3, {3: 2003.0, 6: 2001.0})
+        t = E.simula_trade(m, b, ind, 3, "long")
+        self.assertEqual(t["motivo"], "MKT")
+        self.assertEqual(t["exit_m1"], int(b.i0[7]))             # prima M1 dopo il ricalcolo
+        self.assertAlmostEqual(t["exit"], 2002.0)                # a mercato, all'apertura (bid)
+        self.assertAlmostEqual(t["R"], (2002.0 - 2000.30) / 6)
+        # short: simmetrico, esce ad ask = open + spread
+        m, b = setup(14)
+        for bar in range(5, 14):
+            for k in range(60):
+                set_min(m, bar, k, o=1998.0, h=1998.0, l=1998.0, c=1998.0)
+        ind = ind_manuale(b.n, 3, {3: 1997.0, 6: 1999.0})
+        t = E.simula_trade(m, b, ind, 3, "short")
+        self.assertEqual(t["motivo"], "MKT")
+        self.assertAlmostEqual(t["exit"], 1998.30)
+        self.assertAlmostEqual(t["R"], (2000.0 - 1998.30) / 6)
+        self.assertAlmostEqual(t["costo_spread_R"], 0.30 / 6)
+
+    def test_flag_sl_e_tp_stesso_minuto_e_spread0(self):
+        m, b = setup(12)
+        set_min(m, 4, 7, h=2004.0, l=1990.0)
+        ind = ind_manuale(b.n, 3, {3: 2003.0})
+        t = E.simula_trade(m, b, ind, 3, "long")
+        self.assertTrue(t["sl_e_tp_stesso_minuto"])
+        m, b = setup(12)
+        set_min(m, 4, 7, l=1990.0)
+        t = E.simula_trade(m, b, ind, 3, "long")
+        self.assertFalse(t["sl_e_tp_stesso_minuto"])
+        # spread 0 sostituito: mediana degli spread non nulli della stessa ora
+        m, b = setup(12)
+        ore = ((m.t // 60) % 24)
+        m.sp[(ore == 3) & (np.arange(m.n) % 2 == 0)] = 0.0       # meta' delle M1 dell'ora 3 con spread 0
+        m.sp[(ore == 3) & (np.arange(m.n) % 2 == 1)] = 40.0
+        mm = E.sostituisci_spread_zero(m)
+        self.assertTrue(np.all(mm.sp[(ore == 3)] == 40.0))        # 0 -> mediana non nulla dell'ora 3
+        self.assertEqual(mm.info["spread0_sostituiti"], int(mm.sp_sost.sum()))
+        self.assertTrue(np.all(m.sp[(ore == 3) & (np.arange(m.n) % 2 == 0)] == 0.0))   # originale intatto
+        self.assertTrue(np.all(mm.sp[ore != 3] == 30.0))
+        # la maschera arriva nel log del trade
+        j = 3
+        e = int(b.i0[j + 1])
+        mm.sp_sost[e] = True
+        t = E.simula_trade(mm, b, ind_manuale(b.n, 3, {3: 2003.0}), 3, "long")
+        self.assertTrue(t["spread0_ingresso"])
+        # scala_spread
+        m2 = E.scala_spread(mm, 1.5)
+        self.assertAlmostEqual(float(m2.sp[0]), float(mm.sp[0]) * 1.5)
 
     def test_target_oltre_prezzo_di_ingresso_nessun_trade(self):
         m, b = setup(12)
