@@ -1,0 +1,9 @@
+# Materiali testuali incollati da Claudio (trascrizione sintetica, non normativa)
+## 1. "La Strategia Breaking Bands Spiegata Semplicemente" (sintesi, probabile output di una AI: NON normativa)
+- Bande di Bollinger; due varianti: CONTINUAZIONE (seguire il movimento forte appena avvenuto, dopo laterale, prima spinta; "meno rischio") e INVERSIONE (contro il movimento, 2a/3a spinta, fasi finali di un trend maturo; "piu rischio").
+- Continuazione: mercato calmo -> bulge (rottura banda superiore) -> rientro ordinato con candele piccole verso la banda opposta -> si entra (LONG) al test della banda inferiore (opposta); target = mediana.
+- Inversione: trend maturo, 2a/3a bulge, ritorno verso il centro SENZA toccare la banda opposta, risalita sulla banda superiore (retest della banda dell'impulso) -> si entra SHORT; target = mediana.
+- Gestione: entrata al livello della banda opposta (continuazione) / banda dell'impulso (inversione); target aggiornato ogni 2-3 ore (la mediana si sposta); stop loss = 3 x ATR; se vince chiudere SEMPRE alla mediana.
+- Pattern buono: candele piccole e ordinate, movimento diretto e progressivo, ritracciamento lineare, assenza di aggressivita. Pattern cattivo: candele grandi e disordinate, tocca piu bande in sequenza, movimento troppo violento.
+## 2. Comunicato di aggiornamento (documentazione ufficiale aggiornata)
+Introdotti: regole tecniche vincolanti sul test della banda; criteri binari per la deviazione standard; controllo di coerenza finale; indicatore Standard Deviation + SMA50; Dichiarazione di Test; standard grafico unificato (banda superiore verde, inferiore rossa, mediana blu; sotto: deviazione standard linea nera con SMA50 giallo oro). Allegati citati: Guida Operativa 11, Checklist aggiornata, Prompt aggiornato, Dichiarazione di Test, screenshot standard. **Claudio ha fornito solo: Prompt, Checklist Tabellare, Esempi Operativi (PDF). MANCANO Guida Operativa 11, Dichiarazione di Test, screenshot.**
