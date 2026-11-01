@@ -516,6 +516,14 @@ def _esegui(args):
         pr = json.loads(args.prova)
         prm.update(pr.get("PARAMS", {}))
         DISEGNO.update(pr.get("DISEGNO", {}))
+    simbolo = args.simbolo or SIMBOLO_DEFAULT
+    if args.punto is not None:
+        prm["PUNTO"] = args.punto
+    elif simbolo in PUNTI_NOTI:
+        prm["PUNTO"] = PUNTI_NOTI[simbolo]
+    elif not (args.prova and "PUNTO" in json.loads(args.prova).get("PARAMS", {})):
+        raise SystemExit("simbolo %s senza punto noto: indicare --punto" % simbolo)
+    attese = ATTESE_RIGHE if simbolo == SIMBOLO_DEFAULT else {}
     prova = bool(args.prova or args.solo_h1 or args.placebo_target is not None
                  or args.placebo_max_anni is not None)
     if args.placebo_target is not None:
@@ -529,7 +537,7 @@ def _esegui(args):
             k, v = x.split("=", 1)
             mapping[k] = v
     else:
-        mapping = {k: os.path.join(args.dir, v) for k, v in FILE_PERIODI.items()}
+        mapping = {k: os.path.join(args.dir, v) for k, v in file_periodi(simbolo).items()}
     periodi = [Periodo(i, k, v) for i, (k, v) in enumerate(mapping.items())]
     tfs = [prm["TF_PRIMARIO"]] if args.solo_h1 else [prm["TF_PRIMARIO"], prm["TF_ESPLORATIVO"]]
     # ---- intestazione
@@ -553,9 +561,10 @@ def _esegui(args):
         "parametri": {k: prm[k] for k in sorted(prm)}, "disegno": {k: DISEGNO[k] for k in sorted(DISEGNO)},
         "sensibilita": SENSIBILITA, "tf": [TF_NOME[t] for t in tfs],
         "sha256_csv": {p.nome: p.sha for p in periodi}, "righe_csv": {p.nome: p.m1_orig_info["righe_finali"] for p in periodi},
-        "righe_attese_A3": {p.nome: ATTESE_RIGHE.get(p.nome) for p in periodi},
-        "righe_coincidono_con_A3": {p.nome: (p.m1_orig_info["righe_finali"] == ATTESE_RIGHE.get(p.nome))
-                                    if p.nome in ATTESE_RIGHE else None for p in periodi},
+        "simbolo": simbolo, "punto": prm["PUNTO"],
+        "righe_attese_A3": {p.nome: attese.get(p.nome) for p in periodi},
+        "righe_coincidono_con_A3": {p.nome: (p.m1_orig_info["righe_finali"] == attese.get(p.nome))
+                                    if p.nome in attese else None for p in periodi},
         "sha256_codice": codice, "sha256_documenti_congelati": docs, "hash_dati_coincidono": hash_dati_ok,
         "python": sys.version.split()[0], "numpy": np.__version__,
         "PARAMETRI_NON_CONGELATI_PROVA": prova,
@@ -737,11 +746,18 @@ def _esegui(args):
     V["n_configurazioni_esaminate"] = {
         "primaria": 1, "M30_sottoviste": 3 if len(tfs) > 1 else 0, "sensibilita": len(SENSIBILITA),
         "nota": "le esplorative non selezionano; clausole obbligatorie di criteri_previsioni_v1.md Parte C da riportare"}
+    if simbolo == SIMBOLO_DEFAULT:
+        cl1 = "XAUUSD fuori dallo scopo dichiarato dalla Guida (MAJOR/MINOR, D1/H4/H1/M30); M15 non ammesso e non testato"
+        cl4 = "nessun dato EURUSD; i 4 periodi sono 4 regimi; N per cella in T2"
+    else:
+        cl1 = ("%s: ambito dichiarato dalla Guida (MAJOR/MINOR, D1/H4/H1/M30) da verificare per il simbolo; "
+               "M15 non ammesso e non testato" % simbolo)
+        cl4 = "dati del solo simbolo %s; i 4 periodi sono 4 regimi; N per cella in T2" % simbolo
     V["clausole_Parte_C"] = [
-        "XAUUSD fuori dallo scopo dichiarato dalla Guida (MAJOR/MINOR, D1/H4/H1/M30); M15 non ammesso e non testato",
+        cl1,
         "Guida usata = 'versione didattica' non confermata come Guida Operativa 11 ufficiale; mancano Dichiarazione di Test e screenshot",
         "stop 3 ATR, target SMA20, ricalcolo 3 ore da Guida/Protocolli; soglie 'molto/ordinato' sono interpretazioni (specifica sez. 8); pattern testati = soprainsieme dei validi",
-        "nessun dato EURUSD; i 4 periodi sono 4 regimi; N per cella in T2",
+        cl4,
         "criteri non misurabili: news, giudizio visivo",
         "trade a FINE_DATI, SL+TP stesso minuto, target oltre ingresso, spread=0: quantificati in T2/T9",
         "configurazioni esaminate: vedi n_configurazioni_esaminate; le esplorative non selezionano",
@@ -801,7 +817,7 @@ def md_albero(x, livello=0) -> str:
 
 def scrivi_md(ris: dict) -> str:
     h, T = ris["intestazione"], ris["tabelle"]
-    s = "# Breaking Band su XAUUSD — risultati (generato da run_test.py)\n\n"
+    s = "# Breaking Band su %s — risultati (generato da run_test.py)\n\n" % h.get("simbolo", SIMBOLO_DEFAULT)
     s += "sha256 dei risultati (JSON canonico): `%s`\n\n" % ris["sha256_risultati"]
     s += "## Intestazione: parametri, file letti, hash\n" + md_albero(h) + "\n"
     V = T["VERDETTO"]
@@ -846,7 +862,10 @@ def scrivi_md(ris: dict) -> str:
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--dir", help="cartella con i 4 CSV (nomi in params.FILE_PERIODI)")
+    ap.add_argument("--dir", help="cartella con i 4 CSV (nomi ABTG_M1_<SIMBOLO>_2013/_2018/_2020.csv, ABTG_M1_<SIMBOLO>.csv)")
+    ap.add_argument("--simbolo", help="simbolo (default XAUUSD): solo nomi dei file e punto noto")
+    ap.add_argument("--punto", type=float, help="dimensione del punto nel prezzo (oro 0.01; EURUSD 0.00001); "
+                                                "se omesso: quello noto del simbolo (params.PUNTI_NOTI)")
     ap.add_argument("--periodi", nargs="*", help="nome=percorso.csv (alternativa a --dir; solo per prove)")
     ap.add_argument("--out", required=True, help="prefisso dei file di output")
     ap.add_argument("--congelati", help="cartella con specifica_v1.md, disegno_test_v1.md, criteri_previsioni_v1.md")

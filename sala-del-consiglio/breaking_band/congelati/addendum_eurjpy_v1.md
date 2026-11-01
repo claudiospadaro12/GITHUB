@@ -1,0 +1,2 @@
+# Addendum pre-registrato: Breaking Band su EURJPY (C0, 01/11/2026) — scritto PRIMA di eseguire il codice su EURJPY
+Dati: 4 CSV M1 BCM di EURJPY (righe 368.696 / 371.969 / 373.040 / 645.391 come nel riepilogo dell'export), 3 decimali, hash in congelati/HASH_DATI_EURJPY.txt. Regole, parametri e verdetto IDENTICHI a criteri_estensione_eurusd_v1.md; unica modifica strumentale: PUNTO = 0,001. Estensione ESPLORATIVA (come GBPUSD e USDJPY). Previsioni: stesse di addendum_gbpusd_v1.md.

@@ -12,6 +12,7 @@ Esecuzione:  python3 -I test_run.py
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -34,7 +35,7 @@ PROVA_DIS = json.dumps({"DISEGNO": {"N_ESTRAZIONI": 200, "N_BOOTSTRAP": 300}})
 def scrivi_csv(path, seed, giorni):
     rng = np.random.default_rng(seed)
     t0 = int(np.datetime64("2019-01-01T00:00", "m").astype(np.int64))
-    m = RT.genera_placebo_m1(rng, giorni * 1440, 2000.0, 25.0, t0, 4)
+    m = RT.genera_placebo_m1(rng, giorni * 1440, 2000.0, 25.0, t0, 4, 1.5)
     sp = m.sp.copy()
     sp[::5000] = 0.0                                     # alcune righe con spread 0 (da sostituire)
     sp[1::7] += rng.integers(0, 20, size=sp[1::7].size)
@@ -246,7 +247,7 @@ class TestMartingala(unittest.TestCase):
         g = []
         for seed in range(3):
             rng = np.random.default_rng(100 + seed)
-            m = RT.genera_placebo_m1(rng, 350000, 2000.0, 25.0, 60 * 24 * 1000, 4)
+            m = RT.genera_placebo_m1(rng, 350000, 2000.0, 25.0, 60 * 24 * 1000, 4, 1.5)
             b = E.costruisci_barre(m, 60)
             ind = E.indicatori(b)
             sig = [(j, 1 if (j // 3) % 2 == 0 else -1) for j in range(200, b.n - 1)]
@@ -256,6 +257,134 @@ class TestMartingala(unittest.TestCase):
         z = g.mean() / (g.std(ddof=1) / np.sqrt(g.size))
         self.assertGreater(g.size, 1500)
         self.assertLess(abs(z), 3.5, "z=%.2f media=%.4f" % (z, g.mean()))
+
+
+# ------------------------------------------------------------------ invarianza di scala (ciclo 1, estensione EURUSD)
+SCALA_IGNORA = {"rischio", "entry", "stop", "target0", "target_finale", "exit", "atr", "spread_ingresso", "targets",
+                "livello_banda", "mediana", "penetrazione", "range_test", "atr_mediana_prezzo"}
+
+
+def uguali(a, b, percorso=""):
+    """Confronto ricorsivo: float con tolleranza relativa, campi in unita di prezzo ignorati."""
+    if isinstance(a, dict):
+        assert isinstance(b, dict) and set(a) == set(b), "chiavi diverse in %s: %s" % (percorso, set(a) ^ set(b))
+        for k in a:
+            if k in SCALA_IGNORA:
+                continue
+            uguali(a[k], b[k], percorso + "/" + k)
+    elif isinstance(a, list):
+        assert isinstance(b, list) and len(a) == len(b), "lunghezze diverse in %s" % percorso
+        for i, (x, y) in enumerate(zip(a, b)):
+            uguali(x, y, "%s[%d]" % (percorso, i))
+    elif isinstance(a, float) or isinstance(b, float):
+        assert a is not None and b is not None and abs(a - b) <= 1e-7 * max(1.0, abs(a), abs(b)), \
+            "%s: %r != %r" % (percorso, a, b)
+    else:
+        assert a == b, "%s: %r != %r" % (percorso, a, b)
+
+
+def scrivi_csv_scalato(path_src, path_dst, fattore, decimali):
+    with open(path_src) as f, open(path_dst, "w") as g:
+        g.write(f.readline())
+        for ln in f:
+            p = ln.rstrip("\n").split(";")
+            q = [p[0]] + [("%." + str(decimali) + "f") % (float(x) * fattore) for x in p[1:5]] + p[5:]
+            g.write(";".join(q) + "\n")
+
+
+class TestInvarianzaDiScala(unittest.TestCase):
+    """Stessa serie dell'oro con prezzi x0,001 e PUNTO x0,001 (= EURUSD a 5 decimali): segnali, trade e R identici."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        d = cls.d = cls.tmp.name
+        cls.oro = {}
+        cls.eur = {}
+        for nome, seed in (("A", 1), ("B", 2)):
+            cls.oro[nome] = os.path.join(d, "oro_%s.csv" % nome)
+            cls.eur[nome] = os.path.join(d, "eur_%s.csv" % nome)
+            scrivi_csv(cls.oro[nome], seed, 300)
+            scrivi_csv_scalato(cls.oro[nome], cls.eur[nome], 0.001, 5)       # 2 decimali x0,001 = 5 decimali esatti
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def lancia(self, nome, files, extra):
+        return RT.main(["--periodi", "A=" + files["A"], "B=" + files["B"], "--out", os.path.join(self.d, nome),
+                        "--solo-h1", "--placebo-target", "30", "--placebo-max-anni", "2", "--prova", PROVA] + extra)
+
+    def test_tabelle_identiche_oro_e_prezzi_scalati(self):
+        r_oro = self.lancia("oro", self.oro, ["--punto", "0.01"])
+        r_eur = self.lancia("eur", self.eur, ["--punto", "0.00001"])
+        n = r_oro["tabelle"]["T2_risultati"]["POOLED_H1"]["n"]
+        self.assertGreater(n, 30, "serve un campione non banale")
+        uguali(r_oro["tabelle"], r_eur["tabelle"])
+        self.assertEqual(r_oro["intestazione"]["punto"], 0.01)
+        self.assertEqual(r_eur["intestazione"]["punto"], 0.00001)
+        # i campi in unita di prezzo sono davvero scalati
+        a = [t for v in r_oro["tabelle"]["LOG_TRADE"].values() for t in v]
+        b = [t for v in r_eur["tabelle"]["LOG_TRADE"].values() for t in v]
+        for x, y in zip(a, b):
+            self.assertAlmostEqual(x["entry"] * 0.001, y["entry"], places=5)
+            self.assertAlmostEqual(x["spread_ingresso"] * 0.001, y["spread_ingresso"], places=9)
+
+    def test_punto_sbagliato_cambia_i_costi(self):
+        # controllo di sensibilita del test: con il punto dell'oro sui prezzi scalati lo spread diventa 1000 volte piu grande
+        r_ok = self.lancia("eur_ok", self.eur, ["--punto", "0.00001"])
+        r_ko = self.lancia("eur_ko", self.eur, ["--punto", "0.01"])
+        self.assertNotEqual(r_ok["tabelle"]["T2_risultati"]["POOLED_H1"]["n"],
+                            r_ko["tabelle"]["T2_risultati"]["POOLED_H1"]["n"])
+
+    def test_scala_potenza_di_due_bit_esatta(self):
+        """Prezzi x2^-10 e punto x2^-10: nessun arrotondamento, quindi segnali, trade e R IDENTICI (uguaglianza esatta)."""
+        import signals as S
+        k = 2.0 ** -10
+        rng = np.random.default_rng(5)
+        m = RT.genera_placebo_m1(rng, 250 * 1440, 2000.0, 25.0, 60 * 24 * 1000, 4, 1.5)
+        m2 = E.costruisci_m1(m.t, m.o * k, m.h * k, m.l * k, m.c * k, m.sp)
+        prm = dict(__import__("params").PARAMS)
+        prm.update(RILASSATO)
+        prm2 = dict(prm)
+        prm2["PUNTO"] = prm["PUNTO"] * k
+        out = []
+        for mm, pp in ((m, prm), (m2, prm2)):
+            b = E.costruisci_barre(mm, 60)
+            ind = E.indicatori(b)
+            res = {v: S.rileva(b, ind, v, pp) for v in S.VARIANTI}
+            tr = {v: E.esegui_segnali(mm, b, ind, [(s["j"], s["side"]) for s in res[v]["segnali"]],
+                                      **RT.kw_engine(pp, 60)) for v in S.VARIANTI}
+            out.append((res, tr))
+        for v in ("CONT", "INV"):
+            (r1, t1), (r2, t2) = out[0][0][v], out[1][0][v]
+            self.assertEqual([(s["j"], s["side"], s["solidita"], s["bonus"]) for s in r1["segnali"]],
+                             [(s["j"], s["side"], s["solidita"], s["bonus"]) for s in r2["segnali"]])
+            self.assertEqual(r1["imbuto_episodi"], r2["imbuto_episodi"])
+            (tt1, c1), (tt2, c2) = out[0][1][v], out[1][1][v]
+            self.assertEqual(c1, c2)
+            self.assertEqual([(t["j"], t["side"], t["motivo"], t["R"], t["R_lordo"], t["exit_m1"]) for t in tt1],
+                             [(t["j"], t["side"], t["motivo"], t["R"], t["R_lordo"], t["exit_m1"]) for t in tt2])
+            self.assertGreater(len(tt1), 5, v)
+
+    def test_simbolo_nomi_file_e_punto_noto(self):
+        d = os.path.join(self.d, "eurdir")
+        os.makedirs(d)
+        for nome, src in (("2013", "A"), ("2018", "B"), ("2020", "A")):
+            shutil.copy(self.eur[src], os.path.join(d, "ABTG_M1_EURUSD_%s.csv" % nome))
+        shutil.copy(self.eur["B"], os.path.join(d, "ABTG_M1_EURUSD.csv"))
+        out = os.path.join(self.d, "eursym")
+        ris = RT.main(["--dir", d, "--simbolo", "EURUSD", "--out", out, "--solo-h1", "--placebo-target", "5",
+                       "--placebo-max-anni", "1", "--prova", PROVA_DIS])
+        h = ris["intestazione"]
+        self.assertEqual((h["simbolo"], h["punto"]), ("EURUSD", 0.00001))        # punto noto del simbolo
+        self.assertEqual(sorted(h["sha256_csv"]), ["2013", "2018", "2020", "2025-26"])
+        self.assertTrue(all(v is None for v in h["righe_attese_A3"].values()))
+        with open(out + ".md") as f:
+            self.assertIn("su EURUSD", f.read())
+        self.assertIn("EURUSD", ris["tabelle"]["VERDETTO"]["clausole_Parte_C"][0])
+        with self.assertRaises(SystemExit):                                      # simbolo ignoto senza --punto
+            RT.main(["--dir", d, "--simbolo", "ZZZUSD", "--out", out + "x", "--solo-h1"])
 
 
 if __name__ == "__main__":
