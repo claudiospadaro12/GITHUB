@@ -43,3 +43,8 @@ Media 14
 
 === slide8.xml
 Visualizzazione a grafico
+
+=== NOTE DI C0 (dalle immagini della presentazione) ===
+slide 3 (impostazioni indicatore): Bollinger Bands periodo 37, deviazione 3, Close, MediumSeaGreen (NON 20/2 come la Breaking Band).
+slide 8 (grafico, foto di schermo MT4): bande verdi molto gonfie, molti livelli orizzontali a percentuale (-1,25% ... +4%) e pivot S1-S3/R1-R3, supertrend/medie in rosso e verde. Non e la schermata standard della Breaking Band.
+Differenze con la Breaking Band: 20/2 vs 37/3; setup = prezzo che ESCE dalle bande + livello S/R in D1/W/M (ordini pendenti sui livelli oltre la banda), non bulge+rientro+retest; stop STRETTO 5-10 pip dal massimo/minimo della candela uscita (H1: 15 pip) invece di 3 ATR; TP = mediana interna (o livello S/R / media 14) come in comune; nessuna deviazione standard con SMA50; filtro: non operare dopo rilascio di dati macro.
