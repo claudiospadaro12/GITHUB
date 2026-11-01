@@ -22,9 +22,11 @@ import os
 import sys
 import time
 
-import numpy as np
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # con python3 -I la cartella dello script non e' nel path
 
-import engine as E
+import numpy as np  # noqa: E402
+
+import engine as E  # noqa: E402
 import signals as S
 from params import (ATTESE_RIGHE, DESCRITTORI_A2, DISEGNO, FILE_PERIODI, PARAMS, SENSIBILITA, parametri,
                     ricalcolo_barre)
@@ -279,13 +281,14 @@ def sintesi_baseline(trades: list, bl: dict, mask: np.ndarray) -> dict:
     neg = -np.where(Mo < 0, Mo, 0.0).sum(axis=1)
     with np.errstate(divide="ignore", invalid="ignore"):
         pfn = np.where(neg > 0, pos / neg, np.inf)
+        pf_p50 = float(np.quantile(pfn, 0.50))
     n_draw = M.shape[0]
     return {"n_trade": int(cols.size), "n_abbinati": n_ok, "media_osservata_R": obs,
             "media_nulla": float(nulla.mean()), "p5": float(np.quantile(nulla, 0.05)),
             "p50": float(np.quantile(nulla, 0.50)), "p95": float(np.quantile(nulla, 0.95)),
             "percentile_osservato": float((nulla < obs).mean()),
             "p_B": float((1 + int((nulla >= obs).sum())) / (n_draw + 1)),
-            "pf_nullo_p50": float(np.quantile(pfn, 0.50)),
+            "pf_nullo_p50": pf_p50,
             "pf_osservato": pf_di([t["R"] for t in sel])}
 
 
@@ -494,7 +497,16 @@ def raggruppa(trades, f):
     return out
 
 
-def esegui(args) -> dict:
+def esegui(args):
+    salvato = dict(DISEGNO)
+    try:
+        return _esegui(args)
+    finally:
+        DISEGNO.clear()
+        DISEGNO.update(salvato)
+
+
+def _esegui(args):
     t_start = time.time()
     prm = dict(PARAMS)
     if args.prova:
@@ -539,6 +551,8 @@ def esegui(args) -> dict:
         "sensibilita": SENSIBILITA, "tf": [TF_NOME[t] for t in tfs],
         "sha256_csv": {p.nome: p.sha for p in periodi}, "righe_csv": {p.nome: p.m1_orig_info["righe_finali"] for p in periodi},
         "righe_attese_A3": {p.nome: ATTESE_RIGHE.get(p.nome) for p in periodi},
+        "righe_coincidono_con_A3": {p.nome: (p.m1_orig_info["righe_finali"] == ATTESE_RIGHE.get(p.nome))
+                                    if p.nome in ATTESE_RIGHE else None for p in periodi},
         "sha256_codice": codice, "sha256_documenti_congelati": docs, "hash_dati_coincidono": hash_dati_ok,
         "python": sys.version.split()[0], "numpy": np.__version__,
         "PARAMETRI_NON_CONGELATI_PROVA": prova,

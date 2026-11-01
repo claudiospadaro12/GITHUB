@@ -560,6 +560,72 @@ class TestProprieta(unittest.TestCase):
         self.assertEqual([int(j) for j in np.flatnonzero(sig)], [s["j"] for s in self.full["CONT"]["segnali"]])
 
 
+# ------------------------------------------------------------------ pattern piantati con INDICATORI REALI
+def percorso_piantato(seed, nq=260, nimp=8, imp=2.0, K=24, drop=14.0, tail=60, noise=0.25):
+    """Quiete (rumore), impulso rialzista, ritracciamento regolare con accelerazione finale, coda."""
+    rng = np.random.default_rng(seed)
+    c = [100.0]
+    for _ in range(nq):
+        c.append(c[-1] + rng.normal(0, noise))
+    for _ in range(nimp):
+        c.append(c[-1] + imp + rng.normal(0, 0.2))
+    peak = c[-1]
+    for k in range(1, K + 1):
+        c.append(peak - drop * (k / K) ** 1.5 + rng.normal(0, 0.1))
+    for _ in range(tail):
+        c.append(c[-1] + rng.normal(0, noise))
+    c = np.array(c)
+    o = np.concatenate(([c[0]], c[:-1]))
+    h = np.maximum(o, c) + np.abs(rng.normal(0, 0.15, c.size))
+    l = np.minimum(o, c) - np.abs(rng.normal(0, 0.15, c.size))
+    n = c.size
+    return E.Barre(60, np.arange(n, dtype=np.int64) * 60, o, h, l, c, np.zeros(n, dtype=np.int64),
+                   np.arange(n, dtype=np.int64), np.arange(n, dtype=np.int64) + 1), nq + nimp
+
+
+class TestIndicatoriReali(unittest.TestCase):
+    """Gli stessi pattern ma con gli indicatori calcolati da E.indicatori (allineamento degli indici incluso)."""
+
+    def _verifica(self, var, seed, **kw):
+        b, pk = percorso_piantato(seed, **kw)
+        ind = E.indicatori(b)
+        r = S.rileva(b, ind, var)
+        self.assertGreaterEqual(len(r["segnali"]), 1, "il pattern piantato DEVE generare il segnale")
+        s = r["segnali"][0]
+        self.assertEqual(s["side"], s["d"] if var == "CONT" else -s["d"])        # CONT con il bulge, INV contro
+        self.assertGreaterEqual(s["dp"], PARAMS["MIN_RETR"])
+        self.assertLessEqual(s["dp"], PARAMS["T_MAX"])
+        j = s["j"]
+        # specchio: stesso j, lato opposto
+        bm = E.Barre(b.periodo, b.t, -b.o, -b.l, -b.h, -b.c, b.tv, b.i0, b.i1)
+        rm = S.rileva(bm, E.indicatori(bm), var)
+        self.assertEqual([(x["j"], x["side"]) for x in rm["segnali"]], [(x["j"], -x["side"]) for x in r["segnali"]])
+        # troncamento: fino a j-1 il segnale non c'e', fino a j si'
+        for k, atteso in ((j - 1, False), (j, True), (j + 5, True)):
+            bt = E.Barre(b.periodo, b.t[:k + 1], b.o[:k + 1], b.h[:k + 1], b.l[:k + 1], b.c[:k + 1], b.tv[:k + 1],
+                         b.i0[:k + 1], b.i1[:k + 1])
+            rt = S.rileva(bt, E.indicatori(bt), var)
+            self.assertEqual(any(x["j"] == j for x in rt["segnali"]), atteso, f"k={k}")
+        return r
+
+    def test_cont_long_con_indicatori_reali(self):
+        self._verifica("CONT", 1, K=24, drop=14.0, imp=2.5)
+
+    def test_inv_short_con_indicatori_reali(self):
+        # cerca (deterministicamente) una configurazione INV tra poche forme del ritracciamento; deve esisterne una
+        trovato = None
+        for seed in range(8):
+            for K, drop, imp in ((20, 16.0, 2.0), (24, 14.0, 2.5), (28, 14.0, 2.5), (20, 14.0, 2.0)):
+                b, pk = percorso_piantato(seed, K=K, drop=drop, imp=imp)
+                if S.rileva(b, E.indicatori(b), "INV")["segnali"]:
+                    trovato = (seed, K, drop, imp)
+                    break
+            if trovato:
+                break
+        self.assertIsNotNone(trovato, "nessuna configurazione piantata ha prodotto un segnale INV")
+        self._verifica("INV", trovato[0], K=trovato[1], drop=trovato[2], imp=trovato[3])
+
+
 class TestNessunNumeroSparso(unittest.TestCase):
     def test_signals_py_senza_soglie_nel_codice(self):
         permessi = {0, 1, 2, 0.5, 6, 24, 60}      # 0/1/2: strutturali; 0.5: meta' del range; 6: criteri B; 24/60: ora
