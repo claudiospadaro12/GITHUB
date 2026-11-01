@@ -50,6 +50,8 @@ def batteria_su_A4():
         for tag, bars, mir in (("LONG", b, False), ("SHORT", PP.mirror(b), True)):
             if sc.get("solo_long") and mir:
                 continue
+            if any(k not in mapcfg for k in sc["cfg"]):
+                continue            # meccanismi di sola reimplementazione A7 (alt_*)
             prm = dict(PARAMS)
             for k, v in sc["cfg"].items():
                 prm[mapcfg[k]] = v

@@ -52,7 +52,7 @@ class Cfg:
         self.sd_lag = 3
         self.sd_gate = True        # sensibilita Sa: False spegne sd<S50 (resta sd<=sd[-3])
         # --- letture alternative di punti ambigui (default = lettura piu letterale, vedi domande.md) ---
-        self.alt_arm_from_warmup = False       # Q1: armamento solo da barra >= warmup (default: da indicatori pronti)
+        self.alt_arm_early = False             # Q1/D008: default = si arma solo da barra >= warmup (200); True = da indicatori pronti
         self.alt_consume_reset_on_new_p = False  # Q4: il consumo CONT per tocco precoce si annulla se p riparte
         self.alt_cont_first_touch_only = False   # Q3: il primo tocco (tau-p>=3) deve soddisfare tutto, altrimenti CONT consumata
         self.alt_eval_from_arm_bar = False       # Q6: valutare il pattern gia alla barra di armamento t0
@@ -180,7 +180,7 @@ def detect(bars, cfg=None, trace=False):
     ep = None
     last_p = {1: -1, -1: -1}
     n_ep = 0
-    arm_from = cfg.warmup if cfg.alt_arm_from_warmup else 0
+    arm_from = 0 if cfg.alt_arm_early else cfg.warmup     # D008: episodi armati da barra 200
 
     def close_ep(e, reason):
         e.end = reason

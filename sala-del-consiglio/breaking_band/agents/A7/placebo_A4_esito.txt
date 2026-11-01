@@ -1,0 +1,5 @@
+CONT_H1 {"anni_sintetici": 300, "costo_medio_R": 0.04064929324106328, "esito": "SUPERATO", "lordo_medio_R": -0.0015664646043532396, "n": 748, "netto_medio_R": -0.04221575784541651, "z_lordo": -0.07783100753000544}
+INV_H1 {"anni_sintetici": 300, "costo_medio_R": 0.04079756201499285, "esito": "NON_CONCLUSIVO_N<100", "lordo_medio_R": 0.07302072896482895, "n": 90, "netto_medio_R": 0.03222316694983608, "z_lordo": 1.6592223321516868}
+CONT_M30 {"anni_sintetici": 300, "costo_medio_R": 0.05781556454420348, "esito": "SUPERATO", "lordo_medio_R": 0.014200034723001752, "n": 1384, "netto_medio_R": -0.04361552982120172, "z_lordo": 0.9253039869799754}
+INV_M30 {"anni_sintetici": 300, "costo_medio_R": 0.05906264600895695, "esito": "SUPERATO", "lordo_medio_R": -0.000893695364991679, "n": 147, "netto_medio_R": -0.059956341373948625, "z_lordo": -0.02038038707848943}
+tempo 40 s

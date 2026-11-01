@@ -159,9 +159,12 @@ def scenari():
     add(nome="C_N_band_riding_impulso_oltre_20_barre", dopo="CONT: impulso di 24 barre (band riding > 20) -> bulge disarmata",
         deltas=S(24, 2.0) + S(4, -0.8) + O(10) + S(3, -0.8), n_imp=24,
         segnali=[], episodi_fine=["impulso_lungo"], contatori={"ep_disarmati_impulso_lungo": 1}, flags=None)
-    add(nome="C_N_warmup", dopo="CONT: il segnale cadrebbe prima della barra 200 -> soppresso",
+    add(nome="C_N_warmup_nessun_armamento", dopo="CONT: D008, serie di 145 barre: nessuna barra >= 200, nessun episodio armato",
         deltas=S(8, 2.0) + S(4, -0.8) + O(10) + S(3, -0.8), n_imp=8, n_q=120,
-        segnali=[], contatori={"segnali_soppressi_warmup": 1}, flags=None)
+        segnali=[], contatori={"armati": 0, "segnali_soppressi_warmup": 0}, flags=None)
+    add(nome="C_mecc_warmup_soppresso", dopo="MECCANISMO (lettura alternativa alt_arm_early): armato prima di 200, il segnale a tau<200 e soppresso",
+        deltas=S(8, 2.0) + S(4, -0.8) + O(10) + S(3, -0.8), n_imp=8, n_q=120, cfg={"alt_arm_early": True},
+        segnali=[], contatori={"armati": 1, "segnali_soppressi_warmup": 1}, flags=None, solo_long=True)
     add(nome="C_mecc_MIN_RETR", dopo="MECCANISMO (parametro alterato min_retr=20): tocco a p+17 < 20 consuma l'episodio",
         deltas=S(8, 2.0) + S(4, -0.8) + O(10) + S(3, -0.8), n_imp=8, cfg={"min_retr": 20},
         segnali=[], contatori={"CONT_consumati_tocco_precoce": 1}, flags=None, solo_long=True)

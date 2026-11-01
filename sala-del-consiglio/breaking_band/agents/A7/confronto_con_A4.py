@@ -39,7 +39,7 @@ import pattern_piantati as PP        # noqa: E402
 import autotest_reimpl as AT         # noqa: E402  (regime_series)
 R, VG = PP.R, PP.VG
 
-ALT_FLAGS = ["alt_arm_from_warmup", "alt_consume_reset_on_new_p", "alt_cont_first_touch_only",
+ALT_FLAGS = ["alt_arm_early", "alt_consume_reset_on_new_p", "alt_cont_first_touch_only",
              "alt_eval_from_arm_bar", "alt_warmup_not_consume"]
 
 
@@ -159,15 +159,16 @@ def sintetico():
                 continue
             alldivs += compare_series(S, E, bars, 60, "%s[%s]" % (sc["nome"], tag), verbose=False)
     print("pattern piantati: %d divergenze" % len(alldivs))
-    print("\n=== CONFRONTO SU SERIE A REGIMI (6000 barre, 6 semi) ===")
+    print("\n=== CONFRONTO SU SERIE A REGIMI (6000 barre, 30 semi, TF 60 e 30) ===")
     n0 = len(alldivs)
     tot7 = tot4 = 0
-    for seed in range(1, 7):
+    for seed in range(1, 31):
         bars = AT.regime_series(6000, seed)
-        for var in ("CONT", "INV"):
-            s4, _ = a4_run(S, E, bars, 60, var); s7, _ = a7_run(bars, var)
-            tot7 += len(s7); tot4 += len(s4)
-        alldivs += compare_series(S, E, bars, 60, "regimi_seed%d" % seed, verbose=False)
+        for tf in (60, 30):
+            for var in ("CONT", "INV"):
+                s4, _ = a4_run(S, E, bars, tf, var); s7, _ = a7_run(bars, var)
+                tot7 += len(s7); tot4 += len(s4)
+            alldivs += compare_series(S, E, bars, tf, "regimi_seed%d" % seed, verbose=False)
     print("serie a regimi: %d segnali A7, %d segnali A4, %d divergenze" % (tot7, tot4, len(alldivs) - n0))
     print("\n--- DETTAGLIO DIVERGENZE ---")
     stampa_div(alldivs, 25)
