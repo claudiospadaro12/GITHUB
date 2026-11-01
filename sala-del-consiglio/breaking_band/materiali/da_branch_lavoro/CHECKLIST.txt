@@ -1,0 +1,275 @@
+✅ VALUTAZIONE UFFICIALE DEL PATTERN – BREAKING BAND 
+Tipo di pattern identificato
+☐ CONTINUAZIONE
+☐ INVERSIONE
+Motivazione sintetica della scelta: (indicare gli elementi visivi e strutturali che ti fanno classificare il pattern in una delle due categorie)
+✅ CHECKLIST UFFICIALE COMPILATA
+CONGESTIONE INIZIALE — peso 25%
+È la fase pre-bulge che prepara la compressione. Deve essere presente una CS (congestione standard) oppure una CDA (congestione direzionale ammissibile).
+A) Congestione Standard (CS) → laterale, compressione classica
+B) Congestione Direzionale Ammissibile (CDA) → canale/flag direzionale che riproduce la compressione matematica
+Nota operativa:
+La congestione iniziale, sia essa Congestione Standard (CS) o Congestione Direzionale Ammissibile (CDA), rappresenta esclusivamente una fase preparatoria del modello BREAKING BAND.
+La strategia si attiva solo se, e solo dopo, la congestione è seguita da un bulge valido, inteso come esplosione di volatilità conforme ai criteri ufficiali (bande fortemente aperte, deviazione standard in forte aumento, candele impulsive).
+Una struttura di congestione — anche ordinata, direzionale o tecnicamente pulita — che non genera successivamente un bulge NON costituisce un setup Breaking Band e non deve essere ulteriormente analizzata ai fini della strategia.
+In assenza di bulge, qualsiasi valutazione di ritracciamenti, rientri o test di banda è da considerarsi fuori metodo
+— CONGESTIONE STANDARD (CS)
+(Valida se almeno 4/5 criteri sono SI)
+Criterio
+Sì/No
+Bande in compressione chiara e progressiva
+☐
+Range candele ridotto e omogeneo
+☐
+Lateralità (assenza di direzionalità netta)
+☐
+Nessun micro-impulso significativo
+☐
+Deviazione standard bassa e stabile
+☐
+Regola: Se <4 criteri sono SÌ → CS non valida → valutare se esiste CDA.
+ — CONGESTIONE DIREZIONALE AMMISSIBILE (CDA)
+(Usare SOLO se la CS è assente - Valida solo se TUTTI i criteri sono YES)
+Criterio CDA
+Sì/No
+Deviazione standard in calo costante per ≥10–15 candele
+☐
+Deviazione standard < SMA50
+☐
+Bande di Bollinger in restringimento reale (ampiezza in calo 15–30%)
+☐
+Nessuna candela >1.5×ATR (fase di scarico pulita)
+☐
+Movimento ordinato in canale/flag senza impulsi contrari
+☐
+Regola CDA:
+Se TUTTI i criteri sono SÌ → CDA = Congestione valida (25%)
+Se NO anche un solo criterio → Congestione NON valida (0%)
+BULGE (Esplosione di volatilità) — peso 25%
+Il bulge è la condizione necessaria del modello Breaking Band .
+Tutti i criteri devono essere SÌ. Se un solo criterio è NO → pattern NON valido.
+Criterio
+Sì/No
+Bande molto aperte (“bocca di coccodrillo”)
+☐
+Deviazione standard sopra la sua SMA50
+☐
+Candele impulsive (1.5–3× ATR)
+☐
+Movimento netto e unidirezionale
+☐
+Mediana molto distante dal prezzo
+☐
+Impulso ≤ 20 candele
+☐
+Regola: Se un solo criterio è NO → setup invalidato.
+IDENTIFICAZIONE DEL PATTERN
+(Non contribuisce al punteggio, ma determina la checklist da applicare)
+Tipo pattern
+Flag
+CONTINUAZIONE → deve arrivare alla banda opposta
+☐
+INVERSIONE → deve rientrare alla mediana senza toccare la banda opposta
+☐
+STRUTTURA DEL RITRACCIAMENTO / RIENTRO — peso 20%
+Deve essere ordinato, coerente, “di scarico” post bulge.NOTA TECNICA DI INTERPRETAZIONE – RITRACCIAMENTO / RIENTRO ORDINATO
+Ai fini della compilazione della presente sezione, il concetto di ritracciamento ordinato (o rientro ordinato) va inteso prioritariamente come fase di scarico controllato della volatilità post-bulge e non come linearità geometrica perfetta del movimento.
+Sono pertanto ammissibili micro-rotazioni, piccoli zig-zag e rimbalzi intermedi, a condizione che:
+non siano presenti candele impulsive;
+non vi siano accelerazioni improvvise di volatilità;
+il movimento mantenga una struttura di decompressione e non di nuovo impulso.
+La valutazione dell’ordine del ritracciamento deve quindi basarsi sull’assenza di violenza e discontinuità, più che sulla perfetta direzionalità del percorso.
+NOTA TECNICA DI INTERPRETAZIONE – RITRACCIAMENTO / RIENTRO ORDINATO
+Ai fini della compilazione della presente sezione, il concetto di ritracciamento ordinato (o rientro ordinato) va inteso prioritariamente come fase di scarico controllato della volatilità post-bulge e non come linearità geometrica perfetta del movimento.
+Sono pertanto ammissibili micro-rotazioni, piccoli zig-zag e rimbalzi intermedi, a condizione che:
+non siano presenti candele impulsive;
+non vi siano accelerazioni improvvise di volatilità;
+il movimento mantenga una struttura di decompressione e non di nuovo impulso.
+La valutazione dell’ordine del ritracciamento deve quindi basarsi sull’assenza di violenza e discontinuità, più che sulla perfetta direzionalità del percorso.
+Richiesto almeno l’80% dei criteri rispettati .
+A. Struttura delle candele
+Criterio
+Sì/No
+Range ridotto del 30–50% rispetto al bulge
+☐
+Nessuna candela > 1.5× ATR
+☐
+Ombre ≤ 1.5× corpo
+☐
+Assenza di spike profondi o engulfing impulsivi durante il ritracciamento/rientro
+☐
+B. Direzionalità controllata
+Criterio
+Continuazione
+Inversione
+Movimento ordinato (no impulsi contrari)
+☐
+☐
+Deve procedere diretto verso la banda opposta
+☐
+----
+Deve rientrare verso la mediana senza toccare la banda opposta
+----
+☐
+Micro-rotazioni accettate se non impulsive
+☐
+☐
+C. Comportamento delle bande
+Criterio
+Continuazione
+Inversione
+Bande in restringimento dopo il bulge
+☐
+☐
+Banda del test piatta o inclinata a favore
+----
+☐
+Nessuna espansione contraria
+☐
+☐
+La banda opposta NON richiede compressione né inclinazione
+☐
+----
+TEST CHIAVE DEL PATTERN — peso 10%
+Il test è diverso per Continuazione e Inversione.
+CONTINUAZIONE
+Criterio
+Sì/No
+Test della banda opposta (obbligatorio)
+☐
+Candela del test NON impulsiva
+☐
+INVERSIONE
+Criterio
+Sì/No
+Test della banda dell’impulso
+☐
+NO contatto precedente con banda opposta
+☐
+Banda dell’impulso piatta/in compressione
+☐
+CONFERME TECNICHE — peso 5%
+Evento
+Continuazione
+Inversione
+Deviazione standard in calo
+☐
+☐
+Idealmente sotto la sua SMA50
+☐
+☐
+SMA50 inclinata a favore del setup
+☐
+☐
+Assenza news ad alto impatto imminenti
+☐
+☐
+INVALIDAZIONI ASSOLUTE (Se un solo punto è Sì → pattern NON valido)
+Evento
+Continuazione
+Inversione
+Candela impulsiva >1.5× ATR durante ritracciamento/test
+☐
+---
+Candela impulsiva >1.0 × ATR durante rientro/test mediana
+---
+☐
+Banda inclinata contro la direzione del trade
+---
+☐
+Banda si gonfia nel momento del test
+---
+☐
+Ritracciamento / rientro disordinato, spike profondi
+☐
+☐
+Nel pattern di inversione: tocco della banda opposta
+----
+☐
+Deviazione standard ancora alta/instabile
+☐
+☐
+🧮 MODELLO DI VALUTAZIONE DELLA SOLIDITÀ (% totale)
+Categoria
+Peso
+Congestione Iniziale
+25%
+Bulge
+25%
+Ritracciamento / Rientro Ordinato
+20%
+Comportamento delle Bande
+15%
+Test del Pattern
+10%
+Conferme Tecniche
+5%
+⭐ BONUS DI QUALITÀ (NON PESATI)
+(Non influenzano la solidità percentuale. Servono a identificare setup più maturi e operazioni di qualità superiore.)
+A. Candela di reazione sul test
+Criterio
+Sì/No
+Candela sul test con struttura di inversione NON impulsiva (pin bar, doji, piccolo engulfing)
+☐
+Rigetto pulito della banda testata
+☐
+Candela ≤ 1×ATR
+☐
+B. Comportamento del livello testato
+Criterio
+Sì/No
+Reazione immediata del prezzo al test (assenza di incertezza o congestione sporca)
+☐
+Test allineato alla micro-inclinazione della banda (piatta o a favore)
+☐
+Nessuno spike profondo nella candela precedente al test
+☐
+C. Fluidità del movimento
+Criterio
+Sì/No
+Ritracciamento/rientro con ritmo costante fino al test
+☐
+Nessuna candela impulsiva nelle 3 candele precedenti
+☐
+Deviazione standard in continuo calo fino al momento del test
+☐
+D. Bonus specifici per CONTINUAZIONE
+Criterio
+Sì/No
+Leggera perdita di inclinazione della banda opposta (non richiesta, ma positiva)
+☐
+Test avvenuto dopo micro-range prestabilizzato
+☐
+Candela del test con corpo piccolo e spike ordinato
+☐
+E. Bonus specifici per INVERSIONE
+Criterio
+Sì/No
+Banda dell’impulso perfettamente piatta nelle ultime 3 candele
+☐
+Rientro molto graduale e “di scarico”
+☐
+Rigetto evidente sulla banda dell’impulso al retest
+☐
+🎯 Regola operativa della sezione BONUS
+0–1 bonus → setup valido ma non eccellente
+2–3 bonus → setup buono
+4+ bonus → setup di qualità superiore
+NON può correggere un pattern che ha invalidazioni ufficiali
+NON altera la solidità (%) della checklist pesata
+📈 9. Percentuale di Successo Associata (Basata sulla solidità finale)
+Solidità
+Qualità
+Probabilità
+85–100%
+Ottimo
+65–75%
+70–84%
+Buono
+55–65%
+55–69%
+Medio
+45–55%
+<55%
+Debole
+<45%

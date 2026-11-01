@@ -1,0 +1,59 @@
+PASS  dati sintetici M1 coerenti (OHLC, tempi crescenti) | 43200 barre M1; nessuna anomalia
+PASS  aggregazione M1->H1 (barre complete) | 720 barre H1
+PASS  aggregazione H1: open/high/low/close della barra #100 = M1 corrispondenti
+PASS  ATR a mano (SMA: [nan,1.5,2.0]; Wilder: [nan,1.5,1.75])
+PASS  troncamento: segnale corretto -> SUPERATO | 683 tagli, 88 segnali nella regione, nessuna differenza
+PASS  perturbazione futuro: segnale corretto -> SUPERATO | 40 perturbazioni del futuro, passato invariato
+PASS  specchio: segnale simmetrico corretto -> SUPERATO | specchio coerente: orig L/S=48/40 -> specchio L/S=40/48
+PASS  specchio con offset positivo (p'=K-p): segnale corretto -> SUPERATO | specchio coerente: orig L/S=48/40 -> specchio L/S=40/48
+PASS  riproducibilita: segnale deterministico -> SUPERATO | 2 esecuzioni, hash identico 5289ea97c1902d94
+PASS  difetto look-ahead di 1 barra -> troncamento FALLITO | 46/683 tagli con output diverso; primo: taglio k=68, mismatch su 'signal' alla barra j=68
+INFO  look-ahead di 1 barra con 200 perturbazioni casuali -> esito=FALLITO (13/200 perturbazioni cambiano il passato; primo: k=164, mismatch su 'signal' alla barra j=164); con le 40 di default puo mancare
+PASS  difetto look-ahead di 5 barre -> troncamento FALLITO | 170/683 tagli con output diverso; primo: taglio k=67, mismatch su 'signal' alla barra j=67
+PASS  difetto look-ahead di 5 barre -> perturbazione FALLITO | 8/40 perturbazioni cambiano il passato; primo: k=186, mismatch su 'signal' alla barra j=183
+PASS  difetto statistica globale sul campione -> almeno uno tra troncamento e perturbazione FALLITO | troncamento=FALLITO, perturbazione=SUPERATO
+PASS  difetto asimmetria long/short (finestre 20 vs 30) -> specchio FALLITO | 'signal': 19 barre non speculari (prima j=218) | segnali orig L/S=44/31, specchio L/S=40/34
+PASS  difetto non determinismo (rumore non seminato) -> riproducibilita FALLITO | hash diversi: c9b9edbbaf04, df214b828145
+PASS  segnale sempre nullo -> troncamento NON_CONCLUSIVO (mai SUPERATO) | nessuna differenza ma solo 0 segnali nella regione testata (<5): controllo vuoto
+PASS  segnale sempre nullo -> specchio NON_CONCLUSIVO | segnali insufficienti per concludere (L=0, S=0)
+PASS  riproducibilita su processo (script deterministico) -> SUPERATO | 2 esecuzioni (PYTHONHASHSEED diversi), sha256 uguale fc35904d36769d8d
+PASS  riproducibilita su processo (script casuale) -> FALLITO | sha256 diversi: 47da56ff17d4, 1839abef591b
+PASS  hash criteri invariato -> SUPERATO | sha256 attuale d74f0424cf1677a1 == atteso d74f0424cf1677a1
+PASS  hash criteri dopo modifica della soglia -> FALLITO | sha256 attuale 1f27d23f2c06a4ed != atteso d74f0424cf1677a1
+PASS  criteri piu recenti dei risultati -> FALLITO (evidenza debole) | criteri modificati DOPO 1 file risultati (es. /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/tmpA7/tmprpolcuxv/ris.csv)
+PASS  criteri precedenti ai risultati -> SUPERATO (evidenza debole) | mtime criteri <= mtime di tutti i 1 file risultati (evidenza debole)
+PASS  seme da file riproducibile e campione di 20 deterministico e ordinato
+PASS  imbuto coerente (cumulativo, ricalcolo, riconciliazione segnali=trade+scartati) -> SUPERATO | imbuto coerente (3 stadi)
+PASS  imbuto con conteggio alterato -> FALLITO | stadio 'congestione': riportato 124, ricalcolato 121
+PASS  imbuto con stadio finale > stadio precedente -> FALLITO | stadio 'rientro' (122) > stadio 'congestione' (121)
+PASS  imbuto che non riconcilia segnali = trade + scartati -> FALLITO | n_signals 61 != n_trades 3 + n_skipped 2
+PASS  nessuna sovrapposizione (trade disgiunti) -> SUPERATO | 2 trade, nessuna sovrapposizione
+PASS  trade che entra con un altro aperto -> FALLITO | trade #1 entra alle 2020-01-06 11:00 mentre #0 e aperto fino a 2020-01-06 12:30
+PASS  segnale noto mentre il trade precedente e aperto (ingresso dopo l'uscita) -> FALLITO | trade #1: segnale noto alle 2020-01-06 12:00 con #0 ancora aperto (uscita 2020-01-06 12:30)
+PASS  ingresso alla barra successiva -> SUPERATO | 2 trade, ingresso sempre alla barra successiva
+PASS  ingresso sulla stessa barra o in ritardo -> FALLITO | trade #0: ingresso 2020-01-08 02:00 != barra successiva 2020-01-08 03:00; trade #1: ingresso 2020-01-09 10:00 != barra successiva 2020-01-09 09:00
+PASS  sim a mano: long a target, ask 100,20 -> uscita 101,00 pnl +0,80 | pnl=0.8000
+PASS  sim a mano: short, lo spread impedisce il target alla barra 1 e lo concede alla 2 (pnl +1,00) | idx=2 pnl=1.0000
+PASS  sim a mano (chart_bid_cost): short colpisce il target in barra 1 sul grafico, paga lo spread in uscita (pnl +0,80) | idx=1 pnl=0.8000
+PASS  stop-first: barra con stop e target -> esce a STOP, both_touched=True, pnl = 99,00-100,20 = -1,20 | reason=stop pnl=-1.2000
+PASS  stop-first (short): stop e target nella stessa barra -> STOP, pnl = 100,00-101,00 = -1,00 | reason=stop pnl=-1.0000
+PASS  la barra di ingresso e controllata (stop toccato in barra 0, uscita idx 0)
+PASS  gap oltre lo stop: fill all'open peggiore 98,50 (pnl = 98,50-100,20 = -1,70) | exit=98.50
+PASS  target ricalcolato: nuovo livello efficace dalla barra 10:02 -> uscita a target 100,50 in idx 2
+PASS  target ricalcolato: se il nuovo livello vale dalla barra dopo, NON scatta in idx 2 (fine dati)
+PASS  chiusura forzata all'open della barra: long esce a bid 100,20 pnl 100,20-100,20 = 0 (spread pagato) | pnl=0.0000
+PASS  chiusura forzata short: entry bid 100,00, uscita ask 100,40 -> pnl -0,40 | pnl=-0.4000
+PASS  entry_time prima dei dati -> prima M1 disponibile, entry_gap_min riportato
+PASS  spread (chart_bid_cost): long e short su movimenti speculari pagano lo stesso costo (pnl uguali = 0,80) | L=0.8000 S=0.8000
+PASS  simmetria del simulatore (executable, specchio bid/ask, spread variabile): 400 trade, pnl/uscita identici | differenze=0; uscite stop/target/forzata=143/192/65
+PASS  simmetria del simulatore (chart_bid_cost, specchio negate, spread costante 25 punti): 400 trade identici | differenze=0; uscite stop/target/forzata=129/192/79
+PASS  proprieta documentata: chart_bid_cost con spread VARIABILE NON e speculare (il test lo rileva) | trade non speculari=388/400
+PASS  confronto log/ricalcolo su 20 trade identici -> SUPERATO | 20 trade identici entro 1e-06; motore n/win/PF=20/12/0.9094, ricalcolo=20/12/0.9094
+PASS  log con un pnl alterato di 0,05 -> FALLITO | 1 differenze su 20 trade; prima: trade #3 pnl motore 5.05000 != ricalcolo 5.00000
+PASS  log con motivo di uscita alterato -> FALLITO | 1 differenze su 20 trade; prima: trade #5 motivo uscita motore 'stop' != ricalcolo 'target'
+PASS  compare_summary n/wins/PF identici -> SUPERATO
+PASS  compare_summary con PF diverso dell'1% -> FALLITO
+PASS  summarize_pnls a mano (n=5, wins=3, PF=2,75)
+PASS  trace_trade produce una tabella per la ricostruzione a mano
+
+AUTO-TEST: 56/56 controlli riusciti in 3.1 s - ESITO GLOBALE: SUPERATO

@@ -2,15 +2,15 @@
  "project_id": "BB-2026-11-01",
  "project_name": "Breaking Band sull'oro",
  "mode": "REALE",
- "state_version": 1,
- "updated_at": "2026-11-01T07:54:27+00:00",
+ "state_version": 2,
+ "updated_at": "2026-11-01T08:01:57+00:00",
  "candidate_version": null,
  "phase": "Ciclo 0 - analisi indipendenti (fase 1)",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
   "available_parallel_slots": ">=6 (provato lanciando 6 agenti insieme)",
-  "active_processes": 6
+  "active_processes": 2
  },
  "agents": [
   {
@@ -33,7 +33,7 @@
    "id": "A2",
    "role": "Strategia e dominio",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -41,7 +41,7 @@
    "id": "A3",
    "role": "Evidenze e dati",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -49,7 +49,7 @@
    "id": "A4",
    "role": "Esecuzione (motore)",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -57,7 +57,7 @@
    "id": "A5",
    "role": "Adozione ed economia",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -86,7 +86,7 @@
     "R001",
     "R010"
    ],
-   "status": "IN_CORSO"
+   "status": "COMPLETATO (rapporto ricevuto; artefatti controllati da C0: A4 26 test rieseguiti OK, A3 script rieseguito, A2/A5 file presenti)"
   },
   {
    "id": "T002",
@@ -94,7 +94,7 @@
    "requirement_ids": [
     "R002"
    ],
-   "status": "IN_CORSO"
+   "status": "COMPLETATO (rapporto ricevuto; artefatti controllati da C0: A4 26 test rieseguiti OK, A3 script rieseguito, A2/A5 file presenti)"
   },
   {
    "id": "T003",
@@ -102,7 +102,7 @@
    "requirement_ids": [
     "R003"
    ],
-   "status": "IN_CORSO"
+   "status": "COMPLETATO (rapporto ricevuto; artefatti controllati da C0: A4 26 test rieseguiti OK, A3 script rieseguito, A2/A5 file presenti)"
   },
   {
    "id": "T004",
@@ -110,7 +110,7 @@
    "requirement_ids": [
     "R008"
    ],
-   "status": "IN_CORSO"
+   "status": "COMPLETATO (rapporto ricevuto; artefatti controllati da C0: A4 26 test rieseguiti OK, A3 script rieseguito, A2/A5 file presenti)"
   },
   {
    "id": "T005",
@@ -135,6 +135,11 @@
    "id": "H001",
    "text": "Le soglie numeriche mancanti della Guida Operativa 11 si traducono dalla Checklist con interpretazione dichiarata",
    "label": "IPOTESI"
+  },
+  {
+   "id": "H002",
+   "text": "Guida Operativa 11 e Dichiarazione di Test trovate sul branch lavoro (docs/breaking_band/), copiate in materiali/da_branch_lavoro/. Guida letta da C0 in fase 1 dopo i contributi di A2/A3/A4/A5 (che non l'avevano).",
+   "label": "FATTO_VERIFICATO"
   }
  ],
  "evidence": [],
@@ -149,5 +154,5 @@
  "checks": [],
  "scores": [],
  "artifacts": [],
- "last_event_id": "E002"
+ "last_event_id": "E005"
 }

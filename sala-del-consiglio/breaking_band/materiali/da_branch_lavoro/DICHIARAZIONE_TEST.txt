@@ -1,0 +1,16 @@
+DICHIARAZIONE DI TEST
+Candela
+Tipo contatto
+Banda
+Direzione bulge
+Ultima rossa
+Ultima verde
+Spike test
+Spike violazione
+Corpo Test
+Corpo Violazione
+Superiore verde
+inferiore rossa
+mediana blu
+rialzista
+ribassista
