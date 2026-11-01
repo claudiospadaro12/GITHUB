@@ -552,7 +552,7 @@ class _Macchina:
         n_ += bool(max(osup[u - 1], oinf[u - 1]) < DA["BN_B3_OMBRA"] * float(c.atr[u - 2]))      # B3
         dc = np.abs(np.diff(c.b.c[ep.p:u + 1]))
         n_ += bool(dc.mean() > 0 and dc.std() / dc.mean() <= DA["BN_C1_CV"])                     # C1
-        n_ += bool(np.all(c.ztr[u - 3:u] <= DA["BN_C2_Z"]))                                      # C2
+        n_ += bool(np.all(c.ztr[u - DA["BN_C2_N"]:u] <= DA["BN_C2_Z"]))                                      # C2
         k = DA["BN_C3_N"]
         n_ += bool(np.all(c.sd[u - k + 1:u + 1] <= c.sd[u - k:u]))                               # C3
         if inv:

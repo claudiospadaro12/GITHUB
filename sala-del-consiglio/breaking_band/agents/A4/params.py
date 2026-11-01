@@ -60,7 +60,7 @@ DESCRITTORI_A2 = {
     "X2_Z": 1.0, "X3_TOL": 0.10, "X4_SD": 1.05, "X7_SD2": 1.10,
     # bonus
     "BN_A1_Z": 1.0, "BN_A1_CORPO": 0.3, "BN_A1_OMBRA": 2.0, "BN_A1_TERZO": 3.0, "BN_A1_ENG": 0.75,
-    "BN_A3_Z": 1.0, "BN_B2_TOL": 0.10, "BN_B3_OMBRA": 1.0, "BN_C1_CV": 0.75, "BN_C2_Z": 1.5, "BN_C3_N": 5,
+    "BN_A3_Z": 1.0, "BN_B2_TOL": 0.10, "BN_B3_OMBRA": 1.0, "BN_C1_CV": 0.75, "BN_C2_Z": 1.5, "BN_C2_N": 3, "BN_C3_N": 5,
     "BN_D1": 5, "BN_D2_FIN": 4, "BN_D2_ATR": 1.0, "BN_D3_CORPO": 0.40, "BN_D3_OMBRA": 1.0,
     "BN_E1_TOL": 0.05, "BN_E2_LUN": 5, "BN_E2_Z": 0.75, "BN_E3_OMBRA": 1.5,
 }
