@@ -1,0 +1,1 @@
+2026-11-01 09:36:34 | confronto_con_A4 REALE | autorizzazione C0: C0 01/11/2026: autorizzo i 4 CSV reali per la verifica del run primario (messaggio fase run1) | dir=/tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/exp_all | tf=[60, 30] | hash CSV verificati contro HASH_DATI

@@ -1,0 +1,15 @@
+2013     CONT TF=60 A4: segnali=8  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
+2013     CONT TF=60 A7: segnali=8  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
+2013     INV  TF=60 A4: segnali=1  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
+2013     INV  TF=60 A7: segnali=1  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
+2013     CONT TF=30 A4: segnali=17  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
+2013     CONT TF=30 A7: segnali=17  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
+2013     INV  TF=30 A4: segnali=1  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
+2013     INV  TF=30 A7: segnali=1  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
+2020     CONT TF=60 A4: segnali=4  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
+2020     CONT TF=60 A7: segnali=4  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
+2020     INV  TF=60 A4: segnali=1  troncamento=SUPERATO perturbazione=NON_CONCLUSIVO riprod=SUPERATO
+2020     INV  TF=60 A7: segnali=1  troncamento=SUPERATO perturbazione=NON_CONCLUSIVO riprod=SUPERATO specchio=SUPERATO
+2020     CONT TF=30 A4: segnali=19  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
+2020     CONT TF=30 A7: segnali=19  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
+2020     INV  TF=30 A4: segnali=1  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO

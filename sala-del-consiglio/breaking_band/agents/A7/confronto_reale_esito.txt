@@ -1,0 +1,28 @@
+ABTG_M1_XAUUSD_2013.csv TF=60: barre A7=5874 A4=5874 identiche=True
+CONT   ABTG_M1_XAUUSD_2013.csv_tf60                                 A7=8 A4=8 OK
+INV    ABTG_M1_XAUUSD_2013.csv_tf60                                 A7=1 A4=1 OK
+ABTG_M1_XAUUSD_2013.csv TF=30: barre A7=11727 A4=11727 identiche=True
+CONT   ABTG_M1_XAUUSD_2013.csv_tf30                                 A7=17 A4=17 OK
+INV    ABTG_M1_XAUUSD_2013.csv_tf30                                 A7=1 A4=1 OK
+ABTG_M1_XAUUSD_2018.csv TF=60: barre A7=5873 A4=5873 identiche=True
+CONT   ABTG_M1_XAUUSD_2018.csv_tf60                                 A7=5 A4=5 OK
+INV    ABTG_M1_XAUUSD_2018.csv_tf60                                 A7=1 A4=1 OK
+ABTG_M1_XAUUSD_2018.csv TF=30: barre A7=11744 A4=11744 identiche=True
+CONT   ABTG_M1_XAUUSD_2018.csv_tf30                                 A7=13 A4=13 OK
+INV    ABTG_M1_XAUUSD_2018.csv_tf30                                 A7=3 A4=3 OK
+ABTG_M1_XAUUSD_2020.csv TF=60: barre A7=5904 A4=5904 identiche=True
+CONT   ABTG_M1_XAUUSD_2020.csv_tf60                                 A7=4 A4=4 OK
+INV    ABTG_M1_XAUUSD_2020.csv_tf60                                 A7=1 A4=1 OK
+ABTG_M1_XAUUSD_2020.csv TF=30: barre A7=11808 A4=11808 identiche=True
+CONT   ABTG_M1_XAUUSD_2020.csv_tf30                                 A7=19 A4=19 OK
+INV    ABTG_M1_XAUUSD_2020.csv_tf30                                 A7=1 A4=1 OK
+ABTG_M1_XAUUSD.csv TF=60: barre A7=10280 A4=10280 identiche=True
+CONT   ABTG_M1_XAUUSD.csv_tf60                                      A7=2 A4=2 OK
+INV    ABTG_M1_XAUUSD.csv_tf60                                      A7=3 A4=3 OK
+ABTG_M1_XAUUSD.csv TF=30: barre A7=20552 A4=20552 identiche=True
+CONT   ABTG_M1_XAUUSD.csv_tf30                                      A7=8 A4=8 OK
+INV    ABTG_M1_XAUUSD.csv_tf30                                      A7=5 A4=5 OK
+
+--- DETTAGLIO DIVERGENZE ---
+
+ESITO CONFRONTO REALE: NESSUNA DIVERGENZA
