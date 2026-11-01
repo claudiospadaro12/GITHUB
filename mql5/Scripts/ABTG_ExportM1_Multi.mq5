@@ -27,8 +27,8 @@
 #property script_show_inputs
 #property version "1.00"
 
-input string InpSimboli  = "EURUSD,GBPUSD,USDJPY,EURJPY,D30EUR,U30USD,NAS100|US100|USTEC|U100USD|NDX100,SPX500|US500|U500USD"; // voci (alias con |)
-input string InpFinestre = "2013.01.01-2014.01.01,2018.01.01-2019.01.01,2020.01.01-2021.01.01,2025.01.01-2026.10.01";            // finestre da-a (a esclusa)
+input string InpSimboli  = "EURUSD,GBPUSD,USDJPY,EURJPY"; // voci (alias con |)
+input string InpFinestre = "2015.01.01-2016.01.01,2017.01.01-2018.01.01,2019.01.01-2020.01.01,2022.01.01-2023.01.01";            // finestre da-a (a esclusa)
 input bool   InpChiudiTerminale = false;   // true SOLO nel lancio automatico
 
 #define F_SIMBOLI   "ABTG_SIMBOLI_BCM.txt"
