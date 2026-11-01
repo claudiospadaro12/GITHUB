@@ -48,7 +48,7 @@ def barre_da_dict(bars: dict, periodo_min: int) -> E.Barre:
 
 
 def spread_barre(m1: E.M1, barre: E.Barre, punto: float | None = None) -> np.ndarray:
-    """Spread di barra in USD = MEDIANA degli spread delle M1 della barra (solo per descrittori e Sf)."""
+    """Spread di barra in unita di prezzo = MEDIANA degli spread delle M1 della barra (solo per descrittori e Sf)."""
     punto = PARAMS["PUNTO"] if punto is None else punto
     out = np.empty(barre.n)
     for k in range(barre.n):
@@ -134,7 +134,7 @@ class _Ctx:
         self.arm = {d: self._armamento(self.vista[d]) for d in (1, -1)}
         self._cong: dict = {}
         if prm["TOCCO_PEN_SPREAD"] and sp_bar is None:
-            raise ValueError("TOCCO_PEN_SPREAD != 0 richiede sp_bar (spread di barra in USD)")
+            raise ValueError("TOCCO_PEN_SPREAD != 0 richiede sp_bar (spread di barra in unita di prezzo)")
 
     # --- criteri B1..B6 (vettoriali, causali: la riga t usa solo barre <= t)
     def _armamento(self, v: _Vista) -> dict:
@@ -628,7 +628,7 @@ class _Macchina:
 def rileva(barre: E.Barre, ind: E.Indicatori, variante: str, prm: dict | None = None, sp_bar=None) -> dict:
     """Esegue la macchina a stati per una variante ('CONT' | 'INV') su UNA serie (un periodo, un TF).
 
-    sp_bar: spread di barra in USD (solo per la sensibilita Sf e per il descrittore penetrazione<spread).
+    sp_bar: spread di barra in unita di prezzo (solo per la sensibilita Sf e per il descrittore penetrazione<spread).
     Ritorna un dict con 'segnali' (lista di dict con j, side, descrittori), 'imbuto_barre', 'imbuto_episodi',
     'armati', 'fine_episodi', 'extra', 'episodi'."""
     if variante not in VARIANTI:

@@ -80,15 +80,26 @@ DISEGNO = {
     "FASCE_ORA": ((0, 7), (8, 15), (16, 23)),
     # placebo
     "PLACEBO_TARGET_SEGNALI": 1500, "PLACEBO_MAX_ANNI": 300, "PLACEBO_Z_MAX": 3.0, "PLACEBO_N_MIN": 100,
-    "PLACEBO_MIN_PER_ANNO": 350000, "PLACEBO_PREZZO": 2000.0, "PLACEBO_SPREAD_PUNTI": 25.0,
-    "GARCH_ALPHA": 0.08, "GARCH_BETA": 0.90, "PLACEBO_VOL_H": 1.5,
+    "PLACEBO_MIN_PER_ANNO": 350000, "PLACEBO_PREZZO_PUNTI": 200000.0, "PLACEBO_SPREAD_PUNTI": 25.0,
+    "GARCH_ALPHA": 0.08, "GARCH_BETA": 0.90, "PLACEBO_VOL_H_PUNTI": 150.0,
     "PLACEBO_SOTTOPASSI": 4, "PLACEBO_BLOCCO": 1440, "PLACEBO_RIMESCOLAMENTI": 200,
 }
 
-# Righe attese per file (audit A3) e nomi dei periodi
+# Strumenti: dimensione del punto (spread del CSV in punti -> prezzo) e file. SOLO modifiche strumentali (ciclo 1).
+# PUNTO e' un argomento di run_test.py (--punto); se omesso si usa quello noto del simbolo (--simbolo, default XAUUSD).
+PUNTI_NOTI = {"XAUUSD": 0.01, "EURUSD": 0.00001, "GBPUSD": 0.00001, "USDJPY": 0.001, "EURJPY": 0.001}
+SIMBOLO_DEFAULT = "XAUUSD"
+# Righe attese per file (audit A3, solo oro)
 ATTESE_RIGHE = {"2013": 348647, "2018": 349730, "2020": 351258, "2025-26": 611062}
-FILE_PERIODI = {"2013": "ABTG_M1_XAUUSD_2013.csv", "2018": "ABTG_M1_XAUUSD_2018.csv",
-                "2020": "ABTG_M1_XAUUSD_2020.csv", "2025-26": "ABTG_M1_XAUUSD.csv"}
+
+
+def file_periodi(simbolo):
+    """Nomi dei 4 file: ABTG_M1_<SIMBOLO>_2013/_2018/_2020.csv e ABTG_M1_<SIMBOLO>.csv (gen 2025 - set 2026)."""
+    return {"2013": "ABTG_M1_%s_2013.csv" % simbolo, "2018": "ABTG_M1_%s_2018.csv" % simbolo,
+            "2020": "ABTG_M1_%s_2020.csv" % simbolo, "2025-26": "ABTG_M1_%s.csv" % simbolo}
+
+
+FILE_PERIODI = file_periodi(SIMBOLO_DEFAULT)      # compatibilita: i nomi dell'oro
 
 
 def parametri(**override):

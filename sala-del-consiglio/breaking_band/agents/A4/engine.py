@@ -5,7 +5,7 @@ fornisce dati M1 -> barre H1/M15 -> indicatori (senza look-ahead) -> simulazione
 trade dato un segnale -> filtro "una posizione alla volta" -> statistiche.
 
 Convenzioni (tutte dichiarate, vedi README.md):
-- I prezzi dei CSV sono BID. ask = bid + spread. spread in punti, 1 punto = 0,01 USD.
+- I prezzi dei CSV sono BID. ask = bid + spread. spread in punti (1 punto = params.PUNTO nel prezzo: 0,01 per l'oro, 0,00001 per EURUSD).
 - Tempo: minuti interi dall'epoca (int64), come nel CSV (ora server, nessuna conversione).
 - Un segnale alla chiusura della barra j -> ingresso all'apertura della PRIMA M1 della barra j+1.
 - Long: entra ask (open + spread), esce a bid. Short: entra bid (open), esce ask (bid + spread).
@@ -307,11 +307,11 @@ def simula_trade(m1: M1, barre: Barre, ind: Indicatori, j: int, side, stop_atr: 
     NO_BARRA_SUCCESSIVA, INDICATORI_NON_PRONTI, GAP_INGRESSO, TARGET_OLTRE_INGRESSO.
     Se eseguito: eseguito=True, j, side, entry_m1, entry_time, entry, stop, target0, target_finale,
     n_agg_target, targets (SCHEDULE completa [(minuto_da_cui_vale, livello), ...], la prima voce e il
-    target iniziale valido dalla M1 di ingresso), rischio (D in USD), exit_m1, exit_time, exit,
+    target iniziale valido dalla M1 di ingresso), rischio (D in unita di prezzo), exit_m1, exit_time, exit,
     motivo ('SL'|'TP'|'MKT'|'TF'|'FINE_DATI'), R (netto), R_lordo (senza spread), costo_spread_R,
     durata_barre, durata_minuti, bar_ingresso, bar_uscita, gap_ingresso_min, sl_e_tp_stesso_minuto,
     spread0_ingresso / spread0_uscita (spread sostituito da sostituisci_spread_zero), spread_ingresso
-    (USD), atr (ATR della barra segnale).
+    (unita di prezzo), atr (ATR della barra segnale).
     """
     s = _lato(side)
     if maxhold < 1:
@@ -346,7 +346,7 @@ def simula_trade(m1: M1, barre: Barre, ind: Indicatori, j: int, side, stop_atr: 
     x = None          # indice M1 di uscita
     fill = None
     motivo = None
-    sp_x = 0.0        # spread (USD) alla M1 di uscita
+    sp_x = 0.0        # spread (unita di prezzo) alla M1 di uscita
     both = False
     n_agg = 0
     bar_a = j + 1

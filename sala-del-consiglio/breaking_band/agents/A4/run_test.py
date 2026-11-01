@@ -28,8 +28,8 @@ import numpy as np  # noqa: E402
 
 import engine as E  # noqa: E402
 import signals as S
-from params import (ATTESE_RIGHE, DESCRITTORI_A2, DISEGNO, FILE_PERIODI, PARAMS, SENSIBILITA, parametri,
-                    ricalcolo_barre)
+from params import (ATTESE_RIGHE, DESCRITTORI_A2, DISEGNO, PARAMS, PUNTI_NOTI, SENSIBILITA, SIMBOLO_DEFAULT,
+                    file_periodi, parametri, ricalcolo_barre)
 
 TF_NOME = {60: "H1", 30: "M30"}
 VARIANTI = S.VARIANTI
@@ -307,12 +307,14 @@ def tabella_baseline(trades: list, bl: dict) -> dict:
 
 
 # =============================================================================== placebo
-def genera_placebo_m1(rng, n_min: int, prezzo0: float, spread_pt: float, t0: int, sott: int) -> E.M1:
+def genera_placebo_m1(rng, n_min: int, prezzo0: float, spread_pt: float, t0: int, sott: int,
+                      vol_h: float) -> E.M1:
     """M1 sintetico a deriva zero, volatilita raggruppata (GARCH(1,1) sull'ora), percorso con `sott` sotto-passi
-    per minuto (high/low = estremi del percorso). Prezzi BID, spread costante."""
+    per minuto (high/low = estremi del percorso). Prezzi BID, spread costante (in punti). prezzo0 e vol_h (sd oraria)
+    in unita di prezzo: il chiamante li ricava da costanti in PUNTI del simbolo (DISEGNO.PLACEBO_*_PUNTI * PUNTO)."""
     D = DISEGNO
     n_h = n_min // 60 + 1
-    v0 = D["PLACEBO_VOL_H"] ** 2
+    v0 = vol_h ** 2
     omega = v0 * (1.0 - D["GARCH_ALPHA"] - D["GARCH_BETA"])
     e = rng.standard_normal(n_h)
     v = np.empty(n_h)
@@ -337,8 +339,9 @@ def placebo(prm: dict, tfs, target: int, max_anni: int, seed: int) -> dict:
     chunk = 0
     while chunk < max_anni and any(len(acc[k]) < target for k in chiavi):
         rng = np.random.default_rng(seed + chunk)
-        m1 = genera_placebo_m1(rng, D["PLACEBO_MIN_PER_ANNO"], D["PLACEBO_PREZZO"], D["PLACEBO_SPREAD_PUNTI"],
-                               t0, D["PLACEBO_SOTTOPASSI"])
+        m1 = genera_placebo_m1(rng, D["PLACEBO_MIN_PER_ANNO"], D["PLACEBO_PREZZO_PUNTI"] * prm["PUNTO"],
+                               D["PLACEBO_SPREAD_PUNTI"], t0, D["PLACEBO_SOTTOPASSI"],
+                               D["PLACEBO_VOL_H_PUNTI"] * prm["PUNTO"])
         for tf in tfs:
             barre = E.costruisci_barre(m1, tf)
             ind = E.indicatori(barre)
@@ -689,7 +692,7 @@ def _esegui(args):
         atr_med = float(np.nanmedian(ind.atr14))
         tr = [t for t in primario if t["periodo"] == per.nome]
         T8[per.nome] = {
-            "buy_and_hold_in_ATR": float((b.c[-1] - b.c[0]) / atr_med), "atr_mediana_usd": atr_med,
+            "buy_and_hold_in_ATR": float((b.c[-1] - b.c[0]) / atr_med), "atr_mediana_prezzo": atr_med,
             "long": {"n": sum(1 for t in tr if t["side"] == 1),
                      "media_R": float(np.mean([t["R"] for t in tr if t["side"] == 1])) if any(t["side"] == 1 for t in tr) else None},
             "short": {"n": sum(1 for t in tr if t["side"] == -1),
