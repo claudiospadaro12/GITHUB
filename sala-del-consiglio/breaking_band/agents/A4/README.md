@@ -8,7 +8,7 @@ Solo libreria standard + numpy. Esecuzione di tutto con `python3 -I <file>` (i f
 | `engine.py` | dati M1, barre H1/M30, indicatori, simulazione del trade, filtro una posizione, statistiche |
 | `signals.py` | macchina a stati CONT / INV (`rileva`), imbuto per stadi, descrittori, `signal_fn_factory` per A7 |
 | `run_test.py` | produce T1-T9 + verdetto (JSON + markdown) con parametri e sha256 dei file letti nell'intestazione |
-| `test_engine.py` (30 test), `test_signals.py` (31), `test_run.py` (11) | test su dati SINTETICI |
+| `test_engine.py` (30 test), `test_signals.py` (31), `test_run.py` (15) | test su dati SINTETICI |
 | `domande.md` | punti ambigui della specifica e letture implementate (da leggere PRIMA dell'hash) |
 
 ## Uso
@@ -18,6 +18,8 @@ python3 -I run_test.py --dir <cartella 4 CSV> --out <prefisso> --congelati <.../
         --hash-dati <.../congelati/HASH_DATI.txt> [--parte-a NON_VALUTATA|VERIFICATO|NON_VERIFICATO] \
         [--placebo-blocchi N]
 ```
+**Strumento (ciclo 1, estensione EURUSD)**: `--simbolo` (default `XAUUSD`; determina solo i nomi dei file `ABTG_M1_<SIMBOLO>_2013/_2018/_2020.csv` e `ABTG_M1_<SIMBOLO>.csv`) e `--punto` (dimensione del punto nel prezzo; se omesso si usa quello noto del simbolo in `params.PUNTI_NOTI`: XAUUSD 0,01, EURUSD 0,00001, GBPUSD 0,00001, USDJPY/EURJPY 0,001; simbolo ignoto senza `--punto` = errore). Con i default il comportamento sull'oro e quello congelato. Le costanti del placebo sono in PUNTI del simbolo (`PLACEBO_PREZZO_PUNTI`, `PLACEBO_VOL_H_PUNTI`, `PLACEBO_SPREAD_PUNTI`). L'intestazione registra `simbolo` e `punto`. Esempio: `python3 -I run_test.py --dir <cartella> --simbolo EURUSD --out <prefisso> ...`.
+
 `--solo-h1`, `--placebo-target`, `--placebo-max-anni`, `--prova` sono SOLO per prove e segnano l'intestazione `PARAMETRI_NON_CONGELATI_PROVA=true`. Output: `<prefisso>.json` (senza timestamp: due esecuzioni identiche hanno lo stesso `sha256_risultati`) e `<prefisso>.md`.
 
 ## Motore (engine.py)
@@ -33,6 +35,7 @@ python3 -I run_test.py --dir <cartella 4 CSV> --out <prefisso> --congelati <.../
 - Un solo percorso di codice: il caso d=-1 e lo SPECCHIO dei prezzi (`_Vista`). Causale: picco `p` = massimo corrente, nessun pivot a destra.
 - Stadi CONT: armati, finestra (tau-p >= 3), C0 tocco banda opposta, C3 sequenza (SEQ), C1a ritracciamento non impulsivo, C1b candela test non impulsiva, sd<S50, sd<=sd[-3], SEGNALE. Stadi INV: armati, finestra, I0 mediana toccata, I1 banda opposta mai toccata, retest banda dell'impulso, I2, I3 banda piatta, sd<S50, sd<=sd[-3], SEGNALE.
 - Per A7: `signal_fn_factory("CONT"|"INV", 60|30)` -> `fn(bars) -> {'signal','atr','sma20'}`.
+- Invarianza di scala (test_run.py): stessa serie dell'oro con prezzi x0,001 e punto x0,001 -> tabelle identiche (campi in unita di prezzo esclusi); con scala 2^-10 segnali, trade e R sono bit-identici.
 - Test automatico: nessun numero di soglia sparso in `signals.py` (scansione AST).
 
 ## Tabelle di run_test.py

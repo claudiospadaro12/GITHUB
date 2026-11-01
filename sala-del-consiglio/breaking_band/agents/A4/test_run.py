@@ -357,7 +357,7 @@ class TestInvarianzaDiScala(unittest.TestCase):
                                       **RT.kw_engine(pp, 60)) for v in S.VARIANTI}
             out.append((res, tr))
         for v in ("CONT", "INV"):
-            (r1, t1), (r2, t2) = out[0][0][v], out[1][0][v]
+            r1, r2 = out[0][0][v], out[1][0][v]
             self.assertEqual([(s["j"], s["side"], s["solidita"], s["bonus"]) for s in r1["segnali"]],
                              [(s["j"], s["side"], s["solidita"], s["bonus"]) for s in r2["segnali"]])
             self.assertEqual(r1["imbuto_episodi"], r2["imbuto_episodi"])
