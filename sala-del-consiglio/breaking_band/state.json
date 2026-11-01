@@ -2,15 +2,15 @@
  "project_id": "BB-2026-11-01",
  "project_name": "Breaking Band sull'oro",
  "mode": "REALE",
- "state_version": 2,
- "updated_at": "2026-11-01T08:01:57+00:00",
+ "state_version": 3,
+ "updated_at": "2026-11-01T08:03:15+00:00",
  "candidate_version": null,
- "phase": "Ciclo 0 - analisi indipendenti (fase 1)",
+ "phase": "Ciclo 0 - fase 2: integrazione (A1)",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
   "available_parallel_slots": ">=6 (provato lanciando 6 agenti insieme)",
-  "active_processes": 2
+  "active_processes": 1
  },
  "agents": [
   {
@@ -25,7 +25,7 @@
    "id": "A1",
    "role": "Vicecoordinatore e integratore",
    "kind": "REALE",
-   "status": "IN_ATTESA",
+   "status": "IN_CORSO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -65,7 +65,7 @@
    "id": "A6",
    "role": "Revisore critico",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -73,7 +73,7 @@
    "id": "A7",
    "role": "Verificatore",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   }
@@ -151,8 +151,29 @@
   }
  ],
  "issues": [],
- "checks": [],
+ "checks": [
+  {
+   "id": "C001",
+   "type": "esecuzione",
+   "requirement_ids": [
+    "R004"
+   ],
+   "outcome": "SUPERATO",
+   "executed_by": "A7 (autotest 56/56) e C0 (tail output)",
+   "evidence_ref": "agents/A7/autotest_esito.txt"
+  },
+  {
+   "id": "C002",
+   "type": "esecuzione",
+   "requirement_ids": [
+    "R003"
+   ],
+   "outcome": "SUPERATO",
+   "executed_by": "A4 e C0 (26 test rieseguiti)",
+   "evidence_ref": "agents/A4/test_engine.py"
+  }
+ ],
  "scores": [],
  "artifacts": [],
- "last_event_id": "E005"
+ "last_event_id": "E007"
 }
