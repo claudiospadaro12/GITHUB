@@ -277,7 +277,6 @@ def _evaluate(ep, v, t, cfg, cnt, signals, tr_out):
             C0 = touch_L
             seq = _seq_present(v, p, t) if C0 else False
             C3 = not seq
-            zz = v.z[p + 1:t + 1]
             C1_ritr = bool(np.all(v.z[p + 1:t] <= cfg.impulsiva)) if t > p + 1 else True
             C1_test = bool(v.z[t] <= cfg.impulsiva)
             C1 = C1_ritr and C1_test
@@ -293,8 +292,6 @@ def _evaluate(ep, v, t, cfg, cnt, signals, tr_out):
                 band = any(v.h[u] >= v.U[u] for u in range(p + 1, t))
                 if band and not med:
                     cnt["info_CONT_ritorno_banda_senza_mediana"] += 1
-                if not C3:
-                    pass
                 if C3 and not C1:
                     cnt["CONT_C1_morti_nel_ritracciamento" if not C1_ritr else "CONT_C1_morti_su_candela_del_test"] += 1
             if tr_out is not None and C0:
@@ -307,42 +304,27 @@ def _evaluate(ep, v, t, cfg, cnt, signals, tr_out):
                 ep.consumed["CONT"] = True
     # ------------------ INVERSIONE ------------------
     if not ep.consumed["INV"]:
-        touched_opp = bool(np.any(v.l[s:t + 1] <= v.L[s:t + 1]))     # I1: Low_u > L_u per ogni u in [s, tau]
+        touched_opp = bool(np.any(v.l[s:t + 1] <= v.L[s:t + 1]))     # I1 negata: Low_u <= L_u per qualche u in [s, tau]
+        med_r = any(v.l[r] <= v.M[r] for r in range(p + 1, t))        # I0: r in (p, tau) con Low_r <= M_r
+        retest = bool(dp >= cfg.min_retr and v.h[t] >= v.U[t] and v.h[t] <= v.h[p])
+        I2 = bool(np.all(v.z[p + 1:t + 1] <= cfg.impulsiva_inv))
+        I3 = bool(t >= 4 and (v.U[t - 1] - v.U[t - 4]) <= cfg.band_tol * v.atr[t - 1])
+        flags = [med_r, not touched_opp, retest, I2, I3, sd_ok_a, sd_ok_b]
+        k = 0
+        while k < len(flags) and flags[k]:
+            k += 1
+        if k > ep.max_stage["INV"]:
+            ep.max_stage["INV"] = k
+        if tr_out is not None and (med_r and retest or touched_opp):
+            tr_out.append({"ep": ep.id, "t": t, "tipo": "INV", "d": d, "p": p, "I0_mediana": med_r,
+                           "I1_banda_opposta_mai_toccata": not touched_opp, "retest": retest,
+                           "I2_nessuna_impulsiva": I2, "I3_banda_piatta": I3,
+                           "sd<S50": sd_ok_a, "sd<=sd[-3]": sd_ok_b, "tutte": all(flags)})
         if touched_opp:
             ep.consumed["INV"] = True
             cnt["INV_consumati_banda_opposta"] += 1
-            if tr_out is not None:
-                tr_out.append({"ep": ep.id, "t": t, "tipo": "INV", "evento": "consumato_banda_opposta", "d": d, "p": p})
-        elif dp >= cfg.min_retr:
-            med_r = any(v.l[r] <= v.M[r] for r in range(p + 1, t))        # r in (p, tau)
-            retest = bool(v.h[t] >= v.U[t]) and bool(v.h[t] <= v.h[p])
-            if med_r and retest:
-                I2 = bool(np.all(v.z[p + 1:t + 1] <= cfg.impulsiva_inv))
-                I3 = bool((v.U[t - 1] - v.U[t - 4]) <= cfg.band_tol * v.atr[t - 1]) if t >= 4 else False
-                flags = [med_r, True, retest, I2, I3, sd_ok_a, sd_ok_b]
-            else:
-                I2 = I3 = None
-                flags = [med_r, True, retest, False, False, False, False]
-            k = 0
-            while k < len(flags) and flags[k]:
-                k += 1
-            if med_r and k > ep.max_stage["INV"]:
-                ep.max_stage["INV"] = k
-            elif (not med_r) and ep.max_stage["INV"] < 0:
-                pass
-            if tr_out is not None and med_r and retest:
-                tr_out.append({"ep": ep.id, "t": t, "tipo": "INV", "d": d, "p": p, "I0_mediana": med_r, "I1": True,
-                               "retest": retest, "I2_nessuna_impulsiva": I2, "I3_banda_piatta": I3,
-                               "sd<S50": sd_ok_a, "sd<=sd[-3]": sd_ok_b, "tutte": all(flags)})
-            if all(flags):
-                _emit(ep, t, "INV", d, cfg, cnt, signals)
-        # stadio 1 (mediana toccata) anche senza retest
-        if not ep.consumed["INV"] and dp >= 1:
-            if any(v.l[r] <= v.M[r] for r in range(p + 1, t + 1)) and ep.max_stage["INV"] < 1:
-                ep.max_stage["INV"] = 1 if not touched_opp else ep.max_stage["INV"]
-                # I1 e verificata (altrimenti saremmo consumati): stadio 2 raggiunto
-                if not touched_opp and ep.max_stage["INV"] < 2:
-                    ep.max_stage["INV"] = 2
+        elif all(flags):
+            _emit(ep, t, "INV", d, cfg, cnt, signals)
 
 
 def _emit(ep, t, tipo, d, cfg, cnt, signals):
