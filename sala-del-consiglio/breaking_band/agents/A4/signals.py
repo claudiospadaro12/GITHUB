@@ -363,6 +363,7 @@ class _Macchina:
                     ep.precoce = True
             else:
                 ep.finestre.append(u)
+                ep.stadio = max(ep.stadio, 1)                      # finestra p+MIN_RETR raggiunta
                 if not ep.consumato:
                     self._valuta(ep, v, u)
             self._aggiorna_fase(ep, v, u)
