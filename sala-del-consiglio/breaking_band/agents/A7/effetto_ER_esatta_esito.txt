@@ -1,0 +1,10 @@
+2013     H1  segnali A7(float)=9 A7(aritmetica esatta)=9, uguali=True, armati float/esatto=66/66
+2013     M30 segnali A7(float)=18 A7(aritmetica esatta)=18, uguali=True, armati float/esatto=150/150
+2018     H1  segnali A7(float)=6 A7(aritmetica esatta)=6, uguali=True, armati float/esatto=55/55
+2018     M30 segnali A7(float)=16 A7(aritmetica esatta)=16, uguali=True, armati float/esatto=135/135
+2020     H1  segnali A7(float)=5 A7(aritmetica esatta)=5, uguali=True, armati float/esatto=58/58
+2020     M30 segnali A7(float)=20 A7(aritmetica esatta)=20, uguali=True, armati float/esatto=124/124
+2025-26  H1  segnali A7(float)=5 A7(aritmetica esatta)=5, uguali=True, armati float/esatto=88/88
+2025-26  M30 segnali A7(float)=13 A7(aritmetica esatta)=13, uguali=True, armati float/esatto=191/191
+
+Celle in cui l'aritmetica esatta CAMBIA i segnali: 0 su 8

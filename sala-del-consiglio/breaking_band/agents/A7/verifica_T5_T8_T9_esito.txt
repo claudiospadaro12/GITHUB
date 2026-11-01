@@ -1,0 +1,36 @@
+T5
+  con_tutti n                                    A4=25                     A7=25                     OK
+  con_tutti media_R                              A4=-0.1599829745800373    A7=-0.1599829745800373    OK
+  con_tutti PF                                   A4=0.507155164488927      A7=0.507155164488927      OK
+  senza i 3 migliori: media                      A4=-0.24207427459061667   A7=-0.24207427459061667   OK
+  senza i 3 migliori: PF                         A4=0.3437523611957751     A7=0.34375236119577507    OK
+  LOPO senza 2013: media                         A4=0.04612373038191639    A7=0.046123730381916375   OK
+  LOPO senza 2013: PF                            A4=1.245993228703552      A7=1.245993228703552      OK
+  LOPO senza 2018: media                         A4=-0.168964740126406     A7=-0.168964740126406     OK
+  LOPO senza 2018: PF                            A4=0.47503147848885324    A7=0.47503147848885324    OK
+  LOPO senza 2020: media                         A4=-0.22173814307155357   A7=-0.22173814307155362   OK
+  LOPO senza 2020: PF                            A4=0.37672696029048935    A7=0.37672696029048924    OK
+  LOPO senza 2025-26: media                      A4=-0.2545804927890337    A7=-0.25458049278903366   OK
+  LOPO senza 2025-26: PF                         A4=0.37258983252536565    A7=0.3725898325253656     OK
+  bootstrap settimane K                          A4=25                     A7=25                     OK
+  bootstrap IC90 lo                              A4=-0.35590623927487036   A7=-0.35590623927487036   OK
+  bootstrap IC90 hi                              A4=0.02865778921867941    A7=0.02865778921867941    OK
+T8/T9
+  T9 spread0 sostituiti 2013                     A4=439                    A7=439                    OK
+  T8 buy&hold in ATR 2013 (tol 2e-4: mediana ATR, seme diverso) A4=-111.55036586950463    A7=-111.55648492838762    OK
+  T8 n long 2013                                 A4=6                      A7=6                      OK
+  T9 spread0 sostituiti 2018                     A4=94                     A7=94                     OK
+  T8 buy&hold in ATR 2018 (tol 2e-4: mediana ATR, seme diverso) A4=-12.95836694136077     A7=-12.960584932766764    OK
+  T8 n long 2018                                 A4=1                      A7=1                      OK
+  T9 spread0 sostituiti 2020                     A4=144                    A7=144                    OK
+  T8 buy&hold in ATR 2020 (tol 2e-4: mediana ATR, seme diverso) A4=69.54011753342536      A7=69.56640074213391      DIVERSO
+  T8 n long 2020                                 A4=2                      A7=2                      OK
+  T9 spread0 sostituiti 2025-26                  A4=0                      A7=0                      OK
+  T8 buy&hold in ATR 2025-26 (tol 2e-4: mediana ATR, seme diverso) A4=101.19197174932327     A7=101.19676357181518     OK
+  T8 n long 2025-26                              A4=2                      A7=2                      OK
+VERDETTO: INCONCLUSIVO N= 25 media_R=-0.1600 PF=0.5072 p_B1=0.9320
+  VERDETTO N                                     A4=25                     A7=25                     OK
+  VERDETTO media_R                               A4=-0.1599829745800373    A7=-0.1599829745800373    OK
+  VERDETTO esito coerente con N<30 -> INCONCLUSIVO A4=INCONCLUSIVO           A7=INCONCLUSIVO           OK
+
+DIFFERENZE: 1

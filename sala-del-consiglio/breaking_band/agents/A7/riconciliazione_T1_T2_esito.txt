@@ -1,0 +1,24 @@
+T1/T2/LOG: 0 incoerenze interne
+OSSERVAZIONI sul confronto per barra B1..B6 (A4 vs aritmetica ESATTA in centesimi, ties ER==0,50): 9 celle diverse
+  OSS: imbuto B per barra H1 2013 d=-1: A4 marg [998, 2332, 2656, 1697, 786, 5674] cum [998, 941, 623, 384, 346, 346] | A7 aritmetica ESATTA marg [998, 2332, 2656, 1698, 786, 5674] cum [998, 941, 623, 385, 347, 347] | A7 float marg [998, 2332, 2656, 1697, 786, 5674] cum [998, 941, 623, 384, 346, 346]
+  OSS: imbuto B per barra M30 2013 d=+1: A4 marg [2355, 4671, 5121, 3285, 1049, 11527] cum [2355, 2160, 1424, 698, 503, 503] | A7 aritmetica ESATTA marg [2355, 4671, 5121, 3287, 1049, 11527] cum [2355, 2160, 1424, 699, 503, 503] | A7 float marg [2355, 4671, 5121, 3285, 1049, 11527] cum [2355, 2160, 1424, 698, 503, 503]
+  OSS: imbuto B per barra M30 2013 d=-1: A4 marg [2307, 4671, 5338, 3394, 1561, 11527] cum [2307, 2139, 1526, 778, 641, 641] | A7 aritmetica ESATTA marg [2307, 4671, 5338, 3396, 1561, 11527] cum [2307, 2139, 1526, 778, 641, 641] | A7 float marg [2307, 4671, 5338, 3392, 1561, 11527] cum [2307, 2139, 1526, 778, 641, 641]
+  OSS: imbuto B per barra H1 2018 d=-1: A4 marg [638, 2437, 2823, 1785, 575, 5673] cum [638, 594, 421, 251, 193, 193] | A7 aritmetica ESATTA marg [638, 2437, 2823, 1786, 575, 5673] cum [638, 594, 421, 251, 193, 193] | A7 float marg [638, 2437, 2823, 1784, 575, 5673] cum [638, 594, 421, 250, 192, 192]
+  OSS: imbuto B per barra M30 2018 d=+1: A4 marg [1765, 4881, 5145, 3380, 1183, 11544] cum [1765, 1662, 1145, 583, 419, 419] | A7 aritmetica ESATTA marg [1765, 4881, 5145, 3381, 1183, 11544] cum [1765, 1662, 1145, 583, 419, 419] | A7 float marg [1765, 4881, 5145, 3381, 1183, 11544] cum [1765, 1662, 1145, 583, 419, 419]
+  OSS: imbuto B per barra M30 2018 d=-1: A4 marg [1690, 4881, 5295, 3322, 1262, 11544] cum [1690, 1624, 1055, 553, 432, 432] | A7 aritmetica ESATTA marg [1690, 4881, 5295, 3324, 1262, 11544] cum [1690, 1624, 1055, 554, 433, 433] | A7 float marg [1690, 4881, 5295, 3322, 1262, 11544] cum [1690, 1624, 1055, 553, 433, 433]
+  OSS: imbuto B per barra H1 2025-26 d=-1: A4 marg [1123, 4335, 4781, 2689, 1009, 10080] cum [1123, 1099, 681, 316, 278, 278] | A7 aritmetica ESATTA marg [1123, 4335, 4781, 2690, 1009, 10080] cum [1123, 1099, 681, 316, 278, 278] | A7 float marg [1123, 4335, 4781, 2689, 1009, 10080] cum [1123, 1099, 681, 315, 277, 277]
+  OSS: imbuto B per barra M30 2025-26 d=+1: A4 marg [2581, 8604, 9149, 6359, 2496, 20352] cum [2581, 2491, 1773, 1054, 820, 820] | A7 aritmetica ESATTA marg [2581, 8604, 9149, 6360, 2496, 20352] cum [2581, 2491, 1773, 1054, 820, 820] | A7 float marg [2581, 8604, 9149, 6360, 2496, 20352] cum [2581, 2491, 1773, 1054, 820, 820]
+  OSS: imbuto B per barra M30 2025-26 d=-1: A4 marg [2500, 8604, 9276, 5426, 2005, 20352] cum [2500, 2406, 1531, 722, 594, 594] | A7 aritmetica ESATTA marg [2500, 8604, 9276, 5427, 2005, 20352] cum [2500, 2406, 1531, 722, 594, 594] | A7 float marg [2500, 8604, 9276, 5427, 2005, 20352] cum [2500, 2406, 1531, 722, 594, 594]
+H1: CONT 19 + INV 6 = POOLED 25 ; M30: CONT 57 + INV 10 = POOLED 67
+imbuto per BARRA B1..B6 (marginali e cumulativi, per direzione), A4 vs A7 (aritmetica esatta): 7/16 celle identiche
+imbuto per EPISODIO (stadi cumulativi), A4 vs A7: 126/136 conteggi identici
+  differenza di stadio: INV_H1 2013 stadio 'I0_mediana_toccata': A4=37 A7=19
+  differenza di stadio: INV_M30 2013 stadio 'I0_mediana_toccata': A4=98 A7=25
+  differenza di stadio: INV_H1 2018 stadio 'I0_mediana_toccata': A4=36 A7=16
+  differenza di stadio: INV_M30 2018 stadio 'I0_mediana_toccata': A4=89 A7=27
+  differenza di stadio: INV_M30 2018 stadio 'I1_banda_opposta_mai_toccata': A4=26 A7=27
+  differenza di stadio: INV_H1 2020 stadio 'I0_mediana_toccata': A4=29 A7=8
+  differenza di stadio: INV_M30 2020 stadio 'I0_mediana_toccata': A4=82 A7=25
+  differenza di stadio: INV_H1 2025-26 stadio 'I0_mediana_toccata': A4=47 A7=23
+  differenza di stadio: INV_M30 2025-26 stadio 'I0_mediana_toccata': A4=116 A7=53
+  differenza di stadio: INV_M30 2025-26 stadio 'I1_banda_opposta_mai_toccata': A4=49 A7=50

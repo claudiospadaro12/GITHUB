@@ -1,0 +1,7 @@
+CONT_H1_TOTALE n= 19 vincite= 11 media=-0.2175 PF=0.4193  OK
+INV_H1_TOTALE  n=  6 vincite=  5 media=+0.0220 PF=1.1322  OK
+POOLED_H1      n= 25 vincite= 16 media=-0.1600 PF=0.5072  OK
+CONT_M30_TOTALE n= 57 vincite= 41 media=-0.0635 PF=0.7425  OK
+INV_M30_TOTALE n= 10 vincite=  6 media=-0.2408 PF=0.3979  OK
+POOLED_M30     n= 67 vincite= 47 media=-0.0899 PF=0.6662  OK
+celle TOTALE/POOLED con differenze: 0

@@ -1,0 +1,28 @@
+2013     pool simulato: long 2776 short 2672 | A4: {'long': 2776, 'short': 2672}
+2018     pool simulato: long 2738 short 2737 | A4: {'long': 2738, 'short': 2737}
+2020     pool simulato: long 2411 short 3169 | A4: {'long': 2411, 'short': 3169}
+2025-26  pool simulato: long 4432 short 5505 | A4: {'long': 4432, 'short': 5505}
+trade primari H1: 25
+
+B1 pooled (mancanti A4=0, mia=0)
+  n_abbinati             A4=25                     A7=25                     OK
+  media_osservata_R      A4=-0.1599829745800373    A7=-0.1599829745800373    OK
+  media_nulla            A4=-0.009289610284138935  A7=-0.009289610276830881  OK
+  p5                     A4=-0.17790153719788815   A7=-0.17790153719788815   OK
+  p50                    A4=-0.0013107800182438306 A7=-0.0013107800182438263 OK
+  p95                    A4=0.14627467256940987    A7=0.14627467256940987    OK
+  percentile_osservato   A4=0.068                  A7=0.068                  OK
+  p_B                    A4=0.9320339830084957     A7=0.9320339830084957     OK
+
+B0 pooled (mancanti A4=0, mia=0)
+  n_abbinati             A4=25                     A7=25                     OK
+  media_osservata_R      A4=-0.1599829745800373    A7=-0.1599829745800373    OK
+  media_nulla            A4=-0.012024469889847726  A7=-0.012024469885501297  OK
+  p5                     A4=-0.17141307183638607   A7=-0.17141307183638607   OK
+  p50                    A4=-0.006604041440857295  A7=-0.006604041440856824  OK
+  p95                    A4=0.1298720577981263     A7=0.1298720577981263     OK
+  percentile_osservato   A4=0.06                   A7=0.06                   OK
+  p_B                    A4=0.9400299850074962     A7=0.9400299850074962     OK
+
+Trade con maxhold raggiunto nel pool (fuori dal confronto esatto): 0
+ESITO B1/B0 indipendenti: IDENTICI

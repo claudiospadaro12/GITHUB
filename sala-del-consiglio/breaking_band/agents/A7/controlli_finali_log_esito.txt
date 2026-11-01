@@ -1,0 +1,20 @@
+V09: 92 trade, celle (variante x TF x periodo) con sovrapposizioni o segnale noto con trade aperto: 0
+V07: eventi stop+target nella stessa M1 nel ricalcolo (tutti i 92 trade) = 0 ; T9 (H1) = 0
+V16: celle T2 attese 22, mancanti [] ; chiavi M15 presenti [] ; sensibilita ['Sa', 'Sb', 'Sc', 'Sd', 'Se20', 'Se50', 'Sf', 'Sg'] ; tabelle ['LOG_TRADE', 'T1_imbuto', 'T2_risultati', 'T3_fasce', 'T4_linea_di_base', 'T5_robustezza', 'T6_sensibilita', 'T7_placebo', 'T8_deriva', 'T9_dati_esecuzione', 'VERDETTO']
+V16 celle con n=0 presenti nel report: []
+T7 placebo (dal run):
+   CONT_H1    n=748 esito=SUPERATO z=-0.07783100753000544 lordo=-0.0015664646043532396
+   CONT_M30   n=1384 esito=SUPERATO z=0.9253039869799754 lordo=0.014200034723001752
+   INV_H1     n=90 esito=NON_CONCLUSIVO_N<100 z=1.6592223321516868 lordo=0.07302072896482895
+   INV_M30    n=147 esito=SUPERATO z=-0.02038038707848943 lordo=-0.000893695364991679
+   mtime specifica       08:16:39
+   mtime criteri         08:16:39
+   mtime HASH_DOCUMENTI  08:16:39
+   mtime HASH_DATI       08:16:39
+   mtime HASH_CODICE     09:34:45
+   mtime primario.json   09:35:38
+events.jsonl presente: True
+    {"id": "E008", "ciclo": 0, "tipo": "CONGELAMENTO_DOCUMENTI", "da": "C0", "ts": "2026-11-01T08:16:39+00:00", "sintesi": "Congelati specifica_v1, disegno_test_v1, criteri_previsioni_v1 PRIMA di qualunque esecuzione dei segnali sui dati reali.
+    {"id": "E011", "ciclo": 0, "tipo": "CONGELAMENTO_CODICE", "da": "C0", "ts": "2026-11-01T09:34:45+00:00", "sintesi": "Codice A4 congelato con sha256 PRIMA del run sui dati reali. Parte A: V03,V05,CK-09,V20,V23 SUPERATI; V19 parziale (S03 non
+
+PROBLEMI: []

@@ -2,10 +2,10 @@
  "project_id": "BB-2026-11-01",
  "project_name": "Breaking Band sull'oro",
  "mode": "REALE",
- "state_version": 5,
- "updated_at": "2026-11-01T08:18:35+00:00",
+ "state_version": 6,
+ "updated_at": "2026-11-01T09:55:10+00:00",
  "candidate_version": null,
- "phase": "Ciclo 0 - fase 3: implementazione segnali (A4) e verifica indipendente (A7), solo dati sintetici",
+ "phase": "Consegna ciclo 0 (stato VALIDAZIONE_NECESSARIA)",
  "cycle": 0,
  "concurrency": {
   "requested_roles": 8,
@@ -17,7 +17,7 @@
    "id": "C0",
    "role": "Presidente e coordinatore",
    "kind": "REALE",
-   "status": "IN_CORSO",
+   "status": "COMPLETATO",
    "current_task_id": null,
    "last_event_id": null
   },
@@ -185,7 +185,13 @@
    "evidence_ref": "agents/A4/test_engine.py"
   }
  ],
- "scores": [],
+ "scores": [
+  {
+   "cycle": 0,
+   "total": 86,
+   "note": "C0 su evidenze A6/A7"
+  }
+ ],
  "artifacts": [],
- "last_event_id": "E009"
+ "last_event_id": "E013"
 }

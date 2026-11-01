@@ -676,7 +676,7 @@ def _targets(spec):
 
 def simulate_trade(m1, spec, spread_model="executable", stop_gap_worse=True, target_gap_improve=False,
                    check_entry_bar=True, fixed_spread_pts=None, block_target_beyond_entry=True,
-                   mkt_on_recalc_beyond=True, max_entry_gap_min=None):
+                   mkt_on_recalc_beyond=True, max_entry_gap_min=None, end_index=None):
     """Ricalcolo da zero di UN trade su barre M1. NON usa il motore di A4.
 
     spec: direction (+1/-1), entry_time (apertura della barra successiva alla barra segnale),
@@ -737,7 +737,8 @@ def simulate_trade(m1, spec, spread_model="executable", stop_gap_worse=True, tar
     res = {"id": spec.get("id"), "direction": d, "entry_idx": i0, "entry_time": t[i0],
            "entry_gap_min": t[i0] - e_t, "entry_price": entry, "spread_entry": s_e, "warnings": warnings,
            "status": "ok"}
-    for i in range(i0, m1.n):
+    last = m1.n - 1 if end_index is None else min(int(end_index), m1.n - 1)
+    for i in range(i0, last + 1):
         s = spr[i]
         if ft is not None and t[i] >= ft:
             px = o[i] if d == 1 else o[i] + s
@@ -780,7 +781,7 @@ def simulate_trade(m1, spec, spread_model="executable", stop_gap_worse=True, tar
             return _close(res, i, t[i], stop_px, "stop", bool(stop_hit and tgt_hit), d, entry, s)
         if tgt_hit:
             return _close(res, i, t[i], tgt_px, "target", False, d, entry, s)
-    i = m1.n - 1
+    i = last
     px = c[i] if d == 1 else c[i] + spr[i]
     return _close(res, i, t[i], px, "end_of_data", False, d, entry, spr[i])
 

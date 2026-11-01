@@ -1,0 +1,1 @@
+OK /home/user/GITHUB/sala-del-consiglio/breaking_band/agents/A7/rerun/primario.json / .md  sha256_risultati=367e6d67b990c1ba1764ce9911f806aae0e095593d63188d6633965f0c484bd7  (48.5 s)

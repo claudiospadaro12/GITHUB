@@ -13,3 +13,8 @@
 2020     CONT TF=30 A4: segnali=19  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
 2020     CONT TF=30 A7: segnali=19  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
 2020     INV  TF=30 A4: segnali=1  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO
+2020     INV  TF=30 A7: segnali=1  troncamento=SUPERATO perturbazione=SUPERATO riprod=SUPERATO specchio=SUPERATO
+
+ESITO CK-01/CK-03/V11 su estratto reale: NON TUTTI SUPERATI
+segnale INV 2020 H1 alla barra [5435]
+perturbazione mirata (7 tagli intorno al segnale INV 2020 H1, A4): differenze = 0 -> SUPERATO
