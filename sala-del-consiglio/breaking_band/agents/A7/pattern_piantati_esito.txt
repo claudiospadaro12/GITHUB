@@ -74,10 +74,15 @@ PASS  C_N_band_riding_impulso_oltre_20_barre [LONG] - contatore ep_disarmati_imp
 PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
 PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - esito episodio | fine=['impulso_lungo']
 PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - contatore ep_disarmati_impulso_lungo | atteso=1 ottenuto=1
-PASS  C_N_warmup [LONG] - segnali | attesi=[] ottenuti=[]
-PASS  C_N_warmup [LONG] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
-PASS  C_N_warmup [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
-PASS  C_N_warmup [SHORT(specchio)] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
+PASS  C_N_warmup_nessun_armamento [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_warmup_nessun_armamento [LONG] - contatore armati | atteso=0 ottenuto=0
+PASS  C_N_warmup_nessun_armamento [LONG] - contatore segnali_soppressi_warmup | atteso=0 ottenuto=0
+PASS  C_N_warmup_nessun_armamento [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_warmup_nessun_armamento [SHORT(specchio)] - contatore armati | atteso=0 ottenuto=0
+PASS  C_N_warmup_nessun_armamento [SHORT(specchio)] - contatore segnali_soppressi_warmup | atteso=0 ottenuto=0
+PASS  C_mecc_warmup_soppresso [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_mecc_warmup_soppresso [LONG] - contatore armati | atteso=1 ottenuto=1
+PASS  C_mecc_warmup_soppresso [LONG] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
 PASS  C_mecc_MIN_RETR [LONG] - segnali | attesi=[] ottenuti=[]
 PASS  C_mecc_MIN_RETR [LONG] - contatore CONT_consumati_tocco_precoce | atteso=1 ottenuto=1
 PASS  C_mecc_T_MAX [LONG] - segnali | attesi=[] ottenuti=[]
@@ -135,4 +140,4 @@ PASS  I_N_sd_in_risalita [SHORT(specchio)] - criteri grezzi come attesi (calcolo
 PASS  I_N_sd_in_risalita [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
 PASS  I_N_sd_in_risalita [SHORT(specchio)] - picco causale p | atteso=234 ottenuto=234
 
-PATTERN PIANTATI: 131/131 verifiche riuscite
+PATTERN PIANTATI: 136/136 verifiche riuscite

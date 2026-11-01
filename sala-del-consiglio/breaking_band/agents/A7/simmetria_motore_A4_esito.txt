@@ -1,0 +1,6 @@
+seed=11 TF=60 spread=0: eseguiti=390, trade non speculari=0, scarti diversi=0, uscite={'SL': 69, 'TP': 313, 'MKT': 4, 'FINE_DATI': 4} -> SUPERATO
+seed=11 TF=30 spread=0: eseguiti=424, trade non speculari=0, scarti diversi=0, uscite={'TP': 302, 'MKT': 28, 'SL': 94} -> SUPERATO
+seed=12 TF=60 spread=0: eseguiti=382, trade non speculari=0, scarti diversi=0, uscite={'TP': 292, 'SL': 80, 'MKT': 6, 'FINE_DATI': 4} -> SUPERATO
+seed=12 TF=30 spread=0: eseguiti=407, trade non speculari=0, scarti diversi=0, uscite={'TP': 306, 'SL': 78, 'MKT': 21, 'FINE_DATI': 2} -> SUPERATO
+
+ESITO V05 simmetria del motore (spread 0): SUPERATO

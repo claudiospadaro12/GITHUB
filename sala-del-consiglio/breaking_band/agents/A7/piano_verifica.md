@@ -36,7 +36,7 @@ Gravita: B = bloccante per "verificato localmente", S = significativa (va dichia
 | V18 | Provenienza dati (R002) | R | sha256 dei 4 CSV = `HASH_DATI.txt`; righe = audit A3 (348.647 / 349.730 / 351.258 / 611.062) | S | DOPO AUTORIZZAZIONE (solo hashing; `confronto_con_A4.py --reale` lo fa prima di leggere) |
 | V19 | Test di mutazione sulla COPIA del motore (R004) | E | ogni difetto iniettato (look-ahead, spread omesso, target prima dello stop, ingresso stessa barra, nessun controllo di posizione) e rilevato | S | **NON ESEGUITO** su A4. Fatto sulla MIA reimplementazione: 14/14 mutanti uccisi. ESEGUIBILE ORA |
 | V20 | Test di A4 rieseguiti da A7 (R003) | E | tutti passano, non tautologici | B | **ESEGUITO**: test_engine 30 OK, test_signals 31 OK, test_run 11 OK (esecuzione del 01/11, `PYTHONDONTWRITEBYTECODE=1`). Qualita dei test (non tautologici): NON ispezionata |
-| V21 | Reimplementazione indipendente del nucleo dei segnali (CK-16) | R | segnali (barra, lato, tipo) e episodi (d, s, p) identici ad A4 su sintetico; poi su reale | B | **ESEGUITO su sintetico**: segnali IDENTICI (pattern piantati: 0 divergenze; 6 serie a regimi: 26 = 26). **1 divergenza di episodi: Q1** (armamento prima della barra 200; A4 arma solo da t>=200; riconcilia `alt_arm_from_warmup`). Reale: DOPO AUTORIZZAZIONE (`confronto_con_A4.py --reale`) |
+| V21 | Reimplementazione indipendente del nucleo dei segnali (CK-16) | R | segnali (barra, lato, tipo) e episodi (d, s, p) identici ad A4 su sintetico; poi su reale | B | **ESEGUITO su sintetico, dopo D008: 0 divergenze** (pattern piantati; 30 serie a regimi x TF 60/30: 278 segnali = 278, episodi (d,s,p) identici). Reale: DOPO AUTORIZZAZIONE (`confronto_con_A4.py --reale`) |
 | V22 | Pattern piantati con gemello negativo per criterio (CK-14) | E | segnale alla barra attesa (positivi); nessun segnale e flag attribuito (negativi), long e specchio | B | **ESEGUITO**: reimplementazione 131/131 + 14/14 mutanti; **codice A4: 36/36** (solo segnali). Coperti: CONT (tocco, C1 nel ritracciamento e sul test, sd<S50, sd<=sd[-3], SEQ, band riding, warm-up), INV (I0, I1, retest, I2, I3, sd<S50, sd<=sd[-3]), armamento B1, B3, B4, B5. NON coperti: B2 e B6 isolati, tocco precoce naturale, MIN_RETR/T_MAX congelati (solo come meccanismo con parametro alterato), uguaglianze esatte sulle soglie |
 | V23 | Placebo su passeggiata casuale (CK-13) | E | lordo medio per trade con |z|<=3 in ogni variante/TF; netto = -costo | B | DOPO RUN (T7 di `run_test.py`; eseguibile su sintetico ORA, non eseguito da A7) |
 
@@ -46,13 +46,13 @@ Gravita: B = bloccante per "verificato localmente", S = significativa (va dichia
 | 01 troncamento | ESEGUITO sintetico SUPERATO (V01); estratto reale: DOPO AUTORIZZAZIONE |
 | 02 aggregazione barre | PARZIALE: barre A4 = mio aggregatore (sintetico, con gap di fine settimana, 4 serie x TF) SUPERATO; barra segnale/ingresso coperto da V08; reale DOPO AUTORIZZAZIONE |
 | 03 perturbazione | ESEGUITO sintetico SUPERATO (V02) |
-| 04 niente normalizzazione globale | PARZIALE: troncamento+perturbazione SUPERATI; ispezione V03 NON ESEGUITA (ESEGUIBILE ORA) |
+| 04 niente normalizzazione globale | SUPERATO su sintetico: troncamento+perturbazione + ispezione V03 (unica statistica globale: mediana spread per ora, solo costi) |
 | 05 target ricalcolato | PARZIALE: ricalcolo con schedule su 1185 trade identico (ricalcoli, fase, mkt, livello); scenario con mediana nota a mano su motore A4 NON scritto (ESEGUIBILE ORA) |
 | 06 stop-first | ESEGUITO sintetico SUPERATO (60/60); conteggio reale DOPO RUN; gap stop esplicito ESEGUIBILE ORA |
 | 07 spread | PARZIALE (V06) |
-| 08 simmetria | segnale SUPERATO; motore NON ESEGUITO su A4 (V05) |
-| 09 un segnale per episodio / una posizione / esclusivita | NON ESEGUITO (ESEGUIBILE ORA con scenari a tocchi multipli e nuova bulge a trade aperto) |
-| 13 placebo | DOPO RUN (V23) |
+| 08 simmetria | segnale SUPERATO; motore SUPERATO (V05, spread 0) |
+| 09 un segnale per episodio / una posizione / esclusivita | SUPERATO su sintetico (40 serie, scenario a 7 tocchi, 407 segnali densi) |
+| 13 placebo | placebo sintetico SUPERATO a 700 anni (V23); risultato nel run: DOPO RUN |
 | 14 pattern piantati | ESEGUITO (V22) con i limiti elencati |
 | 20 hash CSV | DOPO AUTORIZZAZIONE |
 | 21 spread (unita, zeri, mediane) | sostituzione zeri: SUPERATO su sintetico; dati reali: audit A3, riverifica DOPO AUTORIZZAZIONE |
@@ -72,7 +72,7 @@ Gravita: B = bloccante per "verificato localmente", S = significativa (va dichia
 - "Verificato localmente" non dimostra un vantaggio statistico, ne validita fuori campione, ne conto demo/reale.
 
 ## 6. Ordine di esecuzione e regole
-1. ORA (ESEGUIBILE ORA, sintetico): V03, V05, V19, CK-05/06/09, ispezione di `run_test.py` (B1), scenari motore a mano. Nessun CSV.
+1. FATTO il 01/11 (sintetico): V03, V05, V19 (parziale), V20, V23, CK-09, D008 (`esito_pre_hash.md`). Ancora ESEGUIBILE ORA: ispezione di `run_test.py` (B1/B0/B2), CK-05 con mediana nota a mano, gap sullo stop esplicito. Nessun CSV.
 2. Dopo congelamento del codice: hash del codice (V14), rilancio di V01-V08, V20-V22 sul codice congelato.
 3. Con AUTORIZZAZIONE di C0: V18 (sha256 CSV), `confronto_con_A4.py --reale ... --autorizzazione-C0 "<riferimento>"` (hash prima, registro `registro_esecuzioni_A7.txt`), estratto reale per CK-01.
 4. Dopo il run: V06-V17 sul log reale, V23.

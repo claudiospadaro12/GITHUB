@@ -41,7 +41,7 @@ def batteria_su_A4():
     """Esegue i pattern piantati (attese scritte a mano da A7) sul codice dei segnali di A4. Confronta SOLO i segnali
     (i contatori sono di A7). I meccanismi con parametro alterato usano i nomi di params.PARAMS di A4."""
     S, E = C.load_a4()
-    from params import PARAMS
+    from params import PARAMS     # (sys.path punta alla cartella caricata da load_a4)
     mapcfg = {"min_retr": "MIN_RETR", "t_max": "T_MAX"}
     res = []
     for sc in PP.scenari():
@@ -71,6 +71,8 @@ def batteria_su_A4():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--solo-batteria":      # usato dai mutanti (cartella in env A7_A4DIR)
+        sys.exit(0 if batteria_su_A4() else 1)
     rc = main()
     ok = batteria_su_A4()
     sys.exit(0 if (rc == 0 and ok) else 1)

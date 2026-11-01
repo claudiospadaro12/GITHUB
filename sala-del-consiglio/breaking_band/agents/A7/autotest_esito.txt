@@ -13,14 +13,14 @@ PASS  difetto look-ahead di 5 barre -> troncamento FALLITO | 170/683 tagli con o
 PASS  difetto look-ahead di 5 barre -> perturbazione FALLITO | 8/40 perturbazioni cambiano il passato; primo: k=186, mismatch su 'signal' alla barra j=183
 PASS  difetto statistica globale sul campione -> almeno uno tra troncamento e perturbazione FALLITO | troncamento=FALLITO, perturbazione=SUPERATO
 PASS  difetto asimmetria long/short (finestre 20 vs 30) -> specchio FALLITO | 'signal': 19 barre non speculari (prima j=218) | segnali orig L/S=44/31, specchio L/S=40/34
-PASS  difetto non determinismo (rumore non seminato) -> riproducibilita FALLITO | hash diversi: fe367d807876, 0a6f4499e776
+PASS  difetto non determinismo (rumore non seminato) -> riproducibilita FALLITO | hash diversi: e843216c2e15, 3a2d40518309
 PASS  segnale sempre nullo -> troncamento NON_CONCLUSIVO (mai SUPERATO) | nessuna differenza ma solo 0 segnali nella regione testata (<5): controllo vuoto
 PASS  segnale sempre nullo -> specchio NON_CONCLUSIVO | segnali insufficienti per concludere (L=0, S=0)
 PASS  riproducibilita su processo (script deterministico) -> SUPERATO | 2 esecuzioni (PYTHONHASHSEED diversi), sha256 uguale fc35904d36769d8d
-PASS  riproducibilita su processo (script casuale) -> FALLITO | sha256 diversi: bba075773af7, 76fcb249ebc3
+PASS  riproducibilita su processo (script casuale) -> FALLITO | sha256 diversi: cdfd00a398c4, 03cc98237526
 PASS  hash criteri invariato -> SUPERATO | sha256 attuale d74f0424cf1677a1 == atteso d74f0424cf1677a1
 PASS  hash criteri dopo modifica della soglia -> FALLITO | sha256 attuale 1f27d23f2c06a4ed != atteso d74f0424cf1677a1
-PASS  criteri piu recenti dei risultati -> FALLITO (evidenza debole) | criteri modificati DOPO 1 file risultati (es. /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/tmpA7/tmpbuu2_nuu/ris.csv)
+PASS  criteri piu recenti dei risultati -> FALLITO (evidenza debole) | criteri modificati DOPO 1 file risultati (es. /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/tmpA7/tmpg80t2vzo/ris.csv)
 PASS  criteri precedenti ai risultati -> SUPERATO (evidenza debole) | mtime criteri <= mtime di tutti i 1 file risultati (evidenza debole)
 PASS  seme da file riproducibile e campione di 20 deterministico e ordinato
 PASS  imbuto coerente (cumulativo, ricalcolo, riconciliazione segnali=trade+scartati) -> SUPERATO | imbuto coerente (3 stadi)
@@ -62,4 +62,4 @@ PASS  compare_summary con PF diverso dell'1% -> FALLITO
 PASS  summarize_pnls a mano (n=5, wins=3, PF=2,75)
 PASS  trace_trade produce una tabella per la ricostruzione a mano
 
-AUTO-TEST: 62/62 controlli riusciti in 3.1 s - ESITO GLOBALE: SUPERATO
+AUTO-TEST: 62/62 controlli riusciti in 3.0 s - ESITO GLOBALE: SUPERATO

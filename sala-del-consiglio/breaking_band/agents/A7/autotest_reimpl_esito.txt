@@ -70,10 +70,15 @@ PASS  C_N_band_riding_impulso_oltre_20_barre [LONG] - contatore ep_disarmati_imp
 PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
 PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - esito episodio | fine=['impulso_lungo']
 PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - contatore ep_disarmati_impulso_lungo | atteso=1 ottenuto=1
-PASS  C_N_warmup [LONG] - segnali | attesi=[] ottenuti=[]
-PASS  C_N_warmup [LONG] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
-PASS  C_N_warmup [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
-PASS  C_N_warmup [SHORT(specchio)] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
+PASS  C_N_warmup_nessun_armamento [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_warmup_nessun_armamento [LONG] - contatore armati | atteso=0 ottenuto=0
+PASS  C_N_warmup_nessun_armamento [LONG] - contatore segnali_soppressi_warmup | atteso=0 ottenuto=0
+PASS  C_N_warmup_nessun_armamento [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_warmup_nessun_armamento [SHORT(specchio)] - contatore armati | atteso=0 ottenuto=0
+PASS  C_N_warmup_nessun_armamento [SHORT(specchio)] - contatore segnali_soppressi_warmup | atteso=0 ottenuto=0
+PASS  C_mecc_warmup_soppresso [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_mecc_warmup_soppresso [LONG] - contatore armati | atteso=1 ottenuto=1
+PASS  C_mecc_warmup_soppresso [LONG] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
 PASS  C_mecc_MIN_RETR [LONG] - segnali | attesi=[] ottenuti=[]
 PASS  C_mecc_MIN_RETR [LONG] - contatore CONT_consumati_tocco_precoce | atteso=1 ottenuto=1
 PASS  C_mecc_T_MAX [LONG] - segnali | attesi=[] ottenuti=[]
@@ -154,8 +159,8 @@ UCCISO   mutante 'B4 ER soglia 0': 1 verifiche falliscono, es. 'ARM_N_B4 movimen
 UCCISO   mutante 'B5 mediana: soglia 0': 1 verifiche falliscono, es. 'ARM_N_B5 mediana non distante >= 2 ATR_s'
 UCCISO   mutante 'B3 impulsiva: soglia 0': 1 verifiche falliscono, es. 'ARM_N_B3 nessuna candela >= 1,5 ATR_s'
 UCCISO   mutante 'B6 impulso lungo: limite 1000': 6 verifiche falliscono, es. 'C_N_band_riding_impulso_oltre_20_barre [LONG] - segnali'
-UCCISO   mutante 'warm-up 0': 4 verifiche falliscono, es. 'C_N_warmup [LONG] - segnali'
+UCCISO   mutante 'warm-up 0': 6 verifiche falliscono, es. 'C_N_warmup_nessun_armamento [LONG] - segnali'
 UCCISO   mutante 'sd_lag 1 invece di 3': 6 verifiche falliscono, es. 'C_N_sd_in_risalita [LONG] - segnali'
 mutanti uccisi: 14/14 (sopravvissuti: 0)
 
-AUTO-TEST REIMPL: 138/138 verifiche riuscite (batteria + generici); mutanti uccisi 14/14; tempo 62.9 s
+AUTO-TEST REIMPL: 143/143 verifiche riuscite (batteria + generici); mutanti uccisi 14/14; tempo 55.6 s

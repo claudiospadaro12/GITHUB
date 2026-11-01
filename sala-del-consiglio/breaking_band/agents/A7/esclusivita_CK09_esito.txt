@@ -1,0 +1,7 @@
+(a) 40 serie a regimi: 174 segnali A4; episodi con >1 segnale per variante: A4=0, A7=0; episodi con CONT e INV insieme=0
+(a2) scenario con 7 barre di tocco consecutive della banda opposta dopo il segnale: segnali CONT A4=[254] A7=[254]
+(c0) M1 espansi riaggregano nelle barre originali: True
+(c) segnali reali: 7 segnali, eseguiti=7, scartati per posizione aperta A4=0 / ricostruzione A7=0, sovrapposizioni=0, contatori riconciliati=True, stessi trade (barra, uscita)=True -> SUPERATO
+(c) segnali densi artificiali + reali: 407 segnali, eseguiti=116, scartati per posizione aperta A4=174 / ricostruzione A7=174, sovrapposizioni=0, contatori riconciliati=True, stessi trade (barra, uscita)=True -> SUPERATO
+
+ESITO CK-09: SUPERATO

@@ -43,11 +43,12 @@ ALT_FLAGS = ["alt_arm_early", "alt_consume_reset_on_new_p", "alt_cont_first_touc
              "alt_eval_from_arm_bar", "alt_warmup_not_consume"]
 
 
-def load_a4():
-    """Carica signals.py e engine.py di A4 SENZA modificarli."""
-    if not os.path.exists(os.path.join(A4DIR, "signals.py")):
-        raise SystemExit("agents/A4/signals.py non trovato")
-    sys.path.insert(0, A4DIR)
+def load_a4(a4dir=None):
+    """Carica signals.py e engine.py di A4 SENZA modificarli (o di una COPIA mutata se a4dir e dato / env A7_A4DIR)."""
+    a4dir = a4dir or os.environ.get("A7_A4DIR") or A4DIR
+    if not os.path.exists(os.path.join(a4dir, "signals.py")):
+        raise SystemExit("signals.py non trovato in %s" % a4dir)
+    sys.path.insert(0, a4dir)
     import importlib
     S = importlib.import_module("signals")
     E = importlib.import_module("engine")

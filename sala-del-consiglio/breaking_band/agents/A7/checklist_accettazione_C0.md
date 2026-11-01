@@ -5,7 +5,7 @@ Un risultato del test Breaking Band puo dirsi **verificato localmente** SOLO se 
 - [ ] B  Hash sha256 dei tre documenti congelati registrato da C0 PRIMA del run (V14) — documenti verificati da A7 il 01/11: coincidono con HASH_DOCUMENTI.
 - [ ] B  **Hash del CODICE** (signals.py, engine.py, params.py, run_test.py) registrato prima del run (V14, CK-32). Non ancora fatto.
 - [ ] B  sha256 dei 4 CSV = HASH_DATI.txt e righe = audit A3 (V18) — richiede autorizzazione di C0 (solo hashing).
-- [ ] B  Decisione di C0 su Q1 (armamento prima della barra 200: A4 arma da t>=200, A7 da indicatori pronti) PRIMA dell'hash del codice; vedi `domande.md`.
+- [x] B  Q1 risolta da D008 (armamento da barra 200): reimplementazione allineata, 0 divergenze su sintetico.
 - [ ] B  Convenzioni di simulazione (specifica sez. 6) coincidenti col ricalcolatore (piano sez. 2): fill target al livello, mkt, target oltre ingresso, gap 180, spread 0.
 
 ## B. Correttezza del motore e dei segnali
