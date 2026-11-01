@@ -226,6 +226,26 @@ def aggregate_m1(m1, tf_minutes, min_m1=1):
     return res
 
 
+def replace_zero_spread(m1):
+    """Specifica_v1 6.9: spread 0 -> mediana degli spread NON nulli dello stesso periodo (file) e della stessa ora
+    server ((minuti // 60) % 24); se per quell'ora non ce ne sono: mediana di tutto il periodo. Restituisce
+    (nuovo M1, maschera delle righe sostituite). Scritta da zero (non usa il codice di A4)."""
+    sp = m1.sp_pts.copy()
+    zero = sp == 0
+    nz = sp[~zero]
+    if len(nz) == 0 or not zero.any():
+        return m1, zero
+    hour = (m1.t // 60) % 24
+    glob = float(np.median(nz))
+    med = {}
+    for hh in range(24):
+        v = sp[(hour == hh) & (~zero)]
+        med[hh] = float(np.median(v)) if len(v) else glob
+    for i in np.flatnonzero(zero):
+        sp[i] = med[int(hour[i])]
+    return M1(m1.t, m1.o, m1.h, m1.l, m1.c, sp, point=m1.point), zero
+
+
 def true_range(h, l, c):
     pc = np.concatenate(([np.nan], c[:-1]))
     tr = np.maximum.reduce([h - l, np.abs(h - pc), np.abs(l - pc)])
@@ -655,7 +675,8 @@ def _targets(spec):
 
 
 def simulate_trade(m1, spec, spread_model="executable", stop_gap_worse=True, target_gap_improve=False,
-                   check_entry_bar=True, fixed_spread_pts=None):
+                   check_entry_bar=True, fixed_spread_pts=None, block_target_beyond_entry=True,
+                   mkt_on_recalc_beyond=True, max_entry_gap_min=None):
     """Ricalcolo da zero di UN trade su barre M1. NON usa il motore di A4.
 
     spec: direction (+1/-1), entry_time (apertura della barra successiva alla barra segnale),
@@ -675,6 +696,11 @@ def simulate_trade(m1, spec, spread_model="executable", stop_gap_worse=True, tar
         esce a ask = livello + spread.
       * STOP PRIMA DEL TARGET se nella stessa M1 sono toccati entrambi.
       * chiusura forzata: all'open della M1 (lato eseguibile); fine dati: close dell'ultima M1.
+      * specifica_v1 sez. 6.4: (a) block_target_beyond_entry: long con target0 <= ask o short con target0 >= bid
+        -> nessun trade, status 'target_oltre_ingresso'; (b) mkt_on_recalc_beyond: se dopo un ricalcolo il nuovo target e
+        gia superato all'apertura della prima M1 in cui vale (long: bid >= target; short: ask <= target) -> uscita a
+        mercato a quell'apertura, motivo 'mkt'. max_entry_gap_min (spec 6.1: 180): se la M1 di ingresso e piu lontana
+        -> status 'gap_ingresso' (nessun trade).
     Restituisce dict con prezzi, tempi, motivo ('stop'|'target'|'forced'|'end_of_data'), pnl (unita di prezzo, spread
     incluso), both_touched (stop e target toccati nella barra di uscita), warnings."""
     if spread_model not in SPREAD_MODELS:
@@ -700,10 +726,14 @@ def simulate_trade(m1, spec, spread_model="executable", stop_gap_worse=True, tar
         p += 1
     if sched[p][0] > t[i0]:
         raise ValueError("nessun target in vigore alla barra di ingresso")
-    if d == 1 and (stop >= entry or sched[p][1] <= entry):
-        warnings.append("long con stop >= prezzo di ingresso o target <= ingresso")
-    if d == -1 and (stop <= entry or sched[p][1] >= entry):
-        warnings.append("short con stop <= prezzo di ingresso o target >= ingresso")
+    if max_entry_gap_min is not None and (t[i0] - e_t) > max_entry_gap_min:
+        return {"status": "gap_ingresso", "id": spec.get("id"), "entry_gap_min": t[i0] - e_t}
+    if block_target_beyond_entry and ((d == 1 and sched[p][1] <= entry) or (d == -1 and sched[p][1] >= entry)):
+        return {"status": "target_oltre_ingresso", "id": spec.get("id")}
+    if d == 1 and stop >= entry:
+        warnings.append("long con stop >= prezzo di ingresso")
+    if d == -1 and stop <= entry:
+        warnings.append("short con stop <= prezzo di ingresso")
     res = {"id": spec.get("id"), "direction": d, "entry_idx": i0, "entry_time": t[i0],
            "entry_gap_min": t[i0] - e_t, "entry_price": entry, "spread_entry": s_e, "warnings": warnings,
            "status": "ok"}
@@ -712,9 +742,15 @@ def simulate_trade(m1, spec, spread_model="executable", stop_gap_worse=True, tar
         if ft is not None and t[i] >= ft:
             px = o[i] if d == 1 else o[i] + s
             return _close(res, i, t[i], px, "forced", False, d, entry, s)
+        p_prev = p
         while p + 1 < len(sched) and sched[p + 1][0] <= t[i]:
             p += 1
         tgt = sched[p][1]
+        if mkt_on_recalc_beyond and p != p_prev and i > i0:
+            if d == 1 and o[i] >= tgt:
+                return _close(res, i, t[i], o[i], "mkt", False, d, entry, s)
+            if d == -1 and o[i] + s <= tgt:
+                return _close(res, i, t[i], o[i] + s, "mkt", False, d, entry, s)
         if i == i0 and not check_entry_bar:
             continue
         if spread_model == "executable":
@@ -786,8 +822,9 @@ def select_sample(n_total, k=20, seed=0):
     return sorted(rng.sample(range(n_total), min(k, n_total)))
 
 
-_REASON_SYN = {"sl": "stop", "stop_loss": "stop", "stoploss": "stop", "tp": "target", "take_profit": "target",
-               "takeprofit": "target", "forced": "forced", "force": "forced", "time": "forced", "timeout": "forced",
+_REASON_SYN = {"mkt": "mkt", "sl": "stop", "stop_loss": "stop", "stoploss": "stop", "tp": "target", "take_profit": "target",
+               "takeprofit": "target", "forced": "forced", "force": "forced", "time": "forced", "timeout": "forced", "tf": "forced",
+               "fine_dati": "end_of_data",
                "eod": "end_of_data", "end": "end_of_data", "end_of_data": "end_of_data", "stop": "stop", "target": "target"}
 
 
@@ -1129,6 +1166,28 @@ def selftest(verbose=True):
     # entry con gap: entry_time in un buco -> prima M1 successiva
     x = simulate_trade(mTS, {"direction": 1, "entry_time": "2020.01.06 09:30", "stop": 90.0, "target": 120.0})
     rec("entry_time prima dei dati -> prima M1 disponibile, entry_gap_min riportato", x["entry_idx"] == 0 and x["entry_gap_min"] == 30)
+
+    # --- specifica_v1 6.4: target oltre l'ingresso, ricalcolo oltre il prezzo, gap di ingresso, spread zero ---
+    x = simulate_trade(mL1, {"direction": 1, "entry_time": T0, "stop": 99.0, "target": 100.1})
+    rec("target0 <= ask (100,10 <= 100,20): nessun trade, status target_oltre_ingresso", x["status"] == "target_oltre_ingresso")
+    x = simulate_trade(mS1, {"direction": -1, "entry_time": T0, "stop": 101.0, "target": 100.0})
+    rec("short con target0 >= bid (100,00 >= 100,00): nessun trade", x["status"] == "target_oltre_ingresso")
+    mMK = mk([(100.0, 100.2, 99.9, 100.1), (100.1, 100.3, 100.0, 100.2), (100.6, 100.8, 100.5, 100.7)])
+    x = simulate_trade(mMK, {"direction": 1, "entry_time": T0, "stop": 99.0, "targets": [(T0, 105.0), ("2020.01.06 10:02", 100.4)]})
+    rec("ricalcolo: nuovo target 100,40 gia superato all'open 100,60 della barra 10:02 -> uscita a mercato 'mkt' a 100,60 (pnl +0,40)",
+        x["exit_reason"] == "mkt" and x["exit_idx"] == 2 and abs(x["exit_price"] - 100.6) < 1e-9 and abs(x["pnl"] - 0.40) < 1e-9, "reason=%s pnl=%.4f" % (x["exit_reason"], x["pnl"]))
+    x = simulate_trade(mMK, {"direction": 1, "entry_time": T0, "stop": 99.0, "targets": [(T0, 105.0), ("2020.01.06 10:02", 100.4)]}, mkt_on_recalc_beyond=False)
+    rec("stessa situazione senza regola 'mkt': target 100,40 colpito in barra 2 e riempito AL LIVELLO 100,40 (nessun miglioramento)", x["exit_reason"] == "target" and abs(x["exit_price"] - 100.4) < 1e-9)
+    x = simulate_trade(mTS, {"direction": 1, "entry_time": "2020.01.05 20:00", "stop": 90.0, "target": 120.0}, max_entry_gap_min=180)
+    rec("gap di ingresso 840 min > 180: nessun trade, status gap_ingresso", x["status"] == "gap_ingresso")
+    t_z = np.arange(48, dtype=np.int64) * 60 + to_minutes("2020.01.06 00:00")      # una barra all'ora, 2 giorni
+    sp_z = np.array([20.0 + (i % 24) for i in range(48)])                          # spread = 20 + ora
+    sp_z[5] = 0.0; sp_z[46] = 0.0; sp_z[47] = 0.0                                   # tre zeri: ore 5, 22, 23 del 2o giorno
+    m_z = M1(t_z, np.full(48, 100.0), np.full(48, 100.5), np.full(48, 99.5), np.full(48, 100.0), sp_z)
+    m_z2, msk = replace_zero_spread(m_z)
+    rec("spread 0 -> mediana dei non nulli della stessa ora server (ora 5 -> 25 dal 2o giorno; ore 22/23 -> 42/43 dal 1o)",
+        int(msk.sum()) == 3 and m_z2.sp_pts[5] == 25.0 and m_z2.sp_pts[46] == 42.0 and m_z2.sp_pts[47] == 43.0 and np.all(m_z2.sp_pts > 0),
+        "%s" % m_z2.sp_pts[[5, 46, 47]].tolist())
 
     # --- contabilita spread long vs short: stesso movimento (50 punti), stesso spread -> costi uguali ---
     mU = mk([(100.0, 100.2, 99.9, 100.1), (100.1, 101.1, 100.0, 101.0)])      # sale

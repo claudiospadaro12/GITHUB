@@ -1,0 +1,28 @@
+# Domande di A7 sulla specifica_v1.md (reimplementazione indipendente)
+Fonte letta: SOLO `congelati/specifica_v1.md` (sha256 4da8af64af86d216c592f5ba95166a3d72d072a7be09dc734915d09bdbb60a92). Per ogni punto: lettura implementata in `reimpl_segnali.py` (la piu letterale), alternativa selezionabile con `Cfg.alt_*`, effetto atteso, stato del confronto con A4 (solo dati sintetici; NESSUN CSV reale letto).
+Etichette: AMBIGUO / LACUNA / CONTRADDIZIONE. Dopo aver finito la reimplementazione (hash in `HASH_REIMPL_PRIMA_DI_LEGGERE_A4.txt`) ho letto l'interfaccia di A4 e il suo `domande.md` per scrivere il confronto: le letture di A7 erano gia fissate.
+
+| # | Punto | Lettura A7 (default) | Alternativa (`Cfg`) | Confronto con A4 (sintetico) |
+|---|---|---|---|---|
+| Q1 | AMBIGUO. Warm-up sez. 3: "le prime 200 barre non generano segnali" ma il disegno T1 parla di "F0 barre valide" | Indicatori pronti = si arma da subito; sono soppressi solo i SEGNALI con tau < 200 | `alt_arm_from_warmup=True`: si arma solo da t >= 200 | **DIVERGE**: A4 arma solo da t >= 200 (episodi con s < 200 assenti in A4). I segnali coincidono in tutti i casi provati; la differenza tocca solo gli episodi armati prima di 200 e testati dopo (rara). Decisione da C0 prima dell'hash |
+| Q2 | LACUNA. Un segnale soppresso dal warm-up consuma l'episodio? | Si (e comunque "la prima barra che soddisfa tutto" e il segnale) | `alt_warmup_not_consume` | Non osservata differenza |
+| Q3 | AMBIGUO. C0 "primo tocco con tau-p >= 3" vs "il segnale e la PRIMA barra che soddisfa TUTTE le condizioni" (sez. 5) | Ogni barra con tau-p >= 3 e Low<=L e candidata; segnale alla prima che soddisfa tutto | `alt_cont_first_touch_only`: solo il primissimo tocco, poi CONT consumata | Coincide con A4 (stessa lettura, A4 punto 1) |
+| Q4 | CONTRADDIZIONE. "tocco a tau-p<3 CONSUMA l'episodio" vs "p nuovo: tocchi precedenti annullati" | Consumo permanente per la variante CONT | `alt_consume_reset_on_new_p` | Coincide con A4 (punto 2) |
+| Q5 | LACUNA. Nuova bulge nella stessa direzione con episodio attivo | Se `s_nuovo > p_corrente` SOSTITUISCE l'episodio attivo; se `s_nuovo <= p` e lo stesso impulso e si ignora; `last_p` per direzione vale anche dopo la morte dell'episodio. Direzione opposta: disarma l'episodio attivo. Al piu UN episodio attivo | — | Coincide con A4 (punto 4) |
+| Q6 | AMBIGUO. La barra di armamento t0 puo essere barra di test? | No: valutazione da t0+1 | `alt_eval_from_arm_bar` | Coincide con A4 (punto 7) |
+| Q7 | AMBIGUO. I1 "Low_u > L_u per ogni u in [s, tau]" | Letterale: include la barra s e le barre dell'impulso. Poiche s e la barra del MINIMO della finestra, `Low_s <= L_s` accade spesso: l'INV puo essere quasi sempre consumata. Nei miei pattern INV il minimo calmo e dentro la banda per costruzione | — | Come A4 (punto 6, con sensibilita Sg). Segnalo il rischio di filtro auto-colpente: da misurare nell'imbuto |
+| Q8 | LACUNA. TR della prima barra e seme dell'ATR | TR[0] = High-Low; ATR(14) seme = media dei primi 14 TR (incluso TR[0]); `z_t = R_t/ATR_(t-1)` | — | Nessuna differenza osservata |
+| Q9 | AMBIGUO. B3 "ATR_s" e verso del corpo | `R_u >= 1,5 * ATR` alla barra s (inclusa), corpo `C_u > O_u` (specchio per d=-1); basta UNA barra in (s, t] | — | Nessuna differenza osservata |
+| Q10 | LACUNA. B4 con denominatore 0 (t = s) | Falso. ER usa le chiusure da s a t | — | Nessuna differenza osservata |
+| Q11 | LACUNA. W_ref se mancano indicatori (`s-14` < primo `W` valido o `S50` non pronto) | Non si arma | — | Nessuna differenza osservata |
+| Q12 | AMBIGUO. Disarmo: ordine dei controlli | A ogni barra: aggiorna p; se `p - s > 20` -> disarmo "impulso lungo"; altrimenti se `tau - p > 30` -> disarmo "t_max"; altrimenti valuta. Una barra che fa nuovo estremo non e mai barra di test | — | Nessuna differenza osservata |
+| Q13 | AMBIGUO. INV: `r` ammesso a p+1? e retest a tau-p>=3 | `r` in (p, tau) con `Low_r <= M_r` (anche p+1); retest richiede `tau - p >= 3` e `High_tau <= High_p` | — | Nessuna differenza osservata |
+| Q14 | AMBIGUO. SEQ e INV: la sequenza mediana -> banda dell'impulso e per definizione un INV | Le varianti sono indipendenti: lo stesso episodio puo dare INV (retest) e poi, se tocca la banda opposta, la CONT e scartata dalla SEQ | — | Coincide con A4 |
+| Q15 | LACUNA. Lo spread 0 e i "segnali scartati" | Il modulo dei segnali non conosce posizioni aperte ne gap di ingresso: restituisce TUTTI i segnali; scarti e conteggi sono del motore | — | — |
+| Q16 | AMBIGUO. Soglie al limite (`>=` / `>`) | Ovunque come scritto in specifica: B1 `>=`, B2 `>`, B3 `>=`, B4 `>=`, B5 `>=`, B6 `<=`, impulsiva `<=` 1,5 ammessa, sd<S50 stretto, sd<=sd[-3] largo, banda piatta `<=`, tocchi `>=`/`<=` | — | I pattern piantati NON esercitano gli uguali esatti (con prezzi reali l'uguale e raro): limite dichiarato |
+
+## Sintesi per C0
+1. **Una sola divergenza A7-A4 su dati sintetici: Q1 (warm-up e armamento).** Segnali identici (pattern piantati e 6 serie a regimi: 26 = 26). Da decidere PRIMA dell'hash: o A4 arma solo da t>=200 (come ora) o da subito. Per i dati reali l'effetto atteso e trascurabile ma non nullo.
+2. Q7 (I1 su [s, tau]) puo svuotare l'INV: non e una divergenza ma un rischio di disegno gia noto (Sg).
+3. Il contrafattuale "CONT senza SEQ" non e isolabile con i miei scenari (nei tentativi falliva anche sd<=sd[-3]): la SEQ e verificata via imbuto (C0 vero, C3 falso, stadio massimo 1) e contatore, non via segnale.
+4. Mancano nei pattern: uguaglianze esatte sulle soglie, MIN_RETR/T_MAX con i valori congelati (testati come MECCANISMO con parametro alterato), tocco precoce naturale (richiede sd quasi nulla, non costruibile senza violare altri criteri).

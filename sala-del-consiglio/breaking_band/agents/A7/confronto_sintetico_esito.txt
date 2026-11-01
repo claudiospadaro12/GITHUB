@@ -1,0 +1,51 @@
+=== CONFRONTO SU PATTERN PIANTATI (long e specchio) ===
+pattern piantati: 4 divergenze
+
+=== CONFRONTO SU SERIE A REGIMI (6000 barre, 6 semi) ===
+serie a regimi: 26 segnali A7, 26 segnali A4, 10 divergenze
+
+--- DETTAGLIO DIVERGENZE ---
+  DIVERGENZA C_N_warmup[L] CONT tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(1, 119)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA C_N_warmup[L] INV tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(1, 119)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA C_N_warmup[S] CONT tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(-1, 119)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA C_N_warmup[S] INV tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(-1, 119)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed1 CONT tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(-1, 51)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed1 INV tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(-1, 51)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed3 CONT tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (2)=[(1, 88), (1, 149)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed3 INV tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (2)=[(1, 88), (1, 149)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed4 CONT tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(1, 78)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed4 INV tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(1, 78)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed5 CONT tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(1, 117)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed5 INV tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (1)=[(1, 117)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed6 CONT tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (2)=[(-1, 60), (1, 157)] | solo A4 (0)=[] | picchi diversi=[]
+  DIVERGENZA regimi_seed6 INV tf=60: solo_A7=[] solo_A4=[] episodi_uguali=False armati_uguali=False
+     letture alternative che riconciliano (min. combinazione): [('alt_arm_from_warmup',)]
+     episodi solo A7 (2)=[(-1, 60), (1, 157)] | solo A4 (0)=[] | picchi diversi=[]
+
+ESITO CONFRONTO SINTETICO: 14 DIVERGENZE (tempo 29.2 s)

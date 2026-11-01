@@ -1,0 +1,138 @@
+=== TEST UNITARI A MANO ===
+PASS  SMA20=10,5; sd popolazione=5,76628 (ddof=0); U=M+2sd; L=M-2sd; W=4sd | sd=5.766281297 atteso=5.766281297
+PASS  ATR Wilder (seme SMA dei primi N TR): [nan, 1,5, 1,75]
+PASS  z_t = (High-Low)_t / ATR_(t-1) | z2=1.333333
+PASS  SEQ presente: mediana a r=2, poi banda impulso a u=4 (p=0, tau=6)
+PASS  SEQ assente: ordine inverso (banda a 2, poi mediana a 4)
+PASS  SEQ assente: solo mediana
+PASS  SEQ assente: solo banda dell'impulso
+PASS  SEQ assente: mediana e banda sulla STESSA barra (serve r < u)
+PASS  SEQ assente: la banda e a u = tau (serve u < tau)
+PASS  SEQ assente: la mediana e prima del picco (serve r > p)
+
+=== ARMAMENTO (B1-B5): attese scritte a mano ===
+PASS  ARM_POS tutti i criteri B1-B6 veri | attesi=[True, True, True, True, True, True] ottenuti=[True, True, True, True, True, True]
+PASS  ARM_N_B1 bande non raddoppiate (pre-fase molto ampia) | attesi=[False, True, True, True, True, True] ottenuti=[False, True, True, True, True, True]
+PASS  ARM_N_B3 nessuna candela >= 1,5 ATR_s | attesi=[True, True, False, True, True, True] ottenuti=[True, True, False, True, True, True]
+PASS  ARM_N_B4 movimento non netto (ER < 0,50) | attesi=[True, True, True, False, True, True] ottenuti=[True, True, True, False, True, True]
+PASS  ARM_N_B5 mediana non distante >= 2 ATR_s | attesi=[True, True, True, True, False, True] ottenuti=[True, True, True, True, False, True]
+
+=== PATTERN PIANTATI (CONT/INV, long e short specchiato) ===
+PASS  C_POS [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.213 S50=2.251 sd[-3]=2.202 zmax_ritr=1.24 z_t=1.19
+PASS  C_POS [LONG] - segnali | attesi=[(254, 1, 'CONT')] ottenuti=[(254, 1, 'CONT')]
+PASS  C_POS [LONG] - picco causale p | atteso=237 ottenuto=237
+PASS  C_POS [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.213 S50=2.251 sd[-3]=2.202 zmax_ritr=1.24 z_t=1.19
+PASS  C_POS [SHORT(specchio)] - segnali | attesi=[(254, -1, 'CONT')] ottenuti=[(254, -1, 'CONT')]
+PASS  C_POS [SHORT(specchio)] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_C0_nessun_tocco [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.155 S50=2.250 sd[-3]=2.202 zmax_ritr=1.24 z_t=0.65
+PASS  C_N_C0_nessun_tocco [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_C0_nessun_tocco [LONG] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_C0_nessun_tocco [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.155 S50=2.250 sd[-3]=2.202 zmax_ritr=1.24 z_t=0.65
+PASS  C_N_C0_nessun_tocco [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_C0_nessun_tocco [SHORT(specchio)] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_C1_candela_impulsiva_nel_ritracciamento [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.556 S50=2.147 sd[-3]=1.970 zmax_ritr=1.89 z_t=1.15
+PASS  C_N_C1_candela_impulsiva_nel_ritracciamento [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_C1_candela_impulsiva_nel_ritracciamento [LONG] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_C1_candela_impulsiva_nel_ritracciamento [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.556 S50=2.147 sd[-3]=1.970 zmax_ritr=1.89 z_t=1.15
+PASS  C_N_C1_candela_impulsiva_nel_ritracciamento [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_C1_candela_impulsiva_nel_ritracciamento [SHORT(specchio)] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_C1_candela_del_test_impulsiva [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.418 S50=2.255 sd[-3]=2.202 zmax_ritr=1.24 z_t=2.66
+PASS  C_N_C1_candela_del_test_impulsiva [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_C1_candela_del_test_impulsiva [LONG] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_C1_candela_del_test_impulsiva [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.418 S50=2.255 sd[-3]=2.202 zmax_ritr=1.24 z_t=2.66
+PASS  C_N_C1_candela_del_test_impulsiva [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_C1_candela_del_test_impulsiva [SHORT(specchio)] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_sd_non_sotto_S50 [LONG] - criteri grezzi come attesi (calcolo naive) | sd=2.010 S50=1.772 sd[-3]=2.807 zmax_ritr=1.14 z_t=1.12
+PASS  C_N_sd_non_sotto_S50 [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_sd_non_sotto_S50 [LONG] - picco causale p | atteso=235 ottenuto=235
+PASS  C_N_sd_non_sotto_S50 [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=2.010 S50=1.772 sd[-3]=2.807 zmax_ritr=1.14 z_t=1.12
+PASS  C_N_sd_non_sotto_S50 [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_sd_non_sotto_S50 [SHORT(specchio)] - picco causale p | atteso=235 ottenuto=235
+PASS  C_N_sd_in_risalita [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.635 S50=2.297 sd[-3]=1.536 zmax_ritr=1.25 z_t=1.20
+PASS  C_N_sd_in_risalita [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_sd_in_risalita [LONG] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_sd_in_risalita [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.635 S50=2.297 sd[-3]=1.536 zmax_ritr=1.25 z_t=1.20
+PASS  C_N_sd_in_risalita [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_sd_in_risalita [SHORT(specchio)] - picco causale p | atteso=237 ottenuto=237
+PASS  C_N_SEQ_mediana_poi_banda_impulso [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.881 S50=2.914 sd[-3]=1.504 zmax_ritr=1.46 z_t=1.28
+PASS  C_N_SEQ_mediana_poi_banda_impulso [LONG] - criteri grezzi alla barra 260 come attesi
+PASS  C_N_SEQ_mediana_poi_banda_impulso [LONG] - segnali | attesi=[(260, -1, 'INV')] ottenuti=[(260, -1, 'INV')]
+PASS  C_N_SEQ_mediana_poi_banda_impulso [LONG] - contatore CONT_morti_per_SEQ_episodi | atteso=1 ottenuto=1
+PASS  C_N_SEQ_mediana_poi_banda_impulso [LONG] - contatore segnali_CONT | atteso=0 ottenuto=0
+PASS  C_N_SEQ_mediana_poi_banda_impulso [LONG] - contatore segnali_INV | atteso=1 ottenuto=1
+PASS  C_N_SEQ_mediana_poi_banda_impulso [LONG] - stadio massimo CONT dell'imbuto | atteso=1 ottenuto=1
+PASS  C_N_SEQ_mediana_poi_banda_impulso [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.881 S50=2.914 sd[-3]=1.504 zmax_ritr=1.46 z_t=1.28
+PASS  C_N_SEQ_mediana_poi_banda_impulso [SHORT(specchio)] - criteri grezzi alla barra 260 come attesi
+PASS  C_N_SEQ_mediana_poi_banda_impulso [SHORT(specchio)] - segnali | attesi=[(260, 1, 'INV')] ottenuti=[(260, 1, 'INV')]
+PASS  C_N_SEQ_mediana_poi_banda_impulso [SHORT(specchio)] - contatore CONT_morti_per_SEQ_episodi | atteso=1 ottenuto=1
+PASS  C_N_SEQ_mediana_poi_banda_impulso [SHORT(specchio)] - contatore segnali_CONT | atteso=0 ottenuto=0
+PASS  C_N_SEQ_mediana_poi_banda_impulso [SHORT(specchio)] - contatore segnali_INV | atteso=1 ottenuto=1
+PASS  C_N_SEQ_mediana_poi_banda_impulso [SHORT(specchio)] - stadio massimo CONT dell'imbuto | atteso=1 ottenuto=1
+PASS  C_N_band_riding_impulso_oltre_20_barre [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_band_riding_impulso_oltre_20_barre [LONG] - esito episodio | fine=['impulso_lungo']
+PASS  C_N_band_riding_impulso_oltre_20_barre [LONG] - contatore ep_disarmati_impulso_lungo | atteso=1 ottenuto=1
+PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - esito episodio | fine=['impulso_lungo']
+PASS  C_N_band_riding_impulso_oltre_20_barre [SHORT(specchio)] - contatore ep_disarmati_impulso_lungo | atteso=1 ottenuto=1
+PASS  C_N_warmup [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_warmup [LONG] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
+PASS  C_N_warmup [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  C_N_warmup [SHORT(specchio)] - contatore segnali_soppressi_warmup | atteso=1 ottenuto=1
+PASS  C_mecc_MIN_RETR [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_mecc_MIN_RETR [LONG] - contatore CONT_consumati_tocco_precoce | atteso=1 ottenuto=1
+PASS  C_mecc_T_MAX [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  C_mecc_T_MAX [LONG] - contatore ep_disarmati_t_max | atteso=1 ottenuto=1
+PASS  I_POS [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.998 S50=2.254 sd[-3]=2.532 zmax_ritr=1.32 z_t=1.20
+PASS  I_POS [LONG] - segnali | attesi=[(257, -1, 'INV')] ottenuti=[(257, -1, 'INV')]
+PASS  I_POS [LONG] - picco causale p | atteso=235 ottenuto=235
+PASS  I_POS [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.998 S50=2.254 sd[-3]=2.532 zmax_ritr=1.32 z_t=1.20
+PASS  I_POS [SHORT(specchio)] - segnali | attesi=[(257, 1, 'INV')] ottenuti=[(257, 1, 'INV')]
+PASS  I_POS [SHORT(specchio)] - picco causale p | atteso=235 ottenuto=235
+PASS  I_N_I0_mediana_mai_toccata [LONG] - criteri grezzi come attesi (calcolo naive) | sd=0.785 S50=2.091 sd[-3]=2.505 zmax_ritr=0.96 z_t=0.97
+PASS  I_N_I0_mediana_mai_toccata [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I0_mediana_mai_toccata [LONG] - picco causale p | atteso=234 ottenuto=234
+PASS  I_N_I0_mediana_mai_toccata [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=0.785 S50=2.091 sd[-3]=2.505 zmax_ritr=0.96 z_t=0.97
+PASS  I_N_I0_mediana_mai_toccata [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I0_mediana_mai_toccata [SHORT(specchio)] - picco causale p | atteso=234 ottenuto=234
+PASS  I_N_I1_banda_opposta_toccata [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.997 S50=2.173 sd[-3]=2.531 zmax_ritr=1.30 z_t=1.19
+PASS  I_N_I1_banda_opposta_toccata [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I1_banda_opposta_toccata [LONG] - contatore INV_consumati_banda_opposta | atteso=1 ottenuto=1
+PASS  I_N_I1_banda_opposta_toccata [LONG] - picco causale p | atteso=235 ottenuto=235
+PASS  I_N_I1_banda_opposta_toccata [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.997 S50=2.173 sd[-3]=2.531 zmax_ritr=1.30 z_t=1.19
+PASS  I_N_I1_banda_opposta_toccata [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I1_banda_opposta_toccata [SHORT(specchio)] - contatore INV_consumati_banda_opposta | atteso=1 ottenuto=1
+PASS  I_N_I1_banda_opposta_toccata [SHORT(specchio)] - picco causale p | atteso=235 ottenuto=235
+PASS  I_N_retest_assente [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.998 S50=2.230 sd[-3]=2.638 zmax_ritr=1.32 z_t=1.22
+PASS  I_N_retest_assente [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_retest_assente [LONG] - stadio massimo INV dell'imbuto | atteso=2 ottenuto=2
+PASS  I_N_retest_assente [LONG] - picco causale p | atteso=235 ottenuto=235
+PASS  I_N_retest_assente [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.998 S50=2.230 sd[-3]=2.638 zmax_ritr=1.32 z_t=1.22
+PASS  I_N_retest_assente [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_retest_assente [SHORT(specchio)] - stadio massimo INV dell'imbuto | atteso=2 ottenuto=2
+PASS  I_N_retest_assente [SHORT(specchio)] - picco causale p | atteso=235 ottenuto=235
+PASS  I_N_I2_candela_impulsiva [LONG] - criteri grezzi come attesi (calcolo naive) | sd=2.407 S50=3.312 sd[-3]=2.560 zmax_ritr=1.52 z_t=1.31
+PASS  I_N_I2_candela_impulsiva [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I2_candela_impulsiva [LONG] - picco causale p | atteso=236 ottenuto=236
+PASS  I_N_I2_candela_impulsiva [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=2.407 S50=3.312 sd[-3]=2.560 zmax_ritr=1.52 z_t=1.31
+PASS  I_N_I2_candela_impulsiva [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I2_candela_impulsiva [SHORT(specchio)] - picco causale p | atteso=236 ottenuto=236
+PASS  I_N_I3_banda_impulso_inclinata_contro [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.412 S50=2.371 sd[-3]=1.477 zmax_ritr=1.17 z_t=1.13
+PASS  I_N_I3_banda_impulso_inclinata_contro [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I3_banda_impulso_inclinata_contro [LONG] - picco causale p | atteso=236 ottenuto=236
+PASS  I_N_I3_banda_impulso_inclinata_contro [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.412 S50=2.371 sd[-3]=1.477 zmax_ritr=1.17 z_t=1.13
+PASS  I_N_I3_banda_impulso_inclinata_contro [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_I3_banda_impulso_inclinata_contro [SHORT(specchio)] - picco causale p | atteso=236 ottenuto=236
+PASS  I_N_sd_non_sotto_S50 [LONG] - criteri grezzi come attesi (calcolo naive) | sd=4.123 S50=3.239 sd[-3]=4.499 zmax_ritr=1.37 z_t=1.19
+PASS  I_N_sd_non_sotto_S50 [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_sd_non_sotto_S50 [LONG] - picco causale p | atteso=235 ottenuto=235
+PASS  I_N_sd_non_sotto_S50 [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=4.123 S50=3.239 sd[-3]=4.499 zmax_ritr=1.37 z_t=1.19
+PASS  I_N_sd_non_sotto_S50 [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_sd_non_sotto_S50 [SHORT(specchio)] - picco causale p | atteso=235 ottenuto=235
+PASS  I_N_sd_in_risalita [LONG] - criteri grezzi come attesi (calcolo naive) | sd=1.600 S50=2.125 sd[-3]=1.551 zmax_ritr=1.15 z_t=1.10
+PASS  I_N_sd_in_risalita [LONG] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_sd_in_risalita [LONG] - picco causale p | atteso=234 ottenuto=234
+PASS  I_N_sd_in_risalita [SHORT(specchio)] - criteri grezzi come attesi (calcolo naive) | sd=1.600 S50=2.125 sd[-3]=1.551 zmax_ritr=1.15 z_t=1.10
+PASS  I_N_sd_in_risalita [SHORT(specchio)] - segnali | attesi=[] ottenuti=[]
+PASS  I_N_sd_in_risalita [SHORT(specchio)] - picco causale p | atteso=234 ottenuto=234
+
+PATTERN PIANTATI: 131/131 verifiche riuscite

@@ -1,0 +1,62 @@
+--- A4 CONT TF=60: serie a regimi 6000 barre, 7 segnali
+    [SUPERATO] invarianza_troncamento - 173 tagli, 7 segnali nella regione, nessuna differenza
+    [SUPERATO] invarianza_perturbazione_futuro - 40 perturbazioni del futuro, passato invariato
+    [SUPERATO] simmetria_specchio - specchio coerente: orig L/S=3/4 -> specchio L/S=4/3
+    [SUPERATO] riproducibilita - 2 esecuzioni, hash identico e4ec8fdeb702b7fc
+--- A4 CONT TF=30: serie a regimi 6000 barre, 7 segnali
+    [SUPERATO] invarianza_troncamento - 173 tagli, 7 segnali nella regione, nessuna differenza
+    [SUPERATO] invarianza_perturbazione_futuro - 40 perturbazioni del futuro, passato invariato
+    [SUPERATO] simmetria_specchio - specchio coerente: orig L/S=3/4 -> specchio L/S=4/3
+    [SUPERATO] riproducibilita - 2 esecuzioni, hash identico e4ec8fdeb702b7fc
+--- A4 INV TF=60: serie a regimi 6000 barre, 2 segnali
+    [SUPERATO] invarianza_troncamento - 158 tagli, 2 segnali nella regione, nessuna differenza
+    [SUPERATO] invarianza_perturbazione_futuro - 40 perturbazioni del futuro, passato invariato
+    [SUPERATO] simmetria_specchio - specchio coerente: orig L/S=2/0 -> specchio L/S=0/2
+    [SUPERATO] riproducibilita - 2 esecuzioni, hash identico 85fe246d7b1d492c
+--- A4 INV TF=30: serie a regimi 6000 barre, 2 segnali
+    [SUPERATO] invarianza_troncamento - 158 tagli, 2 segnali nella regione, nessuna differenza
+    [SUPERATO] invarianza_perturbazione_futuro - 40 perturbazioni del futuro, passato invariato
+    [SUPERATO] simmetria_specchio - specchio coerente: orig L/S=2/0 -> specchio L/S=0/2
+    [SUPERATO] riproducibilita - 2 esecuzioni, hash identico 85fe246d7b1d492c
+--- A4 CONT su C_POS con coda: [SUPERATO] invarianza_troncamento - 219 tagli, 1 segnali nella regione, nessuna differenza
+--- A4 INV su I_POS con coda: [SUPERATO] invarianza_troncamento - 222 tagli, 1 segnali nella regione, nessuna differenza
+
+ESITO controlli A4 su sintetici: TUTTI SUPERATI
+PASS  A4 su C_POS [LONG]: attesi=[(254, 1, 'CONT')] ottenuti=[(254, 1, 'CONT')]
+PASS  A4 su C_POS [SHORT]: attesi=[(254, -1, 'CONT')] ottenuti=[(254, -1, 'CONT')]
+PASS  A4 su C_N_C0_nessun_tocco [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_C0_nessun_tocco [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_C1_candela_impulsiva_nel_ritracciamento [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_C1_candela_impulsiva_nel_ritracciamento [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_C1_candela_del_test_impulsiva [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_C1_candela_del_test_impulsiva [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_sd_non_sotto_S50 [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_sd_non_sotto_S50 [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_sd_in_risalita [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_sd_in_risalita [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_SEQ_mediana_poi_banda_impulso [LONG]: attesi=[(260, -1, 'INV')] ottenuti=[(260, -1, 'INV')]
+PASS  A4 su C_N_SEQ_mediana_poi_banda_impulso [SHORT]: attesi=[(260, 1, 'INV')] ottenuti=[(260, 1, 'INV')]
+PASS  A4 su C_N_band_riding_impulso_oltre_20_barre [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_band_riding_impulso_oltre_20_barre [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_warmup [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_N_warmup [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su C_mecc_MIN_RETR [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su C_mecc_T_MAX [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_POS [LONG]: attesi=[(257, -1, 'INV')] ottenuti=[(257, -1, 'INV')]
+PASS  A4 su I_POS [SHORT]: attesi=[(257, 1, 'INV')] ottenuti=[(257, 1, 'INV')]
+PASS  A4 su I_N_I0_mediana_mai_toccata [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_I0_mediana_mai_toccata [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_I1_banda_opposta_toccata [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_I1_banda_opposta_toccata [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_retest_assente [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_retest_assente [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_I2_candela_impulsiva [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_I2_candela_impulsiva [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_I3_banda_impulso_inclinata_contro [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_I3_banda_impulso_inclinata_contro [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_sd_non_sotto_S50 [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_sd_non_sotto_S50 [SHORT]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_sd_in_risalita [LONG]: attesi=[] ottenuti=[]
+PASS  A4 su I_N_sd_in_risalita [SHORT]: attesi=[] ottenuti=[]
+
+BATTERIA PATTERN PIANTATI SU A4: 36/36

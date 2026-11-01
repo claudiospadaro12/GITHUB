@@ -13,14 +13,14 @@ PASS  difetto look-ahead di 5 barre -> troncamento FALLITO | 170/683 tagli con o
 PASS  difetto look-ahead di 5 barre -> perturbazione FALLITO | 8/40 perturbazioni cambiano il passato; primo: k=186, mismatch su 'signal' alla barra j=183
 PASS  difetto statistica globale sul campione -> almeno uno tra troncamento e perturbazione FALLITO | troncamento=FALLITO, perturbazione=SUPERATO
 PASS  difetto asimmetria long/short (finestre 20 vs 30) -> specchio FALLITO | 'signal': 19 barre non speculari (prima j=218) | segnali orig L/S=44/31, specchio L/S=40/34
-PASS  difetto non determinismo (rumore non seminato) -> riproducibilita FALLITO | hash diversi: c9b9edbbaf04, df214b828145
+PASS  difetto non determinismo (rumore non seminato) -> riproducibilita FALLITO | hash diversi: fe367d807876, 0a6f4499e776
 PASS  segnale sempre nullo -> troncamento NON_CONCLUSIVO (mai SUPERATO) | nessuna differenza ma solo 0 segnali nella regione testata (<5): controllo vuoto
 PASS  segnale sempre nullo -> specchio NON_CONCLUSIVO | segnali insufficienti per concludere (L=0, S=0)
 PASS  riproducibilita su processo (script deterministico) -> SUPERATO | 2 esecuzioni (PYTHONHASHSEED diversi), sha256 uguale fc35904d36769d8d
-PASS  riproducibilita su processo (script casuale) -> FALLITO | sha256 diversi: 47da56ff17d4, 1839abef591b
+PASS  riproducibilita su processo (script casuale) -> FALLITO | sha256 diversi: bba075773af7, 76fcb249ebc3
 PASS  hash criteri invariato -> SUPERATO | sha256 attuale d74f0424cf1677a1 == atteso d74f0424cf1677a1
 PASS  hash criteri dopo modifica della soglia -> FALLITO | sha256 attuale 1f27d23f2c06a4ed != atteso d74f0424cf1677a1
-PASS  criteri piu recenti dei risultati -> FALLITO (evidenza debole) | criteri modificati DOPO 1 file risultati (es. /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/tmpA7/tmprpolcuxv/ris.csv)
+PASS  criteri piu recenti dei risultati -> FALLITO (evidenza debole) | criteri modificati DOPO 1 file risultati (es. /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/tmpA7/tmpbuu2_nuu/ris.csv)
 PASS  criteri precedenti ai risultati -> SUPERATO (evidenza debole) | mtime criteri <= mtime di tutti i 1 file risultati (evidenza debole)
 PASS  seme da file riproducibile e campione di 20 deterministico e ordinato
 PASS  imbuto coerente (cumulativo, ricalcolo, riconciliazione segnali=trade+scartati) -> SUPERATO | imbuto coerente (3 stadi)
@@ -44,6 +44,12 @@ PASS  target ricalcolato: se il nuovo livello vale dalla barra dopo, NON scatta 
 PASS  chiusura forzata all'open della barra: long esce a bid 100,20 pnl 100,20-100,20 = 0 (spread pagato) | pnl=0.0000
 PASS  chiusura forzata short: entry bid 100,00, uscita ask 100,40 -> pnl -0,40 | pnl=-0.4000
 PASS  entry_time prima dei dati -> prima M1 disponibile, entry_gap_min riportato
+PASS  target0 <= ask (100,10 <= 100,20): nessun trade, status target_oltre_ingresso
+PASS  short con target0 >= bid (100,00 >= 100,00): nessun trade
+PASS  ricalcolo: nuovo target 100,40 gia superato all'open 100,60 della barra 10:02 -> uscita a mercato 'mkt' a 100,60 (pnl +0,40) | reason=mkt pnl=0.4000
+PASS  stessa situazione senza regola 'mkt': target 100,40 colpito in barra 2 e riempito AL LIVELLO 100,40 (nessun miglioramento)
+PASS  gap di ingresso 840 min > 180: nessun trade, status gap_ingresso
+PASS  spread 0 -> mediana dei non nulli della stessa ora server (ora 5 -> 25 dal 2o giorno; ore 22/23 -> 42/43 dal 1o) | [25.0, 42.0, 43.0]
 PASS  spread (chart_bid_cost): long e short su movimenti speculari pagano lo stesso costo (pnl uguali = 0,80) | L=0.8000 S=0.8000
 PASS  simmetria del simulatore (executable, specchio bid/ask, spread variabile): 400 trade, pnl/uscita identici | differenze=0; uscite stop/target/forzata=143/192/65
 PASS  simmetria del simulatore (chart_bid_cost, specchio negate, spread costante 25 punti): 400 trade identici | differenze=0; uscite stop/target/forzata=129/192/79
@@ -56,4 +62,4 @@ PASS  compare_summary con PF diverso dell'1% -> FALLITO
 PASS  summarize_pnls a mano (n=5, wins=3, PF=2,75)
 PASS  trace_trade produce una tabella per la ricostruzione a mano
 
-AUTO-TEST: 56/56 controlli riusciti in 3.1 s - ESITO GLOBALE: SUPERATO
+AUTO-TEST: 62/62 controlli riusciti in 3.1 s - ESITO GLOBALE: SUPERATO

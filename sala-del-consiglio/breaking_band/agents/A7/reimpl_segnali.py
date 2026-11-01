@@ -167,7 +167,7 @@ def detect(bars, cfg=None, trace=False):
     cnt.update({"armati": 0, "armati_+1": 0, "armati_-1": 0, "armo_bloccato_s<=p_prec": 0,
                 "ep_sostituiti_stessa_dir": 0, "ep_disarmati_dir_opposta": 0, "ep_disarmati_impulso_lungo": 0,
                 "ep_disarmati_t_max": 0, "ep_con_barra_p+MIN_RETR": 0,
-                "CONT_consumati_tocco_precoce": 0, "INV_consumati_banda_opposta": 0,
+                "CONT_consumati_tocco_precoce": 0, "CONT_morti_per_SEQ_episodi": 0, "INV_consumati_banda_opposta": 0,
                 "info_CONT_ritorno_banda_senza_mediana": 0, "segnali_soppressi_warmup": 0,
                 "segnali_CONT": 0, "segnali_INV": 0})
     for i, nm in enumerate(STAGES_CONT):
@@ -245,6 +245,7 @@ def detect(bars, cfg=None, trace=False):
                 e.consumed = {"CONT": False, "INV": False}
                 e.max_stage = {"CONT": 0, "INV": 0}
                 e.reached_minretr = False
+                e.seq_flag = False
                 e.sigs = []
                 e.end = None
                 ep = e
@@ -292,6 +293,9 @@ def _evaluate(ep, v, t, cfg, cnt, signals, tr_out):
                 band = any(v.h[u] >= v.U[u] for u in range(p + 1, t))
                 if band and not med:
                     cnt["info_CONT_ritorno_banda_senza_mediana"] += 1
+                if not C3 and not ep.seq_flag:
+                    ep.seq_flag = True
+                    cnt["CONT_morti_per_SEQ_episodi"] += 1
                 if C3 and not C1:
                     cnt["CONT_C1_morti_nel_ritracciamento" if not C1_ritr else "CONT_C1_morti_su_candela_del_test"] += 1
             if tr_out is not None and C0:
@@ -315,7 +319,7 @@ def _evaluate(ep, v, t, cfg, cnt, signals, tr_out):
             k += 1
         if k > ep.max_stage["INV"]:
             ep.max_stage["INV"] = k
-        if tr_out is not None and (med_r and retest or touched_opp):
+        if tr_out is not None and (retest or touched_opp):
             tr_out.append({"ep": ep.id, "t": t, "tipo": "INV", "d": d, "p": p, "I0_mediana": med_r,
                            "I1_banda_opposta_mai_toccata": not touched_opp, "retest": retest,
                            "I2_nessuna_impulsiva": I2, "I3_banda_piatta": I3,
