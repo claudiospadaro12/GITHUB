@@ -1,0 +1,8 @@
+N=64 media=0.1648
+  A4/A7 base: settimana condivisa, rapporto somme, seme 20261101, linear blocchi=52  IC90 [0.0699, 0.2529]  lo>0: True
+  statistica = media delle medie settimanali                             blocchi=52  IC90 [0.1066, 0.2737]  lo>0: True
+  blocco = coppia x settimana (non condiviso)                            blocchi=61  IC90 [0.0705, 0.2508]  lo>0: True
+  blocco = 2 settimane condivise                                         blocchi=49  IC90 [0.0676, 0.2547]  lo>0: True
+  quantile 'lower'/'higher' (stesso seme)                                blocchi=52  IC90 [0.0698, 0.2529]  lo>0: True
+  blocco = singolo trade (nessun blocco)                                 blocchi=64  IC90 [0.0708, 0.2526]  lo>0: True
+  200 semi diversi (base): lo min 0.0644  max 0.0732  | semi con lo<=0: 0
