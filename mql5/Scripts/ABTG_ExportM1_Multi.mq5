@@ -27,8 +27,8 @@
 #property script_show_inputs
 #property version "1.00"
 
-input string InpSimboli  = "NASUSD_EXT,SPXUSD_EXT"; // voci (alias con |)
-input string InpFinestre = "2021.01.01-2022.01.01,2022.01.01-2023.01.01,2023.01.01-2024.01.01,2024.01.01-2025.01.01,2025.01.01-2026.10.01";            // finestre da-a (a esclusa)
+input string InpSimboli  = "D30EUR"; // voci (alias con |)
+input string InpFinestre = "2024.09.01-2025.01.01,2025.01.01-2026.10.01";            // finestre da-a (a esclusa)
 input bool   InpChiudiTerminale = false;   // true SOLO nel lancio automatico
 
 #define F_SIMBOLI   "ABTG_SIMBOLI_BCM.txt"
