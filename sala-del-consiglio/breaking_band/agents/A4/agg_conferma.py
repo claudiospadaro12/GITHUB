@@ -183,7 +183,8 @@ def stat_gruppo(trades: list, con_ic: bool = True) -> dict:
 
 
 def verdetto_conferma(N, media, ic, wr_pct, pareggio_pct, lopo: dict, media_costo_extra) -> dict:
-    """Esattamente criteri_conferma_forex_v1.md. Ritorna anche la lettura alternativa (precedenza stile v1)."""
+    """criteri_conferma_forex_v1.md con la precedenza di D010 (N>=30, hi IC90 < 0,05 -> NESSUN VANTAGGIO RILEVANTE anche se
+    l'IC contiene 0). Ritorna anche la lettura alternativa letterale come campo informativo."""
     A = AGG
     cond = {
         "1_N>=30": N >= A["N_MIN"],
@@ -200,7 +201,7 @@ def verdetto_conferma(N, media, ic, wr_pct, pareggio_pct, lopo: dict, media_cost
             return "CONFERMATO"
         contiene_zero = ic["ic90_lo"] <= 0 <= ic["ic90_hi"]
         nessun = ic["ic90_hi"] < A["EPS_NESSUN_VANTAGGIO_R"]
-        if precedenza_v1:                    # NESSUN VANTAGGIO prima di NON DIMOSTRATO (come criteri v1)
+        if precedenza_v1:                    # D010: NESSUN VANTAGGIO prima di NON DIMOSTRATO (come criteri v1)
             return "NESSUN VANTAGGIO RILEVANTE" if nessun else "NON DIMOSTRATO"
         if contiene_zero:                    # ordine di scrittura del documento: IC contiene 0 -> NON DIMOSTRATO
             return "NON DIMOSTRATO"
@@ -208,16 +209,16 @@ def verdetto_conferma(N, media, ic, wr_pct, pareggio_pct, lopo: dict, media_cost
             return "NESSUN VANTAGGIO RILEVANTE"
         return "NON DIMOSTRATO"              # N>=30, IC a destra di 0 ma almeno un'altra condizione manca
 
-    lett = esito(False)
-    alt = esito(True)
+    lett = esito(True)       # D010: NESSUN VANTAGGIO RILEVANTE prima di NON DIMOSTRATO
+    alt = esito(False)       # lettura letterale (ordine di scrittura): solo informativa
     note = []
     if lett != alt:
-        note.append("la precedenza tra NON DIMOSTRATO e NESSUN VANTAGGIO RILEVANTE e AMBIGUA nel documento: lettura "
-                    "letterale (ordine di scrittura) = %s; lettura stile v1 = %s (vedi domande.md)" % (lett, alt))
+        note.append("precedenza D010: esito primario = %s; lettura alternativa (ordine di scrittura del documento) = %s"
+                    % (lett, alt))
     livello = None
     if lett == "CONFERMATO":
         livello = "N>=60" if N >= A["N_PIENO"] else "30<=N<60"
-    return {"esito": lett, "esito_lettura_alternativa_v1": alt, "condizioni": cond, "N": N, "media_R": media,
+    return {"esito": lett, "esito_lettura_alternativa_letterale": alt, "condizioni": cond, "N": N, "media_R": media,
             "ic90": ic, "win_rate_pct": wr_pct, "pareggio_atteso_medio_pct": pareggio_pct,
             "soglia_win_rate_pct": (pareggio_pct + A["PP_VINCITE"]) if pareggio_pct is not None else None,
             "leave_one_pair_out_media_R": lopo, "media_R_con_costo_extra": media_costo_extra,

@@ -158,9 +158,10 @@ class TestScenari(unittest.TestCase):
         self.assertLess(r["leave_one_pair_out_media_R"]["EURUSD"], 0)
         self.assertGreater(r["leave_one_pair_out_media_R"]["GBPUSD"], 0)
         self.assertNotEqual(r["esito"], "CONFERMATO")
-        # (2) IC90 contiene 0 -> NON DIMOSTRATO
-        r = self.calcola(scenario(np.random.default_rng(6), 25, bernoulli(0.5, 0.3, -0.28)))["VERDETTO"]
+        # (2) IC90 contiene 0 e limite superiore >= 0,05 -> NON DIMOSTRATO
+        r = self.calcola(scenario(np.random.default_rng(6), 25, bernoulli(0.5, 1.0, -0.9)))["VERDETTO"]
         self.assertFalse(r["condizioni"]["2_media>0_e_IC90_inf>0"])
+        self.assertGreaterEqual(r["ic90"]["ic90_hi"], 0.05)
         self.assertEqual(r["esito"], "NON DIMOSTRATO")
 
     def test_nessun_vantaggio_rilevante(self):
@@ -168,7 +169,7 @@ class TestScenari(unittest.TestCase):
         r = self.calcola(scenario(np.random.default_rng(7), 25, bernoulli(0.5, 0.2, -0.8)))["VERDETTO"]
         self.assertLess(r["ic90"]["ic90_hi"], 0)
         self.assertEqual(r["esito"], "NESSUN VANTAGGIO RILEVANTE")
-        self.assertEqual(r["esito_lettura_alternativa_v1"], "NESSUN VANTAGGIO RILEVANTE")
+        self.assertEqual(r["esito_lettura_alternativa_letterale"], "NESSUN VANTAGGIO RILEVANTE")
 
     def test_ambiguita_precedenza_documentata(self):
         # R = +/-0,1 a coppie: media 0 esatta, IC90 ~ (-0,016; +0,016): contiene 0 E limite superiore < 0,05
@@ -183,8 +184,9 @@ class TestScenari(unittest.TestCase):
         V = self.calcola(cj)["VERDETTO"]
         self.assertTrue(V["ic90"]["ic90_lo"] <= 0 <= V["ic90"]["ic90_hi"])
         self.assertLess(V["ic90"]["ic90_hi"], 0.05)
-        self.assertEqual(V["esito"], "NON DIMOSTRATO")                              # lettura letterale (ordine del documento)
-        self.assertEqual(V["esito_lettura_alternativa_v1"], "NESSUN VANTAGGIO RILEVANTE")
+        self.assertAlmostEqual(V["media_R"], 0.0, places=12)
+        self.assertEqual(V["esito"], "NESSUN VANTAGGIO RILEVANTE")                  # D010: primario
+        self.assertEqual(V["esito_lettura_alternativa_letterale"], "NON DIMOSTRATO")   # ordine di scrittura: solo informativo
         self.assertTrue(V["note"])
 
     def test_tabella_verdetti_funzione_pura(self):
@@ -205,7 +207,10 @@ class TestScenari(unittest.TestCase):
         self.assertEqual(AG.verdetto_conferma(**dict(base, media=-0.2, ic=neg))["esito"], "NESSUN VANTAGGIO RILEVANTE")
         # limite superiore esattamente 0,05: NON e < 0,05
         e = AG.verdetto_conferma(**dict(base, media=-0.2, ic=dict(ic, ic90_lo=-0.3, ic90_hi=0.05)))
-        self.assertEqual(e["esito_lettura_alternativa_v1"], "NON DIMOSTRATO")
+        self.assertEqual(e["esito"], "NON DIMOSTRATO")
+        # D010: IC90 contiene 0 e hi < 0,05 -> NESSUN VANTAGGIO RILEVANTE (alternativa letterale: NON DIMOSTRATO)
+        e = AG.verdetto_conferma(**dict(base, media=0.0, ic=dict(ic, ic90_lo=-0.016, ic90_hi=0.016)))
+        self.assertEqual((e["esito"], e["esito_lettura_alternativa_letterale"]), ("NESSUN VANTAGGIO RILEVANTE", "NON DIMOSTRATO"))
 
 
 class TestMetodo(unittest.TestCase):
