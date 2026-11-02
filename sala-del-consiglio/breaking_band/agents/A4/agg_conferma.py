@@ -12,8 +12,11 @@ Esplorative (non decidono): M30 pooled, ogni coppia da sola, CONT e INV separati
 
 USO:
   python3 -I agg_conferma.py --json EURUSD=<file> GBPUSD=<file> USDJPY=<file> EURJPY=<file> --out <prefisso> \
-       [--hash-codice congelati/HASH_CODICE_V2.txt] [--hash-documenti-conferma <sha256 atteso del criteri_conferma_forex_v1.md>] \
+       [--hash-codice congelati/HASH_CODICE_V2.txt] \
        [--criteri congelati/criteri_conferma_forex_v1.md]
+Se un controllo di integrita non e superato (o non e verificabile) il verdetto e marcato 'VERDETTO NON VALIDO (integrita)'
+(titolo, riga stampata e JSON: campi `verdetto_valido`=false e `etichetta`; D011) e il programma esce con codice 2;
+altrimenti codice 0. Il campo `esito` resta quello calcolato.
 Output: <prefisso>.json (senza timestamp: riproducibile) e <prefisso>.md. Legge SOLO JSON, mai CSV.
 Le costanti dei criteri sono in AGG (unica fonte, dal documento congelato).
 """
@@ -35,6 +38,9 @@ AGG = {
     "COPPIE": ("EURUSD", "GBPUSD", "USDJPY", "EURJPY"), "ANNI": ("2015", "2017", "2019", "2022"),
     "TF_PRIMARIO": "H1", "TF_ESPLORATIVO": "M30", "N_PIENO": 60,
 }
+
+
+ETICHETTA_NON_VALIDO = "VERDETTO NON VALIDO (integrita)"
 
 
 # =============================================================================== utilita'
@@ -245,6 +251,8 @@ def calcola(coppie: dict, anni=None, hash_codice: dict | None = None) -> dict:
     V["controlli_integrita_ok"] = all(c["ok"] is True for c in ctrl)
     V["controlli_non_verificabili"] = [c["nome"] for c in ctrl if c["ok"] is None]
     V["controlli_falliti"] = [c["nome"] for c in ctrl if c["ok"] is False]
+    V["verdetto_valido"] = V["controlli_integrita_ok"]
+    V["etichetta"] = V["esito"] if V["verdetto_valido"] else ETICHETTA_NON_VALIDO
     esplor = {
         "M30_pooled": stat_gruppo(m30),
         "H1_per_coppia": {nome: stat_gruppo([t for t in h1 if t["coppia"] == nome]) for nome in sorted(coppie)},
@@ -296,7 +304,7 @@ def scrivi_md(r: dict) -> str:
     V = r["VERDETTO"]
     s = "# Conferma forex H1 su anni nuovi — aggregatore (criteri_conferma_forex_v1.md)\n\n"
     s += "sha256 dei risultati (JSON canonico): `%s`\n\n" % r["sha256_risultati"]
-    s += "## VERDETTO: %s\n\n" % V["esito"] + md_albero(V) + "\n"
+    s += "## %s: %s\n\n" % (("VERDETTO" if V["verdetto_valido"] else ETICHETTA_NON_VALIDO), V["esito"]) + md_albero(V) + "\n"
     s += "## Statistiche pooled H1 (ipotesi H-C)\n" + md_albero(r["H_C_pooled_H1"]) + "\n"
     s += "## Controlli di integrita'\n" + "".join("- %s: %s %s\n" % (c["nome"], c["ok"], c["dettaglio"])
                                                   for c in r["controlli"]) + "\n"
@@ -343,9 +351,13 @@ def main(argv=None):
     with open(args.out + ".md", "w") as f:
         f.write(scrivi_md(r))
     V = r["VERDETTO"]
-    print("OK %s.json / .md  VERDETTO=%s  N=%s  sha256_risultati=%s" % (args.out, V["esito"], V["N"], r["sha256_risultati"]))
+    print("%s %s.json / .md  %s=%s  N=%s  sha256_risultati=%s" % (
+        "OK" if V["verdetto_valido"] else "ATTENZIONE", args.out,
+        "VERDETTO" if V["verdetto_valido"] else ETICHETTA_NON_VALIDO, V["esito"], V["N"], r["sha256_risultati"]))
+    if not V["verdetto_valido"]:
+        print("controlli falliti: %s; non verificabili: %s" % (V["controlli_falliti"], V["controlli_non_verificabili"]))
     return r
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(0 if main()["VERDETTO"]["verdetto_valido"] else 2)

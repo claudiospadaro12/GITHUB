@@ -338,15 +338,74 @@ class TestCLI(unittest.TestCase):
             p = subprocess.run([sys.executable, "-I", os.path.join(HERE, "agg_conferma.py"), "--json"] + files +
                                ["--out", os.path.join(d, "o3"), "--hash-codice", hc, "--criteri", crit],
                                capture_output=True, text=True)
-            self.assertEqual(p.returncode, 0, p.stderr)
+            self.assertEqual(p.returncode, 0, p.stderr)          # JSON integri -> codice 0
             with open(os.path.join(d, "o3.json")) as f:
                 self.assertEqual(json.load(f)["sha256_risultati"], a["sha256_risultati"])
             with open(os.path.join(d, "o1.md")) as f:
                 md = f.read()
             self.assertIn("VERDETTO: CONFERMATO", md)
+            self.assertTrue(a["VERDETTO"]["verdetto_valido"])
+            self.assertEqual(a["VERDETTO"]["etichetta"], "CONFERMATO")
             self.assertEqual(a["intestazione"]["sha256_criteri_conferma"], hashlib.sha256(b"criteri finti").hexdigest())
             with self.assertRaises(SystemExit):
                 AG.main(["--json", files[0], files[0], "--out", os.path.join(d, "x")])
+
+
+class TestNonValido(unittest.TestCase):
+    """D011: integrita non superata -> 'VERDETTO NON VALIDO (integrita)' ovunque e codice di uscita 2."""
+
+    def lancia(self, d, cj, extra=()):
+        files = []
+        for n, j in cj.items():
+            p = os.path.join(d, n + ".json")
+            with open(p, "w") as f:
+                json.dump(j, f, sort_keys=True)
+            files.append("%s=%s" % (n, p))
+        hc = os.path.join(d, "HASH_CODICE_V2.txt")
+        with open(hc, "w") as f:
+            f.write("".join("%s  %s\n" % (v, k) for k, v in CODICE.items()))
+        out = os.path.join(d, "out")
+        p = subprocess.run([sys.executable, "-I", os.path.join(HERE, "agg_conferma.py"), "--json"] + files +
+                           ["--out", out, "--hash-codice", hc] + list(extra), capture_output=True, text=True)
+        with open(out + ".json") as f:
+            j = json.load(f)
+        with open(out + ".md") as f:
+            md = f.read()
+        return p, j, md
+
+    def test_json_manomesso_non_valido_codice_2(self):
+        cj = scenario(np.random.default_rng(2), 25, bernoulli(0.88, 0.33, -1.0))
+        cj["GBPUSD"]["tabelle"]["LOG_TRADE"]["CONT_H1_2015"][0]["R"] += 1.0          # sha non riallineato
+        with tempfile.TemporaryDirectory() as d:
+            p, j, md = self.lancia(d, cj)
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("VERDETTO NON VALIDO (integrita)", p.stdout)
+        self.assertIn("VERDETTO NON VALIDO (integrita)", md.splitlines()[4] + md)
+        self.assertFalse(j["VERDETTO"]["verdetto_valido"])
+        self.assertEqual(j["VERDETTO"]["etichetta"], "VERDETTO NON VALIDO (integrita)")
+        self.assertIn(j["VERDETTO"]["esito"], ("CONFERMATO", "NON DIMOSTRATO", "NESSUN VANTAGGIO RILEVANTE", "INCONCLUSIVO"))
+        self.assertIn("GBPUSD:sha256_risultati_ricalcolato", j["VERDETTO"]["controlli_falliti"])
+
+    def test_json_integro_valido_codice_0(self):
+        cj = scenario(np.random.default_rng(2), 25, bernoulli(0.88, 0.33, -1.0))
+        with tempfile.TemporaryDirectory() as d:
+            p, j, md = self.lancia(d, cj)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertTrue(j["VERDETTO"]["verdetto_valido"])
+        self.assertEqual(j["VERDETTO"]["etichetta"], "CONFERMATO")
+        self.assertNotIn("NON VALIDO", md)
+        self.assertNotIn("NON VALIDO", p.stdout)
+
+    def test_controllo_non_verificabile_rende_non_valido(self):
+        cj = scenario(np.random.default_rng(2), 25, bernoulli(0.88, 0.33, -1.0), hash_dati=False)
+        with tempfile.TemporaryDirectory() as d:
+            p, j, _ = self.lancia(d, cj)
+        self.assertEqual(p.returncode, 2)
+        self.assertEqual(j["VERDETTO"]["controlli_falliti"], [])
+        self.assertTrue(j["VERDETTO"]["controlli_non_verificabili"])
+
+    def test_docstring_senza_opzioni_inesistenti(self):
+        self.assertNotIn("hash-documenti-conferma", AG.__doc__)
 
 
 if __name__ == "__main__":
