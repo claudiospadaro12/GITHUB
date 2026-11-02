@@ -32,3 +32,6 @@ C1 N≥30 ✔; C2 R>0 con IC90 inferiore>0 ✘; C3 win ≥ breakeven+5pt ✘; C4
 - Dati `_EXT` clonati dal BCM: spread 0 (assunto 1,0 bp Nasdaq / 2,2 bp S&P), orario corretto +60 min verificato solo su una settimana di gennaio 2025 (DST non verificato).
 - 3 periodi e 2 strumenti molto correlati (Nasdaq e S&P): i 173 trade non sono indipendenti.
 - Verdetto "nessun vantaggio rilevante" = con queste regole l'IC90 esclude un vantaggio >+0,10R, non prova che ogni variante discrezionale sia inutile.
+
+## Verifica indipendente
+Un agente ha riscritto il test primario dalla sola specifica (`reimpl.py`, `note.md` con 12 ambiguita dichiarate), senza vedere codice o risultati. Confronto trade per trade: 173 su 173 identici per strumento, periodo, istante e prezzo d'ingresso, prezzo d'uscita, motivo e R (differenza massima 0). La codifica del lato differisce solo nel formato del campo.
