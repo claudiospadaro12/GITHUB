@@ -1,0 +1,608 @@
+{
+ "H_C_pooled_H1": {
+  "bootstrap_settimane": {
+   "ic90_hi": 0.12232578193890696,
+   "ic90_lo": -0.12073691311893829,
+   "media": 0.005827761022548436,
+   "n_replicati": 10000,
+   "settimane": 45
+  },
+  "media_R": 0.005827761022548439,
+  "mediana_R": 0.1854331596003682,
+  "n": 49,
+  "pareggio_atteso_medio_pct": 75.89107134296859,
+  "pf_netto": 1.0297922195207205,
+  "quota_long": 0.32653061224489793,
+  "somma_R": 0.2855602901048735,
+  "vincite": 36,
+  "win_rate_pct": 73.46938775510205
+ },
+ "VERDETTO": {
+  "N": 49,
+  "condizioni": {
+   "1_N>=30": true,
+   "2_media>0_e_IC90_inf>0": false,
+   "3_WR>=pareggio+5pp": false,
+   "4_leave_one_pair_out_media>0": false,
+   "5_costo_extra_0.05R_media>0": false
+  },
+  "controlli_falliti": [],
+  "controlli_integrita_ok": true,
+  "controlli_non_verificabili": [],
+  "costo_extra_R": 0.05,
+  "esito": "NON DIMOSTRATO",
+  "esito_lettura_alternativa_letterale": "NON DIMOSTRATO",
+  "etichetta": "NON DIMOSTRATO",
+  "ic90": {
+   "ic90_hi": 0.12232578193890696,
+   "ic90_lo": -0.12073691311893829,
+   "media": 0.005827761022548436,
+   "n_replicati": 10000,
+   "settimane": 45
+  },
+  "leave_one_pair_out_media_R": {
+   "EURJPY": -0.053232437066424686,
+   "EURUSD": -0.030197058377417176,
+   "GBPUSD": 0.08987472191789342,
+   "USDJPY": 0.009556059095500138
+  },
+  "livello_N": null,
+  "media_R": 0.005827761022548439,
+  "media_R_con_costo_extra": -0.04417223897745157,
+  "note": [],
+  "pareggio_atteso_medio_pct": 75.89107134296859,
+  "significato": "CONFERMATO = ripetuto fuori campione su forex H1 a costi realistici; NON e EA pronto, ne lotti, ne conto reale (restano test a tick reali, news filter, altri simboli)",
+  "soglia_win_rate_pct": 80.89107134296859,
+  "verdetto_valido": true,
+  "win_rate_pct": 73.46938775510205
+ },
+ "controlli": [
+  {
+   "dettaglio": "trovate: ['EURJPY', 'EURUSD', 'GBPUSD', 'USDJPY']",
+   "nome": "quattro_coppie_attese",
+   "ok": true
+  },
+  {
+   "dettaglio": "simbolo nel JSON: EURJPY",
+   "nome": "EURJPY:simbolo_coincide_con_il_nome",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURJPY:sha256_risultati_ricalcolato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURJPY:parametri_congelati_non_di_prova",
+   "ok": true
+  },
+  {
+   "dettaglio": "periodi: ['2015', '2017', '2019', '2022']",
+   "nome": "EURJPY:periodi_attesi",
+   "ok": true
+  },
+  {
+   "dettaglio": "SEED=20261101 N_BOOTSTRAP=10000",
+   "nome": "EURJPY:seme_e_replicati_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURJPY:hash_dati_csv_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURJPY:codice_v2_congelato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURJPY:log_trade_coerente_con_T2_POOLED_H1",
+   "ok": true
+  },
+  {
+   "dettaglio": "simbolo nel JSON: EURUSD",
+   "nome": "EURUSD:simbolo_coincide_con_il_nome",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURUSD:sha256_risultati_ricalcolato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURUSD:parametri_congelati_non_di_prova",
+   "ok": true
+  },
+  {
+   "dettaglio": "periodi: ['2015', '2017', '2019', '2022']",
+   "nome": "EURUSD:periodi_attesi",
+   "ok": true
+  },
+  {
+   "dettaglio": "SEED=20261101 N_BOOTSTRAP=10000",
+   "nome": "EURUSD:seme_e_replicati_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURUSD:hash_dati_csv_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURUSD:codice_v2_congelato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "EURUSD:log_trade_coerente_con_T2_POOLED_H1",
+   "ok": true
+  },
+  {
+   "dettaglio": "simbolo nel JSON: GBPUSD",
+   "nome": "GBPUSD:simbolo_coincide_con_il_nome",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "GBPUSD:sha256_risultati_ricalcolato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "GBPUSD:parametri_congelati_non_di_prova",
+   "ok": true
+  },
+  {
+   "dettaglio": "periodi: ['2015', '2017', '2019', '2022']",
+   "nome": "GBPUSD:periodi_attesi",
+   "ok": true
+  },
+  {
+   "dettaglio": "SEED=20261101 N_BOOTSTRAP=10000",
+   "nome": "GBPUSD:seme_e_replicati_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "GBPUSD:hash_dati_csv_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "GBPUSD:codice_v2_congelato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "GBPUSD:log_trade_coerente_con_T2_POOLED_H1",
+   "ok": true
+  },
+  {
+   "dettaglio": "simbolo nel JSON: USDJPY",
+   "nome": "USDJPY:simbolo_coincide_con_il_nome",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "USDJPY:sha256_risultati_ricalcolato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "USDJPY:parametri_congelati_non_di_prova",
+   "ok": true
+  },
+  {
+   "dettaglio": "periodi: ['2015', '2017', '2019', '2022']",
+   "nome": "USDJPY:periodi_attesi",
+   "ok": true
+  },
+  {
+   "dettaglio": "SEED=20261101 N_BOOTSTRAP=10000",
+   "nome": "USDJPY:seme_e_replicati_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "USDJPY:hash_dati_csv_coincidono",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "USDJPY:codice_v2_congelato",
+   "ok": true
+  },
+  {
+   "dettaglio": "",
+   "nome": "USDJPY:log_trade_coerente_con_T2_POOLED_H1",
+   "ok": true
+  }
+ ],
+ "esplorative": {
+  "H1_per_coppia": {
+   "EURJPY": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.23667147147893278,
+     "ic90_lo": -0.026024396442066,
+     "media": 0.11699989860179191,
+     "n_replicati": 10000,
+     "settimane": 17
+    },
+    "media_R": 0.11699989860179194,
+    "mediana_R": 0.18320082172370625,
+    "n": 17,
+    "pareggio_atteso_medio_pct": 78.63536596000586,
+    "pf_netto": 2.6348178043539914,
+    "quota_long": 0.5294117647058824,
+    "somma_R": 1.988998276230463,
+    "vincite": 14,
+    "win_rate_pct": 82.3529411764706
+   },
+   "EURUSD": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.323147855007727,
+     "ic90_lo": -0.09438021239998229,
+     "media": 0.13027713713152053,
+     "n_replicati": 10000,
+     "settimane": 11
+    },
+    "media_R": 0.1302771371315205,
+    "mediana_R": 0.2512948708406572,
+    "n": 11,
+    "pareggio_atteso_medio_pct": 73.89305184173973,
+    "pf_netto": 2.1262156748625753,
+    "quota_long": 0.18181818181818182,
+    "somma_R": 1.4330485084467255,
+    "vincite": 9,
+    "win_rate_pct": 81.81818181818181
+   },
+   "GBPUSD": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.049397539854828816,
+     "ic90_lo": -0.5692066684303181,
+     "media": -0.25331703507143183,
+     "n_replicati": 10000,
+     "settimane": 12
+    },
+    "media_R": -0.25331703507143183,
+    "mediana_R": 0.15877743669410563,
+    "n": 12,
+    "pareggio_atteso_medio_pct": 76.45324464527778,
+    "pf_netto": 0.3920391158285603,
+    "quota_long": 0.16666666666666666,
+    "somma_R": -3.039804420857182,
+    "vincite": 7,
+    "win_rate_pct": 58.333333333333336
+   },
+   "USDJPY": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.27212324393840087,
+     "ic90_lo": -0.35488942859031564,
+     "media": -0.010742452635014697,
+     "n_replicati": 10000,
+     "settimane": 8
+    },
+    "media_R": -0.010742452635014697,
+    "mediana_R": 0.3077204561045659,
+    "n": 9,
+    "pareggio_atteso_medio_pct": 72.3998631647657,
+    "pf_netto": 0.9538723622807613,
+    "quota_long": 0.3333333333333333,
+    "somma_R": -0.09668207371513227,
+    "vincite": 6,
+    "win_rate_pct": 66.66666666666667
+   }
+  },
+  "H1_per_lato": {
+   "long": {
+    "media_R": -0.0025486677131574768,
+    "mediana_R": 0.14243197720627998,
+    "n": 16,
+    "pareggio_atteso_medio_pct": 80.0492291343362,
+    "pf_netto": 0.9836170588431585,
+    "quota_long": 1.0,
+    "somma_R": -0.04077868341051963,
+    "vincite": 11,
+    "win_rate_pct": 68.75
+   },
+   "short": {
+    "media_R": 0.009889059803496743,
+    "mediana_R": 0.21360213682711326,
+    "n": 33,
+    "pareggio_atteso_medio_pct": 73.8749948380631,
+    "pf_netto": 1.045989349506474,
+    "quota_long": 0.0,
+    "somma_R": 0.32633897351539254,
+    "vincite": 25,
+    "win_rate_pct": 75.75757575757575
+   }
+  },
+  "H1_per_periodo": {
+   "2015": {
+    "media_R": 0.11096068750027205,
+    "mediana_R": 0.18320082172370625,
+    "n": 17,
+    "pareggio_atteso_medio_pct": 75.25550800124786,
+    "pf_netto": 1.943165843752318,
+    "quota_long": 0.17647058823529413,
+    "somma_R": 1.8863316875046248,
+    "vincite": 15,
+    "win_rate_pct": 88.23529411764706
+   },
+   "2017": {
+    "media_R": -0.205746976182297,
+    "mediana_R": 0.04473235065323297,
+    "n": 14,
+    "pareggio_atteso_medio_pct": 77.2647758874813,
+    "pf_netto": 0.4634434902270789,
+    "quota_long": 0.35714285714285715,
+    "somma_R": -2.880457666552158,
+    "vincite": 7,
+    "win_rate_pct": 50.0
+   },
+   "2019": {
+    "media_R": 0.19602612337202396,
+    "mediana_R": 0.21911044900033563,
+    "n": 9,
+    "pareggio_atteso_medio_pct": 77.72123925115358,
+    "pf_netto": 24.878266591449762,
+    "quota_long": 0.6666666666666666,
+    "somma_R": 1.7642351103482157,
+    "vincite": 8,
+    "win_rate_pct": 88.88888888888889
+   },
+   "2022": {
+    "media_R": -0.053838760132867605,
+    "mediana_R": 0.19559983708177553,
+    "n": 9,
+    "pareggio_atteso_medio_pct": 73.12453823323631,
+    "pf_netto": 0.7738673495653262,
+    "quota_long": 0.2222222222222222,
+    "somma_R": -0.48454884119580843,
+    "vincite": 6,
+    "win_rate_pct": 66.66666666666667
+   }
+  },
+  "H1_per_variante": {
+   "CONT": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.15333117095797663,
+     "ic90_lo": -0.0924714927819487,
+     "media": 0.03669681645482177,
+     "n_replicati": 10000,
+     "settimane": 40
+    },
+    "media_R": 0.036696816454821785,
+    "mediana_R": 0.2046009869544444,
+    "n": 44,
+    "pareggio_atteso_medio_pct": 74.66063492524962,
+    "pf_netto": 1.2128736441575663,
+    "quota_long": 0.3181818181818182,
+    "somma_R": 1.6146599240121584,
+    "vincite": 33,
+    "win_rate_pct": 75.0
+   },
+   "INV": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.1920310222752276,
+     "ic90_lo": -0.7710745254716473,
+     "media": -0.26581992678145705,
+     "n_replicati": 10000,
+     "settimane": 5
+    },
+    "media_R": -0.26581992678145705,
+    "mediana_R": 0.03312972049165278,
+    "n": 5,
+    "pareggio_atteso_medio_pct": 86.71891181889535,
+    "pf_netto": 0.3354501830463505,
+    "quota_long": 0.4,
+    "somma_R": -1.3290996339072851,
+    "vincite": 3,
+    "win_rate_pct": 60.0
+   }
+  },
+  "M30_per_coppia": {
+   "EURJPY": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.07087949081805908,
+     "ic90_lo": -0.17359784645532775,
+     "media": -0.04276500346992072,
+     "n_replicati": 10000,
+     "settimane": 31
+    },
+    "media_R": -0.04276500346992074,
+    "mediana_R": 0.10576667301937145,
+    "n": 36,
+    "pareggio_atteso_medio_pct": 82.96926688237991,
+    "pf_netto": 0.7637069002960079,
+    "quota_long": 0.4722222222222222,
+    "somma_R": -1.5395401249171465,
+    "vincite": 25,
+    "win_rate_pct": 69.44444444444444
+   },
+   "EURUSD": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.11166352446441023,
+     "ic90_lo": -0.08810534683944815,
+     "media": 0.012912180241194364,
+     "n_replicati": 10000,
+     "settimane": 49
+    },
+    "media_R": 0.012912180241194351,
+    "mediana_R": 0.1687024286098099,
+    "n": 57,
+    "pareggio_atteso_medio_pct": 76.47831186568985,
+    "pf_netto": 1.0720827651251936,
+    "quota_long": 0.5087719298245614,
+    "somma_R": 0.735994273748078,
+    "vincite": 46,
+    "win_rate_pct": 80.70175438596492
+   },
+   "GBPUSD": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.1384311888036237,
+     "ic90_lo": -0.02528788912155269,
+     "media": 0.0596076106225826,
+     "n_replicati": 10000,
+     "settimane": 55
+    },
+    "media_R": 0.05960761062258261,
+    "mediana_R": 0.1775906806396816,
+    "n": 67,
+    "pareggio_atteso_medio_pct": 79.97744936484128,
+    "pf_netto": 1.4821714051886214,
+    "quota_long": 0.4626865671641791,
+    "somma_R": 3.993709911713035,
+    "vincite": 52,
+    "win_rate_pct": 77.61194029850746
+   },
+   "USDJPY": {
+    "bootstrap_settimane": {
+     "ic90_hi": 0.14885861488334984,
+     "ic90_lo": -0.1948544803040367,
+     "media": -0.02087836446099973,
+     "n_replicati": 10000,
+     "settimane": 26
+    },
+    "media_R": -0.02087836446099973,
+    "mediana_R": 0.1880356329065707,
+    "n": 31,
+    "pareggio_atteso_medio_pct": 77.80407565773095,
+    "pf_netto": 0.9020989471786401,
+    "quota_long": 0.2903225806451613,
+    "somma_R": -0.6472292982909916,
+    "vincite": 20,
+    "win_rate_pct": 64.51612903225806
+   }
+  },
+  "M30_pooled": {
+   "bootstrap_settimane": {
+    "ic90_hi": 0.06762363320514918,
+    "ic90_lo": -0.045348639851446014,
+    "media": 0.013313794566769517,
+    "n_replicati": 10000,
+    "settimane": 117
+   },
+   "media_R": 0.013313794566769501,
+   "mediana_R": 0.1654308603257462,
+   "n": 191,
+   "pareggio_atteso_medio_pct": 79.14436040284828,
+   "pf_netto": 1.0804227256279866,
+   "quota_long": 0.450261780104712,
+   "somma_R": 2.5429347622529748,
+   "vincite": 143,
+   "win_rate_pct": 74.86910994764398
+  }
+ },
+ "intestazione": {
+  "anni": [
+   "2015",
+   "2017",
+   "2019",
+   "2022"
+  ],
+  "coppie": [
+   "EURJPY",
+   "EURUSD",
+   "GBPUSD",
+   "USDJPY"
+  ],
+  "costanti_criteri": {
+   "ANNI": [
+    "2015",
+    "2017",
+    "2019",
+    "2022"
+   ],
+   "COPPIE": [
+    "EURUSD",
+    "GBPUSD",
+    "USDJPY",
+    "EURJPY"
+   ],
+   "COSTO_EXTRA_R": 0.05,
+   "EPS_NESSUN_VANTAGGIO_R": 0.05,
+   "IC_ALPHA": 0.05,
+   "N_BOOTSTRAP": 10000,
+   "N_MIN": 30,
+   "N_PIENO": 60,
+   "PP_VINCITE": 5.0,
+   "SEED": 20261101,
+   "TF_ESPLORATIVO": "M30",
+   "TF_PRIMARIO": "H1"
+  },
+  "esplorative": "M30, per coppia, per variante, per periodo, per lato: NON decidono",
+  "sha256_aggregatore": "771b300f4216fa4fbe86a55393cca5d2617394bc62e9c1b10492ec18d16ae7f7",
+  "sha256_codice_dei_json_letti": {
+   "EURJPY": {
+    "engine.py": "932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f",
+    "params.py": "114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f",
+    "run_test.py": "f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad",
+    "signals.py": "9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319"
+   },
+   "EURUSD": {
+    "engine.py": "932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f",
+    "params.py": "114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f",
+    "run_test.py": "f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad",
+    "signals.py": "9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319"
+   },
+   "GBPUSD": {
+    "engine.py": "932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f",
+    "params.py": "114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f",
+    "run_test.py": "f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad",
+    "signals.py": "9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319"
+   },
+   "USDJPY": {
+    "engine.py": "932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f",
+    "params.py": "114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f",
+    "run_test.py": "f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad",
+    "signals.py": "9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319"
+   }
+  },
+  "sha256_criteri_conferma": "0125e484463a33aa206959b8b9743add2025213e1c71ccdb2f630c36207b14a7",
+  "sha256_csv_dei_json_letti": {
+   "EURJPY": {
+    "2015": "38b0ce7b82f8865bfe23c0830322b49d779eb00702efcb8e990f1224d2e2e0f2",
+    "2017": "b337bc3b4b9b545c71bc8296d8fb6584cedc893f9940b758123d2960727bed0c",
+    "2019": "09e4868e6f7ed59402bdc438220723f73e1ef2db66ec6ea8535f12728ad9d224",
+    "2022": "88e18b85d6984850fac8efc60bedd0fdb4c1192c7178c17beb46fb0c8222f398"
+   },
+   "EURUSD": {
+    "2015": "e502fbdfaa5bae4d43c7a82debde10604759583cd19965f6b75a33895b5b9d8f",
+    "2017": "400cc929dcf9c9e7488c6321b649e5ab3c46474cf191960f50a24d800f37046e",
+    "2019": "e17bd81f283358818bf9045929e7d0485a5db0dd6c7dca45e198465a05e5bb03",
+    "2022": "88255bbcd08738944fb698c746e825b100cf2e8849b17d74a4216a0f400cd113"
+   },
+   "GBPUSD": {
+    "2015": "364d2437e8fb8295813c744a47487633b42db7347f5682c0ac5392d601f1a120",
+    "2017": "5e3c03d17de9a40df353d2f2efbbb9524dafef4ad63bac654511d96dcd538d6a",
+    "2019": "6b89831c00a855ef9753045babbf84cf8bdac5314bfa98c21faca01d3f48b476",
+    "2022": "99b86646c0d92d60dd75c9b6464166bddc4586aca959f579ae8df2519d5e630c"
+   },
+   "USDJPY": {
+    "2015": "79b2365daf3921f8e041ea53d9ad335d7396a3f669bbce7288d54406c827b830",
+    "2017": "03b662babed9c2931bafc9ef143f604b5ca36e9a9b6be5b70eba83bc286f1ace",
+    "2019": "4772a92b4035fd1291896f708de8c9bf208ce7c865361cb3251179ee855bea9a",
+    "2022": "8a33bc0f4279acb4533affa254c3fe8afa649e05293a132621faf66a8e572170"
+   }
+  },
+  "sha256_file_json_letti": {
+   "EURJPY": "43d2ed3ec32ef288f5f7f683d7cbefe9e85e426fece11fe0506d3e202b6e1226",
+   "EURUSD": "c0c514a649a068c3163d20c3fdbd849b81f3be57c322f039ad1a21ad6d9e24f7",
+   "GBPUSD": "3af97852e6235a5e5f268a54c04a26cb463f94c40ab6e706560a32d8dfa57cca",
+   "USDJPY": "a02323729f83b9cf5f0a912b81d5e4600d2cca3781c6dc4bb45d136b5e503d8c"
+  },
+  "sha256_risultati_dei_json_letti": {
+   "EURJPY": "2fab0e366521fc6dcd7e1326e6e63038a3c0c806e259f242254d6c72ba0f5c41",
+   "EURUSD": "7d9397e3964e6d8ef94d4900166a4d9dc15df224a6a1d704acb724da5cea460c",
+   "GBPUSD": "c584b01277cfe16e3c5e64227143fec7d03c7967f79b50f438becb56e4d252a5",
+   "USDJPY": "4318950ce7520316b1f0cc43d42358e782c4cc4fa792d5c4d2bcc621e96c62f1"
+  }
+ },
+ "sha256_risultati": "219f8f21e5e23a2163390d50ba6e1945eb3cefb74d227a4568e39790702ea413"
+}

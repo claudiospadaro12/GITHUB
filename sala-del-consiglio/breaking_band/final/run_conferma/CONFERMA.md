@@ -1,0 +1,424 @@
+# Conferma forex H1 su anni nuovi — aggregatore (criteri_conferma_forex_v1.md)
+
+sha256 dei risultati (JSON canonico): `219f8f21e5e23a2163390d50ba6e1945eb3cefb74d227a4568e39790702ea413`
+
+## VERDETTO: NON DIMOSTRATO
+
+- esito: NON DIMOSTRATO
+- esito_lettura_alternativa_letterale: NON DIMOSTRATO
+- **condizioni**
+  - 1_N>=30: True
+  - 2_media>0_e_IC90_inf>0: False
+  - 3_WR>=pareggio+5pp: False
+  - 4_leave_one_pair_out_media>0: False
+  - 5_costo_extra_0.05R_media>0: False
+- N: 49
+- media_R: 0.005828
+- **ic90**
+  - settimane: 45
+  - media: 0.005828
+  - ic90_lo: -0.1207
+  - ic90_hi: 0.1223
+  - n_replicati: 10000
+- win_rate_pct: 73.47
+- pareggio_atteso_medio_pct: 75.89
+- soglia_win_rate_pct: 80.89
+- **leave_one_pair_out_media_R**
+  - EURJPY: -0.05323
+  - EURUSD: -0.0302
+  - GBPUSD: 0.08987
+  - USDJPY: 0.009556
+- media_R_con_costo_extra: -0.04417
+- costo_extra_R: 0.05
+- **note**
+- livello_N: -
+- significato: CONFERMATO = ripetuto fuori campione su forex H1 a costi realistici; NON e EA pronto, ne lotti, ne conto reale (restano test a tick reali, news filter, altri simboli)
+- controlli_integrita_ok: True
+- **controlli_non_verificabili**
+- **controlli_falliti**
+- verdetto_valido: True
+- etichetta: NON DIMOSTRATO
+
+## Statistiche pooled H1 (ipotesi H-C)
+- n: 49
+- vincite: 36
+- win_rate_pct: 73.47
+- pareggio_atteso_medio_pct: 75.89
+- media_R: 0.005828
+- mediana_R: 0.1854
+- somma_R: 0.2856
+- pf_netto: 1.03
+- quota_long: 0.3265
+- **bootstrap_settimane**
+  - settimane: 45
+  - media: 0.005828
+  - ic90_lo: -0.1207
+  - ic90_hi: 0.1223
+  - n_replicati: 10000
+
+## Controlli di integrita'
+- quattro_coppie_attese: True trovate: ['EURJPY', 'EURUSD', 'GBPUSD', 'USDJPY']
+- EURJPY:simbolo_coincide_con_il_nome: True simbolo nel JSON: EURJPY
+- EURJPY:sha256_risultati_ricalcolato: True 
+- EURJPY:parametri_congelati_non_di_prova: True 
+- EURJPY:periodi_attesi: True periodi: ['2015', '2017', '2019', '2022']
+- EURJPY:seme_e_replicati_coincidono: True SEED=20261101 N_BOOTSTRAP=10000
+- EURJPY:hash_dati_csv_coincidono: True 
+- EURJPY:codice_v2_congelato: True 
+- EURJPY:log_trade_coerente_con_T2_POOLED_H1: True 
+- EURUSD:simbolo_coincide_con_il_nome: True simbolo nel JSON: EURUSD
+- EURUSD:sha256_risultati_ricalcolato: True 
+- EURUSD:parametri_congelati_non_di_prova: True 
+- EURUSD:periodi_attesi: True periodi: ['2015', '2017', '2019', '2022']
+- EURUSD:seme_e_replicati_coincidono: True SEED=20261101 N_BOOTSTRAP=10000
+- EURUSD:hash_dati_csv_coincidono: True 
+- EURUSD:codice_v2_congelato: True 
+- EURUSD:log_trade_coerente_con_T2_POOLED_H1: True 
+- GBPUSD:simbolo_coincide_con_il_nome: True simbolo nel JSON: GBPUSD
+- GBPUSD:sha256_risultati_ricalcolato: True 
+- GBPUSD:parametri_congelati_non_di_prova: True 
+- GBPUSD:periodi_attesi: True periodi: ['2015', '2017', '2019', '2022']
+- GBPUSD:seme_e_replicati_coincidono: True SEED=20261101 N_BOOTSTRAP=10000
+- GBPUSD:hash_dati_csv_coincidono: True 
+- GBPUSD:codice_v2_congelato: True 
+- GBPUSD:log_trade_coerente_con_T2_POOLED_H1: True 
+- USDJPY:simbolo_coincide_con_il_nome: True simbolo nel JSON: USDJPY
+- USDJPY:sha256_risultati_ricalcolato: True 
+- USDJPY:parametri_congelati_non_di_prova: True 
+- USDJPY:periodi_attesi: True periodi: ['2015', '2017', '2019', '2022']
+- USDJPY:seme_e_replicati_coincidono: True SEED=20261101 N_BOOTSTRAP=10000
+- USDJPY:hash_dati_csv_coincidono: True 
+- USDJPY:codice_v2_congelato: True 
+- USDJPY:log_trade_coerente_con_T2_POOLED_H1: True 
+
+## Esplorative (non decidono)
+- **M30_pooled**
+  - n: 191
+  - vincite: 143
+  - win_rate_pct: 74.87
+  - pareggio_atteso_medio_pct: 79.14
+  - media_R: 0.01331
+  - mediana_R: 0.1654
+  - somma_R: 2.543
+  - pf_netto: 1.08
+  - quota_long: 0.4503
+  - **bootstrap_settimane**
+    - settimane: 117
+    - media: 0.01331
+    - ic90_lo: -0.04535
+    - ic90_hi: 0.06762
+    - n_replicati: 10000
+- **H1_per_coppia**
+  - **EURJPY**
+    - n: 17
+    - vincite: 14
+    - win_rate_pct: 82.35
+    - pareggio_atteso_medio_pct: 78.64
+    - media_R: 0.117
+    - mediana_R: 0.1832
+    - somma_R: 1.989
+    - pf_netto: 2.635
+    - quota_long: 0.5294
+    - **bootstrap_settimane**
+      - settimane: 17
+      - media: 0.117
+      - ic90_lo: -0.02602
+      - ic90_hi: 0.2367
+      - n_replicati: 10000
+  - **EURUSD**
+    - n: 11
+    - vincite: 9
+    - win_rate_pct: 81.82
+    - pareggio_atteso_medio_pct: 73.89
+    - media_R: 0.1303
+    - mediana_R: 0.2513
+    - somma_R: 1.433
+    - pf_netto: 2.126
+    - quota_long: 0.1818
+    - **bootstrap_settimane**
+      - settimane: 11
+      - media: 0.1303
+      - ic90_lo: -0.09438
+      - ic90_hi: 0.3231
+      - n_replicati: 10000
+  - **GBPUSD**
+    - n: 12
+    - vincite: 7
+    - win_rate_pct: 58.33
+    - pareggio_atteso_medio_pct: 76.45
+    - media_R: -0.2533
+    - mediana_R: 0.1588
+    - somma_R: -3.04
+    - pf_netto: 0.392
+    - quota_long: 0.1667
+    - **bootstrap_settimane**
+      - settimane: 12
+      - media: -0.2533
+      - ic90_lo: -0.5692
+      - ic90_hi: 0.0494
+      - n_replicati: 10000
+  - **USDJPY**
+    - n: 9
+    - vincite: 6
+    - win_rate_pct: 66.67
+    - pareggio_atteso_medio_pct: 72.4
+    - media_R: -0.01074
+    - mediana_R: 0.3077
+    - somma_R: -0.09668
+    - pf_netto: 0.9539
+    - quota_long: 0.3333
+    - **bootstrap_settimane**
+      - settimane: 8
+      - media: -0.01074
+      - ic90_lo: -0.3549
+      - ic90_hi: 0.2721
+      - n_replicati: 10000
+- **M30_per_coppia**
+  - **EURJPY**
+    - n: 36
+    - vincite: 25
+    - win_rate_pct: 69.44
+    - pareggio_atteso_medio_pct: 82.97
+    - media_R: -0.04277
+    - mediana_R: 0.1058
+    - somma_R: -1.54
+    - pf_netto: 0.7637
+    - quota_long: 0.4722
+    - **bootstrap_settimane**
+      - settimane: 31
+      - media: -0.04277
+      - ic90_lo: -0.1736
+      - ic90_hi: 0.07088
+      - n_replicati: 10000
+  - **EURUSD**
+    - n: 57
+    - vincite: 46
+    - win_rate_pct: 80.7
+    - pareggio_atteso_medio_pct: 76.48
+    - media_R: 0.01291
+    - mediana_R: 0.1687
+    - somma_R: 0.736
+    - pf_netto: 1.072
+    - quota_long: 0.5088
+    - **bootstrap_settimane**
+      - settimane: 49
+      - media: 0.01291
+      - ic90_lo: -0.08811
+      - ic90_hi: 0.1117
+      - n_replicati: 10000
+  - **GBPUSD**
+    - n: 67
+    - vincite: 52
+    - win_rate_pct: 77.61
+    - pareggio_atteso_medio_pct: 79.98
+    - media_R: 0.05961
+    - mediana_R: 0.1776
+    - somma_R: 3.994
+    - pf_netto: 1.482
+    - quota_long: 0.4627
+    - **bootstrap_settimane**
+      - settimane: 55
+      - media: 0.05961
+      - ic90_lo: -0.02529
+      - ic90_hi: 0.1384
+      - n_replicati: 10000
+  - **USDJPY**
+    - n: 31
+    - vincite: 20
+    - win_rate_pct: 64.52
+    - pareggio_atteso_medio_pct: 77.8
+    - media_R: -0.02088
+    - mediana_R: 0.188
+    - somma_R: -0.6472
+    - pf_netto: 0.9021
+    - quota_long: 0.2903
+    - **bootstrap_settimane**
+      - settimane: 26
+      - media: -0.02088
+      - ic90_lo: -0.1949
+      - ic90_hi: 0.1489
+      - n_replicati: 10000
+- **H1_per_variante**
+  - **CONT**
+    - n: 44
+    - vincite: 33
+    - win_rate_pct: 75
+    - pareggio_atteso_medio_pct: 74.66
+    - media_R: 0.0367
+    - mediana_R: 0.2046
+    - somma_R: 1.615
+    - pf_netto: 1.213
+    - quota_long: 0.3182
+    - **bootstrap_settimane**
+      - settimane: 40
+      - media: 0.0367
+      - ic90_lo: -0.09247
+      - ic90_hi: 0.1533
+      - n_replicati: 10000
+  - **INV**
+    - n: 5
+    - vincite: 3
+    - win_rate_pct: 60
+    - pareggio_atteso_medio_pct: 86.72
+    - media_R: -0.2658
+    - mediana_R: 0.03313
+    - somma_R: -1.329
+    - pf_netto: 0.3355
+    - quota_long: 0.4
+    - **bootstrap_settimane**
+      - settimane: 5
+      - media: -0.2658
+      - ic90_lo: -0.7711
+      - ic90_hi: 0.192
+      - n_replicati: 10000
+- **H1_per_periodo**
+  - **2015**
+    - n: 17
+    - vincite: 15
+    - win_rate_pct: 88.24
+    - pareggio_atteso_medio_pct: 75.26
+    - media_R: 0.111
+    - mediana_R: 0.1832
+    - somma_R: 1.886
+    - pf_netto: 1.943
+    - quota_long: 0.1765
+  - **2017**
+    - n: 14
+    - vincite: 7
+    - win_rate_pct: 50
+    - pareggio_atteso_medio_pct: 77.26
+    - media_R: -0.2057
+    - mediana_R: 0.04473
+    - somma_R: -2.88
+    - pf_netto: 0.4634
+    - quota_long: 0.3571
+  - **2019**
+    - n: 9
+    - vincite: 8
+    - win_rate_pct: 88.89
+    - pareggio_atteso_medio_pct: 77.72
+    - media_R: 0.196
+    - mediana_R: 0.2191
+    - somma_R: 1.764
+    - pf_netto: 24.88
+    - quota_long: 0.6667
+  - **2022**
+    - n: 9
+    - vincite: 6
+    - win_rate_pct: 66.67
+    - pareggio_atteso_medio_pct: 73.12
+    - media_R: -0.05384
+    - mediana_R: 0.1956
+    - somma_R: -0.4845
+    - pf_netto: 0.7739
+    - quota_long: 0.2222
+- **H1_per_lato**
+  - **long**
+    - n: 16
+    - vincite: 11
+    - win_rate_pct: 68.75
+    - pareggio_atteso_medio_pct: 80.05
+    - media_R: -0.002549
+    - mediana_R: 0.1424
+    - somma_R: -0.04078
+    - pf_netto: 0.9836
+    - quota_long: 1
+  - **short**
+    - n: 33
+    - vincite: 25
+    - win_rate_pct: 75.76
+    - pareggio_atteso_medio_pct: 73.87
+    - media_R: 0.009889
+    - mediana_R: 0.2136
+    - somma_R: 0.3263
+    - pf_netto: 1.046
+    - quota_long: 0
+
+## Intestazione
+- **costanti_criteri**
+  - N_MIN: 30
+  - PP_VINCITE: 5
+  - COSTO_EXTRA_R: 0.05
+  - EPS_NESSUN_VANTAGGIO_R: 0.05
+  - N_BOOTSTRAP: 10000
+  - SEED: 20261101
+  - IC_ALPHA: 0.05
+  - **COPPIE**
+    - EURUSD
+    - GBPUSD
+    - USDJPY
+    - EURJPY
+  - **ANNI**
+    - 2015
+    - 2017
+    - 2019
+    - 2022
+  - TF_PRIMARIO: H1
+  - TF_ESPLORATIVO: M30
+  - N_PIENO: 60
+- **coppie**
+  - EURJPY
+  - EURUSD
+  - GBPUSD
+  - USDJPY
+- **anni**
+  - 2015
+  - 2017
+  - 2019
+  - 2022
+- **sha256_risultati_dei_json_letti**
+  - EURJPY: 2fab0e366521fc6dcd7e1326e6e63038a3c0c806e259f242254d6c72ba0f5c41
+  - EURUSD: 7d9397e3964e6d8ef94d4900166a4d9dc15df224a6a1d704acb724da5cea460c
+  - GBPUSD: c584b01277cfe16e3c5e64227143fec7d03c7967f79b50f438becb56e4d252a5
+  - USDJPY: 4318950ce7520316b1f0cc43d42358e782c4cc4fa792d5c4d2bcc621e96c62f1
+- **sha256_codice_dei_json_letti**
+  - **EURJPY**
+    - engine.py: 932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f
+    - params.py: 114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f
+    - run_test.py: f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad
+    - signals.py: 9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319
+  - **EURUSD**
+    - engine.py: 932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f
+    - params.py: 114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f
+    - run_test.py: f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad
+    - signals.py: 9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319
+  - **GBPUSD**
+    - engine.py: 932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f
+    - params.py: 114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f
+    - run_test.py: f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad
+    - signals.py: 9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319
+  - **USDJPY**
+    - engine.py: 932c4a5aeb1ba0ee180b6514953521b9a0e4e6bc3504b493c6e621b29672fd2f
+    - params.py: 114de57657686a403c3b59156c892b7b55fb08726c1e66f0bc195b4b2e4d077f
+    - run_test.py: f07c16202d2707620ed8be3bf6495d47e1ff8b8c89f15fff35ba139226edfbad
+    - signals.py: 9bd9264d75f304fa6ae55515a47f365f5c8ef4359cb9e7274e5efba6acec1319
+- **sha256_csv_dei_json_letti**
+  - **EURJPY**
+    - 2015: 38b0ce7b82f8865bfe23c0830322b49d779eb00702efcb8e990f1224d2e2e0f2
+    - 2017: b337bc3b4b9b545c71bc8296d8fb6584cedc893f9940b758123d2960727bed0c
+    - 2019: 09e4868e6f7ed59402bdc438220723f73e1ef2db66ec6ea8535f12728ad9d224
+    - 2022: 88e18b85d6984850fac8efc60bedd0fdb4c1192c7178c17beb46fb0c8222f398
+  - **EURUSD**
+    - 2015: e502fbdfaa5bae4d43c7a82debde10604759583cd19965f6b75a33895b5b9d8f
+    - 2017: 400cc929dcf9c9e7488c6321b649e5ab3c46474cf191960f50a24d800f37046e
+    - 2019: e17bd81f283358818bf9045929e7d0485a5db0dd6c7dca45e198465a05e5bb03
+    - 2022: 88255bbcd08738944fb698c746e825b100cf2e8849b17d74a4216a0f400cd113
+  - **GBPUSD**
+    - 2015: 364d2437e8fb8295813c744a47487633b42db7347f5682c0ac5392d601f1a120
+    - 2017: 5e3c03d17de9a40df353d2f2efbbb9524dafef4ad63bac654511d96dcd538d6a
+    - 2019: 6b89831c00a855ef9753045babbf84cf8bdac5314bfa98c21faca01d3f48b476
+    - 2022: 99b86646c0d92d60dd75c9b6464166bddc4586aca959f579ae8df2519d5e630c
+  - **USDJPY**
+    - 2015: 79b2365daf3921f8e041ea53d9ad335d7396a3f669bbce7288d54406c827b830
+    - 2017: 03b662babed9c2931bafc9ef143f604b5ca36e9a9b6be5b70eba83bc286f1ace
+    - 2019: 4772a92b4035fd1291896f708de8c9bf208ce7c865361cb3251179ee855bea9a
+    - 2022: 8a33bc0f4279acb4533affa254c3fe8afa649e05293a132621faf66a8e572170
+- esplorative: M30, per coppia, per variante, per periodo, per lato: NON decidono
+- **sha256_file_json_letti**
+  - EURUSD: c0c514a649a068c3163d20c3fdbd849b81f3be57c322f039ad1a21ad6d9e24f7
+  - GBPUSD: 3af97852e6235a5e5f268a54c04a26cb463f94c40ab6e706560a32d8dfa57cca
+  - USDJPY: a02323729f83b9cf5f0a912b81d5e4600d2cca3781c6dc4bb45d136b5e503d8c
+  - EURJPY: 43d2ed3ec32ef288f5f7f683d7cbefe9e85e426fece11fe0506d3e202b6e1226
+- sha256_criteri_conferma: 0125e484463a33aa206959b8b9743add2025213e1c71ccdb2f630c36207b14a7
+- sha256_aggregatore: 771b300f4216fa4fbe86a55393cca5d2617394bc62e9c1b10492ec18d16ae7f7
+
