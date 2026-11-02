@@ -1,0 +1,2 @@
+c429aa1f8f9b8a49fc791f28c90c9df52a0db50f967a55b775aa90f2818e420c  congelati/specifica_v1.md
+4fd8b0ade9981afdb83647e38a9946e55360b8c046c8ce7ac73f4d4e4daae8a7  congelati/criteri_previsioni_v1.md
