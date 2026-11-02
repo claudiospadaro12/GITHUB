@@ -9,6 +9,7 @@ Solo libreria standard + numpy. Esecuzione di tutto con `python3 -I <file>` (i f
 | `signals.py` | macchina a stati CONT / INV (`rileva`), imbuto per stadi, descrittori, `signal_fn_factory` per A7 |
 | `run_test.py` | produce T1-T9 + verdetto (JSON + markdown) con parametri e sha256 dei file letti nell'intestazione |
 | `test_engine.py` (30 test), `test_signals.py` (31), `test_run.py` (15) | test su dati SINTETICI |
+| `agg_conferma.py`, `test_agg_conferma.py` (16) | CICLO 2: aggregatore dei JSON di run_test.py (4 coppie, anni nuovi) -> criteri 1-5 di criteri_conferma_forex_v1.md e verdetto; legge solo JSON |
 | `domande.md` | punti ambigui della specifica e letture implementate (da leggere PRIMA dell'hash) |
 
 ## Uso
@@ -43,3 +44,6 @@ T1 imbuto (per variante x TF x periodo + TOTALE, con causa di morte e segnalazio
 
 ## Limiti noti
 Non modellati commissioni, swap, slippage oltre il gap. Lo spread di una M1 e quello della riga CSV (non si sa se di apertura o chiusura: DA_VERIFICARE). Il motore e le regole sono verificati solo su dati sintetici; nessuna esecuzione sui 4 CSV reali. La Parte A del verdetto (controlli A7) non e valutata da `run_test.py`. Punti ambigui della specifica: `domande.md`.
+
+## Aggregatore del ciclo 2 (agg_conferma.py)
+`python3 -I agg_conferma.py --json EURUSD=<f> GBPUSD=<f> USDJPY=<f> EURJPY=<f> --out <prefisso> --hash-codice <congelati/HASH_CODICE_V2.txt> --criteri <congelati/criteri_conferma_forex_v1.md>`. Pooled H1 (CONT+INV, 4 coppie): N, media R, IC90 bootstrap a blocchi settimanali (10.000 replicati, seme 20261101, stessa funzione di run_test), win rate contro pareggio atteso medio + 5 punti, leave-one-pair-out, costo extra 0,05 R; verdetto CONFERMATO / NON DIMOSTRATO / NESSUN VANTAGGIO RILEVANTE / INCONCLUSIVO; M30, per coppia, per variante, per periodo e per lato come esplorative. Controlli di integrita dei JSON (sha256_risultati ricalcolato, non di prova, 4 coppie, periodi 2015/2017/2019/2022, codice = v2, hash dati, log trade coerente con T2). Output senza timestamp (riproducibile). Periodi nuovi con run_test: `--periodi 2015=... 2017=... ...` (vedi domande.md punto 29; nessuna modifica al codice v2). Costanti dei criteri in `AGG`.
