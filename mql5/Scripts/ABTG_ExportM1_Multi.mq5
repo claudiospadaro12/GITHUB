@@ -27,8 +27,8 @@
 #property script_show_inputs
 #property version "1.00"
 
-input string InpSimboli  = "EURUSD_EXT,GBPUSD_EXT,AUDJPY_EXT,CHFJPY_EXT,EURJPY_EXT,GBPCAD_EXT,XAUUSD_EXT,USDJPY_EXT,NASUSD_EXT,225JPY_EXT,SPXUSD_EXT,NASUSD,SPXUSD,D30EUR"; // voci (alias con |)
-input string InpFinestre = "2010.01.04-2010.01.11,2015.01.05-2015.01.12,2020.01.06-2020.01.13,2025.01.06-2025.01.13";            // finestre da-a (a esclusa)
+input string InpSimboli  = "NASUSD_EXT,SPXUSD_EXT"; // voci (alias con |)
+input string InpFinestre = "2010.11.14-2011.01.01,2011.01.01-2012.01.01,2012.01.01-2013.01.01,2013.01.01-2014.01.01,2014.01.01-2015.01.01,2015.01.01-2016.01.01,2016.01.01-2017.01.01,2017.01.01-2018.01.01,2018.01.01-2019.01.01,2019.01.01-2020.01.01,2020.01.01-2021.01.01,2021.01.01-2022.01.01,2022.01.01-2023.01.01,2023.01.01-2024.01.01,2024.01.01-2025.01.01,2025.01.01-2026.10.01";            // finestre da-a (a esclusa)
 input bool   InpChiudiTerminale = false;   // true SOLO nel lancio automatico
 
 #define F_SIMBOLI   "ABTG_SIMBOLI_BCM.txt"
