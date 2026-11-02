@@ -1,0 +1,19 @@
+SCENARIO                                                       ATTESO (a mano)              MIO                          A4                           controlli
+01 CONFERMATO                                                  CONFERMATO                   CONFERMATO                   CONFERMATO                   integrita=True cond_ok=True alt_ok=True seed_stabile=True
+02 INCONCLUSIVO N=28                                           INCONCLUSIVO                 INCONCLUSIVO                 INCONCLUSIVO                 integrita=True cond_ok=True alt_ok=True seed_stabile=True
+03 N=30 al limite                                              CONFERMATO                   CONFERMATO                   CONFERMATO                   integrita=True cond_ok=True alt_ok=True seed_stabile=True
+04 N=29 al limite                                              INCONCLUSIVO                 INCONCLUSIVO                 INCONCLUSIVO                 integrita=True cond_ok=True alt_ok=True seed_stabile=True
+05 solo cond.2 falsa (IC90 contiene 0)                         NON DIMOSTRATO               NON DIMOSTRATO               NON DIMOSTRATO               integrita=True cond_ok=True alt_ok=True seed_stabile=True
+06 solo cond.3 falsa (win rate < pareggio+5)                   NON DIMOSTRATO               NON DIMOSTRATO               NON DIMOSTRATO               integrita=True cond_ok=True alt_ok=True seed_stabile=True
+07 solo cond.4 falsa (una coppia trascina)                     NON DIMOSTRATO               NON DIMOSTRATO               NON DIMOSTRATO               integrita=True cond_ok=True alt_ok=True seed_stabile=True
+08 solo cond.5 falsa (costo extra annulla)                     NON DIMOSTRATO               NON DIMOSTRATO               NON DIMOSTRATO               integrita=True cond_ok=True alt_ok=True seed_stabile=True
+09 NESSUN VANTAGGIO RILEVANTE con IC che contiene 0 (D010)     NESSUN VANTAGGIO RILEVANTE   NESSUN VANTAGGIO RILEVANTE   NESSUN VANTAGGIO RILEVANTE   integrita=True cond_ok=True alt_ok=True seed_stabile=True
+10 NESSUN VANTAGGIO RILEVANTE (media negativa)                 NESSUN VANTAGGIO RILEVANTE   NESSUN VANTAGGIO RILEVANTE   NESSUN VANTAGGIO RILEVANTE   integrita=True cond_ok=True alt_ok=True seed_stabile=True
+11 NON DIMOSTRATO (IC largo, media <0)                         NON DIMOSTRATO               NON DIMOSTRATO               NON DIMOSTRATO               integrita=True cond_ok=True alt_ok=True seed_stabile=True
+12 pareggio CON costo (D010)                                   NON DIMOSTRATO               NON DIMOSTRATO               NON DIMOSTRATO               integrita=True cond_ok=True alt_ok=True seed_stabile=True
+13 blocchi settimanali CONDIVISI fra coppie                    NON DIMOSTRATO               NON DIMOSTRATO               NON DIMOSTRATO               integrita=True cond_ok=True alt_ok=True seed_stabile=True
+14 costo extra: media 0,06 passa                               CONFERMATO                   CONFERMATO                   CONFERMATO                   integrita=True cond_ok=True alt_ok=True seed_stabile=True
+15 costo extra: media 0,04 non passa                           NESSUN VANTAGGIO RILEVANTE   NESSUN VANTAGGIO RILEVANTE   NESSUN VANTAGGIO RILEVANTE   integrita=True cond_ok=True alt_ok=True seed_stabile=True
+
+DIVERGENZE / PROBLEMI: 0
+scenari con atteso = mio = A4: 15/15

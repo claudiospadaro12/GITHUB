@@ -1,0 +1,17 @@
+00 controllo: nessuna modifica                                     atteso_ok=True   A4=True   mio=True   verdetto_A4=CONFERMATO                 falliti=[]
+01 R di un trade modificato a mano, hash NON aggiornato            atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['EURUSD:sha256_risultati_ricalcolato', 'EURUSD:log_trade_coerente_con_T2_POOLED_H1']
+02 sha256_risultati sostituito a mano                              atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['GBPUSD:sha256_risultati_ricalcolato']
+03 R modificato E hash ricalcolato (incoerente con T2)             atteso_ok=False  A4=False  mio=True   verdetto_A4=CONFERMATO                 falliti=['EURUSD:log_trade_coerente_con_T2_POOLED_H1']
+04 un trade tolto dal log, hash ricalcolato (T2 n != log)          atteso_ok=False  A4=False  mio=True   verdetto_A4=CONFERMATO                 falliti=['USDJPY:log_trade_coerente_con_T2_POOLED_H1']
+05 engine.py diverso da v2 (hash ricalcolato)                      atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['EURJPY:codice_v2_congelato']
+06 codice v1 (HASH_CODICE.txt) invece di v2 in tutte le coppie     atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['EURJPY:codice_v2_congelato', 'EURUSD:codice_v2_congelato', 'GBPUSD:codice_v2_congelato', 'USDJPY:codice_v2_congelato']
+07 PARAMETRI_NON_CONGELATI_PROVA = true                            atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['EURUSD:parametri_congelati_non_di_prova']
+08 hash dei CSV non coincidono                                     atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['GBPUSD:hash_dati_csv_coincidono']
+09 anni sbagliati (2013/2018/2020/2025-26) in tutte le coppie      atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['EURJPY:periodi_attesi', 'EURUSD:periodi_attesi', 'GBPUSD:periodi_attesi', 'USDJPY:periodi_attesi']
+10 un periodo mancante in una coppia (INV_H1_2022 tolto)           atteso_ok=False  A4=False  mio=True   verdetto_A4=CONFERMATO                 falliti=['USDJPY:log_trade_coerente_con_T2_POOLED_H1']
+11 simbolo nel JSON diverso dall'etichetta (EURJPY dichiarato EURUSD) atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['EURJPY:simbolo_coincide_con_il_nome']
+12 coppia GBPUSD mancante (3 file)                                 atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['quattro_coppie_attese']
+13 stesso JSON usato per due coppie (EURUSD copiato come GBPUSD)   atteso_ok=False  A4=False  mio=False  verdetto_A4=CONFERMATO                 falliti=['GBPUSD:simbolo_coincide_con_il_nome']
+14 tf senza M30                                                    atteso_ok=None   A4=True   mio=False  verdetto_A4=CONFERMATO                 falliti=[]
+
+Casi in cui A4 NON segnala l'anomalia attesa (controlli_integrita_ok != atteso): 0

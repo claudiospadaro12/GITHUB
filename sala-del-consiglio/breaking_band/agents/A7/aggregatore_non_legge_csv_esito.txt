@@ -1,0 +1,3 @@
+    <tmp>/o.md
+aperture di file .csv: 0 ; listdir/glob/walk/subprocess/socket: 0 []
+ESITO: SUPERATO: nessun CSV letto
