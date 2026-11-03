@@ -1,0 +1,17 @@
+n;nome_set;etichette;dettaglio;ultimo_trade;simbolo;oro_si_no;trade_chiusi;win_rate;realizzato_EUR;valore_sotto_realizzato;aperto_EUR;profit_factor;expectancy_EUR;max_dd_EUR;recovery_factor
+1;ustec h1 sr;EXCEPTIONAL;2 strategies (2 unproven);2026.10.16;USTEC;NO;24;88%;957.59;;-;16.96;39.90;56.49;16.95
+2;JPY;UNPROVEN;8 strategies (8 unproven);2026.10.14;USDJPY;NO;16;88%;908.63;;-;165.01;56.79;5.54;164.01
+3;15min btc scalp C;WEAK, UNCONFIRMED;magic 11000, 1 strategy;2026.10.29;BTCUSD;NO;168;45%;574.28;;-;1.23;3.42;571.69;1.00
+4;H1 SRB SPD C1;UNPROVEN;magic 991001, 1 strategy;2026.10.30;XAUUSD;SI;15;87%;537.84;su 6.11;-;3.54;35.86;211.58;2.54
+5;MT5 longterm J.set;UNPROVEN;magic 9314, 1 strategy;2026.10.30;XAUUSD;SI;10;90%;515.76;su 74.97;-;4.37;51.58;153.22;3.37
+6;Gold Scalp C;EXCEPTIONAL;magic 2103, 1 strategy;2026.10.30;XAUUSD;SI;56;75%;475.04;giu 55.22;-;2.29;8.48;67.36;7.05
+7;ustect h1 sr;FAIR, UNCONFIRMED;magic 7701, ustec h1 - sr - 2020-2024 - 1;2026.10.30;USTEC;NO;52;67%;415.20;su 21.35;-;1.52;7.98;238.65;1.74
+8;Ultimate Breakout System;1 OPEN, GOOD, UNCONFIRMED;3 strategies (1 unconfirmed 2 unproven), 1 open;2026.10.30;BTCUSD XTIUSD;NO;55;73%;258.34;(non leggibile);-1.64;1.67;4.70;121.18;2.13
+9;XAUUSD H1 H1E04;UNPROVEN;magic 9637039, 1 strategy;2026.10.30;XAUUSD;SI;16;81%;199.58;su 5.98;-;1.59;12.47;214.87;0.93
+10;BTCUSD H1 A;GOOD, UNCONFIRMED;magic 302402, 1 strategy;2026.10.21;BTCUSD;NO;40;48%;151.72;;-;1.82;3.79;81.28;1.87
+11;BTCUSD H4 A;WEAK, UNCONFIRMED;magic 302404, 1 strategy;2026.10.26;BTCUSD;NO;51;53%;138.17;;-;1.39;2.71;168.45;0.82
+12;BTCUSD D1 B;IDLE 39D, UNPROVEN;magic 302408, 1 strategy;2026.09.21;BTCUSD;NO;3;100%;127.35;;-;-;42.45;0.00;-
+13;UBS G404;FAIR, UNCONFIRMED;4 strategies (1 unconfirmed 1 down 2 unproven);2026.10.30;XAGUSD XAUUSD;MISTO (argento+oro);72;76%;87.72;su 1.30;-;1.63;1.22;67.74;1.29
+14;goldtrade A;UNPROVEN;magic 1001, 1 strategy;2026.10.30;XAUUSD;SI;12;50%;70.67;su 312.40;-;1.19;5.89;254.35;0.28
+15;XAUUSD E FIXED;UNPROVEN;magic 501210, 1 strategy;2026.10.30;XAUUSD;SI;10;40%;54.01;su 95.01;-;1.36;5.40;100.88;0.54
+16;9637005 TSLA SC B;UNPROVEN;magic 9637005, 1 strategy;2026.10.14;TSLA.NAS;NO;7;57%;47.75;;-;5.45;6.82;9.81;4.87
