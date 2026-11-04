@@ -24,3 +24,6 @@ Il backup dei `.chr` originali va sul Desktop del VPS (`BACKUP_CHR_ESTATE_<data>
 
 ## Limiti
 Script non provato su PowerShell (nessun `pwsh` qui): per questo esiste la PROVA e il backup. APPLICA modifica solo i grafici in tabella, solo se il valore attuale e quello estivo atteso, e rilegge il file per verificare.
+
+## ESITO (04/11/2026, 09:33 ora locale del VPS)
+Prova: 10 grafici trovati su 10, 0 valori diversi dall'atteso, 0 non trovati (`PRESET_ORA_SOLARE_ESITO/prova_2026-11-04.txt`). APPLICA: terminale BCM chiuso da Claudio, 10 `.chr` modificati, rilettura OK su tutti e 10 (`applica_2026-11-04.txt`). Backup dei `.chr` originali sul Desktop del VPS: `BACKUP_CHR_ESTATE_20261104_0933`. Profilo attivo: ORO. Primo tentativo (09:25) fermato dallo script: errore mio (CR nel nome profilo) e terminale acceso: niente scritto. Da fare: riavvio del terminale e controllo delle sedie; CODA_13 (03:30 del 05/11) rilegge i `.chr` e deve dire OK sui 10 grafici. Resta da decidere `InpFridayCloseHour=21/Min=50` di PostNews (non toccata).
