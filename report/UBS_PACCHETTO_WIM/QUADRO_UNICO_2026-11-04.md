@@ -2,6 +2,8 @@
 Basato solo su manuali e set (schede in questa cartella). **Nessun test eseguito**: tutto ciò che segue sul comportamento è lettura, non misura.
 
 ## Inventario
+(Il pacchetto comprende anche i 4 EA sull'oro già caricati e studiati prima — Gold Reaper, Goldbot One, Gold Phantom, Goldtrade Pro — che sono la base del nostro trio: qui non vengono rifatti.)
+
 | EA | Tipo | Strumenti | TF | Set | Scheda |
 |---|---|---|---|---|---|
 | Apex Trader | griglia | AUDCAD, AUDNZD, NZDCAD | M15 | 5 | APEX |
