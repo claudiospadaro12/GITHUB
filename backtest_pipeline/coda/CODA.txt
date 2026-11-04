@@ -603,6 +603,13 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 # [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_FiboH4_Multi -Prova R139c_FIBOH4_GBPUSD_unsimbolo.txt -Etichetta r139c -Modello 1 -Deposito 10000
 
 f4e1c2fc712c0d2d0391d0b8313a6380884abbb3 | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
+#
+# --- 04/11/2026: CODA_13 verifica orari in ORA SOLARE (sola lettura) ---
+# Il server BCM e GMT+1 fisso: d inverno = ora italiana (CLAUDE.md, 04/11/2026).
+# Legge i .chr del profilo attivo e confronta gli orari degli EA ABTG con la tabella
+# dei valori attesi (+1 ora rispetto a quelli d estate). Stampa OK / DA CORREGGERE.
+# Pubblicata con l autorizzazione di Claudio del 04/11/2026. Da togliere o rifare a marzo 2027.
+c5e5ede2dc88b59c1bf7e7e2a8518929b6a4f237 | backtest_pipeline/righe/CODA_13_verifica_orari_inverno.ps1
 # =====================================================================
 #  I QUATTRO EA MAI GIRATI -- quattro righe, NON cinque
 #  Aggiunte il 12/09/2026 sera, dopo PASS dei DUE strati del cancello.
