@@ -25,7 +25,7 @@ if($DATI -eq ''){ throw 'cartella dati del terminale BCM non trovata (origin.txt
 Write-Host ('cartella dati: ' + $DATI);
 $run=@(Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($INST + '\') });
 if($run.Count -gt 0){ if($APPLICA){ throw 'Il terminale BCM e AVVIATO: chiudilo (File > Esci, aspetta che sparisca da Gestione attivita) e rilancia la riga.' } else { Write-Host 'NB: il terminale e avviato (in PROVA non importa; per APPLICARE va chiuso).' -ForegroundColor Yellow } };
-$ini=Leggi (Join-Path $DATI 'config\common.ini'); $pl='Default'; $m=[regex]::Match($ini,'(?im)^ProfileLast[ \t]*=[ \t]*(.*?)[ \t]*$'); if($m.Success -and $m.Groups[1].Value.Length -gt 0){ $pl=$m.Groups[1].Value };
+$ini=Leggi (Join-Path $DATI 'config\common.ini'); $pl='Default'; $m=[regex]::Match($ini,'(?im)^ProfileLast[ \t]*=[ \t]*(.*?)[ \t]*$'); if($m.Success -and $m.Groups[1].Value.Length -gt 0){ $pl=$m.Groups[1].Value.Trim() };
 $cd=Join-Path $DATI ('MQL5\Profiles\Charts\' + $pl); if(-not (Test-Path -LiteralPath $cd)){ throw ('profilo non trovato: ' + $cd) };
 Write-Host ('profilo attivo: ' + $pl);
 $BK=Join-Path ([Environment]::GetFolderPath('Desktop')) ('BACKUP_CHR_ESTATE_' + (Get-Date -Format 'yyyyMMdd_HHmm'));
@@ -33,7 +33,7 @@ $nMod=0; $nGia=0; $nDiv=0; $nSkip=0; $nTrov=0;
 foreach($f in Get-ChildItem -LiteralPath $cd -Filter 'chart*.chr' -File){
 $b=[IO.File]::ReadAllBytes($f.FullName); if(-not ($b.Length -ge 2 -and $b[0] -eq 255 -and $b[1] -eq 254)){ continue };
 $t=Leggi $f.FullName; $e=[regex]::Match($t,'(?s)<expert>(.*?)</expert>'); if(-not $e.Success){ continue };
-$g=$e.Groups[1]; $blk=$g.Value; $nm=[regex]::Match($blk,'(?im)^[ \t]*name[ \t]*=[ \t]*(.*?)[ \t]*$').Groups[1].Value; $sy=[regex]::Match($t,'(?im)^[ \t]*symbol[ \t]*=[ \t]*(\S+)').Groups[1].Value;
+$g=$e.Groups[1]; $blk=$g.Value; $nm=[regex]::Match($blk,'(?im)^[ \t]*name[ \t]*=[ \t]*(.*?)[ \t]*$').Groups[1].Value.Trim(); $sy=[regex]::Match($t,'(?im)^[ \t]*symbol[ \t]*=[ \t]*(\S+)').Groups[1].Value;
 $cam=$null; foreach($c in $CAMBI){ if($c[0] -eq $nm -and $c[1] -eq $sy){ $cam=$c[2] } }; if($null -eq $cam){ continue };
 $nTrov++; $blk2=$blk; $dif=@(); $mod=$false;
 foreach($k in $cam.Keys){ $old=$cam[$k][0]; $new=$cam[$k][1]; $re=[regex]::new('(?m)^(' + $k + '=)([^\r\n]*)'); $mm=$re.Matches($blk2);
