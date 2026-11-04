@@ -1,0 +1,89 @@
+N2015 tickvol valori: [(1, 335257)]
+2015-01 giorni 21 prima barra 00:00 ultima 23:59
+2015-02 giorni 20 prima barra 00:00 ultima 23:59
+2015-03 giorni 22 prima barra 00:00 ultima 23:59
+2015-04 giorni 22 prima barra 00:00 ultima 23:59
+2015-05 giorni 21 prima barra 00:00 ultima 23:59
+2015-06 giorni 22 prima barra 00:00 ultima 23:59
+2015-07 giorni 23 prima barra 00:00 ultima 23:59
+2015-08 giorni 21 prima barra 00:00 ultima 23:59
+2015-09 giorni 22 prima barra 00:00 ultima 23:59
+2015-10 giorni 22 prima barra 00:00 ultima 23:59
+2015-11 giorni 21 prima barra 00:00 ultima 23:59
+2015-12 giorni 22 prima barra 00:00 ultima 23:59
+2015-01 top3 ampiezza media: 14:31(6.6), 14:35(6.4), 14:37(6.2)
+2015-02 top3 ampiezza media: 14:30(4.1), 14:32(4.0), 14:31(3.9)
+2015-03 top3 ampiezza media: 14:31(4.4), 14:35(4.1), 14:30(4.1)
+2015-04 top3 ampiezza media: 14:30(5.0), 14:31(4.9), 14:32(4.5)
+2015-05 top3 ampiezza media: 14:31(5.7), 14:30(4.9), 14:34(4.2)
+2015-06 top3 ampiezza media: 14:31(5.1), 14:30(4.7), 14:32(4.5)
+2015-07 top3 ampiezza media: 14:30(5.8), 14:32(4.2), 14:31(4.2)
+2015-08 top3 ampiezza media: 14:42(7.3), 14:41(7.1), 15:15(6.8)
+2015-09 top3 ampiezza media: 14:30(7.3), 14:32(6.5), 14:31(6.4)
+2015-10 top3 ampiezza media: 14:35(5.9), 14:30(5.4), 14:33(5.0)
+2015-11 top3 ampiezza media: 14:30(4.7), 14:35(4.4), 14:31(3.9)
+2015-12 top3 ampiezza media: 14:30(5.8), 15:16(5.4), 14:40(5.2)
+N2020 tickvol valori: [(1, 339962)]
+2020-01 giorni 22 prima barra 00:00 ultima 23:59
+2020-02 giorni 20 prima barra 00:00 ultima 23:59
+2020-03 giorni 22 prima barra 00:00 ultima 23:59
+2020-04 giorni 21 prima barra 00:00 ultima 23:59
+2020-05 giorni 21 prima barra 00:00 ultima 23:59
+2020-06 giorni 22 prima barra 00:00 ultima 23:59
+2020-07 giorni 23 prima barra 00:00 ultima 23:59
+2020-08 giorni 21 prima barra 00:00 ultima 23:59
+2020-09 giorni 22 prima barra 00:00 ultima 23:59
+2020-10 giorni 22 prima barra 00:00 ultima 23:59
+2020-11 giorni 20 prima barra 00:00 ultima 23:59
+2020-12 giorni 22 prima barra 00:00 ultima 23:59
+2020-01 top3 ampiezza media: 14:30(11.7), 14:31(11.5), 14:32(9.8)
+2020-02 top3 ampiezza media: 14:30(23.6), 14:31(20.9), 14:34(15.1)
+2020-03 top3 ampiezza media: 15:00(31.6), 13:30(29.5), 13:31(29.3)
+2020-04 top3 ampiezza media: 14:30(24.7), 14:32(21.1), 14:31(19.4)
+2020-05 top3 ampiezza media: 14:30(19.2), 14:35(17.3), 14:32(15.4)
+2020-06 top3 ampiezza media: 14:30(17.0), 14:33(16.7), 14:31(16.1)
+2020-07 top3 ampiezza media: 14:32(19.1), 14:40(18.4), 14:35(18.4)
+2020-08 top3 ampiezza media: 14:35(16.8), 14:31(16.6), 14:33(16.5)
+2020-09 top3 ampiezza media: 14:30(27.7), 14:31(26.9), 14:45(25.7)
+2020-10 top3 ampiezza media: 14:30(20.9), 15:00(17.8), 14:31(17.3)
+2020-11 top3 ampiezza media: 14:35(24.7), 14:33(20.8), 14:31(20.0)
+2020-12 top3 ampiezza media: 14:31(14.9), 14:34(14.8), 14:30(14.7)
+N2025_26 tickvol valori: [(1, 539348)]
+2025-01 giorni 22 prima barra 00:00 ultima 23:59
+2025-02 giorni 20 prima barra 00:00 ultima 23:59
+2025-03 giorni 21 prima barra 00:00 ultima 23:59
+2025-04 giorni 21 prima barra 00:00 ultima 23:59
+2025-05 giorni 22 prima barra 00:00 ultima 23:59
+2025-06 giorni 21 prima barra 00:00 ultima 23:59
+2025-07 giorni 23 prima barra 00:00 ultima 23:59
+2025-08 giorni 21 prima barra 00:00 ultima 23:59
+2025-09 giorni 22 prima barra 00:00 ultima 23:59
+2025-10 giorni 23 prima barra 00:00 ultima 23:59
+2025-11 giorni 20 prima barra 00:00 ultima 23:59
+2025-12 giorni 22 prima barra 00:00 ultima 23:59
+2026-01 giorni 21 prima barra 00:00 ultima 23:59
+2026-02 giorni 20 prima barra 00:00 ultima 23:59
+2026-03 giorni 22 prima barra 00:00 ultima 23:59
+2026-04 giorni 21 prima barra 00:00 ultima 23:59
+2026-05 giorni 21 prima barra 00:00 ultima 23:59
+2026-06 giorni 22 prima barra 00:00 ultima 23:59
+2026-07 giorni 23 prima barra 00:00 ultima 23:59
+2025-01 top3 ampiezza media: 13:30(41.0), 14:31(35.7), 14:30(29.9)
+2025-02 top3 ampiezza media: 15:00(37.9), 13:30(34.7), 14:31(28.8)
+2025-03 top3 ampiezza media: 15:00(39.4), 14:00(38.2), 13:30(37.5)
+2025-04 top3 ampiezza media: 15:00(56.4), 14:31(50.1), 14:38(49.9)
+2025-05 top3 ampiezza media: 14:30(32.4), 14:31(31.3), 14:32(27.5)
+2025-06 top3 ampiezza media: 14:30(33.9), 14:31(28.4), 14:32(26.8)
+2025-07 top3 ampiezza media: 14:30(28.8), 14:31(23.2), 14:32(20.2)
+2025-08 top3 ampiezza media: 14:30(31.8), 14:31(30.4), 14:45(26.4)
+2025-09 top3 ampiezza media: 14:30(30.3), 14:31(23.8), 14:32(22.2)
+2025-10 top3 ampiezza media: 14:30(30.6), 14:31(27.2), 14:45(23.3)
+2025-11 top3 ampiezza media: 14:30(45.9), 14:32(39.4), 14:31(34.1)
+2025-12 top3 ampiezza media: 14:30(45.2), 14:31(33.7), 14:36(31.5)
+2026-01 top3 ampiezza media: 14:30(47.8), 14:31(38.9), 14:33(32.1)
+2026-02 top3 ampiezza media: 14:30(60.0), 14:31(50.2), 14:32(49.6)
+2026-03 top3 ampiezza media: 13:30(48.6), 14:30(37.4), 13:31(34.4)
+2026-04 top3 ampiezza media: 14:30(45.1), 14:31(33.9), 14:32(30.9)
+2026-05 top3 ampiezza media: 14:30(47.6), 14:31(40.7), 14:50(36.1)
+2026-06 top3 ampiezza media: 14:30(60.6), 14:31(56.2), 14:35(52.2)
+2026-07 top3 ampiezza media: 14:30(64.5), 14:38(46.1), 15:00(43.0)

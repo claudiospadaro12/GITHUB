@@ -1,0 +1,30 @@
+NAS2015
+  inverno(USA solare)            H_GMT1  giorni  89  media  1.60 mediana  1.49  argmax entro +-1 min:  2.2%
+  scarto(USA legale,UE solare)   H_GMT1  giorni  19  media  2.56 mediana  2.39  argmax entro +-1 min: 15.8%
+  estate(entrambi legali)        H_GMT1  giorni 145  media  2.86 mediana  2.62  argmax entro +-1 min: 22.8%
+  inverno(USA solare)            H_LON   giorni  88  media  2.55 mediana  2.32  argmax entro +-1 min: 17.0%
+  scarto(USA legale,UE solare)   H_LON   giorni  20  media  0.94 mediana  0.63  argmax entro +-1 min:  0.0%
+  estate(entrambi legali)        H_LON   giorni 145  media  2.86 mediana  2.62  argmax entro +-1 min: 22.8%
+  inverno(USA solare)            H_ET5   giorni  88  media  2.55 mediana  2.32  argmax entro +-1 min: 17.0%
+  scarto(USA legale,UE solare)   H_ET5   giorni  19  media  2.56 mediana  2.39  argmax entro +-1 min: 15.8%
+  estate(entrambi legali)        H_ET5   giorni 145  media  2.86 mediana  2.62  argmax entro +-1 min: 22.8%
+NAS2020
+  inverno(USA solare)            H_GMT1  giorni  89  media  1.46 mediana  1.38  argmax entro +-1 min:  0.0%
+  scarto(USA legale,UE solare)   H_GMT1  giorni  17  media  1.30 mediana  1.22  argmax entro +-1 min:  0.0%
+  estate(entrambi legali)        H_GMT1  giorni 149  media  2.55 mediana  2.42  argmax entro +-1 min: 20.1%
+  inverno(USA solare)            H_LON   giorni  89  media  2.95 mediana  2.72  argmax entro +-1 min: 28.1%
+  scarto(USA legale,UE solare)   H_LON   giorni  17  media  2.41 mediana  2.42  argmax entro +-1 min: 35.3%
+  estate(entrambi legali)        H_LON   giorni 149  media  2.55 mediana  2.42  argmax entro +-1 min: 20.1%
+  inverno(USA solare)            H_ET5   giorni  89  media  2.95 mediana  2.72  argmax entro +-1 min: 28.1%
+  scarto(USA legale,UE solare)   H_ET5   giorni  17  media  1.30 mediana  1.22  argmax entro +-1 min:  0.0%
+  estate(entrambi legali)        H_ET5   giorni 149  media  2.55 mediana  2.42  argmax entro +-1 min: 20.1%
+NAS2025_26
+  inverno(USA solare)            H_GMT1  giorni 134  media  1.47 mediana  1.40  argmax entro +-1 min:  0.0%
+  scarto(USA legale,UE solare)   H_GMT1  giorni  35  media  1.34 mediana  1.25  argmax entro +-1 min:  0.0%
+  estate(entrambi legali)        H_GMT1  giorni 237  media  2.96 mediana  2.77  argmax entro +-1 min: 28.3%
+  inverno(USA solare)            H_LON   giorni 134  media  2.99 mediana  2.73  argmax entro +-1 min: 27.6%
+  scarto(USA legale,UE solare)   H_LON   giorni  35  media  2.52 mediana  2.17  argmax entro +-1 min: 11.4%
+  estate(entrambi legali)        H_LON   giorni 237  media  2.96 mediana  2.77  argmax entro +-1 min: 28.3%
+  inverno(USA solare)            H_ET5   giorni 134  media  2.99 mediana  2.73  argmax entro +-1 min: 27.6%
+  scarto(USA legale,UE solare)   H_ET5   giorni  35  media  1.34 mediana  1.25  argmax entro +-1 min:  0.0%
+  estate(entrambi legali)        H_ET5   giorni 237  media  2.96 mediana  2.77  argmax entro +-1 min: 28.3%

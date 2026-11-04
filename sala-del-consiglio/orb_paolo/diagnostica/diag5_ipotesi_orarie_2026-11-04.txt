@@ -1,0 +1,30 @@
+NAS2015
+  H_GMT1  giorni 253  ampiezza all'apertura/ampiezza media finestra: media  2.40 mediana  2.22  argmax entro +-1 min: 15.0%
+  H_LON   giorni 253  ampiezza all'apertura/ampiezza media finestra: media  2.60 mediana  2.43  argmax entro +-1 min: 19.0%
+  H_ET5   giorni 252  ampiezza all'apertura/ampiezza media finestra: media  2.73 mediana  2.49  argmax entro +-1 min: 20.2%
+  H_UTC   giorni 255  ampiezza all'apertura/ampiezza media finestra: media  1.64 mediana  1.31  argmax entro +-1 min:  9.0%
+NAS2020
+  H_GMT1  giorni 255  ampiezza all'apertura/ampiezza media finestra: media  2.09 mediana  1.98  argmax entro +-1 min: 11.8%
+  H_LON   giorni 255  ampiezza all'apertura/ampiezza media finestra: media  2.68 mediana  2.53  argmax entro +-1 min: 23.9%
+  H_ET5   giorni 255  ampiezza all'apertura/ampiezza media finestra: media  2.61 mediana  2.45  argmax entro +-1 min: 21.6%
+  H_UTC   giorni 255  ampiezza all'apertura/ampiezza media finestra: media  1.92 mediana  1.63  argmax entro +-1 min: 16.1%
+NAS2025_26
+  H_GMT1  giorni 406  ampiezza all'apertura/ampiezza media finestra: media  2.33 mediana  2.11  argmax entro +-1 min: 16.5%
+  H_LON   giorni 406  ampiezza all'apertura/ampiezza media finestra: media  2.93 mediana  2.74  argmax entro +-1 min: 26.6%
+  H_ET5   giorni 406  ampiezza all'apertura/ampiezza media finestra: media  2.83 mediana  2.63  argmax entro +-1 min: 25.6%
+  H_UTC   giorni 407  ampiezza all'apertura/ampiezza media finestra: media  2.12 mediana  1.65  argmax entro +-1 min: 15.2%
+SPX2015
+  H_GMT1  giorni 251  ampiezza all'apertura/ampiezza media finestra: media  2.32 mediana  2.13  argmax entro +-1 min: 13.5%
+  H_LON   giorni 251  ampiezza all'apertura/ampiezza media finestra: media  2.43 mediana  2.28  argmax entro +-1 min: 14.7%
+  H_ET5   giorni 250  ampiezza all'apertura/ampiezza media finestra: media  2.55 mediana  2.38  argmax entro +-1 min: 15.2%
+  H_UTC   giorni 244  ampiezza all'apertura/ampiezza media finestra: media  1.79 mediana  1.57  argmax entro +-1 min:  7.8%
+SPX2020
+  H_GMT1  giorni 253  ampiezza all'apertura/ampiezza media finestra: media  2.00 mediana  1.87  argmax entro +-1 min: 10.3%
+  H_LON   giorni 253  ampiezza all'apertura/ampiezza media finestra: media  2.47 mediana  2.38  argmax entro +-1 min: 17.8%
+  H_ET5   giorni 253  ampiezza all'apertura/ampiezza media finestra: media  2.43 mediana  2.26  argmax entro +-1 min: 16.6%
+  H_UTC   giorni 253  ampiezza all'apertura/ampiezza media finestra: media  1.93 mediana  1.73  argmax entro +-1 min: 12.3%
+SPX2025_26
+  H_GMT1  giorni 407  ampiezza all'apertura/ampiezza media finestra: media  2.17 mediana  1.92  argmax entro +-1 min: 12.5%
+  H_LON   giorni 407  ampiezza all'apertura/ampiezza media finestra: media  2.62 mediana  2.45  argmax entro +-1 min: 18.2%
+  H_ET5   giorni 407  ampiezza all'apertura/ampiezza media finestra: media  2.54 mediana  2.40  argmax entro +-1 min: 17.4%
+  H_UTC   giorni 407  ampiezza all'apertura/ampiezza media finestra: media  2.10 mediana  1.54  argmax entro +-1 min: 13.5%

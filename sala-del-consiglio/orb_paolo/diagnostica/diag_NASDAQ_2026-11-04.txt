@@ -1,0 +1,40 @@
+=== N2015
+MAPPATURA 2026-01-15 a: USA e EU solari (15, 30) OK
+MAPPATURA 2026-03-16 b: USA legale, EU solare (14, 30) OK
+MAPPATURA 2026-07-15 c: entrambi legali (14, 30) OK
+MAPPATURA 2026-10-26 d: EU solare, USA ancora legale (14, 30) OK
+MAPPATURA 2026-11-02 USA tornati solari (15, 30) OK
+N2015 righe 335257 giorni 312 primo 2015-01-01 ultimo 2015-12-31
+C3 spread: valori distinti 1 top [(0, 335257)]
+C2 giorni feriali con dati 260 conformi 240 esclusi(<95%) 20
+C2 esempi esclusi [('2015-01-01', 0), ('2015-01-19', 145), ('2015-02-16', 143), ('2015-02-23', 363), ('2015-02-25', 362), ('2015-03-02', 361), ('2015-03-04', 363), ('2015-04-03', 0), ('2015-05-25', 160), ('2015-07-03', 209), ('2015-08-21', 343), ('2015-09-07', 207)]
+C1 USA_legale: giorni 165 picco_aggregato 13:30 atteso 14:30 -> FAIL; giorni con argmax entro +-1 min: 0/165 (0%); top argmax [('16:29', 165)]
+   top minuti aggregati [('13:30', 165), ('13:32', 165), ('13:33', 165), ('13:44', 165)]
+C1 USA_solare: giorni 75 picco_aggregato 13:30 atteso 15:30 -> FAIL; giorni con argmax entro +-1 min: 0/75 (0%); top argmax [('16:29', 75)]
+   top minuti aggregati [('13:30', 75), ('13:31', 75), ('13:32', 75), ('13:33', 75)]
+=== N2020
+MAPPATURA 2026-01-15 a: USA e EU solari (15, 30) OK
+MAPPATURA 2026-03-16 b: USA legale, EU solare (14, 30) OK
+MAPPATURA 2026-07-15 c: entrambi legali (14, 30) OK
+MAPPATURA 2026-10-26 d: EU solare, USA ancora legale (14, 30) OK
+MAPPATURA 2026-11-02 USA tornati solari (15, 30) OK
+N2020 righe 339962 giorni 312 primo 2020-01-01 ultimo 2020-12-31
+C3 spread: valori distinti 1 top [(0, 339962)]
+C2 giorni feriali con dati 260 conformi 146 esclusi(<95%) 114
+C2 esempi esclusi [('2020-01-01', 0), ('2020-01-02', 345), ('2020-01-03', 345), ('2020-01-06', 345), ('2020-01-07', 345), ('2020-01-08', 345), ('2020-01-09', 345), ('2020-01-10', 345), ('2020-01-13', 345), ('2020-01-14', 345), ('2020-01-15', 345), ('2020-01-16', 345)]
+C1 USA_legale: giorni 146 picco_aggregato 13:30 atteso 14:30 -> FAIL; giorni con argmax entro +-1 min: 0/146 (0%); top argmax [('16:29', 146)]
+   top minuti aggregati [('13:30', 146), ('13:31', 146), ('13:32', 146), ('13:33', 146)]
+C1 USA_solare nessun giorno
+=== N2025_26
+MAPPATURA 2026-01-15 a: USA e EU solari (15, 30) OK
+MAPPATURA 2026-03-16 b: USA legale, EU solare (14, 30) OK
+MAPPATURA 2026-07-15 c: entrambi legali (14, 30) OK
+MAPPATURA 2026-10-26 d: EU solare, USA ancora legale (14, 30) OK
+MAPPATURA 2026-11-02 USA tornati solari (15, 30) OK
+N2025_26 righe 539348 giorni 493 primo 2025-01-01 ultimo 2026-07-31
+C3 spread: valori distinti 1 top [(0, 539348)]
+C2 giorni feriali con dati 411 conformi 230 esclusi(<95%) 181
+C2 esempi esclusi [('2025-01-01', 0), ('2025-01-02', 345), ('2025-01-03', 345), ('2025-01-06', 345), ('2025-01-07', 345), ('2025-01-08', 345), ('2025-01-09', 0), ('2025-01-10', 345), ('2025-01-13', 345), ('2025-01-14', 345), ('2025-01-15', 345), ('2025-01-16', 345)]
+C1 USA_legale: giorni 230 picco_aggregato 13:30 atteso 14:30 -> FAIL; giorni con argmax entro +-1 min: 0/230 (0%); top argmax [('16:29', 230)]
+   top minuti aggregati [('13:30', 230), ('13:31', 230), ('13:32', 230), ('13:33', 230)]
+C1 USA_solare nessun giorno

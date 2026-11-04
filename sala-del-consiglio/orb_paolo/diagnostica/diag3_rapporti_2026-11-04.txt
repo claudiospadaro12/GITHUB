@@ -1,0 +1,32 @@
+NAS2015
+2015-01 amp14:30    5.90  amp15:30    3.99  rapporto  1.48
+2015-07 amp14:30    5.80  amp15:30    2.89  rapporto  2.01
+REGIME USstd/EUstd giorni 88 rapporto 14:30/15:30 1.51
+REGIME USdst/EUstd giorni 19 rapporto 14:30/15:30 1.55
+REGIME USdst/EUdst giorni 146 rapporto 14:30/15:30 1.71
+NAS2020
+2020-01 amp14:30   11.73  amp15:30    4.80  rapporto  2.44
+2020-07 amp14:30   17.78  amp15:30   11.22  rapporto  1.58
+REGIME USstd/EUstd giorni 89 rapporto 14:30/15:30 1.84
+REGIME USdst/EUstd giorni 20 rapporto 14:30/15:30 1.17
+REGIME USdst/EUdst giorni 149 rapporto 14:30/15:30 1.65
+NAS2025_26
+2025-01 amp14:30   31.34  amp15:30   21.99  rapporto  1.42
+2025-07 amp14:30   28.84  amp15:30   13.06  rapporto  2.21
+2025-12 amp14:30   45.15  amp15:30   18.26  rapporto  2.47
+REGIME USstd/EUstd giorni 134 rapporto 14:30/15:30 1.94
+REGIME USdst/EUstd giorni 35 rapporto 14:30/15:30 1.34
+REGIME USdst/EUdst giorni 237 rapporto 14:30/15:30 1.81
+SPX2015
+2015-01 amp14:30    2.00  amp15:30    1.49  rapporto  1.34
+2015-07 amp14:30    1.74  amp15:30    1.03  rapporto  1.69
+REGIME USstd/EUstd giorni 88 rapporto 14:30/15:30 1.33
+REGIME USdst/EUstd giorni 19 rapporto 14:30/15:30 1.67
+REGIME USdst/EUdst giorni 147 rapporto 14:30/15:30 1.6
+SPX2025_26
+2025-01 amp14:30    6.51  amp15:30    3.72  rapporto  1.75
+2025-07 amp14:30    5.00  amp15:30    2.51  rapporto  1.99
+2025-12 amp14:30    6.59  amp15:30    3.45  rapporto  1.91
+REGIME USstd/EUstd giorni 134 rapporto 14:30/15:30 1.68
+REGIME USdst/EUstd giorni 35 rapporto 14:30/15:30 1.29
+REGIME USdst/EUdst giorni 238 rapporto 14:30/15:30 1.68
