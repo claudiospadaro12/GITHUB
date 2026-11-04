@@ -41,3 +41,14 @@ Dai deal dei report (realizzato, ordinato per ora; il flottante non c'e). Giorni
 - Il minimo corrente coincide con la chiusura della giornata nei 4 giorni: nessun recupero dentro la giornata. Le perdite si chiudono a grappolo (23/01, 31/12 e 17/07 in pochi minuti; il 18/12 in circa 1,7 ore).
 - Giorni con minimo <= -4,3%: 4 con e senza GTP; <= -5%: 2 senza GTP, 4 con GTP.
 - Il Guardian (`ABTG_Guardian.mq5`) sorveglia con **OnTimer ogni secondo** (non a ogni tick): sui picchi veloci dell'oro la reazione puo arrivare dopo che i livelli di stop sono gia stati toccati. Il 18/12 (lento) avrebbe tagliato intorno al -4,3% delle 19:02; sui giorni a grappolo veloce non e determinabile da barre M1.
+
+## Aggiunta 04/11 (sera): analisi con tutti e 4 gli EA insieme (Reaper D9 + Goldbot PF525 + Phantom D4 + GTP COMBO)
+Phantom D4 (prop combo) 2013/2018/2020/2025 da `risultati_archivio/ANNO80K_SUPER_20261028_1933/PHANTOM/*_M1_PHANTOM_PROPCOMBO_D4` su `lavoro` (netti +3.759, +2.034, +3.926, +5.560: coincidono col riferimento). Script: `GTP_COMBO_TRE_ANNI/analisi_trio_vs_quattro.py`. Realizzato, senza flottante, senza Guardian, Modello 1. Il trio qui e Reaper + Goldbot PF525 + Phantom D4 (stessa combinazione della Free Trial); con Goldbot PF525 il giorno peggiore 2013 del trio e -6,01% (l'analisi del 29/10 su `lavoro` dava -5,20% con misura pessimistica sull'equity e altro set Goldbot).
+| Anno | Netto trio / 4 EA | Peggior giorno trio / 4 EA | DD saldo trio / 4 EA | Giorni >=4,3% trio / 4 EA | >=5% |
+|---|---|---|---|---|---|
+| 2013 | 42.960 / 57.653 | -6,01% / -7,74% | 9,26% / 13,40% | 4 / 4 | 3 / 4 |
+| 2018 | 20.206 / 28.959 | -2,94% / -4,64% | 6,61% / 7,65% | 0 / 1 | 0 / 0 |
+| 2020 | 36.154 / 42.683 | -2,33% / -3,34% | 4,68% / 6,58% | 0 / 0 | 0 / 0 |
+| 2025 | 45.016 / 53.859 | -2,08% / -2,71% | 4,77% / 5,42% | 0 / 0 | 0 / 0 |
+Finestre di partenza (80.000 di partenza, peggiore minimo cumulato dall'inizio della finestra; quota di finestre che toccano -9,3%): 2013 14 giorni trio -7,54% (0%), 4 EA -11,22% (2,6%); 30 giorni trio -9,26% (0%), 4 EA -13,40% (5,7%). 2018 14gg -5,94% / -6,68%, 30gg -6,61% / -7,65% (0% -9,3%). 2020 14gg -4,68% / -6,58%, 30gg -4,68% / -6,58% (0%). 2025 14gg -4,18% / -4,83%, 30gg -4,77% / -5,42% (0%).
+2013, i giorni peggiori (trio, minimo corrente = fine giorno; ora server del -4,3%): 31/12 -6,01% (15:00), 17/07 -5,96% (15:38), 18/12 -5,52% (19:02), 23/01 -4,87% (15:02). Con GTP: 31/12 -7,74% (14:56), 23/01 -7,61% (15:02), 17/07 -6,72% (15:38), 18/12 -6,02% (19:02).
