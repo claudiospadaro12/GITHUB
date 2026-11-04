@@ -1,0 +1,55 @@
+# Note grezze #general-trade-talk (772 msg 01/10 04:08 → 03/11 14:03; 42 msg con immagini allegate reali)
+## chunk 1 (01/10 → 13/10 12:50)
+- 01/10 Tony: ricarica conto senza toccare EA ok (prossime pending ricalcolate); per effetto immediato cancellare pending. Prelievo: cancellare pending e lasciare rigenerare, altrimenti rischio margin call.
+- 01/10 Wim: SL/TP virtuali solo se il broker dà avvisi di iperattività; altrimenti normali meglio. langesi: virtuale richiede bassa latenza.
+- 01/10 utenti: DM di scammer frequenti.
+- 02/10 IanL123: Gold bundle per prop (FTMO swing) → community sfavorevole alle prop ("stay away").
+- 02/10 Gabriel007: ForexVPS Prime: MT5 chiuso durante NFP → EA non cancellava pending → perdita ~12% portafoglio; Contabo ok. Consigli: server dedicato (JOHN, Rainy), notifiche (healthchecks.io). 03/10 Wim: con lo strumento Karnek si riceve notifica se MT5 non gira.
+- 03/10 Wim banna un utente (messaggio rimosso).
+- 04/10 Wim: "sfrutto al massimo i miei assistenti AI"; molti update UBS.
+- 04/10 malek: $1200 IC Markets, UBS + tutti gold EA, ha raddoppiato il conto "per errore" senza controllare.
+- 05/10 langesi: slippage in calo (estate poco volume). Tool MQL5 per stop daily DD (product 28252, 165444).
+- 06/10 grosso DD (GR): Alicanto -30%; Flygplan (yolo MaxDD 204) "giù ben più di 30k, peggior DD da quando ha iniziato yolo" (~70% da ATH secondo altro utente); Wim: "sei giù circa 1 mese di profitti?". DanM: yolo 204 + 5.8 per strategia, +120% 10 giorni prima. Rudolf: yolo 1k demo e 1k live azzerati in 2 settimane.
+- 06/10 Wim: Fake breakout filter non prende tutti i falsi breakout; chiude se candela chiude bullish (per sell) e sopra l'entry (o bearish/sotto per buy).
+- 07/10 crollo EA grid altrui (Quantum Queen/Bogdan, segnale MQL5 2234595, "77k usd gone"); utenti: nessuno qui con rischio ragionevole ha perso tutto.
+- 07/10 markushka99: GR set YOLO (quello del "400$→130k"), $1400 → $691 (-50%) in 1 settimana; backtest 4 anni DD 50-80%. Rudolf: 1000→380; demo 1000→1900→550. Eugen: yolo 200% +100% lunedì, ritirato deposito, ridotto a 150%; ieri -50%. Consiglio: ritirare profitti subito. sattysingh: "medium risk con OnlyUp è meglio".
+- 08/10 Wim: set Luna aggiornato in #plug-and-play-eas. JOHN: SL virtuale/set SL TP after entry solo se broker avvisa iperattività.
+- 08/10 Anan22: correlazione EA breakout di Wim → laterale prolungato rischio.
+- 09/10 DiiZi: gap Tesla all'apertura.
+- 11/10 Steve: migrazione GR su VPS MT5 errore dll communicatorplugin10.
+- 12/10 Wim: "io e Jimmy andiamo forte su EasyAlgos".
+- 12/10 *** Scandalo "Huy Tran": utente che vendeva in DM set/EA (set 200$, EA 100$) spacciandoli per propri; Jeremy (Mentor) condivide FILE "UBS_5.0 - 5 GOLD SET PORTFOLIO.zip" 89.92 KB (set UBS, D1/H4, con autoloader; contiene la chiave UBS di Tran). maindfriik/Tom: sono set di Phantom/Gold EA esistenti travestiti; strat4 meno correlata. langesi BT 01/2024→oggi a 10% DD per set: "rischio/rendimento non male ma niente di nuovo". Tran bannato. Wim: "non sembra buono per Tran".
+- 12/10 pipraider: stesso GR su IC Markets (2 ms) in profitto, su Darwinex (70 ms) leggera perdita; Gold Trader uguale su entrambi.
+- 13/10 Wim nuovo video YouTube.
+## chunk 2 (13/10 → 25/10 20:23)
+- 14/10 *** Wim (a !R7 su capitale per tutti gli EA): "Non farei girare TUTTI gli EA su 1 conto. Farei più setup con 4-5 EA, circa 5K per conto"; per 15-20k "dividerei su 3-4 conti, magari 5 (uno piccolo ma aggressivo). Esempio: A) piccolo 1500$: Gold Reaper high risk + set Gold Scalp C; B) 5K: Gold Reaper + Daytrade Pro + Luna; C) 7K: 3 Gold EA; D) 5K: portafoglio UBS (44-strat o Xmas)". 44-strat e Xmas = portafogli UBS nello zip set UBS (3372: cartella "UBS live portfolio", con set del one chart EA).
+- 15/10 Ákos (BBB, $2-5k) chiede portafogli. Rainy-: niente prop con EA (ban per combinazione); propone GR 20% maxDD + Goldbot One 1%/strategia + GTP 1%/strategia + Gold Phantom 20% maxDD + Luna LotsizeStep 1000 → "300% l'anno scorso", DD atteso 35-40% (25% in backtest). Myfxbook Rainy: portfolio 11576068. Con UBS non servono gli altri EA, può replicarli.
+- 15/10 3372: difficile tradurre "20% max dd GR" in UBS; usa 3% o 2% per strategia.
+- 15/10 Dey: BlackBull conto Prime, leva 1:500.
+- 15/10 Rainy- inoltra FILE "UPDATED SETS UBS_V8.3.zip" 2.56 MB (manuale aggiornato + set client Bitcoin di BK) – originale di Wim.
+- 15/10 Wim: sta creando "UBS Optimizer app" per lanciare tutti i backtest e creare portafogli.
+- 15/10 Rainy: metodo: set non correlati, rischio per ciascuno; se live supera 50% del max DD di backtest → panchina; backtest real tick dal 2018 (oro dal 2014), uno per uno. Pepperstone dati gold real tick dal 2018; MetaQuotes demo affidabile dal 2014.
+- 16/10 a.l.r._: conto 'pure' Luna (6 grafici), niente più strategia 9 TGR sui conti principali.
+- 18/10 langesi: GR minimo 3000€ ("1000 troppo poco"). Eugen: con 1000$ e 10% DD il lotto minimo non lo permette.
+- 18/10 princeboto: aneddoti (non verificati) di amici con GR: 500→3000$, 9000→100000$, 300→900$.
+- 19/10 *** Wim: "non vuoi strategie che vanno bene solo sui tuoi dati, ma su tutti i broker... crea strategie i cui grafici 1M OHLC somigliano molto a quelli real ticks. Tutto ciò che sembra molto peggio su real ticks andrà male live."
+- 19/10 Lox: storico real tick broker solo 1-3 anni, prima dati MQL5; Dukascopy via Tick Story / Quant Data Manager.
+- 19/10 Wim: set Daytrade Pro invariati con l'update.
+- 20/10 Wim: "prima scrivevo tutto io; da qualche settimana uso soprattutto AI per il codice" (non StrategyQuant).
+- 21/10 Gaetan: backtest GR 2020-2026 IC Trading 5k → +555k (> 600k) [IMG]. Critiche: backtest ≠ live, slippage peggiorato ("EA chiude subito come fake breakout"), Mistermember tool simulazione condizioni broker.
+- 21-22/10 champ: copia di GR (9 strategie) da youtuber → Wim: "copia truffaldina... probabilmente AI su copia decompilata".
+- 22/10 kridel: TGR moderate oggi 7 trade: 3 piccoli win, 4 loss non piccoli.
+- 22/10 Wim: UBS Optimization app in arrivo (vedrete correlazioni).
+- 23/10 *** Wim AVVISO: canali Telegram t.me/forexeasolutions e t.me/forexeasolutions_fx NON sono suoi, sono truffe di investimento.
+- 23-24/10 Wim conferma Myfxbook ufficiale GR: myfxbook.com/members/strueli/gold-reaper-v30/11320334.
+- 24/10 Wim: "impossibile moderare MQL5, per questo ho creato il Discord per clienti verificati".
+- 24/10 Wim posta 2 immagini backtest Scalp C [IMG x2]; 25/10 Wim: UBS "è il mio miglior EA, può fare tutto quello che fanno gli altri miei EA (breakout) e molto di più".
+- 25/10 Mistermember: Scalp C live VT Markets, 0.01 per 2000 USD (0.04 lot) [IMG], contento.
+## chunk 3 (25/10 → 03/11 14:03, fine)
+- 25/10 tuviah: BT ignora slippage, provare live prima di aumentare rischio Scalp C. Mistermember: tool che applica condizioni broker (commissioni, swap, slippage reali, ordini simultanei).
+- 26/10 Mistermember: ridotto rischio Scalp C dopo agosto (più versioni).
+- 26/10 njw: link gruppo Telegram → solo Wim può invitare.
+- 29/10 Anan22 chiede altri EA; proposti grid/martingala (Sentinel, SSL, Stability Killer, Storm, Yuki, Kyora, Duelist) → criticati come martingala; Rudolf: Sentinel in forte DD flottante.
+- 30/10 JOHN: "UBS 9.5 ha corretto un potenziale problema con ATR usando Variable Values" → 31/10 Wim: "solo in backtesting quando non sono ancora caricate tutte le candele; non riuscivo a replicarlo, un cliente aveva il problema".
+- 31/10 Signofthetimes: "se hai UBS non ti serve altro".
+- 02/11 Wessel: chiede quale set usa track record GR myfxbook strueli/goldreaper/11320334 (nessuna risposta testuale). 03/11 Wessel: GR default solo 2 ordini lontani dal prezzo → Kumar: normale.

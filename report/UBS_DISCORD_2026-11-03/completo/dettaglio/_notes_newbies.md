@@ -1,0 +1,25 @@
+# Note grezze #newbies-corner (141 msg, 01/10 15:55 → 02/11 08:19; 1 immagine allegata)
+- 01/10 Wim a lgil (UBS, conto 1K IC Trading, rischio 5%?): "Dipende da quali set. 5% di rischio per strategia con 5 set sembra ok. Con 40 set sarà un po' dura su 1000".
+- 02/10 Mr.B: ultima GR v4.7 (canale ea-update-notifications) [poi utenti su 5.1, 5.4]. Update = sostituire il file.
+- 02/10 Graham: GR set 15% Wim + NFP true come partenza → consiglio: backtest.
+- 04/10 Ash: usa UBS, GR e Phantom (ha tutti gli EA).
+- 05/10 Crilosan: impostazioni FIFO/no hedging per conti USA? JOHN: "no".
+- 06/10 bot: SL/TP/trailing calcolati dal prezzo di riempimento effettivo (slippage). 07/10 Wim: "lo SL si sposta se la nuova distanza è più grande di quella prevista; il TP no".
+- 06/10 MollyImms GR v5.1 nessuna pending "market is closed" → Wim: algotrading non abilitato? password investor? simbolo sbagliato?
+- 09/10 bot: nei combo set raccomandati OnlyUp=1 per tutti tranne GoldBot One (0), motivo non documentato. Apex = EA smart-grid di Wim (AUDCAD, AUDNZD, NZDCAD M15). Suffisso set "H1_A_P006": H1=TF, A=variante, Pxxx=preset (non ufficiale).
+- 10/10 Kumar: 5 conti replicando set portafoglio A-E, chiede minimi (nessuna risposta Wim).
+- 12/10 olegfusion: combo file GR ha Max DD 7%.
+- 12/10 *** LICENZE: SaidHamid (Big Beautiful/Gold Bundle) "10 licenze per EA: il demo conta?" → KoSSaKi: "Sì, i conti demo contano come 1 licenza", rimanda a tradewithwim.com/faq.
+- 14/10 Jebediah: GR noleggiato, broker EU 1:20, lotto min 1 e step 1 → yllo: funziona con leva bassa usando max DD conservativo; il lotto minimo 1 è del broker, cambiare broker.
+- 15-16/10: GR nessun trade dal 9/10 (oro laterale). 22/10 meanroaster primo trade dal 9/10: -$89 [IMG]. Wim 22/10: "credo romperemo quel livello (4100)... con nuove pending e Gold Trade Pro ancora aperto, potrebbe essere una piacevole sorpresa... o potrei sbagliare".
+- 18/10 bot: Portfolio Setup C (PortC "my MEX live combo deal setup_PortC") contiene daytrade_combo.set, goldbot_one_combo.set, bitcoin scalp_combo_a/b.set anche se la pagina live-results non mostra BTC. 19/10 Wim: "li usavo in passato, rimossi ora, aggiornerò lo zip dei set" + FILE "AllSetsAndManuals.zip" 2.92 MB (ufficiale Wim).
+- 18/10 bot: update UBS: tenere .set in Common\Files\Sets con stessi nomi, ricaricare. 22/10 Logan.Dale: metodo profili MT5 (profilo portfolio + profilo vuoto "UPDATE" per aggiornare EA dal Market e poi ricaricare il profilo) – contraddice il bot.
+- 19/10 bot: backtest dei 4 gold EA insieme incluso nel Gold Bundle.zip.
+- 25/10 Kumar (BBB): critica: mancano video per principianti, README per set (min balance, DD atteso, backtest 10-20 anni, quale live signal); 30-50 set, troppo tempo a leggere. Bot: nessun README; doc GoldBotOne e Luna hanno tabelle balance/DD.
+- 26/10 bot GR conservativo: gold_reaper_propfirm.set (TradeFrequency 2, MaxAllowedDD 9, PropFirmMaxDailyDD 4); gold_reaper_10%maxrisk.set (MaxAllowedDD 10); evitare 60% HighRisk. $1000: floor 0.01 → DD reale può superare il target; "materiale raccomanda conto CENT sotto ~$5.000 per rispettare target DD bassi". GR minimo $600 "lato basso", DD storico ~$350 a 0.01 lot su extreme conservative. Luna conservativo: LotsizeStep 400, OnlyUp true, news filter. Stability Pro low risk set (AutoLotsizeRisk=1).
+- 26/10 bot: AdjustLotsizeToVariableValues deve restare ON (riduce lotto quando distanze crescono col prezzo oro); Weighted lotsize mantiene coerenza dei tier conservativi.
+- 27-28/10 GMT offset error (worldtimeserver) → Wim 28/10: "problema del sito worldtimeserver, lo correggo oggi in tutti gli EA; non danneggia i gold EA, non usano l'ora GMT". 30/10 erng37: errore tornato poi sparito.
+- 28/10 bot Luna: coppie ufficiali solo EURAUD, GBPAUD, AUDCAD, AUDUSD (16 extra sconsigliate, max DD ~$50 a 0.01 vale solo per le 4). Rollover filter.
+- 31/10 Wim: distanze UBS in PIPS, frazioni possibili.
+- 31/10 bot: optimization.set = template per ottimizzazione, NON set live; "300+ set (ogni set = una strategia)". Scalp A/B/C differenze non documentate. Etichette "2010-2020" = periodo ottimizzazione.
+- 02/11 Claus: log UBS sizing: "MaxRiskPerStrategy 4.96% | balance ... EUR | histDD $32.19 | wanted 0.1725 lots → trading 0.17" (formato log nuovo UBS); 25 set misti (XAGUSD, XTIUSD) caricano in 10 minuti vs 2 s per set gold.
