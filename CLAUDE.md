@@ -9,6 +9,7 @@
 - **Backtest**: lo storico BCM ha la stessa regola: un'esecuzione su un anno intero con un solo `InpSessionHour` (es. 8 per il DAX) e sbagliata in inverno (l'EA parte 1 ora prima dell'apertura). Per i test sul DAX/Nasdaq separare estate e inverno o impostare l'ora per periodo.
 - Verifica rapida di un CSV di risultati: colonna `InpSessionHour` coerente con il periodo del test (DAX 8 in estate / 9 in inverno; Nasdaq 14:30 in estate / 15:30 in inverno). Un anno intero con un solo valore: segnare il limite nel referto.
 - FTMO: server = ora italiana + 1 (confermato 02/11/2026, indipendente da questa regola).
+- **ECCEZIONE storico `_EXT` Nasdaq/S&P (verificata 04/11/2026, `sala-del-consiglio/orb_paolo/diagnostica/REFERTO_DIAGNOSTICA_2026-11-04.md`)**: i CSV M1 `NASUSD_EXT`/`SPXUSD_EXT` (2015, 2020, 2025-01..2026-07) NON seguono GMT+1 fisso: l'apertura USA e a **14:30 anche in inverno** (picco di ampiezza a 14:30, non a 15:30). 2015: 14:30 tutto l'anno; 2020 e 2025-26 (ora di Londra): 14:30, ma **13:30** nelle settimane con USA in ora legale e Europa in ora solare (fine marzo e fine ottobre). La convenzione cambia da un blocco di anni all'altro: prima di usare altri anni `_EXT` rifare la diagnostica. Vale per i backtest su `_EXT`; il feed live e il DAX D30EUR restano GMT+1 fisso. `tickvol`=1 e `spread`=0 in questi file.
 
 ## Contesto
 - Conto DEMO BCM 50503392, tipo HEDGING.
