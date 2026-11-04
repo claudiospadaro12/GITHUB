@@ -3,7 +3,7 @@
 Sala del Consiglio, 04/11/2026. Redatto da C0 sulle relazioni di A2 (`agents/A2/regole_P.md`), A7 (`agents/A7/confronto_regole_EA.md`) e A6 (`agents/A6/critica_pdf_e_rischi.md`). Nessun test eseguito, nessun dato analizzato, nessuna taglia/lotto. Le citazioni di codice sono di A7; C0 ne ha riletto 6 nel sorgente (vedi sezione 7). Il resto è **claim di agente**, non prova.
 
 ## 1. In una frase
-Il nostro `ABTG_ORB_Ottimizzato` live **non è il metodo di Paolo**: condivide solo il box da 15 minuti e l'apertura USA. Ingresso, stop, target, gestione e filtri sono diversi. Inoltre il live gira su **XAGUSD e U30USD (Dow)**, non su Nasdaq né DAX.
+Il nostro `ABTG_ORB_Ottimizzato` live **non è il metodo di Paolo**: condivide solo il box da 15 minuti e l'apertura USA. Ingresso, stop, target, gestione e filtri sono diversi. Inoltre, nel preset fornito, il live gira su **XAGUSD e U30USD (Dow)**, non su Nasdaq né DAX.
 
 ## 2. Il PDF: cosa è e cosa vale (A2 + A6)
 - Fonte **secondaria**: riassunto (Chromium, 04/11/2026) di una call. Nessun numero di performance: «profittevole», «testata, funziona», «Nasdaq funziona meglio» sono dichiarazioni, non prove. I "50 historical days" sono un'impostazione dell'indicatore per rivedere i box a occhio, **non** una validazione.
@@ -21,26 +21,26 @@ Il nostro `ABTG_ORB_Ottimizzato` live **non è il metodo di Paolo**: condivide s
 | Box 15 min dopo l'apertura | DIVERSA: 5 min **prima** (14:25–14:30) | IMPLEMENTATA 15:30–15:45 (giusta solo con USA in ora solare; la barra M1 delle 15:45 entra in parte) | DIVERSA (come ORB; `InpAutoUSDST` opt-in spento) |
 | Candela M5 che apre e chiude fuori, spike esclusi | ASSENTE (ordini pendenti) | **DIVERSA**: pendenti STOP al tocco di livello+10 → lo **spike fa scattare l'EA** (`InpUseCloseConfirm=false`) | DIVERSA (come Ott) |
 | Ingresso alla chiusura | DIVERSA (intrabar) | DIVERSA (intrabar, fino alle 22:00) | DIVERSA |
-| Stop oltre il lato opposto del box | IMPLEMENTATA | **DIVERSA**: `SLMode=3` = **mezzo box** (`entry − 0,5×range`) | IMPLEMENTATA (default) |
-| TP 1:1 («3R è ambizioso») | DIVERSA: 2R | **DIVERSA, opposto**: `TPMode=1`, mult 1,5 → TP = entry + 1,5×range = **3R sullo stop a mezzo box**. `InpTP_R=1.0` nel preset è **inerte** (trappola di lettura) | DIVERSA: 2R |
-| Parziale 50% (DAX 30–40 pt) + BE+1 € | parziale = stesso prezzo del TP (superfluo) | **ASSENTE** (`TP1Pct=0` → anche il breakeven è inerte) | opt-in "Piano A" spento |
+| Stop oltre il lato opposto del box | IMPLEMENTATA | **DIVERSA**: `SLMode=3` = HALFRANGE, `entry − 0,5×range`: lo stop sta al **centro del box + E** (E = EntryPoints×K), non sul lato opposto | IMPLEMENTATA (default) |
+| TP 1:1 («3 è ambizioso») | DIVERSA: 2R | **DIVERSA, opposto**: `TPMode=1`, mult 1,5 → TP = entry + 1,5×range = **3R esatti sullo stop (indipendente da E e K)**. `InpTP_R=1.0` nel preset è **inerte** (trappola di lettura) | DIVERSA: 2R |
+| Parziale 50% (DAX 30–40 pt) + BE+1 € | parziale = stesso prezzo del TP (superfluo finché lo stop non viene trascinato; il trailing EMA9 è attivo di default) | **ASSENTE** (`TP1Pct=0` → anche il breakeven è inerte) | opt-in "Piano A" spento |
 | Il resto: SuperTrend/swing a mano | trailing EMA9 M5 | trailing EMA9 M5 **senza soglia, dalla prima barra** | come ORB |
 | Contesto (medie, SuperTrend, VWAP, volumi) | ASSENTE | **ASSENTE**; c'è un filtro EMA200 M5 (una volta alle 15:45), non nel PDF; `UseEmaFilter` e `UseVolumeFilter` non hanno effetto con i pendenti | ASSENTE (opt-in spenti) |
 | Trend a favore / short speculare | entrambe le direzioni | **solo long** (`AllowShort=false`) | entrambe |
 | Resistenze H1/H4, "troppo lontana", retest, TP tecnico, size ridotta | ASSENTE | ASSENTE | ASSENTE |
 | Box stretto meglio di box largo | nessun filtro | `MaxRangePct=0,8%` (tetto molto largo, tipo diverso) | opt-in spento |
-| Rischio 1–2% per trade, size da stop | IMPLEMENTATA | IMPLEMENTATA (1%); con stop a mezzo box il lotto è ~doppio rispetto a uno stop sul lato opposto, a pari rischio nominale | IMPLEMENTATA |
+| Rischio 1–2% per trade, size da stop | IMPLEMENTATA | IMPLEMENTATA (1%); a pari rischio nominale il lotto è almeno 2,2 volte quello che darebbe uno stop sul lato opposto (calcolo A7: range 100, entry a high+10: stop 50 contro 110), e sale a ~3 volte con range piccoli | IMPLEMENTATA |
 | Max 3% al giorno | ASSENTE | ASSENTE nel sorgente; Guardian in `.mqh` esterno **non nei materiali** → NON VERIFICATO | ASSENTE |
 | DAX di mattina | ASSENTE | ASSENTE nel preset live | ASSENTE |
 | Cambio ora legale | valori fissi | fissi, a mano (due volte l'anno) | solo USA, opt-in spento |
 
 ## 4. Le differenze che contano (ordine d'importanza)
 1. **Ingresso**: Paolo = chiusura di M5 fuori dal box; EA live = ordine pendente al tocco. La regola che Paolo scrive per escludere gli spike non è applicata.
-2. **Struttura rischio/rendimento**: Paolo = stop sul lato opposto, TP 1:1. EA live = stop a mezzo box, TP 3R. Sono **due strategie diverse** (stop più stretto, target più lontano, win rate attesa molto diversa).
-3. **Gestione**: Paolo = parziale + BE+1 + resto manuale. EA live = nessun parziale, breakeven inerte, trailing EMA9 automatico senza soglia (rischio indicato dallo stesso Paolo: "stop troppo stretto che ti fa uscire").
+2. **Struttura rischio/rendimento**: Paolo = stop sul lato opposto, TP 1:1. EA live = stop a `entry − 0,5×range` (centro del box + E), TP 3R. Sono **due strategie diverse**. Esempio A7 (range 100, entry a high+10): live stop 50 / TP 150; Paolo stop 110 / TP 110. Il "target più lontano" vale solo se range > 2E; con range ≤ 2E lo stop cade sul bordo alto o sopra. Su XAGUSD E = 10 unità di prezzo (K=1): probabile geometria diversa, non verificabile dai materiali.
+3. **Gestione**: Paolo = parziale + BE+1 + resto manuale. EA live = nessun parziale, breakeven inerte, trailing EMA9 automatico senza soglia (Paolo avverte contro lo stop troppo stretto, ma parla dello stop messo sulla M5 precedente, non di questo trailing).
 4. **Filtri**: l'EA ha EMA200 e tetto 0,8%, che Paolo non cita; non ha nulla di ciò che Paolo cita (SuperTrend, VWAP, livelli).
-5. **Strumenti/ora**: live su argento e Dow; Paolo parla di Nasdaq (sera) e DAX (mattina). Orari live corretti solo con USA in ora solare.
-6. **Emiliano**: ORB, Ott ed Emiliano sono lo stesso codice con default uguali; la distinzione del PDF ("Emiliano = volatilità d'apertura, ORB = trend") nei nostri EA non ha un riscontro operativo.
+5. **Strumenti/ora**: nel preset fornito il live è su argento e Dow (altre istanze non sono nei materiali); Paolo parla di Nasdaq (sera) e DAX (mattina). Orari live corretti solo con USA in ora solare.
+6. **Emiliano**: Ott ed Emiliano hanno default identici per dichiarazione dell'header; ORB ha la stessa logica di default ma codice diverso (`InpOneTradePerDay` mai letto, selezione posizioni non hedge-safe); la distinzione del PDF ("Emiliano = volatilità d'apertura, ORB = trend") nei nostri EA non ha un riscontro operativo.
 
 Nota (C0): il preset live è un'ottimizzazione nostra; stop a mezzo box e TP 3R derivano dal lavoro precedente (l'header del sorgente cita R55 per lo stop "stretto"), non da Paolo. Questo confronto **non dice** se il live sia meglio o peggio del metodo: dice che sono diversi.
 
@@ -61,8 +61,8 @@ Nota (C0): il preset live è un'ottimizzazione nostra; stop a mezzo box e TP 3R 
 ## 6. Rischi di un backtest (A6, riassunto)
 Look-ahead sui filtri (imbalance a 3 barre, swing, H1 in formazione); orario server GMT+1 fisso (Nasdaq = 14:30 server per tutta l'ora legale USA, anche negli scarti con l'Italia; DAX 8/9 con l'Europa): un solo `InpSessionHour` per anno dà risultati di un'altra strategia; entry a chiusura con spread/slippage; ordine intra-barra su M1 con livelli a 35–50 punti; gestione manuale non replicabile; soglie in punti su 16 anni (l'indice è cambiato di un ordine di grandezza → soglie relative); sovradattamento di 31/35/41/53; test multipli (8 scelte binarie = 256 combinazioni); deriva rialzista del Nasdaq (live solo long) senza benchmark; campione DAX piccolo; provenienza/fuso dei file `_EXT` da verificare.
 
-## 7. Verifiche di C0 sulle citazioni di A7 (parziale, R008 non completo)
-Riletti nel sorgente `ABTG_ORB_Ottimizzato.mq5` e nel preset: `SLforLong` con `ORB_SL_HALFRANGE` (`entry − 0,5×(high−low)`); calcolo TP in `TryPlace` (`InpTPMode==ORB_TP_RANGE ? buyPx+(range)*InpTPRangeMult : buyPx+dist*InpTP_R`); `InpTP1Pct<=0` → ritorno anticipato con avviso che il breakeven non si attiva; preset: `SLMode=3`, `TP_R=1.0`, `TPMode=1`, `TPRangeMult=1.5`, `TP1Pct=0.0`, `UseCloseConfirm=false`, `UseEma200Filter=true`, `MaxRangePct=0.8`. **Confermati.** Non riletti da C0: citazioni di `ABTG_ORB.mq5` e `ABTG_ORB_Emiliano.mq5` e le righe sul trailing/Guardian → affidate ad A7 per R008 completo.
+## 7. Verifica delle citazioni (R008: A7 `agents/A7/verifica_citazioni.md` + C0)
+Riletti nel sorgente `ABTG_ORB_Ottimizzato.mq5` e nel preset: `SLforLong` con `ORB_SL_HALFRANGE` (`entry − 0,5×(high−low)`); calcolo TP in `TryPlace` (`InpTPMode==ORB_TP_RANGE ? buyPx+(range)*InpTPRangeMult : buyPx+dist*InpTP_R`); `InpTP1Pct<=0` → ritorno anticipato con avviso che il breakeven non si attiva; preset: `SLMode=3`, `TP_R=1.0`, `TPMode=1`, `TPRangeMult=1.5`, `TP1Pct=0.0`, `UseCloseConfirm=false`, `UseEma200Filter=true`, `MaxRangePct=0.8`. **Confermati.** A7 (R008) ha riaperto tutte le righe di tabella: **nessuna citazione falsa tra quelle che reggono le conclusioni**; corretti in questo documento 7 imprecisioni ("mezzo box", virgolettato "3", parziale ORB, lotto, avviso sullo stop, ambito del preset, ORB vs Emiliano). Errori residui in `A7/confronto_regole_EA.md` (non nel confronto): `Ott:418`→417, `Ott:378`→377, colonne ORB/Ott scambiate nella riga P08d. Guardian: file assente dai materiali e dal repo → tetto 3% NON VERIFICABILE.
 
 ## 8. Limiti
 - PDF letto da A2 con controllo visivo di 5 slide, da A7 di 1 (slide 9), da A6 di 5: dettagli presenti solo in immagini possono mancare.
