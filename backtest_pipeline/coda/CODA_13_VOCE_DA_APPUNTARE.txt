@@ -1,0 +1,1 @@
+c5e5ede2dc88b59c1bf7e7e2a8518929b6a4f237 | backtest_pipeline/righe/CODA_13_verifica_orari_inverno.ps1 |
