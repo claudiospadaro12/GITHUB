@@ -45,3 +45,13 @@ Compress-Archive -Path .\risultati_ottimizzazione\*.csv -DestinationPath .\risul
 ## Dopo (lo fa Claude)
 Analisi robusta dei risultati (no overfit) → crea gli `ABTG_*_Ottimizzato.mq5`
 con i parametri migliori già dentro.
+
+## Da fare davanti al PC del VPS (nota del 04/11/2026, richiesta di Claudio)
+1. Controllo log (scheda Experts) dopo il riavvio del terminale BCM demo 50503392: Nasdaq 15:30/21:45, MaxMinNotte box 00:00-05:59, PostNews 15:45/16:00/20:40, ORB XAGUSD; nessun errore rosso.
+2. Decidere PostNews `InpFridayCloseHour=21` / `Min=50` (non toccato).
+3. Decidere il reset giornaliero del Guardian sul 100k (-V3, 50504263): `InpDailyResetHour=0`.
+4. `EMA200_Ombra` EURUSD: controllare nel codice se usa un'ora fissa per i livelli della notte.
+5. Referto CODA_13 di stanotte (05/11, 03:30): deve dire OK sui 10 grafici.
+6. Risposta di Wim su licenza UBS e AutoLoader.
+7. GTP COMBO sul demo prop 50504894: pendenti, lotti e magic base 1000 senza conflitti.
+Dettagli: `report/PRESET_ORA_SOLARE_2026-11-04.md`. Promemoria pianificato per le 18:00 italiane del 04/11.
