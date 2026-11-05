@@ -57,3 +57,12 @@ Un "TESTATO BENE" richiede: anni di regimi diversi, set diversi, DD prop 80k con
 
 ## H. RESIDUI DEI GIRI PRECEDENTI (dal riepilogo)
 26. Reset del Guardian sul 100k; PostNews chiusura del venerdi'; EMA200_Ombra ore nascoste; AUDNZD salto anomalo dell'equity (NON MISURATO); ORB/Indicement da rifare con orari verificati (opzionale); etichette anni; misura dell'equity floating; prova gratuita FTMO scade ~18/11; vecchie righe del tester che ora fermano su "installazione NON censita" (aggiornate solo quelle nuove).
+
+## AGGIORNAMENTO 05/11 sera (dopo la lettura degli altri canali: `report/UBS_DISCORD_2026-11-03/SINTESI_ALTRI_CANALI_2026-11-05.md`)
+- ORB Master e Indicement: priorita' BASSA (Wim li ha fermati sul suo live il 03/08). Bitcoin Reaper/Scalp Pro: in fondo; se mai con real ticks e strategie 1, 2, 8, 9, 10.
+- NUOVO: verificare le ore del set Luna nei nostri test (Wim: finestra "23 till 1am" server ICMarkets = 21-23 GMT; i nostri test usano AutoGMT=false e offset 1/1: NON VERIFICATO).
+- NUOVO: controllo di `ManualBalance` e lotto di partenza su tutti i set prima dell'uso su un conto piccolo (set ORB del 10/04 sbagliato su 325 dollari).
+- NUOVO: verifica ufficiale delle regole FTMO (copy trading, EA, correlazione/stessa strategia su piu' conti, ordini pendenti, perdita giornaliera) e della leva del conto BCM reale.
+- NUOVO: scaricare a mano `combodeal.zip`, `AllSetsAndManuals.zip` (28/08), `Gold_Bundle.zip` e controllare se contengono i combo `*_3GOLD/_4GOLD` (il nome "AllSets&Manuals.zip" non esiste).
+- Demo forward: serve a provare il funzionamento, non lo slippage (Wim: "I basically never run demo accounts anymore").
+- VPS: misurare RAM/CPU nei picchi; rimedi gratuiti prima di aumentare la RAM (terminali minimizzati, High Performance, desktop heap, riavvio settimanale).
