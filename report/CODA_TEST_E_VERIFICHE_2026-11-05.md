@@ -2,6 +2,18 @@
 
 Regola: criteri e previsioni scritti PRIMA dei numeri; un controllo non fatto e' "NON MISURATO"; nessuna modifica al live/VPS/reale 10105439 senza decisione di Claudio; gli `_Ottimizzato` girano in parallelo con magic diversi, mai al posto degli originali; ogni zip deve stare in chat (<= 10 MB) ed essere evidenziato.
 
+
+## CANCELLO PRIMA DI UBS (deciso da Claudio il 05/11/2026: "prima di partire con UBS dobbiamo aver testato bene TUTTI gli EA")
+UBS parte solo quando ogni EA ha, per ognuno, una riga "TESTATO BENE" con i punti sotto, oppure un limite dichiarato. Stato al 05/11:
+| EA (13 di Wim) | Fatto | Manca prima di UBS |
+|---|---|---|
+| Gold Reaper, Gold Phantom, Goldbot One, Gold Trade Pro (4 oro) | test su anni diversi (2013/2018/2020/2025 e altri), trio con Guardian; fake-out Fase 1 | Fase 2 fake-out (in corso); combo `*_3GOLD/_4GOLD` di Wim; AdjustEntry, Randomization 60, weekend, regola 1/3 del rischio; verifica `AdjustLotsizeToVariableValues` su Reaper e Phantom |
+| Apex, Stability Pro, Luna, Daytrade Pro (forex, 5 anni: 2013, 2017, 2020, 2022, 2025) | 88 passate su 28 set, Guardian sul realizzato | **lotti non calibrati sul prezzo/broker** (profitti e DD a 80k gonfiati dalla crescita del lotto): rifare con rischio calibrato; flottante non misurato; etichette long/short/laterale degli anni; verifica del parametro "max DD a 0.01 lotti" |
+| Indicement, ORB Master (indici) | 1 periodo (2025-01 -> 2026-09), perdono o pareggiano | secondo periodo e orari verificati (`AutoGMT`, GMT+1 fisso BCM); correlazione fra i due NON misurata |
+| Bitcoin Reaper, Bitcoin Scalp Pro | 56 passate FTMO, commissioni | ricalibrare il DD sul prezzo; rifare 2023-2025 con real ticks se possibile; correlazione col trio, Guardian, margine 1:3,3 |
+| UBS | niente (per ultimo) | tutto sopra finito + ricalibrazione max DD a 0.01 lotti |
+Un "TESTATO BENE" richiede: anni di regimi diversi, set diversi, DD prop 80k con Guardian, lotto calibrato, commissioni/slippage dichiarati, un fuori campione, e le previsioni scritte prima.
+
 ## A. IN CORSO ORA
 1. **[FATTO 05/11] Fake-out Gold Reaper** (risultati in `REAPER_FAKEOUT_RISULTATI_2026-11-05.md`: nessuna configurazione migliore del Medium; Fase 2 non scattata) (F0 Off / F1 Low / F2 Medium / F3 High), XAUUSD H1, 80k, anni 2013/2018/2020/2025, 16 passate. Criteri: `report/REAPER_FAKEOUT_CRITERI_2026-11-05.md` (+ Emendamento 1). Riga corta lanciata sul PC di backtest. Poi: leggere i risultati, verificare F2 vs riferimenti del 29/10 (+-3%), verificare mappatura 0-3 e default del venditore.
 
