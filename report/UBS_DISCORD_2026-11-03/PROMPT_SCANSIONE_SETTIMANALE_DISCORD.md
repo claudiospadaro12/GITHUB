@@ -13,10 +13,10 @@ Sei in Chrome, con Discord già aperto e collegato (account di Claudio) sul serv
 
 **Cosa produrre, in italiano**
 1. Per ogni canale con messaggi nuovi: riassunto breve con la fonte (canale, autore, data e ora). Metti in evidenza: annunci di Wim, aggiornamenti degli EA (versioni, nuovi set, bug), numeri di performance con il periodo, e cosa non quadra.
-2. **Allegati**: elenco di tutti (nome, autore, data, canale). Scarica nella cartella Download, dentro una cartella chiamata `DISCORD_<data di oggi AAAA-MM-GG>`, SOLO file `.set`, `.zip`, `.pdf`, `.csv`, `.txt` e le immagini di performance o di backtest. Non scaricare `.exe` e non aprire nessun file scaricato.
-3. Un file di testo `DISCORD_<data>_report.md` nella stessa cartella con il riassunto e l'elenco di quanto scaricato.
+2. **Allegati**: elenco di tutti (nome, dimensione, autore, canale, data e ora, link al messaggio). **Non scaricare nessun allegato e non aprirlo**: l'estensione rifiuta i file di altri utenti (provato il 05/11/2026) e va bene così. Evidenzia gli allegati scritti da Wim o da un moderatore e quelli con estensione `.set`, `.zip`, `.pdf` o `.csv`.
+3. Un file di testo `DISCORD_<data>_report.md` in Download, con il riassunto e l'elenco degli allegati.
 4. In chat: al massimo 12 righe. Cosa c'è di nuovo su UBS, sui 6 EA che usiamo (Daytrade Pro, Luna, Stability Pro, Apex, Indicement, ORB Master) e sui 2 Bitcoin; cosa è cambiato rispetto alla settimana scorsa; i file nuovi scaricati.
 ---
 
 ## Dopo la scansione (lo fa Claudio, sul PC di backtest)
-Gli allegati stanno in `Download\DISCORD_<data>`. Per mandarli a Claude in chat in zip da 10 MB serve una riga come quella degli zip spezzati, adattata a questa cartella (da preparare: dimmelo).
+Gli allegati che interessano li scarica Claudio **a mano** (Scarica sotto il messaggio), dopo un controllo con l'antivirus, e non apre mai `.exe`, `.bat`, `.scr`, `.js`, `.vbs`. Per mandarli a Claude in chat in zip da 10 MB serve una riga come quella degli zip spezzati, adattata alla cartella dove li mette (da preparare: dimmelo).
