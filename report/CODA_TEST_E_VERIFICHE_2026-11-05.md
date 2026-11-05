@@ -14,6 +14,8 @@ Regola: criteri e previsioni scritti PRIMA dei numeri; un controllo non fatto e'
 5. **Randomization 60 contro 0** (cambia il numero di ordini), gia' parzialmente fatta (50/75/100): confrontare con i nostri risultati precedenti.
 6. **Rischio con piu' EA oro insieme**: la regola di Wim "3 EA a 1/3 del rischio, 4 a 1/4, 5 a ~1/4" e "Max Allowed Total DD piu' basso se girano insieme" contro il nostro dimensionamento del trio (Reaper + Phantom + Goldbot) con Guardian.
 7. **Set combo ufficiali `*_3GOLD.set` / `*_4GOLD.set`** (cartella "recommended combo setup" in `AllSets&Manuals.zip`, canale plug-and-play-eas): da scaricare a mano e confrontare con i nostri set prop sugli stessi anni. Anche `LivePortfolioSets.zip` (44 strategie UBS di Wim).
+8b. **Weekend aperto contro chiuso** (MaximusDemicusMaridius 21/03, dichiarato, non verificato): DD massimo 62% con il weekend lasciato aperto contro 72% con il weekend spento (chiusura): contraddice l'idea che chiudere prima del weekend riduca il rischio; da misurare con i nostri anni.
+6b. **Eugen (25/01)**: nei combo `*_3GOLD.set` su 24-25 anni Phantom +22%/1% DD, GTP +46%/6% DD, TGR +58%/3% DD; propone di aumentare il rischio del Phantom di 2-2,5 volte per bilanciare. Dichiarato, non verificato; da provare dentro il test del punto 6 (stessa baseline `*_3GOLD`).
 8. **Fake Breakout HIGH e OFF** (incluso nel test fake-out), **Friday stop hour 23 / chiusura prima del weekend** (Wim 14/03) sul rischio gap: da progettare.
 9. **Strategia 9 del Reaper** (molti la disattivano o la sostituiscono con Scalp C; Marcus: PF basso ma e' la piu' redditizia): verificare con i nostri anni se tenerla; ricordare che richiede "manual strategy selection" (non compatibile con Max Allowed Total DD).
 
