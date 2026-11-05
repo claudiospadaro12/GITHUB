@@ -32,7 +32,7 @@ Fonte: zip `ANNO80K_REAPER_FAKEOUT_20261105_1546` (16 passate, 16 report, tutte 
 - R4 F1 con DD equity > F2 in >= 3 anni su 4 (70%): **GIUSTA** (4 su 4).
 - R5 "doppio del profitto" (F1 >= 1,8 x F2) in almeno un anno (15%): **SBAGLIATA** (massimo 1,32 x).
 - R6 F0 peggiore di F2 per DD in >= 3 anni su 4 (75%): **GIUSTA** (4 su 4).
-- R7 F3 con DD <= F2 in >= 3 anni e netto piu' basso in >= 3 anni (55%): **SBAGLIATA** (netto piu' basso 4 su 4, ma DD <= F2 solo in 3 anni su 4 per la meta' degli anni: 2013 e 2018, 2020; nel 2025 +27%: dettaglio tabella). Letta alla lettera: DD <= F2 in 3 anni su 4 (2013 -1%, 2018 -12%, 2020 -3%) = **GIUSTA** con il confronto in EUR. 
+- R7 F3 con DD equity <= F2 in >= 3 anni su 4 e netto piu' basso in >= 3 anni su 4 (55%): **GIUSTA** (DD in EUR: 5.598 contro 5.633, 4.789 contro 5.466, 3.720 contro 3.841, quindi <= F2 in 3 anni; nel 2025 3.900 contro 3.076; netto piu' basso in 4 anni su 4).
 - R8 Nessuna configurazione "migliore del Medium" (60%): **GIUSTA**.
 - R9 Tutte le 16 passate valide (80%): **GIUSTA**.
 - R10 Operazioni monotone con il livello: riportato, il numero di operazioni cresce di poco con il livello (491 -> 511 nel 2013).
