@@ -18,8 +18,8 @@ $dsk = [Environment]::GetFolderPath('Desktop')
 $rad = Join-Path $dsk 'ABTG_RISULTATI'
 if (-not (Test-Path -LiteralPath $rad)) { Write-Host ('NON ESISTE ' + $rad + ': nessun risultato da zippare.') -ForegroundColor Red; exit 1 }
 if ($Cartella -eq '') {
-  $c = @(Get-ChildItem -LiteralPath $rad -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like 'ANNO80K_WIM_PACCHETTO_*' } | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
-  if ($c.Count -lt 1) { Write-Host ('Nessuna cartella ANNO80K_WIM_PACCHETTO_* sotto ' + $rad + '. Passa -Cartella con il percorso.') -ForegroundColor Red; exit 1 }
+  $c = @(Get-ChildItem -LiteralPath $rad -Directory -ErrorAction SilentlyContinue | Where-Object { ($_.Name -like 'ANNO80K_WIM_PACCHETTO_*') -or ($_.Name -like 'ANNO80K_BTC_FTMO_*') } | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
+  if ($c.Count -lt 1) { Write-Host ('Nessuna cartella ANNO80K_WIM_PACCHETTO_* o ANNO80K_BTC_FTMO_* sotto ' + $rad + '. Passa -Cartella con il percorso.') -ForegroundColor Red; exit 1 }
   $src = $c[0].FullName
 } else { $src = [IO.Path]::GetFullPath($Cartella).TrimEnd('\') }
 if (-not $src.StartsWith($rad + '\', [StringComparison]::OrdinalIgnoreCase)) { Write-Host ('La cartella ' + $src + ' NON sta sotto ' + $rad + ': non la tocco.') -ForegroundColor Red; exit 1 }
