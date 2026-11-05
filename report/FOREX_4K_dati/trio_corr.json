@@ -1,0 +1,442 @@
+[
+ {
+  "set": "APEX_ApexConservativeGrid",
+  "2013": {
+   "corr80": 0.08415530519621325,
+   "co_loss": 2,
+   "exp_co_loss": 3.336986301369863,
+   "cand_loss_days": 21,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": -0.6054774675406079
+  },
+  "2020": {
+   "corr80": 0.04067804944388802,
+   "co_loss": 7,
+   "exp_co_loss": 6.038251366120218,
+   "cand_loss_days": 34,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": -0.21194486493618722
+  },
+  "2025": {
+   "corr80": 0.0034947604628317885,
+   "co_loss": 11,
+   "exp_co_loss": 8.284931506849315,
+   "cand_loss_days": 54,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.0022647130169806654
+  },
+  "2025_real": {
+   "corr": -0.01125863412949931,
+   "trio_net": 4240.210000000001,
+   "cand_net": 912.5100000000001,
+   "comb_net": 5152.72,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -9.179999999999996,
+   "worst_comb": -158.70999999999998,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 9.17999999999995,
+   "dd_comb": 258.87999999999994,
+   "co_loss": 9,
+   "exp_co": 7.841095890410959,
+   "cand_on_trio_worst": 1.15,
+   "trio_on_cand_worst": 0.0
+  }
+ },
+ {
+  "set": "APEX_ApexUltraConservativeGrid",
+  "2013": {
+   "corr80": 0.08363493927007563,
+   "co_loss": 5,
+   "exp_co_loss": 5.561643835616438,
+   "cand_loss_days": 35,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": -0.9720562391790811
+  },
+  "2020": {
+   "corr80": 0.03692085930946591,
+   "co_loss": 9,
+   "exp_co_loss": 8.169398907103826,
+   "cand_loss_days": 46,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": -0.19180299481149568
+  },
+  "2025": {
+   "corr80": 0.023878734090087908,
+   "co_loss": 15,
+   "exp_co_loss": 9.665753424657535,
+   "cand_loss_days": 63,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": -0.019053049024159333
+  },
+  "2025_real": {
+   "corr": 0.012557204530129176,
+   "trio_net": 4240.210000000001,
+   "cand_net": 1036.5200000000002,
+   "comb_net": 5276.7300000000005,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -20.42999999999999,
+   "worst_comb": -157.51999999999998,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 22.18999999999994,
+   "dd_comb": 255.99999999999818,
+   "co_loss": 12,
+   "exp_co": 9.147945205479452,
+   "cand_on_trio_worst": 2.3400000000000003,
+   "trio_on_cand_worst": 0.0
+  }
+ },
+ {
+  "set": "DTP_DaytradeProMax9DDlowrisk",
+  "2013": {
+   "corr80": 0.187400588005296,
+   "co_loss": 31,
+   "exp_co_loss": 14.46027397260274,
+   "cand_loss_days": 91,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": -1.0736274393475722
+  },
+  "2020": {
+   "corr80": 0.15494827017290258,
+   "co_loss": 26,
+   "exp_co_loss": 15.98360655737705,
+   "cand_loss_days": 90,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": -0.21133789343361917
+  },
+  "2025": {
+   "corr80": 0.15372164921467796,
+   "co_loss": 26,
+   "exp_co_loss": 15.64931506849315,
+   "cand_loss_days": 102,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.596656136009461
+  },
+  "2025_real": {
+   "corr": 0.1652991491375451,
+   "trio_net": 4240.210000000001,
+   "cand_net": 130.79000000000002,
+   "comb_net": 4371.0,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -87.00999999999999,
+   "worst_comb": -159.26,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 215.36,
+   "dd_comb": 313.3499999999999,
+   "co_loss": 22,
+   "exp_co": 14.810958904109588,
+   "cand_on_trio_worst": 0.6,
+   "trio_on_cand_worst": 92.64999999999999
+  }
+ },
+ {
+  "set": "DTP_DaytradeProMax20DDmediumrisk",
+  "2013": {
+   "corr80": 0.14297810545214037,
+   "co_loss": 31,
+   "exp_co_loss": 14.46027397260274,
+   "cand_loss_days": 91,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": 0.46346815187007856
+  },
+  "2020": {
+   "corr80": 0.1198666403691066,
+   "co_loss": 25,
+   "exp_co_loss": 15.628415300546449,
+   "cand_loss_days": 88,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": -0.3002352591584176
+  },
+  "2025": {
+   "corr80": 0.09151998323727419,
+   "co_loss": 25,
+   "exp_co_loss": 15.64931506849315,
+   "cand_loss_days": 102,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.5321449571672238
+  },
+  "2025_real": {
+   "corr": 0.10946249765546193,
+   "trio_net": 4240.210000000001,
+   "cand_net": 133.8700000000001,
+   "comb_net": 4374.08,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -153.28,
+   "worst_comb": -159.29999999999998,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 335.52,
+   "dd_comb": 332.46999999999935,
+   "co_loss": 21,
+   "exp_co": 14.810958904109588,
+   "cand_on_trio_worst": 0.5599999999999999,
+   "trio_on_cand_worst": 53.74000000000001
+  }
+ },
+ {
+  "set": "DTP_DaytradeProMax50DDhighrisk",
+  "2013": {
+   "corr80": 0.15641539603953816,
+   "co_loss": 31,
+   "exp_co_loss": 14.46027397260274,
+   "cand_loss_days": 91,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": 0.4634681518700785
+  },
+  "2020": {
+   "corr80": 0.14713548276211655,
+   "co_loss": 24,
+   "exp_co_loss": 15.628415300546449,
+   "cand_loss_days": 88,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": -0.3002352591584176
+  },
+  "2025": {
+   "corr80": 0.09177840805241672,
+   "co_loss": 25,
+   "exp_co_loss": 15.495890410958904,
+   "cand_loss_days": 101,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.5321449571672238
+  },
+  "2025_real": {
+   "corr": 0.10845967886707321,
+   "trio_net": 4240.210000000001,
+   "cand_net": 120.43999999999977,
+   "comb_net": 4360.65,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -384.64,
+   "worst_comb": -361.5300000000001,
+   "worst_comb_day": "2025.04.04",
+   "dd_trio": 308.48,
+   "dd_cand": 936.6600000000002,
+   "dd_comb": 664.8800000000001,
+   "co_loss": 21,
+   "exp_co": 14.665753424657535,
+   "cand_on_trio_worst": 1.0999999999999999,
+   "trio_on_cand_worst": 53.74000000000001
+  }
+ },
+ {
+  "set": "LUNA_Luna4DD",
+  "2013": {
+   "corr80": -0.006559625208137734,
+   "co_loss": 15,
+   "exp_co_loss": 11.123287671232877,
+   "cand_loss_days": 70,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": 0.3338027194718247
+  },
+  "2020": {
+   "corr80": -0.030397976311990243,
+   "co_loss": 5,
+   "exp_co_loss": 5.683060109289618,
+   "cand_loss_days": 32,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": 0.3250603936134498
+  },
+  "2025": {
+   "corr80": -0.021848094682193633,
+   "co_loss": 7,
+   "exp_co_loss": 4.142465753424657,
+   "cand_loss_days": 27,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.6489654830114292
+  },
+  "2025_real": {
+   "corr": -0.020096048613317603,
+   "trio_net": 4240.210000000001,
+   "cand_net": 1129.51,
+   "comb_net": 5369.719999999999,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -49.32999999999999,
+   "worst_comb": -158.23,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 74.41999999999993,
+   "dd_comb": 278.29999999999995,
+   "co_loss": 5,
+   "exp_co": 3.9205479452054797,
+   "cand_on_trio_worst": 1.6299999999999997,
+   "trio_on_cand_worst": 63.07000000000001
+  }
+ },
+ {
+  "set": "STAB_stabilityprolowriskset",
+  "2013": {
+   "corr80": 0.02506452750507491,
+   "co_loss": 5,
+   "exp_co_loss": 5.561643835616438,
+   "cand_loss_days": 35,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": 0.19759378119008345
+  },
+  "2020": {
+   "corr80": -0.059235685645518246,
+   "co_loss": 3,
+   "exp_co_loss": 6.926229508196721,
+   "cand_loss_days": 39,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": 0.01716291788182479
+  },
+  "2025": {
+   "corr80": 0.07238223449179572,
+   "co_loss": 12,
+   "exp_co_loss": 7.824657534246575,
+   "cand_loss_days": 51,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.16080014789591288
+  },
+  "2025_real": {
+   "corr": 0.02257309840363642,
+   "trio_net": 4240.210000000001,
+   "cand_net": 561.58,
+   "comb_net": 4801.790000000001,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -11.11,
+   "worst_comb": -158.89,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 11.129999999999995,
+   "dd_comb": 284.57,
+   "co_loss": 10,
+   "exp_co": 7.405479452054794,
+   "cand_on_trio_worst": 0.97,
+   "trio_on_cand_worst": 0.0
+  }
+ },
+ {
+  "set": "STAB_stabilitypromediumlowriskset",
+  "2013": {
+   "corr80": 0.0062909025774574604,
+   "co_loss": 5,
+   "exp_co_loss": 5.561643835616438,
+   "cand_loss_days": 35,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": 0.14996509695479
+  },
+  "2020": {
+   "corr80": -0.05138404327023757,
+   "co_loss": 3,
+   "exp_co_loss": 7.103825136612022,
+   "cand_loss_days": 40,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": 0.3116798665686805
+  },
+  "2025": {
+   "corr80": 0.08286426937391234,
+   "co_loss": 12,
+   "exp_co_loss": 7.671232876712328,
+   "cand_loss_days": 50,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.16080014789591288
+  },
+  "2025_real": {
+   "corr": 0.03310254667420442,
+   "trio_net": 4240.210000000001,
+   "cand_net": 1305.39,
+   "comb_net": 5545.6,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -33.34,
+   "worst_comb": -156.95999999999998,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 33.399999999999864,
+   "dd_comb": 263.66999999999996,
+   "co_loss": 10,
+   "exp_co": 7.260273972602739,
+   "cand_on_trio_worst": 2.9,
+   "trio_on_cand_worst": 0.0
+  }
+ },
+ {
+  "set": "APEX_ApexElevatedGrid",
+  "2013": {
+   "corr80": 0.07742643837348999,
+   "co_loss": 2,
+   "exp_co_loss": 3.1780821917808217,
+   "cand_loss_days": 20,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": -0.6054774675406079
+  },
+  "2020": {
+   "corr80": 0.020569198293626204,
+   "co_loss": 7,
+   "exp_co_loss": 5.327868852459017,
+   "cand_loss_days": 30,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": -0.23303073547671477
+  },
+  "2025": {
+   "corr80": -0.032975704625966,
+   "co_loss": 10,
+   "exp_co_loss": 7.517808219178082,
+   "cand_loss_days": 49,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.17679123127191052
+  },
+  "2025_real": {
+   "corr": -0.03976881234187781,
+   "trio_net": 4240.210000000001,
+   "cand_net": 1651.43,
+   "comb_net": 5891.640000000001,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -2.17,
+   "worst_comb": -158.70999999999998,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 2.1700000000000728,
+   "dd_comb": 251.52999999999986,
+   "co_loss": 8,
+   "exp_co": 7.115068493150685,
+   "cand_on_trio_worst": 1.15,
+   "trio_on_cand_worst": 0.0
+  }
+ },
+ {
+  "set": "LUNA_LunaAIrecommendedlowrisk",
+  "2013": {
+   "corr80": -0.003032086131749987,
+   "co_loss": 15,
+   "exp_co_loss": 11.282191780821918,
+   "cand_loss_days": 71,
+   "trio_loss_days": 58,
+   "trio_on_cand_worst10": 0.325929753398712
+  },
+  "2020": {
+   "corr80": -0.039948012946396404,
+   "co_loss": 5,
+   "exp_co_loss": 5.683060109289618,
+   "cand_loss_days": 32,
+   "trio_loss_days": 65,
+   "trio_on_cand_worst10": 0.4054282124337396
+  },
+  "2025": {
+   "corr80": -0.0018966218862562331,
+   "co_loss": 7,
+   "exp_co_loss": 4.142465753424657,
+   "cand_loss_days": 27,
+   "trio_loss_days": 56,
+   "trio_on_cand_worst10": 0.6489654830114292
+  },
+  "2025_real": {
+   "corr": -0.004059472170444723,
+   "trio_net": 4240.210000000001,
+   "cand_net": 3475.66,
+   "comb_net": 7715.87,
+   "worst_trio": -159.85999999999999,
+   "worst_cand": -127.00000000000001,
+   "worst_comb": -154.26999999999998,
+   "worst_comb_day": "2025.12.01",
+   "dd_trio": 308.48,
+   "dd_cand": 161.44000000000005,
+   "dd_comb": 231.46000000000004,
+   "co_loss": 5,
+   "exp_co": 3.9205479452054797,
+   "cand_on_trio_worst": 5.589999999999998,
+   "trio_on_cand_worst": -7.8999999999999995
+  }
+ }
+]
