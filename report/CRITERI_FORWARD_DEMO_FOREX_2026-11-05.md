@@ -4,14 +4,14 @@
 
 ## 1. Cosa può e cosa non può dire un forward demo di 8 settimane
 - **Può dire**: se l'EA gira senza errori (licenza, URL, orari, margine), se apre un numero di operazioni coerente col tester sulle stesse settimane, se i costi reali per operazione (spread, commissioni, swap) sono vicini a quelli del tester, se qualcosa va storto in modo grosso.
-- **Non può dire** se l'EA guadagna. Operazioni attese in 8 settimane (dal tester): Daytrade Pro ~65-75, Luna ~100-145, Stability low ~70-170, Apex Conservative ~275-560. Pochi per un giudizio di profitto. Il netto non è un criterio di promozione, serve solo come allarme.
+- **Non può dire** se l'EA guadagna. Operazioni attese in 8 settimane (dal tester): Daytrade Pro ~60-75, Luna ~100-145, Stability low ~70-170, Apex Conservative ~275-560. Pochi per un giudizio di profitto. Il netto non è un criterio di promozione, serve solo come allarme.
 - Lo slippage dell'esecuzione reale non si vede su un conto demo (Wim: "I basically never run demo accounts anymore"). Il test misura il funzionamento, non l'esecuzione.
 - Il confronto principale è con una **replica nel tester** sulle stesse settimane (stesso set, stesso deposito, Modello 1): le differenze tra live-demo e replica sono il risultato, non il profitto in sé.
 
 ## 2. Decisioni di Claudio prima di partire (le mie proposte di default sono sotto)
 | # | Decisione | Proposta di default | Perché |
 |---|---|---|---|
-| D1 | Quali set | **uno per EA**: Stability Pro `low risk`, Luna `4DD`, Apex `ConservativeGrid`, Daytrade Pro `Max20 medium` | Set dello stesso EA fanno le stesse operazioni (Apex 3.623 nel 2013 in tutti e 5 i set; Daytrade Pro 383 in tutti e 3): cambia solo il lotto. Provarne più d'uno dello stesso EA aggiunge poco. Il salto di rischio (es. Daytrade Pro `Max50`) viene dopo, a EA validato |
+| D1 | Quali set | **uno per EA**: Stability Pro `low risk`, Luna `4DD`, Apex `ConservativeGrid`, Daytrade Pro `Max20 medium` | Set dello stesso EA fanno le stesse operazioni (Apex 3.623 nel 2013 in Conservative, Elevated e Ultra; Daytrade Pro 383 in tutti e 3): cambia solo il lotto. Provarne più d'uno dello stesso EA aggiunge poco. Il salto di rischio (es. Daytrade Pro `Max50`) viene dopo, a EA validato |
 | D2 | Dove | un conto demo BCM nuovo da **4.000 EUR** con tutti e 4 gli EA (come nel reale), magic diversi tra loro e da ogni altro EA e `_Ottimizzato` | Misura anche l'effetto del portafoglio. Il DD per singolo EA si ricostruisce solo dalle operazioni, non dall'equity |
 | D3 | Su quale macchina | **VPS** (regola del progetto: gli EA girano in forward sul VPS), ma solo dopo aver misurato RAM/CPU con un terminale in più (coda aperta) | Il VPS si è impallato; un quinto terminale peggiora. Alternativa: PC di backtest a tester fermo |
 | D4 | Registro dell'equity | screenshot serale di saldo/equity/margine **più** il report storico xlsx settimanale (come quelli del 05/11). Se vuoi il minimo/massimo giornaliero senza screenshot posso scrivere un piccolo logger (richiede la tua approvazione) | Il report storico non contiene l'equity minima: senza registro il DD in equity non si misura |
