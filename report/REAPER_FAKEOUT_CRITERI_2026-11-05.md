@@ -49,3 +49,18 @@ Letto #all-gold-eas gennaio-marzo 2026 (file `DISCORD_PASSATO_all-gold-eas_2026-
 - Wim 21/02 e altri: "auto trade frequency" e il resto sono quelli consigliati; un utente (16/02) dice che per gli altri EA conviene ottimizzare tutte le opzioni del filtro e sceglierne una per recovery factor: e' esattamente quello che fa questo test.
 - Wim 17/02: "golden rule in trading: do NOT make long term changes based on short term results" (conferma l'uso di anni lunghi e della Fase 2).
 - Metodo di Wim per i test: balance fisso 100K + Max Allowed Total DD 30 (17/02); dati Metaquotes per oro ("closest to my live results"). Noi usiamo 80k e BCM: differenza dichiarata.
+
+## FASE 2 (05/11/2026, scritta DOPO i risultati della Fase 1 e PRIMA di quelli della Fase 2). Richiesta di Claudio: "l'1 quando la facciamo?"
+**Il verdetto della Fase 1 resta com'e': NON DIMOSTRATO per tutti.** La Fase 2 e' un'estensione voluta da Claudio, non una promozione.
+- Configurazioni: solo **F1 (Low)** contro **F2 (Medium)**. Anni NUOVI: **2015, 2019, 2022, 2024**, piu' **2023 come sostituto fisso del 2024** (se i dati BCM del 2024 mancano, il 2024 e' NON MISURATO e i 4 anni validi sono 2015, 2019, 2022, 2023). 10 passate, stesso set prop e stessi input, Modello 1.
+- Regola di lettura (decisa ora): dopo la Fase 2 si guardano i **9 anni insieme** (4 della Fase 1 + gli anni validi della Fase 2). F1 e' un **"candidato"** SOLO se: netto >= F2 in almeno N-1 anni su N; netto diviso DD equity piu' alto di F2 in almeno 7 anni su 9; nessun anno con DD equity di F1 peggiore di quella di F2 di oltre 1.000 EUR; PROP-ANNI come F2. Altrimenti resta "NON DIMOSTRATO". Anche se e' "candidato" non entra in produzione: si propone un set `_Ottimizzato` separato (magic diverso), decide Claudio.
+- Dato della Fase 1 per il netto/DD: F1 meglio in 2 anni su 4 (2013 4,9 contro 4,0; 2018 2,40 contro 2,37), peggio in 2 (2020 5,1 contro 5,3; 2025 7,4 contro 9,6).
+### Previsioni dichiarate ORA (Fase 2, non misurate)
+- **P1** F1 con netto > F2 in almeno 4 anni su 5 (o 4 su 4 validi): 55%.
+- **P2** F1 con DD equity > F2 in almeno 4 anni su 5: 60%.
+- **P3** F1 con netto/DD > F2 in almeno 3 anni su 5: 40%.
+- **P4** F1 con netto > +10% su F2 in almeno 2 anni su 5: 45%.
+- **P5** I dati BCM del 2024 ci sono (passata valida): 80%.
+- **P6** Sui 9 anni F1 e' "candidato" secondo la regola sopra: 15%.
+- **P7** Nessun anno della Fase 2 con DD equity > 8.000 per F1 o F2: 85%.
+Limiti: come nella Fase 1 (un percorso per anno, OHLC, nessuno slippage); gli anni nuovi sono "fuori campione" rispetto al 2013/2018/2020 ma non dalle ottimizzazioni del venditore, che non conosciamo.
