@@ -18,7 +18,7 @@ Un "TESTATO BENE" richiede: anni di regimi diversi, set diversi, DD prop 80k con
 1. **[FATTO 05/11] Fake-out Gold Reaper** (risultati in `REAPER_FAKEOUT_RISULTATI_2026-11-05.md`: nessuna configurazione migliore del Medium; Fase 2 non scattata) (F0 Off / F1 Low / F2 Medium / F3 High), XAUUSD H1, 80k, anni 2013/2018/2020/2025, 16 passate. Criteri: `report/REAPER_FAKEOUT_CRITERI_2026-11-05.md` (+ Emendamento 1). Riga corta lanciata sul PC di backtest. Poi: leggere i risultati, verificare F2 vs riferimenti del 29/10 (+-3%), verificare mappatura 0-3 e default del venditore.
 
 ## B. SUBITO DOPO (ordine)
-2. **Fase 2 fake-out** (non scattata secondo i criteri; solo su decisione di Claudio con criteri nuovi) SOLO se una configurazione passa la regola della Fase 1: anni 2015, 2019, 2022, 2024 (se i dati BCM ci sono).
+2. **[FATTO 05/11] Fase 2 fake-out** (`REAPER_FAKEOUT_FASE2_RISULTATI_2026-11-05.md`: Low NON dimostrato come migliore del Medium; fallisce nel 2024) SOLO se una configurazione passa la regola della Fase 1: anni 2015, 2019, 2022, 2024 (se i dati BCM ci sono).
 3. **Zip e analisi** di ogni giro con `RIGA_ZIP_RISULTATI_WIM.txt` (riconosce WIM, BTC_FTMO e REAPER_FAKEOUT).
 
 ## C. TEST DA FARE SUL GOLD (EA Wim che abbiamo)
