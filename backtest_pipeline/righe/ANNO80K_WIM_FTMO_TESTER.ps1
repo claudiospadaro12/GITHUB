@@ -221,7 +221,7 @@ if($aperti.Count -gt 0){
   throw 'MT5, METAEDITOR o un AGENTE DEL TESTER risulta APERTO su questo PC (PID, titolo, cartella qui sopra). Se sta lavorando NON chiuderlo: aspetta la sua riga finale con rc. Se e un MT5 aperto a vuoto (per esempio quello usato per installare l EA scelto dal Market), chiudilo A MANO riconoscendolo dal PID e dalla cartella, e rilancia.'
 }
 
-$InstAttesa = 'C:\MT5_FTMO_PROVA'   # FTMO v1 (05/11/2026): terminale di PROVA FTMO sul PC di backtest, conto 1515150476 in SOLA LETTURA (password investitore): non puo operare
+$InstAttesa = 'C:\MT5_Backtest\Mt5_Ftmo_Prova'   # FTMO v1 (05/11/2026): terminale di PROVA FTMO sul PC di backtest, conto 1515150476 in SOLA LETTURA (password investitore): non puo operare
 $Terminal   = Join-Path $InstAttesa 'terminal64.exe'
 if(-not (Test-Path -LiteralPath $Terminal)){ throw ('terminale non trovato dove la sonda lo aspetta: ' + $Terminal + '. Non si cerca altrove apposta.') }
 $DataRoot = Join-Path $env:APPDATA 'MetaQuotes\Terminal'

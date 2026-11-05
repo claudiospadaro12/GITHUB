@@ -3,7 +3,7 @@ Riga: `backtest_pipeline/righe/RIGA_LANCIA_BTC_FTMO_80K.txt` (+ bootstrap). Scri
 
 ## Perimetro
 - EA: **Bitcoin Scalp Pro** (3 set: 1% low, 2% medium, PropFirm) e **Bitcoin Reaper** (4 set: Low, Medium, High, Prop_Firm). Tutti i set, nessuno scelto a mano. BTCUSD H1, Modello 1 (barre da 1 minuto), deposito 80.000 EUR, leva 1:100 nel tester, solo tester. **56 passate** (7 set × 8 anni).
-- Dati: terminale `C:\MT5_FTMO_PROVA`, FTMO-Demo, conto 1515150476 **in sola lettura** (password investitore): il terminale non può aprire ordini. Il terminale delle sedie sul VPS non viene toccato.
+- Dati: terminale `C:\MT5_Backtest\Mt5_Ftmo_Prova`, FTMO-Demo, conto 1515150476 **in sola lettura** (password investitore): il terminale non può aprire ordini. Il terminale delle sedie sul VPS non viene toccato.
 - Anni scelti prima dei numeri, in ordine dal più recente: **2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018**. Per BTC l'etichetta dei regimi è nota: 2018 e 2022 ribasso, 2019 e 2023 recupero/laterale, 2020, 2021, 2024 rialzo, 2025 misto. Se la storia FTMO manca per alcuni anni, quelle passate escono KO (nessun report) e lo si riporta: **non si completano con altri dati**.
 - Parametri: tutti i valori del set del venditore. Nessun input forzato. `AutoGMT` non funziona nel tester: i filtri di orario/notizie del venditore restano ai valori del set (**NON VERIFICATO** che l'orario FTMO GMT+2/+3 coincida con quello atteso dagli EA).
 
