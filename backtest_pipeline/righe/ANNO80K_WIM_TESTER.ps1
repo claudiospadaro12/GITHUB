@@ -1,5 +1,6 @@
 # =====================================================================
 #  MARCATORE_ANNO80K_WIM_TESTER_v1
+#  05/11/2026: -Deposito (default 80000, per i test alla taglia del reale, es. 4000) e censita C:\MT5_Backtest\Mt5_Ftmo_Prova (FTMO sola lettura, chiuso e non toccato).
 #  ANNO80K_TESTER_TRANCHE.ps1 -Ex5Nome '<file>.ex5' -- TEST A FONDO di UN EA del MQL5 Market (demo, solo tester) nello Strategy Tester del PC di backtest DESKTOP-H4D7CAJ.
 #  VARIANTE di ARENA5K_MESE (conto prop 80.000 EUR, 26/10/2026): UN SOLO ANNO scelto con -Anno AAAA (e -Modello, default 1, -Periodo, default H1) a conto vuoto; stesse guardie. Previsioni: report/MARKET_TEST_80K_ATTESE_2026-10-19.md. Originale: 21 tranche MENSILI (ognuna a conto vuoto) piu UNA corsa CONTINUA 2025.01.01 -> 2026.10.01, XAUUSD H1, ticks reali, nessun input imposto.
 #  v5 ANNO80K (26/10/2026, notte): -Fine AAAA.MM.GG (data esclusa) per una corsa continua piu lunga di un anno (da 01/01/-Anno a -Fine), es. 21 mesi: -Anno 2025 -Fine 2026.10.01.
@@ -23,7 +24,8 @@ param(
   [string]$Simbolo = 'XAUUSD',
   [string]$Fine = '',
   [string]$Base = '',
-  [string]$SetFile = ''
+  [string]$SetFile = '',
+  [double]$Deposito = 80000
 )
 
 $ErrorActionPreference = 'Stop'
@@ -43,7 +45,7 @@ $SIMBOLO  = $Simbolo
 # NIENTE $PERIODO qui: questo giro ha DUE periodi del grafico e li porta ognuna la sua voce di $SONDE ($s.Per). Una variabile
 # unica di periodo sarebbe falsa e finirebbe nei titoli e nel referto (classe 1499: i conteggi e le etichette si COSTRUISCONO).
 $MODELLO  = $Modello
-$DEPOSITO = 80000
+$DEPOSITO = $Deposito
 $VALUTA   = 'EUR'
 $LEVA     = 100
 $TETTO_BARRE  = 100000
@@ -234,7 +236,7 @@ foreach($d in @(Get-ChildItem -Path $DataRoot -Directory -ErrorAction SilentlyCo
   }
 }
 # le ALTRE installazioni di questo PC, censite il 05/10/2026 (risultati_archivio/DUKA_P0_20261005_171046/REFERTO_DUKA_P0.txt, sez. 5): AMMESSE PER NOME, chiuse, non toccate
-$Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale')
+$Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale', 'C:\MT5_Backtest\Mt5_Ftmo_Prova')
 # v3 (14/10/2026): una cartella dati con origin.txt = C:\Users\Master\Desktop (nata dopo le 19:28, nessun conto, nessun processo aperto) e ammessa SOLO se
 # il suo common.ini non ha nessun Login= : senza conto non puo operare. Se un giorno ha un Login=, o se common.ini esiste ma non si legge, ci si ferma.
 $CensiteSenzaConto = @('C:\Users\Master\Desktop')
