@@ -66,3 +66,9 @@ Un "TESTATO BENE" richiede: anni di regimi diversi, set diversi, DD prop 80k con
 - NUOVO: scaricare a mano `combodeal.zip`, `AllSetsAndManuals.zip` (28/08), `Gold_Bundle.zip` e controllare se contengono i combo `*_3GOLD/_4GOLD` (il nome "AllSets&Manuals.zip" non esiste).
 - Demo forward: serve a provare il funzionamento, non lo slippage (Wim: "I basically never run demo accounts anymore").
 - VPS: misurare RAM/CPU nei picchi; rimedi gratuiti prima di aumentare la RAM (terminali minimizzati, High Performance, desktop heap, riavvio settimanale).
+
+## AGGIORNAMENTO 05/11 (zip ufficiali di Wim ricevuti: `UBS_DISCORD_2026-11-03/ZIP_UFFICIALI_WIM_LETTURA_2026-11-05.md`)
+- I combo `*_3GOLD` e `*_4GOLD` (con le versioni `prop firms`) ci sono, dentro `combodeal.zip` e `AllSetsAndManuals.zip`. Il punto 7 della coda (confronto con i set combo di Wim) si puo' fare: Reaper 3 / 2, Phantom 4 / 2,5, Goldbot 0,8 / 0,5, Goldtrade 0,3 / 0,2, con Randomization 50 sul Reaper e Phantom.
+- NUOVO test in coda: set combo di Wim contro i nostri set del reale/FTMO, a 3.745 EUR e a 80k, 4 anni, con criteri scritti prima. Attenzione al lotto minimo 0,01 a 3.745 EUR.
+- Manuali PDF di 13 EA ora disponibili (capitali minimi, parametri): da leggere EA per EA. Apex: 2.000-4.000 USD = Conservative con LotsizeStep 3000 o piu'.
+- `Gold_Bundle.zip` e' un solo backtest di Wim (UBS V6.4, 5.000 USD, 1% per strategia, 2020-2026, +109.836, DD equity max 10,4%): materiale di confronto per UBS, non una prova.
