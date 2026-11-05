@@ -3,10 +3,10 @@
 Regola: criteri e previsioni scritti PRIMA dei numeri; un controllo non fatto e' "NON MISURATO"; nessuna modifica al live/VPS/reale 10105439 senza decisione di Claudio; gli `_Ottimizzato` girano in parallelo con magic diversi, mai al posto degli originali; ogni zip deve stare in chat (<= 10 MB) ed essere evidenziato.
 
 ## A. IN CORSO ORA
-1. **Fake-out Gold Reaper** (F0 Off / F1 Low / F2 Medium / F3 High), XAUUSD H1, 80k, anni 2013/2018/2020/2025, 16 passate. Criteri: `report/REAPER_FAKEOUT_CRITERI_2026-11-05.md` (+ Emendamento 1). Riga corta lanciata sul PC di backtest. Poi: leggere i risultati, verificare F2 vs riferimenti del 29/10 (+-3%), verificare mappatura 0-3 e default del venditore.
+1. **[FATTO 05/11] Fake-out Gold Reaper** (risultati in `REAPER_FAKEOUT_RISULTATI_2026-11-05.md`: nessuna configurazione migliore del Medium; Fase 2 non scattata) (F0 Off / F1 Low / F2 Medium / F3 High), XAUUSD H1, 80k, anni 2013/2018/2020/2025, 16 passate. Criteri: `report/REAPER_FAKEOUT_CRITERI_2026-11-05.md` (+ Emendamento 1). Riga corta lanciata sul PC di backtest. Poi: leggere i risultati, verificare F2 vs riferimenti del 29/10 (+-3%), verificare mappatura 0-3 e default del venditore.
 
 ## B. SUBITO DOPO (ordine)
-2. **Fase 2 fake-out** SOLO se una configurazione passa la regola della Fase 1: anni 2015, 2019, 2022, 2024 (se i dati BCM ci sono).
+2. **Fase 2 fake-out** (non scattata secondo i criteri; solo su decisione di Claudio con criteri nuovi) SOLO se una configurazione passa la regola della Fase 1: anni 2015, 2019, 2022, 2024 (se i dati BCM ci sono).
 3. **Zip e analisi** di ogni giro con `RIGA_ZIP_RISULTATI_WIM.txt` (riconosce WIM, BTC_FTMO e REAPER_FAKEOUT).
 
 ## C. TEST DA FARE SUL GOLD (EA Wim che abbiamo)
