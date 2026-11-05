@@ -33,3 +33,6 @@ Nota: i set Medium hanno `OnlyUp` true (il lotto non scende dopo le perdite) e n
 
 ## Limiti
 Pochi giorni = pochi dati (nessuna conclusione statistica); la prova gratuita puo' avere regole o esecuzione diverse da una challenge a pagamento (NON VERIFICATO); i set Medium nascono per conti privati.
+
+## REGISTRO
+- 05/11/2026 sera: Claudio dichiara di aver cambiato i parametri sulla prova FTMO "come scritto" (gradino 1). NON confermato quali EA (previsto: solo Reaper MaxAllowedDD 9 -> 15; Phantom e Goldbot dopo almeno 3 giorni di trading). Da confermare con screenshot degli input. Soglie in EUR sul capitale attuale (~80.700): ritorno ai set prop se l'equity scende sotto 78.000 (margine totale 6.000 sopra il minimo di 72.000) o se la perdita di giornata (equity) supera 2.500.
