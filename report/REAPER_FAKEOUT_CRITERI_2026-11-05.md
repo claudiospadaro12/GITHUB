@@ -41,3 +41,11 @@ Per ogni passata: netto, PF, numero operazioni, DD equity assoluta e relativa, p
 - L'oro a ~5.000 contro ~1.200 nel 2013: il lotto minimo 0.01 pesa diversamente; i DD in $ non sono confrontabili tra anni senza guardare il prezzo.
 - AutoGMT sul BCM non verificato. Mappatura Off/Low/Medium/High derivata, non verificata.
 - Un buon risultato di backtest non dimostra un vantaggio dal vivo. Nessun giudizio su acquisto, lotto o taglia, che decide Claudio.
+
+## EMENDAMENTO 1 (05/11/2026, DOPO la scrittura delle previsioni, PRIMA di qualsiasi risultato: la riga non ha ancora prodotto numeri)
+Letto #all-gold-eas gennaio-marzo 2026 (file `DISCORD_PASSATO_all-gold-eas_2026-01_2026-03.md`). Informazioni nuove, **le previsioni R1-R10 sopra restano com'erano scritte e non vengono cambiate**:
+- **Meccanismo confermato da Wim** (11/03/2026): "low = M1, Medium = M1 + M15. High = M1+M15+H1" e "if first M1 candle closes in negative after entry, it's a fake breakout. same for the other timeframes"; i trade "closed without SL or TP are from the fake breakout filter" (11/03). Quindi **il significato dei livelli (Low/Medium/High) e' ora confermato da Wim**; la corrispondenza con i numeri 0-3 del set resta derivata.
+- Wim 16/02/2026 (contesto probabilmente il filtro in generale, EA non chiaro, forse Phantom): "the default settings for the breakout filter are the recommended ones"; "yes, off by default indeed. though I run it on 'low'". Questo **non coincide con il nostro default 2 (Medium)** per il Reaper: va verificato sul report quale valore ha il set del venditore e quale e' il default dell'EA attuale. **NON VERIFICATO**.
+- Wim 21/02 e altri: "auto trade frequency" e il resto sono quelli consigliati; un utente (16/02) dice che per gli altri EA conviene ottimizzare tutte le opzioni del filtro e sceglierne una per recovery factor: e' esattamente quello che fa questo test.
+- Wim 17/02: "golden rule in trading: do NOT make long term changes based on short term results" (conferma l'uso di anni lunghi e della Fase 2).
+- Metodo di Wim per i test: balance fisso 100K + Max Allowed Total DD 30 (17/02); dati Metaquotes per oro ("closest to my live results"). Noi usiamo 80k e BCM: differenza dichiarata.
