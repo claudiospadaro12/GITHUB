@@ -30,7 +30,11 @@ $limite = [int64]$MaxMB * 1024 * 1024
 $stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $IC)
 $out = Join-Path $rad ('ZIP_DA_MANDARE_' + $stamp)
 New-Item -ItemType Directory -Force -Path $out | Out-Null
-$lista = @(Get-ChildItem -LiteralPath $src -Recurse -File -ErrorAction SilentlyContinue)
+$tutti = @(Get-ChildItem -LiteralPath $src -Recurse -File -ErrorAction SilentlyContinue)
+# v1.1: gli zip DENTRO le cartelle dei risultati sono la copia che il tester fa dello stesso contenuto (e Windows li tratta come cartelle, non si copiano): li salto, altrimenti ogni cosa pesa due volte
+$lista = @($tutti | Where-Object { $_.Extension -ne '.zip' })
+$nZipInterni = $tutti.Count - $lista.Count
+if ($nZipInterni -gt 0) { Write-Host ('Zip gia presenti DENTRO la cartella e saltati (duplicano il contenuto): ' + $nZipInterni) -ForegroundColor Yellow }
 if ($lista.Count -lt 1) { Write-Host 'La cartella dei risultati e vuota: niente da zippare.' -ForegroundColor Red; exit 1 }
 $tot = 0; foreach ($f in $lista) { $tot += $f.Length }
 Write-Host ('File trovati: ' + $lista.Count + ', ' + [math]::Round($tot / 1MB, 1) + ' MB non compressi. Limite per zip: ' + $MaxMB + ' MB.') -ForegroundColor Cyan
