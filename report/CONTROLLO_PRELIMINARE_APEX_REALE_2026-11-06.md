@@ -69,3 +69,17 @@
 
 ## G. Limiti
 Tester a barre da 1 minuto, un percorso per anno, solo profitti realizzati; swap e slippage reali non simulati; il flottante non è misurato; la verifica 7 è NON VERIFICATO. Il test a 21 mesi del trio oro sul reale è in corso: il risultato può cambiare il quadro del Medium.
+
+## H. Spread e costi: cosa c'è nei numeri e quanto pesano (aggiunto 06/11)
+- **Nel tester**: commissioni (come da specifica del simbolo sul demo BCM: circa −2,5 EUR per lotto aperto sull'Apex), swap, e lo **spread memorizzato nello storico M1 del BCM**. Slippage: nessuno (`ExecutionMode=0`).
+- **Dubbio sullo spread recente**: nello storico M1 EURUSD lo spread mediano è 4 punti nel 2013, 3 nel 2018, 2 nel 2020 e **0 nel 2025-26 (59% delle barre a zero)**. Gli anni recenti possono quindi sottostimare lo spread reale. Per l'oro 2025-26 la mediana è 21 punti, plausibile. Non ho confrontato lo storico con lo spread vivo del reale.
+- **Sensibilità di Apex Conservative**: 22-49 lotti aperti all'anno in 1.800-3.600 operazioni; ogni pip di spread in più rispetto al tester costa circa (lotti aperti x 9 EUR per pip, stima mia):
+| Anno | Netto nel tester | Costo di +1 pip | Netto con +1 pip | Netto con +2 pip |
+|---|---|---|---|---|
+| 2013 | +153 | −441 | −288 | −729 |
+| 2017 | +715 | −308 | +407 | +99 |
+| 2020 | +1.716 | −369 | +1.347 | +978 |
+| 2022 | +1.382 | −295 | +1.087 | +792 |
+| 2025 | +913 | −204 | +709 | +505 |
+- **Lettura**: se lo spread reale di AUDCAD, AUDNZD e NZDCAD è anche solo 1 pip più largo di quello del tester, Apex Conservative perde il 12-30% del guadagno (e nel 2013 va in negativo). Daytrade Pro Max9 ha costo di +1 pip di circa 50 EUR all'anno: molto meno sensibile.
+- **Verifica 4 della sezione A da fare con numeri**: leggere lo spread vivo (colonna Spread del Market Watch, a più orari, e con la sessione asiatica) su AUDCAD, AUDNZD, NZDCAD sul reale. Se la mediana è oltre 1,5 pip, il risultato del tester non regge.
