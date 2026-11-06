@@ -77,3 +77,4 @@ Un "TESTATO BENE" richiede: anni di regimi diversi, set diversi, DD prop 80k con
 - FATTO: 70 passate dei 4 EA forex a 4.000 EUR (`RISULTATI_FOREX_4K_2026-11-05.md`, 7 candidati) e confronto col trio oro (`CONFRONTO_TRIO_ORO_FOREX_4K_2026-11-05.md`).
 - SCRITTI i criteri del forward demo (`CRITERI_FORWARD_DEMO_FOREX_2026-11-05.md`): in attesa delle decisioni D1-D5 di Claudio (set, conto, macchina, registro equity, data).
 - FATTO 06/11: trio oro a 4 livelli di rischio, 96 passate a 80.000 e 3.745 (`ORO_GRADINI_RISULTATI_2026-11-06.md`): Medium NON REGGE i limiti FTMO in nessun anno; Combo 3GOLD regge; punto 7 della coda (combo 3GOLD di Wim) fatto, restano AdjustEntry, Randomization, weekend, strategia 9.
+- SCRITTO 06/11: piano del forward demo della Serie 4 (tre conti prop, EA diversi per conto): `PIANO_FORWARD_DEMO_SERIE4_2026-11-06.md`. In attesa delle decisioni D1-D6 di Claudio.
