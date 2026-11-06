@@ -13,7 +13,7 @@ Luna 4DD resta fuori: da sola ha DD 25% nel 2013 e supera il 10% totale della FT
 ## 2. Che cosa ci si aspetta dal tester (2013, 2020, 2025 a 80.000, solo realizzato)
 | Conto | Operazioni a settimana | Netto a 8 settimane: peggiore / 10° percentile / mediana | Finestre di 8 settimane in perdita | Peggior giorno | DD sul saldo realizzato (max) |
 |---|---|---|---|---|---|
-| A | ~20 | −2.662 / −590 / +2.394 (+3,0%) | 16% | −3,2% | 5,0% (cons. 5,0-5,3%) |
+| A | ~20 | −2.662 / −590 / +2.394 (+3,0%) | 16% | −2,9% | 4,8% |
 | B | ~5 | −1.066 / +219 / +2.064 (+2,6%) | 7% | −2,6% | 2,6% |
 | C | ~28 | −1.985 / +233 / +2.698 (+3,4%) | 7% | −3,3% | 5,8% |
 Tre conti insieme: giorni in cui tutti e tre perdono nello stesso giorno 36 su 1.096 (3,3%): in 8 settimane (~40 giorni di mercato) ne ho attesi 1-2. Peggior giorno sui tre conti sommati −4.634 (−1,9% di 240.000), DD complessivo sul saldo 3,9%.
@@ -75,7 +75,7 @@ Tre conti insieme: giorni in cui tutti e tre perdono nello stesso giorno 36 su 1
 - **F3** Nessuno scatto del Guardian su nessun conto in 8 settimane: 75%.
 - **F4** DD equity <= 6% su tutti e tre i conti per le 8 settimane: 75%.
 - **F5** Netto positivo su tutti e tre i conti dopo 8 settimane: 60%. Netto positivo sulla somma dei tre: 80%.
-- **F6** Il conto A ha il DD più alto dei tre: 55%.
+- **F6** Il conto C ha il DD più alto dei tre (nel tester 5,8% contro 4,8% di A e 2,6% di B): 55%.
 - **F7** Almeno un conto raggiunge +5% (4.000) in 8 settimane: 25%; tutti e tre: 3%.
 - **F8** Almeno 3 giorni in cui tutti e tre i conti perdono insieme: 50%.
 - **F9** Costo per operazione > 1,5 volte il tester in almeno un EA: 40%.
