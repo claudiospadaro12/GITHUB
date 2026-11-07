@@ -54,3 +54,6 @@ FTMO vieta gli EA "iperattivi" con piu di **2.000 richieste al server al giorno*
 1. Applicare la patch su una copia, compilare con F7 (errori: mandarmi il testo).
 2. Demo con `InpAutotest=true`, `InpReqEnable=true`: leggere nel Journal i 15 casi `[AUTOTEST] ... CONTATORE RICHIESTE`.
 3. Un giorno con i tre EA oro: confrontare "Richieste oggi" con il Journal.
+
+## Esito compilazione (07/11/2026, ore 21:40, PC di backtest, MetaEditor del terminale BCM)
+`Result: 0 errors, 0 warnings, 3106 ms elapsed, cpu='X64 Regular'`. File `.ex5` di 108.714 byte, sul Desktop (`GUARDIAN_V117\MQL5\Experts\ABTG_Guardian_v117_PROVA.ex5`). Fonte: schermata di Claudio. Il `compila.log` non e stato inviato. **Compilato, NON provato in MT5**: l'autotest, il contatore e la chiusura del venerdi restano da vedere su demo.
