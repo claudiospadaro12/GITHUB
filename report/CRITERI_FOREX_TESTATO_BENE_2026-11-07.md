@@ -15,8 +15,8 @@
 | Giro | Cosa | Passate | Stato |
 |---|---|---|---|
 | **A** | Fuori campione: 10 set x 7 anni nuovi a 4.000 EUR | 70 | **criteri sotto, da lanciare** |
-| **B** | Modello 4 (tick reali) contro Modello 1 su un anno, 4 set | ~8 | criteri da scrivere dopo A |
-| **C** | Orari: `GMT_Offset` +-1 su Luna 4DD e Apex Conservative, 2 anni | ~8 | criteri da scrivere |
+| **B** | Modello 4 (tick reali) contro Modello 1 sul 2025, 4 set | 4 | criteri scritti il 07/11 in `CRITERI_FOREX_GIRI_B_C_2026-11-07.md` |
+| **C** | Orari: `GMT_Offset` 0/0, 2/2, 2/3 su Luna 4DD e Apex Conservative, 2022 e 2025 | 12 | criteri scritti il 07/11 (stesso file) |
 | **D** | Taglia prop 80k a lotto proporzionato (scenario) per i set sopravvissuti | da definire | dopo A, serve verificare i parametri di lotto di ogni EA |
 | **E** | Post-elaborazione, senza passate nuove: flottante giornaliero (deal + M1), commissioni/slippage FTMO, correlazione fra i candidati e col trio oro | 0 | dopo A |
 
