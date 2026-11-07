@@ -1,0 +1,2 @@
+# Copia di prova del Guardian v1.17 (07/11/2026)
+`ABTG_Guardian_v117_PROVA.mq5` = `lavoro` v1.15 + patch v1.16 (chiusura del venerdi) + patch v1.17 (contatore delle richieste). E una COPIA: il file `mql5/Experts/ABTG_Guardian.mq5` del ramo `lavoro` non e toccato. NON compilata prima del 07/11 sera; NON provata in MT5. Include richiesto: `ABTG_PausaGuardian.mqh` (INVARIATO, stessa impronta del v1.15). Riga di compilazione: `backtest_pipeline/righe/RIGA_COMPILA_GUARDIAN_V117.txt`.
