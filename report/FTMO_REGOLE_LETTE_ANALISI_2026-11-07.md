@@ -1,0 +1,57 @@
+# Regole FTMO lette con l'estensione Claude in Chrome — analisi per i nostri piani (07/11/2026)
+
+**Fonte:** `ftmo_regole_unico.zip` di Claudio (output dell'estensione, 26 pagine pubbliche di ftmo.com, lette il 07/11/2026). I file originali sono in `FTMO_REGOLE_ESTENSIONE_dati/`. **Io non ho aperto le pagine di ftmo.com** (non raggiungibili da questa sessione): tutte le frasi qui sotto sono quelle riportate dall'estensione.
+**Limiti da leggere prima:**
+1. Le pagine `/en/` sono state viste **in italiano** dal browser: le frasi sono una traduzione, non l'inglese ufficiale. Per una decisione su soldi vale il testo inglese (e la risposta scritta dell'assistenza).
+2. L'estensione ha riportato frasi con parti omesse ("..."): la regola sul gap trading e quella sul tetto vanno rilette per intero sulla pagina.
+3. Non sono stati estratti: **Terms and Conditions** e Risk Disclosure (solo i titoli), **Perdita massima totale** (Maximum Loss), pagina Simboli (spread/swap/commissioni per strumento), pagina della prova gratuita.
+
+## 1. Cosa e CHIARO (e cosa cambia)
+| Tema | Cosa dice il sito (via estensione) | Effetto sui nostri piani |
+|---|---|---|
+| **Tetto di capitale** ([how-many-accounts](https://ftmo.com/en/faq/how-many-accounts-can-i-have/)) | "L'allocazione totale del capitale su tutti i conti e prodotti è limitata a 400.000 dollari per trader o strategia (prima di qualsiasi scalabilità)." Equivalente **320.000 euro**. Con operazioni identiche o "sostanzialmente simili" su più conti e capitale oltre il tetto, FTMO "si riserva il diritto di sospendere i conti interessati". "Eludere tali limiti tramite registrazioni diverse è severamente vietato." Il Premium alza il tetto | **5 conti da 160k = 800k: fuori.** Il massimo prudente e **320k in totale** (2 x 160k o 4 x 80k), non un euro in più. Il testo dice "per trader **o** strategia": la lettura prudente e che il tetto valga sulla **somma di tutti i conti di Claudio**, anche con EA diversi. "EA diversi = limiti separati" **non e scritto**: da chiedere |
+| **Weekend / notte** ([positions overnight](https://ftmo.com/en/faq/can-i-hold-positions-overnight-or-over-the-weekend/)) | "FTMO vieta di mantenere posizioni aperte durante le interruzioni di mercato superiori a 2 ore per tutti i conti" **tranne** conti Swing e conti in sfida o verifica | Sulla **challenge/verifica** si puo tenere tutto nel weekend. Sul **Standard finanziato** no. La regola del venerdi (chiudere 3 ore prima, cancellare i pendenti) serve **solo li**. Attenzione: vale per ogni interruzione > 2 ore (non solo il weekend): per gli **indici** (pausa notturna) un Standard finanziato obbligherebbe a chiudere ogni sera. Oro e forex hanno pause piu corte |
+| **Ordini pendenti nel weekend** | **Non detto.** Per il prelievo: "Tutte le posizioni aperte e gli ordini pendenti devono essere chiusi prima di richiedere il premio" ([prelievi](https://ftmo.com/en/faq/how-do-i-withdraw-my-profits/)) | Resta **NON VERIFICATO**: domanda scritta all'assistenza |
+| **News** ([can-i-trade-news](https://ftmo.com/en/faq/can-i-trade-news/)) | Blocco di **2 minuti** prima e dopo i comunicati; "Tale restrizione si applica a qualsiasi ordine, inclusi Stop Loss, Take Profit o altri ordini pendenti"; solo i simboli con la valuta interessata; **esenti Swing e sfida/verifica** | Vale solo per il **Standard finanziato**. Il filtro news degli EA di Wim (pendenti chiusi 100-180 minuti prima) copre gli ingressi, ma non gli **SL/TP che scattano** nei 2 minuti: non e controllabile da noi. Da chiedere cosa succede in quel caso |
+| **Perdita giornaliera** ([trading-objectives](https://ftmo.com/en/trading-objectives/)) | Su **patrimonio netto** (saldo + flottante ± swap − commissioni), 5% del capitale iniziale, "ricalcolato giornalmente alle **00:00 CE(S)T**" | Le commissioni e lo swap contano: nel Guardian entrano nell'equity. **Coerente con il Guardian**: reset a mezzanotte italiana = 01:00 server FTMO, `InpDailyResetHour=1` (decisione D009 del 02/11). Il Guardian a 4,3% lascia 0,7 punti di margine |
+| **Giorni minimi** | 4 giorni con almeno una posizione aperta (2-Step) | nessun problema per i nostri EA |
+| **Prelievi** | Dal giorno 14 dalla prima operazione; posizioni **e pendenti** chiusi; 80% (2-Step) o 90% (1-Step, Instant, Scaling, Premium); nessun limite di frequenza scritto | prima di ogni richiesta il Guardian deve poter fare "tutto chiuso" (FlattenAll + pausa) |
+| **VPS** | Consentiti; non operare dagli USA e non impostare geolocalizzazione USA | VPS attuale OK (non verificata la sua posizione) |
+| **Swing** ([swing](https://ftmo.com/en/faq/what-is-the-swing-account-type-and-how-does-it-work/)) | Nessuna restrizione su news e su posizioni oltre la chiusura > 2 ore; **leva ridotta da 1:100 a 1:30**; disponibile **solo con la Challenge a 2 fasi**; non si passa da Standard a Swing | Swing toglie i due vincoli (news, weekend) ma abbassa la leva: **margine dell'oro da misurare** (vedi sotto) |
+| **Trial** | "versione ridotta" dell'esperienza, "non come fase di qualificazione"; durata non estratta | la nostra prova ha 16/11 come scadenza; non conta per le regole del conto vero |
+| **Unione conti** ([merge](https://ftmo.com/en/faq/can-i-merge-my-accounts/)) | Solo conti FTMO **inutilizzati**, stessa valuta e **stesso prodotto**; irreversibile | puo essere la strada per un conto piu grande da conti piccoli, se non usati: non ci aiuta sul tetto, che resta sul totale |
+| **Rimborso** | 2-Step: la quota torna al **primo prelievo**; 1-Step e Instant: non rimborsabile | nessun effetto sui test |
+| **Instant** | Max **1** conto Instant attivo; lo scaling non si applica | non rientra nei piani |
+| **Scaling** | +25% ogni 4 mesi se: 4 mesi, utile netto >= 10%, 2 premi, saldo positivo; tetto 2.000.000 $ | il tetto di 400k per trader vale comunque "prima di qualsiasi scalabilita" |
+
+## 2. Cose NUOVE che non sapevamo (rischio per i nostri EA)
+1. **EA "iperattivi": piu di 2.000 richieste al server al giorno** (aprire, modificare, chiudere ordini o pendenti) — [pratiche vietate](https://ftmo.com/en/forbidden-trading-practices/). Non e il limite di 2.000 posizioni: sono le **modifiche** contate. Le griglie (Apex, Stability) con pendenti e trailing, e gli EA oro con trailing virtuale e randomizzazione, potrebbero toccarlo in giornate agitate. **NON MISURATO.** Misura: contare nel Journal del trial/reale le righe di modifica per giorno (piu giorni, anche quelli agitati) e nel tester per Apex.
+2. **Gap trading**: "aprire posizioni ... quando sono previste importanti notizie globali ... o due ore o meno prima della chiusura di un mercato finanziario rilevante per almeno due ore". La frase e **troncata dall'estensione**. Se vale come scritto, e vietata per tutti i conti l'apertura di nuove posizioni nelle ultime 2 ore prima della chiusura del venerdi e intorno alle notizie importanti. La nostra regola del venerdi (3 ore prima, nessuna nuova apertura) la rispetta; l'effetto sulle notizie (NFP, ecc.) con EA che aprono a ridosso e **ambiguo**: da chiedere, e rileggere la frase intera.
+3. **Posizioni opposte fra conti collegati "a fini manipolativi"** sono vietate (salvo sullo stesso conto). Con piu prop e EA diversi sullo stesso simbolo (es. Phantom short sul conto A, Reaper long sul B) capitano posizioni opposte: serve la risposta scritta che non conti (manca "a fini manipolativi" nel nostro caso, ma e un giudizio di FTMO).
+4. **Gestione del rischio**: FTMO guarda posizioni "sostanzialmente piu grandi" o numero di posizioni "sostanzialmente" diverso rispetto alle tue altre operazioni, su qualsiasi conto, e il rischio cumulato su simboli correlati. Con `OnlyUp` e lotti per saldo che crescono, o con lotti diversi fra trial e reale, il rischio e di apparire incoerenti. Nessuna soglia scritta.
+5. **Operazioni "che contraddicono come si eseguono sui mercati reali"** (leva eccessiva, sovraesposizione, scommesse unilaterali, rollover del conto): giudizio discrezionale di FTMO. Dà ulteriore peso al criterio scritto che ha scartato il Medium oro a 80k.
+6. **Martingala, grid, HFT, tick scalping, latency arbitrage non sono nominati** come vietati. Non e un permesso scritto: Apex e Stability sono griglie. Da chiedere.
+7. **Il capitale del "trader"**: FTMO puo usare i dati dei conti per operare sui propri conti reali separati ([real market](https://ftmo.com/en/faq/what-is-trading-according-to-a-real-market/)): nessun effetto operativo.
+
+## 3. Cosa NON e stato trovato (resta NON VERIFICATO)
+- **Perdita massima totale** (Maximum Loss) e come si calcola: il pannello non e stato estratto. Il Guardian a 9,3% presuppone 10% dal capitale iniziale (fonte secondaria): da confermare.
+- Durata massima della sfida e inattivita; limiti di lotti per strumento; swap, spread e commissioni **per simbolo** (pagina Simboli); soglia della regola di coerenza (non si applica al 2-Step); **conto da 160k** (il banner dice "fino a 200.000 dollari"; la taglia 160k non e stata trovata); reset/riacquisto dopo fallimento; leva **per simbolo** sull'oro (il riassunto di Massimo parlava di 1:9 sui metalli sullo Swing: non confermato).
+- Testi legali completi (T&C, Risk Disclosure).
+
+## 4. Effetto sui piani e sui test
+| Piano | Cosa cambia |
+|---|---|
+| **Quante prop** | Tetto 320k EUR sul totale: 160k x 5 impossibile. Opzioni: 2 x 160k, 4 x 80k, o conti piu piccoli. Sempre sotto il tetto, e se gli EA sono gli stessi la sospensione sopra tetto e a discrezione di FTMO. Il tetto Premium e lo scaling: da chiedere |
+| **Challenge/Verification** | Weekend e news senza vincoli: i test attuali valgono. La regola del venerdi e opzionale (rischio gap) |
+| **Funded Standard** | Obbligo di chiudere prima delle pause > 2 h e stop 2 minuti sulle news. Serve la regola del venerdi (Guardian v1.16 non ancora applicato) e per gli indici l'intraday |
+| **Funded Swing** | Nessun vincolo news/weekend, ma leva 1:30: da misurare se i lotti dell'oro passano il margine |
+| **Guardian** | `InpDailyResetHour=1` coerente con 00:00 CE(S)T. Aggiungere: **contatore delle richieste/modifiche al giorno** (soglia di allarme ben sotto 2.000) |
+| **Prelievi** | Chiudere posizioni **e pendenti** prima di ogni richiesta: serve un comando "tutto chiuso" |
+
+## 5. Test proposti (non lanciati, criteri da scrivere prima)
+1. **Conteggio richieste al giorno** (apri/modifica/chiudi) per Reaper, Phantom, Goldbot, GTP, Apex, Stability dai Journal del tester o del trial. Soglia di allarme 1.000; limite FTMO 2.000.
+2. **Margine a leva 1:30** sull'oro: stessi livelli (Prop, Combo, Medium) a 80k con leva 1:30 per vedere "no money" e livello di margine minimo. In coda con priorità media.
+3. **Gap trading**: elenco delle aperture nelle 2 ore prima della chiusura del venerdi e intorno a NFP/CPI/IR dai deal dei test gia fatti (post-elaborazione, nessuna passata nuova).
+
+## 6. Domande da fare per iscritto all'assistenza FTMO (aggiornate)
+Aggiunte a `DOMANDE_FTMO_PRIMA_DELLA_CHALLENGE_2026-11-06.md`. Nuove rispetto a prima: pendenti nel weekend su ogni tipo di conto; il tetto vale per trader sulla somma anche con EA diversi?; cosa vale come "sostanzialmente simili" per EA; posizioni opposte fra conti con EA diversi; conteggio delle 2.000 richieste (modifiche incluse) e cosa fa scattare l'iperattivita; gap trading (testo intero, notizie); SL/TP che scattano nei 2 minuti di news; Maximum Loss totale; conto 160k e limiti di lotti; leva per simbolo sull'oro su Standard e Swing; martingala/grid/HFT nominati o no; Premium e tetto.

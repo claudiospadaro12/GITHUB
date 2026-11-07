@@ -62,3 +62,17 @@ Il PDF `Regole_FTMO_ufficiali_2026-11-07.pdf` è un riassunto «da Massimo (via 
 
 Verifiche mie sui numeri del riassunto: nei nostri test il Reaper fa circa 12 operazioni a settimana (630 l'anno), non 5-9; sul trial gli ordini pendenti contemporanei erano 40 con tre EA (sotto 200).
 **Peso del weekend nei nostri test (P1-P5, 2013/2020/2025):** dal 9% al 18% delle posizioni attraversa un weekend, e circa l'11-12% del profitto netto viene da quelle posizioni. Su un conto Standard finanziato andrebbero chiuse prima del weekend (`FridayStopHour` dei set è 25, cioè disattivato): il test con la chiusura del venerdì non è stato fatto.
+
+## Aggiornamento 07/11 sera — lettura con l'estensione Claude in Chrome
+Analisi completa in `FTMO_REGOLE_LETTE_ANALISI_2026-11-07.md` (dati grezzi in `FTMO_REGOLE_ESTENSIONE_dati/`). Domande **aggiunte** per iscritto all'assistenza (da inserire nell'email in inglese):
+7. Pending orders: may they stay active over the weekend/overnight on Challenge, Verification, Standard funded and Swing accounts?
+8. The 400,000 USD / 320,000 EUR cap is "per trader or strategy": does it apply to the sum of ALL my accounts even when each account runs different EAs? What counts as "identical or substantially similar" trades for EAs with different settings?
+9. Opposite positions on the same symbol between my own accounts running different EAs: allowed when not manipulative? 
+10. "More than 2,000 server requests per day": do modifications (trailing stop, pending order updates) count? What threshold makes an account "hyperactive"?
+11. Gap trading: please quote the full rule. Does opening positions within 2 hours before the weekend close or around high-impact news apply to all account types, including Challenge/Verification?
+12. News (Standard funded): what happens to an SL/TP that triggers inside the 2-minute window?
+13. Maximum Loss (total): exact calculation and reset rules for the 2-Step; confirm the Maximum Daily Loss is on equity including swap and commissions, reset at 00:00 CE(S)T.
+14. Is a 160,000 account available (or 2 x 80,000 merged)? Lot limits per symbol, leverage per symbol for gold on Standard and Swing.
+15. Are martingale/grid/HFT/tick-scalping strategies allowed (they are not named in the Forbidden Trading Practices)?
+16. Premium programme: how much does it raise the capital cap?
+Stato: **nessuna risposta scritta ricevuta**.
