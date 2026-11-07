@@ -1,0 +1,156 @@
+--- orig.mq5	2026-11-07 17:33:35.095378853 +0000
++++ new.mq5	2026-11-07 17:33:35.108002069 +0000
+@@ -30,7 +30,7 @@
+ //|  Tutto-in-uno: compila con F7. Usa solo Trade.mqh (standard MT5). |
+ //+------------------------------------------------------------------+
+ #property copyright "Progetto EA Aperture Mercati"
+-#property version   "1.15"
++#property version   "1.16"
+ #property strict
+ #include <Trade/Trade.mqh>
+ //  v1.11 -- 19/08/2026. Il calcolo del cap e la scrittura delle bandiere
+@@ -191,6 +191,22 @@
+ input int    InpMaxOpenPositions = 0;   // E1: posizioni aperte insieme, massimo (0=spento). Esempio: 10
+ input double InpMaxNetLots       = 0;   // E1: esposizione NETTA massima su UN simbolo, |lotti buy - lotti sell| (0=spento). Esempio: 0.30
+ input int    InpExposureAction   = 1;   // E1: 0=cancella i pendenti . 1=cancella i pendenti E chiude le piu' recenti . 2=solo allarme
++//--- F1 -- CHIUSURA DEL VENERDI' (v1.16, 07/11/2026) ----------------
++//  Per i conti FTMO "Standard finanziati" (riassunto del 07/11, DA
++//  VERIFICARE con FTMO): niente posizioni aperte nel weekend. Spento di
++//  default = NESSUNA azione e nessuna riga in piu' nel giornale.
++//  Quando e' acceso, il VENERDI' da (chiusura reale del mercato - N ore)
++//  fino alla chiusura: chiude tutte le posizioni, cancella tutti i
++//  pendenti (di QUALSIASI magic se InpCloseAllMagics) e ricaccia indietro
++//  ogni nuovo ordine ogni secondo; accende anche la pausa nuovi ingressi
++//  per gli EA ABTG. La chiusura del mercato si LEGGE dal broker
++//  (SymbolInfoSessionTrade, ultima sessione del venerdi'), non e' un'ora
++//  fissa: cambia di un'ora col cambio d'ora. Se non si legge, usa il
++//  fallback (prudente: presto). Con InpAction=1 (solo allarme) scrive e basta.
++input bool   InpFriEnable       = false;  // F1: chiudi tutto il venerdi' prima della chiusura del mercato (spento = nessuna azione)
++input double InpFriHoursBefore  = 3.0;    // F1: ore PRIMA della chiusura reale del mercato in cui scatta (3.0 = tre ore prima)
++input string InpFriSymbol       = "";     // F1: simbolo da cui leggere l'orario della sessione del venerdi' ("" = simbolo del grafico; consigliato XAUUSD)
++input int    InpFriFallbackMin  = 1260;   // F1: minuti dalla mezzanotte SERVER della chiusura, se la sessione non si legge (1260 = 21:00)
+ //--- COMPORTAMENTO -------------------------------------------------
+ input int    InpAction         = 0;      // 0=CHIUDI+BLOCCA (enforce) . 1=SOLO ALLARME (monitor, non chiude)
+ input bool   InpCloseAllMagics = true;   // true=chiude posizioni/pendenti di QUALSIASI magic (tutto il conto)
+@@ -306,6 +322,35 @@
+ 
+ bool BaselineUguale(const double a,const double b){ return(MathAbs(a-b)<0.005); }
+ 
++//+------------------------------------------------------------------+
++//| F1 (v1.16) -- CHIUSURA DEL VENERDI'. Funzione PURA: non legge il  |
++//| conto ne' il broker. Vera se, in minuti dalla mezzanotte server,  |
++//| "adesso" sta nella finestra [chiusura - ore*60 , chiusura).       |
++//+------------------------------------------------------------------+
++bool FriInFinestra(const int minAdesso,const int minChiusura,const double oreP)
++  {
++   if(minChiusura<=0 || oreP<=0.0) return(false);
++   int inizio=minChiusura-(int)MathRound(oreP*60.0);
++   return(minAdesso>=inizio && minAdesso<minChiusura);
++  }
++//--- v1.16: AUTOTEST della finestra del venerdi' (funzione pura, conto non toccato)
++int AutotestVenerdi()
++  {
++   int falliti=0;
++   Print("[AUTOTEST] ABTG_Guardian v1.16 -- CHIUSURA DEL VENERDI' (funzione pura, conto non toccato)");
++   // chiusura 21:55 = 1315 min; 3 ore prima = 18:55 = 1135 min
++   ABTG_AutotestCaso("18:54 con chiusura 21:55 e 3 ore: FUORI", !FriInFinestra(1134,1315,3.0), true, falliti);
++   ABTG_AutotestCaso("18:55 con chiusura 21:55 e 3 ore: DENTRO", FriInFinestra(1135,1315,3.0), true, falliti);
++   ABTG_AutotestCaso("21:54 con chiusura 21:55: DENTRO", FriInFinestra(1314,1315,3.0), true, falliti);
++   ABTG_AutotestCaso("21:55 = chiusura: FUORI (mercato chiuso)", !FriInFinestra(1315,1315,3.0), true, falliti);
++   ABTG_AutotestCaso("chiusura non letta (0): mai dentro", !FriInFinestra(1200,0,3.0), true, falliti);
++   ABTG_AutotestCaso("0 ore: mai dentro", !FriInFinestra(1314,1315,0.0), true, falliti);
++   ABTG_AutotestCaso("20:55 (chiusura estiva) con 3 ore: 17:55 e' DENTRO", FriInFinestra(1075,1255,3.0), true, falliti);
++   ABTG_AutotestCaso("2 ore: 19:55 DENTRO, 19:54 FUORI", FriInFinestra(1195,1315,2.0) && !FriInFinestra(1194,1315,2.0), true, falliti);
++   return(falliti);
++  }
++
++
+ int AutotestBaselineGiorno()
+   {
+    int falliti=0;
+@@ -605,6 +650,7 @@
+       ABTG_AutotestGuardia();       // casi del canale (nell'include, INVARIATI)
+       AutotestBaselineGiorno();     // v1.14: casi del modo della baseline
+       AutotestEsposizione();        // v1.15: casi del tetto di esposizione
++      AutotestVenerdi();            // v1.16: casi della finestra del venerdi'
+      }
+ 
+    double bal=AccountInfoDouble(ACCOUNT_BALANCE);
+@@ -709,6 +755,13 @@
+    if(InpMaxTotalLots>0 || InpMaxOpenPositions>0 || InpMaxNetLots>0)
+       PrintFormat("[GUARDIAN] tetto di esposizione ATTIVO: %.2f lotti, %d posizioni, netto %.2f, azione %d (0=pendenti, 1=pendenti+chiude piu recenti, 2=allarme)",
+                   InpMaxTotalLots,InpMaxOpenPositions,InpMaxNetLots,InpExposureAction);
++   if(InpFriEnable)
++     {
++      string sy=(StringLen(InpFriSymbol)>0)?InpFriSymbol:_Symbol;
++      SymbolSelect(sy,true);
++      PrintFormat("[GUARDIAN] chiusura del VENERDI' ATTIVA: %.1f ore prima della chiusura del mercato (sessione di %s), azione %s",
++                  InpFriHoursBefore,sy,(InpAction==1?"SOLO ALLARME":"CHIUDI+BLOCCA"));
++     }
+    OnTimer();
+    return(INIT_SUCCEEDED);
+   }
+@@ -749,6 +802,53 @@
+   }
+ 
+ //+------------------------------------------------------------------+
++//| F1 (v1.16) -- minuto di chiusura del VENERDI' letto dal broker    |
++//| (ultima sessione di trading del venerdi', minuti dalla mezzanotte |
++//| server). -1 se non si legge.                                      |
++//+------------------------------------------------------------------+
++int FriMinutoChiusura(const string sym)
++  {
++   datetime da=0,a=0; int ultimo=-1;
++   for(int k=0;k<10;k++)
++     {
++      if(!SymbolInfoSessionTrade(sym,FRIDAY,k,da,a)) break;
++      int m=(int)(a/60);
++      if(m>ultimo) ultimo=m;
++     }
++   return(ultimo);
++  }
++
++int gFriGiornoLog=0;   // un solo log al giorno
++void FridayCheck()
++  {
++   MqlDateTime s; TimeToStruct(TimeCurrent(),s);
++   if(s.day_of_week!=FRIDAY) return;
++   string sym=(StringLen(InpFriSymbol)>0)?InpFriSymbol:_Symbol;
++   int chiusura=FriMinutoChiusura(sym);
++   bool fallback=false;
++   if(chiusura<=0){ chiusura=InpFriFallbackMin; fallback=true; }
++   int adesso=s.hour*60+s.min;
++   if(!FriInFinestra(adesso,chiusura,InpFriHoursBefore)) return;
++   int dk=s.year*1000+s.day_of_year;
++   if(gFriGiornoLog!=dk)
++     {
++      gFriGiornoLog=dk;
++      PrintFormat("[GUARDIAN] VENERDI': chiusura mercato %02d:%02d server (%s), finestra attiva da %02d:%02d. %s",
++                  chiusura/60,chiusura%60,(fallback?"FALLBACK: sessione non letta":"letta dal broker"),
++                  (chiusura-(int)MathRound(InpFriHoursBefore*60.0))/60,(chiusura-(int)MathRound(InpFriHoursBefore*60.0))%60,
++                  (InpAction==0?"CHIUDO TUTTO e cancello i pendenti":"SOLO ALLARME"));
++     }
++   if(InpAction!=0) return;
++   // nuovi ingressi: pausa per gli EA ABTG (gli altri EA si ricacciano qui sotto)
++   SetPausa(TimeCurrent()+(datetime)((chiusura-adesso+60)*60),"chiusura del venerdi' prima del weekend");
++   if(PositionsTotal()>0 || OrdersTotal()>0)
++     {
++      int a=FlattenAll();
++      if(a>0 && InpVerbose) PrintFormat("[GUARDIAN] VENERDI': chiusi/cancellati %d ordini",a);
++     }
++  }
++
++//+------------------------------------------------------------------+
+ //| E1 -- TETTO DI ESPOSIZIONE (v1.15)                                |
+ //+------------------------------------------------------------------+
+ bool gEsposizioneOn=false;
+@@ -923,6 +1023,9 @@
+       if(PositionsTotal()>0 || OrdersTotal()>0) FlattenAll();
+      }
+ 
++   //=== F1 -- CHIUSURA DEL VENERDI' (v1.16): spenta di default = nessuna azione ===
++   if(InpFriEnable) FridayCheck();
++
+    //=== E1 -- TETTO DI ESPOSIZIONE (v1.15): spento a 0/0 = nessuna azione ===
+    double esLots=0.0; int esPos=0; double esNet=0.0;
+    if(InpMaxTotalLots>0 || InpMaxOpenPositions>0 || InpMaxNetLots>0) ExposureCheck(esLots,esPos,esNet);
