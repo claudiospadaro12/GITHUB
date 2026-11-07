@@ -33,7 +33,7 @@ Decisione di Claudio (07/11): **tutto chiuso 3 ore prima della chiusura reale de
 ---
 # v1.17 (07/11/2026 sera): contatore delle richieste al server
 
-**Stato: scritta, NON compilata, NON provata in MT5.** Controllo meccanico fatto: la catena v1.15 -> v1.16 -> v1.17 si applica pulita (`ABTG_Guardian_v1_16_chiusura_venerdi.patch` poi `ABTG_Guardian_v1_17_contatore_richieste.patch`) e il risultato coincide con la patch unica `ABTG_Guardian_v1_17_completa_da_v1_15.patch`; parentesi bilanciate; nessun altro `OnTradeTransaction` nel ramo `lavoro`. Non applicata a `lavoro`.
+**Stato: scritta, NON compilata, NON provata in MT5.** Controllo meccanico fatto: la catena v1.15 -> v1.16 -> v1.17 si applica pulita (`ABTG_Guardian_v1_16_chiusura_venerdi.patch` poi `ABTG_Guardian_v1_17_contatore_richieste.patch`) e il risultato coincide con la patch unica `ABTG_Guardian_v1_17_completa_da_v1_15.patch`; parentesi bilanciate; nessun altro `OnTradeTransaction` nel Guardian né nei suoi include (gli altri EA ne hanno uno proprio: sono programmi separati). Non applicata a `lavoro`.
 
 ## Perche
 FTMO vieta gli EA "iperattivi" con piu di **2.000 richieste al server al giorno** (aprire, modificare o chiudere ordini/pendenti; `forbidden-trading-practices`, letta con l'estensione il 07/11). Non sappiamo quante richieste fanno i nostri EA (trailing, pendenti delle griglie): **NON MISURATO**.
