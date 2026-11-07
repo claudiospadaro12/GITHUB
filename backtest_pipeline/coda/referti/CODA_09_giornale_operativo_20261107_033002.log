@@ -1,0 +1,193 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-11-07 03:32:11  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 9
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\MT5_Wim
+=== conto: 50504894
+=====================================================================
+
+--- GIORNO 20261105   (101.8 KB, ultima scrittura 2026-11-05 23:58) ---
+    righe totali: 376
+    RIGHE DI ORDINE / DEAL: 3
+      CF001:51:00.466Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: modify position #5204337 XAUUSD (sl: 4080.01, tp: 4111.81) [no connection]
+      GR001:51:00.467The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: modify position #5217455 XAUUSD (sl: 4068.91, tp: 4272.09) [no connection]
+      KH001:51:00.468The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: modify position #5140934 XAUUSD (sl: 4066.95, tp: 4135.56) [no connection]
+    GUARDIAN, ultima riga del giorno:
+      FQ023:58:19.098ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=105840.41  dayLoss=-1.61%  totDD=-5.84%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261106   (81 KB, ultima scrittura 2026-11-06 22:53) ---
+    righe totali: 280
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      KG022:53:37.072ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=105840.41  dayLoss=0.00%  totDD=-5.84%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261106   (34.3 KB, ultima scrittura 2026-11-06 23:44) ---
+    righe totali: 134
+    RIGHE DI ORDINE / DEAL: 31
+      IP000:00:00.287ABTG_PunteLarry (EURCAD,H1)[LARRY] SETUP LONG [SMASH punta] del 2026.11.06: ingresso STOP @ 1.57271 (punta/gap 0.00014 = 0.02 x ATR D1).
+      RM000:00:00.446ABTG_PunteLarry (EURAUD,H1)[LARRY] SETUP LONG [SMASH punta] del 2026.11.06: ingresso STOP @ 1.61991 (punta/gap 0.00035 = 0.03 x ATR D1).
+      RH000:00:00.760ABTG_PunteLarry (EURAUD,H1)[LARRY] PENDENTE BUY STOP @ 1.61991  SL 1.59793  TP 1.65288  lot 0.01  (pattern SMASH punta, punta/gap 0.03 x ATR, scadenza 2026.11.06 23:59, ordine 5233368)
+      NG000:01:00.503ABTG_PunteLarry (U30USD,H1)[LARRY] SETUP SHORT [SMASH punta] del 2026.11.06: ingresso STOP @ 51168.50 (punta/gap 285.00 = 0.33 x ATR D1).
+      CS000:01:00.602ABTG_PunteLarry (U30USD,H1)[LARRY] PENDENTE SELL STOP @ 51168.50  SL 53862.20  TP 47128.00  lot 0.10  (pattern SMASH punta, punta/gap 0.33 x ATR, scadenza 2026.11.06 23:59, ordine 5233394)
+      HE000:01:00.662ABTG_SuperWave_DOW_H1_Ottimizzato (U30USD,H1)[SuperWave] pendente 2/3 0.10 lot @ 51323.30
+      CH004:00:00.826ABTG_SuperWave (U30USD,H4)CTrade::OrderSend: sell stop 0.10 U30USD at 51219.30 sl: 52638.00 tp: 48382.30 [invalid price]
+      CO008:00:15.647ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] BUY STOP @ 4109.47 SL 4034.93 TP 4407.63 lot 0.01
+      DP008:00:15.669ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4034.93 SL 4109.47 TP 3736.77 lot 0.01
+      OJ008:59:00.549ABTG_MaxMinNotte_DAX_Short_Ottimizzato (D30EUR,M15)CTrade::OrderSend: sell stop 0.10 D30EUR at 26022.40 sl: 26143.90 tp: 25536.40 [invalid price]
+      IE010:00:00.186ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market buy 0.10 F40EUR sl: 7981.36 tp: 8212.71 [invalid stops]
+      NL010:08:52.077ABTG_DAX_Apertura_EU (D30EUR,M5)[DAX Apertura EU] BUY LIMIT (retest) @ 26009.20000  SL 25852.80000  lot 0.10
+      RH011:00:00.217ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market buy 0.10 F40EUR sl: 7989.69 tp: 8207.18 [invalid stops]
+      EP011:59:00.094RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      CL011:59:00.094RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      HS011:59:00.293RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      NH011:59:00.293RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      JF011:59:00.488RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      HE011:59:00.488RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      FI011:59:00.741RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      HF011:59:00.741RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      RL011:59:01.090RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      PS011:59:01.090RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      KN012:00:10.215ABTG_SupertrendReversal_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4064.73 sl: 4035.75 tp: 4136.68 [invalid price]
+      MH013:00:00.323ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market buy 0.10 F40EUR sl: 7921.85 tp: 8190.16 [invalid stops]
+      NI015:00:00.063ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market buy 0.10 F40EUR sl: 7929.16 tp: 8172.74 [invalid stops]
+      HN015:30:01.015ABTG_Nasdaq_Apertura_US (NASUSD,M15)[Nasdaq Apertura US] SELL STOP @ 26922.50000  SL 27074.40000  lot 0.10
+      LR015:45:00.579ABTG_PostNews (USDJPY,M5)[PostNews] BUY STOP @ 158.495 SL 158.245 TP 158.795 lot 0.01
+      OR015:45:01.022ABTG_PostNews (USDJPY,M5)[PostNews] SELL STOP @ 158.281 SL 158.531 TP 157.981 lot 0.01
+      QM020:00:00.078ABTG_CostToCost (GBPCAD,H4)[COST] target cost-to-cost dalla parte sbagliata del prezzo: nessun ingresso.
+      GK020:00:08.380ABTG_SupertrendReversal_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4078.15 sl: 4025.53 tp: 4209.20 [invalid price]
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261107   (1.7 KB, ultima scrittura 2026-11-07 03:15) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1515150476
+=====================================================================
+
+--- GIORNO 20261105   (95.3 KB, ultima scrittura 2026-11-05 23:55) ---
+    righe totali: 353
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      HQ023:55:15.821ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=80701.73  dayLoss=-0.90%  totDD=-0.88%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261106   (80.3 KB, ultima scrittura 2026-11-06 22:51) ---
+    righe totali: 279
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      RG022:50:15.799ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=80701.73  dayLoss=0.00%  totDD=-0.88%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261106   (93.1 KB, ultima scrittura 2026-11-06 23:43) ---
+    righe totali: 328
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      JS022:53:00.809ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=109781.00  dayLoss=0.00%  totDD=-9.78%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261107   (1.8 KB, ultima scrittura 2026-11-07 03:13) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261104   (1450.1 KB, ultima scrittura 2026-11-04 23:56) ---
+    righe totali: 2112
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261105   (1010.2 KB, ultima scrittura 2026-11-05 16:41) ---
+    righe totali: 1474
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261105   (94.8 KB, ultima scrittura 2026-11-05 23:59) ---
+    righe totali: 354
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      KR023:58:20.881ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6411.11  dayLoss=-2.65%  totDD=-2.65%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261106   (79.7 KB, ultima scrittura 2026-11-06 22:53) ---
+    righe totali: 279
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QG022:53:36.859ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6411.11  dayLoss=0.00%  totDD=-2.65%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
