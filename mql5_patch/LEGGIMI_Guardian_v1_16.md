@@ -29,3 +29,28 @@ Decisione di Claudio (07/11): **tutto chiuso 3 ore prima della chiusura reale de
 - La regola serve solo sui conti Standard finanziati di FTMO (secondo il riassunto, da verificare per iscritto con FTMO); in Challenge e Verifica il weekend è permesso.
 - Un EA che apre a mercato nello stesso secondo può passare: il guardiano controlla ogni secondo.
 - Orari in ora SERVER: il server FTMO è Italia + 1, quello del BCM è GMT+1 fisso.
+
+---
+# v1.17 (07/11/2026 sera): contatore delle richieste al server
+
+**Stato: scritta, NON compilata, NON provata in MT5.** Controllo meccanico fatto: la catena v1.15 -> v1.16 -> v1.17 si applica pulita (`ABTG_Guardian_v1_16_chiusura_venerdi.patch` poi `ABTG_Guardian_v1_17_contatore_richieste.patch`) e il risultato coincide con la patch unica `ABTG_Guardian_v1_17_completa_da_v1_15.patch`; parentesi bilanciate; nessun altro `OnTradeTransaction` nel ramo `lavoro`. Non applicata a `lavoro`.
+
+## Perche
+FTMO vieta gli EA "iperattivi" con piu di **2.000 richieste al server al giorno** (aprire, modificare o chiudere ordini/pendenti; `forbidden-trading-practices`, letta con l'estensione il 07/11). Non sappiamo quante richieste fanno i nostri EA (trailing, pendenti delle griglie): **NON MISURATO**.
+
+## Cosa fa (spento di default: `InpReqEnable=false` = nessuna GlobalVariable, nessuna riga in piu)
+- Conta gli eventi dell'intero conto con `OnTradeTransaction`, di QUALSIASI EA: nuovi ordini (aperture e chiusure a mercato, pendenti), modifiche SL/TP delle posizioni, modifiche e cancellazioni dei pendenti.
+- Giorno = "giorno prop" (`InpDailyResetHour`, 1 per FTMO). Il totale persiste in `ABTG_GUARD_<conto>_REQ_V1` / `..._REQDAY_V1`; dopo un riavvio nello stesso giorno le categorie ripartono da zero ma il totale resta.
+- Avviso a `InpReqWarn` (1000) e allarme a `InpReqAlarm` (1600): riga nel giornale + `Alert`, una volta per livello al giorno. `InpReqAction=1` all'allarme mette anche la pausa nuovi ingressi fino al reset (**solo per gli EA ABTG**: gli EA di terzi non la leggono; il Guardian non puo fermare le loro modifiche senza chiudere tutto).
+- Pannello: una riga "Richieste oggi" con le 4 categorie; il log ogni 5 minuti una riga separata.
+- Autotest (`InpAutotest=true`): 15 casi sulle funzioni pure `ReqClassifica` e `ReqLivello`.
+
+## Limiti dichiarati
+- **E una stima per eccesso**: un pendente che scatta conta anche come "cancellazione". NON VERIFICATO che coincida con il conteggio di FTMO (che cosa contano e da che ora e dal server non e scritto: domanda 10 del file `DOMANDE_FTMO...`).
+- **NON VERIFICATO** che MT5 consegni al Guardian gli eventi generati da altri EA (dovrebbe: sono eventi di conto) e che una modifica di SL/TP arrivi come evento di posizione senza deal. **Verifica da fare il primo giorno**: confrontare il conteggio del pannello con le righe `modify` del Journal e con la storia ordini.
+- Nel tester il Guardian non gira insieme agli altri EA nel nostro schema: la misura sul tester si fa dai Journal delle passate.
+
+## Come provarlo (a tuo ok, su DEMO, mai sul reale)
+1. Applicare la patch su una copia, compilare con F7 (errori: mandarmi il testo).
+2. Demo con `InpAutotest=true`, `InpReqEnable=true`: leggere nel Journal i 15 casi `[AUTOTEST] ... CONTATORE RICHIESTE`.
+3. Un giorno con i tre EA oro: confrontare "Richieste oggi" con il Journal.
