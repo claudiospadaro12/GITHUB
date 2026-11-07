@@ -11,8 +11,8 @@ Criteri e previsioni scritti prima: `CRITERI_ORO_REALE21_2026-11-06.md`. Zip `AN
 | L1 Gradino 1 | tick reali | +12.085 (+323%) | 15.830 | 271 | 1.589 (42,4%) | 26,5% | 10,9% | −438 |
 | L0 Prop | barre 1 min | +8.552 (+228%) | 12.297 | 299 | 1.058 (28,3%) | 21,9% | 6,9% | −253 |
 | L3 Combo | barre 1 min | +6.825 (+182%) | 10.570 | 376 | 1.160 (31,0%) | 22,5% | 6,9% | −346 |
-| L3 Combo | tick reali | +6.078 (+162%) | 9.823 | non raggiunto in 21 mesi... | 1.202 (32,1%) | 23,8% | 7,4% | −354 |
-(Il L0 Prop a tick reali non era in programma. Per L3 a tick reali il raddoppio avviene dopo il periodo letto dal calcolo dei 21 mesi in modo non confermato: leggere con cautela.)
+| L3 Combo | tick reali | +6.078 (+162%) | 9.823 | 384 | 1.202 (32,1%) | 23,8% | 7,4% | −354 |
+(Il livello L0 Prop a tick reali non era in programma.)
 
 ## Esito secondo i criteri scritti (limite superiore del DD assoluto, % di 3.745)
 - **L2 Medium: SCARTATO** per il criterio scritto (87,9% e 85,5% contro il 50%).
