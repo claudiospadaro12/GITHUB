@@ -45,3 +45,20 @@
 
 ## Come usare le risposte
 Ogni risposta si incolla nella colonna "Risposta" con la data e la fonte (pagina o email). Una domanda senza risposta scritta resta "NON VERIFICATO" e non si compra finché non è chiusa. Io aggiorno il piano delle combinazioni e il tetto di capitale con le risposte.
+
+## Aggiornamento 07/11: riepilogo ricevuto da Massimo (fonte SECONDARIA, non la pagina ufficiale)
+Il PDF `Regole_FTMO_ufficiali_2026-11-07.pdf` è un riassunto «da Massimo (via Claude)» delle FAQ FTMO, con l'avviso «verificare sempre sulla pagina ufficiale». Quello che dice, e lo stato di ogni punto:
+| Tema | Cosa dice il riassunto | Stato |
+|---|---|---|
+| EA | Algoritmici ed EA consentiti; nessun obbligo di stop loss | da verificare sulla pagina |
+| EA di terzi | Un EA usato da altri = «stessa strategia»; rischio rifiuto/sospensione se si supera il tetto | coerente con la ricerca |
+| **Tetto di capitale** | **400.000 $ / 320.000 € per trader o per strategia**, su tutti i conti e prodotti, prima dello scaling; operazioni identiche o simili su più conti sommate; registrazioni diverse per aggirare = vietato | da verificare; il 320.000 € è la cifra del riassunto |
+| «EA diversi = limiti separati» | È un'**inferenza** del riassunto, non una frase di FTMO | **da chiedere per iscritto** |
+| Limiti ordini | Max 200 ordini simultanei, 2.000 posizioni al giorno | da verificare |
+| **Weekend/notte** | Posizioni aperte nel weekend vietate sui conti **Standard finanziati**; consentite sui conti Swing e in Challenge/Verifica | **nodo per i nostri EA** |
+| **News** | Stop 2 minuti prima e dopo le notizie USD (oro compreso) sui conti Standard finanziati; non in Challenge/Verifica | **nodo per i nostri EA** |
+| VPN/VPS | Consentiti, tranne accesso dagli USA | da verificare |
+| Swing e leva | Swing: leva 1:9 sui metalli (dichiarato dal riassunto) | da verificare |
+
+Verifiche mie sui numeri del riassunto: nei nostri test il Reaper fa circa 12 operazioni a settimana (630 l'anno), non 5-9; sul trial gli ordini pendenti contemporanei erano 40 con tre EA (sotto 200).
+**Peso del weekend nei nostri test (P1-P5, 2013/2020/2025):** dal 9% al 18% delle posizioni attraversa un weekend, e circa l'11-12% del profitto netto viene da quelle posizioni. Su un conto Standard finanziato andrebbero chiuse prima del weekend (`FridayStopHour` dei set è 25, cioè disattivato): il test con la chiusura del venerdì non è stato fatto.
