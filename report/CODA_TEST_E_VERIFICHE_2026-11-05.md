@@ -4,7 +4,8 @@ Regola: criteri e previsioni scritti PRIMA dei numeri; un controllo non fatto e'
 
 
 ## CANCELLO PRIMA DI UBS (deciso da Claudio il 05/11/2026: "prima di partire con UBS dobbiamo aver testato bene TUTTI gli EA")
-UBS parte solo quando ogni EA ha, per ognuno, una riga "TESTATO BENE" con i punti sotto, oppure un limite dichiarato. Stato al 05/11:
+**DECISIONE 07/11/2026 (Claudio): "chiudiamo il cancello solo con oro e forex".** Il cancello prima di UBS vale SOLO per i 4 EA oro (Reaper, Phantom, Goldbot One, Gold Trade Pro) e i 4 EA forex (Apex, Stability Pro, Luna, Daytrade Pro). Indicement, ORB Master, Bitcoin Reaper e Bitcoin Scalp Pro restano fuori dal cancello (priorita' bassa, si fanno dopo UBS o mai): il loro stato "poco testato / non testato" va dichiarato come limite, non e' piu' un blocco.
+UBS parte solo quando ogni EA del cancello (oro + forex) ha una riga "TESTATO BENE" con i punti sotto, oppure un limite dichiarato. Stato al 05/11 (tabella completa; righe indici e Bitcoin = fuori cancello dal 07/11):
 | EA (13 di Wim) | Fatto | Manca prima di UBS |
 |---|---|---|
 | Gold Reaper, Gold Phantom, Goldbot One, Gold Trade Pro (4 oro) | test su anni diversi (2013/2018/2020/2025 e altri), trio con Guardian; fake-out Fase 1 | Fase 2 fake-out (in corso); combo `*_3GOLD/_4GOLD` di Wim; AdjustEntry, Randomization 60, weekend, regola 1/3 del rischio; verifica `AdjustLotsizeToVariableValues` su Reaper e Phantom |
