@@ -3,7 +3,7 @@
 Criteri e previsioni scritti PRIMA: `CRITERI_FOREX_TESTATO_BENE_2026-11-07.md`. Dati: 19 zip `WIM_01..19` (cartella `ANNO4K_WIM_FOREX_OOS_20261107_1903`), parser e analisi in `FOREX_OOS_dati/` (`parse_oos.py`, `analisi_oos.py`, `oos_res.json`, `oos_analisi.json`). 10 set x 7 anni nuovi (2014, 2016, 2018, 2019, 2021, 2023, 2024), deposito 4.000 EUR, Modello 1 (barre da 1 minuto), terminale BCM, solo tester.
 
 ## Validita
-- **70 passate lanciate, 69 valide, 1 esclusa**: `APEX_ApexElevatedGrid_2024` e **KO** (il salvataggio del report si e bloccato oltre i 600 minuti: manifest "KO", nessun saldo finale). Per i criteri scritti e **esclusa e dichiarata, non sostituita**. Dal log: 1449 operazioni, netto +866,64, DD equity 23,77%: indizio, non risultato. Anche la passata 60 (Apex Conservative 2019) ha avuto lo stesso blocco ma si e chiusa in tempo ed e valida.
+- **70 passate lanciate, 70 valide dopo la rifatta del 08/11**: la prima passata di `APEX_ApexElevatedGrid_2024` era **KO** (il salvataggio del report si e bloccato oltre i 600 minuti, nessun saldo finale; esclusa dai numeri iniziali). **Rifatta il 08/11 alle 17:40 (riga con timeout di 40 minuti): stato OK**, qualita 100%, input `si`, 1.449 operazioni, **netto +866,64**, PF 1,58, **DD equity 23,77%** (1.073,51), DD saldo 9,95%, stop out 0, saldo finale 4.866,64. Gli stessi numeri letti dal log della passata KO: il tester e deterministico. Le tabelle sotto includono ora la passata rifatta. Anche la passata 60 (Apex Conservative 2019) ha avuto lo stesso blocco ma si e chiusa in tempo ed e valida.
 - Tutte le 69 valide: deposito 4.000, qualita storico 100%, input confermati dal report (`si` per Luna e Apex con i 3 parametri di orario; `nessuno_imposto` per Daytrade Pro e Stability, come nel 4k).
 - **Peggior giorno realizzato non letto in 9 passate** (nei zip manca il report htm): Apex Cons 2023, Elevated 2014 e 2023, Ultra 2014 e 2023, DTP Max20 2023, DTP Max9 2024, Luna lowrisk 2018, Stability medium-low 2018. Netto, DD e operazioni vengono dal manifest e sono completi.
 - DD "relativa" nei nuovi anni dal manifest; nei vecchi dal massimo fra report e referto (come nel 4k).
@@ -22,7 +22,7 @@ Regola: DD equity <= 35% in ogni anno (> 50% = scartato), netto > 0 in almeno 10
 | Luna recommended lowrisk | 47,2% (2014) | 48,2% (2013) | 10/12 | 2.215 | ZONA GRIGIA (vicino al 50%) |
 | **Apex Conservative** | 27,1% (2016) | 27,1% | 11/12 | 3.840 | **FUORI CAMPIONE SUPERATO** (con giorni da -23% del conto) |
 | **Apex Ultra** | 32,9% (2016) | 32,9% | 10/12 | 3.362 | **FUORI CAMPIONE SUPERATO** (sul filo: 10/12 e 32,9%) |
-| Apex Elevated | 41,3% (2014), 37,9% (2016) | 45,7% | 11/11 (2024 esclusa) | 4.089 | ZONA GRIGIA |
+| Apex Elevated | 41,3% (2014), 37,9% (2016) | 45,7% | 12/12 | 4.089 | ZONA GRIGIA |
 
 Nessun set scartato (DD > 50% o stop out o saldo < 2.000). Nessuna passata con stop out o "no money".
 
@@ -38,7 +38,7 @@ Nessun set scartato (DD > 50% o stop out o saldo < 2.000). Nessuna passata con s
 | Luna lowrisk | **-1.682** | 1.415 | 1.508 | 793 | 3.476 | 3.588 | 1.360 |
 | Apex Cons | 961 | **-160** | 242 | 439 | 699 | 1.181 | 332 |
 | Apex Ultra | 880 | **-638** | 102 | 288 | 641 | 1.177 | 271 |
-| Apex Elevated | 2.487 | 1.194 | 588 | 987 | 1.675 | 2.414 | (KO) |
+| Apex Elevated | 2.487 | 1.194 | 588 | 987 | 1.675 | 2.414 | 867 |
 
 ## DD equity relativa per anno nuovo (%)
 | Set | 2014 | 2016 | 2018 | 2019 | 2021 | 2023 | 2024 |
@@ -52,11 +52,11 @@ Nessun set scartato (DD > 50% o stop out o saldo < 2.000). Nessuna passata con s
 | Luna lowrisk | 47,2 | 16,0 | 16,6 | 12,6 | 10,2 | 6,2 | 8,1 |
 | Apex Cons | 21,6 | 27,1 | 21,1 | 9,6 | 9,9 | 15,5 | 14,5 |
 | Apex Ultra | 23,8 | 32,9 | 23,2 | 11,6 | 10,8 | 16,7 | 16,1 |
-| Apex Elevated | 41,3 | 37,9 | 32,8 | 12,5 | 16,8 | 26,6 | (KO) |
+| Apex Elevated | 41,3 | 37,9 | 32,8 | 12,5 | 16,8 | 26,6 | 23,8 |
 
 ## Giorni peggiori realizzati (solo dove il report htm c'e, EUR; 4.000 = 100%)
 - Apex Cons: 2014 -749, 2016 **-936 (-23%)**, 2018 -791, 2019 -395, 2021 -208, 2024 -302.
-- Apex Ultra: 2016 **-1.019 (-25%)**, 2018 -851, 2024 -336. Apex Elevated: 2016 **-1.722 (-43%)**, 2018 **-1.696 (-42%)**.
+- Apex Ultra: 2016 **-1.019 (-25%)**, 2018 -851, 2024 -336. Apex Elevated: 2016 **-1.722 (-43%)**, 2018 **-1.696 (-42%)**, 2024 -537 (nel report del KO letto, non in quello della rifatta).
 - DTP Max50: 2018 **-1.652 (-41%)**, 2021 -1.228. DTP Max9: al peggio -206 (-5%). Luna 4DD: -144 al peggio. Stability low: -27 al peggio (il giorno peggiore e minuscolo: griglia con stop piccolo).
 - Quota di aperture al lotto minimo 0,01: Apex Cons 62-68%, Apex Elevated 40-45%, DTP Max9 61-75%, DTP Max20 2-36%; Ultra, Max50, Luna, Stability: 0%.
 
@@ -71,8 +71,8 @@ Nessun set scartato (DD > 50% o stop out o saldo < 2.000). Nessuna passata con s
 | F6 | Almeno uno dei 7 candidati perde la qualifica: 80%; tutti e 7 la mantengono: 5% | **Vero**: Daytrade Pro Max50 la perde. Gli altri 6 restano |
 | F7 | Un anno nuovo con >= 3 candidati in perdita: 50% | **Falso**: al massimo 2 (2016: Apex Cons e Ultra); 2014: solo Luna 4DD |
 | F8 | Un set Apex con un giorno <= -20% in un anno nuovo: 60% | **Vero** (Cons 2016 -23%, Ultra 2016 -25%, Elevated 2016 e 2018 oltre -40%) |
-| F9 | Almeno una coppia esclusa per dati: 40% | **Falso per i dati** (qualita 100% ovunque); 1 esclusa per KO (blocco del salvataggio) |
-| F10 | Tutte le 70 passate valide (meno le escluse per dati): 80% | **Vero** per le 69 valide; la KO e dichiarata |
+| F9 | Almeno una coppia esclusa per dati: 40% | **Falso** (qualita 100% ovunque); 1 passata KO per blocco del salvataggio, poi rifatta e valida |
+| F10 | Tutte le 70 passate valide (meno le escluse per dati): 80% | **Vero**: 70 su 70 valide (una dopo la rifatta) |
 | F11 | Le etichette dei nuovi anni mostrano i peggiori DD delle griglie negli anni direzionali sui cross AUD/NZD: 55% | **NON MISURATO** (etichette degli anni nuovi non calcolate) |
 
 ## Letture
@@ -85,4 +85,4 @@ Nessun set scartato (DD > 50% o stop out o saldo < 2.000). Nessuna passata con s
 - Un percorso per anno e un backtest a barre da 1 minuto: nessun giudizio su acquisto, lotto o taglia.
 
 ## Cosa resta per "TESTATO BENE (forex)"
-Giri B (tick reali 2025), C (orari GMT), D (80k a lotto proporzionato) ed E (flottante giornaliero, commissioni FTMO, correlazione, Guardian). Da rifare: Apex Elevated 2024 (passata KO).
+Giri B (tick reali 2025), C (orari GMT), D (80k a lotto proporzionato) ed E (flottante giornaliero, commissioni FTMO, correlazione, Guardian). Nessuna passata da rifare per il giro A.
