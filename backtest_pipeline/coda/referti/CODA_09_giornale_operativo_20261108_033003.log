@@ -1,0 +1,162 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-11-08 03:32:10  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 9
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\MT5_Wim
+=== conto: 50504894
+=====================================================================
+
+--- GIORNO 20261105   (101.8 KB, ultima scrittura 2026-11-05 23:58) ---
+    righe totali: 376
+    RIGHE DI ORDINE / DEAL: 3
+      CF001:51:00.466Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: modify position #5204337 XAUUSD (sl: 4080.01, tp: 4111.81) [no connection]
+      GR001:51:00.467The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: modify position #5217455 XAUUSD (sl: 4068.91, tp: 4272.09) [no connection]
+      KH001:51:00.468The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: modify position #5140934 XAUUSD (sl: 4066.95, tp: 4135.56) [no connection]
+    GUARDIAN, ultima riga del giorno:
+      FQ023:58:19.098ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=105840.41  dayLoss=-1.61%  totDD=-5.84%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261106   (81 KB, ultima scrittura 2026-11-06 22:53) ---
+    righe totali: 280
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      KG022:53:37.072ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=105840.41  dayLoss=0.00%  totDD=-5.84%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261107   (12.2 KB, ultima scrittura 2026-11-07 23:45) ---
+    righe totali: 50
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261108   (1.7 KB, ultima scrittura 2026-11-08 03:14) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1515150476
+=====================================================================
+
+--- GIORNO 20261105   (95.3 KB, ultima scrittura 2026-11-05 23:55) ---
+    righe totali: 353
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      HQ023:55:15.821ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=80701.73  dayLoss=-0.90%  totDD=-0.88%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261106   (80.3 KB, ultima scrittura 2026-11-06 22:51) ---
+    righe totali: 279
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      RG022:50:15.799ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=80701.73  dayLoss=0.00%  totDD=-0.88%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261107   (12.1 KB, ultima scrittura 2026-11-07 23:43) ---
+    righe totali: 48
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261108   (1.8 KB, ultima scrittura 2026-11-08 03:13) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261104   (1450.1 KB, ultima scrittura 2026-11-04 23:56) ---
+    righe totali: 2112
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261105   (1010.2 KB, ultima scrittura 2026-11-05 16:41) ---
+    righe totali: 1474
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261105   (94.8 KB, ultima scrittura 2026-11-05 23:59) ---
+    righe totali: 354
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      KR023:58:20.881ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6411.11  dayLoss=-2.65%  totDD=-2.65%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261106   (79.7 KB, ultima scrittura 2026-11-06 22:53) ---
+    righe totali: 279
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QG022:53:36.859ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6411.11  dayLoss=0.00%  totDD=-2.65%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
