@@ -1,0 +1,105 @@
+{
+ "DTP_DaytradeProMax9DDlowrisk": {
+  "anni": 12,
+  "net_tester": 7448.5599999999995,
+  "lots": 69.98999999999934,
+  "comm_tester_per_lot": -3.5062151735962206,
+  "ottimistico": 7273.585000000001,
+  "centrale": 7168.600000000004,
+  "prudente": 6888.640000000006,
+  "flip": {},
+  "neg": {}
+ },
+ "DTP_DaytradeProMax20DDmediumrisk": {
+  "anni": 12,
+  "net_tester": 13770.750000000004,
+  "lots": 135.05999999999906,
+  "comm_tester_per_lot": -3.4834888197838088,
+  "ottimistico": 13433.100000000002,
+  "centrale": 13230.510000000004,
+  "prudente": 12690.270000000004,
+  "flip": {},
+  "neg": {}
+ },
+ "DTP_DaytradeProMax50DDhighrisk": {
+  "anni": 12,
+  "net_tester": 40774.48000000001,
+  "lots": 422.7599999999996,
+  "comm_tester_per_lot": -3.467854101617941,
+  "ottimistico": 39717.58,
+  "centrale": 39083.439999999995,
+  "prudente": 37392.40000000001,
+  "flip": {
+   "prudente": 1
+  },
+  "neg": {
+   "prudente": 1
+  }
+ },
+ "STAB_stabilityprolowriskset": {
+  "anni": 12,
+  "net_tester": 10706.390000000001,
+  "lots": 230.5299999999988,
+  "comm_tester_per_lot": -2.5430529649069933,
+  "ottimistico": 10130.065,
+  "centrale": 9784.270000000006,
+  "prudente": 8862.15000000001,
+  "flip": {},
+  "neg": {}
+ },
+ "LUNA_Luna4DD": {
+  "anni": 12,
+  "net_tester": 5666.6900000000005,
+  "lots": 458.72000000000014,
+  "comm_tester_per_lot": -3.7657830484827124,
+  "ottimistico": 4519.889999999999,
+  "centrale": 3831.809999999999,
+  "prudente": 1996.9299999999987,
+  "flip": {
+   "centrale": 1,
+   "prudente": 1
+  },
+  "neg": {
+   "ottimistico": 2,
+   "centrale": 3,
+   "prudente": 3
+  }
+ },
+ "APEX_ApexConservativeGrid": {
+  "anni": 12,
+  "net_tester": 8572.839999999998,
+  "lots": 388.7400000000048,
+  "comm_tester_per_lot": -2.2682512733447324,
+  "ottimistico": 7600.989999999989,
+  "centrale": 7017.879999999981,
+  "prudente": 5462.919999999962,
+  "flip": {
+   "centrale": 1,
+   "prudente": 2
+  },
+  "neg": {
+   "centrale": 2,
+   "prudente": 3,
+   "ottimistico": 1
+  }
+ },
+ "APEX_ApexUltraConservativeGrid": {
+  "anni": 12,
+  "net_tester": 7363.83,
+  "lots": 577.1600000000202,
+  "comm_tester_per_lot": -2.4355291426986976,
+  "ottimistico": 5920.929999999949,
+  "centrale": 5055.189999999919,
+  "prudente": 2746.5499999998383,
+  "flip": {
+   "ottimistico": 1,
+   "centrale": 1,
+   "prudente": 1
+  },
+  "neg": {
+   "ottimistico": 3,
+   "centrale": 3,
+   "prudente": 3
+  }
+ }
+}
