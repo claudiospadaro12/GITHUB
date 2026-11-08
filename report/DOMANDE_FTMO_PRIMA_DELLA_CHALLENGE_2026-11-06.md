@@ -76,3 +76,10 @@ Analisi completa in `FTMO_REGOLE_LETTE_ANALISI_2026-11-07.md` (dati grezzi in `F
 15. Are martingale/grid/HFT/tick-scalping strategies allowed (they are not named in the Forbidden Trading Practices)?
 16. Premium programme: how much does it raise the capital cap?
 Stato: **nessuna risposta scritta ricevuta**.
+
+## Aggiornamento 08/11: Premium Programme (analisi in `FTMO_PREMIUM_ANALISI_2026-11-08.md`)
+17. Does a failed Challenge or Verification (not a funded account) count as a "violated FTMO Account" for the Prime rule "no 1-Step/2-Step FTMO Account violated in the last 4 months"?
+18. Prime requires "4 payouts with at least 4% profit each": does this refer to a single account or can payouts of different accounts be combined? 4% of which balance (initial or current)? Can payouts be requested in the same month?
+19. Prime capital cap of 600,000 USD: what is the exact figure in EUR? How does it combine with the Scaling Plan (+25% every 4 months)?
+20. Are the Prime Challenge discount (10%) and the free Challenge valid for account sizes such as 80,000 and 160,000 (if they exist)?
+21. With Prime, does the suspension rule for identical or substantially similar trades apply only above the new cap?
