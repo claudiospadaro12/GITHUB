@@ -39901,3 +39901,18 @@ Il 06/11 ho scritto a Claudio *«sull'orologio: la manopola resta da girare — 
 - 🔴 **Prima di RIPETERE a Claudio un verdetto dato ieri, si rilegge la fonte.** Un verdetto ripetuto non e' una citazione: e' una nuova affermazione, con la data di oggi — ed e' la stessa regola che ieri ho scritto per i riassunti (*"un riassunto non e' una citazione, e' una riscrittura"*), applicata al tempo invece che al testo.
 - 🪞 **Quando un referto del repo contraddice la mia misura, l'ordine dei controlli e': (1) la DATA dei due dati, (2) il PERIMETRO dei due dati, (3) solo poi il merito.** Saltare al (3) e' credere al proprio dato perche' e' proprio.
 - 🟢 E una cosa da ripetere: **la sonda ha funzionato.** Una riga di sola lettura, messa in coda il 04/11, ha sorvegliato per tre notti una cosa che io sbagliavo — e il suo referto era in repo, con la data in chiaro, prima che io sbagliassi.
+
+### 1540 — 2026-11-08 — UNA RIGA TARDIVA HA CAPOVOLTO IL SEGNO DI UNA GIORNATA GIA' DETTA A CLAUDIO
+Il 06/11 ho scritto a Claudio *«🟢 +70,69 su 16 chiusure, giornata positiva»* per il 05/11. Il CSV pubblicato la sera dopo dice **−135,70 su 18**. Scarto **−206,39**, **segno capovolto**.
+
+**La causa, misurata:** `LARRY DOW L` (magic `772341`, U30USD buy 0,10) ha chiuso alle **22:46:08**, cioe' **un minuto e otto secondi** dopo il taglio di `pubblica_trades.ps1` (22:45), con **−203,66**; con lei una riga Bulge chiusa alle **23:02:07** (−2,73).
+
+🔴 **Supera di un ordine di grandezza il danno che avevo dichiarato tre giorni prima** (mediano **13,10 €**, massimo **143,65 €**) — e soprattutto **non ha spostato una cifra: ha cambiato il VERSO della giornata**. E la finestra tardiva e' piu' larga di quanto avevo scritto: fra **22:45:01 e 23:10** il CSV porta **53 righe**.
+
+**Le regole.**
+- 🔴 **Il segno di una giornata non e' un dato pubblicabile la sera stessa.** Finche' esiste una finestra fra l'ultima chiusura possibile e la pubblicazione, il totale del giorno e' **provvisorio**, e va detto: *«provvisorio, le righe dopo le 22:45 arrivano domani»*. Un 🟢 su un numero provvisorio e' un'affermazione piu' forte del dato.
+- 🔴 **«Nessuna riga chiusa dopo le 22:45» si puo' dire solo del CSV che si ha in mano, non del giorno.** L'ho scritto del 05/11 **la sera stessa**, ed era vero del file e falso del giorno.
+- 🔧 **Il ricontrollo del giorno D−2 prima di scrivere D−1 non e' igiene: e' quello che evita di dire «positiva» su una giornata negativa.** Proposto il 05/11, ancora non eseguito (e' una modifica a una routine: **firma di Claudio**).
+- 📌 **E una riga tardiva puo' spostare anche una FAMIGLIA, non solo un giorno**: `PunteLarry` e' passata da **−38,33 su 25** (pubblicato il 06/11) a **−241,99 su 26**, un fattore **6**.
+
+🟢 **E sotto il difetto di pubblicazione ne e' emerso uno piu' grosso, che il difetto nascondeva**: quella riga ha lasciato correre il prezzo **2.264,40 punti indice** (−4,2% sul Dow) prima dello stop, mentre tre altre sedie nostre, **stesso simbolo, stesse ore, stessa taglia 0,10**, hanno fatto +42,57, +42,55 e −1,85. **La differenza non e' la direzione: e' l'ampiezza dello stop** — e sulla stessa settimana `SUPERWAVE DOW H1` ha chiuso due gambe a **zero esatto** (stop a pari). 👉 **Il difetto di misura stava coprendo un difetto di rischio**, ed e' la ragione per cui un difetto di misura non si archivia come "solo metodo".
