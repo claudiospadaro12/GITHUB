@@ -89,7 +89,7 @@ Cancello minimo congelato: `CANCELLO_MINIMO_PRIMA_DI_UBS_2026-11-08.md`. Sul PC 
 | 2 | **F-E**: costi FTMO e correlazione dei set forex (nessuna passata) | io, mentre gira il giro B | da fare |
 | 3 | **O-2**: costo della chiusura del venerdi, oro, 18 passate | Claudio lancia (`BOOT_RIGA_ORO_WEEKEND.txt`) | riga pronta |
 | 4 | **O-3**: Randomization 60 contro 0 contro 50, 12 passate | io preparo la riga, Claudio lancia | riga da fare |
-| 5 | **D160** (richiesta di Claudio, fuori cancello): verifica che 160k = 2 x 80k, circa 20-25 passate a deposito 160000 | io scrivo criteri e riga | dopo O-3 |
+| 5 | **D160** (richiesta di Claudio, fuori cancello): verifica che 160k = 2 x 80k, 21 passate a deposito 160000 | criteri scritti il 08/11 (`CRITERI_D160_2026-11-08.md`); riga da fare | dopo O-3 |
 | 6 | Pagina di chiusura del cancello: una riga per EA, "TESTATO BENE" o "CON LIMITI" | io | dopo 1-4 |
 | 7 | **UBS**, prima tappa: ricalibrare il "max DD a 0,01 lotti" su BCM e FTMO | | dopo 6 |
 In parallelo, senza PC di backtest: email FTMO con le 16 domande (Claudio, dopo aver letto il testo intero del gap trading), prova del Guardian v1.17 su demo, forward demo, trial FTMO finisce il 16/11.
