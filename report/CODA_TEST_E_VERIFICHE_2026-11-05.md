@@ -80,3 +80,16 @@ Un "TESTATO BENE" richiede: anni di regimi diversi, set diversi, DD prop 80k con
 - FATTO 06/11: trio oro a 4 livelli di rischio, 96 passate a 80.000 e 3.745 (`ORO_GRADINI_RISULTATI_2026-11-06.md`): Medium NON REGGE i limiti FTMO in nessun anno; Combo 3GOLD regge; punto 7 della coda (combo 3GOLD di Wim) fatto, restano AdjustEntry, Randomization, weekend, strategia 9.
 - SCRITTO 06/11: piano del forward demo della Serie 4 (tre conti prop, EA diversi per conto): `PIANO_FORWARD_DEMO_SERIE4_2026-11-06.md`. In attesa delle decisioni D1-D6 di Claudio.
 - FATTO 07/11: trio oro sul reale, 21 mesi, 21 passate (`ORO_REALE21_RISULTATI_2026-11-07.md`): Medium SCARTATO per il criterio scritto (DD limite 86-88%), 15% sul saldo realizzato; Prop e Combo accettabili.
+
+## ORDINE DI ESECUZIONE (08/11/2026, deciso da Claudio: "andiamo in ordine")
+Cancello minimo congelato: `CANCELLO_MINIMO_PRIMA_DI_UBS_2026-11-08.md`. Sul PC di backtest un giro alla volta.
+| # | Cosa | Chi | Stato |
+|---|---|---|---|
+| 1 | **Giro B forex**: tick reali 2025, 4 passate | Claudio lancia la riga (`BOOT_RIGA_WIM_FOREX_TICK.txt`), io leggo | riga pronta |
+| 2 | **F-E**: costi FTMO e correlazione dei set forex (nessuna passata) | io, mentre gira il giro B | da fare |
+| 3 | **O-2**: costo della chiusura del venerdi, oro, 18 passate | Claudio lancia (`BOOT_RIGA_ORO_WEEKEND.txt`) | riga pronta |
+| 4 | **O-3**: Randomization 60 contro 0 contro 50, 12 passate | io preparo la riga, Claudio lancia | riga da fare |
+| 5 | **D160** (richiesta di Claudio, fuori cancello): verifica che 160k = 2 x 80k, circa 20-25 passate a deposito 160000 | io scrivo criteri e riga | dopo O-3 |
+| 6 | Pagina di chiusura del cancello: una riga per EA, "TESTATO BENE" o "CON LIMITI" | io | dopo 1-4 |
+| 7 | **UBS**, prima tappa: ricalibrare il "max DD a 0,01 lotti" su BCM e FTMO | | dopo 6 |
+In parallelo, senza PC di backtest: email FTMO con le 16 domande (Claudio, dopo aver letto il testo intero del gap trading), prova del Guardian v1.17 su demo, forward demo, trial FTMO finisce il 16/11.
