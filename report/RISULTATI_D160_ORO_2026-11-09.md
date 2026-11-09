@@ -57,3 +57,13 @@ Per anno, P4 oro: 2013 R 2,20; 2020 R 1,87; 2025 R 2,04 (rumore Reaper). Il verd
 
 ## Limiti dichiarati
 Solo tester (leva 1:100), margine dell'oro su FTMO e limiti di lotto per ordine **NON** misurati; nessuno slippage di ordini piu grandi; costi per lotto non applicati (scenari F-E); un percorso per anno; riferimento 80k singolo per le rumorose; la prova "lotti uguali" usa il lotto massimo e non la somma dei lotti a 80k (non nei dati disponibili). Daytrade Pro e Gold Trade Pro Combo **non ancora misurati** a 160k.
+
+## AGGIORNAMENTO: Gold Trade Pro Combo (riga `D160_GTP`, 3 passate, tutte valide)
+Input imposti confermati dal report in tutte e 3 (Risk=3, MaxRiskPerStrategy 0,5, PropFirmMaxDailyDD 4,0), deposito 160000, zero stop out e zero "no money". Deterministico (Randomization 0): 1 passata per anno.
+| Anno | Netto 80k | Netto 160k | R | DD rel. 80k -> 160k | Operazioni 80k / 160k | Peggior giorno realizzato 160k | Lotto max 160k | Esito |
+|---|---|---|---|---|---|---|---|---|
+| 2013 | 14.693 | 29.858 | 2,032 | 4,45 -> 4,48 | 325 / 325 | -4.350 (2,7%) | 1,24 | SCALA |
+| 2020 | 6.529 | 13.087 | 2,005 | 5,94 -> 6,15 | 288 / 288 | -2.023 | 1,18 | SCALA |
+| 2025 | 8.843 | 18.290 | 2,068 | 1,91 -> 2,00 | 276 / 276 | -1.696 | 0,45 | SCALA |
+R aggregato 3 anni = 2,04 (scarto +2,0% dal doppio); operazioni identiche (x1,00); DD entro 0,21 punti. Il peggior giorno a 80k non e nei dati letti (`gtp_res.json` non lo contiene): il rapporto dei lotti non e misurato per GTP.
+**Stato D160 a 18 celle su 21** (oro 15 + GTP 3; manca Daytrade Pro Max9): 12 SCALA, 3 SCALA CON SCARTO, 3 NON SCALA (tutte Phantom Prop 2020 e Reaper Combo 2013/2020, rumorose). Deterministiche: 8 SCALA su 9 (Goldbot 5/6, GTP 3/3). Combo P3 senza Daytrade Pro (Goldbot Combo + GTP Combo, 3 anni): 60.701 a 80k -> 123.739 a 160k, R 2,038 (scarto +1,9% dal doppio, dentro il 3%). Con Daytrade Pro il verdetto su P1, P3, P4 e P5 interi resta da chiudere.
