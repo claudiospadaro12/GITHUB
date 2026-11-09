@@ -30,7 +30,7 @@ Cancello congelato l'08/11 (`CANCELLO_MINIMO_PRIMA_DI_UBS_2026-11-08.md`): oro +
 - **Solo tester**, barre da 1 minuto (tick reali solo 2025, perche i tick BCM partono dal 10/07/2024), un percorso per anno, nessun forward, nessuno slippage reale.
 - **Randomization 50** su Reaper e Phantom: i risultati sono percorsi casuali; per decisioni che dipendono da 10-15% servono 3 o piu passate.
 - **Flottante** non ricostruito (DD equity e un limite superiore o il massimo del report); Guardian simulato solo sul realizzato.
-- **Regole e margini FTMO NON VERIFICATI**: leva dell'oro (Standard/Swing), limiti di lotto per ordine, conteggio delle 2.000 richieste, ordini pendenti nel weekend, tetto e copy-trading (mail pronta, non inviata).
+- **Regole FTMO NON VERIFICATE**: leva dell'oro (Standard/Swing), limiti di lotto per ordine, conteggio delle 2.000 richieste, ordini pendenti nel weekend, tetto e copy-trading (mail pronta, non inviata). **Margine**: calcolato dai report (`RISULTATI_MARGINE_ORO_2026-11-09.md`): a 1:30 l'oro usa il 14-47% dell'equity (non serve tagliare i lotti), a 1:9 (ipotesi non confermata) supererebbe il 100% per i conti piu grandi.
 - **Versioni degli EA**: Wim ha ricaricato gli EA sul dashboard con lo stesso numero di versione (07/11): quale file gira su PC, VPS e trial non e verificato.
 - **Guardian v1.17** compilato (0 errori) ma non provato su MT5.
 
