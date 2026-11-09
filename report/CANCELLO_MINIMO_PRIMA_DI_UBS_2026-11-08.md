@@ -7,12 +7,14 @@ Regole fisse: criteri e previsioni prima dei numeri; "NON MISURATO" quando non s
 | # | Voce | EA | Tipo | Stato |
 |---|---|---|---|---|
 | F-A | Fuori campione 7 anni nuovi | 4 forex | 70 passate | **FATTO** (`RISULTATI_FOREX_OOS_2026-11-08.md`) |
-| F-B | Tick reali contro barre, 2025 | DTP Max9, Stab low, Apex Cons, Luna 4DD | 4 passate | **riga pronta, da lanciare** |
-| F-E | Costi FTMO, correlazione (senza passate) | 7 set forex | post-elaborazione | criteri sotto |
+| F-B | Tick reali contro barre, 2025 | DTP Max9, Stab low, Apex Cons, Luna 4DD | 4 passate | **FATTO** (`RISULTATI_FOREX_TICK_2026-11-08.md`) |
+| F-E | Costi FTMO, correlazione (senza passate) | 7 set forex | post-elaborazione | **FATTO** (`RISULTATI_FE_FOREX_COSTI_E_CORRELAZIONE_2026-11-08.md`) |
 | O-1 | `AdjustLotsizeToVariableValues` e `FridayStopHour` nei set oro | Reaper, Phantom, Goldbot | lettura dei report gia fatti | **FATTO**, esito sotto |
-| O-2 | Weekend: costo della chiusura del venerdi (`FridayStopHour`) | Reaper, Phantom, Goldbot | 18 passate | criteri sotto, riga da fare |
-| O-3 | Randomization 60 contro 0 contro 50 | Reaper, Phantom | 12 passate | criteri sotto, riga da fare |
+| O-2 | Weekend: costo della chiusura del venerdi (`FridayStopHour`) | Reaper, Phantom, Goldbot | 18 passate | **FATTO** (`RISULTATI_O2_WEEKEND_2026-11-09.md`) |
+| O-3 | Randomization 60 contro 0 contro 50 | Reaper, Phantom | 12 passate | **FATTO** (O-3 e O-3b) |
 | fuori | giro C (orari GMT), giro D (80k forex), AdjustEntry negativo, strategia 9 del Reaper | | | **limiti dichiarati, non test** |
+
+**CANCELLO CHIUSO il 09/11/2026: `CANCELLO_CHIUSURA_2026-11-09.md`.**
 
 Chiusura del cancello: una pagina con una riga per EA, "TESTATO BENE" oppure "TESTATO CON QUESTI LIMITI", con la regola: *TESTATO BENE* solo se tutte le sue voci sono fatte senza sorprese; altrimenti "con limiti" e i limiti sono elencati. Nessuna promozione a "adatto al reale" o alla prop: la decide Claudio col forward.
 
