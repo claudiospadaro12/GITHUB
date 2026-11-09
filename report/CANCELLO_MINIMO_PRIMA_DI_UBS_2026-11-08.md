@@ -72,3 +72,20 @@ La chiusura non autorizza acquisti, lotti o taglie. UBS parte con la prima tappa
 - **N3** Scarto massimo oltre 10% in almeno un anno: 20%.
 - **N4** Il numero di aperture varia fra le corse (se le corse non sono identiche): 85%.
 - **N5** Le 6 passate sono tutte valide: 90%.
+
+## O-2, REVISIONE del 09/11/2026 (scritta PRIMA dei numeri): con le ripetizioni
+**Perche**: l'O-3b ha mostrato che Reaper e Phantom (Randomization 50) danno percorsi diversi a ogni corsa (rumore 6-46% sul netto annuo del Reaper). Una sola passata FRI19 contro una sola base confonderebbe il costo del venerdi con il rumore. Sostituisce la riga O-2 del 08/11 (commit 06ed8d68, 18 passate), che **non si lancia piu**.
+**Passate (42)**, trio oro di Wim, L0 (Prop) e L3 (Combo 3GOLD), 2013, 2020, 2025, 80.000 EUR, Modello 1:
+- **Reaper e Phantom** (12 celle = 2 EA x 2 livelli x 3 anni): FRI19 (`FridayStopHour=19`, unico input cambiato) in **2 ripetizioni** (R1, R2) + **1 ripetizione del BASE** (nessun input cambiato). Con la passata base del 06/11, ogni cella ha **2 percorsi base e 2 percorsi FRI19**. Totale 36 passate.
+- **Goldbot** (Randomization 0, deterministico, 6 celle): una sola passata FRI19, da confrontare con la passata base del 06/11. 6 passate.
+**Regole fissate ora** (per cella, sul **netto medio**):
+- Rapporto = media FRI19 / media base. **COSTO ACCETTABILE** se il rapporto e >= 0,92 in ciascuno dei 3 anni **e** il DD medio FRI19 non supera quello base di piu di 1 punto; **COSTO ALTO** se il rapporto e < 0,85 in almeno un anno oppure il DD sale di 3 punti; in mezzo ZONA GRIGIA.
+- **NON DISTINGUIBILE DAL RUMORE**: se |1 - rapporto| e minore del maggiore fra lo scarto fra le due basi e lo scarto fra le due FRI19 (in % sulla media), la cella non conta ne come ACCETTABILE ne come ALTO.
+- **CHIUDE** se le posizioni che attraversano il weekend scendono sotto il 2% (del totale aperto); **SOLO BLOCCA NUOVE** se restano oltre il 10%. (Letto dai deal di ogni passata FRI19.)
+- Il **Goldbot** si confronta con la sua unica base: stesse soglie, nessuna fascia di rumore.
+**Previsioni dichiarate ORA (W1-W5 del 08/11 restano; si aggiungono)**:
+- **W6** Almeno la meta delle 12 celle Reaper/Phantom e NON DISTINGUIBILE dal rumore: 55%.
+- **W7** Goldbot: COSTO ACCETTABILE in tutte e 6 le celle: 50%.
+- **W8** La ripetizione del base (BASE_R1) differisce dalla base del 06/11 di oltre il 3% sul netto in almeno 6 celle su 12: 75%.
+- **W9** Il parametro CHIUDE le posizioni (attraversamenti < 2%) in tutti e tre gli EA: 40%.
+- **W10** Tutte le 42 passate valide: 80%.
