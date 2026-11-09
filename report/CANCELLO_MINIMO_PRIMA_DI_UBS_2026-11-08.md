@@ -57,3 +57,18 @@ Si usano i risultati gia raccolti (12 anni, 7 set che hanno superato il fuori ca
 
 ## Cosa cambia quando il cancello e chiuso
 La chiusura non autorizza acquisti, lotti o taglie. UBS parte con la prima tappa: ricalibrare il "max historical DD a 0,01 lotti" sul BCM e sul FTMO (Wim 04/09 e 31/07), poi i set. I test di UBS restano separati dal forward in corso.
+
+## O-3b (aggiunta del 09/11/2026, scritta PRIMA dei numeri): il risultato con Randomization 50 si ripete?
+**Domanda**: nell'O-3 il Reaper con 60 ha reso il 10-15% meno del 50 e con 0 l'8-17% meno. Se due corse identiche con 50 danno gia risultati diversi fra loro, la differenza e **rumore**.
+**Passate (6)**: Reaper L0 (`Gold_reaper_propfirm.set`, Randomization 50 del set), 2013, 2020, 2025, 80.000, Modello 1, **nessun input cambiato**, ripetuto **2 volte** per anno. Riferimento: la passata del 06/11 (96 test) con gli stessi input: ogni anno ha quindi 3 percorsi (base + 2).
+**Regole fissate ora** (per anno, sul netto):
+- **DETERMINISTICO**: le 3 corse hanno lo stesso netto (scarto <= 0,5%) e lo stesso numero di aperture. Allora le differenze 0/50/60 sono **reali** (non casuali).
+- **RUMORE PICCOLO**: scarto massimo fra le 3 corse fra 0,5% e 3%.
+- **RUMORE GRANDE**: scarto massimo oltre il 3%. Se supera il 10% in almeno un anno, il confronto 50-60 dell'O-3 e **non conclusivo** per il Reaper (la fascia di rumore e piu grande della differenza).
+- Nessun giudizio su quale valore sia migliore da una sola serie.
+**Previsioni dichiarate ORA (non misurate)**:
+- **N1** Le 3 corse di ogni anno sono identiche (DETERMINISTICO in 3 anni su 3): 45%.
+- **N2** Scarto massimo <= 3% in tutti e 3 gli anni (DETERMINISTICO o RUMORE PICCOLO): 65%.
+- **N3** Scarto massimo oltre 10% in almeno un anno: 20%.
+- **N4** Il numero di aperture varia fra le corse (se le corse non sono identiche): 85%.
+- **N5** Le 6 passate sono tutte valide: 90%.
