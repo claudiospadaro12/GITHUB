@@ -67,3 +67,34 @@ Input imposti confermati dal report in tutte e 3 (Risk=3, MaxRiskPerStrategy 0,5
 | 2025 | 8.843 | 18.290 | 2,068 | 1,91 -> 2,00 | 276 / 276 | -1.696 | 0,45 | SCALA |
 R aggregato 3 anni = 2,04 (scarto +2,0% dal doppio); operazioni identiche (x1,00); DD entro 0,21 punti. Il peggior giorno a 80k non e nei dati letti (`gtp_res.json` non lo contiene): il rapporto dei lotti non e misurato per GTP.
 **Stato D160 a 18 celle su 21** (oro 15 + GTP 3; manca Daytrade Pro Max9): 12 SCALA, 3 SCALA CON SCARTO, 3 NON SCALA (tutte Phantom Prop 2020 e Reaper Combo 2013/2020, rumorose). Deterministiche: 8 SCALA su 9 (Goldbot 5/6, GTP 3/3). Combo P3 senza Daytrade Pro (Goldbot Combo + GTP Combo, 3 anni): 60.701 a 80k -> 123.739 a 160k, R 2,038 (scarto +1,9% dal doppio, dentro il 3%). Con Daytrade Pro il verdetto su P1, P3, P4 e P5 interi resta da chiudere.
+
+## AGGIORNAMENTO FINALE: Daytrade Pro Max9 (riga `D160_DTP`, 3 passate, tutte valide) e VERDETTO D160 su 21 celle
+Daytrade Pro WSC V4.5, set Max9%DD lowrisk, EURUSD D1, deposito 160000, Modello 1, zero stop out e zero "no money". Deterministico: 1 passata per anno; riferimento a 80k nel pacchetto Wim (`wim_full_88_passate.json`).
+| Anno | Netto 80k | Netto 160k | R | DD equity rel. 80k -> 160k | Operazioni | Peggior giorno (metodo saldo a righe, come a 80k): 80k -> 160k | Esito |
+|---|---|---|---|---|---|---|---|
+| 2013 | 9.197 | 18.201 | 1,979 | 5,75 -> 5,71 | 383 / 383 | -4,78% -> -4,50% | SCALA |
+| 2020 | 16.865 | 33.713 | 1,999 | 3,58 -> 3,60 | 486 / 486 | -3,04% -> -3,04% | SCALA |
+| 2025 | 702 | 1.414 | 2,014 | 4,72 -> 4,70 | 415 / 415 | -3,06% -> -3,07% | SCALA (netto 2025 quasi zero: il rapporto vale poco) |
+**Avvertenza sul peggior giorno di Daytrade Pro**: nei report i deal non sono in ordine di tempo (ordini pendenti riempiti con orari non in sequenza), quindi il "peggior giorno" dipende dal metodo: con il saldo a righe (come a 80k) e uguale in %; ordinando i deal per orario si ottiene un valore molto piu basso (-2,6% nel 2013). Il DD equity e invece solido (assoluto x1,99).
+
+### Verdetto D160 (21 celle: 15 oro + 3 Gold Trade Pro + 3 Daytrade Pro)
+- **15 SCALA, 3 SCALA CON SCARTO, 3 NON SCALA.** Regola: almeno 18 SCALA e nessuna NON SCALA -> **verdetto formale "160k = 2 x 80k" NON soddisfatto**, per colpa delle 3 celle rumorose (Phantom Prop 2020, Reaper Combo 2013 e 2020), dove il riferimento a 80k e una passata sola.
+- **Componenti deterministiche (Goldbot, Gold Trade Pro, Daytrade Pro): 11 celle su 12 SCALA** (l'altra, Goldbot Combo 2025, R 2,12). Rumorose: 4 su 9.
+- **DD in punti: 21 celle su 21 entro 1 punto** (scarto massimo 0,33). Operazioni: identiche a 80k per GTP e DTP (x1,00).
+
+### Combo intere a 160k (netti misurati, tester, 2013 / 2020 / 2025)
+| Combo | 80k, somma 3 anni | 160k, somma 3 anni | R | Scarto dal doppio | Per anno (160k) | Centrale a 160k, media/anno* |
+|---|---|---|---|---|---|---|
+| P1: Phantom Gradino 1 + Goldbot Prop + DTP Max9 | 108.075 | 221.954 | 2,054 | +2,7% | 78.822 / 82.821 / 60.311 | ~63.100 (80k: 30.582) |
+| P3: Goldbot Combo + GTP Combo + DTP Max9 | 87.465 | 177.067 | 2,024 | +1,2% | 76.561 / 66.630 / 33.876 | ~52.100 (80k: 25.685) |
+| P4: Reaper Combo + Goldbot Prop + DTP Max9 | 86.622 | 175.708 | 2,028 | +1,4% | 68.155 / 70.509 / 37.043 | ~50.400 (80k: 24.788) |
+| P5: Phantom Prop + Goldbot Prop + DTP Max9 | 83.759 | 171.504 | 2,048 | +2,4% | 65.639 / 69.514 / 36.351 | ~50.100 (80k: 24.378) |
+*Centrale a 160k = netto tester 160k meno 2 volte il costo centrale a 80k (ipotesi: i costi scalano con i lotti, che a 160k sono il doppio; costi e slippage NON misurati a 160k). Lordo, prima del profit split, medie dei 3 anni.
+**Le quattro somme stanno entro il 3% del doppio dell'80k: "il doppio vale" per le combo** (D8 vera). Per anno P4 varia da R 1,93 (2020) a 2,14 (2013) per il rumore del Reaper.
+
+### Previsioni D1-D12: esito finale
+D1 falsa (15 su 21 SCALA) · D2 falsa (3 NON SCALA) · D3 **vera** (21/21 entro 1 punto) · D4 falsa (R < 2,00 in 4 celle su 21) · D5 vera sui lotti misurati (oro 15/15, GTP/DTP non confrontabili) · D6 vera (15/15) · D7 falsa (Goldbot, GTP e DTP sono le piu pulite) · D8 **vera** (+1,2 / +1,4 / +2,4 / +2,7%) · D9 vera (zero stop out) · D10 falsa (1 KO su 30 passate) · D11 vera (5 delle 9 rumorose con ripetizioni oltre il 5%) · D12 vera (deterministiche 11/12 SCALA, rumorose 4/9).
+
+### Cosa dice D160 e cosa no
+- **Dice**: nel tester un conto da 160k si comporta come due da 80k (lotti, operazioni, DD in % e netto del doppio, +1-3% sulle combo); le stime "x2" usate finora **valgono**.
+- **Non dice**: margine e leva dell'oro su FTMO (tester 1:100), limiti di lotto per ordine (lotto massimo a 160k fino a 1,82 Goldbot Prop 2013, 1,31 DTP 2013), slippage di ordini piu grandi, costi a 160k (ipotesi x2), flottante, ne la sovrapposizione con altri utenti degli stessi EA (nota del 09/11 su copy-trading e tetto). Un percorso per anno, tre anni, nessun forward.
