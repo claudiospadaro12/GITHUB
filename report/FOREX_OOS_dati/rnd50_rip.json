@@ -1,0 +1,62 @@
+{
+ "RND50_R1_L0_GR_80000_2013": {
+  "stato": "OK",
+  "net": 13070.9,
+  "pf": "1.29",
+  "ddp": 7.7,
+  "nin": 601,
+  "worst": -5639.9,
+  "ok": "nessuno_imposto",
+  "qual": "99%"
+ },
+ "RND50_R1_L0_GR_80000_2020": {
+  "stato": "OK",
+  "net": 22487.49,
+  "pf": "1.74",
+  "ddp": 4.75,
+  "nin": 591,
+  "worst": -2058.14,
+  "ok": "nessuno_imposto",
+  "qual": "100%"
+ },
+ "RND50_R1_L0_GR_80000_2025": {
+  "stato": "OK",
+  "net": 33592.95,
+  "pf": "2.72",
+  "ddp": 5.58,
+  "nin": 599,
+  "worst": -1007.4099999999999,
+  "ok": "nessuno_imposto",
+  "qual": "100%"
+ },
+ "RND50_R2_L0_GR_80000_2013": {
+  "stato": "OK",
+  "net": 21779.99,
+  "pf": "1.47",
+  "ddp": 7.56,
+  "nin": 639,
+  "worst": -5454.37,
+  "ok": "nessuno_imposto",
+  "qual": "99%"
+ },
+ "RND50_R2_L0_GR_80000_2020": {
+  "stato": "OK",
+  "net": 25442.23,
+  "pf": "1.88",
+  "ddp": 4.96,
+  "nin": 573,
+  "worst": -1886.4499999999998,
+  "ok": "nessuno_imposto",
+  "qual": "100%"
+ },
+ "RND50_R2_L0_GR_80000_2025": {
+  "stato": "OK",
+  "net": 33743.52,
+  "pf": "2.63",
+  "ddp": 4.34,
+  "nin": 621,
+  "worst": -1123.4599999999998,
+  "ok": "nessuno_imposto",
+  "qual": "100%"
+ }
+}

@@ -43,3 +43,7 @@ Criteri e previsioni scritti PRIMA: `CANCELLO_MINIMO_PRIMA_DI_UBS_2026-11-08.md`
 
 ## Effetto sul cancello (voce O-3: fatta)
 - Reaper e Phantom: **Randomization da lasciare a 50 come nei set prop**; 0 costa il 8-30% del profitto, 60 non aiuta sul Reaper. Resta il limite "la differenza fra 50 e 60 puo essere rumore".
+
+
+## AGGIORNAMENTO 09/11 (O-3b): il confronto sul Reaper non e conclusivo
+Il Reaper a Randomization 50 ripetuto 2 volte (`RISULTATI_O3B_RIPETIBILITA_REAPER_2026-11-09.md`) varia da una corsa all'altra del 46% (2013), 12,5% (2020) e 5,7% (2025): **il tester non e deterministico con la Randomization**. Le differenze fra 0, 50 e 60 sul Reaper nel 2013 e nel 2020 stanno dentro questo rumore. Valgono come indizio solo: le aperture (con 0 molto meno) e il Reaper nel 2025 (0 e 60 sotto la fascia del 50). Il Phantom non e stato ripetuto.
