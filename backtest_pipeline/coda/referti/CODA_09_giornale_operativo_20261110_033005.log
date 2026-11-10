@@ -1,0 +1,254 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-11-10 03:33:32  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 9
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\MT5_Wim
+=== conto: 50504894
+=====================================================================
+
+--- GIORNO 20261109   (86.7 KB, ultima scrittura 2026-11-09 23:55) ---
+    righe totali: 300
+    RIGHE DI ORDINE / DEAL: 8
+      OM000:00:02.506GoldBot_One_V3.5_WSC (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      FS000:00:02.506The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      PS000:00:02.507Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      OH000:00:02.507GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      NH000:05:02.629Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      GQ022:00:00.108The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: cancel #5255731 [market closed]
+      GO022:00:00.123Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: buy stop 0.02 XAUUSD at 4197.41 (4197.41) sl: 4148.59 tp: 4316.41 [market closed]
+      QP022:00:00.130The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: cancel #5255729 [market closed]
+    GUARDIAN, ultima riga del giorno:
+      OG023:55:08.815ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=105522.44  dayLoss=0.32%  totDD=-5.52%  rischioAperto=3.10%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261110   (12.6 KB, ultima scrittura 2026-11-10 03:25) ---
+    righe totali: 44
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      DP003:30:08.666ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=104815.86  dayLoss=1.02%  totDD=-4.82%  rischioAperto=2.75%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261109   (105.7 KB, ultima scrittura 2026-11-09 23:44) ---
+    righe totali: 377
+    RIGHE DI ORDINE / DEAL: 260
+      QP000:00:00.288ABTG_PunteLarry (EURAUD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      CK000:01:00.999ABTG_PunteLarry (U30USD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      EI008:00:26.881ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] BUY STOP @ 4136.60 SL 4051.80 TP 4475.80 lot 0.01
+      RJ008:00:26.951ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4051.80 SL 4136.60 TP 3712.60 lot 0.01
+      JM008:59:00.609ABTG_MaxMinNotte_DAX_Short_Ottimizzato (D30EUR,M15)[MaxMinNotte] SELL STOP @ 25634.60 SL 25727.30 TP 25263.80 lot 0.10
+      JJ009:35:08.464ABTG_DAX_Apertura_EU (D30EUR,M5)[DAX Apertura EU] BUY LIMIT (retest) @ 25929.80000  SL 25767.40000  lot 0.10
+      GH010:00:00.239ABTG_EasyTrend (CHFJPY,H1)[EZ] SEGNALE LONG alle 09:00: livello d'ingresso 193.206 (chiusura candela segnale), estremo figura 192.707, SL 192.677. Candela linreg O=192.922 H=193.103 L=192.895 C=193.033, plot 192.960.
+      NK010:27:35.483ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      LF010:27:35.511ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      OD010:27:35.998ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      KS010:27:36.250ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      OQ010:27:36.913ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      NL010:27:37.207ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      DJ010:27:37.403ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      MI010:27:37.657ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      NG010:27:37.951ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      FR010:27:38.651ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      GP010:27:39.408ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      GO010:27:39.664ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      JM010:27:40.212ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      PH010:27:40.762ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      OF010:27:41.308ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      DE010:27:41.934ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      CS010:27:42.235ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      JN010:27:42.487ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      PL010:27:42.832ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      MK010:27:43.474ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      OI010:27:43.922ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      OD010:27:44.273ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      CR010:27:44.525ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      EQ010:27:44.800ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      JO010:27:45.026ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      OJ010:27:45.430ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      HH010:27:46.577ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      IG010:27:46.943ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      GE010:27:47.216ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      HP010:27:47.396ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      IN010:27:47.645ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      FM010:27:47.947ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      QK010:27:49.320ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #5254609 D30EUR (sl: 25940.40, tp: 26417.00) [invalid stops]
+      ... altre 220 righe non stampate (tetto).
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261110   (7.1 KB, ultima scrittura 2026-11-10 03:14) ---
+    righe totali: 27
+    RIGHE DI ORDINE / DEAL: 3
+      QP000:00:00.398ABTG_PunteLarry (EURAUD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      LE000:00:00.874ABTG_PunteLarry (GBPUSD,H1)[LARRY] SETUP SHORT [SMASH libro] del 2026.11.10: ingresso STOP @ 1.33469 (punta/gap 0.00897 = 1.48 x ATR D1).
+      JD000:00:02.576ABTG_PunteLarry (GBPUSD,H1)[LARRY] PENDENTE SELL STOP @ 1.33469  SL 1.34496  TP -  lot 0.01  (pattern SMASH libro, punta/gap 1.48 x ATR, scadenza 2026.11.10 23:59, ordine 5266531)
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1515150476
+=====================================================================
+
+--- GIORNO 20261109   (83.5 KB, ultima scrittura 2026-11-09 23:55) ---
+    righe totali: 290
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      EH023:55:09.534ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=79415.36  dayLoss=1.61%  totDD=0.73%  rischioAperto=12.88%  stato=OK  pausa=off  cap=ON
+
+--- GIORNO 20261110   (14 KB, ultima scrittura 2026-11-10 03:25) ---
+    righe totali: 50
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      IE003:30:09.042ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=77151.72  dayLoss=4.34%  totDD=3.56%  rischioAperto=0.00%  stato=BLOCKED  pausa=ON  cap=off
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261109   (134.6 KB, ultima scrittura 2026-11-09 23:55) ---
+    righe totali: 485
+    RIGHE DI ORDINE / DEAL: 73
+      RQ000:00:02.192Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      MS000:00:02.194The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      MO000:00:02.194GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      PH000:00:02.194GoldBot_One_V3.5_WSC (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      MH000:05:02.851Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      LF022:00:00.092GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.55 XAUUSD at 4028.03 (4028.03) sl: 4200.06 tp: 4014.40 [market closed]
+      NK022:00:00.113The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.58 XAUUSD at 4199.76 (4199.76) sl: 4026.03 tp: 4395.97 [market closed]
+      NH022:00:00.127Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: buy stop 0.44 XAUUSD at 4213.30 (4213.30) sl: 4172.42 tp: 4259.63 [market closed]
+      IE022:00:00.132GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 1.06 XAUUSD at 4699.35 (4699.35) sl: 4674.53 tp: 4718.33 [market closed]
+      KJ022:00:00.150GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.55 XAUUSD at 4028.03 (4028.03) sl: 4200.06 tp: 4014.40 [market closed]
+      JP022:00:00.172The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.58 XAUUSD at 3870.14 (3870.14) sl: 4043.87 tp: 3673.93 [market closed]
+      JS022:00:00.187Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: sell stop 0.44 XAUUSD at 3878.04 (3878.04) sl: 3918.92 tp: 3831.71 [market closed]
+      HN022:00:00.199GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 1.06 XAUUSD at 3869.99 (3869.99) sl: 3894.81 tp: 3851.01 [market closed]
+      EN022:00:00.211GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.55 XAUUSD at 4028.03 (4028.03) sl: 4200.06 tp: 4014.40 [market closed]
+      NS022:00:00.222The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.87 XAUUSD at 4697.33 (4697.33) sl: 4670.76 tp: 4893.54 [market closed]
+      EP022:00:00.237Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: buy stop 0.26 XAUUSD at 4197.41 (4197.41) sl: 4148.59 tp: 4316.41 [market closed]
+      KM022:00:00.254GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.72 XAUUSD at 4699.62 (4699.62) sl: 4654.44 tp: 4787.83 [market closed]
+      HR022:00:00.272GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.55 XAUUSD at 4028.03 (4028.03) sl: 4200.06 tp: 4014.40 [market closed]
+      HH022:00:00.307The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.87 XAUUSD at 3869.94 (3869.94) sl: 3896.51 tp: 3673.73 [market closed]
+      PK022:00:00.317Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: sell stop 0.26 XAUUSD at 3874.11 (3874.11) sl: 3922.93 tp: 3755.11 [market closed]
+      QF022:00:00.320GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.72 XAUUSD at 3870.03 (3870.03) sl: 3915.21 tp: 3781.82 [market closed]
+      RF022:00:00.328GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.55 XAUUSD at 4028.03 (4028.03) sl: 4200.06 tp: 4014.40 [market closed]
+      PK022:00:00.345The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.33 XAUUSD at 4199.76 (4199.76) sl: 4152.75 tp: 4252.90 [market closed]
+      OH022:00:00.364Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: buy stop 1.36 XAUUSD at 4694.13 (4694.13) sl: 4658.22 tp: 4730.04 [market closed]
+      OE022:00:00.378GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 1.17 XAUUSD at 4700.62 (4700.62) sl: 4609.57 tp: 4826.97 [market closed]
+      NJ022:00:00.384GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.75 XAUUSD at 4027.29 (4027.29) sl: 4110.62 tp: 4013.14 [market closed]
+      EP022:00:00.395The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.33 XAUUSD at 3868.50 (3868.50) sl: 3915.51 tp: 3815.36 [market closed]
+      JS022:00:00.405Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: sell stop 1.36 XAUUSD at 3870.74 (3870.74) sl: 3906.65 tp: 3834.83 [market closed]
+      RN022:00:00.413GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 1.17 XAUUSD at 3866.05 (3866.05) sl: 3957.10 tp: 3739.70 [market closed]
+      EN022:00:00.435GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.75 XAUUSD at 4027.29 (4027.29) sl: 4110.62 tp: 4013.14 [market closed]
+      HR022:00:00.461The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.36 XAUUSD at 4197.92 (4197.92) sl: 4182.59 tp: 4243.91 [market closed]
+      EP022:00:00.491Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: buy stop 0.98 XAUUSD at 4212.08 (4212.08) sl: 4179.85 tp: 4246.32 [market closed]
+      KM022:00:00.506GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 1.44 XAUUSD at 4699.52 (4699.52) sl: 4654.34 tp: 4787.73 [market closed]
+      JR022:00:00.511GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.75 XAUUSD at 4027.29 (4027.29) sl: 4110.62 tp: 4013.14 [market closed]
+      CH022:00:00.527The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.36 XAUUSD at 3872.44 (3872.44) sl: 3887.77 tp: 3826.45 [market closed]
+      KK022:00:00.545Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: sell stop 0.98 XAUUSD at 3872.76 (3872.76) sl: 3904.99 tp: 3838.52 [market closed]
+      CF022:00:00.564GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 1.44 XAUUSD at 3870.03 (3870.03) sl: 3915.21 tp: 3781.82 [market closed]
+      RI022:00:00.581GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.92 XAUUSD at 4027.84 (4027.84) sl: 4063.21 tp: 4005.04 [market closed]
+      OJ022:00:00.594The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.36 XAUUSD at 4197.92 (4197.92) sl: 4182.59 tp: 4243.91 [market closed]
+      LH022:00:00.611Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)CTrade::OrderSend: buy stop 1.64 XAUUSD at 4691.96 (4691.96) sl: 4661.18 tp: 4739.52 [market closed]
+      ... altre 33 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      EQ023:55:07.925ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=105661.30  dayLoss=4.12%  totDD=-5.66%  rischioAperto=0.00%  stato=BLOCKED  pausa=ON  cap=off
+
+--- GIORNO 20261110   (14.6 KB, ultima scrittura 2026-11-10 03:30) ---
+    righe totali: 51
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      IO003:30:07.774ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=105661.30  dayLoss=0.00%  totDD=-5.66%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261104   (1450.1 KB, ultima scrittura 2026-11-04 23:56) ---
+    righe totali: 2112
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261105   (1010.2 KB, ultima scrittura 2026-11-05 16:41) ---
+    righe totali: 1474
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261109   (84.4 KB, ultima scrittura 2026-11-09 23:55) ---
+    righe totali: 295
+    RIGHE DI ORDINE / DEAL: 4
+      NM000:00:01.935GoldBot_One_V3.5_WSC (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      JP000:00:01.936The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      QN000:00:01.988GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      RR022:00:00.106The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: cancel #5255730 [market closed]
+    GUARDIAN, ultima riga del giorno:
+      NN023:55:09.592ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6346.43  dayLoss=1.04%  totDD=-1.62%  rischioAperto=10.48%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261110   (12.7 KB, ultima scrittura 2026-11-10 03:30) ---
+    righe totali: 44
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      GJ003:30:09.449ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6241.67  dayLoss=1.68%  totDD=0.06%  rischioAperto=7.98%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
