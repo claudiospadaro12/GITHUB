@@ -22,3 +22,21 @@
 
 ## Limiti
 Solo oro (Daytrade Pro escluso: i margini forex sono piccoli ma non calcolati); soglie di margin call e stop out di FTMO NON TROVATE; l'equity e la ricostruzione prudente (flottante all'estremo di barra, cambio medio annuo); prezzo = chiusura della barra; ordini pendenti non usano margine finche non sono eseguiti; un percorso per anno; la leva dell'oro su FTMO non e verificata. Nessun giudizio su lotti o taglie.
+
+## AGGIORNAMENTO 10/11/2026 -- la risposta scritta di FTMO cambia la leva dell'oro: 1:50 Standard e 1:15 Swing (se l'oro e nei "Metalli")
+**Fonte**: la risposta dell'assistenza FTMO del 10/11 (`FTMO_RISPOSTE_TRACCIA_2026-11-09.md`, domanda 5): categoria "Metalli, petrolio cash e indici maggiori", margine 200%: **Standard 1:50, Swing 1:15**. **XAUUSD non e nominato**: che l'oro stia in quella categoria e una deduzione, da confermare nel calcolatore del margine FTMO. L'ipotesi 1:9 di Massimo non e confermata (1:9 e per indici minori e materie prime).
+
+**Calcolo (nessuna passata nuova)**: il margine e inversamente proporzionale alla leva, quindi la colonna 1:50 e il doppio della colonna 1:100 e la colonna 1:15 e il doppio della colonna 1:30; il livello di margine minimo si dimezza. Stessi dati, stesso anno peggiore (2013), 80k (a 160k stesso rapporto).
+
+| Conto | 1:50 (Standard) | **1:15 (Swing)** | Livello di margine minimo a 1:15 (circa) |
+|---|---|---|---|
+| A Reaper L0 | 28% | **94%** | 107% |
+| A Reaper L3 | 10% | 34% | 295% |
+| B Phantom L1 + GTP Combo | 20% | **66%** | 152% |
+| B Phantom L0 + GTP Combo | 16% | 56% | 177% |
+| G-A Phantom L1 + Goldbot L0 | 12% | 38% | 258% |
+| G-B Phantom L0 + Goldbot L0 | 8% | 28% | 367% |
+| G-C Reaper L3 + GTP Combo | 24% | **82%** | 121% |
+| G-H Phantom L1 + Goldbot L0 + GTP | 22% | 72% | 140% |
+
+**Lettura**: sullo **Standard (1:50) il margine non e un problema** (8-28%). Sullo **Swing (1:15)** il margine dei conti pesanti sale al 66-94% dell'equity (Reaper L0, Phantom L1 + GTP, G-C) con livelli minimi di 107-152%, cioe vicino allo stop out se in quel momento si e anche in perdita: la mia frase "a 1:30 non serve tagliare i lotti per lo Swing" **non vale piu**. I conti leggeri (Reaper L3 da solo, G-A, G-B) restano sotto il 40%. Lo stop out di FTMO non e stato trovato. Il margine usato e il massimo del minuto sull'equity ricostruita (prudente), non la misura di un conto FTMO. Nessun giudizio su lotti o taglie.
