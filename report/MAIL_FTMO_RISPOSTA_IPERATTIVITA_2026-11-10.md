@@ -1,6 +1,6 @@
 # Risposta a FTMO sull'avviso di iperattivita (bozza del 10/11/2026) — da inviare da Claudio
 
-Rispondere alla mail di FTMO sull'account 1515150476 (stessa conversazione). Compilare le parti tra [parentesi quadre] (in particolare l'ora in cui l'algo trading e stato spento sul VPS e il tuo nome). Non inserire password. Conservare la risposta.
+Rispondere alla mail di FTMO sull'account 1515150476 (stessa conversazione). Resta da compilare solo [Full name] e l'email del conto FTMO. L'ora dello spegnimento (circa 09:30 ora italiana, detta da Claudio) e gia inserita; i numeri vengono dal registro del terminale del 10/11 (Logs: 8.239 righe; giorni 04-09/11 da 16 a 837 righe; registro di trading vuoto alle 13). Inviarla dalla connessione normale, non dall'hotspot. Non inserire password. Conservare la risposta.
 
 ---
 
@@ -8,7 +8,7 @@ Rispondere alla mail di FTMO sull'account 1515150476 (stessa conversazione). Com
 
 Hello FTMO Support,
 
-Thank you for your message about account 1515150476 (the Free Trial). I take it seriously and I have reviewed the order history of the account. It shows a loop on 10/11 after my own risk manager closed the positions at the daily loss limit: the Expert Advisors kept placing new pending orders and my risk manager kept cancelling them, producing well over a thousand order placements and cancellations in a few hours. I stopped it on 10/11 at [time, local time] by switching off algorithmic trading on the account's terminal, and I am redesigning that behavior so that it cannot happen again. The EAs are commercial third-party products.
+Thank you for your message about account 1515150476 (the Free Trial). I take it seriously and I have reviewed the account's order history and the terminal logs. They show a loop on 10 November: after my own risk manager closed all positions at its daily loss limit (at 02:32 server time), the Expert Advisors kept placing new pending orders and my risk manager kept deleting them, producing well over a thousand placements and cancellations in a few hours. The terminal's trade log for that day has about 8,200 lines, against 16 to 840 lines on each of the previous days (4 to 9 November). I stopped it at about 09:30 Italian time (CET) on 10 November by switching off algorithmic trading on the account's terminal; in the early afternoon the terminal's trade log shows no requests. I will keep algorithmic trading switched off until I have changed how my risk manager behaves in that situation and tested the change on a demo account. The EAs are commercial third-party products.
 
 To fix this correctly, could you please tell me:
 
