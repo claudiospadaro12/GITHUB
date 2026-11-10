@@ -10,7 +10,7 @@ Mail: `MAIL_FTMO_2026-11-09.md` (11 domande), inviata da Claudio all'assistenza 
 | 4 | Taglie 2-Step (200.000 $?); Swing: prezzo, ripartizione, altre differenze | | Taglie e costi; scelta Standard o Swing | in attesa |
 | 5 | Leva su XAUUSD, Standard e Swing | | Margine: a 1:30 l'oro usa il 14-47% dell'equity (ok); a 1:9 non sarebbe praticabile | in attesa |
 | 6 | Pendenti nel weekend; weekend e news sulla challenge | | Standard con chiusura del venerdi o Swing | in attesa |
-| 7 | Cosa conta nelle 2.000 richieste al giorno; cosa succede al superamento | | Guardian v1.17 (contatore): soglie di allarme | in attesa |
+| 7 | Cosa conta nelle 2.000 richieste al giorno; cosa succede al superamento | **Risposta parziale, NON alla nostra mail**: l'avviso di iperattivita del 10/11 (conto trial 1515150476) dice che la soglia e 2.000 "scambi o richieste del server comprese le modifiche SL/TP, annullamenti di ordine" al giorno, che le righe del registro corrispondono alle richieste, e che se gli avvisi non calano il conto viene disabilitato. Non dice se un avviso e una violazione ne cosa succede a un conto finanziato. | Guardian v1.17 (contatore): soglie di allarme; misura dal registro (`RIGA_CONTA_RICHIESTE_FTMO.txt`) | parziale |
 | 8 | Posizioni opposte fra conti dello stesso cliente | | EA diversi fra i conti | in attesa |
 | 9 | Gap trading: testo intero, ultime 2 ore prima della chiusura, ordini automatici, Swing | | Aperture del venerdi sera; fermare gli EA | in attesa |
 | 10 | Specifiche XAUUSD e limiti di lotto per ordine/simbolo/conto | | Lotti dei set (a 160k il lotto massimo arriva a circa 1,8) | in attesa |
