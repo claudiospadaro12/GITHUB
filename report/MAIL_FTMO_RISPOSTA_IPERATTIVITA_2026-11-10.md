@@ -20,8 +20,6 @@ To fix this correctly, could you please tell me:
 
 4. **Warnings and consequences.** What is the threshold that triggers this warning, and how many warnings (or on how many days) lead to the account being disabled? Does the same limit and procedure apply to Challenge, Verification and funded accounts, and what happens there when the limit is exceeded?
 
-I also sent you a separate email on 09/11/2026 with other questions about the rules (third-party EAs, the 400,000 USD allocation limit, gold leverage, weekend and gap trading, symbol specifications, account currency). If it has not been answered yet, I would be grateful for a reply to that message as well.
-
 Thank you for your help.
 
 Kind regards,
