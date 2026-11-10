@@ -26,7 +26,7 @@ Sul conto di prova FTMO 1515150476 (09-10/11) il Guardian bloccato chiamava `Fla
 
 ## File
 - `ABTG_Guardian_v118_DEMO_MODO0..3.set`: set per il DEMO BCM 50504894. `InpAction=0` (chiude davvero), `InpDailyLossPct=0.1` (soglia ABBASSATA per far scattare il blocco in pochi minuti), contatore acceso. UTF-16 come gli altri set.
-- `ABTG_Guardian_v118_DEMO_AUTOTEST.set`: come il modo 0 ma con `InpAutotest=true` (passo 1: all'avvio scrive i casi nel giornale).
+- `ABTG_Guardian_v118_DEMO_AUTOTEST.set`: come il modo 0 ma con `InpAutotest=true`, `InpAction=1` (SOLO ALLARME, non chiude niente) e soglie normali (passo 1: all'avvio scrive i casi nel giornale).
 - Riga di compilazione: `backtest_pipeline/righe/RIGA_COMPILA_GUARDIAN_V118.txt`.
 
 ## Piano di prova (solo demo, con l'ok di Claudio; mai reale, mai trial FTMO, mai VPS)
