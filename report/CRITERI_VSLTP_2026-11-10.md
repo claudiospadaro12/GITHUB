@@ -1,5 +1,7 @@
 # Virtual SL/TP (con delay 99 e con delay 0) e richieste al server: CRITERI e PREVISIONI (10/11/2026, scritti PRIMA dei numeri; aggiornati con la variante delay 0)
 
+> **Nota del 10/11 sera:** le misure dal campo (`RICHIESTE_AL_SERVER_STIMA_DAI_TEST_2026-11-10.md`, aggiornamento) mostrano che in funzionamento normale i tre EA stanno fra 16 e 837 righe al giorno e che il trailing con modifica al minuto non si vede. Per il problema delle richieste il test del Virtual SL/TP **passa in secondo piano**: resta valido come test sul comportamento dello SL, ma non e piu urgente.
+
 **Natura: CRITERI, non ancora lanciato.** Aggiornamento dell'10/11 (pomeriggio): aggiunta la variante `SetVSL_to_hardSL_sec_delay=0` suggerita dai messaggi di Discord (Eugen, 02/10, citando Wim: contro l'iperattivita con lo SL virtuale mettere "seconds before pulling real SL" a 0 invece di 99 "cosi non modifica lo SL"; significato NON verificato; vedi `RICHIESTE_AL_SERVER_STIMA_DAI_TEST_2026-11-10.md`). Nasce dall'avviso di iperattivita di FTMO (10/11, conto trial 1515150476: soglia 2.000 richieste al giorno, comprese le modifiche SL/TP) e dalla nota di Massimo (`Limite_richieste_FTMO_trailing_per_Claudio.pdf`) che propone `EnableVirtualSLTP`. Stima dai giornali del tester in `RICHIESTE_AL_SERVER_STIMA_DAI_TEST_2026-11-10.md`. **Dipende dai dati del VPS di stasera** (`RIGA_CONTA_RICHIESTE_FTMO.txt`): se il picco non e quello previsto, si rivede il test. Solo tester; reale, trial FTMO e VPS non si toccano; nessun lotto ne taglia.
 
 ## Domanda
