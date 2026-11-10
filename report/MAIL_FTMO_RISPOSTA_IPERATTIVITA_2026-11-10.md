@@ -8,7 +8,7 @@ Rispondere alla mail di FTMO sull'account 1515150476 (stessa conversazione). Com
 
 Hello FTMO Support,
 
-Thank you for your message about account 1515150476 (the Free Trial). I take it seriously and I am reviewing the logs and the settings of the Expert Advisors that run on the account. The EAs are commercial third-party products and I am checking how often they send modification requests, in particular during the daily break of the gold market, when the market is closed and modifications are rejected.
+Thank you for your message about account 1515150476 (the Free Trial). I take it seriously and I have reviewed the order history of the account. It shows a loop on 10/11 after my own risk manager closed the positions at the daily loss limit: the Expert Advisors kept placing new pending orders and my risk manager kept cancelling them, producing well over a thousand order placements and cancellations in a few hours. I have [stopped it / will stop it] and I am redesigning that behavior so that it cannot happen again. The EAs are commercial third-party products.
 
 To fix this correctly, could you please tell me:
 
