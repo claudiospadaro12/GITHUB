@@ -36,3 +36,12 @@ Fonti: `.xlsx` del trial 1515150476 (cronistorico del 10/11 05:38, ordini) e scr
 - **Questo spiega l'avviso meglio della pausa dell'oro**: l'ipotesi del 10/11 sul picco nell'ora della pausa (tester) resta possibile ma secondaria; il ciclo e un fatto osservato sul conto.
 - **NON MISURATO**: il conteggio dei registri del terminale e le richieste di modifica (la riga sul VPS).
 - **Cosa fare subito (decide Claudio)**: fermare il ciclo, per esempio **spegnendo il trading algoritmico** sul terminale FTMO fino al reset delle 01:00 (non ci sono posizioni aperte) oppure chiudendo il terminale; non cambiare altro. **Per il futuro**: il Guardian non deve cancellare all'infinito i pendenti rimessi dagli EA; serve un comportamento diverso in pausa (da progettare e provare prima di una challenge).
+
+## Confronto fra i quattro conti (cronistorici `.xlsx` del 10/11 05:38; domanda di Claudio: "il settaggio medio degli EA del trial ha inciso?")
+| Conto | Ordini nel report | Annullati / eseguiti | Piazzati per giorno | Lettura |
+|---|---|---|---|---|
+| FTMO trial 80k (1515150476) | 806 | 796 / 10 | 06/11: 19, 09/11: 27, **10/11: 760** | ciclo piazza-e-cancella dalle 02:32, ancora in corso alle 08:32 (screenshot: annullati 1.337) |
+| BCM demo 50504263 | 377 | 351 / 26 | 06/11: 63, **09/11: 314** (21:00: 121, 22:00: 144) | stesso ciclo dopo la chiusura delle 21:18, fermo dopo le 22:50 (motivo NON NOTO) |
+| BCM reale 10105439 | 66 | 44 / 22 | 06/11: 30, 09/11: 28, 10/11: 8 | normale: nessun ciclo |
+| BCM demo 50504894 | 70 (60 pendenti ancora aperti) | pendenti piazzati il 06/11 e ancora li | 06/11: 30, 09/11: 24, 10/11: 6 | normale: pendenti che restano per giorni |
+**Lettura**: in funzionamento normale gli EA piazzano pochi ordini (decine al giorno) e i pendenti restano per giorni. Il numero enorme compare solo sui due conti dove il Guardian e andato in pausa dopo il limite giornaliero: gli EA rimettono i pendenti a ogni barra e la pausa li cancella. Le impostazioni del trial (strategie attive e pendenti per barra: circa 40 ordini a ogni ora piena fra Goldbot, Phantom e Reaper; il trial non mostra ordini del Gold Trade Pro) moltiplicano il ciclo ma non lo creano. **NON VERIFICATO**: che gli input del trial siano uguali a quelli dei demo BCM (serve il confronto dei set caricati).
