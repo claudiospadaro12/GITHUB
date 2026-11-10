@@ -1,6 +1,6 @@
 # Risposta a FTMO sull'avviso di iperattivita (bozza del 10/11/2026) — da inviare da Claudio
 
-Rispondere alla mail di FTMO sull'account 1515150476 (stessa conversazione). Compilare le parti tra [parentesi quadre]. Non inserire password. Conservare la risposta.
+Rispondere alla mail di FTMO sull'account 1515150476 (stessa conversazione). Compilare le parti tra [parentesi quadre] (in particolare l'ora in cui l'algo trading e stato spento sul VPS e il tuo nome). Non inserire password. Conservare la risposta.
 
 ---
 
@@ -8,7 +8,7 @@ Rispondere alla mail di FTMO sull'account 1515150476 (stessa conversazione). Com
 
 Hello FTMO Support,
 
-Thank you for your message about account 1515150476 (the Free Trial). I take it seriously and I have reviewed the order history of the account. It shows a loop on 10/11 after my own risk manager closed the positions at the daily loss limit: the Expert Advisors kept placing new pending orders and my risk manager kept cancelling them, producing well over a thousand order placements and cancellations in a few hours. I have [stopped it / will stop it] and I am redesigning that behavior so that it cannot happen again. The EAs are commercial third-party products.
+Thank you for your message about account 1515150476 (the Free Trial). I take it seriously and I have reviewed the order history of the account. It shows a loop on 10/11 after my own risk manager closed the positions at the daily loss limit: the Expert Advisors kept placing new pending orders and my risk manager kept cancelling them, producing well over a thousand order placements and cancellations in a few hours. I stopped it on 10/11 at [time, local time] by switching off algorithmic trading on the account's terminal, and I am redesigning that behavior so that it cannot happen again. The EAs are commercial third-party products.
 
 To fix this correctly, could you please tell me:
 
