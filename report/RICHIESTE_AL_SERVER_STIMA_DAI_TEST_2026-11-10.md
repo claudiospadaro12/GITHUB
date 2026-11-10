@@ -56,3 +56,6 @@ Fonti: `.xlsx` del trial 1515150476 (cronistorico del 10/11 05:38, ordini) e scr
   - Maximus: FTMO segnala l'iperattivita **anche senza posizioni aperte**; JOHN: il flag viene da MetaQuotes.
   - Consenso dei veterani (Eugen): non usare EA sulle prop (ban per iperattivita o strategie copiate).
 - **Nessuno descrive un ciclo piazza-e-cancella causato da un risk manager**: nel nostro caso la causa e il Guardian, non gli EA.
+
+## Riferimento "normale": demo BCM 50504894 (screenshot dell'app, 10:07 ora italiana)
+Scheda Storico → Ordini: **Fatto 7, Annullato 10, Totale 17** (periodo del filtro non noto, probabilmente "oggi"). Le cancellazioni sono a ore piene o quasi (00:05, 06:10, 07:00, 08:00): sono gli EA che aggiornano i propri pendenti con la nuova barra, in gruppi di 3-4 ordini. A parita di ora, il trial FTMO mostrava **1.347 ordini (1.337 annullati)** alle 08:32: circa **80 volte di piu**. Gli stessi livelli di prezzo compaiono su entrambi (buy stop 4.201-4.203, sell stop 3.869-3.870): sul demo BCM un pendente vive circa un'ora, sul trial veniva cancellato entro un secondo. Questo e il riferimento per la prova del Guardian: in funzionamento normale gli EA producono **qualche ordine all'ora**, non centinaia.
