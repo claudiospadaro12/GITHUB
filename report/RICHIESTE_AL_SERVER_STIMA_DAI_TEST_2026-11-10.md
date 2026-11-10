@@ -45,3 +45,14 @@ Fonti: `.xlsx` del trial 1515150476 (cronistorico del 10/11 05:38, ordini) e scr
 | BCM reale 10105439 | 66 | 44 / 22 | 06/11: 30, 09/11: 28, 10/11: 8 | normale: nessun ciclo |
 | BCM demo 50504894 | 70 (60 pendenti ancora aperti) | pendenti piazzati il 06/11 e ancora li | 06/11: 30, 09/11: 24, 10/11: 6 | normale: pendenti che restano per giorni |
 **Lettura**: in funzionamento normale gli EA piazzano pochi ordini (decine al giorno) e i pendenti restano per giorni. Il numero enorme compare solo sui due conti dove il Guardian e andato in pausa dopo il limite giornaliero: gli EA rimettono i pendenti a ogni barra e la pausa li cancella. Le impostazioni del trial (strategie attive e pendenti per barra: circa 40 ordini a ogni ora piena fra Goldbot, Phantom e Reaper; il trial non mostra ordini del Gold Trade Pro) moltiplicano il ciclo ma non lo creano. **NON VERIFICATO**: che gli input del trial siano uguali a quelli dei demo BCM (serve il confronto dei set caricati).
+
+## Cosa e scritto su Discord (archivi di Wim: settimana 02-09/11 e sintesi precedenti in `UBS_DISCORD_2026-11-03/`; sono dichiarazioni di utenti, NON verificate)
+- **Settimana 02-09/11**: nessun messaggio sul numero eccessivo di ordini o sulle richieste al server (cercati: hyperactivity, 2000, too many orders, order limit, requests). Un utente (Flygplan, 07/11) osserva che il broker rimuove i pendenti oltre il suo limite se si caricano 300 set UBS; lo strumento Strategy Ledger Pro (08/11) ha un allarme "order count against your broker's limit".
+- **Sintesi precedenti (settembre-ottobre)**:
+  - 30/09 Wim: avvisi di iperattivita da ICMarkets circa una volta al mese, che scattano a 2.500-3.000 messaggi, mai superati i 15.000; il 30/09 esce la versione degli EA oro con "virtual trailing SL e TP".
+  - Utenti: 3-5 mila messaggi al giorno = avviso, 15 mila = rischio di conto disabilitato; cause citate: trailing stop e lo stesso magic number su due strategie (Micha9886, risolto cambiando i magic).
+  - 01/10 Wim: SL/TP virtuali solo se il broker avvisa di iperattivita (altrimenti meglio quelli normali); langesi: il virtuale richiede bassa latenza.
+  - 02/10 Eugen, citando Wim: contro l'iperattivita con lo SL virtuale mettere "seconds before pulling real SL" a **0 invece di 99**, cosi non modifica lo SL (e l'input `SetVSL_to_hardSL_sec_delay=99` dei nostri set; significato NON verificato).
+  - Maximus: FTMO segnala l'iperattivita **anche senza posizioni aperte**; JOHN: il flag viene da MetaQuotes.
+  - Consenso dei veterani (Eugen): non usare EA sulle prop (ban per iperattivita o strategie copiate).
+- **Nessuno descrive un ciclo piazza-e-cancella causato da un risk manager**: nel nostro caso la causa e il Guardian, non gli EA.
