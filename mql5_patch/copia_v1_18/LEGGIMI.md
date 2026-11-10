@@ -31,3 +31,9 @@ Sul conto di prova FTMO 1515150476 (09-10/11) il Guardian bloccato chiamava `Fla
 
 ## Piano di prova (solo demo, con l'ok di Claudio; mai reale, mai trial FTMO, mai VPS)
 1. Compila, autotest. 2. Due ore con modo 0 (riferimento: deve riprodurre il ciclo). 3. Due ore ciascuno per i modi 1, 2, 3. Letture e soglie: criteri.
+
+## Esito (10/11/2026)
+- **Compilazione** (PC di backtest, MetaEditor): 0 errori, 0 avvisi, `.ex5` 114.086 byte (SHA256 `733E8BB15928400272DC5569A6408CD78FAF8E97C670480FBA28401DDF87CAF9`). Prevista come "al primo tentativo senza errori" al 60%: riuscita.
+- **Autotest** (grafico NASUSD_EXT M15, demo BCM 50503392 del PC di backtest, set `DEMO_AUTOTEST`, solo allarme, 17:38-17:39): i **14 casi nuovi della pausa: 14 PASS** (atteso = ottenuto). Visibili e PASS anche i casi del contatore richieste da "POSITION con deal NON conta" a "soglie a 0 = spente". I casi piu vecchi (baseline, esposizione, venerdi) non erano nella foto: NON LETTI.
+- **Cosa NON prova**: sono funzioni pure. Il comportamento vero di `PausaEnforce` (cancellazioni, chiusure, tetto, riprova dopo rifiuto) non e ancora stato visto su un conto con gli EA. Resta da fare la prova dei modi 0-3 su un demo con ciclo riproducibile.
+- Nota: il conto del PC e minuscolo (equity circa 11 EUR), quindi il cap sul rischio aperto risulta attivo (111,97%): effetto del conto, non del codice.
