@@ -13,11 +13,11 @@
  },
  "azienda": {
   "ragione_sociale": "Pennellificio Zenit srl",
-  "indirizzo": "[Via ______ n. __ - CAP ____ Citta (__) - Italia]",
-  "tel": "[+39 ___ ______]",
-  "email": "[info@______.it]",
-  "web": "[www.______.it]",
-  "piva": "[P.IVA ___________]",
+  "indirizzo": "Via P. Nenni, 24 - 46019 Cicognara (MN) - Italia",
+  "tel": "+39 0375 88172",
+  "email": "info@pennellificiozenit.it",
+  "web": "www.pennellificiozenit.it",
+  "piva": "P.IVA 01792550202",
   "origine": "Made in Italy"
  },
  "lingue": [

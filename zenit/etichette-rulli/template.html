@@ -175,7 +175,7 @@ for (const p of D.prodotti) {
         <div class="scale">${scaleSVG(p)}</div>
         <div class="icons">${p.utilizzi.map(u=>icon(D.utilizzi[u].icona)).join('')}</div></div>
       <div class="langs">${rows}</div>
-      <div class="foot"><span>${A.ragione_sociale} &middot; ${A.indirizzo} &middot; ${A.tel} &middot; ${A.email} &middot; ${A.web} &middot; ${A.piva}</span>
+      <div class="foot"><span>${A.ragione_sociale} &middot; ${A.indirizzo} &middot; ${A.tel} &middot; ${A.email} &middot; ${A.piva}</span>
         <span class="made"><i></i>${A.origine}</span></div>
     </div>
     ${p.esempio?'<div class="esempio-tag">ESEMPIO</div>':''}`;
