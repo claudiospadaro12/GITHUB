@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Etichette rulli Zenit</title>
+<style>
+  /* Dimensioni e colori sono impostati da JS leggendo prodotti.json (variabili --w --h --k e colori) */
+  :root { --w:210mm; --h:60mm; --k:1; --pri:#12355B; --acc:#E8731A; --bg:#F3F1EC; --txt:#1B1B1B; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family: "Helvetica Neue", Arial, "Liberation Sans", sans-serif; color:var(--txt); background:#cfd3d8; }
+  .sheet { display:flex; flex-direction:column; align-items:center; gap:8mm; padding:8mm 0; }
+  .cap { font-size:7pt; color:#555; align-self:flex-start; margin-left:calc((100% - var(--w))/2); }
+  .label { width:var(--w); height:var(--h); background:#fff; display:flex; overflow:hidden; position:relative;
+           outline:0.2mm solid #888; }
+  body.prod .sheet { display:block; padding:0; }
+  body.prod .label { outline:none; break-after:page; }
+  body.prod .cap, body.prod .esempio-tag { display:none; }
+
+  /* Pannello sinistro: identita' prodotto */
+  .left { width:calc(var(--w)*0.25); background:var(--pri); color:#fff; padding:calc(2.2mm*var(--k)) calc(2.6mm*var(--k));
+          display:flex; flex-direction:column; gap:calc(1.6mm*var(--k)); }
+  .logo { background:#fff; border-radius:1mm; height:calc(var(--h)*0.2); display:flex; align-items:center; justify-content:center; padding:0.8mm; }
+  .logo img { max-width:100%; max-height:100%; display:block; }
+  .pname { font-size:calc(9.5pt*var(--k)); font-weight:700; line-height:1.1; }
+  .pcode { font-size:calc(6.5pt*var(--k)); letter-spacing:.04em; color:#f6c9a3; }
+  .pcode b { color:#fff; font-weight:700; }
+  .ean { margin-top:auto; background:#fff; border-radius:0.8mm; padding:calc(1mm*var(--k)) calc(1.2mm*var(--k)) calc(0.6mm*var(--k)); color:#000; }
+  .ean svg { display:block; width:100%; height:calc(var(--h)*0.25); }
+
+  /* Pannello destro */
+  .right { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .top { display:flex; align-items:center; gap:calc(3mm*var(--k)); background:var(--bg); padding:calc(1.2mm*var(--k)) calc(3mm*var(--k)); height:calc(var(--h)*0.2); border-bottom:0.5mm solid var(--acc); }
+  .top .diagram { height:100%; flex:0 0 auto; }
+  .top .diagram svg { height:100%; width:auto; display:block; }
+  .icons { display:flex; gap:calc(1.6mm*var(--k)); margin-left:auto; }
+  .icons svg { height:calc(var(--h)*0.125); width:auto; display:block; }
+  .langs { flex:1; display:flex; flex-direction:column; }
+  .row { flex:1; display:flex; gap:calc(2mm*var(--k)); padding:calc(0.5mm*var(--k)) calc(3mm*var(--k)); align-items:center; border-bottom:0.15mm solid #d9d5cb; min-height:0; }
+  .row:nth-child(even) { background:#faf9f6; }
+  .row:last-child { border-bottom:none; }
+  .sig { flex:0 0 calc(6.2mm*var(--k)); height:calc(3.6mm*var(--k)); background:var(--pri); color:#fff; font-weight:700;
+         font-size:calc(6pt*var(--k)); display:flex; align-items:center; justify-content:center; border-radius:0.6mm; letter-spacing:.05em; }
+  .txt { font-size:calc(5.5pt*var(--k)); line-height:1.22; min-width:0; }
+  .txt .l1 b { font-size:calc(6.2pt*var(--k)); color:var(--pri); }
+  .txt .l2 { color:#333; }
+  .txt .l2 em { font-style:normal; font-weight:700; color:var(--acc); }
+  .foot { background:var(--pri); color:#e9eef5; font-size:calc(4.8pt*var(--k)); display:flex; justify-content:space-between; align-items:center;
+          padding:0 calc(3mm*var(--k)); height:calc(var(--h)*0.1); gap:2mm; }
+  .foot .made { font-weight:700; color:#fff; white-space:nowrap; font-size:calc(5.8pt*var(--k)); }
+  .foot .made i { display:inline-block; width:calc(3mm*var(--k)); height:calc(2mm*var(--k)); vertical-align:-0.35mm; margin-right:1mm;
+          background:linear-gradient(90deg,#009246 33%,#fff 33% 66%,#ce2b37 66%); border:0.1mm solid #fff; }
+  .esempio-tag { position:absolute; right:-9mm; top:4mm; transform:rotate(35deg); background:var(--acc); color:#fff; font-size:6pt; font-weight:700;
+          padding:0.4mm 10mm; letter-spacing:.15em; opacity:.92; }
+  @media print { body { background:#fff; } }
+</style>
+</head>
+<body>
+<div class="sheet" id="sheet"></div>
+
+<!-- Dati inseriti dallo script genera_pdf.py (o da incollare a mano): contenuto di prodotti.json -->
+<script id="dati" type="application/json">__DATI__</script>
+<script>
+const D = JSON.parse(document.getElementById('dati').textContent);
+const root = document.documentElement.style;
+root.setProperty('--w', D.formato.larghezza_mm + 'mm');
+root.setProperty('--h', D.formato.altezza_mm + 'mm');
+// fattore di scala dei caratteri: 1 a 210x60 mm; si adatta a formati diversi
+root.setProperty('--k', Math.max(0.6, Math.min(D.formato.larghezza_mm / 210, D.formato.altezza_mm / 60)).toFixed(3));
+root.setProperty('--pri', D.colori.primario); root.setProperty('--acc', D.colori.accento);
+root.setProperty('--bg', D.colori.sfondo_chiaro); root.setProperty('--txt', D.colori.testo);
+if (new URLSearchParams(location.search).has('prod') || window.__PROD__) document.body.classList.add('prod');
+
+/* ---- EAN-13 ---- */
+const L=['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+const G=['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
+const R=['1110010','1100110','1101100','1000010','1011100','1001110','1010000','1000100','1001000','1110100'];
+const PAR=['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+function ean13(d12){
+  let s=0; for(let i=0;i<12;i++) s+= (+d12[i])*(i%2?3:1);
+  const full = d12 + ((10 - s%10)%10);
+  let bits='101'; const p=PAR[+full[0]];
+  for(let i=1;i<7;i++) bits += (p[i-1]==='L'?L:G)[+full[i]];
+  bits += '01010';
+  for(let i=7;i<13;i++) bits += R[+full[i]];
+  bits += '101';
+  return {full,bits};
+}
+function eanSVG(d12){
+  const {full,bits}=ean13(d12); const q=9, W=95+2*q, H=60;
+  let bars='';
+  for(let i=0;i<bits.length;i++) if(bits[i]==='1'){
+    const guard = i<3 || (i>=45&&i<50) || i>=92;
+    bars += `<rect x="${q+i}" y="2" width="1" height="${guard?H-3:H-9}" fill="#000"/>`;
+  }
+  const t=(x,s,a='middle')=>`<text x="${x}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="${a}" fill="#000" textLength="${s.length*0}">${s}</text>`;
+  const txt = `<text x="${q-2}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="end">${full[0]}</text>`
+    + `<text x="${q+3+21}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="middle" textLength="39" lengthAdjust="spacing">${full.slice(1,7)}</text>`
+    + `<text x="${q+50+21}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="middle" textLength="39" lengthAdjust="spacing">${full.slice(7)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H+2}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#fff"/>${bars}${txt}</svg>`;
+}
+
+/* ---- Icone semplici (viewBox 24x24) ---- */
+const C = () => D.colori;
+const ICON = {
+  wall:    `<rect x="3" y="4" width="18" height="16" fill="none" stroke="P" stroke-width="1.6"/><path d="M3 9.3H21M3 14.7H21M9 4V9.3M15 9.3V14.7M9 14.7V20" stroke="P" stroke-width="1.2" fill="none"/>`,
+  ceiling: `<rect x="3" y="3" width="18" height="4" fill="P"/><path d="M12 8V15M8.5 11.5L12 15L15.5 11.5" stroke="A" stroke-width="1.8" fill="none"/><path d="M3 20H21" stroke="P" stroke-width="1.4"/>`,
+  enamel:  `<path d="M4 8h13v5H4z" fill="none" stroke="P" stroke-width="1.6"/><path d="M17 10.5h3v7h-6v-3" fill="none" stroke="P" stroke-width="1.6"/><rect x="12" y="17" width="4" height="4" fill="A"/>`,
+  water:   `<path d="M12 3C12 3 5.5 10.5 5.5 14.5a6.5 6.5 0 0013 0C18.5 10.5 12 3 12 3z" fill="A"/><path d="M9 15a3 3 0 003 3" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/>`,
+  smooth:  `<rect x="3" y="9" width="18" height="6" fill="none" stroke="P" stroke-width="1.6"/><path d="M5 12H19" stroke="A" stroke-width="1.6"/>`,
+  rough:   `<path d="M3 15l2-5 2 5 2-6 2 6 2-5 2 5 2-6 2 6 2-4v7H3z" fill="none" stroke="P" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 18H21" stroke="A" stroke-width="1.6"/>`
+};
+function icon(name){
+  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">`
+    + `<circle cx="12" cy="12" r="11.2" fill="#fff" stroke="${D.colori.primario}" stroke-width="0.9"/>`
+    + `<g transform="translate(4.8 4.8) scale(.6)">${ICON[name].replace(/"P"/g,`"${D.colori.primario}"`).replace(/"A"/g,`"${D.colori.accento}"`)}</g></svg>`;
+}
+
+/* ---- Schema quote del rullo: vista laterale (lunghezza) + vista frontale (Ø est/int) + altezza pelo ---- */
+function diagram(p){
+  const P=D.colori.primario, A=D.colori.accento;
+  const f=(x,y,s,a='middle',w=400)=>`<text x="${x}" y="${y}" font-family="Arial,sans-serif" font-size="7.5" font-weight="${w}" text-anchor="${a}" fill="${P}">${s}</text>`;
+  return `<svg viewBox="0 0 150 40" xmlns="http://www.w3.org/2000/svg">
+    <!-- vista laterale -->
+    <rect x="3" y="12" width="52" height="22" rx="2" fill="#fff" stroke="${P}" stroke-width="1.2"/>
+    <rect x="3" y="12" width="52" height="3.5" fill="${A}" opacity=".35"/><rect x="3" y="30.5" width="52" height="3.5" fill="${A}" opacity=".35"/>
+    <path d="M3 8H55M3 6V10M55 6V10" stroke="${P}" stroke-width=".8" fill="none"/>
+    ${f(29,5,'L '+p.lunghezza_mm+' mm','middle',700)}
+    <!-- vista frontale -->
+    <circle cx="86" cy="23" r="15" fill="#fff" stroke="${P}" stroke-width="1.2"/>
+    <circle cx="86" cy="23" r="9" fill="${P}" opacity=".12" stroke="${P}" stroke-width=".8"/>
+    <circle cx="86" cy="23" r="5" fill="#fff" stroke="${P}" stroke-width=".8"/>
+    <path d="M71 23H101" stroke="${A}" stroke-width=".6" stroke-dasharray="1.5 1"/>
+    ${f(113,16,'Ø ext. '+p.diametro_est_mm,'start',700).replace('ext.','e')}
+    ${f(113,26,'Ø int. '+p.diametro_int_mm,'start',700).replace('int.','i')}
+    ${f(113,36,'pelo '+p.pelo_mm+' mm','start',700).replace('pelo','⇕')}
+  </svg>`;
+}
+
+/* ---- Costruzione etichette ---- */
+const sheet = document.getElementById('sheet');
+const A = D.azienda;
+for (const p of D.prodotti) {
+  const cap = document.createElement('div'); cap.className='cap';
+  cap.textContent = p.id + (p.esempio?'  -  ESEMPIO (dati inventati)':'');
+  const lab = document.createElement('div'); lab.className='label';
+  const rows = D.lingue.map(l => {
+    const usi = p.utilizzi.map(u => D.utilizzi[u][l]).join(', ');
+    return `<div class="row"><div class="sig">${l.toUpperCase()}</div><div class="txt">
+      <div class="l1"><b>${p.nome[l]}</b> &ndash; ${p.descrizione[l]}</div>
+      <div class="l2"><em>${D.termini.pile[l]}:</em> ${p.pelo_mm} mm &nbsp;&middot;&nbsp; ${D.materiali[p.materiale][l]} &nbsp;&middot;&nbsp; <em>${D.termini.uses[l]}:</em> ${usi}</div>
+    </div></div>`;
+  }).join('');
+  lab.innerHTML = `
+    <div class="left">
+      <div class="logo"><img src="${D.logo}" alt="Zenit"></div>
+      <div class="pname">${p.nome.it}</div>
+      <div class="pcode">${D.termini.code.it}/${D.termini.code.en} <b>${p.codice}</b></div>
+      <div class="ean">${eanSVG(p.ean)}</div>
+    </div>
+    <div class="right">
+      <div class="top"><div class="diagram">${diagram(p)}</div>
+        <div class="icons">${p.utilizzi.map(u=>icon(D.utilizzi[u].icona)).join('')}</div></div>
+      <div class="langs">${rows}</div>
+      <div class="foot"><span>${A.ragione_sociale} &middot; ${A.indirizzo} &middot; ${A.tel} &middot; ${A.email} &middot; ${A.web} &middot; ${A.piva}</span>
+        <span class="made"><i></i>${A.origine}</span></div>
+    </div>
+    ${p.esempio?'<div class="esempio-tag">ESEMPIO</div>':''}`;
+  sheet.appendChild(cap); sheet.appendChild(lab);
+}
+document.title = 'Etichette rulli Zenit';
+window.__READY__ = true;
+</script>
+</body>
+</html>
