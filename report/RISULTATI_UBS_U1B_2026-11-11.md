@@ -107,7 +107,7 @@ Operazioni e PF 2005-2012: Reaper s5 1.005 / 1,54; s6 970 / 1,92; s7 911 / 2,35;
 
 ### Cosa si legge
 1. **R totale H1**: CONFERMA 3 (Reaper s9, Phantom strat7, strat9), DIFFERENTE 4 (Reaper s6, s7, s8 con DD piu alto del dichiarato del 31-49%, Phantom strat6 con DD piu basso del 33%), DIVERSO 2 (Reaper s5 2,82x; Phantom strat8 0,41x). Mediana 1,07.
-2. **Il periodo conta**: per i 4 Phantom e per Reaper s5 e s8 il DD 2005-2012 e molto piu alto di quello 2013-2025 (fino a 2,3x per Reaper s5, 2,3x per Phantom strat6). Questo e coerente con l'ipotesi gia scritta che il dichiarato di Wim sia calcolato su un periodo che parte prima del 2013 (non dimostrato).
+2. **Il periodo conta**: per i 4 Phantom e per Reaper s5 e s8 il DD 2005-2012 e molto piu alto di quello 2013-2025 (2,7x per Phantom strat7, 2,4x per strat6, 2,1x per Reaper s5, 2,0x per Phantom strat9). Questo e coerente con l'ipotesi gia scritta che il dichiarato di Wim sia calcolato su un periodo che parte prima del 2013 (non dimostrato).
 3. **Reaper s5**: DD0,01 di 310 EUR contro dichiarato 110: nel periodo 2005-2012 il suo DD e quasi il triplo, ed e il set piu fuori scala (anche in USD).
 4. **Regola d'uso (invariata)**: per ogni set usare il DD misurato su BCM sul periodo piu lungo disponibile, non il dichiarato; per i 9 H1 il valore piu alto fra i due periodi.
 
