@@ -27,3 +27,15 @@ I nomi dei set sono quelli dei test (`gen_riga_d160_oro.py`, `gen_riga_d160_dtp.
 4. Test Virtual SL/TP (righe pronte, da lanciare sul PC di backtest).
 5. Forward su demo della combinazione, se Claudio lo vuole.
 Nessuna indicazione di acquisto, lotto o taglia: la scelta e di Claudio.
+
+## Proposta di Claudio (11/11): operare con conti FTMO SWING
+**Motivo**: gli EA di Wim sono pensati per restare aperti nel weekend e i backtest (tutti) li tengono aperti; chiudere il venerdi costa guadagno (misurato 7-12% del netto per EA; per Gold Trade Pro -31% nel 2020). **Cosa dice FTMO (risposta scritta 10/11 e FAQ)**: Swing "nessun limite su news e weekend"; disponibile **solo sul 2-Step**; leva Swing 1:15 sull'oro (categoria "Metalli": XAUUSD non nominato) e 1:30 sul forex; il Swing non si puo cambiare dallo Standard dopo l'acquisto; prezzo e ripartizione dello Swing NON comunicati (da leggere sul sito). Lo Standard funded deve chiudere se il mercato e chiuso piu di 2 ore e ha la finestra news su XAUUSD/DXY: lo Swing evita entrambe le cose, che i backtest non modellano.
+**Margine a 1:15 (oro) e 1:30 (forex)** sui tre conti, ricostruito dalle posizioni dei report (somma dei nozionali aperti contemporaneamente a prezzo di ingresso; EUR/USD medio dell'anno; base forex approssimata; BCM nel tester ha un margine fisso per lotto, quindi questo e un calcolo a parte). Margine massimo in % del saldo iniziale (stessa % su 160k):
+| Conto | Swing 2013 / 2020 / 2025 | Standard (1:50 oro, 1:100 forex) |
+|---|---|---|
+| P1 | 51% / 56% / 56% | 15-17% |
+| P3 | 59% / 53% / 58% | 16-18% |
+| P4 | 50% / 51% / 50% | 15% |
+Con equity piena un margine del 50-59% dà un livello di margine circa 170-200%; a -4,5% di equity (Guardian) circa 160%, a -9,5% circa 153%. **Il livello di stop out di FTMO NON e noto** (non nelle pagine lette): non si puo dire quanto margine di sicurezza ci sia. Con meno posizioni libere un nuovo ordine puo essere rifiutato se il margine libero non basta (non misurato nel tester).
+**Costi**: commissioni e swap nel tester gia comprendono il weekend (BCM). Lo Swing evita il costo della chiusura del venerdi e il problema della finestra news; i costi di spread/slippage di FTMO e le differenze di commissione/swap fra Standard e Swing NON sono noti.
+**Da chiedere a FTMO prima di decidere**: prezzo e ripartizione dello Swing per 80k e 160k (esistono?), leva dell'oro nello Swing, livello di margin call e stop out, swap dello Swing, e se la regola sulle posizioni opposte vale anche per lo Swing.
