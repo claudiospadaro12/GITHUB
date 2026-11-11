@@ -33,15 +33,15 @@ COMMON = dict(
 VARIANTI = {
  "A": dict(COMMON, code="A", name="Variante A - da terra, 2 facce",
            W=500, D=400, H=2200, faces=2, base=120, header=250, promo=160, pegrows=4,
-           trays=[250, 180, 180, 100], hdr_t=60,
+           trays=[250, 230, 200, 100], hdr_t=60,
            logo=(190, 110), h1=34, h2=20, tw=330, plabel=(22, 16)),
  "B": dict(COMMON, code="B", name="Variante B - da banco, 1 faccia",
            W=450, D=300, H=880, faces=1, base=30, header=100, promo=0, pegrows=2,
-           trays=[180, 100], hdr_t=40,
+           trays=[200, 100], hdr_t=40,
            logo=(130, 62), h1=24, h2=14, tw=0, plabel=(0, 0)),
 }
 ROWNAMES = ["Pennelli piatti (blister)", "Pennelli per smalti/rifinitura", "Pennellesse e tondi", "Pennelli per radiatori e vari"]
-TRAYNAMES = {250: "rulli 250 mm", 180: "rulli 180 mm", 100: "mini-rulli 100 mm"}
+TRAYNAMES = {250: "rulli 250 mm", 230: "rulli 230 mm", 200: "rulli 200 mm", 180: "rulli 180 mm", 100: "mini-rulli 100 mm"}
 
 # ----------------------------------------------------------------- derivati
 def derive(c):

@@ -24,18 +24,18 @@ Disegni allegati (quote in mm, schema non in scala di produzione):
 | Foratura pannello | Ø5, passo 25 x 25 | idem |
 | Ganci | asta Ø5, L 150, passo orizzontale 80 | idem |
 
-Prodotti ipotizzati (da verificare): blister pennelli 70 x 170 mm, spessore 12 mm; 8 blister per gancio (~100 mm di asta occupati). Rulli confezionati Ø 65 mm, lunghezze 250 / 180 / 100 mm, sdraiati con asse parallelo alla fronte, gioco 10 mm.
+Prodotti ipotizzati (da verificare): blister pennelli 70 x 170 mm, spessore 12 mm; 8 blister per gancio (~100 mm di asta occupati). Rulli confezionati Ø 65 mm, lunghezze 250 / 230 / 200 / 100 mm (max 25 cm, come da catalogo), sdraiati con asse parallelo alla fronte, gioco 10 mm.
 
 ## 2. Disposizione e capacita' di riferimento
 
 **Variante A (per faccia)**
 - Pennelli: 4 righe x 5 ganci x 8 blister = **160 pz** (righe di esempio: piatti / smalti e rifinitura / pennellesse e tondi / radiatori e vari).
-- Rulli: vaschetta 1 (250 mm) 1 x 2 file = 2; vaschette 2 e 3 (180 mm) 2 x 2 = 4 ciascuna; vaschetta 4 (mini 100 mm) 4 x 2 = 8 -> **18 pz**.
-- Totale 2 facce: **320 pennelli + 36 rulli**. 20 ganci e 4 vaschette per faccia. Capacita rulli bassa: con H 2200 si puo valutare una 5a vaschetta o rulli in verticale.
+- Rulli: vaschetta 1 (250 mm) 1 x 2 file = 2; vaschetta 2 (230 mm) 1 x 2 = 2; vaschetta 3 (200 mm) 2 x 2 = 4; vaschetta 4 (mini 100 mm) 4 x 2 = 8 -> **16 pz**.
+- Totale 2 facce: **320 pennelli + 32 rulli**. 20 ganci e 4 vaschette per faccia. Capacita rulli bassa: con H 2200 si puo valutare una 5a vaschetta o rulli in verticale.
 
 **Variante B (1 faccia)**
 - Pennelli: 2 righe x 5 ganci x 8 = **80 pz**.
-- Rulli: vaschetta 1 (180 mm) 2 x 4 file = 8; vaschetta 2 (mini 100 mm) 3 x 4 = 12 -> **20 pz**.
+- Rulli: vaschetta 1 (200 mm) 2 x 4 file = 8; vaschetta 2 (mini 100 mm) 3 x 4 = 12 -> **20 pz**.
 
 Le capacita' sono calcolate dal generatore sulle misure ipotizzate; con prodotti diversi cambiano (vedi domande aperte).
 

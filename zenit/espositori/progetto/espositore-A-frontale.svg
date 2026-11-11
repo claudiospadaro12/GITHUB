@@ -55,22 +55,14 @@
 <line x1="900.0" y1="2210.0" x2="912.0" y2="2210.0" stroke="#6F7A8A" stroke-width="1" stroke-linecap="butt"/>
 <text x="918.0" y="2182.2" font-size="21" text-anchor="start" fill="#3850A2" font-weight="bold" >Vaschetta 1: rulli 250 mm</text>
 <text x="918.0" y="2213.2" font-size="19" text-anchor="start" fill="#283030" font-weight="normal" >1 affiancati x 2 file = 2 pz</text>
-<rect x="465.0" y="2001.8" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="510.0" y="2013.8" width="90.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
-<rect x="465.0" y="2001.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="636.0" y="2001.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="655.0" y="2001.8" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="700.0" y="2013.8" width="90.0" height="41.0" rx="3" fill="#3850A2" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
-<rect x="655.0" y="2001.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="826.0" y="2001.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="465.0" y="2019.1" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="510.0" y="2031.1" width="90.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
-<rect x="465.0" y="2019.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="636.0" y="2019.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="655.0" y="2019.1" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="700.0" y="2031.1" width="90.0" height="41.0" rx="3" fill="#3850A2" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
-<rect x="655.0" y="2019.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="826.0" y="2019.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<rect x="535.0" y="2001.8" width="230.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
+<rect x="592.5" y="2013.8" width="115.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
+<rect x="535.0" y="2001.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<rect x="756.0" y="2001.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<rect x="535.0" y="2019.1" width="230.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
+<rect x="592.5" y="2031.1" width="115.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
+<rect x="535.0" y="2019.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<rect x="756.0" y="2019.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
 <rect x="420.0" y="2065.0" width="460.0" height="35.0" rx="0" fill="#FFFFFF" stroke="#283030" stroke-width="1.3" />
 <rect x="420.0" y="2095.0" width="460.0" height="5.0" rx="0" fill="#3850A2" stroke="none" stroke-width="1.5" />
 <rect x="424.0" y="2068.0" width="26.0" height="26.0" rx="0" fill="url(#hatch)" stroke="#283030" stroke-width="1" />
@@ -85,24 +77,24 @@
 <rect x="798.0" y="2071.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
 <text x="830.0" y="2086.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
 <line x1="900.0" y1="2040.0" x2="912.0" y2="2040.0" stroke="#6F7A8A" stroke-width="1" stroke-linecap="butt"/>
-<text x="918.0" y="2012.1" font-size="21" text-anchor="start" fill="#3850A2" font-weight="bold" >Vaschetta 2: rulli 180 mm</text>
-<text x="918.0" y="2043.1" font-size="19" text-anchor="start" fill="#283030" font-weight="normal" >2 affiancati x 2 file = 4 pz</text>
-<rect x="465.0" y="1831.8" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="510.0" y="1843.8" width="90.0" height="41.0" rx="3" fill="#3850A2" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
-<rect x="465.0" y="1831.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<text x="918.0" y="2012.1" font-size="21" text-anchor="start" fill="#3850A2" font-weight="bold" >Vaschetta 2: rulli 230 mm</text>
+<text x="918.0" y="2043.1" font-size="19" text-anchor="start" fill="#283030" font-weight="normal" >1 affiancati x 2 file = 2 pz</text>
+<rect x="445.0" y="1831.8" width="200.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
+<rect x="495.0" y="1843.8" width="100.0" height="41.0" rx="3" fill="#3850A2" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
+<rect x="445.0" y="1831.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
 <rect x="636.0" y="1831.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="655.0" y="1831.8" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="700.0" y="1843.8" width="90.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
+<rect x="655.0" y="1831.8" width="200.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
+<rect x="705.0" y="1843.8" width="100.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
 <rect x="655.0" y="1831.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="826.0" y="1831.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="465.0" y="1849.1" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="510.0" y="1861.1" width="90.0" height="41.0" rx="3" fill="#3850A2" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
-<rect x="465.0" y="1849.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<rect x="846.0" y="1831.8" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<rect x="445.0" y="1849.1" width="200.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
+<rect x="495.0" y="1861.1" width="100.0" height="41.0" rx="3" fill="#3850A2" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
+<rect x="445.0" y="1849.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
 <rect x="636.0" y="1849.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="655.0" y="1849.1" width="180.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
-<rect x="700.0" y="1861.1" width="90.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
+<rect x="655.0" y="1849.1" width="200.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
+<rect x="705.0" y="1861.1" width="100.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
 <rect x="655.0" y="1849.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
-<rect x="826.0" y="1849.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
+<rect x="846.0" y="1849.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
 <rect x="420.0" y="1895.0" width="460.0" height="35.0" rx="0" fill="#FFFFFF" stroke="#283030" stroke-width="1.3" />
 <rect x="420.0" y="1925.0" width="460.0" height="5.0" rx="0" fill="#3850A2" stroke="none" stroke-width="1.5" />
 <rect x="424.0" y="1898.0" width="26.0" height="26.0" rx="0" fill="url(#hatch)" stroke="#283030" stroke-width="1" />
@@ -117,7 +109,7 @@
 <rect x="798.0" y="1901.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
 <text x="830.0" y="1916.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
 <line x1="900.0" y1="1870.0" x2="912.0" y2="1870.0" stroke="#6F7A8A" stroke-width="1" stroke-linecap="butt"/>
-<text x="918.0" y="1842.1" font-size="21" text-anchor="start" fill="#3850A2" font-weight="bold" >Vaschetta 3: rulli 180 mm</text>
+<text x="918.0" y="1842.1" font-size="21" text-anchor="start" fill="#3850A2" font-weight="bold" >Vaschetta 3: rulli 200 mm</text>
 <text x="918.0" y="1873.1" font-size="19" text-anchor="start" fill="#283030" font-weight="normal" >2 affiancati x 2 file = 4 pz</text>
 <rect x="435.0" y="1661.8" width="100.0" height="65.0" rx="9" fill="#EFE6D2" stroke="#283030" stroke-width="1.1" />
 <rect x="460.0" y="1673.8" width="50.0" height="41.0" rx="3" fill="#F08A1C" stroke="none" stroke-width="1.5" fill-opacity="0.9"/>
@@ -412,8 +404,8 @@
 <text x="650.0" y="2501.0" font-size="22" text-anchor="middle" fill="#283030" font-weight="bold" >500</text>
 <text x="30.0" y="95.0" font-size="34" text-anchor="start" fill="#3850A2" font-weight="bold" >ESPOSITORE ZENIT  |  Variante A - da terra, 2 facce</text>
 <text x="30.0" y="135.0" font-size="21" text-anchor="start" fill="#6F7A8A" font-weight="normal" >VISTA FRONTALE (faccia A)  |  quote in mm  |  schema per preventivo, ipotesi da confermare</text>
-<text x="30.0" y="2595.0" font-size="21" text-anchor="start" fill="#283030" font-weight="bold" >Capacita' indicativa per faccia: 160 pennelli in blister + 18 rulli</text>
-<text x="30.0" y="2625.0" font-size="21" text-anchor="start" fill="#283030" font-weight="bold" >Totale 2 facce: 320 pennelli + 36 rulli</text>
+<text x="30.0" y="2595.0" font-size="21" text-anchor="start" fill="#283030" font-weight="bold" >Capacita' indicativa per faccia: 160 pennelli in blister + 16 rulli</text>
+<text x="30.0" y="2625.0" font-size="21" text-anchor="start" fill="#283030" font-weight="bold" >Totale 2 facce: 320 pennelli + 32 rulli</text>
 <text x="30.0" y="2655.0" font-size="19" text-anchor="start" fill="#6F7A8A" font-weight="normal" >Prodotti disegnati a scopo illustrativo; misure confezioni e referenze reali da confermare. Retro: faccia B speculare.</text>
 <rect x="30" y="2673" width="26" height="26" fill="#3850A2" stroke="#6F7A8A" stroke-width="1"/>
 <text x="66.0" y="2693.0" font-size="19" text-anchor="start" fill="#283030" font-weight="normal" >blu brand (placeholder)</text>
