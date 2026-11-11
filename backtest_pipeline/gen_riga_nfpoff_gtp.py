@@ -9,7 +9,7 @@ def sost(a, b, n=1):
     assert t.count(a) == n, (t.count(a), a[:90])
     t = t.replace(a, b)
 IMPS = 'Risk=3:i;MaxRiskPerStrategy=0.5:d;PropFirmMaxDailyDD=4.0:d'
-ARMI = {'N0': 'EnableNFP_Filter=false:b'}
+ARMI = {'N0': 'EnableNFP_Filter=false:b;EnableVirtualSLTP=false:b;SetVSL_to_hardSL_sec_delay=99:i;FridayStopHour=25:i'}
 runs = [('Gold Trade Pro MT5.ex5', a, '1', 'D1', 'XAUUSD', IMPS + ';' + ARMI['N0'], '', 'NFPOFF_N0_R1_COMBO_GTP_160000_%s' % a) for a in ('2013', '2020', '2025')]
 N = len(runs)
 q = lambda L: ','.join("'" + x + "'" for x in L)

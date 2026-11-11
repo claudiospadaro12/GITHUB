@@ -26,7 +26,7 @@ ANNI = ['2013', '2020', '2025']
 IMP = 'FridayStopHour=19:i'
 runs = []   # (ex5, zip, anno, fine, periodo, set, imposti, etichetta, deposito)
 # D160: componenti delle combo P1/P3/P4/P5 a DEPOSITO 160000. Deterministiche (Goldbot, Randomization 0): 1 passata/anno; rumorose (Phantom, Reaper, Randomization 50): 2 ripetizioni/anno.
-ARMI = {'N0': 'EnableNFP_Filter=false:b'}
+ARMI = {'N0': 'EnableNFP_Filter=false:b;EnableVirtualSLTP=false:b;SetVSL_to_hardSL_sec_delay=99:i;FridayStopHour=25:i'}
 # NFP filter spento: Goldbot Prop (L0) e Combo (L3) 1 passata/anno (deterministici); Phantom L1 e Reaper L3 (Randomization 50) 2 ripetizioni/anno
 COMP = [('GB', 'L0', 1, ('N0',)), ('GB', 'L3', 1, ('N0',)), ('PH', 'L1', 2, ('N0',)), ('GR', 'L3', 2, ('N0',))]
 for anno in ANNI:

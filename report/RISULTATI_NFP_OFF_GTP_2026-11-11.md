@@ -1,3 +1,7 @@
+# RITIRATO (11/11/2026, sera): le conclusioni sotto NON valgono
+**Le 3 passate NFP-off del Gold Trade Pro sono CONFUSE da input ereditati dal tester.** Il report mostra `FridayStopHour=19` (nel riferimento D160 era 25) in tutte e 3: il tester ricorda il valore salvato dalla prova GTP del venerdi 19:00 (9/11) quando l'input non e imposto. La riga non lo imponeva (solo Risk, MaxRisk, DD giorno ed `EnableNFP_Filter`). Prova: il braccio C0 del Virtual SL/TP (virtual spento, nessun cambio NFP voluto) da' gli STESSI identici netti (29.650 / 9.439 / 16.705), perche anch'esso aveva ereditato `FridayStopHour=19` ed `EnableNFP_Filter=false` dalla passata precedente. Quindi il -8,9% (e il -28% del 2020) e l'effetto della chiusura del venerdi alle 19:00 (che nel 2020 costa al GTP -31%, misurato), NON dell'NFP. Il test va rifatto imponendo tutti gli input "appiccicosi". Le righe corrette sono rigenerate (`RIGA_LANCIA_NFPOFF_GTP`, `RIGA_LANCIA_NFPOFF_ORO`).
+
+---
 # Filtro NFP spento: risultati del Gold Trade Pro (11/11/2026, sera) — 3 passate
 
 **Natura: MISURA, parziale** (solo la riga GTP della coppia; la riga oro non e arrivata). Criteri e previsioni scritti prima: `CRITERI_NFP_OFF_2026-11-11.md`. Gold Trade Pro Combo (Risk 3, MaxRisk 0,5, DD giorno 4,0), XAUUSD D1, 160.000 EUR, Modello 1, 2013 / 2020 / 2025, `EnableNFP_Filter=false` (unico input cambiato), 1 passata per anno (deterministico). Riferimento: D160 GTP (filtro acceso). Script `D160_dati/analisi_nfpoff_gtp.py`.

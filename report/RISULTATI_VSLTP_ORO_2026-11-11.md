@@ -3,6 +3,8 @@
 **Natura: MISURA, parziale.** Arrivata solo la riga oro (`RIGA_LANCIA_VSLTP_ORO`, 33 passate: Goldbot Prop L0, Phantom Gradino 1 L1, Reaper Combo L3; Gold Trade Pro non ancora arrivato). Criteri e previsioni scritti prima: `CRITERI_VSLTP_2026-11-10.md`. Riferimento = passate D160 (virtual spento, ritardo 99). 160.000 EUR, Modello 1, 2013 / 2020 / 2025. Solo tester. Script `D160_dati/analisi_vsltp_oro.py`, sintesi `vsltp_oro_sintesi.json`.
 
 ## Validita
+**Controllo aggiunto la sera dell'11/11 (input del report contro il riferimento D160, tutti gli input):** nelle 33 passate oro gli input sono identici al riferimento tranne i due imposti (`EnableVirtualSLTP`, `SetVSL_to_hardSL_sec_delay`): FridayStopHour 25, `EnableNFP_Filter=true` e ritardo 99 nei bracci V99 sono confermati in tutte (15 V99, 15 V0, 3 C0). **I risultati dell'oro quindi valgono.** (Le 9 passate Gold Trade Pro dello stesso test NON sono valide: vedi `RISULTATI_VSLTP_GTP_INVALIDO_2026-11-11.md`.)
+
 **33/33 passate valide**: stato OK, qualita 99-100%, zero stop out e zero "no money", **input imposti confermati dal report in tutte** (V99: `EnableVirtualSLTP=true`; V0: true e ritardo 0; C0: false e ritardo 0). Riferimento: Reaper L3 2020 con una sola ripetizione (R1 KO nel D160).
 
 ## Scostamento dai criteri (dichiarato)
