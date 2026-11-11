@@ -80,3 +80,36 @@ Criteri e previsioni scritti PRIMA: `UBS_U1B_CRITERI_2026-11-10.md` (disegno riv
 - Un percorso per periodo e per set; Modello 1; cambio EUR/USD ipotesi; lotti variabili col prezzo.
 - I 9 set H1 non hanno il periodo lungo: si possono rifare in due meta (2005-2012 e 2013-2025) e confrontare i due DD (il DD a cavallo non si misura).
 - **Nessun giudizio su acquisti, taglie o lotti.**
+
+
+## U1b-H1: i 9 set H1 sul periodo 2005-2012 (11/11/2026, risultati arrivati; criteri e previsioni nel file dei criteri, scritti prima)
+**Natura: MISURA.** 9 passate su 9 valide (stato OK, qualita 96% >= 95%, zero stop out e zero "no money"), EA Ultimate_Breakout_EA_WSC_V9.5, XAUUSD, 100.000 EUR, lotto fisso, periodo 2005-01-01 -> 2013-01-01, da 07:03 a 07:29 (circa 26 minuti). DD a 0,01 lotti = DD equity del report / 10, in EUR; R = DD0,01 / dichiarato (il dichiarato e in dollari: tra parentesi R con 1,15 USD per EUR, ipotesi). DD(totale) = il piu alto fra i due periodi (il DD a cavallo del 2013 non e misurato). Dati: `D160_dati/ubsu1bh1.json`.
+| Set | Dichiarato | DD0,01 2005-2012 | R 2005-2012 | DD0,01 2013-2025 | R 2013-2025 | **R totale** (in USD) | Classe totale (EUR / USD) |
+|---|---|---|---|---|---|---|---|
+| GR_s5_H1 | 110 | 309.8 | 2.82 | 150.3 | 1.37 | **2.82** (3.24) | DIVERSO / DIVERSO |
+| GR_s6_H1 | 140 | 148.4 | 1.06 | 183.2 | 1.31 | **1.31** (1.50) | DIFFERENTE / DIVERSO |
+| GR_s7_H1 | 90 | 122.9 | 1.37 | 133.7 | 1.49 | **1.49** (1.71) | DIFFERENTE / DIVERSO |
+| GR_s8_H1 | 130 | 190.1 | 1.46 | 149.6 | 1.15 | **1.46** (1.68) | DIFFERENTE / DIVERSO |
+| GR_s9_H1 | 700 | 634.5 | 0.91 | 607.9 | 0.87 | **0.91** (1.04) | CONFERMA / CONFERMA |
+| PH_strat6 | 476 | 320.7 | 0.67 | 136.1 | 0.29 | **0.67** (0.77) | DIFFERENTE / CONFERMA |
+| PH_strat7 | 400 | 426.7 | 1.07 | 158.6 | 0.40 | **1.07** (1.23) | CONFERMA / CONFERMA |
+| PH_strat8 | 720 | 292.0 | 0.41 | 199.4 | 0.28 | **0.41** (0.47) | DIVERSO / DIVERSO |
+| PH_strat9 | 600 | 469.5 | 0.78 | 235.4 | 0.39 | **0.78** (0.90) | CONFERMA / CONFERMA |
+
+Operazioni e PF 2005-2012: Reaper s5 1.005 / 1,54; s6 970 / 1,92; s7 911 / 2,35; s8 1.251 / 2,09; s9 5.981 / 1,34; Phantom strat6 1.056 / 1,68; strat7 1.197 / 1,71; strat8 898 / 1,36; strat9 1.099 / 1,40. Netto 2005-2012: da 9.003 (Phantom strat8) a 27.387 (Reaper s9).
+
+### Previsioni H1-1...H1-5
+- **H1-1** (>= 8 passate su 9 valide): **vera** (9/9).
+- **H1-2** (DD 2005-2012 piu basso del 2013-2025 in >= 6 set su 9): **falsa** (2/9: Reaper s6 e s7). In 7 set su 9 il periodo 2005-2012 ha DD *piu alto*.
+- **H1-3** (R totale < 1,5 in >= 7 set su 9): **vera in EUR** (8/9; solo Reaper s5, R 2,82). In USD con 1,15 solo 5/9 sono sotto 1,5 (ipotesi del cambio).
+- **H1-4** (i 4 Phantom restano DIVERSO con R < 0,5): **falsa**: solo strat8 (R 0,41). Con il 2005-2012 gli altri tre salgono a 0,67 / 1,07 / 0,78 (erano 0,29-0,40 sul solo 2013-2025). Il DD dichiarato dei Phantom era dunque compatibile con un periodo che include gli anni 2005-2012.
+- **H1-5** (finisce in meno di 1 ora): **vera** (circa 26 minuti).
+
+### Cosa si legge
+1. **R totale H1**: CONFERMA 3 (Reaper s9, Phantom strat7, strat9), DIFFERENTE 4 (Reaper s6, s7, s8 con DD piu alto del dichiarato del 31-49%, Phantom strat6 con DD piu basso del 33%), DIVERSO 2 (Reaper s5 2,82x; Phantom strat8 0,41x). Mediana 1,07.
+2. **Il periodo conta**: per i 4 Phantom e per Reaper s5 e s8 il DD 2005-2012 e molto piu alto di quello 2013-2025 (fino a 2,3x per Reaper s5, 2,3x per Phantom strat6). Questo e coerente con l'ipotesi gia scritta che il dichiarato di Wim sia calcolato su un periodo che parte prima del 2013 (non dimostrato).
+3. **Reaper s5**: DD0,01 di 310 EUR contro dichiarato 110: nel periodo 2005-2012 il suo DD e quasi il triplo, ed e il set piu fuori scala (anche in USD).
+4. **Regola d'uso (invariata)**: per ogni set usare il DD misurato su BCM sul periodo piu lungo disponibile, non il dichiarato; per i 9 H1 il valore piu alto fra i due periodi.
+
+### Limiti
+Nessun DD a cavallo del 2013; qualita 96% (inferiore al 98-100% del 2013-2025); un percorso per set; data source BCM contro MetaQuotes non testata (U1c); il significato esatto dell'intervallo del dichiarato di Wim non e verificato; DD a 0,01 lotti ricavato dividendo per 10 (il tester ha girato a 0,1).
