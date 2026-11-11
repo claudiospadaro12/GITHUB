@@ -36,16 +36,15 @@
 <rect x="801.0" y="959.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
 <rect x="420.0" y="1005.0" width="410.0" height="35.0" rx="0" fill="#FFFFFF" stroke="#283030" stroke-width="1.3" />
 <rect x="420.0" y="1035.0" width="410.0" height="5.0" rx="0" fill="#3850A2" stroke="none" stroke-width="1.5" />
-<rect x="433.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="465.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="513.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="545.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="593.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="625.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="673.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="705.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="753.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="785.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="424.0" y="1008.0" width="26.0" height="26.0" rx="0" fill="url(#hatch)" stroke="#283030" stroke-width="1" />
+<rect x="493.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="525.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="573.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="605.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="653.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="685.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="733.0" y="1011.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="765.0" y="1026.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
 <line x1="850.0" y1="980.0" x2="862.0" y2="980.0" stroke="#6F7A8A" stroke-width="1" stroke-linecap="butt"/>
 <text x="868.0" y="952.1" font-size="21" text-anchor="start" fill="#3850A2" font-weight="bold" >Vaschetta 1: rulli 180 mm</text>
 <text x="868.0" y="983.1" font-size="19" text-anchor="start" fill="#283030" font-weight="normal" >2 affiancati x 4 file = 8 pz</text>
@@ -99,16 +98,15 @@
 <rect x="776.0" y="789.1" width="9.0" height="65.0" rx="4" fill="#C9BFA6" stroke="#283030" stroke-width="1.0" />
 <rect x="420.0" y="835.0" width="410.0" height="35.0" rx="0" fill="#FFFFFF" stroke="#283030" stroke-width="1.3" />
 <rect x="420.0" y="865.0" width="410.0" height="5.0" rx="0" fill="#3850A2" stroke="none" stroke-width="1.5" />
-<rect x="433.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="465.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="513.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="545.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="593.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="625.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="673.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="705.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
-<rect x="753.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
-<text x="785.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="424.0" y="838.0" width="26.0" height="26.0" rx="0" fill="url(#hatch)" stroke="#283030" stroke-width="1" />
+<rect x="493.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="525.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="573.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="605.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="653.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="685.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
+<rect x="733.0" y="841.0" width="64.0" height="20.0" rx="2" fill="#FFF3B0" stroke="#6F7A8A" stroke-width="0.8" />
+<text x="765.0" y="856.0" font-size="15" text-anchor="middle" fill="#283030" font-weight="bold" >€</text>
 <line x1="850.0" y1="810.0" x2="862.0" y2="810.0" stroke="#6F7A8A" stroke-width="1" stroke-linecap="butt"/>
 <text x="868.0" y="782.1" font-size="21" text-anchor="start" fill="#3850A2" font-weight="bold" >Vaschetta 2: mini-rulli 100 mm</text>
 <text x="868.0" y="813.1" font-size="19" text-anchor="start" fill="#283030" font-weight="normal" >3 affiancati x 4 file = 12 pz</text>

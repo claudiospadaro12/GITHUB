@@ -92,3 +92,19 @@ Carico stimato (da verificare con pesi reali): blister ~0,1 kg -> ~0,8 kg per ga
 - Ruote si/no; ancoraggio; limiti di ingombro dei punti vendita target; altezza massima del banco per la Var. B.
 - Colori brand e logo ufficiali, headline definitive, necessita' di illuminazione o QR code.
 - Tasche portadepliant: quali formati (DL, A5) e quanti.
+
+
+## Raccomandazioni del benchmark: stato (benchmark/espositori-concorrenza.md)
+| # | Raccomandazione | Stato |
+|---|---|---|
+| 1-2 | Ordine per superficie/uso e codice colore | Parziale: la fascia guida usa gli stessi 4 colori delle etichette (lisce, poco ruvide, ruvide, molto ruvide). Le righe dei pennelli restano per tipo (come nel catalogo). |
+| 3 | Pennelli fuori imballo per la prova tattile | Non applicato nel disegno (blister). Da valutare con il cliente, anche per il rischio furto. |
+| 4 | Campione di pelo/texture sulle vaschette | Applicato: un riquadro campione sulla sponda di ogni vaschetta. |
+| 5 | Guida alla scelta a livello occhi | Parziale: la fascia guida e' sopra le vaschette dei rulli (circa 90 cm), non a 150-170 cm. Spostarla richiede di riordinare il layout: da decidere. |
+| 6 | Scorta in basso | Applicato come ipotesi: la base diventa vano scorta con sportello chiudibile. |
+| 7 | Modularita' terra/banco/parete | Solo terra e banco (varianti A e B). La parete non e' disegnata. |
+| 8 | Tre varianti di materiale | Gia' nel confronto cartone/metallo/MDF di questo documento. |
+| 9 | Testata sostituibile | Da specificare al fornitore: inserto di testata intercambiabile. |
+| 10 | Segnaletica da 1-2 m e QR | Applicato: scritte grandi e QR segnaposto in testata. L'indirizzo del QR va deciso. |
+
+Le misure dell'espositore da terra (H 220 x L 50 x P 40 cm) sono state indicate dal cliente.

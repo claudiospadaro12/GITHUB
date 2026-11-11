@@ -170,8 +170,14 @@ def front(c, path):
     # --- fascia promo + tasche
     if c["promo"]:
         cv.rect(upr, tray_top, W - 2 * upr, c["promo"], fill=C["white"], stroke=C["grey"], sw=1)
-        cv.text(upr + 18, tray_top + c["promo"] / 2 + 10, "Scegli il rullo giusto.", c["plabel"][0] - 6, weight="bold", fill=C["blue"])
-        cv.text(upr + 18, tray_top + c["promo"] / 2 - 26, "Guida alla scelta →", c["plabel"][1], fill=C["orange"], weight="bold")
+        cv.text(upr + 14, tray_top + c["promo"] - 38, "SCEGLI IL RULLO", c["plabel"][0] - 2, weight="bold", fill=C["blue"])
+        cv.text(upr + 14, tray_top + c["promo"] - 62, "per la tua superficie", c["plabel"][1], fill=C["ink"])
+        for k, (col, nm) in enumerate([("#3850A2", "LISCE"), ("#2E8B8B", "POCO R."), ("#E8731A", "RUVIDE"), ("#B23A2E", "MOLTO R.")]):
+            bx = upr + 14 + k * 47
+            cv.rect(bx, tray_top + 22, 43, 36, fill=col, rx=4)
+            for d_ in range(3):
+                cv.circ(bx + 10 + d_ * 11.5, tray_top + 40, 4.2 if d_ <= k - 1 else 1.8, fill=C["white"])
+            cv.text(bx + 21.5, tray_top + 8, nm, 8, "middle", fill=C["ink"], weight="bold")
         for j in range(2):
             px = W - upr - 20 - 100 * (2 - j) - 10 * (1 - j) + 0
             cv.rect(px + 6, tray_top + 60, 88, 90, fill=C["white"], stroke=C["grey"], sw=1)             # depliant che sporge
@@ -191,9 +197,10 @@ def front(c, path):
                 cv.rect(x + L - 9, yc - c["r"], 9, c["roller_d"], fill="#C9BFA6", stroke=C["ink"], sw=1.0, rx=4)
         cv.rect(upr, hb, c["usable_w"], c["lip_h"], fill=C["white"], stroke=C["ink"], sw=1.3)     # sponda
         cv.rect(upr, hb, c["usable_w"], 5, fill=C["blue"])
-        nt = int(c["usable_w"] // 80)
+        cv.rect(upr + 4, hb + 6, 26, 26, fill="url(#hatch)", stroke=C["ink"], sw=1)             # campione di pelo/texture applicato
+        nt = int((c["usable_w"] - 40) // 80)
         for k in range(nt):                                                                      # cartellini prezzo
-            tx = upr + (c["usable_w"] - nt * 80) / 2 + k * 80 + 8
+            tx = upr + 40 + (c["usable_w"] - 40 - nt * 80) / 2 + k * 80 + 8
             cv.rect(tx, hb + 9, 64, 20, fill="#FFF3B0", stroke=C["grey"], sw=0.8, rx=2)
             cv.text(tx + 32, hb + 14, "€", 15, "middle", fill=C["ink"], weight="bold")
         # etichetta a destra
@@ -231,6 +238,11 @@ def front(c, path):
     if iw > lw - 12: iw = lw - 12; ih = iw * 1040 / 2000
     cv.add(f'<image x="{cv.X(c["upr"] + 5 + (lw - iw) / 2):.1f}" y="{cv.Y(hdr_bot + (c["header"] + ih) / 2):.1f}" width="{iw:.1f}" height="{ih:.1f}" href="{LOGO_URI}"/>')
     tx = c["upr"] + 5 + lw + 22
+    if c["faces"] == 2:
+        qx = W - c["upr"] - 70; qy = hdr_bot + c["header"] - 86
+        cv.rect(qx, qy, 62, 62, fill=C["white"], stroke=C["white"], sw=1)
+        cv.text(qx + 31, qy + 28, "QR", 20, "middle", fill=C["ink"], weight="bold")
+        cv.text(qx + 31, qy + 8, "guida scelta", 9, "middle", fill=C["ink"])
     cv.text(tx, hdr_bot + c["header"] / 2 - 4, "PENNELLI", c["h1"], fill=C["white"], weight="bold")
     cv.text(tx, hdr_bot + c["header"] / 2 - 4 - c["h1"] - 6, "E RULLI", c["h1"], fill=C["white"], weight="bold")
     cv.text(tx, hdr_bot + c["header"] / 2 - 2 * c["h1"] - 22, "per ogni superficie.", c["h2"], fill="#FFD9A0")
@@ -241,10 +253,10 @@ def front(c, path):
     cv.rect(0, 0, W, base, fill="#3A4558", stroke=C["ink"], sw=1.5)
     cv.line(0, base / 2, W, base / 2, stroke="#8791A3", sw=1, dash="6 5") if base > 60 else None
     if base >= 100:
-        cv.text(W / 2, base / 2 + 22, "BASE ZAVORRATA", 20, "middle", fill=C["white"], weight="bold")
-        cv.text(W / 2, base / 2 - 24, "piedini regolabili / ruote opz.", 17, "middle", fill="#D8DEE8")
+        cv.text(W / 2, base / 2 + 22, "SCORTA (sportello) + BASE", 18, "middle", fill=C["white"], weight="bold")
+        cv.text(W / 2, base / 2 - 24, "scorta integrata, piedini / ruote opz.", 17, "middle", fill="#D8DEE8")
     cv.line(W, base / 2, W + 12, base / 2, stroke=C["grey"], sw=1)
-    cv.label(W + 18, base / 2 - (0 if base >= 100 else 45), f"Base {W} x {c['D']} x {base}", ["Zavorrata, antiribaltamento; ruote Ø60 frenate opzionali (altezza totale invariata)." if base >= 100 else "Zoccolo zavorrato con piedini antiscivolo in gomma."], tsize=21, size=19, width=34)
+    cv.label(W + 18, base / 2 - (0 if base >= 100 else 45), f"Base {W} x {c['D']} x {base}", ["Zona bassa = scorta ad alta rotazione dietro sportello chiudibile; zavorrata, antiribaltamento; ruote Ø60 opz." if base >= 100 else "Zoccolo zavorrato con piedini antiscivolo in gomma."], tsize=21, size=19, width=34)
     # --- quote
     xo = -60
     segs = [(0, base)]
@@ -352,7 +364,7 @@ def side(c, path):
     lab(peg_top - c["row_p"] / 2, "Ganci su pannello forato", [f"asta Ø5 x L {c['hook_len']}, passo verticale {c['row_p']:.0f}; {c['blister_per_hook']} blister (sp. {c['blister_t']}) per gancio"])
     if c["promo"]: lab(tray_top + c["promo"] / 2, "Tasca portadepliant", ["sporgenza 40, formato DL"])
     lab(base + c["tray_pitch"] * (n - 1) / 2 + 60, f"Vaschette x{n} per faccia", [f"inclinate {c['incl']}°, profondita' utile {d:.0f}, sponda h{c['lip_h']} con cartellino prezzo; {c['rows']} file di rulli"])
-    lab(base / 2, "Base zavorrata", [f"{D} x {base}; baricentro basso (verifica ribaltamento a carico del fornitore)." + (" Ruote Ø60 opz." if base >= 100 else " Piedini antiscivolo.")], y=None if base >= 100 else -45)
+    lab(base / 2, "Base con scorta", [f"{D} x {base}; vano scorta con sportello; baricentro basso (verifica ribaltamento a carico del fornitore)." + (" Ruote Ø60 opz." if base >= 100 else " Piedini antiscivolo.")], y=None if base >= 100 else -45)
     title_block(cv, c, "VISTA LATERALE" + (" (sezione, entrambe le facce)" if faces == 2 else " (sezione)"), "Il montante centrale regge i ganci su entrambe le facce; le vaschette poggiano su un cuneo/struttura inclinata." if faces == 2 else "Il pannello posteriore regge ganci e vaschette; appoggio a parete o banco.")
     cv.out(path)
 

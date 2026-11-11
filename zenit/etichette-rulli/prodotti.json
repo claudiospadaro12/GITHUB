@@ -40,7 +40,7 @@
    "en": "Recommended uses",
    "de": "Empfohlene Anwendungen",
    "es": "Usos recomendados",
-   "fr": "Utilisations recommandées"
+   "fr": "Usages"
   },
   "code": {
    "it": "Cod.",
@@ -48,6 +48,43 @@
    "de": "Art.-Nr.",
    "es": "Ref.",
    "fr": "Réf."
+  },
+  "surf": {
+   "it": "Superfici",
+   "en": "Surfaces",
+   "de": "Untergründe",
+   "es": "Superficies",
+   "fr": "Surfaces"
+  },
+  "pack": {
+   "it": "Confez.",
+   "en": "Pack",
+   "de": "VE",
+   "es": "Env.",
+   "fr": "Cond."
+  },
+  "pilecls": {
+   "corto": {
+    "it": "corto",
+    "en": "short",
+    "de": "kurz",
+    "es": "corto",
+    "fr": "court"
+   },
+   "medio": {
+    "it": "medio",
+    "en": "medium",
+    "de": "mittel",
+    "es": "medio",
+    "fr": "moyen"
+   },
+   "lungo": {
+    "it": "lungo",
+    "en": "long",
+    "de": "lang",
+    "es": "largo",
+    "fr": "long"
+   }
   }
  },
  "materiali": {
@@ -221,8 +258,7 @@
    "utilizzi": [
     "smalti_murali",
     "cartongesso",
-    "resine",
-    "lisce"
+    "resine"
    ],
    "nome": {
     "it": "Microfinish",
@@ -237,7 +273,11 @@
     "de": "Professioneller Farbroller mit kurzem Flor für glatte Oberflächen.",
     "es": "Rodillo profesional de pelo corto para acabados lisos.",
     "fr": "Manchon professionnel à poils courts pour finitions lisses."
-   }
+   },
+   "superfici": [
+    "lisce"
+   ],
+   "confezione": 12
   },
   {
    "id": "146-23",
@@ -250,8 +290,7 @@
    "materiale": "microzenit",
    "utilizzi": [
     "impregnanti",
-    "resine",
-    "lisce"
+    "resine"
    ],
    "nome": {
     "it": "Aurora",
@@ -266,7 +305,11 @@
     "de": "Professioneller Farbroller mit kurzem Flor für Imprägnierungen und Harze.",
     "es": "Rodillo profesional de pelo corto para impregnantes y resinas.",
     "fr": "Manchon professionnel à poils courts pour imprégnants et résines."
-   }
+   },
+   "superfici": [
+    "lisce"
+   ],
+   "confezione": 12
   },
   {
    "id": "159-23",
@@ -280,8 +323,7 @@
    "utilizzi": [
     "vernici",
     "parquet",
-    "resine",
-    "lisce"
+    "resine"
    ],
    "nome": {
     "it": "Micro5",
@@ -296,7 +338,11 @@
     "de": "Professioneller Farbroller mit sehr kurzem Flor für Lacke und Parkett.",
     "es": "Rodillo profesional de pelo muy corto para barnices y parqué.",
     "fr": "Manchon professionnel à poils très courts pour vernis et parquet."
-   }
+   },
+   "superfici": [
+    "lisce"
+   ],
+   "confezione": 12
   },
   {
    "id": "135E23",
@@ -323,7 +369,12 @@
     "de": "Professioneller Nylon-Farbroller für den universellen Einsatz.",
     "es": "Rodillo profesional de nailon para uso universal.",
     "fr": "Manchon professionnel en nylon pour usage universel."
-   }
+   },
+   "superfici": [
+    "poco_ruvide",
+    "lisce"
+   ],
+   "confezione": 12
   },
   {
    "id": "132S23",
@@ -335,8 +386,7 @@
    "pelo_mm": 28,
    "materiale": "merinos",
    "utilizzi": [
-    "idro_liquide",
-    "rugose"
+    "idro_liquide"
    ],
    "nome": {
     "it": "Lamb",
@@ -351,7 +401,50 @@
     "de": "Professioneller Langflor-Farbroller aus reiner Merinowolle.",
     "es": "Rodillo profesional de pelo largo en lana merino pura.",
     "fr": "Manchon professionnel à poils longs en pure laine mérinos."
-   }
+   },
+   "superfici": [
+    "molto_ruvide"
+   ],
+   "confezione": 6
   }
- ]
+ ],
+ "classi_superficie": {
+  "lisce": {
+   "colore": "#3850A2",
+   "punti": 0,
+   "it": "lisce",
+   "en": "smooth",
+   "de": "glatt",
+   "es": "lisas",
+   "fr": "lisses"
+  },
+  "poco_ruvide": {
+   "colore": "#2E8B8B",
+   "punti": 1,
+   "it": "poco ruvide",
+   "en": "slightly rough",
+   "de": "leicht rau",
+   "es": "poco rugosas",
+   "fr": "légèrement rugueuses"
+  },
+  "ruvide": {
+   "colore": "#E8731A",
+   "punti": 2,
+   "it": "ruvide",
+   "en": "rough",
+   "de": "rau",
+   "es": "rugosas",
+   "fr": "rugueuses"
+  },
+  "molto_ruvide": {
+   "colore": "#B23A2E",
+   "punti": 3,
+   "it": "molto ruvide",
+   "en": "very rough",
+   "de": "sehr rau",
+   "es": "muy rugosas",
+   "fr": "très rugueuses"
+  }
+ },
+ "classi_pelo_nota": "IPOTESI Zenit (non nel catalogo): corto <=8 mm, medio 9-14 mm, lungo >=15 mm. Da confermare."
 }

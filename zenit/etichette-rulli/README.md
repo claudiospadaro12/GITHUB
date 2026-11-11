@@ -36,3 +36,8 @@ python3 genera_pdf.py --stampa   # pagine a misura esatta 210x60 per la tipograf
 - Elenco prodotti reali: codici, EAN assegnati (prefisso GS1 aziendale), misure, materiali, altezze pelo, descrizioni
 - Revisione delle traduzioni da parte di madrelingua/tecnici del settore
 - Eventuali elementi obbligatori: lotto/data, marchi, simboli di riciclo, testi per mercati specifici
+
+## Raccomandazioni del benchmark applicate (benchmark/etichette-rulli-concorrenza.md)
+- Applicate: altezza pelo in mm con indicatore a barre (corto/medio/lungo, soglie ipotizzate da Zenit: <=8, 9-14, >=15 mm); scala delle superfici a 4 livelli con colori, presa dalle classi del catalogo 2026 (lisce / poco ruvide / ruvide / molto ruvide); icone e numeri uguali nelle 5 lingue; confezione in zona fissa; materiale in chiaro.
+- Non applicate perche' mancano i dati: matrice vernice x rullo (compatibilita' non presente nel catalogo), indirizzo QR alla guida, simbolo di riciclo, marchio di gamma distintivo.
+- Da confermare: le soglie del pelo e le traduzioni.
