@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" preserveAspectRatio="xMidYMid meet">
+  <!-- PLACEHOLDER LOGO: sostituire questo file con il logo Zenit (SVG o PNG, stesso nome o aggiornare "logo" in prodotti.json) -->
+  <rect x="1" y="1" width="118" height="38" rx="3" fill="#fff" stroke="#E8731A" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <path d="M8 29 L20 11 L32 29 Z" fill="#E8731A"/>
+  <text x="38" y="23" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#12355B">LOGO ZENIT</text>
+  <text x="38" y="33" font-family="Arial, Helvetica, sans-serif" font-size="5.5" fill="#6b7785">segnaposto - da sostituire</text>
+</svg>
