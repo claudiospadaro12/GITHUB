@@ -13,12 +13,12 @@ Disegni allegati (quote in mm, schema non in scala di produzione):
 
 | Parametro | Var. A da terra | Var. B da banco |
 |---|---|---|
-| Ingombro base (L x P) | 600 x 400 | 450 x 300 |
-| Altezza totale | 1800 | 880 |
+| Ingombro base (L x P) | 500 x 400 (misura indicata dal cliente) | 450 x 300 |
+| Altezza totale | 2200 (misura indicata dal cliente) | 880 |
 | Facce espositive | 2 (schiena a schiena, montante centrale 20) | 1 (pannello posteriore 20) |
 | Base | 120 zavorrata; piedini regolabili oppure ruote Ø60 frenate (opz., altezza totale invariata) | 30, piedini antiscivolo |
-| Testata (header) | 600 x 220, spessore 60, stampa fronte/retro | 450 x 100, spessore 40 |
-| Zona ganci (pannello forato) | 620 alt., 3 righe, passo righe ~207 | 410 alt., 2 righe, passo ~205 |
+| Testata (header) | 500 x 250, spessore 60, stampa fronte/retro | 450 x 100, spessore 40 |
+| Zona ganci (pannello forato) | 990 alt., 4 righe, passo righe ~248 | 410 alt., 2 righe, passo ~205 |
 | Fascia grafica + tasche DL | 160 alt., 2 tasche formato DL (99x210), visibile 140 | non prevista (tasca clip-on opzionale) |
 | Vaschette rulli | 4 per faccia, passo 170, inclinazione 15 gradi, profondita' utile 180, sponda h 35 | 2, passo 170, profondita' utile 270 |
 | Foratura pannello | Ø5, passo 25 x 25 | idem |
@@ -29,9 +29,9 @@ Prodotti ipotizzati (da verificare): blister pennelli 70 x 170 mm, spessore 12 m
 ## 2. Disposizione e capacita' di riferimento
 
 **Variante A (per faccia)**
-- Pennelli: 3 righe x 7 ganci x 8 blister = **168 pz** (righe: pennelli piatti / smalti e rifinitura / pennellesse e tondi - esempio).
-- Rulli: vaschetta 1 (250 mm) 2 x 2 file = 4; vaschetta 2 (180 mm) 3 x 2 = 6; vaschetta 3 (180 mm) 3 x 2 = 6; vaschetta 4 (mini 100 mm) 5 x 2 = 10 -> **26 pz**.
-- Totale 2 facce: **336 pennelli + 52 rulli**. 21 ganci e 4 vaschette per faccia; un cartellino prezzo per gancio e ~7 per sponda vaschetta.
+- Pennelli: 4 righe x 5 ganci x 8 blister = **160 pz** (righe di esempio: piatti / smalti e rifinitura / pennellesse e tondi / radiatori e vari).
+- Rulli: vaschetta 1 (250 mm) 1 x 2 file = 2; vaschette 2 e 3 (180 mm) 2 x 2 = 4 ciascuna; vaschetta 4 (mini 100 mm) 4 x 2 = 8 -> **18 pz**.
+- Totale 2 facce: **320 pennelli + 36 rulli**. 20 ganci e 4 vaschette per faccia. Capacita rulli bassa: con H 2200 si puo valutare una 5a vaschetta o rulli in verticale.
 
 **Variante B (1 faccia)**
 - Pennelli: 2 righe x 5 ganci x 8 = **80 pz**.

@@ -129,7 +129,7 @@ function diagram(p){
     <circle cx="86" cy="23" r="9" fill="${P}" opacity=".12" stroke="${P}" stroke-width=".8"/>
     <circle cx="86" cy="23" r="5" fill="#fff" stroke="${P}" stroke-width=".8"/>
     <path d="M71 23H101" stroke="${A}" stroke-width=".6" stroke-dasharray="1.5 1"/>
-    ${f(113,16,'Ø ext. '+p.diametro_est_mm,'start',700).replace('ext.','e')}
+    ${p.diametro_est_mm?f(113,16,'Ø ext. '+p.diametro_est_mm,'start',700).replace('ext.','e'):''}
     ${f(113,26,'Ø int. '+p.diametro_int_mm,'start',700).replace('int.','i')}
     ${f(113,36,'pelo '+p.pelo_mm+' mm','start',700).replace('pelo','⇕')}
   </svg>`;
@@ -154,7 +154,7 @@ for (const p of D.prodotti) {
       <div class="logo"><img src="${D.logo}" alt="Zenit"></div>
       <div class="pname">${p.nome.it}</div>
       <div class="pcode">${D.termini.code.it}/${D.termini.code.en} <b>${p.codice}</b></div>
-      <div class="ean">${eanSVG(p.ean)}</div>
+      <div class="ean">${p.ean?eanSVG(p.ean):'<div style="font:700 2.4mm Arial;text-align:center;padding:4mm 0">EAN da assegnare</div>'}</div>
     </div>
     <div class="right">
       <div class="top"><div class="diagram">${diagram(p)}</div>

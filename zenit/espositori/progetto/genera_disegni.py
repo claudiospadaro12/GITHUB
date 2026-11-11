@@ -8,9 +8,13 @@ import math, os
 from textwrap import wrap
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# Palette placeholder (da sostituire con i Pantone/CMYK reali Zenit)
-C = dict(blue="#14386B", orange="#F08A1C", sand="#F4F1EA", ink="#1D2530", grey="#6F7A8A",
+# Blu e grigio scuro dal logo Zenit; arancio e sabbia restano segnaposto
+C = dict(blue="#3850A2", orange="#F08A1C", sand="#F4F1EA", ink="#283030", grey="#6F7A8A",
          light="#D5DAE2", white="#FFFFFF", wood="#B9814A", bristle="#E6D3A0", sleeve="#EFE6D2")
+
+import base64
+with open(os.path.join(HERE, "..", "..", "brand", "logo-zenit-web.png"), "rb") as _f:
+    LOGO_URI = "data:image/png;base64," + base64.b64encode(_f.read()).decode()
 
 # ----------------------------------------------------------------- PARAMETRI (mm)
 COMMON = dict(
@@ -28,15 +32,15 @@ COMMON = dict(
 )
 VARIANTI = {
  "A": dict(COMMON, code="A", name="Variante A - da terra, 2 facce",
-           W=600, D=400, H=1800, faces=2, base=120, header=220, promo=160, pegrows=3,
+           W=500, D=400, H=2200, faces=2, base=120, header=250, promo=160, pegrows=4,
            trays=[250, 180, 180, 100], hdr_t=60,
-           logo=(190, 110), h1=34, h2=20, tw=330, plabel=(26, 18)),
+           logo=(190, 110), h1=34, h2=20, tw=330, plabel=(22, 16)),
  "B": dict(COMMON, code="B", name="Variante B - da banco, 1 faccia",
            W=450, D=300, H=880, faces=1, base=30, header=100, promo=0, pegrows=2,
            trays=[180, 100], hdr_t=40,
            logo=(130, 62), h1=24, h2=14, tw=0, plabel=(0, 0)),
 }
-ROWNAMES = ["Pennelli piatti (blister)", "Pennelli per smalti/rifinitura", "Pennellesse e tondi"]
+ROWNAMES = ["Pennelli piatti (blister)", "Pennelli per smalti/rifinitura", "Pennellesse e tondi", "Pennelli per radiatori e vari"]
 TRAYNAMES = {250: "rulli 250 mm", 180: "rulli 180 mm", 100: "mini-rulli 100 mm"}
 
 # ----------------------------------------------------------------- derivati
@@ -166,8 +170,8 @@ def front(c, path):
     # --- fascia promo + tasche
     if c["promo"]:
         cv.rect(upr, tray_top, W - 2 * upr, c["promo"], fill=C["white"], stroke=C["grey"], sw=1)
-        cv.text(upr + 18, tray_top + c["promo"] / 2 + 10, "Scegli il rullo giusto.", c["plabel"][0], weight="bold", fill=C["blue"])
-        cv.text(upr + 18, tray_top + c["promo"] / 2 - 26, "Chiedi la guida alla scelta  →", c["plabel"][1], fill=C["orange"], weight="bold")
+        cv.text(upr + 18, tray_top + c["promo"] / 2 + 10, "Scegli il rullo giusto.", c["plabel"][0] - 6, weight="bold", fill=C["blue"])
+        cv.text(upr + 18, tray_top + c["promo"] / 2 - 26, "Guida alla scelta →", c["plabel"][1], fill=C["orange"], weight="bold")
         for j in range(2):
             px = W - upr - 20 - 100 * (2 - j) - 10 * (1 - j) + 0
             cv.rect(px + 6, tray_top + 60, 88, 90, fill=C["white"], stroke=C["grey"], sw=1)             # depliant che sporge
@@ -222,12 +226,14 @@ def front(c, path):
     # --- testata
     cv.rect(0, hdr_bot, W, c["header"], fill=C["blue"], stroke=C["ink"], sw=1.5)
     lw, lh = c["logo"]
-    cv.rect(c["upr"] + 5, hdr_bot + (c["header"] - lh) / 2, lw, lh, fill=C["orange"], stroke=C["white"], sw=2.5, extra='stroke-dasharray="9 6"')
-    cv.text(c["upr"] + 5 + lw / 2, hdr_bot + c["header"] / 2 - 4, "LOGO ZENIT", c["h2"] + 4, "middle", fill=C["white"], weight="bold")
-    cv.text(c["upr"] + 5 + lw / 2, hdr_bot + c["header"] / 2 - 4 - (c["h2"] + 8), "(placeholder)", c["h2"] - 4, "middle", fill=C["white"]) if lh > 70 else None
+    cv.rect(c["upr"] + 5, hdr_bot + (c["header"] - lh) / 2, lw, lh, fill=C["white"], stroke=C["white"], sw=2.5, rx=8)
+    ih = lh - 12; iw = ih * 2000 / 1040
+    if iw > lw - 12: iw = lw - 12; ih = iw * 1040 / 2000
+    cv.add(f'<image x="{cv.X(c["upr"] + 5 + (lw - iw) / 2):.1f}" y="{cv.Y(hdr_bot + (c["header"] + ih) / 2):.1f}" width="{iw:.1f}" height="{ih:.1f}" href="{LOGO_URI}"/>')
     tx = c["upr"] + 5 + lw + 22
-    cv.text(tx, hdr_bot + c["header"] / 2 + 2, "PENNELLI E RULLI", c["h1"], fill=C["white"], weight="bold")
-    cv.text(tx, hdr_bot + c["header"] / 2 - c["h1"] * 0.8, "per ogni superficie.", c["h2"], fill="#FFD9A0")
+    cv.text(tx, hdr_bot + c["header"] / 2 - 4, "PENNELLI", c["h1"], fill=C["white"], weight="bold")
+    cv.text(tx, hdr_bot + c["header"] / 2 - 4 - c["h1"] - 6, "E RULLI", c["h1"], fill=C["white"], weight="bold")
+    cv.text(tx, hdr_bot + c["header"] / 2 - 2 * c["h1"] - 22, "per ogni superficie.", c["h2"], fill="#FFD9A0")
     m = hdr_bot + c["header"] / 2
     cv.line(W, m, W + 12, m, stroke=C["grey"], sw=1)
     cv.label(W + 18, m, "Testata (esempio headline)", [f"Pannello grafico {W} x {c['header']}, logo Zenit in alto a sinistra. Stampa fronte e retro (faccia B uguale o diversa)."] if c["faces"] == 2 else [f"Pannello grafico {W} x {c['header']}, logo Zenit a sinistra."], tsize=21, size=19, width=34)

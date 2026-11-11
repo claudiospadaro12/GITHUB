@@ -1,86 +1,357 @@
 {
-  "_nota": "DATI DI ESEMPIO: tutti i prodotti, codici ed EAN sono inventati (marcati ESEMPIO). Sostituire con dati reali.",
-  "formato": { "larghezza_mm": 210, "altezza_mm": 60 },
-  "logo": "logo-zenit.png",
-  "colori": { "primario": "#3850A2", "accento": "#E8731A", "sfondo_chiaro": "#F3F1EC", "testo": "#283030" },
-  "azienda": {
-    "ragione_sociale": "Pennellificio Zenit srl",
-    "indirizzo": "[Via ______ n. __ - CAP ____ Citta (__) - Italia]",
-    "tel": "[+39 ___ ______]",
-    "email": "[info@______.it]",
-    "web": "[www.______.it]",
-    "piva": "[P.IVA ___________]",
-    "origine": "Made in Italy"
+ "_nota": "Prodotti reali da CATALOGO 2026 (misure 23 cm, Ø = diametro interno anima). Descrizioni e traduzioni da far rivedere. EAN non presenti nel catalogo: da assegnare.",
+ "formato": {
+  "larghezza_mm": 210,
+  "altezza_mm": 60
+ },
+ "logo": "logo-zenit.png",
+ "colori": {
+  "primario": "#3850A2",
+  "accento": "#E8731A",
+  "sfondo_chiaro": "#F3F1EC",
+  "testo": "#283030"
+ },
+ "azienda": {
+  "ragione_sociale": "Pennellificio Zenit srl",
+  "indirizzo": "[Via ______ n. __ - CAP ____ Citta (__) - Italia]",
+  "tel": "[+39 ___ ______]",
+  "email": "[info@______.it]",
+  "web": "[www.______.it]",
+  "piva": "[P.IVA ___________]",
+  "origine": "Made in Italy"
+ },
+ "lingue": [
+  "it",
+  "en",
+  "de",
+  "es",
+  "fr"
+ ],
+ "termini": {
+  "pile": {
+   "it": "Altezza pelo",
+   "en": "Pile height",
+   "de": "Florhöhe",
+   "es": "Altura del pelo",
+   "fr": "Hauteur de poil"
   },
-  "lingue": ["it", "en", "de", "es", "fr"],
-  "termini": {
-    "pile":   { "it": "Altezza pelo", "en": "Pile height", "de": "Florhöhe", "es": "Altura del pelo", "fr": "Hauteur de poil" },
-    "uses":   { "it": "Utilizzi consigliati", "en": "Recommended uses", "de": "Empfohlene Anwendungen", "es": "Usos recomendados", "fr": "Utilisations recommandées" },
-    "code":   { "it": "Cod.", "en": "Item no.", "de": "Art.-Nr.", "es": "Ref.", "fr": "Réf." }
+  "uses": {
+   "it": "Utilizzi consigliati",
+   "en": "Recommended uses",
+   "de": "Empfohlene Anwendungen",
+   "es": "Usos recomendados",
+   "fr": "Utilisations recommandées"
   },
-  "materiali": {
-    "microfibra": { "it": "microfibra", "en": "microfibre", "de": "Mikrofaser", "es": "microfibra", "fr": "microfibre" },
-    "poliestere": { "it": "poliestere", "en": "polyester", "de": "Polyester", "es": "poliéster", "fr": "polyester" }
+  "code": {
+   "it": "Cod.",
+   "en": "Item no.",
+   "de": "Art.-Nr.",
+   "es": "Ref.",
+   "fr": "Réf."
+  }
+ },
+ "materiali": {
+  "microfibra": {
+   "it": "microfibra",
+   "en": "microfibre",
+   "de": "Mikrofaser",
+   "es": "microfibra",
+   "fr": "microfibre"
   },
-  "utilizzi": {
-    "pareti":      { "icona": "wall",    "it": "pareti", "en": "walls", "de": "Wände", "es": "paredes", "fr": "murs" },
-    "soffitti":    { "icona": "ceiling", "it": "soffitti", "en": "ceilings", "de": "Decken", "es": "techos", "fr": "plafonds" },
-    "smalti":      { "icona": "enamel",  "it": "smalti", "en": "enamels", "de": "Lacke", "es": "esmaltes", "fr": "laques et émaux" },
-    "idropitture": { "icona": "water",   "it": "idropitture", "en": "water-based paints", "de": "Dispersionsfarben", "es": "pinturas al agua", "fr": "peintures à l'eau" },
-    "lisce":       { "icona": "smooth",  "it": "superfici lisce", "en": "smooth surfaces", "de": "glatte Untergründe", "es": "superficies lisas", "fr": "surfaces lisses" },
-    "rugose":      { "icona": "rough",   "it": "superfici rugose", "en": "rough surfaces", "de": "raue Untergründe", "es": "superficies rugosas", "fr": "surfaces rugueuses" }
+  "poliestere": {
+   "it": "poliestere",
+   "en": "polyester",
+   "de": "Polyester",
+   "es": "poliéster",
+   "fr": "polyester"
   },
-  "prodotti": [
-    {
-      "id": "ZR-MF12",
-      "esempio": true,
-      "codice": "ZR 0180 MF12",
-      "ean": "800000000011",
-      "lunghezza_mm": 180, "diametro_int_mm": 48, "diametro_est_mm": 68,
-      "pelo_mm": 12, "materiale": "microfibra",
-      "utilizzi": ["pareti", "soffitti", "idropitture", "lisce"],
-      "nome": { "it": "Rullo Microfibra 12", "en": "Microfibre Roller 12", "de": "Mikrofaser-Farbroller 12", "es": "Rodillo de microfibra 12", "fr": "Manchon microfibre 12" },
-      "descrizione": {
-        "it": "Rullo universale in microfibra, ottima ritenzione e resa uniforme.",
-        "en": "Universal microfibre roller with high paint pick-up and an even finish.",
-        "de": "Universal-Farbroller aus Mikrofaser mit hoher Farbaufnahme und gleichmäßigem Auftrag.",
-        "es": "Rodillo universal de microfibra con gran carga de pintura y acabado uniforme.",
-        "fr": "Manchon universel en microfibre, forte rétention et rendu uniforme."
-      }
-    },
-    {
-      "id": "ZR-PL18",
-      "esempio": true,
-      "codice": "ZR 0250 PL18",
-      "ean": "800000000028",
-      "lunghezza_mm": 250, "diametro_int_mm": 48, "diametro_est_mm": 72,
-      "pelo_mm": 18, "materiale": "poliestere",
-      "utilizzi": ["pareti", "soffitti", "idropitture", "rugose"],
-      "nome": { "it": "Rullo Poliestere 18", "en": "Polyester Roller 18", "de": "Polyester-Farbroller 18", "es": "Rodillo de poliéster 18", "fr": "Manchon polyester 18" },
-      "descrizione": {
-        "it": "Rullo a pelo lungo per superfici irregolari, intonaci e fondi rugosi.",
-        "en": "Long-pile roller for uneven surfaces, plaster and textured substrates.",
-        "de": "Langflor-Farbroller für unebene Flächen, Putz und strukturierte Untergründe.",
-        "es": "Rodillo de pelo largo para superficies irregulares, revocos y soportes rugosos.",
-        "fr": "Manchon à poils longs pour surfaces irrégulières, enduits et supports rugueux."
-      }
-    },
-    {
-      "id": "ZR-MF04",
-      "esempio": true,
-      "codice": "ZR 0110 MF04",
-      "ean": "800000000035",
-      "lunghezza_mm": 110, "diametro_int_mm": 12, "diametro_est_mm": 30,
-      "pelo_mm": 4, "materiale": "microfibra",
-      "utilizzi": ["smalti", "lisce"],
-      "nome": { "it": "Minirullo Microfibra 4", "en": "Microfibre Mini Roller 4", "de": "Mikrofaser-Mini-Farbroller 4", "es": "Minirrodillo de microfibra 4", "fr": "Mini-manchon microfibre 4" },
-      "descrizione": {
-        "it": "Rullo a pelo corto per smalti e finiture lisce, senza bolle né schizzi.",
-        "en": "Short-pile roller for enamels and smooth finishes, bubble- and splatter-free.",
-        "de": "Kurzflor-Farbroller für Lacke und glatte Oberflächen, ohne Blasen und Spritzer.",
-        "es": "Rodillo de pelo corto para esmaltes y acabados lisos, sin burbujas ni salpicaduras.",
-        "fr": "Manchon à poils courts pour laques et finitions lisses, sans bulles ni éclaboussures."
-      }
-    }
-  ]
+  "micropoli": {
+   "it": "microfibra 65% / poliestere 35%",
+   "en": "65% microfibre / 35% polyester",
+   "de": "65 % Mikrofaser / 35 % Polyester",
+   "es": "65 % microfibra / 35 % poliéster",
+   "fr": "65 % microfibre / 35 % polyester"
+  },
+  "microzenit": {
+   "it": "Microzenit",
+   "en": "Microzenit",
+   "de": "Microzenit",
+   "es": "Microzenit",
+   "fr": "Microzenit"
+  },
+  "nylon": {
+   "it": "nylon",
+   "en": "Nylon",
+   "de": "Nylon",
+   "es": "nailon",
+   "fr": "nylon"
+  },
+  "merinos": {
+   "it": "pura lana merinos",
+   "en": "pure merino wool",
+   "de": "reine Merinowolle",
+   "es": "lana merino pura",
+   "fr": "pure laine mérinos"
+  }
+ },
+ "utilizzi": {
+  "pareti": {
+   "icona": "wall",
+   "it": "pareti",
+   "en": "walls",
+   "de": "Wände",
+   "es": "paredes",
+   "fr": "murs"
+  },
+  "soffitti": {
+   "icona": "ceiling",
+   "it": "soffitti",
+   "en": "ceilings",
+   "de": "Decken",
+   "es": "techos",
+   "fr": "plafonds"
+  },
+  "smalti": {
+   "icona": "enamel",
+   "it": "smalti",
+   "en": "enamels",
+   "de": "Lacke",
+   "es": "esmaltes",
+   "fr": "laques et émaux"
+  },
+  "idropitture": {
+   "icona": "water",
+   "it": "idropitture",
+   "en": "water-based paints",
+   "de": "Dispersionsfarben",
+   "es": "pinturas al agua",
+   "fr": "peintures à l'eau"
+  },
+  "lisce": {
+   "icona": "smooth",
+   "it": "superfici lisce",
+   "en": "smooth surfaces",
+   "de": "glatte Untergründe",
+   "es": "superficies lisas",
+   "fr": "surfaces lisses"
+  },
+  "rugose": {
+   "icona": "rough",
+   "it": "superfici rugose",
+   "en": "rough surfaces",
+   "de": "raue Untergründe",
+   "es": "superficies rugosas",
+   "fr": "surfaces rugueuses"
+  },
+  "smalti_murali": {
+   "icona": "enamel",
+   "it": "smalti murali",
+   "en": "wall enamels",
+   "de": "Wandlacke",
+   "es": "esmaltes para paredes",
+   "fr": "émaux muraux"
+  },
+  "cartongesso": {
+   "icona": "wall",
+   "it": "cartongesso",
+   "en": "plasterboard",
+   "de": "Gipskarton",
+   "es": "yeso laminado",
+   "fr": "plaques de plâtre"
+  },
+  "resine": {
+   "icona": "enamel",
+   "it": "resine",
+   "en": "resins",
+   "de": "Harze",
+   "es": "resinas",
+   "fr": "résines"
+  },
+  "impregnanti": {
+   "icona": "smooth",
+   "it": "impregnanti per legno",
+   "en": "wood impregnating products",
+   "de": "Holzimprägnierungen",
+   "es": "impregnantes para madera",
+   "fr": "imprégnants pour bois"
+  },
+  "vernici": {
+   "icona": "water",
+   "it": "vernici acqua/solvente",
+   "en": "water/solvent-based varnishes",
+   "de": "Lacke auf Wasser-/Lösemittelbasis",
+   "es": "barnices al agua/disolvente",
+   "fr": "vernis à l'eau/solvant"
+  },
+  "parquet": {
+   "icona": "smooth",
+   "it": "parquet",
+   "en": "parquet",
+   "de": "Parkett",
+   "es": "parqué",
+   "fr": "parquet"
+  },
+  "universale": {
+   "icona": "wall",
+   "it": "universale",
+   "en": "universal use",
+   "de": "universell einsetzbar",
+   "es": "uso universal",
+   "fr": "usage universel"
+  },
+  "idro_liquide": {
+   "icona": "water",
+   "it": "idropitture molto liquide",
+   "en": "very fluid water-based paints",
+   "de": "sehr dünnflüssige Dispersionsfarben",
+   "es": "pinturas al agua muy fluidas",
+   "fr": "peintures à l'eau très fluides"
+  }
+ },
+ "prodotti": [
+  {
+   "id": "1965-23",
+   "esempio": false,
+   "codice": "1965.23",
+   "ean": null,
+   "lunghezza_mm": 230,
+   "diametro_int_mm": 47,
+   "pelo_mm": 11,
+   "materiale": "micropoli",
+   "utilizzi": [
+    "smalti_murali",
+    "cartongesso",
+    "resine",
+    "lisce"
+   ],
+   "nome": {
+    "it": "Microfinish",
+    "en": "Microfinish",
+    "de": "Microfinish",
+    "es": "Microfinish",
+    "fr": "Microfinish"
+   },
+   "descrizione": {
+    "it": "Rullo professionale a pelo corto per finiture lisce.",
+    "en": "Professional short-pile roller for smooth finishes.",
+    "de": "Professioneller Farbroller mit kurzem Flor für glatte Oberflächen.",
+    "es": "Rodillo profesional de pelo corto para acabados lisos.",
+    "fr": "Manchon professionnel à poils courts pour finitions lisses."
+   }
+  },
+  {
+   "id": "146-23",
+   "esempio": false,
+   "codice": "146.23",
+   "ean": null,
+   "lunghezza_mm": 230,
+   "diametro_int_mm": 47,
+   "pelo_mm": 8,
+   "materiale": "microzenit",
+   "utilizzi": [
+    "impregnanti",
+    "resine",
+    "lisce"
+   ],
+   "nome": {
+    "it": "Aurora",
+    "en": "Aurora",
+    "de": "Aurora",
+    "es": "Aurora",
+    "fr": "Aurora"
+   },
+   "descrizione": {
+    "it": "Rullo professionale a pelo corto per impregnanti e resine.",
+    "en": "Professional short-pile roller for impregnating products and resins.",
+    "de": "Professioneller Farbroller mit kurzem Flor für Imprägnierungen und Harze.",
+    "es": "Rodillo profesional de pelo corto para impregnantes y resinas.",
+    "fr": "Manchon professionnel à poils courts pour imprégnants et résines."
+   }
+  },
+  {
+   "id": "159-23",
+   "esempio": false,
+   "codice": "159.23",
+   "ean": null,
+   "lunghezza_mm": 230,
+   "diametro_int_mm": 47,
+   "pelo_mm": 5,
+   "materiale": "microzenit",
+   "utilizzi": [
+    "vernici",
+    "parquet",
+    "resine",
+    "lisce"
+   ],
+   "nome": {
+    "it": "Micro5",
+    "en": "Micro5",
+    "de": "Micro5",
+    "es": "Micro5",
+    "fr": "Micro5"
+   },
+   "descrizione": {
+    "it": "Rullo professionale a pelo cortissimo per vernici e parquet.",
+    "en": "Professional very-short-pile roller for varnishes and parquet.",
+    "de": "Professioneller Farbroller mit sehr kurzem Flor für Lacke und Parkett.",
+    "es": "Rodillo profesional de pelo muy corto para barnices y parqué.",
+    "fr": "Manchon professionnel à poils très courts pour vernis et parquet."
+   }
+  },
+  {
+   "id": "135E23",
+   "esempio": false,
+   "codice": "135E23",
+   "ean": null,
+   "lunghezza_mm": 230,
+   "diametro_int_mm": 47,
+   "pelo_mm": 12,
+   "materiale": "nylon",
+   "utilizzi": [
+    "universale"
+   ],
+   "nome": {
+    "it": "Crux",
+    "en": "Crux",
+    "de": "Crux",
+    "es": "Crux",
+    "fr": "Crux"
+   },
+   "descrizione": {
+    "it": "Rullo professionale in nylon per uso universale.",
+    "en": "Professional nylon roller for universal use.",
+    "de": "Professioneller Nylon-Farbroller für den universellen Einsatz.",
+    "es": "Rodillo profesional de nailon para uso universal.",
+    "fr": "Manchon professionnel en nylon pour usage universel."
+   }
+  },
+  {
+   "id": "132S23",
+   "esempio": false,
+   "codice": "132S23",
+   "ean": null,
+   "lunghezza_mm": 230,
+   "diametro_int_mm": 55,
+   "pelo_mm": 28,
+   "materiale": "merinos",
+   "utilizzi": [
+    "idro_liquide",
+    "rugose"
+   ],
+   "nome": {
+    "it": "Lamb",
+    "en": "Lamb",
+    "de": "Lamb",
+    "es": "Lamb",
+    "fr": "Lamb"
+   },
+   "descrizione": {
+    "it": "Rullo professionale a pelo lungo in pura lana merinos.",
+    "en": "Professional long-pile roller in pure merino wool.",
+    "de": "Professioneller Langflor-Farbroller aus reiner Merinowolle.",
+    "es": "Rodillo profesional de pelo largo en lana merino pura.",
+    "fr": "Manchon professionnel à poils longs en pure laine mérinos."
+   }
+  }
+ ]
 }
