@@ -1,8 +1,8 @@
 {
   "_nota": "DATI DI ESEMPIO: tutti i prodotti, codici ed EAN sono inventati (marcati ESEMPIO). Sostituire con dati reali.",
   "formato": { "larghezza_mm": 210, "altezza_mm": 60 },
-  "logo": "logo-placeholder.svg",
-  "colori": { "primario": "#12355B", "accento": "#E8731A", "sfondo_chiaro": "#F3F1EC", "testo": "#1B1B1B" },
+  "logo": "logo-zenit.png",
+  "colori": { "primario": "#3850A2", "accento": "#E8731A", "sfondo_chiaro": "#F3F1EC", "testo": "#283030" },
   "azienda": {
     "ragione_sociale": "Pennellificio Zenit srl",
     "indirizzo": "[Via ______ n. __ - CAP ____ Citta (__) - Italia]",

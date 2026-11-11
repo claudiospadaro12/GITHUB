@@ -5,7 +5,7 @@
 <title>Etichette rulli Zenit</title>
 <style>
   /* Dimensioni e colori sono impostati da JS leggendo prodotti.json (variabili --w --h --k e colori) */
-  :root { --w:210mm; --h:60mm; --k:1; --pri:#12355B; --acc:#E8731A; --bg:#F3F1EC; --txt:#1B1B1B; }
+  :root { --w:210mm; --h:60mm; --k:1; --pri:#3850A2; --acc:#E8731A; --bg:#F3F1EC; --txt:#1B1B1B; }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family: "Helvetica Neue", Arial, "Liberation Sans", sans-serif; color:var(--txt); background:#cfd3d8; }
   .sheet { display:flex; flex-direction:column; align-items:center; gap:8mm; padding:8mm 0; }
@@ -14,7 +14,7 @@
            outline:0.2mm solid #888; }
   body.prod .sheet { display:block; padding:0; }
   body.prod .label { outline:none; break-after:page; }
-  body.prod .cap, body.prod .esempio-tag { display:none; }
+  body.prod .cap, body.prod .esempio-tag { position:absolute; left:calc(2.6mm*var(--k)); top:calc(var(--h)*0.47); width:calc(var(--w)*0.25 - 5.2mm*var(--k)); text-align:center; background:var(--acc); color:#fff; font-size:calc(6pt*var(--k)); font-weight:700; padding:0.6mm 0; letter-spacing:.15em; border-radius:0.6mm; }
 
   /* Pannello sinistro: identita' prodotto */
   .left { width:calc(var(--w)*0.25); background:var(--pri); color:#fff; padding:calc(2.2mm*var(--k)) calc(2.6mm*var(--k));
@@ -49,8 +49,7 @@
   .foot .made { font-weight:700; color:#fff; white-space:nowrap; font-size:calc(5.8pt*var(--k)); }
   .foot .made i { display:inline-block; width:calc(3mm*var(--k)); height:calc(2mm*var(--k)); vertical-align:-0.35mm; margin-right:1mm;
           background:linear-gradient(90deg,#009246 33%,#fff 33% 66%,#ce2b37 66%); border:0.1mm solid #fff; }
-  .esempio-tag { position:absolute; right:-9mm; top:4mm; transform:rotate(35deg); background:var(--acc); color:#fff; font-size:6pt; font-weight:700;
-          padding:0.4mm 10mm; letter-spacing:.15em; opacity:.92; }
+  .esempio-tag { position:absolute; left:calc(2.6mm*var(--k)); top:calc(var(--h)*0.47); width:calc(var(--w)*0.25 - 5.2mm*var(--k)); text-align:center; background:var(--acc); color:#fff; font-size:calc(6pt*var(--k)); font-weight:700; padding:0.6mm 0; letter-spacing:.15em; border-radius:0.6mm; }
   @media print { body { background:#fff; } }
 </style>
 </head>
@@ -86,17 +85,17 @@ function ean13(d12){
   return {full,bits};
 }
 function eanSVG(d12){
-  const {full,bits}=ean13(d12); const q=9, W=95+2*q, H=60;
+  const {full,bits}=ean13(d12); const q=9, W=95+2*q, H=58;
   let bars='';
   for(let i=0;i<bits.length;i++) if(bits[i]==='1'){
     const guard = i<3 || (i>=45&&i<50) || i>=92;
-    bars += `<rect x="${q+i}" y="2" width="1" height="${guard?H-3:H-9}" fill="#000"/>`;
+    bars += `<rect x="${q+i}" y="2" width="1" height="${guard?H-5:H-11}" fill="#000"/>`;
   }
   const t=(x,s,a='middle')=>`<text x="${x}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="${a}" fill="#000" textLength="${s.length*0}">${s}</text>`;
   const txt = `<text x="${q-2}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="end">${full[0]}</text>`
     + `<text x="${q+3+21}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="middle" textLength="39" lengthAdjust="spacing">${full.slice(1,7)}</text>`
     + `<text x="${q+50+21}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="middle" textLength="39" lengthAdjust="spacing">${full.slice(7)}</text>`;
-  return `<svg viewBox="0 0 ${W} ${H+2}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#fff"/>${bars}${txt}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H+4}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#fff"/>${bars}${txt}</svg>`;
 }
 
 /* ---- Icone semplici (viewBox 24x24) ---- */
