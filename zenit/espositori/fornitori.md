@@ -31,33 +31,36 @@ Data ricerca: 2026-11-11
 3. **Del Duca Print oppure Stora Enso (cartone)** — per espositori da banco/PLV a basso costo con grafica Zenit; Stora Enso dichiara produzione da 1 pezzo, Del Duca accetta grafica del cliente.
 Nota: la shortlist non e' consolidata, perche' i siti non sono stati letti.
 
-## Bozza email di richiesta preventivo
+## Bozza email di richiesta preventivo (compilata con stime)
 
-**Oggetto:** Richiesta preventivo espositori su misura per pennelli e rulli — Pennellificio Zenit srl
+Valori **stimati da noi**, non misurati: da confermare con un blister e un rullo reali prima dell'ordine. Il prezzo non e' stimato: lo chiediamo ai fornitori per tre quantita'.
 
-Gentile [Nome / Ufficio commerciale],
+**Oggetto:** Richiesta preventivo espositore da terra su misura per pennelli e rulli - Pennellificio Zenit srl
 
-siamo Pennellificio Zenit srl, produttore italiano di pennelli e rulli per verniciatura, e stiamo valutando un fornitore per espositori personalizzati destinati a [colorifici / ferramenta / brico].
+Gentile Ufficio commerciale,
 
-Vi chiediamo un preventivo per:
-- Tipologia: [da terra / da banco / da parete-pannello forato]
-- Materiale preferito: [cartone / metallo / legno / altro]
-- Misure indicative (L x P x H): [__ x __ x __ cm]
-- Numero di referenze da esporre: [__] (pennelli: [__], rulli: [__]); peso indicativo per espositore: [__ kg]
-- Quantita': [20 / 50 / 100 / 200] pezzi, con eventuale scaglionamento
-- Grafica: personalizzata con nostro logo e immagini [forniremo file vettoriali / chiediamo supporto grafico]
-- Consegna richiesta entro: [data] a [localita']
+siamo Pennellificio Zenit srl (Cicognara, MN), produttore di pennelli e rulli per verniciatura, e cerchiamo un fornitore per un espositore personalizzato da punto vendita (colorifici, ferramenta, brico).
+
+Richiesta:
+- Tipologia: espositore da terra, due facce, con pannello forato e ganci per pennelli, 4 vaschette inclinate per rulli, 2 tasche portadepliant, testata grafica sostituibile, base con vano scorta
+- Misure: altezza 220 cm x larghezza 50 cm x profondita 40 cm
+- Materiale: ci interessano alternative (cartone ondulato rinforzato, metallo verniciato, legno/MDF) con prezzo per ciascuna
+- Contenuto indicativo per faccia: circa 160 pennelli in blister (blister circa 7 x 17 cm, spessore 1,2 cm) e circa 16 rulli (lunghezza massima 25 cm, diametro circa 6,5 cm)
+- Peso indicativo del carico: circa 20 kg per faccia, circa 40 kg totali; si richiede verifica di stabilita' al ribaltamento
+- Quantita': preventivo per 25, 50 e 100 pezzi, con prezzo unitario per ciascuna
+- Grafica: personalizzata con il nostro logo; forniamo file vettoriali, chiediamo anche indicazioni sul formato
+- Consegna: in Italia, 46019 Cicognara (MN); tempi da indicarci
 
 Ci servirebbero:
-1. Prezzo unitario per le quantita' indicate e costi una tantum (progetto, fustelle, stampi, campione)
+1. Prezzo unitario per le tre quantita' e costi una tantum (progetto, fustelle, stampi, campione)
 2. Quantita' minima d'ordine
 3. Tempi di realizzazione e consegna
-4. Modalita' di imballo/spedizione (montato o da assemblare)
-5. Disponibilita' di un campione/prototipo
+4. Imballo e spedizione (montato o da assemblare, imballo piatto)
+5. Possibilita' di un prototipo o campione prima dell'ordine
 
-Restiamo a disposizione per un confronto e per inviare disegni e materiali.
+Possiamo inviare i disegni quotati. Restiamo a disposizione.
 
 Cordiali saluti,
-[Nome Cognome] — [Ruolo]
 Pennellificio Zenit srl
-[Telefono] — [Email] — [Indirizzo]
+Via P. Nenni, 24 - 46019 Cicognara (MN)
+Tel. +39 0375 88172 - info@pennellificiozenit.it
