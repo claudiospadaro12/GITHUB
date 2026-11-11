@@ -47,3 +47,37 @@ Criteri fissati prima: per conto nessun giorno <= -4,3%, peggior giorno >= -4,0%
 | **B** | 160k e 80k con la STESSA combo Phantom Prop + Goldbot Prop + Daytrade Pro (24.378, PF 1,71, DD 5,2%); 80k Phantom Gradino 1 | **83.950** | 87.867 / 98.899 / 65.084 | -2,9% / 4,4% |
 | Aggressivo (112k) | P1 160k + P3 + P4, Daytrade Pro su tre conti | 111.637 | 117.440 / 132.871 / 84.600 | -4,1% / 6,6% |
 Limiti: in A il Phantom e su tutti e tre i conti (livelli diversi: stesso EA); in B due conti sono identici (copia, stesso EA e stesso set): rischio di "strategia identica" con tetto 400k condiviso con altri utenti. Il DD equity limite superiore del conto con Daytrade Pro e 10,7% nel 2013 (somma dei massimi; non ricostruito, quindi puo essere inferiore). Le ore di posizioni opposte (A: 1.321-2.308 per coppia in 3 anni; B: 3.166-3.958, in parte perche il Phantom tiene long e short insieme nello stesso conto, e il conto gemello li ha identici) sono una misura del tester, non una previsione.
+
+## Assetto scelto da Claudio (11/11) e costi inclusi (aggiunta)
+**Assetto**: 160k = P1 (Phantom Gradino 1 + Goldbot Prop + Daytrade Pro Max9); 80k = P3 (Goldbot Combo + Gold Trade Pro Combo + Daytrade Pro); 80k = P4 (Reaper Combo + Goldbot Prop + Daytrade Pro). Media annua 111.637 EUR (scenario centrale), congiunto: DD realizzato 6,6% nel 2013, peggior giorno -4,1% di 320k; limite superiore del DD equity per conto 12,6-13,2% nel 2013 (non ricostruito); P1 ha un giorno a -4,4% (oltre la soglia del Guardian). Scelta di rischio di Claudio, non mia.
+
+### Costi: cosa c'e e cosa no
+| Voce | Nel calcolo? | Valore | Stato |
+|---|---|---|---|
+| Spread | Si, implicito (barre BCM, Modello 1) | spread storico BCM | MISURATO nel tester, ma NON e lo spread FTMO |
+| Commissione del tester | Si | circa 3,0-3,6 EUR/lotto andata e ritorno (letta dai deal: Goldbot 2013 -259 EUR su 86,5 lotti; Daytrade Pro 2013 -332 su 99,5) | MISURATO (BCM) |
+| Swap | Si | da -245 a -1.025 EUR/anno per EA e anno | MISURATO (BCM), non FTMO |
+| Extra "centrale": commissioni FTMO + slippage | Si, detratto | 36 EUR/lotto oro, 4 EUR/lotto forex (meta all'apertura, meta alla chiusura) | **IPOTESI mia, NON verificata** |
+| Spread FTMO (apertura, notizie, rollover) | No | pagina Simboli FTMO non letta | NON MISURATO |
+| Swap FTMO (triplo del mercoledi) | No | idem | NON MISURATO |
+| Slippage vero, richieste rifiutate, latenza VPS | Solo dentro l'ipotesi dei 36/4 | | NON MISURATO |
+| Chiusura del venerdi | No | costo 7-12% del netto (misurato per EA) | MISURATO ma NON applicato |
+| Tick reali | No | Goldbot -6%, Reaper -8%, Phantom -3%, Daytrade Pro sensibile | MISURATO ma NON applicato |
+| Profit split FTMO (80% / 90%) | No | netto lordo | NON applicato |
+| Cambio EUR/USD | Media dell'anno (2018 ipotesi) | | approssimato |
+
+### Sensibilita al solo parametro dei costi extra (P1 x2 + P3 + P4, media 2013/2020/2025)
+| Scenario | Extra oro / forex (EUR per lotto) | P1 (80k) | P3 | P4 | **Totale 160k+80k+80k** |
+|---|---|---|---|---|---|
+| Tester puro (solo costi BCM) | 0 / 0 | 36.025 | 29.155 | 28.874 | **130.079** |
+| Ottimistico | 18 / 2,5 | 33.255 | 27.372 | 26.782 | **120.664** |
+| **Centrale (usato)** | 36 / 4 | 30.582 | 25.685 | 24.788 | **111.637** |
+| Prudente | 70 / 8 | 25.420 | 22.386 | 20.907 | **94.134** |
+Con le voci "NON applicato" (venerdi, tick reali, profit split, spread e swap FTMO) il netto reale puo stare sotto lo scenario prudente: non quantificato.
+
+### Da compilare con i dati FTMO (pagina Simboli / piattaforma)
+| Simbolo | Spread tipico FTMO | Commissione FTMO per lotto | Swap long / short | Leva | Fonte e data |
+|---|---|---|---|---|---|
+| XAUUSD | | | | 1:50 Standard / 1:15 Swing | |
+| EURUSD e coppie di Daytrade Pro | | | | | |
+Quando i valori sono noti si rifa il calcolo con le commissioni e gli swap di FTMO al posto dei 36/4.
