@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Riga unica U1b UBS: 37 set oro di Wim (formato UBS, dal pacchetto Ultimate-Breakout-System-Set-Files.zip) cosi come consegnati (lotto fisso 0,1), EA Ultimate_Breakout_EA_WSC_V9.5.ex5, XAUUSD, deposito 100.000 EUR, BCM, solo tester: (A) 2005-01-01 -> 2026-01-01 per 37 set, (B) 2013-01-01 -> 2026-01-01 per i 31 set non nel pilota. Criteri: report/UBS_U1B_CRITERI_2026-11-10.md (sezione U1b-H1).
+Uso: python3 gen_riga_ubs_u1bh1.py <PIN40> <SHA256 di righe/ANNO80K_WIM_TESTER.ps1 a quel pin>"""
+import sys, os, re
+PIN, SHA = sys.argv[1], sys.argv[2].upper()
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+t = open('righe/RIGA_LANCIA_GTP_COMBO_TRE_ANNI_80K.txt', encoding='ascii').read()
+def sost(a, b, n=1):
+    global t
+    assert t.count(a) == n, (t.count(a), a[:90])
+    t = t.replace(a, b)
+ZIP = 'Ultimate-Breakout-System-Set-Files.zip'
+EA = 'Ultimate_Breakout_EA_WSC_V9.5.ex5'
+IMP = 'FridayStopHour=19:i'
+runs = []   # (ex5, zip, anno, fine, periodo, set, imposti, etichetta, deposito)
+SETS = [  # (file .set, timeframe del set, tag)
+ ('Gold_a.set','D1','PHd_a'),('Gold_b.set','D1','PHd_b'),('Gold_c.set','D1','PHd_c'),
+ ('strategy1_Daily.set','D1','GR_s1_D1'),('strategy2_Daily.set','D1','GR_s2_D1'),('strategy3_Daily.set','D1','GR_s3_D1'),
+ ('strategy4_H4.set','H4','GR_s4_H4'),('strategy5_H1.set','H1','GR_s5_H1'),('strategy6_H1.set','H1','GR_s6_H1'),
+ ('strategy7_H1.set','H1','GR_s7_H1'),('strategy8_H1.set','H1','GR_s8_H1'),('strategy9_H1.set','H1','GR_s9_H1'),
+ ('Gold_Phantom_strat1.set','D1','PH_strat1'),('Gold_Phantom_strat2.set','D1','PH_strat2'),('Gold_Phantom_strat3.set','D1','PH_strat3'),
+ ('Gold_Phantom_strat4.set','H4','PH_strat4'),('Gold_Phantom_strat5.set','H4','PH_strat5'),('Gold_Phantom_strat6.set','H1','PH_strat6'),
+ ('Gold_Phantom_strat7.set','H1','PH_strat7'),('Gold_Phantom_strat8.set','H1','PH_strat8'),('Gold_Phantom_strat9.set','H1','PH_strat9'),
+ ('dailyA.set','D1','GB_dailyA'),('dailyB.set','D1','GB_dailyB'),('dailyC.set','D1','GB_dailyC'),('dailyD.set','D1','GB_dailyD'),
+ ('dailyE.set','D1','GB_dailyE'),('dailyH.set','D1','GB_dailyH'),('dailyI.set','D1','GB_dailyI'),('dailyK.set','D1','GB_dailyK'),
+ ('GOLDTRADEPROH4_b.set','H4','GTP_H4b'),('GOLDTRADEPRO_E.set','D1','GTP_E'),('GOLDTRADEPRO_F.set','D1','GTP_F'),
+ ('GOLDTRADEPRO_G.set','D1','GTP_G'),('GOLDTRADEPRO_H.set','D1','GTP_H'),('GOLDTRADEPRO_a.set','D1','GTP_a'),
+ ('GOLDTRADEPRO_c.set','D1','GTP_c'),('GOLDTRADEPRO_d.set','D1','GTP_d'),
+]
+assert len(SETS) == 37 and len(set(x[0] for x in SETS)) == 37 and len(set(x[2] for x in SETS)) == 37
+H1SETS = {'GR_s5_H1','GR_s6_H1','GR_s7_H1','GR_s8_H1','GR_s9_H1','PH_strat6','PH_strat7','PH_strat8','PH_strat9'}
+for st, per, tag in SETS:   # solo i 9 set H1, periodo 2005-01-01 -> 2013-01-01
+    if tag in H1SETS:
+        runs.append((EA, ZIP, '2005', '2013.01.01', per, st, '', 'UBSU1BH1_%s_100000_2005-2012' % tag, 100000))
+N = len(runs)
+assert N == 9
+q = lambda L: ','.join("'" + x.replace("'", "''") + "'" for x in L)
+assert all(re.fullmatch(r"[\x20-\x7E]*", str(x)) for r in runs for x in r)
+assert len(set(r[7] for r in runs)) == N
+arrays = ("$fare=@(" + q([r[0] for r in runs]) + "); $ZIPR=@(" + q([r[1] for r in runs]) + "); $ANNI=@(" + q([r[2] for r in runs]) +
+          "); $FINR=@(" + q([r[3] for r in runs]) + "); $PER=@(" + q([r[4] for r in runs]) + "); $SETR=@(" + q([r[5] for r in runs]) +
+          "); $IMPR=@(" + q([r[6] for r in runs]) + "); $ETI=@(" + q([r[7] for r in runs]) + "); $DEPR=@(" + q([str(r[8]) for r in runs]) + "); $MOD=@(" + q(['1'] * N) +
+          "); $SIMR=@(" + q(['XAUUSD'] * N) + "); $vi=0; $skipEA=@{}; $nok=@{}; $nfail=@{}; ")
+a = t.index('$fare=@('); c = t.index('$tutti=@(')
+t = t[:a] + arrays + t[c:]
+i = t.index("Write-Host 'GOLD TRADE PRO COMBO"); j = t.index("' -ForegroundColor Cyan;", i)
+testa = ("U1b-H1 UBS: 9 set oro H1 di Wim in formato UBS (Reaper strategy5-9, Phantom strat6-9), dal pacchetto Ultimate-Breakout-System-Set-Files.zip, COSI COME CONSEGNATI (lotto fisso 0,1, nessun input cambiato), EA Ultimate_Breakout_EA_WSC_V9.5.ex5 (cartella WIM di MQL5\\Experts), XAUUSD, DEMO, SOLO TESTER, Modello 1, deposito 100000 EUR, UNA passata per set dal 2005-01-01 al 2013-01-01 (il periodo che era saltato per il tetto di 100.000 barre del tester): 9 passate in tutto. Misura il DD equity massimo e lo confronta col HistoricalMaxDD scritto nel set. Criteri e previsioni: report/UBS_U1B_CRITERI_2026-11-10.md (sezione U1b-H1). Mi mandi la cartella ABTG_RISULTATI\\ANNO_ORO_GRADINI_UBSU1BH1_<data>. Non giudica acquisti, taglie ne lotti. MT5 deve essere CHIUSO. NON e collaudata da agenti: ha passato SOLO il cancello meccanico e il mio controllo.")
+t = t[:i] + "Write-Host '" + testa + t[j:]
+sost("PRIMA DI LANCIARE: Gold Trade Pro deve essere gia installato (demo del Market) su QUESTO terminale; NON attaccarli a nessun grafico.",
+     "PRIMA DI LANCIARE: Ultimate_Breakout_EA_WSC_V9.5.ex5 deve essere gia installato in MQL5\\Experts\\WIM di QUESTO terminale, UNA copia sola; il file Ultimate-Breakout-System-Set-Files.zip (il pacchetto dei set di Wim) deve stare sul Desktop o in Download o in Documenti, con il nome originale; NON attaccare nessun EA a un grafico.")
+sost("TEMPO: alcune ore in tutto (a Modello 1 una passata annuale dura da pochi minuti a circa un ora); timeout 240 minuti per passata.",
+     "TEMPO: circa 30-60 minuti (" + str(N) + " passate: 9 H1 su 8 anni; stima dal pilota, non garantita); timeout 240 minuti per passata. Se la finestra Salvataggio report resta ferma oltre 20 minuti, chiudi A MANO il terminale BCM (Task Manager > Dettagli > terminal64.exe di C:\\\\Program Files\\\\BCM Markets MT5 Terminal, SOLO quello). Se per un EA le prime due passate non danno nessun OK, quell EA viene saltato e si passa al successivo. Se Ultimate-Breakout-System-Set-Files.zip non si trova, la riga si FERMA subito con un messaggio rosso: controlla le prime righe appena lanciata.")
+sost("Scrive SOLO (oltre ai file che MT5 scrive da se: log, storico, cache del tester):",
+     "Scrive SOLO (oltre ai file che MT5 scrive da se: log, storico, cache del tester; la copia dei set del venditore in MQL5\\Profiles\\Tester di questo terminale; la decompressione di Ultimate-Breakout-System-Set-Files.zip in abtg_wim_sets nel profilo utente):")
+sost("'MQL5\\Experts\\Market'", "'MQL5\\Experts'")
+sost("$TO=420;", "$TO=240;")
+sost("$SN='ANNO80K_TESTER.ps1'", "$SN='ANNO80K_WIM_TESTER.ps1'")
+sost("$SH='D2AA1B85FBE16190EDC4F46BD7301D7EDA7CD7F576E5D798C57E8820121D4C1B'", "$SH='" + SHA + "'")
+sost("$MA='MARCATORE_ANNO80K_TESTER_TRANCHE_v1'", "$MA='MARCATORE_ANNO80K_WIM_TESTER_v1'")
+sost("$PIN='3e43646db065d2503f084f9e747b84bba9e1e97c'", "$PIN='" + PIN + "'")
+t = re.sub(r"if\(\$okl\.Count -lt 1\)\{ throw '[^']*' \}", lambda m: "if($okl.Count -lt 1){ throw 'Manca Ultimate_Breakout_EA_WSC_V9.5.ex5 in MQL5\\Experts di questo terminale. Nessun tester e partito.' }", t, count=1)
+t = t.replace('ANNO80K_GTPCOMBO_ANNI_', 'ANNO_ORO_GRADINI_UBSU1BH1_')
+t = t.replace("EA .ex5 trovati nel Market di questo terminale", "EA .ex5 trovati in MQL5\\Experts di questo terminale").replace("MANCA nel Market di questo terminale, SALTO", "MANCA in MQL5\\Experts di questo terminale, SALTO")
+staging = ("$cerca=@([Environment]::GetFolderPath('Desktop'), (Join-Path $env:USERPROFILE 'Downloads'), (Join-Path $env:USERPROFILE 'Documents')); $SETDIR=Join-Path $env:USERPROFILE 'abtg_wim_sets'; New-Item -ItemType Directory -Force -Path $SETDIR | Out-Null; $zpath=@{}; "
+           "foreach($zn in @($ZIPR | Select-Object -Unique)){ $f=$null; $zb=[IO.Path]::GetFileNameWithoutExtension($zn); foreach($c in $cerca){ if((-not $f) -and (Test-Path -LiteralPath $c)){ $g=@(Get-ChildItem -LiteralPath $c -Recurse -Depth 3 -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -like ($zb + '*.zip') } | Sort-Object LastWriteTime -Descending | Select-Object -First 1); if($g.Count -gt 0){ $f=$g[0].FullName } } }; "
+           "if($f){ $dst=Join-Path $SETDIR $zb; if(Test-Path -LiteralPath $dst){ Remove-Item -LiteralPath $dst -Recurse -Force }; Expand-Archive -LiteralPath $f -DestinationPath $dst -Force; $zpath[$zn]=$dst; Write-Host ('ZIP DEI SET trovato: ' + $f + '  ->  ' + $dst) -ForegroundColor Green } else { Write-Host ('ZIP DEI SET NON TROVATO: ' + $zn + ' (cercato in Desktop, Download e Documenti, fino a 3 livelli di sottocartelle).') -ForegroundColor Red } }; "
+           "if($zpath.Count -lt 1){ Write-Host 'MI FERMO: Ultimate-Breakout-System-Set-Files.zip non si trova sul Desktop, in Download o in Documenti di questo PC. Mettilo li (e un file di Wim, lo stesso che mi hai mandato) e rilancia. Nessun tester e partito.' -ForegroundColor Red; return }; "
+           "foreach($sn in @($SETR | Select-Object -Unique)){ $gg=@(Get-ChildItem -LiteralPath $zpath[$ZIPR[0]] -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq $sn }); if($gg.Count -ne 1){ Write-Host ('MI FERMO: nel pacchetto il set ' + $sn + ' risulta ' + $gg.Count + ' volte (ne serve UNA). Nessun tester e partito.') -ForegroundColor Red; return } }; ")
+sost("$ris=@(); $rc1=0; foreach($n in $fare){ $ErrorActionPreference='Stop';", staging + "$ris=@(); $rc1=0; foreach($n in $fare){ $ErrorActionPreference='Stop'; "
+     "$sf=''; if($zpath.ContainsKey($ZIPR[$vi])){ $gg=@(Get-ChildItem -LiteralPath $zpath[$ZIPR[$vi]] -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq $SETR[$vi] }); if($gg.Count -ge 1){ $sf=$gg[0].FullName } }; "
+     "if($skipEA.ContainsKey($n)){ Write-Host ('SALTATA (EA gia escluso): ' + $n + ' ' + $ETI[$vi]) -ForegroundColor Yellow; $ris += ,@(($n + ' ' + $ETI[$vi] + ' SALTATA'), 99); $vi=$vi+1; continue }; "
+     "if($sf -eq ''){ Write-Host ('SET NON TROVATO, passata SALTATA: ' + $SETR[$vi] + ' (' + $n + ' ' + $ETI[$vi] + ')') -ForegroundColor Red; $ris += ,@(($n + ' ' + $ETI[$vi] + ' SET MANCANTE'), 98); $nfail[$n]=1+[int]$nfail[$n]; $vi=$vi+1; continue }; ")
+sost("-Ex5Nome $n ", "-Ex5Nome $n -SetFile $sf -Deposito $($DEPR[$vi]) ", 2)
+sost("$ris += ,@($n, $rc);", "$ris += ,@(($n + ' ' + $ETI[$vi-1]), $rc); if($rc -eq 0){ $nok[$n]=1 } else { $nfail[$n]=1+[int]$nfail[$n] }; if((-not $nok.ContainsKey($n)) -and ([int]$nfail[$n] -ge 2) -and (-not $skipEA.ContainsKey($n))){ $skipEA[$n]=1; Write-Host ('ATTENZIONE: le prime ' + $nfail[$n] + ' passate di ' + $n + ' non hanno dato nessun OK (licenza, dati o simbolo): il RESTO di questo EA viene SALTATO e si passa al prossimo.') -ForegroundColor Red };")
+sost("conto vuoto 80000 EUR, ' + $sy", "conto vuoto ' + $DEPR[$vi] + ' EUR, ' + $sy")
+sost("passate da fare a 80000 EUR: ", "passate da fare (deposito 80000 o 3745 EUR a seconda della passata): ")
+t = t.replace('80.000 EUR', '100.000 EUR').replace('80000 EUR', '100000 EUR')
+open('righe/RIGA_LANCIA_UBS_U1BH1.txt', 'w', encoding='ascii').write(t)
+print('scritta', len(t), 'passate', N)
