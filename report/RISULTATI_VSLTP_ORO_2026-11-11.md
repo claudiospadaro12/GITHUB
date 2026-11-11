@@ -37,3 +37,26 @@ V1 vera (33/33, input confermati) · V2 Goldbot RIDUCE >= 50%: **falsa** (-4,6% 
 3. **Non misurato, ma importante**: con ritardo 0 e virtual acceso lo stop reale potrebbe non essere mai impostato sul server (significato non verificato, solo un messaggio di Discord di seconda mano): se si ferma il terminale o il VPS la posizione resta senza protezione; nel tester non si vede. Prima di ogni uso su un conto va letto il manuale di Wim.
 4. **Il tester non e il live**: il conteggio delle richieste di FTMO e un'altra misura. Dal campo la causa del picco di richieste era il ciclo del Guardian bloccato (`RICHIESTE_AL_SERVER_STIMA_DAI_TEST_2026-11-10.md`), non il trailing.
 5. Gold Trade Pro (V99, V0, C0): in attesa dell'altra riga.
+
+---
+## AGGIORNAMENTO (11/11, 20:00): Gold Trade Pro Combo — 9 passate rifatte con TUTTI gli input imposti, e VERDETTO a 4 EA
+**Validita**: 9/9 valide (stato OK, qualita 99-100%, zero stop out/no money). Controllo ripetuto sui **tutti** gli input del report contro il riferimento D160: **nessun input diverso** oltre ai due del test; V99 = virtual true e ritardo 99, V0 = true e 0, C0 = false e 0 (confermati). Sostituisce le 9 passate non valide (`RISULTATI_VSLTP_GTP_INVALIDO_2026-11-11.md`). Script `D160_dati/analisi_vsltp_gtp.py`.
+| Braccio | Netto 3 anni vs rif. (61.235) | Righe di giornale vs rif. (2013 / 2020 / 2025) | DD: massimo aumento | Peggior giorno: massimo peggioramento | Operazioni | Richieste | Costo |
+|---|---|---|---|---|---|---|---|
+| V99 | 59.920 (-2,1%) | -5,1% (-2 / -3 / -9) | +0,38 pt | 272 EUR (0,17 pt) | -0,1% | NON RIDUCE | NEUTRO |
+| V0 | 63.556 (+3,8%) | **-36,7%** (-26 / -34 / -48) | +0,65 pt | 572 EUR (0,36 pt) | -0,1% | RIDUCE POCO | NEUTRO |
+| C0 | 61.235 (0,0%) | -0,0% | 0 | 0 | 0 | NON CONTA | - |
+C0 coincide col riferimento al euro: la riproducibilita e confermata e il ritardo 0 a virtual spento non cambia niente.
+Per anno V0: netto 29.325 / 12.420 / 21.812 contro 29.858 / 13.087 / 18.290 (2025 +19%, 2013 e 2020 -2% e -5%).
+
+## VERDETTO FINALE sull'oro (4 EA, 3 anni, 160k)
+| EA | V99 | V0 | V0 contro V99 |
+|---|---|---|---|
+| Goldbot Prop | NON RIDUCE (-4,6%): DA SCARTARE | RIDUCE POCO (-21,9%), NEUTRO: DA VALUTARE | in mezzo (17 punti) |
+| Phantom Gradino 1 | NON RIDUCE (-7,8%): DA SCARTARE | RIDUCE POCO (-26,4%), NEUTRO: DA VALUTARE | in mezzo (19 punti) |
+| Reaper Combo | NON RIDUCE (-0,9%): DA SCARTARE | RIDUCE POCO (-24,3%), NEUTRO: DA VALUTARE | **MIGLIORE** (23 punti) |
+| Gold Trade Pro Combo | NON RIDUCE (-5,1%): DA SCARTARE | RIDUCE POCO (-36,7%), NEUTRO: DA VALUTARE | **MIGLIORE** (32 punti) |
+Riduzione media delle righe con V0: **-27%** (da -22% a -37%); con V99: -4,6% (da -1% a -8%). Il costo e neutro: netto da -2% a +18% (dentro il rumore per Phantom e Reaper), DD al massimo +0,65 punti, peggior giorno al massimo +0,36 punti.
+**Previsioni V1-V16 (finali sull'oro)**: V1 vera · V2 Goldbot RIDUCE >= 50% falsa, netto +-10% vera · V3 Phantom RIDUCE falsa (02/06/2025 non misurabile) · V4 Reaper RIDUCE falsa · V5 GTP RIDUCE >= 50% **falsa** (-36,7%) · V6 EA fuori banda falsa · V7 peggior giorno oltre 0,5 pt falsa (massimo 0,36) · V8 nessuno VIRTUAL CONVIENE: **vera** (V0 e DA VALUTARE) · V9 righe invariate falsa · V10 operazioni oltre 10% falsa · V11 vera · V12 V0 MIGLIORE su >= 2 EA su 4: **vera** (2/4: Reaper e GTP) · V13 non misurabile · V14 C0 NON CONTA vera (Goldbot e GTP) · V15 falsa · V16 vera (V0 riduce di piu in 4/4).
+## Conclusione
+Il Virtual SL/TP con ritardo 99 non riduce le righe. Con **ritardo 0** le righe del giornale del tester calano di circa un quarto (22-37%), mai della meta, a costo neutro: e **DA VALUTARE**, non "conviene". Non e una soluzione al problema delle richieste del Guardian, e il rischio di sicurezza (stop reale potenzialmente non sul server con ritardo 0) non e misurato e non e dimostrato dal tester: vedi limiti sopra.
