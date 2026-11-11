@@ -1,0 +1,53 @@
+=== VERIFICA ORARI INVERNO (server BCM = ora italiana, GMT+1 fisso) v1 ===
+data lettura: 2026-11-11 03:33:21  (ora locale del VPS)
+letti dai .chr del PROFILO ATTIVO. I .chr sono una foto al salvataggio del profilo.
+cartelle dati: 9
+
+=== C:\MT5_Backtest   [cartella dati 04C7A32B575E40027B4FF8724D14D702]
+    profilo attivo: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+
+=== C:\MT5_Wim   [cartella dati 1297BD8797010AA1C8EB9E4BAE18737D]
+    profilo attivo: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    INFO             ABTG_Guardian  GBPJPY  InpDailyResetHour=0  (ora SERVER: d'inverno = ora italiana)
+
+=== C:\Program Files\BCM Markets MT5 Terminal   [cartella dati 215D85D767A1C39E22D242C8114BF9F5]
+    profilo attivo: 'ORO'   [CONFIG] config\common.ini -> ProfileLast=ORO
+    OK               ABTG_EasyTrend  CHFJPY
+    OK               ABTG_EasyTrend  GBPUSD
+    OK               ABTG_MaxMinNotte  XAUUSD
+    OK               ABTG_PostNews  USDJPY
+    OK               ABTG_PostNews  EURJPY
+    OK               ABTG_PostNews  EURUSD
+    OK               ABTG_ORB_Ottimizzato  XAGUSD
+    OK               ABTG_DAX_Apertura_EU  D30EUR
+    OK               ABTG_Dow_Apertura_US  U30USD
+    OK               ABTG_MaxMinNotte_DAX_Short_Ottimizzato  D30EUR
+    OK               ABTG_ORB_Ottimizzato  U30USD
+    OK               ABTG_Nasdaq_Apertura_US  NASUSD
+
+=== C:\FTMO   [cartella dati 46C9F8E9FF0C747B2B5E09BCC13D5237]
+    profilo attivo: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    INFO             ABTG_Guardian  EURGBP  InpDailyResetHour=1  (ora SERVER: d'inverno = ora italiana)
+
+=== C:\Program Files\Pepperstone MetaTrader 5   [cartella dati 73B7A2420D6397DFF9014A20F1201F97]
+    profilo attivo: 'Euro'   [CONFIG] config\common.ini -> ProfileLast=Euro
+
+=== C:\Program Files\Tickmill Europe MT5 Terminal   [cartella dati 857385E4B0F2356AD99AA95CDF40FAE9]
+    profilo attivo: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+
+=== C:\Program Files\BCM Markets MT5 Terminal -V3   [cartella dati BCA8AD18563BF5B64A433C2662D0A104]
+    profilo attivo: 'SQUADRA 100K'   [CONFIG] config\common.ini -> ProfileLast=SQUADRA 100K
+    INFO             ABTG_Guardian  AUDNZD  InpDailyResetHour=0  (ora SERVER: d'inverno = ora italiana)
+
+=== C:\MT5_MANUALE   [cartella dati CF6C240A869369695913FB76DA84BD22]
+    profilo attivo: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+
+=== C:\BCM_Reale   [cartella dati E23E1504A8D02A22179395F0652B86B6]
+    profilo attivo: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    INFO             ABTG_Guardian  E35EUR  InpDailyResetHour=0  (ora SERVER: d'inverno = ora italiana)
+
+=====================================================================
+SEDIE LETTE: 66   OK: 12   DA CORREGGERE: 0   ABTG senza orario previsto: 33   terminali NON GUARDATI: 0
+ESITO: tutti gli orari previsti sono a ora solare.
+=====================================================================
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
