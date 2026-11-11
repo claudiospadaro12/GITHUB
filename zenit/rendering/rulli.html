@@ -1,0 +1,33 @@
+<!doctype html><meta charset="utf-8"><title>Rendering etichette rulli Zenit</title>
+<style>html,body{margin:0}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+<body><script type="module">
+import * as THREE from 'three';
+const Q=new URLSearchParams(location.search);const N=(Q.get('n')||'1,2,3').split(',').map(Number);
+const loadImg=u=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=u});
+const W=+(Q.get('w')||1800),H=+(Q.get('h')||900),CLOSE=Q.get('close')==='1';const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setSize(W,H);R.setPixelRatio(1);
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputColorSpace=THREE.SRGBColorSpace;R.toneMapping=THREE.ACESFilmicToneMapping;document.body.appendChild(R.domElement);
+const S=new THREE.Scene();
+const bg=document.createElement('canvas');bg.width=4;bg.height=512;{const g=bg.getContext('2d');const gr=g.createLinearGradient(0,0,0,512);gr.addColorStop(0,'#f4f6fa');gr.addColorStop(1,'#cfd5df');g.fillStyle=gr;g.fillRect(0,0,4,512)}
+const bt=new THREE.CanvasTexture(bg);bt.colorSpace=THREE.SRGBColorSpace;S.background=bt;
+S.add(new THREE.HemisphereLight(0xffffff,0xb7bfcc,1.1));
+const sun=new THREE.DirectionalLight(0xffffff,2.3);sun.position.set(40,90,90);sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);Object.assign(sun.shadow.camera,{left:-60,right:60,top:60,bottom:-30,near:5,far:400});sun.shadow.bias=-.0005;S.add(sun);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(600,300),new THREE.MeshStandardMaterial({color:'#f1f2f5',roughness:.85}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;S.add(fl);
+const fur=(base)=>{const c=document.createElement('canvas');c.width=512;c.height=512;const g=c.getContext('2d');g.fillStyle=base;g.fillRect(0,0,512,512);for(let i=0;i<14000;i++){const l=Math.random()>.5;g.fillStyle=l?'rgba(255,255,255,.10)':'rgba(0,0,0,.07)';g.fillRect(Math.random()*512,Math.random()*512,1.5,6+Math.random()*6)}const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,1);return t};
+const FUR={1:'#4f8f86',2:'#eceee8',3:'#f1efe6',4:'#f0e6a8',5:'#f4f4f0'};
+const Dm=6.5,L=23, lab=[];const ROT=Array(5).fill(CLOSE?0.42:0.35);
+for(const n of N){lab.push([n,await loadImg(`./tex/lab-${n}.png`)])}
+lab.forEach(([n,img],i)=>{
+  const x=(i-(lab.length-1)/2)*11;
+  const g=new THREE.Group();g.position.set(x,L/2,0);S.add(g);
+  const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(Dm/2,Dm/2,L,64),new THREE.MeshStandardMaterial({map:fur(FUR[n]),roughness:.95}));sleeve.castShadow=true;sleeve.receiveShadow=true;g.add(sleeve);
+  const core=new THREE.Mesh(new THREE.CylinderGeometry(2.3,2.3,L+.02,32,1,true),new THREE.MeshStandardMaterial({color:'#c0392b',roughness:.6,side:THREE.DoubleSide}));g.add(core);
+  const lt=new THREE.CanvasTexture(img);lt.colorSpace=THREE.SRGBColorSpace;lt.anisotropy=16;
+  const band=new THREE.Mesh(new THREE.CylinderGeometry(Dm/2+.06,Dm/2+.06,6,96,1,true),new THREE.MeshStandardMaterial({map:lt,roughness:.45,side:THREE.DoubleSide}));
+  band.rotation.y=-Math.PI/2+(ROT[i]||0.12); // u=0 (pannello logo) al bordo sinistro visibile
+  band.position.y=0;g.add(band);
+  g.rotation.y=0;
+});
+const cam=new THREE.PerspectiveCamera(CLOSE?7:14,W/H,1,2000);cam.position.set(CLOSE?5:0,CLOSE?14:14,CLOSE?130:110);cam.lookAt(CLOSE?2:0,CLOSE?L*.5:L*.55,0);
+R.render(S,cam);window.__DONE__=true;
+</script>
