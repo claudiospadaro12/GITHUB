@@ -21,7 +21,7 @@ Reaper + Phantom + Goldbot a livello Medium (L2) a 80k nel tester: netto 209.017
 | **80k** | Gold Phantom Gradino 1 (L1) | 5.764 / 7.926 / 18.756 | 10.815 | **10.815** (13,5%) | **1,59** (1,22 / 1,44 / 2,64) | 5,5% | 5,0% / 2,8% / 3,0% | -2,5% |
 | **80k** | Daytrade Pro Max9 (EURUSD ecc., D1) | 8.799 / 16.431 / 372 | 8.534 | **8.534** (10,7%) | **1,51** (1,50 / 2,04 / 1,02) | 4,7% | limite sup. 5,8% / 3,6% / 4,7% | -2,6% |
 | **Totale** | 320k di capitale equivalente | 48.152 / 56.790 / 50.629 | | **51.857** (16,2%) | | congiunto 4,1% (2013), 1,3%, 1,5% | | congiunto -2,2% di 320k (2013) |
-Media annua lorda, prima del profit split. Senza costi (tester puro) il totale medio e circa 59.000 (Goldbot+Reaper 19.953, Phantom 13.992, DTP 8.921 a 80k).
+Media annua lorda, prima del profit split. Senza costi (tester puro) il totale medio e circa 62.800 (Goldbot+Reaper 19.953 x2, Phantom 13.992, DTP 8.921).
 **DD equity**: per i due conti oro ricostruita con il flottante dalle barre M1 (`equity_tre.json`; il peggior giorno equity del 160k e 3,7% il 31/12/2013, ultimo giorno del test, forse chiusura forzata); per DTP non ci sono le barre forex, quindi e il valore del report (DD equity del tester).
 
 ## Posizioni opposte fra conti (misura, 3 anni)
