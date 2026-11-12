@@ -23,3 +23,25 @@ N1 21 passate valide: **vera per l'oro** (18/18; GTP da rifare) · N2 operazioni
 - **Il tester non allarga lo spread nelle news**: il rischio vero dell'NFP (spread e slippage di decine di dollari in pochi secondi) non e nel test. Quindi un esito neutro **non basta a dire che sia sicuro spegnerlo** su un conto prop. Tenerlo acceso (parere di Massimo e mio) resta la scelta prudente, a costo praticamente nullo nel tester.
 ## Limiti
 Un percorso per anno, Phantom e Reaper con rumore (2 ripetizioni); date NFP da una lista mia; il GTP non e misurato; nessun test di spread nelle news. Nessun giudizio su lotti o taglie.
+
+---
+## AGGIORNAMENTO (12/11, mattina): Gold Trade Pro Combo — 3 passate valide, e VERDETTO a 5 EA
+**Validita**: 3/3 valide (stato OK, qualita 99-100%, zero stop out/no money); **tutti gli input del report identici al riferimento D160 tranne `EnableNFP_Filter=false`** (`FridayStopHour=25`, Virtual spento, ritardo 99 confermati). Sostituisce le 3 passate ritirate dell'11/11 (`RISULTATI_NFP_OFF_GTP_2026-11-11.md`). Zip `NFPOFFGTP_20261112_0654`, script `D160_dati/analisi_nfpoff_gtp2.py`.
+| Anno | Netto spento / acceso | PF | DD equity | Peggior giorno | Operazioni | Attraverso l'NFP spento / acceso |
+|---|---|---|---|---|---|---|
+| 2013 | 29.716 / 29.858 (-0,5%) | 2,40 / 2,42 | 4,48% / 4,48% | -4.350 / -4.350 | 325 / 325 | 3 / 3 |
+| 2020 | 12.902 / 13.087 (-1,4%) | 1,73 / 1,75 | 6,18% / 6,15% | -2.023 / -2.023 | 289 / 288 | 1 / 1 |
+| 2025 | 18.107 / 18.290 (-1,0%) | 2,66 / 2,70 | 2,13% / 2,00% | -1.696 / -1.696 | 278 / 276 | 0 / 0 |
+| **3 anni** | **60.725 / 61.235 (-0,8%)** | | DD massimo +0,13 pt | nessun peggioramento | +0,7% | |
+**Gold Trade Pro: NEUTRO** (netto -0,8%, DD +0,13 pt, peggior giorno invariato). Il filtro, con le sue finestre (10 minuti prima e 240 dopo), nel tester quasi non agisce: nel 2025 nessuna posizione attraversa l'NFP ne con il filtro acceso ne con quello spento. Il confronto del 11/11 (-8,9%, -28% nel 2020) era l'effetto di `FridayStopHour=19` ereditato, non dell'NFP: confermato (qui 2020 = -1,4%).
+
+## VERDETTO FINALE (5 EA, 3 anni, 160k)
+| EA | Netto spento vs acceso | DD: massimo aumento | Esito |
+|---|---|---|---|
+| Goldbot Prop | -3,6% | +0,55 pt | NEUTRO |
+| Goldbot Combo | -3,6% | +0,37 pt | NEUTRO |
+| Phantom Gradino 1 | -0,8% | +0,29 pt | NEUTRO |
+| Reaper Combo | +6,7% | +0,25 pt | NEUTRO |
+| Gold Trade Pro Combo | -0,8% | +0,13 pt | NEUTRO |
+**5 su 5 NEUTRO, nessuno PEGGIORE, nessuno MIGLIORE.** Previsioni finali: N1 vera (21/21 valide) · N2 operazioni in aumento in >= 4 EA su 5: **vera** (5/5: +0,7% / +1,9% / +2,2% / +2,2% / +3,0%) · N3 2025 con almeno una posizione attraverso l'NFP in ogni EA: **falsa** (GTP, Goldbot e Reaper 0) · N4 falsa · N5 Goldbot <5%: vera · N6 PEGGIORE: falsa · N7 MIGLIORE: falsa · N8 peggior giorno oltre 0,5 pt: falsa (massimo 0,43) · **N9**: la regola scritta da **"SPEGNERE CONVIENE"** (la mia previsione era il 25%).
+**Lettura**: la regola e permissiva (conta solo che nessuno peggiori): un esito NEUTRO su tutti dice che nel tester **spegnere il filtro non cambia il risultato**, non che convenga. Non c'e un guadagno da prendere; il rischio vero dell'NFP (spread e slippage nei secondi del rilascio) NON e nel tester. Per questo il filtro si tiene **acceso** (parere di Massimo e mio, costo nullo nel tester). Decisione: Claudio.
