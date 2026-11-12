@@ -34,3 +34,6 @@ Per passata della tappa 2: DD equity in % del deposito, netto, PF, operazioni, l
 
 ## Limiti
 Un percorso per set (Randomization 0); 6-7 anni per periodo, DD01 su 6-7 anni e un singolo evento peggiore; cambio EUR/USD 1,15 ipotesi; il lotto cresce col saldo (compounding); Modello 1; il periodo di misura a lotto fisso 0,1 non ha compounding, la prova si; solo oro e solo questi 9 set.
+
+## Aggiunta del 12/11/2026 (dopo aver letto la tappa 1; le previsioni U3-3..U3-7 NON cambiano)
+Tappa 1 letta (`RISULTATI_UBS_U3A_2026-11-12.md`): U3-1 confermata (18/18 valide), U3-2 FALSA (DD01 diverso di oltre 1,5 volte solo in 2 set su 9). La tappa 2 usa `HistoricalMaxDD = DD01 x 1,15`, arrotondato a 2 decimali: incrocio X = valore misurato su P1, prova su P2; incrocio Y = misurato su P2, prova su P1.
