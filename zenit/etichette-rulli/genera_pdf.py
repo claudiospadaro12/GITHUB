@@ -33,7 +33,7 @@ def main():
     dati = json.loads(Path(a.dati).read_text(encoding="utf-8"))
     w, h = dati["formato"]["larghezza_mm"], dati["formato"]["altezza_mm"]
     n = len(dati["prodotti"])
-    html = (QUI / "template.html").read_text(encoding="utf-8")
+    html = (QUI / dati.get("template", "template.html")).read_text(encoding="utf-8")
     html = html.replace("__DATI__", json.dumps(dati, ensure_ascii=False).replace("</", "<\\/"))
 
     if a.stampa:

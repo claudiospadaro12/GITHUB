@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Adesivo rulli Zenit</title>
+<style>
+  /* Adesivo da applicare sul film del rullo. Layout fisso 110 x 65 mm, scalato al formato dichiarato in prodotti.json */
+  * { box-sizing:border-box; margin:0; padding:0; }
+  :root { --pri:#3850A2; --ink:#1d2330; }
+  body { font-family:"Helvetica Neue",Arial,"Liberation Sans",sans-serif; color:var(--ink); background:#cfd3d8; }
+  .sheet { display:flex; flex-direction:column; align-items:center; gap:8mm; padding:8mm 0; }
+  .cap { font-size:7pt; color:#555; align-self:flex-start; margin-left:calc((100% - var(--w))/2); }
+  body.prod .sheet { display:block; padding:0; } body.prod .cap { display:none; }
+  .wrap { width:var(--w); height:var(--h); overflow:hidden; position:relative; }
+  body.prod .wrap { break-after:page; }
+  .lab { width:110mm; height:65mm; position:absolute; left:0; top:0; transform-origin:0 0; transform:scale(var(--s)); background:#fff;
+         border:1.1mm solid var(--pri); border-radius:1.6mm; overflow:hidden; }
+  .lab > * { position:absolute; }
+  .addr { left:0.4mm; top:0; bottom:0; width:3.6mm; writing-mode:vertical-rl; transform:rotate(180deg); font-size:3.3pt; color:var(--pri); display:flex; align-items:center; justify-content:center; letter-spacing:.02em; white-space:nowrap; }
+  .logo { left:5.4mm; top:2.6mm; height:13mm; }
+  .ean { left:62mm; top:2.6mm; width:36.4mm; height:13mm; border:0.3mm solid #9aa; border-radius:0.8mm; padding:0.6mm; }
+  .ean svg { width:100%; height:100%; display:block; }
+  .noean { display:flex; align-items:center; justify-content:center; height:100%; font-size:5pt; font-weight:700; color:#667; text-align:center; line-height:1.2; }
+  .name { left:5.4mm; top:17.2mm; width:56mm; }
+  .name h1 { font-size:10.5pt; font-weight:800; letter-spacing:.01em; line-height:1.05; }
+  .name .sub { font-size:6.6pt; font-weight:600; margin-top:.5mm; }
+  .name .made { font-size:5.6pt; font-weight:800; color:var(--pri); margin-top:.4mm; letter-spacing:.06em; }
+  .langs { left:5.4mm; top:29.4mm; width:57mm; }
+  .langs .r { display:flex; gap:1.2mm; align-items:baseline; font-size:5.1pt; line-height:2.75mm; white-space:nowrap; }
+  .langs .s { flex:0 0 4.2mm; font-weight:800; color:#fff; background:var(--pri); text-align:center; border-radius:.5mm; font-size:4.2pt; line-height:2.5mm; }
+  .rec { left:63mm; top:17.4mm; width:35.5mm; display:flex; gap:1mm; }
+  .rec .it { flex:1; text-align:center; font-size:4.3pt; font-weight:800; line-height:1.05; }
+  .rec svg { width:9mm; height:8mm; display:block; margin:0 auto 0.2mm; }
+  .recnote { left:63mm; top:31.6mm; width:35.5mm; text-align:center; font-size:3.9pt; font-weight:700; line-height:1.15; }
+  .scale { left:63mm; top:36.4mm; width:35.5mm; }
+  .scale svg { width:100%; display:block; }
+  .scale .cap2 { font-size:3.6pt; font-weight:700; color:#555; text-align:center; margin-bottom:.4mm; letter-spacing:.04em; }
+  .lot { left:5.4mm; top:44.2mm; font-size:5.2pt; font-weight:700; }
+  .boxes { left:5.4mm; top:47.6mm; width:93.1mm; height:13.2mm; display:flex; gap:.9mm; }
+  .bx { flex:1; border:0.35mm solid var(--pri); border-radius:1mm; text-align:center; display:flex; flex-direction:column; }
+  .bx.w2 { flex:1.5; }
+  .bx .h { font-size:4.2pt; font-weight:700; color:var(--pri); background:#eef1f8; padding:.5mm 0; line-height:1.1; border-radius:.7mm .7mm 0 0; }
+  .bx .v { font-size:9pt; font-weight:800; flex:1; display:flex; align-items:center; justify-content:center; }
+  .strip { right:0; top:0; bottom:0; width:6.3mm; display:flex; flex-direction:column; }
+  .strip i { flex:1; display:block; border-radius:1.4mm 0 0 1.4mm; margin:.35mm 0; }
+</style>
+</head>
+<body>
+<div class="sheet" id="sheet"></div>
+<script id="dati" type="application/json">__DATI__</script>
+<script>
+const D = JSON.parse(document.getElementById('dati').textContent);
+const root = document.documentElement.style;
+root.setProperty('--w', D.formato.larghezza_mm + 'mm'); root.setProperty('--h', D.formato.altezza_mm + 'mm');
+root.setProperty('--s', Math.min(D.formato.larghezza_mm/110, D.formato.altezza_mm/65).toFixed(4));
+root.setProperty('--pri', D.colori.primario);
+if (new URLSearchParams(location.search).has('prod') || window.__PROD__) document.body.classList.add('prod');
+/* ---- EAN-13 ---- */
+const L=['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+const G=['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
+const R=['1110010','1100110','1101100','1000010','1011100','1001110','1010000','1000100','1001000','1110100'];
+const PAR=['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+function ean13(d12){
+  let s=0; for(let i=0;i<12;i++) s+= (+d12[i])*(i%2?3:1);
+  const full = d12 + ((10 - s%10)%10);
+  let bits='101'; const p=PAR[+full[0]];
+  for(let i=1;i<7;i++) bits += (p[i-1]==='L'?L:G)[+full[i]];
+  bits += '01010';
+  for(let i=7;i<13;i++) bits += R[+full[i]];
+  bits += '101';
+  return {full,bits};
+}
+function eanSVG(d12){
+  const {full,bits}=ean13(d12); const q=9, W=95+2*q, H=58;
+  let bars='';
+  for(let i=0;i<bits.length;i++) if(bits[i]==='1'){
+    const guard = i<3 || (i>=45&&i<50) || i>=92;
+    bars += `<rect x="${q+i}" y="2" width="1" height="${guard?H-5:H-11}" fill="#000"/>`;
+  }
+  const t=(x,s,a='middle')=>`<text x="${x}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="${a}" fill="#000" textLength="${s.length*0}">${s}</text>`;
+  const txt = `<text x="${q-2}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="end">${full[0]}</text>`
+    + `<text x="${q+3+21}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="middle" textLength="39" lengthAdjust="spacing">${full.slice(1,7)}</text>`
+    + `<text x="${q+50+21}" y="${H}" font-family="Arial,sans-serif" font-size="9" text-anchor="middle" textLength="39" lengthAdjust="spacing">${full.slice(7)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H+4}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#fff"/>${bars}${txt}</svg>`;
+}
+
+
+function recycle(num,sub,cap){
+  const P='M20 4 L36 32 L4 32 Z';
+  return `<div class="it"><svg viewBox="0 0 40 36" xmlns="http://www.w3.org/2000/svg"><path d="${P}" fill="none" stroke="#1d2330" stroke-width="2.6" stroke-linejoin="round"/>`
+   + `<path d="M14 9.5 L20 4 L26 9.5Z M31.5 27.5 L36 32 L29 33Z M11 33 L4 32 L8 26Z" fill="#1d2330"/>`
+   + `<text x="20" y="25" font-family="Arial" font-weight="700" font-size="13" text-anchor="middle">${num}</text></svg>${cap}<br>${sub}</div>`;
+}
+function scaleSVG(p){
+  const S=D.classi_superficie, keys=Object.keys(S); let o='';
+  keys.forEach((k,i)=>{ const x=i*21, on=p.superfici.includes(k), c=S[k].colore;
+    o+=`<rect x="${x}" y="1" width="19" height="13" rx="1.5" fill="${on?c:'#fff'}" stroke="${on?c:'#b9bcc2'}" stroke-width="1"/>`;
+    for(let j=0;j<3;j++) o+=`<circle cx="${x+5+j*4.5}" cy="7.5" r="${j<S[k].punti?1.5:0.6}" fill="${on?'#fff':'#b9bcc2'}"/>`; });
+  return `<svg viewBox="0 0 83 15" xmlns="http://www.w3.org/2000/svg">${o}</svg>`;
+}
+const sheet=document.getElementById('sheet'); const A=D.azienda;
+for (const p of D.prodotti) {
+  const cap=document.createElement('div'); cap.className='cap'; cap.textContent=p.id+(p.esempio?' - ESEMPIO':''); 
+  const wrap=document.createElement('div'); wrap.className='wrap';
+  const rows=D.lingue.map(l=>`<div class="r"><span class="s">${l.toUpperCase()}</span><span>${p.utilizzi.map(u=>D.utilizzi[u][l]).join(' &middot; ')}</span></div>`).join('');
+  const lotto=p.lotto||D.lotto_segnaposto;
+  wrap.innerHTML=`<div class="lab">
+    <div class="addr">${A.indirizzo_breve} &middot; ${A.web}</div>
+    <img class="logo" src="${D.logo}" alt="Zenit">
+    <div class="ean">${p.ean?eanSVG(p.ean):'<div class="noean">EAN<br>da assegnare</div>'}</div>
+    <div class="name"><h1>${p.titolo}</h1><div class="sub">${p.sottotitolo}</div><div class="made">${A.origine.toUpperCase()}</div></div>
+    <div class="langs">${rows}</div>
+    <div class="rec">${recycle(4,'LDPE','FILM')}${recycle(22,'PAP','ETICHETTA')}</div>
+    <div class="recnote">VERIFICA LE DISPOSIZIONI<br>DEL TUO COMUNE</div>
+    <div class="scale"><div class="cap2">SUPERFICI &middot; SURFACES</div>${scaleSVG(p)}</div>
+    <div class="lot">${lotto}</div>
+    <div class="boxes">
+      <div class="bx w2"><div class="h">SERIE / SERIES</div><div class="v">${p.codice}</div></div>
+      <div class="bx"><div class="h">MISURA CM</div><div class="v">${p.lunghezza_mm/10}</div></div>
+      <div class="bx"><div class="h">DIAMETRO</div><div class="v">${p.diametro_int_mm}</div></div>
+      <div class="bx"><div class="h">PELO MM</div><div class="v">${p.pelo_mm}</div></div>
+      <div class="bx"><div class="h">PEZZI</div><div class="v">${p.confezione||''}</div></div>
+    </div>
+    <div class="strip">${D.colori_strip.map(c=>`<i style="background:${c}"></i>`).join('')}</div>
+  </div>`;
+  sheet.appendChild(cap); sheet.appendChild(wrap);
+}
+document.title='Adesivi rulli Zenit'; window.__READY__=true;
+</script>
+</body>
+</html>

@@ -41,3 +41,10 @@ python3 genera_pdf.py --stampa   # pagine a misura esatta 210x60 per la tipograf
 - Applicate: altezza pelo in mm con indicatore a barre (corto/medio/lungo, soglie ipotizzate da Zenit: <=8, 9-14, >=15 mm); scala delle superfici a 4 livelli con colori, presa dalle classi del catalogo 2026 (lisce / poco ruvide / ruvide / molto ruvide); icone e numeri uguali nelle 5 lingue; confezione in zona fissa; materiale in chiaro.
 - Non applicate perche' mancano i dati: matrice vernice x rullo (compatibilita' non presente nel catalogo), indirizzo QR alla guida, simbolo di riciclo, marchio di gamma distintivo.
 - Da confermare: le soglie del pelo e le traduzioni.
+
+## Nuovo formato: adesivo sul film (stesso stile dell'etichetta attuale)
+Partendo dalla foto dell'etichetta reale (Rullo Kilometri 158.20), `template-adesivo.html` ne riprende la struttura: bordo blu, logo e codice a barre in alto, nome prodotto, riquadri SERIE / MISURA / DIAMETRO / PEZZI, simboli di riciclo (FILM 4 LDPE, ETICHETTA 22 PAP), striscia dei 6 colori a destra, indirizzo verticale a sinistra. Novita': le 5 lingue (usi), altezza del pelo, scala delle superfici, "SERIE / SERIES".
+- Formato **110 x 65 mm = ipotesi** (stimato dalla foto): da confermare misurando l'adesivo reale. Si cambia in `prodotti.json` (`formato`).
+- Il primo prodotto (KM, Kilometri 158.20) usa i dati reali letti dalla foto, compreso l'EAN 8050612135517 (cifra di controllo verificata). Gli altri 5 vengono dal catalogo 2026 e hanno l'EAN "da assegnare".
+- Il riquadro PEZZI e il lotto ("OR. 82/00 06/26", valore della foto) vanno riempiti per ogni confezione.
+- Il vecchio formato a fascetta resta in `template.html` (si usa togliendo `"template"` da `prodotti.json`).
