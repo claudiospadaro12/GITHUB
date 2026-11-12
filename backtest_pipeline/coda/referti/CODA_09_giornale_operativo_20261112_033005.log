@@ -1,0 +1,262 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-11-12 03:33:47  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 9
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\MT5_Wim
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261111   (84.4 KB, ultima scrittura 2026-11-11 23:55) ---
+    righe totali: 290
+    RIGHE DI ORDINE / DEAL: 1
+      OF016:00:00.549Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      QL023:55:19.739ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=104130.07  dayLoss=0.21%  totDD=-4.13%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261112   (14.4 KB, ultima scrittura 2026-11-12 03:25) ---
+    righe totali: 51
+    RIGHE DI ORDINE / DEAL: 7
+      PK000:05:02.403Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      LK000:05:02.580Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      OK000:05:02.825The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      KF000:05:03.016GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      CF000:05:03.197GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      NF000:05:03.370GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      CF000:05:03.539GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      JK003:30:19.593ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=104120.55  dayLoss=-0.03%  totDD=-4.12%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261111   (33.3 KB, ultima scrittura 2026-11-11 23:42) ---
+    righe totali: 129
+    RIGHE DI ORDINE / DEAL: 20
+      RS000:05:18.355ABTG_PunteLarry (XAUUSD,H1)[LARRY] SETUP LONG [SMASH libro] del 2026.11.11: ingresso STOP @ 4146.64 (punta/gap 40.79 = 0.48 x ATR D1).
+      OF000:05:18.382ABTG_PunteLarry (XAUUSD,H1)[LARRY] PENDENTE BUY STOP @ 4146.64  SL 4005.00  TP 4359.10  lot 0.01  (pattern SMASH libro, punta/gap 0.48 x ATR, scadenza 2026.11.11 23:59, ordine 5284279)
+      EO008:00:17.824ABTG_MaxMinNotte (XAUUSD,M15)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4055.04 sl: 4024.03 tp: 4179.08 [invalid price]
+      KL008:00:17.856ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4024.03 SL 4055.04 TP 3899.99 lot 0.01
+      HQ011:59:00.042RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      JN011:59:00.042RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      ID011:59:00.676RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      CK011:59:00.676RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      KG011:59:01.781RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_BUY 1.0 D30EUR Error code=4202
+      MD011:59:01.781RangeBreakout EA MT5 (D30EUR,M3)Not enough money for ORDER_TYPE_SELL 1.0 D30EUR Error code=4202
+      QE015:00:00.489ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market sell 0.01 GBPJPY sl: 212.580 tp: 211.878 [not enough money]
+      NN015:30:01.040ABTG_Nasdaq_Apertura_US (NASUSD,M15)[Nasdaq Apertura US] SELL STOP @ 28220.70000  SL 28310.90000  lot 0.10
+      CQ017:00:00.162ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market sell 0.01 GBPJPY sl: 212.927 tp: 211.901 [not enough money]
+      GS017:36:08.216ABTG_DAX_Apertura_EU (D30EUR,M5)[DAX Apertura EU] BUY LIMIT (retest) @ 26654.50000  SL 26551.10000  lot 0.10
+      LR018:23:35.820ABTG_Dow_Apertura_US (U30USD,M5)[Dow Apertura US] BUY LIMIT (retest) @ 52369.50000  SL 52116.50000  lot 0.10
+      MN020:00:00.162ABTG_EasyTrend (CHFJPY,H1)[EZ] SEGNALE LONG alle 19:00: livello d'ingresso 191.833 (chiusura candela segnale), estremo figura 191.621, SL 191.591. Candela linreg O=191.861 H=191.958 L=191.794 C=191.865, plot 191.846.
+      QE020:00:02.046ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market sell 0.40 U30USD sl: 52859.57 tp: 52325.95 [invalid stops]
+      JM021:00:01.859ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market sell 0.40 U30USD sl: 52870.14 tp: 52335.60 [invalid stops]
+      CI022:05:00.384ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market sell 0.40 U30USD sl: 52907.00 tp: 52341.35 [invalid stops]
+      EG023:00:00.486ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market sell 0.40 U30USD sl: 52921.21 tp: 52351.65 [invalid stops]
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261112   (9.8 KB, ultima scrittura 2026-11-12 03:15) ---
+    righe totali: 38
+    RIGHE DI ORDINE / DEAL: 4
+      ER000:05:47.126ABTG_PunteLarry (XAUUSD,H1)[LARRY] pendente non piu' attivo (scaduto o cancellato): giornata chiusa.
+      IQ000:05:47.126ABTG_PunteLarry (XAUUSD,H1)[LARRY] SETUP LONG [SMASH libro] del 2026.11.12: ingresso STOP @ 4066.88 (punta/gap 30.92 = 0.36 x ATR D1).
+      DP000:05:47.152ABTG_PunteLarry (XAUUSD,H1)[LARRY] PENDENTE BUY STOP @ 4066.88  SL 3973.89  TP 4206.37  lot 0.01  (pattern SMASH libro, punta/gap 0.36 x ATR, scadenza 2026.11.12 23:59, ordine 5295649)
+      FO001:00:00.753ABTG_BulgeAzzurra (EURGBP,M5)CTrade::OrderSend: market sell 0.40 U30USD sl: 52823.00 tp: 52366.25 [invalid stops]
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1515150476
+=====================================================================
+
+--- GIORNO 20261111   (1806.7 KB, ultima scrittura 2026-11-11 23:55) ---
+    righe totali: 6516
+    RIGHE DI ORDINE / DEAL: 3118
+      QL000:05:00.791The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.02 XAUUSD at 4198.00 (4198.00) sl: 4022.70 tp: 4394.71 [auto trading disabled by client]
+      GG000:05:00.791The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.02 XAUUSD at 3871.89 (3871.89) sl: 4047.19 tp: 3675.18 [auto trading disabled by client]
+      JD000:05:00.791The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4697.91 (4697.91) sl: 4672.54 tp: 4896.69 [auto trading disabled by client]
+      HN000:05:00.791The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3868.33 (3868.33) sl: 3893.70 tp: 3669.55 [auto trading disabled by client]
+      QM000:05:00.791The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4200.41 (4200.41) sl: 4154.54 tp: 4253.58 [auto trading disabled by client]
+      GF000:05:00.792The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.01 XAUUSD at 3867.85 (3867.85) sl: 3913.72 tp: 3814.68 [auto trading disabled by client]
+      EH000:05:00.792GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.06 XAUUSD at 4699.26 (4699.26) sl: 4674.15 tp: 4718.46 [auto trading disabled by client]
+      CQ000:05:00.792GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.06 XAUUSD at 3869.92 (3869.92) sl: 3895.03 tp: 3850.72 [auto trading disabled by client]
+      DM000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4699.54 (4699.54) sl: 4653.83 tp: 4788.78 [auto trading disabled by client]
+      GO000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3869.96 (3869.96) sl: 3915.67 tp: 3780.72 [auto trading disabled by client]
+      MF000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.06 XAUUSD at 4700.55 (4700.55) sl: 4608.44 tp: 4828.37 [auto trading disabled by client]
+      QJ000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.06 XAUUSD at 3865.93 (3865.93) sl: 3958.04 tp: 3738.11 [auto trading disabled by client]
+      LK000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.08 XAUUSD at 4699.43 (4699.43) sl: 4653.72 tp: 4788.67 [auto trading disabled by client]
+      OQ000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.08 XAUUSD at 3869.96 (3869.96) sl: 3915.67 tp: 3780.72 [auto trading disabled by client]
+      KL000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.13 XAUUSD at 4201.06 (4201.06) sl: 4190.72 tp: 4261.02 [auto trading disabled by client]
+      GL000:05:00.793GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.13 XAUUSD at 3869.66 (3869.66) sl: 3880.00 tp: 3809.70 [auto trading disabled by client]
+      RF000:05:00.832GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4202.01 (4202.01) sl: 4175.59 tp: 4301.95 [auto trading disabled by client]
+      MK000:05:00.832GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3869.50 (3869.50) sl: 3895.92 tp: 3769.56 [auto trading disabled by client]
+      DK000:05:00.832GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.02 XAUUSD at 4203.11 (4203.11) sl: 4164.71 tp: 4291.73 [auto trading disabled by client]
+      LF000:05:00.832GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.02 XAUUSD at 3869.33 (3869.33) sl: 3907.73 tp: 3780.71 [auto trading disabled by client]
+      QL000:05:00.832GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: buy stop 0.03 XAUUSD at 4199.92 (4199.92) sl: 4172.01 tp: 4245.41 [auto trading disabled by client]
+      GM000:05:00.832GoldBot_One_V3.5_WSC (XAUUSD,D1)CTrade::OrderSend: sell stop 0.03 XAUUSD at 3869.24 (3869.24) sl: 3897.15 tp: 3823.75 [auto trading disabled by client]
+      LQ000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4689.92 (4689.92) sl: 4563.82 tp: 4720.37 [auto trading disabled by client]
+      QK000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3874.17 (3874.17) sl: 4000.27 tp: 3843.72 [auto trading disabled by client]
+      RH000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4689.92 (4689.92) sl: 4563.82 tp: 4720.37 [auto trading disabled by client]
+      CP000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3874.17 (3874.17) sl: 4000.27 tp: 3843.72 [auto trading disabled by client]
+      HR000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4689.92 (4689.92) sl: 4563.82 tp: 4720.37 [auto trading disabled by client]
+      MN000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3874.17 (3874.17) sl: 4000.27 tp: 3843.72 [auto trading disabled by client]
+      NE000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4689.92 (4689.92) sl: 4563.82 tp: 4720.37 [auto trading disabled by client]
+      OG000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3874.17 (3874.17) sl: 4000.27 tp: 3843.72 [auto trading disabled by client]
+      DO000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: buy stop 0.04 XAUUSD at 4689.92 (4689.92) sl: 4563.82 tp: 4720.37 [auto trading disabled by client]
+      IL000:05:00.864GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.04 XAUUSD at 3874.17 (3874.17) sl: 4000.27 tp: 3843.72 [auto trading disabled by client]
+      CK000:05:00.926The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4196.99 (4196.99) sl: 4180.96 tp: 4244.51 [auto trading disabled by client]
+      DH000:05:00.926The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.01 XAUUSD at 3872.98 (3872.98) sl: 3889.01 tp: 3825.46 [auto trading disabled by client]
+      QQ000:05:00.926GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.03 XAUUSD at 3873.36 (3873.36) sl: 3892.95 tp: 3746.82 [auto trading disabled by client]
+      CP000:05:00.926The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4196.99 (4196.99) sl: 4180.96 tp: 4244.51 [auto trading disabled by client]
+      DS000:05:00.926The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: sell stop 0.01 XAUUSD at 3872.98 (3872.98) sl: 3889.01 tp: 3825.46 [auto trading disabled by client]
+      RJ000:05:00.927GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: sell stop 0.03 XAUUSD at 3873.36 (3873.36) sl: 3892.95 tp: 3746.82 [auto trading disabled by client]
+      GH000:05:00.928GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)CTrade::OrderSend: buy stop 0.08 XAUUSD at 4693.80 (4693.80) sl: 4672.30 tp: 4778.05 [auto trading disabled by client]
+      MR000:05:00.928The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4196.99 (4196.99) sl: 4180.96 tp: 4244.51 [auto trading disabled by client]
+      ... altre 3078 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      DO023:55:06.460ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=77183.54  dayLoss=-0.04%  totDD=3.52%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261112   (16.2 KB, ultima scrittura 2026-11-12 03:30) ---
+    righe totali: 58
+    RIGHE DI ORDINE / DEAL: 14
+      OM000:05:02.214The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      LJ000:05:02.392The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      QG000:05:03.061GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      HG000:05:03.194GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      OG000:05:03.353GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      PH000:05:03.482GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending sell orders reached... deleting lowest sellstop order!
+      QG000:05:03.647GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      MG000:05:03.753GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      EG000:05:03.898GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      MG000:05:04.420GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      RG000:05:04.535GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      NE002:00:00.500The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      NF003:00:00.600The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      JG003:00:00.712The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      PF003:30:06.310ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=77183.54  dayLoss=0.00%  totDD=3.52%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261111   (97.2 KB, ultima scrittura 2026-11-11 23:55) ---
+    righe totali: 340
+    RIGHE DI ORDINE / DEAL: 1
+      KN016:00:00.615Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      MO023:55:17.850ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=107241.40  dayLoss=-0.32%  totDD=-7.24%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261112   (17.2 KB, ultima scrittura 2026-11-12 03:30) ---
+    righe totali: 61
+    RIGHE DI ORDINE / DEAL: 10
+      JJ000:05:02.176The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      OJ000:05:02.364The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      NJ000:05:02.629Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      EF000:05:02.787GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      PJ000:05:02.926Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      HE000:05:03.136GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      GE000:05:03.335GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      IE000:05:03.520GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      DE000:05:03.725GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      KE000:05:03.911GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      RD003:30:17.687ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=107070.28  dayLoss=-0.51%  totDD=-7.07%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20261111   (367.3 KB, ultima scrittura 2026-11-12 00:00) ---
+    righe totali: 592
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261112   (181.3 KB, ultima scrittura 2026-11-12 03:15) ---
+    righe totali: 286
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261111   (82.5 KB, ultima scrittura 2026-11-11 23:55) ---
+    righe totali: 289
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      FJ023:55:26.865ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6121.34  dayLoss=0.00%  totDD=1.99%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261112   (15.1 KB, ultima scrittura 2026-11-12 03:25) ---
+    righe totali: 55
+    RIGHE DI ORDINE / DEAL: 11
+      OM000:05:00.854The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      OM000:05:01.020The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+      QG000:05:01.706GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      QG000:05:01.818GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      MG000:05:01.984GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      RH000:05:02.108GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending sell orders reached... deleting lowest sellstop order!
+      NG000:05:02.207GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      HG000:05:02.308GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      KG000:05:02.402GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      RG000:05:02.504GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      PG000:05:02.614GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      LL003:30:26.714ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6121.34  dayLoss=0.00%  totDD=1.99%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
