@@ -1,0 +1,2212 @@
+{
+ "BASE|2013-2018": {
+  "tag": "BASE",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1824,
+  "net": 52706.18,
+  "pf": "1.53",
+  "dd": 8546.44,
+  "ddp": 10.683050000000001,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -2525.49,
+  "ndays": 549
+ },
+ "BASE|2019-2025": {
+  "tag": "BASE",
+  "per": "2019-2025",
+  "stato": "KO",
+  "ops": 0,
+  "net": 0.0,
+  "pf": "0.00",
+  "dd": 0.0,
+  "ddp": 0.0,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [],
+  "diff": [],
+  "worst_day": null,
+  "ndays": 0
+ },
+ "NOA|2013-2018": {
+  "tag": "NOA",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1662,
+  "net": 46998.37,
+  "pf": "1.54",
+  "dd": 7692.61,
+  "ddp": 9.615762499999999,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyA"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -2065.46,
+  "ndays": 546
+ },
+ "NOA|2019-2025": {
+  "tag": "NOA",
+  "per": "2019-2025",
+  "stato": "OK",
+  "ops": 1794,
+  "net": 74462.0,
+  "pf": "1.87",
+  "dd": 6240.94,
+  "ddp": 7.801175,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyA"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1270.97,
+  "ndays": 583
+ },
+ "NOB|2013-2018": {
+  "tag": "NOB",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1710,
+  "net": 47208.31,
+  "pf": "1.52",
+  "dd": 6921.29,
+  "ddp": 8.6516125,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyB"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1974.19,
+  "ndays": 532
+ },
+ "NOB|2019-2025": {
+  "tag": "NOB",
+  "per": "2019-2025",
+  "stato": "OK",
+  "ops": 1828,
+  "net": 70564.22,
+  "pf": "1.81",
+  "dd": 5634.64,
+  "ddp": 7.0433,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyB"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1559.03,
+  "ndays": 561
+ },
+ "NOC|2013-2018": {
+  "tag": "NOC",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1672,
+  "net": 49912.39,
+  "pf": "1.53",
+  "dd": 8251.43,
+  "ddp": 10.3142875,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyC"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1526.54,
+  "ndays": 546
+ },
+ "NOC|2019-2025": {
+  "tag": "NOC",
+  "per": "2019-2025",
+  "stato": "OK",
+  "ops": 1815,
+  "net": 76473.24,
+  "pf": "1.82",
+  "dd": 5416.16,
+  "ddp": 6.7702,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyC"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1605.3899999999999,
+  "ndays": 583
+ },
+ "NOD|2013-2018": {
+  "tag": "NOD",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1709,
+  "net": 42360.22,
+  "pf": "1.50",
+  "dd": 6472.25,
+  "ddp": 8.0903125,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyD"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1952.5900000000001,
+  "ndays": 549
+ },
+ "NOD|2019-2025": {
+  "tag": "NOD",
+  "per": "2019-2025",
+  "stato": "OK",
+  "ops": 1838,
+  "net": 60901.89,
+  "pf": "1.73",
+  "dd": 5407.34,
+  "ddp": 6.759175,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyD"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1238.98,
+  "ndays": 581
+ },
+ "NOE|2013-2018": {
+  "tag": "NOE",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1554,
+  "net": 31511.23,
+  "pf": "1.50",
+  "dd": 5141.67,
+  "ddp": 6.4270875,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyE"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1915.63,
+  "ndays": 547
+ },
+ "NOE|2019-2025": {
+  "tag": "NOE",
+  "per": "2019-2025",
+  "stato": "OK",
+  "ops": 1685,
+  "net": 65527.64,
+  "pf": "2.02",
+  "dd": 4122.94,
+  "ddp": 5.153675,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyE"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1285.25,
+  "ndays": 579
+ },
+ "NOF|2013-2018": {
+  "tag": "NOF",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1490,
+  "net": 46888.49,
+  "pf": "1.57",
+  "dd": 7759.12,
+  "ddp": 9.6989,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyF"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -2096.3,
+  "ndays": 540
+ },
+ "NOF|2019-2025": {
+  "tag": "NOF",
+  "per": "2019-2025",
+  "stato": "OK",
+  "ops": 1605,
+  "net": 74951.42,
+  "pf": "1.92",
+  "dd": 4702.45,
+  "ddp": 5.8780624999999995,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyF"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1344.81,
+  "ndays": 577
+ },
+ "NOG|2013-2018": {
+  "tag": "NOG",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1493,
+  "net": 46621.73,
+  "pf": "1.55",
+  "dd": 7754.84,
+  "ddp": 9.69355,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyG"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "0",
+    "false"
+   ],
+   [
+    "RunStrategyH",
+    "1",
+    "true"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1999.65,
+  "ndays": 530
+ },
+ "NOG|2019-2025": {
+  "tag": "NOG",
+  "per": "2019-2025",
+  "stato": "KO",
+  "ops": 0,
+  "net": 0.0,
+  "pf": "0.00",
+  "dd": 0.0,
+  "ddp": 0.0,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [],
+  "diff": [],
+  "worst_day": null,
+  "ndays": 0
+ },
+ "NOH|2013-2018": {
+  "tag": "NOH",
+  "per": "2013-2018",
+  "stato": "OK",
+  "ops": 1503,
+  "net": 46873.13,
+  "pf": "1.57",
+  "dd": 7338.2,
+  "ddp": 9.17275,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyH"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "0",
+    "false"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -2133.42,
+  "ndays": 510
+ },
+ "NOH|2019-2025": {
+  "tag": "NOH",
+  "per": "2019-2025",
+  "stato": "OK",
+  "ops": 1623,
+  "net": 69998.5,
+  "pf": "1.86",
+  "dd": 5710.81,
+  "ddp": 7.138512500000001,
+  "q": 98,
+  "so": 0,
+  "nm": 0,
+  "dep": "80000",
+  "off": [
+   "RunStrategyH"
+  ],
+  "diff": [
+   [
+    "ShowInfoPanel",
+    "1",
+    "true"
+   ],
+   [
+    "UpdateInfoTesting",
+    "0",
+    "false"
+   ],
+   [
+    "AllowBuyTrades",
+    "1",
+    "true"
+   ],
+   [
+    "AllowSellTrades",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyA",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyB",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyC",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyD",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyE",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyF",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyG",
+    "1",
+    "true"
+   ],
+   [
+    "RunStrategyH",
+    "0",
+    "false"
+   ],
+   [
+    "setSL_TP_After_Entry",
+    "0",
+    "false"
+   ],
+   [
+    "Virtual_expiration",
+    "1",
+    "true"
+   ],
+   [
+    "RemoveCommentSuffix",
+    "0",
+    "false"
+   ],
+   [
+    "EnableNFP_Filter",
+    "1",
+    "true"
+   ],
+   [
+    "AutoGMT",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_CloseOpenTrades",
+    "1",
+    "true"
+   ],
+   [
+    "NFP_ClosePendingOrders",
+    "1",
+    "true"
+   ],
+   [
+    "UseEquity",
+    "0",
+    "false"
+   ],
+   [
+    "OnlyUp",
+    "0",
+    "false"
+   ],
+   [
+    "CheckMargin",
+    "1",
+    "true"
+   ],
+   [
+    "AdjustLotsizeToVariableValues",
+    "1",
+    "true"
+   ]
+  ],
+  "worst_day": -1389.73,
+  "ndays": 547
+ }
+}
