@@ -1,5 +1,8 @@
 # Confronto in giorni: P1, P3, P4 (settaggi Prop) contro le due combinazioni A e B del Gold Bundle (13/11/2026)
 
+> **CORREZIONE del 13/11 sera**: A e B non sono "senza fallimenti": con partenze in tutto l'anno A fallisce 7,8% (31% nel 2013) e B 8,6%; vedi `GOLD_BUNDLE_COMBINAZIONI_2026-11-13.md`. I P1/P3/P4 con set Prop restano a 0% (verificato su tutte le partenze).
+
+
 **Natura: SIMULAZIONE sul tester** (BCM, Modello 1, 80.000 EUR, partenze gennaio-marzo, equity con flottante ricostruito dalle barre M1, costi FTMO centrali 36 EUR/lotto oro e 4 forex = mia ipotesi; giorni di calendario, mediane; fallisce a -5% giorno o -10% totale). A = Goldbot L1 + Phantom L0; B = Goldbot L1 + Phantom L1 (`GOLD_BUNDLE_COMBINAZIONI_2026-11-13.md`). P1 = Phantom Gradino 1 + Goldbot Prop + Daytrade Pro; P3 = Goldbot Combo + Gold Trade Pro Combo + Daytrade Pro; P4 = Reaper Combo + Goldbot Prop + Daytrade Pro. Il Daytrade Pro non ha dati per il 2018 e il suo flottante non si ricostruisce: i confronti sono fatti in due modi.
 
 ## 1. Stessi anni (2013, 2020, 2025), P con Daytrade Pro

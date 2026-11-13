@@ -1,5 +1,8 @@
 # Tempi della sfida con i settaggi Prop, in giorni di CALENDARIO e con i costi (13/11/2026)
 
+> **CORREZIONE del 13/11 sera**: le righe "poi L1" (rialzo) non valgono: fallimento 28% su tutte le partenze (vedi `L1_CON_COSTI_2026-11-13.md`). Le righe "solo Prop" (P1, P3, P4: 0%) sono confermate su tutte le partenze.
+
+
 **Natura: SIMULAZIONE sui dati del tester** (BCM, Modello 1, 80.000 EUR, anni 2013/2020/2025). Parte oro con equity (flottante ricostruito dalle barre M1) piu Daytrade Pro Max9 realizzato (il flottante del Daytrade Pro non si ricostruisce). Combinazioni scelte: P1 (Phantom Gradino 1 + Goldbot Prop + DTP), P3 (Goldbot Combo + Gold Trade Pro Combo + DTP), P4 (Reaper Combo + Goldbot Prop + DTP). Costi "centrali" = mia ipotesi: 36 EUR/lotto oro e 4 EUR/lotto forex (andata e ritorno, meta all'apertura e meta alla chiusura), sopra quelli gia nel tester; "prudenti" = il doppio. Il netto/anno con costi centrali coincide con `PORTAFOGLIO_SCELTO_2026-11-11.md` (30.582 / 25.685 / 24.788). Partenza da ogni giorno di gennaio-marzo di ciascun anno (finestra di 9 mesi o piu); fallisce a -5% in un giorno o -10% totale; passa a +10% (fase 1) o +5% (fase 2), almeno 4 giorni. Un percorso per anno; nessun giudizio su lotti, taglie, acquisti.
 
 ## Giorni di calendario (mediana; 25-75%; massimo)

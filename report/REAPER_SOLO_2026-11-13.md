@@ -1,5 +1,8 @@
 # Solo Gold Reaper: tempi della sfida per livello (13/11/2026)
 
+> **CORREZIONE del 13/11 sera**: i fallimenti del Reaper L0 da solo erano sottostimati (partenze solo gennaio-marzo). Con partenze in tutto l'anno (4 anni, costi centrali / doppi): **Reaper L0 17,3% / 23,3% (74% delle partenze del 2013: giornate di -6% il 15/08, 22/10 e 18/12/2013)**; L1 28% / 43%; Medium 64% / 72%; L3 0% / 0%. Il tester NON simula il Guardian: con il Guardian a 4,3% i tagli intraday potrebbero evitare parte di questi fallimenti.
+
+
 **Natura: SIMULAZIONE sul tester** (BCM, Modello 1, 80.000 EUR, anni 2013/2018/2020/2025, un percorso per anno; il Reaper ha Randomization 50 = rumore). Stesso metodo di `TEMPI_SFIDA_CON_COSTI_2026-11-13.md` ma SOLO il Reaper (senza Daytrade Pro): equity con flottante ricostruito dalle barre M1, partenze gennaio-marzo, fallisce a -5% giorno o -10% totale, passa a +10% (fase 1) o +5% (fase 2). Costi centrali = 36 EUR/lotto, mia ipotesi. Script `ORO_GRADINI_dati/reaper_solo.py`.
 | Livello (set) | Netto/anno (senza / con costi) | Fase 1 +10%: giorni di calendario mediana, passa, fallisce | Fase 2 +5% mediana |
 |---|---|---|---|
