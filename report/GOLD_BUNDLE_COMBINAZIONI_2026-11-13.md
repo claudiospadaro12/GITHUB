@@ -10,7 +10,7 @@
 | **B, la piu veloce con rischio basso** | Goldbot L1 + Phantom L1 | `Goldbot_PropFirm_10_5.set` + `GoldPhantom_Propfirm.set` | **~147 giorni** (104 + 43) | **2,7%** (3,1% con costi doppi), passa 97,3% | 27.624 |
 
 ## Altre combinazioni con fallimento 0% e passaggio >= 95%
-GB L0 + PH L3 + GTP Combo (201 giorni, 100% passa); GB L0 + PH L0 + GTP Combo (206); GB L3 + PH L3 + GTP Combo (212); GB L3 + PH L0 + GTP Combo (219). Il Reaper non compare in nessuna combinazione con fallimento 0%; le migliori con il Reaper hanno fallimenti 3-10% (es. Goldbot L0 + Phantom L1 + Reaper L3: 163 giorni, 4,8-9,9%).
+GB L0 + PH L3 + GTP Combo (201 giorni, 100% passa); GB L0 + PH L0 + GTP Combo (206); GB L3 + PH L3 + GTP Combo (212); GB L3 + PH L0 + GTP Combo (219). **Correzione del 13/11 (dopo la domanda di Claudio sul Reaper)**: la frase originale ("il Reaper non compare in nessuna combinazione con fallimento 0%") valeva solo con il filtro "passaggio >= 95%". Il Reaper Combo (L3) compare in combinazioni a fallimento 0% con passaggio ~75% entro la finestra (cioe piu lente): Goldbot L0 + Phantom L0 + Reaper L3 = 205 giorni (senza Reaper 299), Goldbot L3 + Phantom L3 + Reaper L3 = 216 (senza Reaper 336). Con il Reaper a L0 o L1 i fallimenti salgono: Goldbot L0 + Phantom L1 + Reaper L0 = 91 giorni ma 11,3% (31,8% con costi doppi); Goldbot L1 + Phantom L1 + Reaper L3 = 133 giorni, 7,9% (15,8%).
 
 ## Limiti
 Un percorso per anno (Phantom e Reaper con rumore); fallimenti sottostimati senza spread e slippage FTMO; costi ipotizzati; senza Daytrade Pro; giorni di equity >= 4,5% presenti in A (4) e B (5) nei 4 anni (nel 2013 soprattutto); il Guardian a 4,3% serve.
