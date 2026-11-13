@@ -21,3 +21,15 @@ Correlazione giornaliera media fra i set: 0,18.
 | Reaper L3 + portafoglio UBS (8 set) | 95 + 46 = 141 | 6,8% |
 **Lettura**: il portafoglio UBS da solo e lento (circa 12 mesi per le due fasi) ma senza fallimenti e con giorni peggiori di -3,5%. Aggiunto al Gold Bundle accorcia i tempi di circa 40-50 giorni, ma i fallimenti salgono a 3-10%: le giornate storte dell'oro e dell'UBS coincidono piu spesso di quanto dica la correlazione media. Il DD del portafoglio UBS e solo realizzato: l'equity vera e piu alta e non e stata ricostruita.
 **Limiti**: DD misurato sullo stesso periodo del test (U3: fuori periodo regge solo in parte); realizzato senza flottante; un percorso per set; anni diversi per le due meta della simulazione combinata; Daytrade Pro non incluso.
+
+## Aggiunta del 13/11: equity del portafoglio UBS (flottante ricostruito dalle barre M1)
+**Natura: MISURA/ricostruzione** (script `ORO_GRADINI_dati/ubs_equity.py`): le posizioni dei report U2 braccio B (8 set; 0 deal non abbinati su 8.469 posizioni) con il flottante all'estremo delle barre M1 dell'oro, per gli anni con barre (2013, 2018, 2020, 2025); cambio EUR/USD medio dell'anno (2018 = ipotesi mia); ogni set scalato x0,8 per 80.000 EUR. DD = picco-valle dentro l'anno.
+| Portafoglio | 2013: peggior giorno / DD equity / DD chiuso | 2018 | 2020 | 2025 | Giorni >= 4,5% |
+|---|---|---|---|---|---|
+| 8 set | 2,84% / **8,1%** / 7,7% | 1,57% / 3,2% / 2,7% | 1,24% / 2,6% / 2,2% | 1,63% / 2,5% / 1,3% | **0** |
+| 7 set (senza Reaper s1 D1) | 2,72% / 6,7% / 6,2% | 1,57% / 3,1% | 1,20% / 2,5% | 1,53% / 2,4% | 0 |
+| 6 set (5 + Reaper s5) | 2,07% / 4,7% / 4,3% | 0,98% / 3,1% | 1,20% / 2,2% | 1,30% / 1,7% | 0 |
+| 5 set | 2,07% / 4,1% / 3,6% | 0,98% / 3,1% | 1,20% / 2,2% | 1,30% / 1,7% | 0 |
+Il flottante aggiunge poco al DD del portafoglio (8,1% in equity contro 7,7% chiuso nel 2013). Il DD cumulato non e la somma dei DD dei singoli set (8 x 2,4% = 19%): 8,1% nel 2013 e meno di meta.
+**Sfida simulata con l'equity** (partenza gennaio-marzo di 2013/2018/2020/2025, finestre dentro l'anno, +10% / +5%): 8 set: fase 1 passa 70% (mediana 182 giorni, p75 253), fallisce 0%, il 30% non arriva al +10% entro la finestra; fase 2 passa 85% (mediana 89). 6 set: fase 1 mediana 180 (passa 50%); 5 set: 193 (passa 49%). Totale tipico per le due fasi: circa 270 giorni (8 set).
+**Limiti**: DD in-sample (stesso periodo della misura del DD: U3 mostra che fuori periodo regge solo in parte); 4 anni di barre; flottante all'estremo della barra, non al tick; 2018 con cambio ipotizzato.
