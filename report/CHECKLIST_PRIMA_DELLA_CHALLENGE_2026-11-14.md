@@ -11,6 +11,7 @@
 
 ## 2. Guardian (la protezione vera: il limite giornaliero interno degli EA NON ha impedito giorni a -6% nei nostri test del Reaper L0)
 1. `InpStartBalance` = **80.000** (non 100.000) su ogni conto FTMO [nota di Massimo]. Guardian su un grafico XAUUSD (va bene).
+   **`InpDailyResetHour` = 1 sui conti FTMO** (il server FTMO e ora italiana + 1 e il reset FTMO e a mezzanotte italiana = 01:00 server). Il preset BCM demo ha 0 (server BCM = ora italiana in inverno): non copiare 0 sui conti FTMO senza controllare. [da `FTMO_REGOLE_LETTE_ANALISI_2026-11-07.md` e dal commento del set `ABTG_Guardian_DEMO100K_BCM.set`; l'orario del server FTMO va confermato sul Market Watch il giorno della partenza.]
 2. Soglie: 4,5% giornaliero e 9,5% totale come scelto da Claudio; le simulazioni dei miei referti usano 4,3%. Il Guardian NON e simulato nel tester: quanto salvi nei casi estremi e NON MISURATO.
 3. Dopo la partenza leggere ogni giorno la riga `[GUARDIAN]` (equity, dayLoss, totDD, rischioAperto, stato).
 
@@ -27,7 +28,7 @@ Mandarmi le foto: le uso per ricalcolare i costi extra (ipotesi attuale 36 EUR/l
 
 ## 5. Prima di cliccare "acquista"
 1. Tipo di conto: 2-Step **Swing**, 80.000 EUR; leva oro/indici 1:15, forex 1:30 (risposta scritta FTMO). Margine su P1 e P4 stimato circa 50-59% del saldo.
-2. Valuta EUR ammessa. Reset del limite giornaliero (CET o CEST) e livello di stop out: FTMO non ha risposto (Claudio ha deciso di non scrivere ancora).
+2. Valuta EUR ammessa. **Reset del limite giornaliero: 00:00 CE(S)T**, cioe mezzanotte italiana (pagina ufficiale ftmo.com trading objectives, modificata il 02/11/2026; era gia nel nostro `FTMO_REGOLE_LETTE_ANALISI_2026-11-07.md`). Livello di stop out: FTMO non ha risposto (Claudio ha deciso di non scrivere ancora).
 3. **Posizioni opposte tra conti**: FTMO vieta "cross-account hedging in modo rigoroso" e non ha chiarito come lo misura. Nel tester P1 e P4 hanno avuto circa 2.451 ore in 3 anni con posizioni oro opposte (Phantom contro Reaper/Goldbot). Resta un rischio non misurato; Claudio ha deciso di procedere senza ulteriori mail.
 4. Tetto 400.000 $ per strategia: Goldbot e Daytrade Pro sono identici su P1 e P4 (circa 180.000 $ per i due conti da 80k); con le challenge di Massimo sugli stessi EA il totale per EA si avvicina al tetto: non chiarito se EA con set diversi contano come stessa strategia (FTMO ha detto: ognuno opera i propri).
 5. Nessuna taglia aumentata dopo i giorni minimi; filtro NFP acceso.
