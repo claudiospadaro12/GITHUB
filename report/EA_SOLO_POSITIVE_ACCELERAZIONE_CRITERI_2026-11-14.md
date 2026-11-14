@@ -5,6 +5,7 @@
 ## Regole (da implementare cosi)
 1. **Verso iniziale**: segno della prima accelerazione (vedi 3); nessun ordine finche non c'e.
 2. **Uscita**: ogni posizione chiude SOLO quando il profitto NETTO (profitto + swap + commissione) e >= `InpTargetEuro` (default 1,5 EUR a 0,01 lotti). **Nessuno stop sulla singola posizione.**
+2b. **Modo di uscita a cesto (aggiunta del 14/11, osservazione di Claudio: "tutto quando diventano blu poi li chiude"):** oltre alla chiusura per singola posizione (regola 2), si prova l'uscita A CESTO: quando il profitto netto complessivo del cesto e >= `InpBasketTargetEuro` (default 2,0 EUR) si chiudono TUTTE le posizioni insieme, anche se qualcuna e in perdita. `InpExitMode` = 0 per posizione, 1 a cesto; i due modi si provano separatamente sugli stessi anni. Con l'uscita a cesto una posizione vincente puo restare aperta finche le altre non recuperano: aumenta il tempo in cui il conto e esposto.
 3. **Accelerazione** (parametri da FISSARE prima e NON ottimizzare): velocita = spostamento del bid negli ultimi 5 secondi, in punti, nel verso corrente; rapporto = velocita / media del valore assoluto dello spostamento a 5 s negli ultimi 600 s. Posizioni da aprire per passo = `clamp(floor(rapporto) - 1, 0, 3)`; massimo `InpMaxOpen` = 8 posizioni aperte insieme; pausa minima fra due passi 5 s.
 3b. **Distanza fra le entrate (aggiunta del 14/11, dalle osservazioni di Claudio sull'EA della pubblicita):** quell'EA apre molte posizioni quasi uguali, a 1-2 punti l'una dall'altra, 3-4 per volta o anche 10, oppure poche con lotto grande. Nello screenshot le 7 posizioni erano a distanze di circa 0,06-0,30 USD (prezzi a 3 decimali). Nel nostro EA: distanza minima fra due entrate `InpMinGapUsd` (default 0,05 USD) e **tetto ai lotti totali aperti** `InpMaxTotalLots` (default 0,08 lotti): il rischio dipende dai lotti totali, non dal numero di posizioni (10 x 0,01 e 1 x 0,10 sono la stessa esposizione).
 4. **Solo aggiungere ai vincitori**: nuove posizioni SOLO se il P/L fluttuante complessivo del cesto e >= 0. Mai aggiungere su un cesto in perdita (niente media al ribasso).
@@ -23,6 +24,7 @@ Tester BCM, Modello 4 (tick reali), XAUUSD, deposito 10.000 EUR, tre anni separa
 - **S-4** Il DD equity massimo e almeno 3 volte `InpBasketStopEuro` (le perdite fluttuanti superano il freno prima che chiuda per gap e velocita): 40%.
 - **S-5** Almeno il 5% delle posizioni resta aperto piu di 1 ora: 70%.
 - **S-6** I costi (commissioni + spread) assorbono oltre meta del profitto lordo: 60%.
+- **S-8** (modo a cesto contro per posizione, stessi anni) Il DD equity massimo del modo a cesto e maggiore di quello per posizione in almeno 2 anni su 3: 70%; il numero di scatti del freno 6 e maggiore: 65%; il netto e maggiore in almeno 2 anni su 3: 40%.
 - **S-7** Il comportamento nel 2025 (oro in rialzo) e migliore di quello del 2013: 75%.
 
 ## Regole di lettura (fissate ora)
