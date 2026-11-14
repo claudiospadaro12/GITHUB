@@ -53,3 +53,24 @@
 7. **Trustpilot ForexEASolutions** (estratto): 4,5/5 su 16 recensioni; recensioni con testo simile da controllare.
 
 **Da fare in una seconda passata di Claude Desktop** (prompt `PROMPT_CLAUDE_DESKTOP_ANALISI_SITI_EA_2026-11-13.md`, con priorita): sito ufficiale e manuali (soprattutto il manuale attuale del Reaper v5.6, del Goldbot One V3.5 e del Gold Trade Pro V7.2), pagine MQL5 e segnali di Phantom (2355966), GTP (2084890, 2242498), DTP (1949810) e UBS (2373798), regole FTMO sulle pagine ufficiali, Forex Factory e Reddit.
+
+---
+# Aggiunta 14/11: manuale Gold Reaper scaricato dal sito Profalgo (`gold-reaper-manual.pdf`)
+
+**Confronto con quello che avevamo**: il file e IDENTICO a `Gold_Reaper_V5.1.pdf` (stessa impronta SHA256, stesso testo di 400 righe): "Version 5.1 (October 2026)". Nessun contenuto nuovo. Ma l'EA sulla pagina MQL5 e alla versione 5.6 (aggiornata il 28/10/2026): le modifiche fra 5.1 e 5.6 NON sono documentate nei file che abbiamo. Il canale `ea-update-notifications` ha il suo ultimo messaggio il 29/10: potrebbe contenere il changelog 5.6 (non letto).
+
+**Cose del manuale utili a noi (testo del manuale, non verificato sul conto)**
+1. **URL da consentire in MT5** (Strumenti > Opzioni > Expert Advisors > WebRequest) — risponde alla voce di Massimo sulle licenze:
+   - `https://forexeasolutions.org/` e `https://forexeasolutions.services/` (se acquistato su forexeasolutions.com);
+   - `https://www.tradewithwim.com/` (se ricevuto direttamente da Wim);
+   - `https://www.worldtimeserver.com/` e `https://nfs.faireconomy.media/`.
+   Servono a licenza, backup, AutoGMT e filtro NFP. Quale dei primi tre serve dipende da dove e stato comprato l'EA: da controllare per Claudio e per Massimo (licenze separate).
+2. **Calendario MT5 su un VPS nuovo**: con UseMQL5Calendar attivo (default) "on a fresh VPS, open Toolbox, Calendar once and let it sync". Nel tester il calendario non c'e e l'EA usa le date interne. Dopo la migrazione Contabo: aprire il Calendario una volta in ogni terminale, altrimenti il filtro NFP potrebbe non avere i dati (effetto non verificato).
+3. **Randomization**: "around 50 is a sensible starting point for prop firms... if you run the same EA on several accounts, identical trades across them can be flagged as copy trading". Il set prop ha 50; nei nostri test l'abbiamo messa a 0 per avere corse ripetibili. In live i risultati avranno quindi un rumore in piu. Esistono anche le "Prop Firm Unique Trade Settings" (AdjustEntry, AdjustSL, AdjustTP, AdjustTrailSL, AdjustTrailTP, AdjustBreakEven, tutti default 0): sposta entrate, stop e target di pochi pips. Attenzione: AdjustSL positivo allarga lo stop e quindi il rischio; il lotto e calcolato sulla distanza originale.
+4. **Limite giornaliero interno** (`Set Max DAILY Drawdown (Prop Firms)`, nei nostri set 4,0 per L0): "closes everything and stops trading until the next day"; "Set it a little tighter than the firm's actual limit". **Punto aperto**: nei nostri test del Reaper L0 (che includono PropFirmMaxDailyDD=4,0, verificato nel file .ini) l'equity ricostruita ha avuto giorni a -6% nel 2013. Il limite interno non ha quindi impedito quei giorni: non so perche (misura sul saldo e non sull'equity, controllo non istantaneo, gap, o ricostruzione). NON SPIEGATO. E il motivo per cui il Guardian a 4,3% resta necessario e non va sostituito dal limite interno dell'EA.
+5. **OnlyUp** (nel set prop e false; nei set default true): se true il lotto non scende dopo le perdite (sizing dal massimo saldo): piu aggressivo durante un drawdown. Per "Reset Highest Balance for OnlyUp" dopo un prelievo.
+6. **Manual strategy selection + Max Allowed Total DD**: vietato dal manuale ("Do NOT use manual strategy selection while using Max Allowed Total Drawdown"). Conferma quanto gia sapevamo (RunStrategy1-9 vale solo con TradeFrequency manuale e con altro metodo di lotto).
+7. **Filtri news nuovi (V5.1)**: tassi (IR) e inflazione (CPI), spenti di default, stesse finestre dell'NFP (100 prima / 60 dopo). Nei set non li abbiamo attivi. Non testati da noi. Claudio tiene NFP acceso: tenerlo cosi.
+8. **Livelli TradeFrequency**: il manuale elenca 7 opzioni (extreme conservative, conservative, moderate, Intense, Extreme, Auto, Manual strategy selection), senza dire quali strategie attiva ciascuno. L'elenco "1-3 / 1-5 / 1-7 / 1-8 / 1-9" e del bot, non del manuale. Strategie per rischio (manuale): 1-3 basso, 4-7 medio, 8-9 alto.
+9. **Backtest consigliato dal manuale**: grafico XAUUSD H1, "1 Minute OHLC" sui dati del broker o real ticks per i test piu sicuri, UseVariableValues e AdjustLotsizeToVariableValues attivi: coerente con la nostra pipeline (modello 1 minuto OHLC).
+10. **Capitale minimo**: manuale "Minimum account balance: $600 (use auto trade frequency)".
