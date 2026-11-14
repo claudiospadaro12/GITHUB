@@ -40,3 +40,8 @@ Tester BCM, Modello 4 (tick reali), XAUUSD, deposito 10.000 EUR, tre anni separa
 
 ## Limiti dichiarati
 Un percorso per anno; Randomization assente; velocita e rapporto di accelerazione sono scelte mie, non misurate; i parametri di default sono punti di partenza; il tester non ha slippage ne latenza (uno scalper a pochi secondi guadagna di piu nel tester che in demo); nessun dato su cosa fa la strategia della pubblicita (non verificabile).
+
+## Nota del 14/11 sera (codice scritto: `mql5/Experts/ABTG_ScalperClaudio.mq5`, 1.00)
+- **Non compilato qui** (nessun MetaEditor): il primo passo e compilare sul PC di backtest e riportare gli errori.
+- **Tick reali per 2013 e 2020 sul BCM: DISPONIBILITA NON VERIFICATA.** Fin qui abbiamo usato i tick reali solo sul 2025 e sul 2026; un EA a 1-2 secondi non e valido a candele da 1 minuto (Modello 1). Se i tick 2013/2020 non ci sono, la prova si fa sul 2025 e sul 2026 e la previsione S-3 su 2013 resta non testabile.
+- La distanza di 1-2 punti fra le entrate e MISURATA (stampata nel riepilogo), non imposta; `InpGapMaxPoints` e solo una guardia.
