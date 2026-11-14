@@ -16,7 +16,7 @@ sost(OLD8, PIN[:8], t.count(OLD8))
 m = re.search(r"Questa e la riga CORTA di (.*?): 18 passate, solo tester", t)
 assert m
 t = t.replace(m.group(1) + ": 18 passate, solo tester", "SCALPER CLAUDIO (prima prova a tick reali di ABTG_ScalperClaudio.ex5 1.02, XAUUSD, Modello 4, deposito 10.000 EUR, 5 varianti sul primo trimestre 2025 e la variante base sul primo trimestre 2026): 6 passate, solo tester")
-sost("report/OTT1_GOLDBOT_PROP_CRITERI_2026-11-13.md", "report/SCALPER_CLAUDIO_CRITERI_2026-11-14.md")
+sost("report/OTT1_GOLDBOT_PROP_CRITERI_2026-11-13.md", "report/EA_SOLO_POSITIVE_ACCELERAZIONE_CRITERI_2026-11-14.md")
 sost("(22 KB, passata dal cancello)", "(%d KB, passata dal cancello)" % round(os.path.getsize('righe/RIGA_LANCIA_SCALPER_CLAUDIO.txt') / 1024))
 open('righe/BOOT_RIGA_SCALPER_CLAUDIO.txt', 'w', encoding='ascii').write(t)
 print('boot', len(t))
