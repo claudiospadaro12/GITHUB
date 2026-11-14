@@ -53,11 +53,17 @@
 //|  Il riepilogo finale (journal e CSV) dice quanto spesso la       |
 //|  direzione aveva "ragione".                                      |
 //|                                                                  |
+//|  1.01 (richiesta di Claudio: "i lotti vanno in crescita man mano |
+//|  che si vince, tipo a piramide"): InpLotMode 1 = il lotto sale   |
+//|  con i guadagni chiusi (ogni InpLotStepEuro +InpLotStep, tetto   |
+//|  InpLotMax); 2 = in piu' sale a ogni passo aggiunto al cesto.    |
+//|  MAI dopo una perdita; il freno azzera. Tetto totale 0,20 lotti. |
+//|                                                                  |
 //|  Non e' una strategia provata: e' una misura. Nessun giudizio su |
 //|  lotti o taglie.                                                 |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.00"
+#property version   "1.01"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635
@@ -72,7 +78,11 @@ input double          InpMinMovePoints    = 3.0;    // movimento minimo in PUNTI
 input double          InpPointsPerOrder   = 3.0;    // 1 ordine ogni X punti di movimento
 input int             InpMaxOpen          = 8;      // posizioni aperte insieme (max)
 input double          InpLot              = 0.01;   // lotto di ogni posizione (uguale per tutte)
-input double          InpMaxTotalLots     = 0.08;   // tetto ai lotti totali aperti
+input double          InpMaxTotalLots     = 0.20;   // tetto ai lotti totali aperti
+input int             InpLotMode          = 1;      // 0 = lotto fisso; 1 = il lotto SALE con i guadagni chiusi (piramide sul guadagno); 2 = come 1 e in piu' sale a ogni passo aggiunto al cesto
+input double          InpLotStepEuro      = 10.0;   // modo 1/2: ogni X euro di guadagno chiuso (dall'ultimo azzeramento) il lotto sale di InpLotStep
+input double          InpLotStep          = 0.01;   // aumento del lotto
+input double          InpLotMax           = 0.05;   // tetto del lotto per posizione
 input double          InpGapMaxPoints     = 10.0;   // guardia: il passo si ferma se il prezzo scappa oltre X punti dalla prima entrata
 input int             InpStepPauseMs      = 1000;   // pausa minima fra due passi (ms di tick)
 input int             InpMaxSpreadPoints  = 0;      // 0 = nessun filtro; altrimenti non apre se lo spread supera X punti
@@ -105,6 +115,9 @@ struct SBasket
   };
 
 //--- stato
+double   gCumProgress = 0.0;   // guadagno chiuso che fa salire il lotto (si azzera col freno)
+int      gBasketSteps = 0;       // passi aggiunti al cesto in corso (modo 2)
+double   gMaxLotSeen = 0.0;
 CTrade   trade;
 double   gTkBid[RING];
 long     gTkMsc[RING];
@@ -173,6 +186,7 @@ int OnInit()
    if(InpMaxOpen < 1 || InpMaxOpen > 20) { Alert("ABTG_ScalperClaudio: InpMaxOpen deve essere fra 1 e 20"); return(INIT_FAILED); }
    if(InpMinMovePoints <= 0.0 || InpPointsPerOrder <= 0.0 || InpTargetEuro <= 0.0 || InpBasketTargetEuro <= 0.0 || InpBasketStopEuro <= 0.0)
      { Alert("ABTG_ScalperClaudio: soglie e target devono essere > 0 (il freno e' obbligatorio)"); return(INIT_FAILED); }
+   if(InpLotMode < 0 || InpLotMode > 2 || InpLotMax < InpLot - 1e-9 || InpLotStep < 0.0 || InpLotStepEuro <= 0.0) { Alert("ABTG_ScalperClaudio: parametri del lotto non validi (modo 0-2, InpLotMax >= InpLot, passo >= 0)"); return(INIT_FAILED); }
    if(InpMaxTotalLots < NormLot(InpLot) - 1e-9) { Alert("ABTG_ScalperClaudio: InpMaxTotalLots < lotto singolo"); return(INIT_FAILED); }
    trade.SetExpertMagicNumber((ulong)InpMagic);
    trade.SetDeviationInPoints((ulong)InpDeviationPts);
@@ -209,7 +223,7 @@ void OnDeinit(const int reason)
                + ", vita media " + DoubleToString(avgLife, 1) + " s, vissute oltre 1 ora " + IntegerToString((int)gLongLived);
    string s2 = "RIEPILOGO freno " + IntegerToString((int)gBrake) + " scatti, uscite: target " + IntegerToString((int)gCloseTarget) + ", cesto " + IntegerToString((int)gCloseBasket)
                + ", freno " + IntegerToString((int)gCloseBrake) + ", altro " + IntegerToString((int)gCloseOther)
-               + ", perdita fluttuante massima " + DoubleToString(gMaxFloatLoss, 2) + ", posizioni aperte massime " + IntegerToString(gMaxOpenSeen);
+               + ", lotto massimo usato " + DoubleToString(gMaxLotSeen, 2) + ", perdita fluttuante massima " + DoubleToString(gMaxFloatLoss, 2) + ", posizioni aperte massime " + IntegerToString(gMaxOpenSeen);
    string s3 = "RIEPILOGO distanza media fra entrate successive di un passo " + DoubleToString(avgGap, 1) + " punti (n " + IntegerToString((int)gGapN) + "), rifiuti " + IntegerToString((int)gRejects)
                + ", richieste totali " + IntegerToString((int)gReqTotal) + ", massimo in un giorno " + IntegerToString(MathMax(gReqMaxDay, gReqToday));
    string s4 = "RIEPILOGO S-9 direzione: " + IntegerToString((int)gSigN) + " segnali controllati a " + IntegerToString(InpSignalCheckSec) + " s: proseguito " + DoubleToString(sigAcc, 1)
@@ -402,6 +416,16 @@ void SigCheck(const MqlTick &tk)
      }
   }
 //+------------------------------------------------------------------+
+// lotto del passo: sale SOLO con i guadagni (anti-martingala), mai dopo una perdita; il freno azzera
+double CurLot(const SBasket &b)
+  {
+   double lot = InpLot;
+   if(InpLotMode >= 1) lot += MathFloor(MathMax(gCumProgress, 0.0) / InpLotStepEuro) * InpLotStep;
+   if(InpLotMode == 2 && b.n > 0) lot += gBasketSteps * InpLotStep;
+   if(lot > InpLotMax) lot = InpLotMax;
+   return NormLot(lot);
+  }
+//+------------------------------------------------------------------+
 void TryEntry(const MqlTick &tk, const SBasket &b)
   {
    if(TimeCurrent() < gCooldownUntil) return;
@@ -425,11 +449,14 @@ void TryEntry(const MqlTick &tk, const SBasket &b)
    int n = (int)MathFloor(MathAbs(move) / InpPointsPerOrder);
    if(n < 1) n = 1;
    if(n > InpMaxOpen - b.n) n = InpMaxOpen - b.n;
-   double lot = NormLot(InpLot);
+   if(b.n == 0) gBasketSteps = 0;
+   double lot = CurLot(b);
+   if(lot > gMaxLotSeen) gMaxLotSeen = lot;
    while(n > 0 && b.lots + n * lot > InpMaxTotalLots + 1e-9) n--;
    if(n <= 0) return;
    gLastStepMsc = tk.time_msc;
    gSteps++;
+   gBasketSteps++;
    SigPush(tk.time_msc, dir, (tk.bid + tk.ask) / 2.0);
    double first = 0.0, prev = 0.0;
    int opened = 0;
@@ -514,6 +541,8 @@ void OnTradeTransaction(const MqlTradeTransaction &trans, const MqlTradeRequest 
    if(net > 0.0) { gWins++; gGrossWin += net; } else gGrossLoss += -net;
    if(secs > 3600) gLongLived++;
    if(why == "target") gCloseTarget++; else if(why == "cesto") gCloseBasket++; else if(why == "freno") gCloseBrake++; else gCloseOther++;
+   gCumProgress += net;
+   if(why == "freno" || gCumProgress < 0.0) gCumProgress = 0.0;   // dopo il freno o una perdita si riparte dal lotto di base
    CommDel(pid);
    if(InpWriteCsv)
      {

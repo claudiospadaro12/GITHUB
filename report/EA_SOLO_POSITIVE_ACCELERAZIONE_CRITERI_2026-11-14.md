@@ -45,3 +45,9 @@ Un percorso per anno; Randomization assente; velocita e rapporto di accelerazion
 - **Non compilato qui** (nessun MetaEditor): il primo passo e compilare sul PC di backtest e riportare gli errori.
 - **Tick reali per 2013 e 2020 sul BCM: DISPONIBILITA NON VERIFICATA.** Fin qui abbiamo usato i tick reali solo sul 2025 e sul 2026; un EA a 1-2 secondi non e valido a candele da 1 minuto (Modello 1). Se i tick 2013/2020 non ci sono, la prova si fa sul 2025 e sul 2026 e la previsione S-3 su 2013 resta non testabile.
 - La distanza di 1-2 punti fra le entrate e MISURATA (stampata nel riepilogo), non imposta; `InpGapMaxPoints` e solo una guardia.
+
+## Aggiornamento 14/11 sera: lotti a piramide (richiesta di Claudio: "i lotti vanno in crescita man mano che si vince, tipo a piramide") - codice 1.01
+- `InpLotMode` 0 = lotto fisso (0,01); **1 = il lotto sale con il guadagno chiuso** (ogni `InpLotStepEuro` = 10 EUR di guadagno chiuso, +`InpLotStep` = 0,01, tetto `InpLotMax` = 0,05); **2 = come 1 e in piu sale a ogni passo aggiunto al cesto in corso**. Il lotto non sale mai dopo una perdita; il freno e una perdita netta del cesto azzerano il progresso. Tetto lotti totali aperti 0,20.
+- **Ambiguita dichiarata**: "piramide" puo voler dire (1) crescita con i guadagni chiusi o (2) crescita nel cesto. Sono provati entrambi, separati e contro il lotto fisso.
+- **Previsioni aggiunte ora:** S-10 con il lotto a piramide (modo 1) il netto finale e maggiore del lotto fisso in almeno 2 anni su 3: 55%; S-11 il DD equity massimo in EUR e almeno 2 volte quello a lotto fisso: 75%; S-12 la perdita media per scatto del freno e maggiore del lotto fisso: 85%; S-13 il modo 2 ha il DD piu alto del modo 1 in tutti gli anni provati: 70%.
+- Il freno resta a 20 EUR di netto del cesto: con lotti 5 volte piu grandi lo stesso freno scatta con movimenti del prezzo 5 volte piu piccoli, cioe piu spesso.
