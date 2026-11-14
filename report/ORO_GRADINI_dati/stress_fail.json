@@ -1,0 +1,218 @@
+{
+ "P1 oro (Goldbot L0 + Phantom L1)|costi x1|base": {
+  "fail": 0.0,
+  "pass_": 60.4,
+  "aperti": 39.6,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.69
+ },
+ "P1 oro (Goldbot L0 + Phantom L1)|costi x1|DD x1,15 e profitti x0,92": {
+  "fail": 10.8,
+  "pass_": 48.6,
+  "aperti": 40.5,
+  "per_anno": {
+   "2013": 42.4,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -5.39
+ },
+ "P1 oro (Goldbot L0 + Phantom L1)|costi x1|DD x1,35 e profitti x0,85": {
+  "fail": 27.8,
+  "pass_": 22.4,
+  "aperti": 49.9,
+  "per_anno": {
+   "2013": 63.7,
+   "2018": 45.5,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -6.33
+ },
+ "P1 oro (Goldbot L0 + Phantom L1)|costi x2|base": {
+  "fail": 0.0,
+  "pass_": 52.7,
+  "aperti": 47.3,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.92
+ },
+ "P1 oro (Goldbot L0 + Phantom L1)|costi x2|DD x1,15 e profitti x0,92": {
+  "fail": 23.0,
+  "pass_": 31.4,
+  "aperti": 45.5,
+  "per_anno": {
+   "2013": 55.0,
+   "2018": 35.5,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -5.66
+ },
+ "P1 oro (Goldbot L0 + Phantom L1)|costi x2|DD x1,35 e profitti x0,85": {
+  "fail": 41.9,
+  "pass_": 14.3,
+  "aperti": 43.8,
+  "per_anno": {
+   "2013": 80.1,
+   "2018": 70.3,
+   "2020": 14.1,
+   "2025": 0.0
+  },
+  "peggior_giorno": -6.64
+ },
+ "P4 oro (Goldbot L0 + Reaper L3)|costi x1|base": {
+  "fail": 0.0,
+  "pass_": 43.7,
+  "aperti": 56.3,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -3.92
+ },
+ "P4 oro (Goldbot L0 + Reaper L3)|costi x1|DD x1,15 e profitti x0,92": {
+  "fail": 0.0,
+  "pass_": 32.4,
+  "aperti": 67.6,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.51
+ },
+ "P4 oro (Goldbot L0 + Reaper L3)|costi x1|DD x1,35 e profitti x0,85": {
+  "fail": 22.9,
+  "pass_": 9.9,
+  "aperti": 67.2,
+  "per_anno": {
+   "2013": 73.3,
+   "2018": 16.8,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -5.3
+ },
+ "P4 oro (Goldbot L0 + Reaper L3)|costi x2|base": {
+  "fail": 0.0,
+  "pass_": 35.9,
+  "aperti": 64.1,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.23
+ },
+ "P4 oro (Goldbot L0 + Reaper L3)|costi x2|DD x1,15 e profitti x0,92": {
+  "fail": 2.3,
+  "pass_": 15.9,
+  "aperti": 81.8,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 9.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.87
+ },
+ "P4 oro (Goldbot L0 + Reaper L3)|costi x2|DD x1,35 e profitti x0,85": {
+  "fail": 40.0,
+  "pass_": 2.9,
+  "aperti": 57.1,
+  "per_anno": {
+   "2013": 93.9,
+   "2018": 63.5,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -5.72
+ },
+ "P3 oro (Goldbot L3 + GTP Combo)|costi x1|base": {
+  "fail": 0.0,
+  "pass_": 52.7,
+  "aperti": 47.3,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.15
+ },
+ "P3 oro (Goldbot L3 + GTP Combo)|costi x1|DD x1,15 e profitti x0,92": {
+  "fail": 0.0,
+  "pass_": 33.1,
+  "aperti": 66.9,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.77
+ },
+ "P3 oro (Goldbot L3 + GTP Combo)|costi x1|DD x1,35 e profitti x0,85": {
+  "fail": 11.7,
+  "pass_": 17.8,
+  "aperti": 70.5,
+  "per_anno": {
+   "2013": 43.4,
+   "2018": 2.6,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -5.6
+ },
+ "P3 oro (Goldbot L3 + GTP Combo)|costi x2|base": {
+  "fail": 0.0,
+  "pass_": 41.6,
+  "aperti": 58.4,
+  "per_anno": {
+   "2013": 0.0,
+   "2018": 0.0,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -4.4
+ },
+ "P3 oro (Goldbot L3 + GTP Combo)|costi x2|DD x1,15 e profitti x0,92": {
+  "fail": 10.6,
+  "pass_": 24.4,
+  "aperti": 64.9,
+  "per_anno": {
+   "2013": 39.2,
+   "2018": 2.6,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -5.06
+ },
+ "P3 oro (Goldbot L3 + GTP Combo)|costi x2|DD x1,35 e profitti x0,85": {
+  "fail": 26.9,
+  "pass_": 13.8,
+  "aperti": 59.3,
+  "per_anno": {
+   "2013": 49.2,
+   "2018": 56.5,
+   "2020": 0.0,
+   "2025": 0.0
+  },
+  "peggior_giorno": -5.94
+ }
+}
