@@ -1,0 +1,762 @@
+﻿[00:00:09] All right, let's go over the setup for
+[00:00:11] the UBS Optimizer. So, we have the
+[00:00:14] Optimizer app here. We go to the
+[00:00:16] settings.
+[00:00:17] And the most important things you have
+[00:00:19] to be doing is setting up the MT5 you're
+[00:00:21] going to use.
+[00:00:22] So, there's a list of detected
+[00:00:23] installations, and I highly recommend
+[00:00:25] using a portable one if you want to use
+[00:00:27] the little helpers uh afterwards. I will
+[00:00:30] explain the little helpers a little bit
+[00:00:31] further.
+[00:00:32] So, the detected installation, you
+[00:00:34] simply choose one of your installations
+[00:00:36] you want to be using, in this case, the
+[00:00:38] portable one, which is also in the
+[00:00:40] description here.
+[00:00:42] You select it, and it will fill in
+[00:00:43] automatically your folders that you will
+[00:00:45] be using.
+[00:00:48] You also need to
+[00:00:49] uh select the Expert Advisor, which of
+[00:00:51] course is the Ultimate Breakout System,
+[00:00:53] and we're going to be using the latest
+[00:00:54] version of the EA.
+[00:00:57] You can also select which account you'll
+[00:00:59] be using um if you have multiple
+[00:01:01] accounts in the MT5 already
+[00:01:03] uh
+[00:01:04] available. It will automatically use the
+[00:01:06] login and password, so you don't have to
+[00:01:07] fill in anything for that and the
+[00:01:09] server.
+[00:01:10] You can also select which default
+[00:01:12] deposit, default currency, default
+[00:01:14] leverage, etc. to be used when doing
+[00:01:16] testing.
+[00:01:17] Uh maximum hours per optimization is
+[00:01:19] simply to prevent the MT5 from hanging
+[00:01:22] during optimizations,
+[00:01:24] uh as well as the backtest timeout here.
+[00:01:27] Default testing agents is which kind of
+[00:01:30] uh testing agent you will be using for
+[00:01:32] doing optimizations.
+[00:01:34] In this case, I always use MQL5 MQL5
+[00:01:37] Cloud Network, which is the fastest,
+[00:01:40] which is not free. You have to pay of
+[00:01:41] course for the optimizations, or you can
+[00:01:43] simply use your local agent, which is
+[00:01:44] basically your own computer.
+[00:01:47] Default magic number base is which magic
+[00:01:50] number will be used when creating new
+[00:01:51] sets during the optimization, so that
+[00:01:54] you can select different magic numbers
+[00:01:56] for different optimization runs.
+[00:01:58] And you can also choose to put your
+[00:02:01] MT5 reports, a copy in a different
+[00:02:03] folder than what the app will be using.
+[00:02:05] Same for your stand funds.
+[00:02:07] What's also important here is the little
+[00:02:09] helpers, which basically will allow you
+[00:02:10] to run multiple
+[00:02:12] tests stress stress tests at the same
+[00:02:14] time.
+[00:02:15] So, instead of running one test after
+[00:02:17] the other, you can for example have
+[00:02:19] seven MT5s run at the same time running
+[00:02:21] all the tests together. This will of
+[00:02:23] course speed up a lot of the stress
+[00:02:25] testing.
+[00:02:27] So, you have to enable this little
+[00:02:28] helpers here, select how many
+[00:02:30] little helpers you want to be using, and
+[00:02:32] click on create update little helpers.
+[00:02:34] If you want to change the number, it's
+[00:02:36] update.
+[00:02:37] If something goes wrong with the little
+[00:02:38] helpers, you can always reset them
+[00:02:40] completely, which will delete all the
+[00:02:42] data for from them and set them up
+[00:02:44] completely new.
+[00:02:47] That's it for setting up. Very easy.
+[00:02:51] So, the first part of the UBS Optimizer
+[00:02:54] would be running a new optimization. You
+[00:02:56] can still do a simple optimization in
+[00:02:58] your MT5 and import those results into
+[00:03:00] the app, but you can also start your
+[00:03:02] optimization right from here. And why it
+[00:03:04] is interesting to do so is because I
+[00:03:06] made it easy to set up your
+[00:03:08] optimization. So, let's make an example.
+[00:03:11] It's the easiest way to show. For
+[00:03:13] example, we will be running an
+[00:03:14] optimization on gold. We give it a name,
+[00:03:16] gold test.
+[00:03:19] Uh symbol, we select gold. Time frame,
+[00:03:21] H1. These are all the default values.
+[00:03:24] We can select the genetic algorithm or
+[00:03:27] the slow complete algorithm, but of
+[00:03:29] course we going to select the genetic.
+[00:03:31] Criterion is how you will rank your
+[00:03:34] optimization results. Testing agents is
+[00:03:36] how you will be using the MQL5 Cloud or
+[00:03:39] your own computer or not. Entry
+[00:03:41] strategy, the three entry strategies
+[00:03:43] from UBS. Let's for the this example
+[00:03:45] take the breakout point of resistance.
+[00:03:47] Lot size mode, going to use a manual lot
+[00:03:49] size cuz we're
+[00:03:51] running a test on gold at 0.1 lots.
+[00:03:54] Deposit, currency, leverage, I mean this
+[00:03:56] all speaks for itself.
+[00:03:58] So, now we can do a couple things. First
+[00:04:00] of all, we can simply upload a set file
+[00:04:02] that you already have.
+[00:04:03] You can use one of the template that I
+[00:04:05] made. For example, breakout support and
+[00:04:07] resistance. There's some templates for
+[00:04:08] gold that were in the
+[00:04:10] zip file with all the set files from
+[00:04:12] UBS. For example, the gold gold reaper
+[00:04:14] optimization set is in here.
+[00:04:16] Or and this is interesting for
+[00:04:18] people that don't know much about how to
+[00:04:20] set up an optimization set file, let the
+[00:04:23] app propose one. For example, we select
+[00:04:25] here an intraday. You can choose
+[00:04:27] scalper, intraday, or swing.
+[00:04:29] Intraday uh
+[00:04:31] strategy.
+[00:04:32] And we're going to select auto detect
+[00:04:34] optimization ranges.
+[00:04:37] So, what the app will do
+[00:04:38] is
+[00:04:39] already select all the interesting
+[00:04:41] parameters to be optimizing,
+[00:04:43] fill in the values that needs to be
+[00:04:45] optimized, the ranges,
+[00:04:47] and basically, it's already ready to go
+[00:04:49] to start an optimization.
+[00:04:52] So, in this example, we have some entry
+[00:04:54] parameters and a few exit parameters
+[00:04:57] that we filled in the values. And when
+[00:04:58] we go down, we can start optimization
+[00:05:01] simply by clicking. It will give you a
+[00:05:03] quick overview
+[00:05:05] about selections you made.
+[00:05:07] And then you simply click start.
+[00:05:10] So, now the app will start up the MT5
+[00:05:13] and run the optimization process as if
+[00:05:15] you would do it on the MT5 itself. You
+[00:05:17] can see the values we set in, H1, the
+[00:05:20] period and sample, deposit, everything
+[00:05:23] is like the app
+[00:05:25] had set it.
+[00:05:27] You can also see that it's using the
+[00:05:28] MQL5 cloud for this one.
+[00:05:31] So, it will start the optimization
+[00:05:32] process. You can see the first results
+[00:05:34] already starting to come in.
+[00:05:37] We're not going to show the full
+[00:05:38] optimization process, of course, because
+[00:05:39] it's a 4-hour process.
+[00:05:42] Um so, I'm going to stop this one
+[00:05:45] and close it.
+[00:05:47] And it will take some time before the
+[00:05:48] app realize the MT5 is closed.
+[00:05:52] And once it has
+[00:05:54] stopped, once the optimization process
+[00:05:56] is completed, it will put all the
+[00:05:58] results into the runs tab on your UBS
+[00:06:02] optimizer. So, here we can see the
+[00:06:05] optimization results that I had so far
+[00:06:08] from this uh small run.
+[00:06:12] And from that part, we're going to
+[00:06:14] select candidates, but that is for the
+[00:06:15] next video.
+[00:06:18] So,
+[00:06:19] now we're going to
+[00:06:20] we're in the runs uh section of UBot
+[00:06:23] Optimizer, where we just had the small
+[00:06:25] uh test run. As you can see, I did
+[00:06:27] already a lot more testing in the UBot
+[00:06:30] uh app. So, we're going to select a
+[00:06:32] different one which has more results,
+[00:06:33] cuz this one only had 34 passes. So,
+[00:06:35] let's for example select the range
+[00:06:37] breakout uh optimization run that I did
+[00:06:40] uh
+[00:06:40] half of October. You can simply open it,
+[00:06:43] and you can see all the optimization
+[00:06:44] results. You can see the settings we
+[00:06:46] used for this optimization.
+[00:06:48] And all the optimizations results are
+[00:06:50] here.
+[00:06:52] What we can do now is simply manually
+[00:06:54] select candidates that we think are
+[00:06:55] good, and we can
+[00:06:57] add the pass to the candidates. We can
+[00:06:59] also run a quick backtest for every pass
+[00:07:01] if you want to have a quick look about
+[00:07:03] how the growth curve of this uh
+[00:07:05] candidate will look.
+[00:07:06] Or, and this is why I made the app to
+[00:07:09] make things easier, we can have the app
+[00:07:11] select the best candidates to work on.
+[00:07:14] So, in step two, select candidates,
+[00:07:17] we can select a bunch of candidates that
+[00:07:19] pass our criteria.
+[00:07:21] Um so, we know we're testing on good
+[00:07:23] candidates.
+[00:07:24] You can change of course these criteria.
+[00:07:26] They might not be final yet, cuz I'm
+[00:07:28] still testing to find the best uh setups
+[00:07:30] for selecting candidates. But, these are
+[00:07:33] already quite good. What I did is
+[00:07:35] there's three classes of candidates that
+[00:07:37] the app will select. First class are
+[00:07:39] simply like the best candidates from the
+[00:07:42] optimization run.
+[00:07:44] Then, there's a bunch of candidates that
+[00:07:45] are
+[00:07:46] that the app tries to find that are not
+[00:07:49] correlated with the candidates from the
+[00:07:51] first class. So, that we get a bunch of
+[00:07:53] different candidates that are equally
+[00:07:55] good, but simply using big difference in
+[00:07:58] entry or exit parameters.
+[00:08:00] And then, the final part, the third
+[00:08:01] class, is pure random selection of
+[00:08:04] candidates which still fit the criteria,
+[00:08:07] but are randomly picked from the list of
+[00:08:09] candidates.
+[00:08:11] This three classes of candidates is to
+[00:08:14] make sure that you don't overfit your
+[00:08:17] list of candidates with very similar
+[00:08:19] looking candidates.
+[00:08:21] So, you get basically uh the best
+[00:08:23] candidates, a bunch of candidates that
+[00:08:24] look different from the best, and then a
+[00:08:26] bunch of random candidates. You can set,
+[00:08:28] of course, the percentage of how many
+[00:08:30] from the first class, second class uh
+[00:08:32] should be in there,
+[00:08:34] um and then some other criteria to make
+[00:08:36] sure that you select good ones.
+[00:08:39] These are more explained, of course,
+[00:08:41] in the manual. And if you float over the
+[00:08:44] the the names, you will get some extra
+[00:08:45] information about what these numbers
+[00:08:47] mean.
+[00:08:49] So, in this case, let's say we're going
+[00:08:51] to select some candidates from this
+[00:08:52] list. We generally click. The app will
+[00:08:54] be selecting by itself the best
+[00:08:57] candidates, the most different ones, and
+[00:08:59] some random ones.
+[00:09:01] Once it's done,
+[00:09:03] it will take some time cuz there were
+[00:09:04] 7,000 candidates,
+[00:09:06] or 7,000 results.
+[00:09:10] All right. So,
+[00:09:11] this gives us small recap of what it
+[00:09:13] did. I already had this filled in, so
+[00:09:15] it's nothing new for the app.
+[00:09:18] So, you can see the candidates
+[00:09:20] without any uh further remarks are the
+[00:09:23] best ones that it selected. And
+[00:09:25] probably, if you would
+[00:09:27] rank them by recovery rate, you will see
+[00:09:29] that the top list is mostly
+[00:09:31] filled in by these best candidates. Then
+[00:09:34] you have some couple candidates with a
+[00:09:35] little bit different, so basically using
+[00:09:37] different
+[00:09:38] um
+[00:09:40] different entry or exit parameters.
+[00:09:42] And then you'll also have some random
+[00:09:43] parameters uh random candidates in there
+[00:09:46] which still fit the criteria.
+[00:09:49] Once you have this bunch of candidates,
+[00:09:51] which is 16 total in this uh example,
+[00:09:54] you can all uh forward them to the
+[00:09:55] stress test
+[00:09:57] simply clicking this
+[00:09:59] button. And that's for the next video.
+[00:10:01] So, now we are in the stress test
+[00:10:02] section of the app, which is one of the
+[00:10:03] most important ones cuz here we're going
+[00:10:06] to do some further testing on the
+[00:10:07] candidates and really select those that
+[00:10:10] have a um potential for live trading.
+[00:10:13] As you can see here you have an overview
+[00:10:14] of all the runs you did for
+[00:10:16] optimizations where you already had some
+[00:10:18] candidates for,
+[00:10:19] but we were working on the
+[00:10:22] this one,
+[00:10:24] which had 160 candidates. You can see
+[00:10:26] them all here.
+[00:10:28] So these include the best ones, the most
+[00:10:30] different ones, and some random picks
+[00:10:33] all here.
+[00:10:35] So basically what we're going to do is
+[00:10:36] do some stress test on these candidates
+[00:10:39] so we end up with a smaller group of
+[00:10:41] really good candidates.
+[00:10:43] What does the stress test mean?
+[00:10:45] By default, I selected two,
+[00:10:47] [clears throat] the out of sample ones
+[00:10:48] and the real ticks versus one minute
+[00:10:50] open high low close.
+[00:10:52] For me, these two are the most important
+[00:10:53] ones to make a first selection of
+[00:10:55] candidates. So for out of sample, I
+[00:10:57] selected a bigger period than the in
+[00:10:59] sample, which was 20
+[00:11:01] 2020 till 2023. So you can see we have
+[00:11:04] some out of sample before and after
+[00:11:07] the candidates optimization period.
+[00:11:10] And some real ticks versus one minute
+[00:11:11] open high close cuz this is important to
+[00:11:13] make sure that our one minute open high
+[00:11:14] low close testing is reliable one. We
+[00:11:17] don't need a lot of data for this.
+[00:11:18] Basically, one year, one year and a half
+[00:11:20] of real ticks comparison with the one
+[00:11:22] minute open high close.
+[00:11:24] So these two tests are selected.
+[00:11:28] So we have some verdict rules we can set
+[00:11:30] up for this stress testing, which
+[00:11:32] basically means how will the app
+[00:11:34] determine if a strategy is failing or
+[00:11:37] succeeding the test.
+[00:11:39] I made some default values that you can
+[00:11:40] use. These are not perfect yet, but
+[00:11:43] they're quite good. You will see that
+[00:11:44] the app is quite strict in selecting
+[00:11:45] candidates, so
+[00:11:47] many will get a caution.
+[00:11:49] Uh more there will be quite a lot uh
+[00:11:52] failing test even though you might think
+[00:11:53] it's a good test, so
+[00:11:55] this needs to be calibrated a bit more
+[00:11:57] maybe in the future, but I think it's
+[00:11:58] quite good to start with for now.
+[00:12:02] You can also do some overrides for the
+[00:12:04] the stress test. For example,
+[00:12:07] uh which lot size method we're going to
+[00:12:09] use for this stress test? Keep it what's
+[00:12:11] currently used in the set? Or we're
+[00:12:13] going to use a manual lot size, for
+[00:12:14] example, 0.1 just to make sure
+[00:12:17] um the expert advisor will stay the
+[00:12:18] same. Deposit we can set, for example,
+[00:12:20] the stress test will run on 100,000 K,
+[00:12:23] and I like using a fixed balance always
+[00:12:25] for stress testing, so we're going to
+[00:12:27] set that to 100 K as well.
+[00:12:29] You can also use some other inputs to
+[00:12:31] force
+[00:12:32] um for the stress test, but I don't see
+[00:12:34] any reason
+[00:12:35] uh in this example.
+[00:12:38] Select done.
+[00:12:39] As you can see, I already I already did
+[00:12:40] some uh stress testing in the past. You
+[00:12:42] can see the overview here. You can
+[00:12:44] simply open them.
+[00:12:45] Um but to run the stress test for this,
+[00:12:47] you simply click run stress tests.
+[00:12:50] It will ask you which folder to put
+[00:12:52] them.
+[00:12:54] Select the folder.
+[00:12:56] And it will start running the back test.
+[00:13:00] You will see in the beginning it will
+[00:13:01] run one helper.
+[00:13:03] So, this is where the
+[00:13:05] little helpers come into place.
+[00:13:07] It will run a first back test on one
+[00:13:09] helper, and after that
+[00:13:11] it will start opening multiple MT5s to
+[00:13:13] run all the stress tests at the same
+[00:13:16] time.
+[00:13:18] You can see here it's running the first
+[00:13:20] stress test on the out-of-sample test,
+[00:13:23] 2018 to 2026. So, we can already see
+[00:13:28] how this strategy is looking in
+[00:13:30] out-of-sample.
+[00:13:32] But basically, we're going to wait until
+[00:13:33] all these stress tests are finished, and
+[00:13:35] then have a look at the results.
+[00:13:38] So, once the stress test is finished, it
+[00:13:40] will save the result.
+[00:13:43] As you can see, it's doing now.
+[00:13:45] Saving the results.
+[00:13:47] And then it will start doing the next
+[00:13:49] one. So, from now on it will start
+[00:13:51] running multiple
+[00:13:53] There you go. Multiple MT5s all running
+[00:13:56] some stress tests.
+[00:13:58] It runs the first one separately because
+[00:13:59] it needs to be sure that the data is
+[00:14:00] loaded. Like this one as well, the real
+[00:14:02] ticks, it needs to run this one first
+[00:14:04] before other real ticks
+[00:14:06] uh helpers will do the same.
+[00:14:09] Of course, this will speed up the
+[00:14:10] process quite considerably.
+[00:14:16] So, I skipped a bit the full back test
+[00:14:18] for this bunch of 60 candidates because
+[00:14:21] it would take too long, but I already
+[00:14:23] did like a bunch of back test in the
+[00:14:24] past, so here we can use this one
+[00:14:27] to give the example. So, here are all
+[00:14:29] the results from the back test
+[00:14:31] from the stress test.
+[00:14:32] You can see the out of sample we did and
+[00:14:34] the real ticks versus open high low
+[00:14:36] close. If you simply roll over it, you
+[00:14:39] can see
+[00:14:41] the result quickly showing from these in
+[00:14:45] out of sample test. You can see inside
+[00:14:48] the screenshot that there's an in sample
+[00:14:50] period and an out of sample period.
+[00:14:52] So, from this we can already like
+[00:14:53] quickly go over it and select them.
+[00:14:54] Look, this for example would be like a a
+[00:14:56] good candidate cuz the out of sample is
+[00:14:58] quite good in line with the in sample.
+[00:15:01] This one as well.
+[00:15:02] The second column, the real ticks versus
+[00:15:04] 1-minute open high low close, will also
+[00:15:06] immediately show the result between the
+[00:15:08] two if you simply go over it. So, this
+[00:15:09] is a very good way to quickly see if a
+[00:15:11] candidate has any potential at all. If
+[00:15:13] the
+[00:15:14] if the real ticks versus 1-minute open
+[00:15:16] high low close shows big difference, you
+[00:15:18] know already that this uh back test this
+[00:15:21] candidate is not really worth pursuing
+[00:15:23] further. And you can see it will give
+[00:15:24] also a pass or a caution or a fail uh
+[00:15:27] depending on how the criteria were met
+[00:15:30] for these kind of tests.
+[00:15:34] What we also see after the back test is
+[00:15:36] all these candidates that we tested is
+[00:15:38] the correlation chart.
+[00:15:41] So, you can simply go over this as well
+[00:15:42] and see immediately if two candidates
+[00:15:44] look quite a lot like each other. Like
+[00:15:47] for example, this one uh 0.97 is very
+[00:15:50] high correlated, while these two are
+[00:15:52] much less correlated in the in the back
+[00:15:54] test.
+[00:15:57] Then a bit down below, we have a
+[00:15:59] candidates all test, which basically
+[00:16:01] will show all the tests from all the
+[00:16:03] candidates so far. Cuz as you can see,
+[00:16:05] what we did was we ran multiple back
+[00:16:07] tests, multiple stress tests, sometimes
+[00:16:10] different period, maybe some different
+[00:16:11] stress test. Uh
+[00:16:13] but all these tests come together in and
+[00:16:15] candidates all test. For example, this
+[00:16:18] one, let's see if it I for example here,
+[00:16:20] we can see we did multiple tests.
+[00:16:25] And we can
+[00:16:26] Here we did a longer back test as well.
+[00:16:29] And we can see all these results here in
+[00:16:31] this candidates' overview. Then we can
+[00:16:34] for example select the least correlated
+[00:16:36] sets.
+[00:16:38] For example, the 10 least correlated
+[00:16:39] ones
+[00:16:40] and send these for portfolio creation.
+[00:16:43] Or you can manually select if you say
+[00:16:45] for example, I really like
+[00:16:48] um
+[00:16:49] I really like this one. You right click
+[00:16:52] and you can have a bunch of options.
+[00:16:53] First of all, you can already save some
+[00:16:55] back testing set files, but you can add
+[00:16:57] it to the portfolio.
+[00:16:59] You can fine-tune it if you want to say
+[00:17:00] if you want to or you can fine-tune it
+[00:17:02] if you want to try to improve the
+[00:17:04] overall performance a bit.
+[00:17:06] Um and a bunch of other options. So,
+[00:17:08] let's for example, we say we're simply
+[00:17:10] going to take these least correlated
+[00:17:11] sets and send these 10 to the portfolio.
+[00:17:14] I have no idea to be honest if these are
+[00:17:15] good ones, but they're least correlated,
+[00:17:17] so let's simply do this for an example.
+[00:17:20] Send these 10 to the portfolio.
+[00:17:23] And then we go to the portfolio where
+[00:17:24] you can see that these will be added.
+[00:17:26] There they are.
+[00:17:28] And this will be for next video.
+[00:17:30] All right. Now to the portfolio tab,
+[00:17:31] which is one of the most interesting uh
+[00:17:33] aspects of this UBS optimizer in my
+[00:17:35] opinion because this will allow us to
+[00:17:37] create a balanced portfolio based on
+[00:17:40] strategies we selected from the previous
+[00:17:42] uh stress test or even from importing
+[00:17:44] back test yourself.
+[00:17:46] For example, in this one I selected some
+[00:17:49] from the gold range. I imported one as
+[00:17:51] well.
+[00:17:52] You can see the all the results here uh
+[00:17:54] from their back test, from the stress
+[00:17:55] test.
+[00:17:56] Um all these were done with 1% risk per
+[00:17:59] trade cuz since they were using a range
+[00:18:01] breakout with a variable stop loss based
+[00:18:03] on the range. So, that's the best way
+[00:18:05] for range breakouts.
+[00:18:07] A bit lower, we can again see the
+[00:18:09] correlation between all of these.
+[00:18:12] And then there's this option portfolio
+[00:18:14] below will be the least correlated.
+[00:18:17] 11 I don't know let's say 10 to make it
+[00:18:18] like logical. 10 of the 10, so we're
+[00:18:21] going to use all 10 basically
+[00:18:23] Uh strategies. If you select five here,
+[00:18:25] it will select the five most
+[00:18:27] uncorrelated strategies. But,
+[00:18:30] let's make a bigger portfolio and use
+[00:18:31] 10. It will show here the names and
+[00:18:35] the charts for all these portfolios, all
+[00:18:37] these candidates.
+[00:18:39] &gt;&gt; [snorts]
+[00:18:40] &gt;&gt; Then, these are the candidates we're
+[00:18:42] going to be putting in the portfolio. By
+[00:18:44] default, the lot sizes are as tested,
+[00:18:47] which basically means 1% risk per trade
+[00:18:49] on 100k account.
+[00:18:51] And we can see below already the result
+[00:18:53] of the portfolio running these together.
+[00:18:56] Now, there are many ways to adjust this
+[00:18:58] portfolio to make it more balanced.
+[00:19:00] Okay, so the best way to start
+[00:19:03] making a balanced portfolio is setting
+[00:19:05] the lot sizes to max risk per strategy.
+[00:19:08] For example, 10% risk per strategy. This
+[00:19:10] is just to give an initial
+[00:19:12] uh setup. We're going to leave off
+[00:19:14] compounding for now, and the max
+[00:19:15] drawdown will be used uh from the empty
+[00:19:18] 5 report the whole backtest.
+[00:19:21] So, you can see when everything is
+[00:19:22] running at 10% risk per strategy, it
+[00:19:24] already says what the risk per trade
+[00:19:27] would be for these
+[00:19:28] um strategies.
+[00:19:30] And the growth curve would look like
+[00:19:31] this. This is not really balanced. It's
+[00:19:33] more balanced than it was, but it's not
+[00:19:34] really the perfect balancing uh
+[00:19:36] according to what is possible.
+[00:19:39] So, that's why I made this find the
+[00:19:41] smoothest portfolio button.
+[00:19:43] And if you press it,
+[00:19:46] and you
+[00:19:48] set your goal, for example, the return
+[00:19:49] per year uh divided by maximum drawdown
+[00:19:52] or the best sharp ratio for the
+[00:19:54] portfolio. Can have a up couple of
+[00:19:55] options here. Let's keep the best return
+[00:19:58] versus drawdown. Um
+[00:20:01] and we click on search,
+[00:20:04] the app will try to create the smoothest
+[00:20:06] portfolio possible. So, this is the
+[00:20:08] result. You can already see the proposed
+[00:20:11] risk per strategy changed compared to
+[00:20:13] the 10%.
+[00:20:14] The profit changed, the drawdown changed
+[00:20:16] a bit, but of course, what's more
+[00:20:17] important, the recovery rate improved,
+[00:20:20] sharp ratio improved. We can see this is
+[00:20:22] a bit a more smoother curve.
+[00:20:24] Then we can accept it and put it into
+[00:20:26] the sliders and the app will adjust all
+[00:20:28] the sliders here. So, you can see now
+[00:20:31] this is the full portfolio.
+[00:20:34] You can see the individual
+[00:20:35] um
+[00:20:37] strategies still there. You can see some
+[00:20:39] have much more weight than others, but
+[00:20:41] this will create the smoothest possible
+[00:20:43] portfolio according to mathematical
+[00:20:46] calculations that are in the app.
+[00:20:50] Below, you can see more of the results.
+[00:20:54] But, what is very nice now that we have
+[00:20:56] this balanced portfolio, we can simply
+[00:20:58] save this full portfolio setup.
+[00:21:02] Like all of these.
+[00:21:04] Can also save the full back test the
+[00:21:06] full back test report.
+[00:21:08] Um all these sets have
+[00:21:11] sometimes a manual balance in there, so
+[00:21:14] we can select if we save them without or
+[00:21:16] with them. This case it's always better
+[00:21:18] with without them if you're going to run
+[00:21:20] them live.
+[00:21:21] Uh and then save. We'll open the folder.
+[00:21:24] Can select a folder, for example,
+[00:21:28] gold test.
+[00:21:33] We go there.
+[00:21:35] And then and then when we go to this
+[00:21:36] folder, we can see the gold range that
+[00:21:38] we saved here. All the set files are
+[00:21:40] here and these are already set with the
+[00:21:42] maximum risk per trade so that if you
+[00:21:45] run them together on your UBS
+[00:21:48] EA, you will get this type of
+[00:21:51] performance.
+[00:21:52] What is also nice which I didn't show,
+[00:21:53] you can also adjust your maximum
+[00:21:55] drawdown targets. For example, it was a
+[00:21:57] bit high now. Um
+[00:21:59] we can simply slide it to we want
+[00:22:01] maximum 10% drawdown.
+[00:22:06] And the app will adjust all the sliders
+[00:22:08] again. You have your portfolio.
+[00:22:10] You have your numbers. You can see the
+[00:22:11] maximum drawdown here was
+[00:22:13] 9,000 on a 100k account, so that is less
+[00:22:16] than 10%.
+[00:22:18] And then we can save this again as well.
+[00:22:21] Let's say we just want the full
+[00:22:22] portfolio again.
+[00:22:24] Same folder.
+[00:22:25] It's going to override now, of course.
+[00:22:28] And if you go there, we have the
+[00:22:29] adjusted set files.
+[00:22:31] Which, if you run them together with the
+[00:22:32] auto loader, the portfolio will run with
+[00:22:35] a maximum drawdown of 10%. Of course,
+[00:22:37] you have to take into consideration
+[00:22:38] consideration that if you run it on a
+[00:22:40] very small balance, it might be more.
+[00:22:42] But, to give you a good idea, this is
+[00:22:44] what will happen.
+[00:22:48] Regarding this smaller balance, you can
+[00:22:50] do, of course, simply do the test. Let's
+[00:22:52] say we want to do
+[00:22:53] uh
+[00:22:54] a 5K account.
+[00:22:57] It will adjust. We want a maximum 10%.
+[00:23:01] I don't think it's possible on a 5K
+[00:23:02] account, to be honest.
+[00:23:03] As you can see, the maximum drawdown,
+[00:23:06] even if we would slide it to one,
+[00:23:09] the maximum drawdown will always be
+[00:23:10] around 2,500.
+[00:23:11] So, even at the smallest lot size for
+[00:23:13] this combination, for these strategies,
+[00:23:15] at the smallest lot size with 0.01 lots
+[00:23:17] for gold, you will have a potential
+[00:23:20] maximum drawdown of 2,500. So, you know,
+[00:23:22] there's a 50% maximum drawdown potential
+[00:23:25] on a 5K account. So, with this app, you
+[00:23:28] can always quickly check with your
+[00:23:30] deposit, with your settings, with your
+[00:23:33] desired risk, if it will fit or not for
+[00:23:36] your account.
+[00:23:40] That's it for the portfolio section. Of
+[00:23:41] course, there's much more explanations
+[00:23:42] about how the
+[00:23:45] parameters and all these
+[00:23:47] sliders and everything works in the
+[00:23:48] manual, which are included in the app.
+[00:23:54] Okay.
+[00:23:55] Okay. [clears throat] So, the last Okay.
+[00:23:58] Okay. So, the last part of the UBS
+[00:23:59] Optimizer app would be the fine-tuning
+[00:24:02] tab.
+[00:24:03] So, what we can do is if we find a
+[00:24:04] strategy that looks good, but
+[00:24:07] needs some improvements.
+[00:24:09] For example,
+[00:24:12] let's take
+[00:24:14] uh well,
+[00:24:18] where is it going?
+[00:24:26] All right. So, the final tab for UBS
+[00:24:28] Optimizer is the fine-tuning tab, which
+[00:24:29] is quite nice, to be honest.
+[00:24:32] So, what we can do is if we find results
+[00:24:34] from our stress testing
+[00:24:36] and we see candidate that looks good,
+[00:24:38] but not good enough, we can simply
+[00:24:39] right-click and click on fine-tune this
+[00:24:42] candidate. Now, I'm not going to select
+[00:24:44] this one cuz it's not good for the
+[00:24:46] example, but I already made some which
+[00:24:49] we can reuse, for example, this one for
+[00:24:51] US 500.
+[00:24:54] So, we can see my fine-tuning results
+[00:24:56] here, but
+[00:24:58] what you normally do is you
+[00:25:00] get this screen
+[00:25:01] where you can see the growth curve
+[00:25:03] and you can select, simply by dragging,
+[00:25:05] which period you want to optimize. So,
+[00:25:08] or fine-tune. So, in this example, what
+[00:25:10] I did was fine-tune this one.
+[00:25:13] Then you get an overview of the
+[00:25:15] parameters you want to fine-tune, so you
+[00:25:16] can basically set the ranges. Um these
+[00:25:19] are the values that were the result of
+[00:25:21] the optimization process, the original
+[00:25:23] one. And then we can say, "Okay, let's
+[00:25:25] do like step of one,
+[00:25:28] um
+[00:25:28] with to the step size and one step,
+[00:25:31] which means like one to the left, one to
+[00:25:33] the right, of course. Smaller than two
+[00:25:35] is makes no sense here, so it's two to
+[00:25:37] the right.
+[00:25:38] Uh we can set all these ranges manually
+[00:25:40] as well.
+[00:25:41] So, basically, we're trying to find some
+[00:25:42] ranges right around the existing values
+[00:25:46] to see if it gets better results.
+[00:25:48] Then you run optimization
+[00:25:51] and after that, it will start up again
+[00:25:53] the MT5 running optimization with these
+[00:25:56] parameters for optimization.
+[00:25:57] Uh it will get the best results and run
+[00:26:00] stress test on them as well, all
+[00:26:02] automatically. Then in the overview, if
+[00:26:04] we quickly just check what I did already
+[00:26:06] in the past,
+[00:26:08] you can see the original one
+[00:26:11] compared to the fine-tuned ones. So,
+[00:26:13] these these are the best candidates that
+[00:26:15] it selected from the renewed
+[00:26:17] optimization process, the fine-tuning
+[00:26:19] process. And you can see what the effect
+[00:26:21] is on the out of sample. So, everything
+[00:26:22] that is not in orange, basically, is now
+[00:26:25] out of sample based on this new
+[00:26:27] optimization process for the tuned
+[00:26:29] section. Based on this, for example, you
+[00:26:31] can see this one looks better than the
+[00:26:33] original one while the historical one, I
+[00:26:35] mean the the out of sample still looks
+[00:26:37] very good. Then we can add this to the
+[00:26:39] portfolio. So, this fine-tuning allows
+[00:26:41] us to
+[00:26:42] take an existing strategy.
+[00:26:47] Here you can see more detail. Taking
+[00:26:49] existing strategy, we fine-tune this
+[00:26:50] one. This is the result of the
+[00:26:51] fine-tuning, and this is the performance
+[00:26:54] now out of sample based on this
+[00:26:55] fine-tuning.
