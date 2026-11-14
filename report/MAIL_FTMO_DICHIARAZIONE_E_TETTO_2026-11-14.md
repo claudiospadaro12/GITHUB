@@ -24,7 +24,7 @@ Best regards,
 
 ---
 
-# VERSIONE CORTA (scelta di Claudio il 14/11/2026): solo le domande 2 e 3, senza dichiarazione del familiare. BOZZA, NON INVIATA.
+# VERSIONE CORTA (scelta di Claudio il 14/11/2026): solo le domande 2 e 3, senza dichiarazione del familiare. **INVIATA da Claudio il 14/11/2026** (sera). In attesa di risposta.
 
 **Subject:** Questions about the Maximum Capital Allocation and third-party EAs
 
