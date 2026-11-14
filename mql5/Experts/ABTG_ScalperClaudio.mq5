@@ -59,11 +59,19 @@
 //|  InpLotMax); 2 = in piu' sale a ogni passo aggiunto al cesto.    |
 //|  MAI dopo una perdita; il freno azzera. Tetto totale 0,20 lotti. |
 //|                                                                  |
+//|  1.02 (richiesta di Claudio: "se si perde gli ordini si chiudono |
+//|  a saldo flottante 0"): InpRecoveryToZero. Se il netto del cesto |
+//|  scende sotto -InpUnderwaterEuro, nessuna chiusura parziale e    |
+//|  nessuna aggiunta finche' il netto non torna a >= InpZeroEuro;   |
+//|  allora si chiude TUTTO. Il freno (-InpBasketStopEuro) resta     |
+//|  attivo: senza, un cesto in perdita puo' restare aperto per      |
+//|  sempre e il rischio non ha limite.                             |
+//|                                                                  |
 //|  Non e' una strategia provata: e' una misura. Nessun giudizio su |
 //|  lotti o taglie.                                                 |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.01"
+#property version   "1.02"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635
@@ -91,6 +99,9 @@ input group "=== Uscita (solo in profitto) ==="
 input ENUM_EXIT_MODE  InpExitMode         = EXIT_PER_POSIZIONE; // 0 = ogni posizione al suo target, 1 = tutto il cesto insieme
 input double          InpTargetEuro       = 1.5;    // modo 0: chiude quando il netto della posizione e' >= X (valuta del conto)
 input double          InpBasketTargetEuro = 2.0;    // modo 1: chiude tutto quando il netto del cesto e' >= X
+input bool            InpRecoveryToZero   = true;   // se il cesto va in perdita, NON si chiude piu' nulla finche' il netto del cesto torna a InpZeroEuro; poi si chiude TUTTO ("a saldo flottante 0")
+input double          InpUnderwaterEuro   = 3.0;    // il cesto e' "in perdita" solo se il netto scende sotto -X (altrimenti lo spread subito dopo l'apertura lo farebbe sembrare in perdita)
+input double          InpZeroEuro         = 0.0;    // soglia di uscita del recupero: il netto del cesto torna a >= X
 
 input group "=== Freno (obbligatorio) ==="
 input double          InpBasketStopEuro   = 20.0;   // se il netto del cesto scende sotto -X chiude tutto
@@ -115,6 +126,7 @@ struct SBasket
   };
 
 //--- stato
+bool     gUnderwater = false;    // il cesto e' sceso sotto -InpUnderwaterEuro: modo recupero
 double   gCumProgress = 0.0;   // guadagno chiuso che fa salire il lotto (si azzera col freno)
 int      gBasketSteps = 0;       // passi aggiunti al cesto in corso (modo 2)
 double   gMaxLotSeen = 0.0;
@@ -138,7 +150,8 @@ long     gBrake = 0, gLongLived = 0, gRejects = 0;
 double   gMaxFloatLoss = 0.0;
 int      gMaxOpenSeen = 0;
 double   gGapSum = 0.0; long gGapN = 0;
-long     gCloseTarget = 0, gCloseBasket = 0, gCloseBrake = 0, gCloseOther = 0;
+long     gCloseTarget = 0, gCloseBasket = 0, gCloseBrake = 0, gCloseZero = 0, gCloseOther = 0;
+long     gRecoveries = 0;
 //--- misura S-9: coda di segnali da controllare
 long     gSigMsc[SIGQ];
 int      gSigDir[SIGQ];
@@ -222,7 +235,7 @@ void OnDeinit(const int reason)
                + ", win rate " + DoubleToString(wr, 1) + "%, netto " + DoubleToString(gSumNet, 2) + ", PF " + DoubleToString(pf, 2)
                + ", vita media " + DoubleToString(avgLife, 1) + " s, vissute oltre 1 ora " + IntegerToString((int)gLongLived);
    string s2 = "RIEPILOGO freno " + IntegerToString((int)gBrake) + " scatti, uscite: target " + IntegerToString((int)gCloseTarget) + ", cesto " + IntegerToString((int)gCloseBasket)
-               + ", freno " + IntegerToString((int)gCloseBrake) + ", altro " + IntegerToString((int)gCloseOther)
+               + ", freno " + IntegerToString((int)gCloseBrake) + ", a zero " + IntegerToString((int)gCloseZero) + " (cesti in recupero " + IntegerToString((int)gRecoveries) + "), altro " + IntegerToString((int)gCloseOther)
                + ", lotto massimo usato " + DoubleToString(gMaxLotSeen, 2) + ", perdita fluttuante massima " + DoubleToString(gMaxFloatLoss, 2) + ", posizioni aperte massime " + IntegerToString(gMaxOpenSeen);
    string s3 = "RIEPILOGO distanza media fra entrate successive di un passo " + DoubleToString(avgGap, 1) + " punti (n " + IntegerToString((int)gGapN) + "), rifiuti " + IntegerToString((int)gRejects)
                + ", richieste totali " + IntegerToString((int)gReqTotal) + ", massimo in un giorno " + IntegerToString(MathMax(gReqMaxDay, gReqToday));
@@ -345,10 +358,20 @@ bool ManageExit(const SBasket &b)
    if(b.net <= -InpBasketStopEuro)
      {
       gBrake++;
+      gUnderwater = false;
       gCooldownUntil = TimeCurrent() + InpCooldownMin * 60;
       LogV("FRENO: netto cesto " + DoubleToString(b.net, 2) + " -> chiudo tutto, pausa " + IntegerToString(InpCooldownMin) + " min");
       CloseAll("freno");
       return true;
+     }
+   if(InpRecoveryToZero)
+     {
+      if(b.net < -InpUnderwaterEuro && !gUnderwater) { gUnderwater = true; gRecoveries++; LogV("cesto in perdita " + DoubleToString(b.net, 2) + ": aspetto il ritorno a " + DoubleToString(InpZeroEuro, 2)); }
+      if(gUnderwater)
+        {
+         if(b.net >= InpZeroEuro) { gUnderwater = false; CloseAll("zero"); return true; }
+         return false;   // in recupero: nessuna chiusura parziale, nessuna aggiunta (b.net < 0 blocca TryEntry)
+        }
      }
    if(InpExitMode == EXIT_A_CESTO)
      {
@@ -488,6 +511,7 @@ void OnTick()
    SigCheck(tk);
    SBasket b;
    ReadBasket(b);
+   if(b.n == 0) gUnderwater = false;
    if(b.n > 0 && ManageExit(b)) return;
    TryEntry(tk, b);
    if(!IsTester() && (ulong)GetTickCount64() - gLastStatusMs > 1000)
@@ -540,7 +564,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans, const MqlTradeRequest 
    gClosed++; gSumNet += net; gSumLife += secs;
    if(net > 0.0) { gWins++; gGrossWin += net; } else gGrossLoss += -net;
    if(secs > 3600) gLongLived++;
-   if(why == "target") gCloseTarget++; else if(why == "cesto") gCloseBasket++; else if(why == "freno") gCloseBrake++; else gCloseOther++;
+   if(why == "target") gCloseTarget++; else if(why == "cesto") gCloseBasket++; else if(why == "freno") gCloseBrake++; else if(why == "zero") gCloseZero++; else gCloseOther++;
    gCumProgress += net;
    if(why == "freno" || gCumProgress < 0.0) gCumProgress = 0.0;   // dopo il freno o una perdita si riparte dal lotto di base
    CommDel(pid);
