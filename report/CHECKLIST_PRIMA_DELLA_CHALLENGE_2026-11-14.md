@@ -35,3 +35,7 @@ Mandarmi le foto: le uso per ricalcolare i costi extra (ipotesi attuale 36 EUR/l
 ## 6. Stato dei test in corso
 - Tick reali 2025 su Goldbot L0, Phantom L1 e Reaper L3 (160k): in corso sul PC di backtest. Serve solo a controllare che i test a candele da 1 minuto siano affidabili per il Phantom. Non e un prerequisito.
 - Candela di conferma (UBS Goldbot daily e GTP, 382 contro 283 set): rinviata, riguarda UBS e Gold Trade Pro; non e nei set P1/P4.
+
+## Aggiunta (14/11, dopo la lettura del testo ufficiale FTMO)
+- **Richieste al server**: FTMO vieta l'EA con "more than 2,000 server requests per day on individual simulated trades or pending orders" (ftmo.com, forbidden trading practices, modificata il 02/11/2026). Probabilmente le modifiche di SL/TP contano. Nei test ho contato solo ordini piazzati o cancellati (max circa 91 al giorno per il Phantom, circa 58 per il Reaper, circa 30 per il Goldbot). **Misurare sul trial**: nel Journal di MT5 contare per giorno le righe "modify" per ogni EA e mandarmi il conteggio dopo 2-3 giorni.
+- Le posizioni opposte tra conti: il testo ufficiale parla di "scopo manipolativo"; la risposta scritta di FTMO e piu severa ("rigoroso"). Vale la piu severa.

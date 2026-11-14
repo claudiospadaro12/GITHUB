@@ -49,3 +49,29 @@ La terza lettura (archiviata in `SITI_EA_ARCHIVIO_2026-11-14/terza_lettura/`) co
 - Altre conferme: Reaper 5.6 e Phantom 2.5 aggiornati il 28/10/2026; recensioni negative del Reaper del 10/11, 28/10, 22/10 (gia note); prezzi incoerenti; "Final price 990$" ripetuto.
 
 **Decisione**: fermiamo l'analisi dei siti con Claude Desktop (tre passate parziali, numeri incoerenti). Se serve un dato (in particolare il segnale Phantom 2355966 e il Reaper 2204998), si fa con una schermata da te sulla pagina MQL5: la leggo io direttamente.
+
+---
+# Aggiunta: terza lettura AGGIORNATA (zip `ANALISI_SITI_EA_2026-11-14_1`, archiviata in `terza_lettura_v2/`)
+
+E la stessa analisi della terza lettura con una "seconda lettura" aggiunta in coda a ogni file (stesso nome cartella, impronta diversa). Dichiara ancora cifre MQL5 che cambiano tra letture: "non usare nessuna cifra senza aprirla a mano". Riporto solo cio che serve a noi.
+
+## FTMO: testo ufficiale letto (ftmo.com/en/forbidden-trading-practices, ultima modifica dichiarata 02/11/2026)
+- **Iperattivita**: vietato l'EA che causa attivita eccessiva, con "more than 2,000 server requests per day on individual simulated trades or pending orders". **"Server requests" includono con ogni probabilita anche le modifiche di SL/TP** (NON verificato nel testo): il mio controllo del 14/11 sui report del tester contava solo ordini piazzati o cancellati (Phantom L1 max circa 91/giorno, Reaper L3 max circa 58, Goldbot L0 max circa 30), quindi **non copre le modifiche del trailing: NON MISURATO**. Da misurare sul trial: contare nel Journal di MT5 le righe "modify" per giorno.
+- **Posizioni opposte**: vietate "for manipulative purposes, for example by simultaneously entering into opposite positions", con eccezione per un singolo conto. Questa formulazione (scopo manipolativo) e MENO netta della risposta scritta che FTMO ci ha dato il 13/11 ("cross-account hedging vietato in modo rigoroso"): resta valida la piu severa. Le posizioni opposte tra P1 e P4 nascono da strategie indipendenti, ma il rischio non e eliminato.
+- **Tetto 400.000 $ per strategia e "stessa strategia su piu conti"**: NON compaiono in questa pagina; il tetto resta quello della risposta scritta di FTMO (la pagina letta e un'altra). I blog di terzi (pickmytrade, propvator) non fanno fede.
+- Gap trading vietato "intorno a eventi macro" (coerente con la risposta di FTMO: solo se intenzionale).
+- Esperienze di terzi con gli EA di Wim su FTMO: NON TROVATE (Reddit e Forex Factory: ricerche senza risultati pertinenti, non e una prova di assenza).
+
+## Reaper: altri segnali pubblici (dichiarati dalla pagina, non verificati, DD non letto)
+| Segnale | Dati |
+|---|---|
+| 2265877 "Gold Reaper New V2 2" | 81 settimane, +214% dal 2024, 737 operazioni, 71,91% operazioni in profitto, DD 16,05% (lettura precedente) |
+| 2195619 "Gold Reaper Live default settings" (copia su Pepperstone UK) | 63 settimane, **+29% dal 2024**, 726 operazioni |
+| 2287007 "Reaper high risk" | 47 settimane, +2.080% su 1.888 operazioni, avviso piattaforma 17/12/2025 "Too much growth in the last month indicates a high risk" |
+Lettura mia: lo stesso EA mostra rendimenti molto diversi secondo il rischio scelto; il conto con le impostazioni di default ha fatto solo +29% in 63 settimane contro il +312% del sito. Sono conti di tipo diverso e non so le date di partenza, quindi e un'indicazione, non un confronto.
+
+## Altro
+- /risk-warning di Profalgo (aggiornato 23/03/2026): rischio e stop loss a carico dell'utente (Sez. 5.1) ma "assumes full responsibility for the Product and Services" (Sez. 7.5(a)); martingala, grid e prop firm non nominati.
+- Il nome "Gold Reaper" e usato anche da altri venditori (MQL5 161775, gumroad a 10,25 $, blog 775895): non sono del nostro venditore.
+- La pagina MQL5 del Reaper MT4 contiene un paragrafo di un altro EA ("GoldStrike Predator"): errore di pagina o duplicato, non verificato.
+- Portafoglio A del sito (Reaper moderate + Luna AI Pro + Gold Trade Pro): +228%, DD 12,4%, periodo e broker non indicati; il link Myfxbook non si apre.

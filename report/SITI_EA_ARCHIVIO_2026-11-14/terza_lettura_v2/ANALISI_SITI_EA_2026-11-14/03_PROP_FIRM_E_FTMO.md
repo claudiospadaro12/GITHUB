@@ -1,0 +1,23 @@
+# 03 - Prop firm e FTMO (con gli EA)
+
+Stato: NON APERTO in questa sessione. Pagine FTMO (regole, FAQ, community), Trustpilot FTMO, forum prop firm e discussioni Forex Factory su FTMO non sono state lette.
+
+Cio' che e' stato letto e riguarda le prop firm:
+- forexeasolutions.com (home, 2026-11-14): nessuna pagina dedicata alle prop firm. Compare solo nelle schede di Indicement, Bitcoin Reaper e ORB Master con le etichette "Prop firm ready" / "Prop firm compatible". Livello di prova: affermazione del venditore, senza dati.
+- MQL5, The Gold Phantom (161561, 2026-11-14): "passes prop firm challenges with ease" e "PROP FIRM READY!". Livello di prova: affermazione del venditore, senza prove.
+- MQL5, Gold Reaper (111357): nessun riferimento a FTMO o prop firm nella parte letta.
+
+Non valutato: regole FTMO su stessa strategia su piu' conti, posizioni opposte, news, swing, spread/slippage oro.
+
+## Lettura 2026-11-14: regole FTMO (fonte ufficiale)
+
+Fonte: ftmo.com/en/forbidden-trading-practices/ (letta 2026-11-14; metadati: ultima modifica 2026-11-02).
+- EA "hyperactivity": vietate operazioni gestite da robot che causano attivita' eccessiva, con "more than 2,000 server requests per day on individual simulated trades or pending orders". Livello di prova: regola ufficiale.
+- Posizioni opposte: vietate se eseguite "for manipulative purposes, for example by simultaneously entering into opposite positions", con eccezione per "a single simulated account". Livello: regola ufficiale.
+- Stessa strategia su piu' conti: NON compare una frase con questa formulazione nel testo ufficiale letto. La regola piu' vicina riguarda operazioni coordinate tra conti diversi.
+- Limite di capitale 400.000 USD per strategia: NON compare nel testo ufficiale letto. Il valore viene solo da blog di terze parti (pickmytrade.io, propvator.com): livello "fonte secondaria, non verificata".
+- News trading: il testo ufficiale vieta il gap trading intorno a eventi macro/earnings, senza usare l'espressione "news trading".
+
+Fonti di terze parti lette (non ufficiali, non usate come prova): pickmytrade.io, fundedtrading.com, propvator.com, takeprofitapp.com, E8 Markets help center (intercom.help/e8). Nota: E8 e FXIFY hanno regole diverse dalle FTMO e non si applicano a FTMO.
+
+Esperienze con gli EA di Profalgo su FTMO: NON TROVATE nelle letture di oggi (ricerca Reddit, Forex Factory senza risultati pertinenti).
