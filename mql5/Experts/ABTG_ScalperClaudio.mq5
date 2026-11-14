@@ -70,6 +70,7 @@
 //|  Non e' una strategia provata: e' una misura. Nessun giudizio su |
 //|  lotti o taglie.                                                 |
 //+------------------------------------------------------------------+
+// MARCATORE_ABTG_SCALPER_CLAUDIO_v1 (controllato dalla riga che scarica questo file)
 #property copyright "ABTG"
 #property version   "1.02"
 #include <Trade\Trade.mqh>
