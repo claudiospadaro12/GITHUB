@@ -24,3 +24,8 @@ Quale regola di quella prop; quanti conti; se aveva lo stesso set su piu conti o
 - Chiedere all'utente i dettagli (domande preparate in chat).
 - Archiviare le risposte FTMO sugli EA di terzi (gia nel repo) come prova di cio che FTMO ha detto.
 - Valutare se ridurre le sovrapposizioni fra P1/P4 e fra i conti di Claudio e Massimo.
+
+## Seguiti (14/11/2026 sera)
+- Un secondo utente ha scritto: randomizzazione, commenti e trucchi sono inutili; "se usi un EA commerciale prima o poi vieni bannato"; se e redditizio lo useranno tutti e la soglia verra raggiunta. **Opinione, nessuna prova.**
+- Claudio ha risposto chiedendo come un utente possa sapere quanti altri usano lo stesso EA nella stessa societa e se la soglia non dovrebbe essere per trader; ha chiesto se il ban citava il capitale combinato. **Risposta inviata il 14/11/2026.** In attesa.
+- In parallelo: mail a FTMO (domande su "identical strategy" e su fase e conseguenze del controllo) inviata il 14/11/2026: vedi `MAIL_FTMO_DICHIARAZIONE_E_TETTO_2026-11-14.md`. Il testo originale della risposta FTMO del 10-13/11 e in `FTMO_RISPOSTA_ORIGINALE_2026-11-10_INGLESE.md`.
