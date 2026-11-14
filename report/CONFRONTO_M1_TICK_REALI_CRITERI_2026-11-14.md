@@ -44,3 +44,18 @@ Nessuno dei criteri che cambierebbero le mie stime e scattato (nessun FAIL, ness
 - I **fail% a 0%** di P1/P3/P4 e la tabella Reaper v2 vanno letti con questa avvertenza (non cambio le cifre: non ho dati per correggerle).
 - Il comportamento del Reaper (trailing, ordini pendenti) NON mostra la differenza che prevedevo: il Modello 1 ricostruisce le sue operazioni quasi identiche.
 - **Limiti**: 1 anno e 4 coppie; Reaper con Randomization (in questi test valore non verificato qui); le coppie Reaper sono varianti DD12/DD15, non il set Prop L0/L3; Phantom, Gold Trade Pro e Daytrade Pro non sono coperti.
+
+---
+# TAPPA 2 (14/11/2026): criteri e previsioni fissati PRIMA di lanciare la riga
+
+**Cosa si lancia**: i componenti oro di P1 e P4 a TICK REALI (Modello 4), anno 2025 (2025-01-01 -> 2026-01-01), deposito 160.000 EUR, XAUUSD, set ufficiali di `combodeal.zip` applicati con -SetFile, STESSI input e STESSO deposito delle passate a candele gia in archivio (`D160_R1_*_2025` e `D160_R2_*_2025`, Modello 1). 3 passate: Goldbot Prop (L0, `Goldbot_PropFirm_5_2.5.set`), Phantom Gradino 1 (L1, `GoldPhantom_Propfirm.set`), Reaper Combo (L3, `Gold_reaper_propfirm_combo_3GOLD.set`). Phantom e Reaper hanno Randomization 50 (rumore): per misurare il rumore uso le due ripetizioni a candele (R1, R2) come "banda"; una sola passata a tick per EA. Le passate a candele NON si rilanciano.
+
+**Confronto**: sulle operazioni chiuse nel 2025, stesse metriche e soglie di Wim di sopra (PF tick/M1 >= 0,7; DD saldo tick <= 1,5 volte M1; operazioni entro 10%; win rate entro 10 punti) piu il peggior giorno chiuso. Un risultato a tick reali "dentro la banda M1" (tra il minimo e il massimo di R1 e R2) NON e distinguibile dal rumore.
+
+**Previsioni (fissate ora)**
+1. Goldbot L0 (deterministico): PASS pieno; PF ratio 0,85-1,0; operazioni entro 3%; peggior giorno tick fino a +15% rispetto a M1.
+2. Reaper L3 (strategie a basso rischio, pochi ordini): PF ratio 0,85-1,05, DD tick fino a 1,3 volte M1; la differenza M1-tick sara piccola o dentro la banda del rumore.
+3. Phantom L1: la piu incerta: PF ratio tra 0,7 e 1,0, DD tick fino a 1,5 volte M1; probabilita che almeno una metrica esca dalla banda del rumore: circa 40%.
+4. Direzione: netto tick < netto M1 per i tre EA (mi aspetto 3 su 3; accetto 2 su 3 come "confermata").
+**Cosa cambierebbe i miei numeri**: se un EA risulta FAIL (PF ratio < 0,5) o DD tick > 1,5 volte M1, le tabelle P1/P4 vanno corrette per quell'EA; se tutte e tre sono dentro le soglie, la sola avvertenza resta quella gia scritta sopra (tempi +10-20%, DD +2-35%).
+**Limiti dichiarati**: un solo anno (2025); una passata a tick per EA rumoroso; il 2013 (anno del peggior giorno) non e confrontabile (nessun tick reale BCM); deposito 160.000 invece di 80.000 (le percentuali si confrontano, i lotti scalano con il saldo).
