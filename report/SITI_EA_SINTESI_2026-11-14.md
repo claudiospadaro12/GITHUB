@@ -36,3 +36,16 @@ Nessuna esperienza di terzi con i nostri EA su FTMO; nessuna nuova regola FTMO v
 2. Sulla pagina del segnale 2265877 controllare il perche dei periodi senza operazioni (giugno-ottobre 2026) e il DD (16,9% o 46%).
 3. Leggere le regole FTMO solo da ftmo.com (pagina "forbidden trading practices" e FAQ) e annotare la data.
 4. Forex Factory, Reddit e Trustpilot FTMO con la ricerca "Gold Reaper", "UBS", "Profalgo", "FTMO EA".
+
+---
+# Aggiunta: terza lettura (zip `ANALISI_SITI_EA_2026-11-14`) e CONTRADDIZIONI tra le tre letture
+
+La terza lettura (archiviata in `SITI_EA_ARCHIVIO_2026-11-14/terza_lettura/`) copre sito del venditore, MQL5 Phantom (161561) e Reaper (111357), i segnali 2204998 e 2355966 e un thread Forex Factory del 2018. Nessuna informazione su FTMO. Estrazioni automatiche troncate a 100.000 caratteri, dichiarate.
+
+**Le tre letture non coincidono sugli stessi dati, quindi i numeri vanno trattati come NON AFFIDABILI finche non li vediamo noi:**
+- Gli EA oro del sito coincidono (Reaper +312%/15,2%, GTP +198%/12,1%, Goldbot +178%/10,5%, Phantom +142%/9,8%). Gli altri prodotti NO: Parte 1 dava Daytrade Pro +73,8%/15,6%, Luna +207%/40,2%, Bitcoin Reaper -11,7%/34%, ORB Master +27,2%/50,1%; la terza lettura dice Daytrade Pro +156%/11,3%, Luna +94%/7,2%, Bitcoin Reaper +64%/18,6%, ORB +87%/8,4%. Almeno una delle due e sbagliata (o la pagina cambia): **non uso la tabella dei prodotti non oro della Parte 1**.
+- Segnale 2204998 (Reaper + GTP + Daytrade Pro): DD 32,6% (relativo sul saldo, 1.821,98 USD), 26,12% (2.361,66 USD) e 50,68% (1.822,33 USD) nelle tre letture. Mia interpretazione, da verificare: MQL5 riporta piu misure di drawdown (saldo/equity, relativo/assoluto) e i lettori ne hanno usate di diverse; i 1.822 USD tornano in due letture. **Non e una contraddizione dimostrata ne una conferma.**
+- Segnale Phantom Darwinex 2355966 (avviato il 27/01/2026): crescita mensile +6,62% / +2,18% (versione tedesca) / **-1,78% con previsione annua -21,59%** nella lettura di oggi; DD 23,43% o 19,65%; 13 perdite consecutive per -445,56 USD; avvisi "nessuna attivita" ricorrenti dal 07/07 al 15/10/2026. **Se la lettura negativa e quella vera, e un'informazione rilevante sul Phantom (cuore di P1), ma non so con quali impostazioni giri quel conto.** Da aprire e leggere a mano (sezione crescita mensile e storico).
+- Altre conferme: Reaper 5.6 e Phantom 2.5 aggiornati il 28/10/2026; recensioni negative del Reaper del 10/11, 28/10, 22/10 (gia note); prezzi incoerenti; "Final price 990$" ripetuto.
+
+**Decisione**: fermiamo l'analisi dei siti con Claude Desktop (tre passate parziali, numeri incoerenti). Se serve un dato (in particolare il segnale Phantom 2355966 e il Reaper 2204998), si fa con una schermata da te sulla pagina MQL5: la leggo io direttamente.
