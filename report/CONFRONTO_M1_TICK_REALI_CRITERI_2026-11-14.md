@@ -63,3 +63,26 @@ Nessuno dei criteri che cambierebbero le mie stime e scattato (nessun FAIL, ness
 ---
 # TAPPA 2, VARIANTE A 80.000 EUR (14/11/2026, su osservazione di Claudio: le challenge sono da 80k)
 Il test della Tappa 2 era stato preparato a 160.000 EUR per confrontarlo con le passate a candele D160. Ma le challenge Swing sono da 80.000 e, nei nostri dati D160 (`RISULTATI_D160_ORO_2026-11-09.md`), il **Reaper Combo (L3) NON scala col doppio** (rapporto 160k/80k = 2,93 nel 2013 e 1,61 nel 2020; Phantom Gradino 1 2,03-2,20): per quell'EA un risultato a 160k non rappresenta il conto da 80k. Per questo e stata preparata la variante **TICK80** (`BOOT_RIGA_TICK80_ORO.txt`: pin b535ac31, SHA256 BEBE11FE...): stesse 3 passate, deposito 80.000. Le passate a candele da confrontare sono quelle a 80.000 della griglia ANNO_ORO_GRADINI (2025: L0 Goldbot, L1 Phantom, L3 Reaper; dati in `ORO_GRADINI_dati/oro_agg.json`). Criteri, soglie e previsioni della Tappa 2 restano invariati (scritti prima). Con 80k i lotti sono la meta: l'arrotondamento a 0,01 pesa di piu, soprattutto sul Reaper L3.
+
+---
+# TAPPA 3 (14/11/2026): PHANTOM A TICK REALI SUL 2026, contro il segnale di Wim e il nostro trial. CRITERI E PREVISIONI scritti PRIMA di lanciare la riga
+
+**Domanda**: il divario tra il Phantom in tester (2025: PF 2,87-2,90, 1.105 operazioni, +25% su 160k) e il Phantom live (segnale Darwinex di Wim dal 27/01/2026: PF 1,07-1,08, 692 operazioni in 48 settimane; nostro trial FTMO ottobre-novembre: 25 operazioni, PF 0,26; reale 12 operazioni, PF 0,40) e dovuto al PERIODO (2026 diverso dal 2025), al CAPITALE PICCOLO del segnale (2.000-5.000 USD) o a COSTI/ESECUZIONE e impostazioni?
+
+**Passate** (Gold Phantom `GoldPhantom_Propfirm.set` = Gradino 1 = L1, XAUUSD H1, Modello 4 tick reali, 01/01/2026 -> 13/11/2026, set ufficiale da `combodeal.zip`, nessun input cambiato): (A) deposito **80.000 EUR** (la nostra configurazione P1); (B) deposito **5.000 EUR** (approssima il segnale Darwinex, 5.000 USD circa, capitale versato). Il Phantom ha Randomization 50: una passata ciascuno = un solo percorso; il rumore a 80k lo stimo dalle due ripetizioni a candele del 2025 (R1 contro R2: netto 40.190 contro 41.576, PF 2,87 contro 2,90).
+
+**Metriche**: profit factor, operazioni totali e per settimana, win rate, netto in %, peggior mese, segno dei mesi (confronto con la tabella mensile del segnale, che mi dovra dare Claudio come schermata), PF del sotto-periodo 20/10-12/11/2026 (stesso del trial).
+
+**Previsioni (fissate ora)**
+1. A (80k): PF tra 1,8 e 3,5: probabilita 65%. Operazioni per settimana 18-25 (nel 2025: 21): probabilita 70%.
+2. B (5k): meno strategie attive (TradeFrequency Auto sceglie in base al saldo) e lotti arrotondati: operazioni per settimana pari al 40-70% di A: probabilita 55%; PF di B tra A-0,6 e A+0,6: 50%.
+3. Il PF del segnale (1,07) NON viene riprodotto da A ne da B (nessuna delle due sotto 1,5): probabilita 70%. Se questo accade il divario non si spiega con periodo e capitale: restano costi/esecuzione e impostazioni diverse del segnale.
+4. Segno dei mesi di A uguale al segnale in almeno 6 mesi su 10: 55%.
+5. Sotto-periodo 20/10-12/11: PF di A inferiore a quello dell'intero periodo: 60%.
+
+**Regole di lettura (decise ora)**
+- A con PF >= 1,8: il tester regge nel 2026; il divario col segnale non e da periodo; passa a costi/impostazioni (e il Phantom resta "non validato dal vivo"), nessuna correzione ai tempi di P1.
+- A con PF tra 1,4 e 1,8: 2026 piu debole del 2025; ricalcolare i tempi di P1 con il Phantom ridotto; avvertenza esplicita.
+- A con PF < 1,4: il Phantom 2026 e molto sotto al 2025: P1 va rivisto (tempi, e se sostituire il Phantom con altro nella parte oro) PRIMA di comprare le challenge.
+- B molto peggio di A (PF di B < A - 1,0 oppure operazioni < 40% di A): il capitale piccolo spiega il segnale; l'80k resta il riferimento.
+**Limiti**: un solo percorso con rumore; impostazioni del segnale NON note; periodo parziale (1/1-13/11); il segnale e in USD su Darwinex; nessun costo FTMO.
