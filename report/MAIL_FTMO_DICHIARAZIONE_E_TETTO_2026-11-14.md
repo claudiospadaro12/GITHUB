@@ -32,6 +32,8 @@ Hello FTMO Support,
 
 Thank you for your replies of 10 and 13 November (points 1 and 2 in particular). I would like to ask two short follow-up questions.
 
+I have no way of knowing whether other clients are already running the same third-party EAs, or how much capital they manage, so I cannot check the limit myself. I would be very sorry to find out only after having paid for and passed a Challenge.
+
 1. You wrote that others may already be using the same EA "and therefore the same strategy". If the same commercial EA is run with different set files (different risk or settings), is it still considered the "identical strategy" for the capital limit?
 
 2. Your reply says that using a third-party EA "may result in your FTMO Account being denied if you exceed our Maximum Capital Allocation". (a) At which stage can this check be applied to an account running a third-party EA: during the Challenge, at Verification, when the funded account is issued, or at a payout? (b) What is the consequence at each stage (account denied, trading suspended, account closed, payout withheld), and can it affect payouts I have already earned? (c) If an account is denied or closed because of this limit, is the Challenge fee refunded? (d) Would FTMO notify me before suspending or closing an account?
