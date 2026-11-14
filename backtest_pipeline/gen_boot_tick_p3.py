@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Riga CORTA di TICK160 ORO (P3 a tick reali 2025). Modello: righe/BOOT_RIGA_OTT1.txt. Uso: python3 gen_boot_tick160_oro.py <PIN40 della riga lunga> <SHA256 della riga lunga>"""
+"""Riga CORTA di TICK P3 (P3 a tick reali 2025). Modello: righe/BOOT_RIGA_OTT1.txt. Uso: python3 gen_boot_tick_p3.py <PIN40 della riga lunga> <SHA256 della riga lunga>"""
 import sys, os, re
 PIN, SHA = sys.argv[1], sys.argv[2].upper()
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
