@@ -88,3 +88,17 @@ Stessa analisi con in coda una "terza lettura": aggiunge Trustpilot, Myfxbook, b
 - Esperienze di terzi con gli EA di Wim su FTMO: NON TROVATE.
 
 **Coerenza con i nostri backtest**: il 31/10 avevamo gia confrontato i rendimenti mensili del segnale 2265877 con i nostri test (`CONFRONTO_SEGNALE_WIM_REAPER_2026-10-31.md`): i segni dei mesi coincidono (es. febbraio 2025 -6,7% contro -3,6%; ottobre 2025 -4,2% contro -3,0%), con ampiezze minori nei test. Il blog di terzi usa lo stesso modello a 1 minuto. I dati dei siti non contraddicono la nostra base: li usiamo per ipotesi e controlli, non per cambiare i numeri.
+
+---
+# Aggiunta: quarta lettura (zip `ANALISI_SITI_EA_2026-11-14_3`, archiviata in `quarta_lettura/`)
+Aggiunge le pagine del sito del venditore che mancavano (/reviews, /faq, /affiliates, /about, /brokers, /membership, /easyalgos, /free-ebook) e un tentativo su Forex Factory. Dichiarazioni del venditore, non verificate.
+
+**Cose utili a noi**
+- **Licenze**: FAQ: "Each purchase comes with 10 licenses per Expert Advisor", non trasferibili dopo l'attivazione. Coincide con le 10 licenze per EA di Claudio (e Massimo ha le sue, separate). **Non e dichiarato cosa conta come "licenza" (conto? terminale? IP?)**: se e per conto, Goldbot e Daytrade Pro (presenti su trial FTMO, P1, P4, demo, reale e VPS) potrebbero avvicinarsi a 10. Da fare: elencare i conti su cui ogni EA e stato attivato e contarli. Non verificato come Wim conta.
+- **Membership $99/mese**: solo Gold Reaper, un solo conto MT5, con dashboard/SET/manuale/aggiornamenti finche si e membri. Non ci riguarda.
+- **Supporto**: solo lun-ven 9-17 CET, risposta in 1-2 giorni lavorativi, nessun supporto nel weekend. Utile: non contare su aiuto nel fine settimana (l'upgrade Contabo del venerdi sera).
+- **Rischio/responsabilita**: rinnovo il punto noto: tutto il rischio e a carico dell'utente (risk-warning sez. 5.1).
+
+**Cose di affidabilita (non cambiano i test)**: /easyalgos dice che "il broker paga EasyAlgos per i clienti che porta" mentre /brokers raccomanda gli stessi broker (IC Markets, IC Trading) come "we use and trust" senza dichiarare compensi; leva UE "1:30" nella FAQ contro "fino a 1:500" in /brokers; "over 950 verified reviews" ma /reviews ne mostra 81 senza recensioni negative; storia dichiarata incoerente (2000/2005/2008/2013/2014; Profalgo "fondata nel 2019" senza numero di registro in /about, C-93668 nel risk-warning); "piu di 10.000 prodotti venduti" non verificabile.
+
+**Forex Factory**: indice letto (Prop Firm Discussion: 41 thread e 59.077 risposte; Trading Systems 3.412), ma le liste di discussioni e la ricerca interna non si aprono dal sistema di lettura: NON LETTE. Nessuna informazione utile da li. Reddit bloccato. FX Blue: nessun conto Profalgo.
