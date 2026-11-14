@@ -16,9 +16,12 @@
 | **Phantom 2026 + correzione tick su tutto P1** | circa 21.500 - 23.800 | 1,23 - 1,43 | **138 - 160** | 159 - 184 | **169 - 196** | 46 - 56% | 56 - 69% | 79 - 91% |
 Le probabilita entro 6/7/9 mesi sono ricavate interpolando la distribuzione di base (in sequenza: mediana 137, 76% a 182 giorni, 89% a 210, 100% a 270).
 
-## P1 e P4 insieme
-- Base: entrambe entro 7 mesi 75%, entro 9 mesi 95% (P4 e il collo di bottiglia, 77% e 95%).
-- Nuovo (stima mia, con P1 piu lento e P4 invariato): entrambe entro 7 mesi circa **50-65%**, entro 9 mesi circa **77-90%**. P4 diventa chiaramente piu veloce di P1 solo nello scenario con correzione tick: sotto la stima base P1 restava piu veloce.
+## P1 e P4 insieme (CORRETTO dopo verifica)
+**Correzione:** una versione precedente di questo file diceva che P4 era invariato e piu veloce di P1. Era sbagliato: il Phantom 2026 tocca solo P1, ma la correzione tick vale anche per P4 (Reaper + Goldbot + DTP).
+- P4 base: 145 giorni (somma delle fasi), 173 in sequenza; entro 7 mesi 77%, entro 9 mesi 95%.
+- P4 con correzione tick (tempo x1,09-1,20): circa 158-174 (somma delle fasi), 188-208 in sequenza; entro 7 mesi circa 62-70%.
+- P1 resta piu veloce o alla pari di P4 in tutti gli scenari (senza tick: 127-133 contro 145; con tick: 138-160 contro 158-174). P4 NON e piu veloce di P1.
+- Entrambe entro 7 mesi: base 75%, nuovo circa 45-60%. Entrambe entro 9 mesi: base 95%, nuovo circa 70-88%. Stime rozze (correlazione tra i due portafogli ipotizzata).
 
 ## Limiti
 Primo ordine (non simulazione); il tempo non scala esattamente con la deriva; i fallimenti NON sono ricalcolati (piu tempo = piu esposizione alle giornate di coda, effetto piccolo ma non nullo); nessun margine di errore calcolato; il Phantom 2026 e un percorso con Randomization 50 su 10,5 mesi; nessun costo FTMO reale (spread, slippage); la correzione tick e misurata solo sul 2025.
