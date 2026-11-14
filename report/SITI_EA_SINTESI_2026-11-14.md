@@ -102,3 +102,22 @@ Aggiunge le pagine del sito del venditore che mancavano (/reviews, /faq, /affili
 **Cose di affidabilita (non cambiano i test)**: /easyalgos dice che "il broker paga EasyAlgos per i clienti che porta" mentre /brokers raccomanda gli stessi broker (IC Markets, IC Trading) come "we use and trust" senza dichiarare compensi; leva UE "1:30" nella FAQ contro "fino a 1:500" in /brokers; "over 950 verified reviews" ma /reviews ne mostra 81 senza recensioni negative; storia dichiarata incoerente (2000/2005/2008/2013/2014; Profalgo "fondata nel 2019" senza numero di registro in /about, C-93668 nel risk-warning); "piu di 10.000 prodotti venduti" non verificabile.
 
 **Forex Factory**: indice letto (Prop Firm Discussion: 41 thread e 59.077 risposte; Trading Systems 3.412), ma le liste di discussioni e la ricerca interna non si aprono dal sistema di lettura: NON LETTE. Nessuna informazione utile da li. Reddit bloccato. FX Blue: nessun conto Profalgo.
+
+---
+# Aggiunta: lettura del 13/11 sera (zip `ANALISI_SITI_EA_2026-11-13_1`, archiviata in `lettura_13_11/`): chiarisce i drawdown e mette a fuoco il Phantom
+E la prima sessione di Claude Desktop (13/11, 23:51), parziale: sito del venditore (solo home), MQL5 (3 prodotti, 2 segnali), ForexPeaceArmy (solo titoli del tag EA). Nessun dato FTMO.
+
+## I drawdown "contraddittori" sono misure diverse della stessa pagina MQL5 (segnali)
+- **Segnale 2204998** (Reaper + GTP + Daytrade Pro, avviato il 26/02/2024, 217 settimane, 8.285 operazioni, PF 1,15): massimo per saldo **2.361,66 USD = 26,12%**; **relativo sul saldo 32,59%**; **relativo sull'equity 9,00%**. Quindi le cifre 26,12% / 32,6% / 9,00% sono tre misure DIVERSE, non una contraddizione. (Il 50,68% di un'altra lettura resta non spiegato.)
+- **Segnale 2355966** (Gold Phantom, Darwinex, avviato il 27/01/2026, 48 settimane): massimo per saldo **624,38 USD = 23,43%**; relativo sul saldo 11,02%; relativo sull'equity 5,95%; **692 operazioni, profit factor 1,07-1,08**; saldo 5.336,90 USD con deposito iniziale 2.000 e depositi 3.000 USD, prelievi 0 ("Growth 17,21%": il rendimento sul capitale versato e circa 6,7%). Avvisi di inattivita da febbraio a ottobre 2026.
+
+## Il punto che conta: il Phantom live e molto sotto al nostro tester
+| Fonte | Periodo | Operazioni | Profit factor |
+|---|---|---|---|
+| Nostro tester, Phantom L1 (D160 R1/R2, 160k) | 2025 | 1.105 | **2,87 / 2,90** |
+| Segnale Darwinex di Wim (impostazioni NON note) | 27/01-13/11/2026 | 692 | **1,07-1,08** |
+| Nostro trial FTMO | ottobre-novembre 2026 | 25 (36% in profitto) | **0,26** (campione piccolo) |
+| Nostro reale | idem | 12 (17%) | **0,40** (campione piccolo) |
+Fonti dei due ultimi: `STORICO_REALE_E_TRIAL_2026-11-12.md`. **Non e una prova che il tester sia sbagliato**: periodi diversi (2025 contro 2026), campioni piccoli, impostazioni e capitale diversi (a 2.000-5.000 USD il lotto minimo 0,01 e la selezione automatica delle strategie cambiano il comportamento), spread e slippage di Darwinex e dei broker live non nel tester. Ma e il divario piu grande che abbiamo tra tester e live, ed e sul Phantom, componente di P1.
+
+**Prova che propongo (nessuna lanciata)**: far girare il Phantom Gradino 1 (`GoldPhantom_Propfirm.set`) a tick reali sul periodo 01/01/2026 -> oggi (stesso periodo del live) e confrontare profit factor, numero di operazioni e mesi con (a) il segnale Darwinex e (b) il nostro trial. Criteri e previsioni da fissare prima.
