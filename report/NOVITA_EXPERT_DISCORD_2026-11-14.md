@@ -1,0 +1,39 @@
+# Novita sugli Expert da Discord ForexEASolutions (03/11 - 13/11/2026) e cosa significano per noi
+
+**Natura**: sintesi di 5 letture parziali fatte con Claude in Chrome (zip archiviati in `report/DISCORD_ARCHIVIO_2026-11-13/`). Attribuzioni: i giri 1-2 avevano attribuzioni a Wim sbagliate in `all-gold-eas`. Qui uso come "Wim" solo i messaggi con il suo nome in intestazione (automated-support, general-trade-talk, indicement-and-orb-master, luna-ai, share-your-performance, important-announcements). Digital_Wim e un BOT: le sue frasi sono "del bot", non di Wim. Nessun messaggio letto in `all-gold-eas` integralmente (1.377 messaggi raccolti, 42 righe esportate). Dati di utenti non verificati.
+
+## A. Cose di Wim che riguardano i nostri EA (intestazione verificata)
+1. **Reaper: il suo conto usa TradeFrequency "moderate"** (06/11, automated-support): "default settings, but trade frequency set to moderate". Il file `live_signal_settings.set` che abbiamo dal 29/10 ha TradeFrequency=2, MaxAllowedDD=30, FakeOutFilter=2, UseVariableValues e UseHL_TrailingSL attivi, Virtual_expiration spento, NFP 100/60. I nostri set prop (L0 e L3) hanno TradeFrequency=2 come il suo, ma MaxAllowedDD 9 (L0) o 3 (L3). Test sui report gia esistenti: con TF=2 aprono solo le strategie 1-7 (`REAPER_STRATEGIE_ATTIVE_TF2_2026-11-13.md`).
+2. **Licenze (07/11, important-announcements)**: "license invalid" su alcuni VPS (non sul PC) = problema di instradamento del VPS; disattivare IPv6 aiuta spesso. Wim ha ricaricato gli EA sulla dashboard con una lettura degli URL migliorata, **numero di versione invariato**. Non dice di riscaricarli. Il 06/11 ha risposto a un utente: "it works with me, so the server isn't down", e ha scritto in privato.
+3. **Goldbot One, strategia 8 (11/11, automated-support)**: un utente vede ordini pendenti cancellati e rimessi ogni 5 minuti, solo con quel set. Wim: "remove all pending orders and restart the EA. Let me know if it continues doing that. I never was able to replicate this myself." L'utente dice che ricomincia (possibile glitch MT5).
+4. **UBS (11/11-12/11, share-your-performance)**: Wim testa a 0.01 lotti con HistoricalMaxDD regolato; dice che l'EA arrotonda sempre il lotto PER ECCESSO "even if its below 0.005", che il limite max trade puo aggirare il controllo e che "many small things compound". Il 12/11: "we are NOT looking at individual trades. We are looking at TOTAL drawdown of the strategy" (testo troncato). Un utente cita il manuale p.7: valore "per 0.01 lots, in $". Conferma i problemi che avevamo visto nei nostri test UBS (DD% fuori dal periodo misurato).
+5. **UBS in vendita**: dal 06/11 prodotto separato sul sito di Wim; promo 999 $ fino al 12/11, listino 1.699 $; "over 350 ready-made SET files"; app **UBS Optimizer** (11/11). Nessuna decisione di acquisto da parte mia.
+6. **ORB (09/11)**: il segnale ORB gira strategie nuove con il nuovo algoritmo Range Breakout di UBS ("completely new strategies"); "ORB will be updated soon with it"; non e l'ORB che hanno gli utenti.
+7. **Moon dog (04/11)**: Wim: "It's a Gold Reaper copy (decompiled source code)... just changed the parameter names when I called him out". Il 13/11 "grifters will be grifters".
+8. **Luna AI (04-05/11)**: Wim: i night scalper hanno win rate alto e rischio/rendimento sfavorevole, "the only way it works", SL piu stretti "will kill your account"; "I don't do custom EA work". Non e nei nostri portafogli.
+
+## B. Dal bot Digital_Wim (NON di Wim; non verificato)
+- Reaper default: TradeFrequency 5 (Auto), MaxAllowedDD 30, StartLots 0.01, MaxSpread 500, OnlyUp 1. (Verificato sui nostri file: `gold_reaper_default.set` ha esattamente questi valori.) Risultati live "circa 16% max DD e circa 200% di crescita a MaxAllowedDD 30".
+- Livelli TradeFrequency del Reaper: extreme conservative = strategie 1-3; conservative 1-5; moderate 1-7; intense 1-8; extreme 1-9; Auto = budget = saldo x MaxAllowedDD / 100 con soglie 200 / 330 / 560 / 810 $. Il manuale V5.1 classifica 1-3 basso rischio, 4-7 medio, 8-9 alto.
+- Drawdown storico per 0.01 lotti: Reaper circa 350 $, Gold Trade Pro circa 600 $.
+- **NFP nei set combo (minuti prima/dopo)**: Gold Trade Pro 10/240, Goldbot One 180/50, Gold Phantom 100/60 (il bot lo ha elencato il 06/11 a una domanda di un utente). Differiscono tra loro. Il Reaper ha filtro NFP interno con AutoGMT.
+- Autoloader UBS rilegge i `.set` circa una volta a settimana.
+- Wim "non promuove le prop firm tradizionali" (Darwinex Zero); per prop il bot dice: rischio piu basso, Max Daily DD e min equity nelle Prop Firm Settings, 0,25-0,5% per trade. Nessun set UBS "speciale prop".
+
+## C. Dichiarazioni di utenti (non verificate)
+- **Reaper 2003-2007** (Rainy-, 08/11): backtest con qualita 100% "very bad" con il set "Gold Reaper New V2 2"; buoni dal 2008. I nostri anni (2013, 2018, 2020, 2025) sono tutti dopo il 2008: il regime 2003-2007 non e coperto.
+- Reaper live: kridel.201 "DD 10.75% since I started it on 2nd October 2026" (03/11; set non indicato); Mαteopp "3 full TP and 2 BE for TGR on IC Markets"; Rainy- "TGR only took 5 trades, not 10+". Phantom: due ordini che toccano lo SL (Grok3007, 03/11).
+- Strategia 5 del Phantom: domanda degli utenti del 10/11; risposta di Wim dell'11/11 solo parziale ("you can not disable strategy 5, unless... manual strategy selection and then do NOT use Max allowed Total Drawdown for risk (but rather max ..."): **testo completo NON TROVATO**, attribuzione da verificare.
+- Strategia 8 del Reaper: segnalazione del 13/11 di 5 posizioni aperte insieme; **risposta di Wim NON TROVATA**. Con TF=2 i nostri set non aprono la strategia 8.
+- Dati storici consigliati (riferito da utenti): MetaQuotes demo per il lungo periodo (2004-2026), il broker (es. IC Markets, real ticks dal 2023) per il breve.
+- Slippage: Roboforex "+3.8 pts" medio (Mαteopp, 04/11, senza periodo). Prop: nessun dato su FTMO in `propfirm-discussion` (31 messaggi, nessuno di Wim).
+- Utenti citano la documentazione: "If you plan to run multiple EAs together, use the 'Recommended Combo Setup' ZIP instead" (04/11).
+- Un utente usa Gold Reaper v5.6 (07/11); il manuale che abbiamo e V5.1 (profilo `C:\MT5_Wim`: GoldReaper V5.6, Goldbot One V3.5, Gold Trade Pro V7.2).
+
+## D. Cosa e da verificare / fare (nessuna decisione su taglie o acquisti)
+1. Riscaricare gli EA dalla dashboard e confrontare data/dimensione dei file con quelli sul VPS (Wim ha ricaricato il 07/11 senza cambiare la versione).
+2. Disattivare IPv6 sul VPS se compare "license invalid"; dopo l'eventuale migrazione Contabo con cambio IP, controllare le licenze su ogni terminale.
+3. Prendere dal sito il manuale aggiornato del Reaper (abbiamo V5.1, in uso V5.6): il changelog V5.1 parla di due nuovi filtri news (tassi, CPI) spenti di default, ordini pendenti rimossi automaticamente quando una strategia e spenta, correzione per broker con sessione a cavallo di mezzanotte.
+4. Leggere a mano 3 messaggi di Wim: Phantom strategia 5 (11/11), segnalazione Reaper strategia 8 (13/11), eventuali righe su dashboard/licenze. Prompt giro 4: `PROMPT_CHROME_DISCORD_GIRO4_RICERCA_2026-11-13.md`.
+5. NFP: i set combo hanno finestre diverse per EA (GTP 10/240, Goldbot 180/50, Phantom 100/60, per il bot): da confrontare con i set caricati sul trial.
+6. Regime 2003-2007 del Reaper: non testato da noi; se serve si puo provare un anno di quel periodo (dati M1 oro dal 2003? NON VERIFICATO che li abbiamo).
