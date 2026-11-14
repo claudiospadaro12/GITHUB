@@ -86,3 +86,32 @@ Il test della Tappa 2 era stato preparato a 160.000 EUR per confrontarlo con le 
 - A con PF < 1,4: il Phantom 2026 e molto sotto al 2025: P1 va rivisto (tempi, e se sostituire il Phantom con altro nella parte oro) PRIMA di comprare le challenge.
 - B molto peggio di A (PF di B < A - 1,0 oppure operazioni < 40% di A): il capitale piccolo spiega il segnale; l'80k resta il riferimento.
 **Limiti**: un solo percorso con rumore; impostazioni del segnale NON note; periodo parziale (1/1-13/11); il segnale e in USD su Darwinex; nessun costo FTMO.
+
+---
+# TAPPA 3: RISULTATI (14/11/2026, dopo i criteri e le previsioni sopra)
+Zip `ANNO_ORO_GRADINI_PH2026_20261114_1625`; dati in `PH2026_TICK_dati/` (manifest, script `parse.py`). Phantom Gradino 1 (`GoldPhantom_Propfirm.set`), XAUUSD H1, **tick reali 100%**, 01/01-13/11/2026. Input verificati sul report: TradeFrequency 5, Risk 1234, MaxAllowedDD 9, PropFirmMaxDailyDD 4, Randomization 50, OnlyUp false, magic 75000, NFP 100/60 (= quelli di P1). Nessuno stop out, nessun "no money".
+
+| | A: 80.000 EUR | B: 5.000 EUR |
+|---|---|---|
+| Netto | **+8.011 EUR = +10,0%** in 10,5 mesi | +2.129 EUR = +42,6% |
+| Profit factor | **1,71** | **1,74** |
+| Operazioni (a settimana) | 832 (**18,3**) | 532 (11,7 = 64% di A) |
+| Win rate | 66,7% | 54,3% |
+| DD equity / saldo | 3,08% / 2,43% | 7,94% / 6,64% |
+| Mesi (% del deposito) gen..nov | +2,3 -0,4 +2,2 +1,4 -0,4 +1,2 +0,2 +2,8 +2,5 **-1,8** -0,0 | +7,1 -3,4 +7,7 +8,0 +1,2 +7,1 -0,5 +10,1 +12,0 **-6,3** -0,4 |
+| **20/10-13/11** (periodo del trial) | **PF 0,95**, 75 operazioni, win 48%, -127 EUR | PF 0,89, 61 operazioni, -62 EUR |
+
+## Previsioni contro risultati
+1. A, PF 1,8-3,5: **mancata di poco** (1,71); operazioni a settimana 18-25: **giusta** (18,3).
+2. B: operazioni 40-70% di A: **giusta** (64%); PF entro +-0,6 da A: **giusta** (1,74 contro 1,71).
+3. Il PF del segnale (1,07) non riprodotto ne da A ne da B: **giusta** (nessuna sotto 1,5).
+4. Segno dei mesi contro la tabella del segnale: **NON VERIFICABILE** (manca la tabella mensile del segnale 2355966).
+5. Sotto-periodo 20/10-12/11 con PF inferiore: **giusta** (0,95 contro 1,71).
+
+## Lettura (regola decisa prima: PF di A tra 1,4 e 1,8 = "2026 piu debole del 2025")
+- Il Phantom nel 2026 e **il peggiore dei quattro anni testati** per PF: 2013 4,7 / 2020 2,7 / 2025 2,4 / 2026 **1,71**. Netto annuo a 80k (D160, candele da 1 minuto): 2013 10.873 / 2020 10.919 / 2025 20.183 / **2026 circa 9.300 annualizzato (a tick reali)**. Il 2025 era l'anno eccezionale; il 2026 e vicino al 2013 e 2020 (a tick il netto e gia piu basso dell'8-17% rispetto alle candele).
+- **Il capitale piccolo NON spiega il segnale di Wim**: B (5.000) ha lo stesso PF di A (1,74 contro 1,71). Il divario con il segnale (PF 1,07, 692 operazioni) resta: restano costi/esecuzione (il tester non ha slippage ne spread FTMO/Darwinex) e impostazioni diverse del segnale (non note).
+- Il tratto debole del trial (ottobre-novembre) si vede anche in tester: PF 0,95 su 75 operazioni, ottobre -1,8% (A) e -6,3% (B). Il trial (25 operazioni, PF 0,26, set Medium) resta molto sotto, ma e un campione piccolo con altri set.
+- **Conseguenza per P1 (stima mia, NON ricalcolata: il motore di simulazione non e piu disponibile in questa sessione)**: con il Phantom a circa 9.300 EUR l'anno invece di 14.000 (media 2013/2020/2025), il netto annuo di P1 passa da circa 30.600 a circa 26.000, e dopo la correzione tick a circa 21-24.000; le mediane delle due fasi si allungano del 15-25% (P1 da 137 a circa 160 giorni in sequenza). P4 non e toccato da questo test.
+- Per le fasi di perdita il Phantom 2026 non peggiora: DD equity 3,1% a 80k, nessun giorno oltre i limiti letti (peggior giorno da misurare sulle operazioni giornaliere: non fatto).
+**Limiti**: un percorso con Randomization 50; periodo parziale 10,5 mesi; il confronto con il segnale richiede la sua tabella mensile.
