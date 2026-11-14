@@ -1,6 +1,6 @@
 # Bozza mail all'assistenza FTMO: dichiarazione del familiare e tetto di capitale (14/11/2026)
 
-**Stato: BOZZA, NON INVIATA.** La decisione di inviarla e di Claudio. Prima di inviarla: controllare che la frase "different EAs and settings wherever possible" sia vera (oggi il "Combo A" di Massimo coincide con la parte oro di P1) e che il nome del titolare del conto sia corretto. Non contiene numeri di conto ne dati personali di Massimo. Segue la risposta dell'assistenza del 10/11 (`FTMO_RISPOSTE_TRACCIA_2026-11-09.md`).
+**Stato: BOZZA, NON INVIATA.** La decisione di inviarla e di Claudio. Prima di inviarla: controllare che le frasi "separate household" e "his own licences" siano vere (dette da Claudio il 14/11) e che il nome del titolare del conto sia corretto. Non contiene numeri di conto ne dati personali di Massimo. Segue la risposta dell'assistenza del 10/11 (`FTMO_RISPOSTE_TRACCIA_2026-11-09.md`).
 
 ---
 
@@ -10,7 +10,7 @@ Hello FTMO Support,
 
 Thank you for your reply of 10 November. I would like to be transparent about one point and ask three short questions.
 
-**Transparency.** My brother may open his own FTMO account(s), separately from mine. Each of us would trade only his own account, with his own capital, licences and VPS. We will not manage each other's accounts or coordinate the timing of trades. We both use commercially available third-party Expert Advisors with the developer's published set files, which you confirmed are allowed, and we will use different EAs and settings wherever possible.
+**Transparency.** My brother may open his own FTMO account(s), separately from mine. He lives in a separate household and has purchased his own licences. Each of us would trade only his own account, with his own capital, and we will not manage each other's accounts or coordinate the timing of trades. We both use commercially available third-party Expert Advisors with the developer's published set files, which you confirmed are allowed.
 
 **Questions**
 1. Under these conditions, are our accounts treated as separate (not linked) for the Maximum Capital Allocation and the "per beneficial owner" calculation?
