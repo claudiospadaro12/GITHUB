@@ -1,0 +1,1218 @@
+[
+ {
+  "nuovo": "Breakout_Support_Resistance/bitcoin Scalp Pro(H1)/Optimization.set",
+  "vecchio": "bitcoin Scalp Pro(H1)/Optimization.set",
+  "cambi": [],
+  "aggiunti": 93,
+  "tolti": 21
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Gold Reaper/strategy7_H1.set",
+  "vecchio": "GOLD/Gold Reaper/strategy7_H1.set",
+  "cambi": [
+   [
+    "ST1_UpDiff",
+    "-60",
+    "-10"
+   ]
+  ],
+  "aggiunti": 11,
+  "tolti": 3
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Gold Reaper/strategy8_H1.set",
+  "vecchio": "GOLD/Gold Reaper/strategy8_H1.set",
+  "cambi": [
+   [
+    "Exit_HL_trailingSL_timeframe",
+    "0",
+    "16385"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Gold Reaper/strategy9_H1.set",
+  "vecchio": "GOLD/Gold Reaper/strategy9_H1.set",
+  "cambi": [
+   [
+    "Exit_HL_trailingSL_timeframe",
+    "0",
+    "16385"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Gold Reaper/strategy1_Daily.set",
+  "vecchio": "GOLD/Gold Reaper/strategy1_Daily.set",
+  "cambi": [
+   [
+    "Exit_TrailTP_size",
+    "1600",
+    "700"
+   ],
+   [
+    "Exit_TrailTP_Start",
+    "700",
+    "1600"
+   ],
+   [
+    "Exit_HL_trailingSL_timeframe",
+    "0",
+    "16385"
+   ],
+   [
+    "Exit_HL_countback",
+    "0",
+    "50"
+   ],
+   [
+    "Exit_HL_trailingSL_candles_LEFT",
+    "0",
+    "14"
+   ],
+   [
+    "Exit_HL_trailingSL_candles_RIGHT",
+    "0",
+    "12"
+   ],
+   [
+    "Exit_HL_TrailingSL_MinDist",
+    "0",
+    "300"
+   ],
+   [
+    "Exit_HL_trailingSL_extra_distance",
+    "0",
+    "022"
+   ]
+  ],
+  "aggiunti": 11,
+  "tolti": 7
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPRO_a.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_a.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPRO_d.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_d.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPROH4_b.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPROH4_b.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPRO_c.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_c.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPRO_E.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_E.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPRO_H.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_H.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPRO_G.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_G.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldtrade Pro/GOLDTRADEPRO_F.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_F.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyK.set",
+  "vecchio": "GOLD/Goldbot One/dailyK.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyA.set",
+  "vecchio": "GOLD/Goldbot One/dailyA.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/Optimization.set",
+  "vecchio": "bitcoin Scalp Pro(H1)/Optimization.set",
+  "cambi": [
+   [
+    "RF",
+    "0",
+    "3"
+   ],
+   [
+    "TR",
+    "0",
+    "200"
+   ],
+   [
+    "SpreadFilter",
+    "true",
+    "false"
+   ],
+   [
+    "MaxSpread",
+    "999999",
+    "40"
+   ],
+   [
+    "Virtual_expiration",
+    "false",
+    "true"
+   ],
+   [
+    "DefaultValue",
+    "100000",
+    "0"
+   ],
+   [
+    "ST1_HL_strength_L",
+    "27",
+    "9"
+   ],
+   [
+    "ST1_HL_strength_R",
+    "8",
+    "2"
+   ],
+   [
+    "ST1_countback",
+    "209",
+    "200"
+   ],
+   [
+    "ST1_MinDist_to_HL",
+    "8000",
+    "810"
+   ],
+   [
+    "ST1_UpDiff",
+    "-900.0",
+    "90"
+   ],
+   [
+    "ST1_DownDiff",
+    "1500",
+    "5"
+   ],
+   [
+    "ST1_MaxPendingOrders",
+    "5",
+    "1"
+   ],
+   [
+    "MaxTrades",
+    "5",
+    "1"
+   ],
+   [
+    "MinDist_orders",
+    "160",
+    "1"
+   ],
+   [
+    "ST1_Expiration_hours",
+    "180",
+    "165"
+   ],
+   [
+    "Exit_Timing",
+    "0",
+    "1"
+   ],
+   [
+    "UseEveryTick",
+    "false",
+    "true"
+   ],
+   [
+    "Exit_stop",
+    "20000",
+    "850"
+   ],
+   [
+    "Exit_limit",
+    "36000",
+    "650"
+   ],
+   [
+    "Exit_TrailSL_size",
+    "43000",
+    "1750"
+   ],
+   [
+    "Exit_TrailSL_Start",
+    "0",
+    "1500"
+   ],
+   [
+    "Exit_TrailSL_Stop",
+    "1000000",
+    "10000"
+   ],
+   [
+    "Trade_Exit_TrailTP_",
+    "------------------------------ Trailing TP management ---------",
+    "#########"
+   ],
+   [
+    "Exit_TrailTP_size",
+    "47000",
+    "750"
+   ],
+   [
+    "Exit_TrailTP_Start",
+    "24000",
+    "450"
+   ],
+   [
+    "Exit_BE_start",
+    "0",
+    "900"
+   ],
+   [
+    "Exit_BE_extra_pips",
+    "0",
+    "200"
+   ],
+   [
+    "Exit_HL_trailingSL_extra_distance",
+    "2",
+    "0"
+   ],
+   [
+    "Exit_MagicTrail_start",
+    "12.0",
+    "1"
+   ],
+   [
+    "GridStart",
+    "50",
+    "50.0"
+   ],
+   [
+    "GridStep",
+    "20",
+    "20.0"
+   ],
+   [
+    "GridTakeProfitPips",
+    "100",
+    "100.0"
+   ],
+   [
+    "GridTakeProfitUSD",
+    "50",
+    "50.0"
+   ],
+   [
+    "GridLossUSD",
+    "0",
+    "0.0"
+   ],
+   [
+    "GridMultiplier",
+    "1",
+    "1.0"
+   ],
+   [
+    "CloseAtMinEquity",
+    "0",
+    "0.0"
+   ],
+   [
+    "CloseAtMaxEquity",
+    "0",
+    "0.0"
+   ],
+   [
+    "PropFirmMaxDailyDD",
+    "0",
+    "0.0"
+   ],
+   [
+    "RandomizationValue",
+    "0",
+    "0.0"
+   ],
+   [
+    "ManualBalance",
+    "0",
+    "0.0"
+   ],
+   [
+    "StartLots",
+    "0.1",
+    "0.01"
+   ],
+   [
+    "MaxRiskInDollar_input",
+    "100",
+    "100.0"
+   ],
+   [
+    "LotPerBalance_step",
+    "40",
+    "30"
+   ],
+   [
+    "EnableNFP_Filter",
+    "true",
+    "false"
+   ],
+   [
+    "UseTradingTimeZones",
+    "true",
+    "false"
+   ],
+   [
+    "FridayEnd",
+    "18:00",
+    "23:59"
+   ],
+   [
+    "SaturdayEnd",
+    "00:01",
+    "23:59"
+   ],
+   [
+    "SundayEnd",
+    "00:01",
+    "23:59"
+   ]
+  ],
+  "aggiunti": 85,
+  "tolti": 21
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyI.set",
+  "vecchio": "GOLD/Goldbot One/dailyI.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyE.set",
+  "vecchio": "GOLD/Goldbot One/dailyE.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyH.set",
+  "vecchio": "GOLD/Goldbot One/dailyH.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyC.set",
+  "vecchio": "GOLD/Goldbot One/dailyC.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyB.set",
+  "vecchio": "GOLD/Goldbot One/dailyB.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Goldbot One/dailyD.set",
+  "vecchio": "GOLD/Goldbot One/dailyD.set",
+  "cambi": [
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Gold Phantom/Gold_Phantom_strat5.set",
+  "vecchio": "GOLD/Gold_Phantom_strat5.set",
+  "cambi": [
+   [
+    "EA_MagicNumber",
+    "4005",
+    "90121301"
+   ],
+   [
+    "EA_Comment",
+    "Gold_Phantom_strat5.set",
+    "UBS asoma 90121301"
+   ],
+   [
+    "HistoricalMaxDD",
+    "283",
+    "74"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 41
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/Gold Phantom/Gold_Phantom_strat4.set",
+  "vecchio": "GOLD/Gold_Phantom_strat4.set",
+  "cambi": [
+   [
+    "EA_MagicNumber",
+    "4004",
+    "1105"
+   ],
+   [
+    "EA_Comment",
+    "Gold_Phantom_strat4.set",
+    "UBS asoma 90121302"
+   ],
+   [
+    "HistoricalMaxDD",
+    "146",
+    "216"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 41
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/GOLD_Scalp/ScalpH1_A.set",
+  "vecchio": "Other sets/GOLD_Scalp/ScalpH1_A.set",
+  "cambi": [
+   [
+    "UseEveryTick",
+    "false",
+    "true"
+   ],
+   [
+    "Exit_TrailSL_size",
+    "60",
+    "90"
+   ],
+   [
+    "Exit_TrailSL_Start",
+    "20",
+    "0"
+   ]
+  ],
+  "aggiunti": 11,
+  "tolti": 7
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/GOLD/GOLD_Scalp/ScalpH1_B.set",
+  "vecchio": "Other sets/GOLD_Scalp/ScalpH1_B.set",
+  "cambi": [
+   [
+    "UseEveryTick",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 11,
+  "tolti": 7
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/Advanced Scalper/usdjpy_H4_SL17.set",
+  "vecchio": "Advanced Scalper/usdjpy_H4_SL17.set",
+  "cambi": [],
+  "aggiunti": 19,
+  "tolti": 18
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/Advanced Scalper/usdjpy_H1_SL30.set",
+  "vecchio": "Advanced Scalper/usdjpy_H1_SL30.set",
+  "cambi": [],
+  "aggiunti": 19,
+  "tolti": 18
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/Daytrade Pro/optimization.set",
+  "vecchio": "Other sets/daytrade 2(DAILY)/optimization.set",
+  "cambi": [
+   [
+    "EP",
+    "0",
+    "0.1"
+   ],
+   [
+    "TR",
+    "100",
+    "150"
+   ],
+   [
+    "SpreadFilter",
+    "false",
+    "true"
+   ],
+   [
+    "MaxSpread",
+    "40",
+    "100"
+   ],
+   [
+    "Virtual_expiration",
+    "true",
+    "false"
+   ],
+   [
+    "ST1_HL_strength_L",
+    "2",
+    "27"
+   ],
+   [
+    "ST1_HL_strength_R",
+    "6",
+    "2"
+   ],
+   [
+    "ST1_countback",
+    "50",
+    "210"
+   ],
+   [
+    "ST1_MinDist_to_HL",
+    "13",
+    "20"
+   ],
+   [
+    "ST1_UpDiff",
+    "2",
+    "-20.0"
+   ],
+   [
+    "ST1_DownDiff",
+    "3",
+    "-4.5"
+   ],
+   [
+    "MaxTrades",
+    "1",
+    "99"
+   ],
+   [
+    "MinDist_orders",
+    "1",
+    "50"
+   ],
+   [
+    "ST1_Expiration_hours",
+    "155",
+    "216"
+   ],
+   [
+    "UseEveryTick",
+    "true",
+    "false"
+   ],
+   [
+    "Exit_stop",
+    "175",
+    "450"
+   ],
+   [
+    "Exit_limit",
+    "120",
+    "290"
+   ],
+   [
+    "Exit_TrailSL_size",
+    "100",
+    "190"
+   ],
+   [
+    "Exit_TrailSL_Stop",
+    "10000",
+    "80"
+   ],
+   [
+    "Exit_TrailSL_step",
+    "0.4",
+    "0.1"
+   ],
+   [
+    "Exit_TrailTP_Start",
+    "160",
+    "200"
+   ],
+   [
+    "Exit_BE_start",
+    "35",
+    "66"
+   ],
+   [
+    "Exit_BE_extra_pips",
+    "115",
+    "16"
+   ],
+   [
+    "Exit_MagicTrail_start",
+    "1",
+    "0.1"
+   ]
+  ],
+  "aggiunti": 118,
+  "tolti": 19
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/Daytrade Pro/DaytradePro_EURJPY.set",
+  "vecchio": "Daytrade Pro/DaytradePro_EURJPY.set",
+  "cambi": [
+   [
+    "PrintLogs",
+    "true",
+    "false"
+   ],
+   [
+    "VolTimeframe",
+    "0",
+    "16408"
+   ],
+   [
+    "VolAtrTimeframe",
+    "0",
+    "16408"
+   ],
+   [
+    "ST1_HL_strength_L",
+    "13",
+    "14"
+   ],
+   [
+    "ST1_HL_strength_R",
+    "10",
+    "12"
+   ],
+   [
+    "ST1_MinDist_to_HL",
+    "20",
+    "30"
+   ],
+   [
+    "MinDist_orders",
+    "40",
+    "50"
+   ],
+   [
+    "ST1_Expiration_hours",
+    "48",
+    "64"
+   ],
+   [
+    "Exit_stop",
+    "120",
+    "110"
+   ],
+   [
+    "Exit_limit",
+    "180",
+    "160"
+   ],
+   [
+    "HistoricalMaxDD",
+    "130",
+    "100.31"
+   ]
+  ],
+  "aggiunti": 73,
+  "tolti": 25
+ },
+ {
+  "nuovo": "Breakout_Support_Resistance/Daytrade Pro/DaytradePro_GBPJPY.set",
+  "vecchio": "Daytrade Pro/DaytradePro_GBPJPY.set",
+  "cambi": [
+   [
+    "ShowInfoPanel",
+    "true",
+    "false"
+   ],
+   [
+    "PrintLogs",
+    "true",
+    "false"
+   ],
+   [
+    "VolTimeframe",
+    "0",
+    "16408"
+   ],
+   [
+    "VolAtrTimeframe",
+    "0",
+    "16408"
+   ],
+   [
+    "ST1_HL_strength_L",
+    "4",
+    "3"
+   ],
+   [
+    "ST1_HL_strength_R",
+    "9",
+    "8"
+   ],
+   [
+    "ST1_MinDist_to_HL",
+    "100",
+    "80"
+   ],
+   [
+    "ST1_UpDiff",
+    "14.0",
+    "12"
+   ],
+   [
+    "ST1_DownDiff",
+    "-2.5",
+    "-5.5"
+   ],
+   [
+    "ST1_Expiration_hours",
+    "72",
+    "24"
+   ],
+   [
+    "Exit_stop",
+    "340",
+    "280"
+   ],
+   [
+    "Exit_limit",
+    "300",
+    "240"
+   ],
+   [
+    "Exit_TrailTP_size",
+    "15",
+    "35"
+   ],
+   [
+    "Exit_TrailTP_Start",
+    "160",
+    "140"
+   ],
+   [
+    "Exit_BE_start",
+    "195",
+    "175"
+   ],
+   [
+    "Exit_BE_extra_pips",
+    "40",
+    "55"
+   ],
+   [
+    "HistoricalMaxDD",
+    "105",
+    "113.52"
+   ]
+  ],
+  "aggiunti": 74,
+  "tolti": 25
+ },
+ {
+  "nuovo": "Client sets/MisterMember (Xmas)/9637014_BK_TSLA_VOL_D1ATR.set",
+  "vecchio": "client sets/9637014_BK_TSLA_VOL_D1ATR.set",
+  "cambi": [
+   [
+    "EA_Comment",
+    "TSLA.NAS VOL D1ATR",
+    "9637014_BK_TSLA_VOL_D1AT"
+   ],
+   [
+    "ManualBalance",
+    "0",
+    "10000"
+   ],
+   [
+    "Risk",
+    "0",
+    "123"
+   ],
+   [
+    "LotPerBalance_step",
+    "30",
+    "1000"
+   ],
+   [
+    "MaxRiskPerStrategy_Value",
+    "2",
+    "2.0"
+   ],
+   [
+    "HistoricalMaxDD",
+    "53",
+    "53.741"
+   ],
+   [
+    "MaxLots",
+    "99",
+    "1000"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Client sets/MisterMember (Xmas)/9637015_BK_TSLA_VOL_M15.set",
+  "vecchio": "client sets/9637015_BK_TSLA_VOL_M15.set",
+  "cambi": [
+   [
+    "EA_Comment",
+    "TSLA.NAS VOL M15",
+    "9637015_BK_TSLA_VOL_M15"
+   ],
+   [
+    "ManualBalance",
+    "0",
+    "10000"
+   ],
+   [
+    "Risk",
+    "0",
+    "123"
+   ],
+   [
+    "LotPerBalance_step",
+    "30",
+    "1000"
+   ],
+   [
+    "MaxRiskPerStrategy_Value",
+    "2",
+    "2.0"
+   ],
+   [
+    "HistoricalMaxDD",
+    "43",
+    "50.3649"
+   ],
+   [
+    "MaxLots",
+    "99",
+    "1000"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Client sets/BaSa/9637046_basa_gold d1 - sr - 2008-2024 - 14.set",
+  "vecchio": "client sets/9637046_basa_gold d1 - sr - 2008-2024 - 14.set",
+  "cambi": [
+   [
+    "HistoricalMaxDD",
+    "30",
+    "170"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Client sets/BaSa/9637045_basa_gold d1 - sr - 2008-2024 - 11.set",
+  "vecchio": "client sets/9637045_basa_gold d1 - sr - 2008-2024 - 11.set",
+  "cambi": [
+   [
+    "HistoricalMaxDD",
+    "30",
+    "146"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Client sets/BaSa/9637048_basa_gold d1 - sr - 2008-2024 - 9.set",
+  "vecchio": "client sets/9637048_basa_gold d1 - sr - 2008-2024 - 9.set",
+  "cambi": [
+   [
+    "HistoricalMaxDD",
+    "30",
+    "208"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "Client sets/BaSa/9637047_basa_gold d1 - sr - 2008-2024 - 5.set",
+  "vecchio": "client sets/9637047_basa_gold d1 - sr - 2008-2024 - 5.set",
+  "cambi": [
+   [
+    "HistoricalMaxDD",
+    "30",
+    "105"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "UBS live portfolio/Sets/US100_1.set",
+  "vecchio": "Indicement/USTEC(H1)/US100_1.set",
+  "cambi": [
+   [
+    "EnableNFP_Filter",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "UBS live portfolio/Sets/dailyK.set",
+  "vecchio": "GOLD/Goldbot One/dailyK.set",
+  "cambi": [
+   [
+    "EnableNFP_Filter",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleD",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "UBS live portfolio/Sets/GOLDTRADEPRO_d.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_d.set",
+  "cambi": [
+   [
+    "EnableNFP_Filter",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "UBS live portfolio/Sets/GOLDTRADEPRO_E.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_E.set",
+  "cambi": [
+   [
+    "EnableNFP_Filter",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "UBS live portfolio/Sets/GOLDTRADEPRO_H.set",
+  "vecchio": "GOLD/Goldtrade Pro/GOLDTRADEPRO_H.set",
+  "cambi": [
+   [
+    "EnableNFP_Filter",
+    "false",
+    "true"
+   ],
+   [
+    "UseConfirmationCandleA",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ },
+ {
+  "nuovo": "UBS live portfolio/Sets/US100_4.set",
+  "vecchio": "Indicement/USTEC(H1)/US100_4.set",
+  "cambi": [
+   [
+    "EnableNFP_Filter",
+    "false",
+    "true"
+   ]
+  ],
+  "aggiunti": 0,
+  "tolti": 0
+ }
+]
