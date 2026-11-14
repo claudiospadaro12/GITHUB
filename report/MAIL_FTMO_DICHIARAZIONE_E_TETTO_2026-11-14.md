@@ -15,7 +15,7 @@ Thank you for your replies of 10 and 13 November (points 1, 2 and 12 in particul
 **Questions**
 1. Under these conditions, are our accounts treated as separate (not linked) for the Maximum Capital Allocation and the "per beneficial owner" calculation?
 2. You wrote that others may already be using the same EA "and therefore the same strategy". If the same commercial EA is run with different set files (different risk or settings), is it still considered the "identical strategy" for the capital limit?
-3. Timing of the limit. Your reply says that using a third-party EA "may result in your FTMO Account being denied if you exceed our Maximum Capital Allocation". If an account has already been funded and it later turns out that the total capital run by other clients with the same third-party EA exceeds the Maximum Capital Allocation, can that affect my already-issued accounts or payouts I have already earned? Or does the limit only apply when a new account is issued? And would FTMO notify me before suspending or closing an account?
+3. Timing of the limit. Your reply says that using a third-party EA "may result in your FTMO Account being denied if you exceed our Maximum Capital Allocation". (a) Is this check done before I purchase a Challenge, or at the moment I start it, so that I would know before paying? (b) If it is applied later, can it affect an account that has already been funded, or payouts I have already earned? (c) If an account is denied or closed because of this limit, is the Challenge fee refunded? (d) Would FTMO notify me before suspending or closing an account?
 
 Thank you for your time.
 
