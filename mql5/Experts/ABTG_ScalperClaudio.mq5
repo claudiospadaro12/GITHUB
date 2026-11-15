@@ -67,19 +67,34 @@
 //|  attivo: senza, un cesto in perdita puo' restare aperto per      |
 //|  sempre e il rischio non ha limite.                             |
 //|                                                                  |
+//|  1.03 (15/11/2026): correzioni dopo la prima misura (-96,5% in   |
+//|  3 mesi a tick reali): (a) niente spam di ordini a mercato       |
+//|  chiuso: pausa dopo un rifiuto e controllo della sessione;       |
+//|  (b) passi e segnali contati solo se almeno un ordine si apre;   |
+//|  (c) netto per motivo di uscita nel riepilogo; (d) obiettivo e   |
+//|  limite di perdita GIORNALIERI (0 = spenti); (e) misura del      |
+//|  vantaggio: mossa dopo 5, 30 e 120 s, lorda e al netto dello     |
+//|  spread, per ora, velocita e rapporto spread/mossa.              |
+//|  Criteri: report/ABTG_SCALPER_CLAUDIO_V103_CRITERI_2026-11-15.md |
+//|                                                                  |
 //|  Non e' una strategia provata: e' una misura. Nessun giudizio su |
 //|  lotti o taglie.                                                 |
 //+------------------------------------------------------------------+
 // MARCATORE_ABTG_SCALPER_CLAUDIO_v1 (controllato dalla riga che scarica questo file)
 #property copyright "ABTG"
-#property version   "1.02"
+#property version   "1.03"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635
 #define RING          4096
 #define SIGQ          256
+#define EH            3      // orizzonti della misura del vantaggio (5, 30, 120 s)
+#define EDIM          3      // dimensioni: velocita, ora, rapporto spread/mossa
+#define EBMAX         6
 
 enum ENUM_EXIT_MODE { EXIT_PER_POSIZIONE = 0, EXIT_A_CESTO = 1 };
+
+void PrintEdge();
 
 input group "=== Ingresso: direzione dal movimento del bid ==="
 input int             InpLookbackSec      = 2;      // secondi su cui si misura il movimento (1-2)
@@ -110,6 +125,10 @@ input int             InpCooldownMin      = 30;     // minuti di pausa dopo lo s
 input int             InpMaxRequestsPerDay= 0;      // 0 = nessun tetto (si MISURA); altrimenti richieste al server al giorno
 input int             InpStartHour        = 0;      // ora SERVER da cui puo' operare
 input int             InpEndHour          = 24;     // ora SERVER oltre la quale si ferma (24 = mai)
+
+input group "=== Giornata (0 = spento) ==="
+input double          InpDailyTargetEuro  = 0.0;    // se il guadagno del giorno (chiuso + cesto aperto) raggiunge X: chiude tutto e NON riapre fino al giorno dopo (ora server)
+input double          InpDailyLossEuro    = 0.0;    // se la perdita del giorno raggiunge X: chiude tutto e NON riapre fino al giorno dopo
 
 input group "=== Generali ==="
 input long            InpMagic            = 779902; // magic dell'EA
@@ -160,6 +179,18 @@ double   gSigMid[SIGQ];
 int      gSigHead = 0, gSigCnt = 0;
 long     gSigN = 0, gSigWin = 0, gSigRev = 0;
 string   gCsv = "";
+//--- 1.03: tempo, pause dopo i rifiuti, netto per motivo, giornata, misura del vantaggio
+long     gNowMsc = 0, gOpenPauseUntil = 0, gClosePauseUntil = 0;
+double   gNetT = 0.0, gNetC = 0.0, gNetF = 0.0, gNetZ = 0.0, gNetO = 0.0;
+double   gDayRealized = 0.0;
+bool     gDayStop = false;
+long     gDayTargetHits = 0, gDayLossHits = 0;
+long     gEvMsc[SIGQ];
+int      gEvDir[SIGQ], gEvStage[SIGQ], gEvB0[SIGQ], gEvB1[SIGQ], gEvB2[SIGQ];
+double   gEvMid[SIGQ], gEvSp[SIGQ];
+int      gEvHead = 0, gEvCnt = 0;
+long     gEdN[EH * EDIM * EBMAX];
+double   gEdG[EH * EDIM * EBMAX], gEdC[EH * EDIM * EBMAX], gEdQ[EH * EDIM * EBMAX];
 ulong    gLastStatusMs = 0;
 
 //+------------------------------------------------------------------+
@@ -201,12 +232,15 @@ int OnInit()
    if(InpMinMovePoints <= 0.0 || InpPointsPerOrder <= 0.0 || InpTargetEuro <= 0.0 || InpBasketTargetEuro <= 0.0 || InpBasketStopEuro <= 0.0)
      { Alert("ABTG_ScalperClaudio: soglie e target devono essere > 0 (il freno e' obbligatorio)"); return(INIT_FAILED); }
    if(InpLotMode < 0 || InpLotMode > 2 || InpLotMax < InpLot - 1e-9 || InpLotStep < 0.0 || InpLotStepEuro <= 0.0) { Alert("ABTG_ScalperClaudio: parametri del lotto non validi (modo 0-2, InpLotMax >= InpLot, passo >= 0)"); return(INIT_FAILED); }
+   if(InpDailyTargetEuro < 0.0 || InpDailyLossEuro < 0.0) { Alert("ABTG_ScalperClaudio: obiettivo e limite giornalieri non possono essere negativi (0 = spenti)"); return(INIT_FAILED); }
    if(InpMaxTotalLots < NormLot(InpLot) - 1e-9) { Alert("ABTG_ScalperClaudio: InpMaxTotalLots < lotto singolo"); return(INIT_FAILED); }
    trade.SetExpertMagicNumber((ulong)InpMagic);
    trade.SetDeviationInPoints((ulong)InpDeviationPts);
    trade.SetTypeFillingBySymbol(_Symbol);
    ArrayResize(gCommId, 0); ArrayResize(gCommVal, 0);
    gTkHead = 0; gTkCnt = 0; gLastStepMsc = 0; gCooldownUntil = 0; gSigHead = 0; gSigCnt = 0;
+   gEvHead = 0; gEvCnt = 0; gDayStop = false; gDayRealized = 0.0; gOpenPauseUntil = 0; gClosePauseUntil = 0;
+   ArrayInitialize(gEdN, 0); ArrayInitialize(gEdG, 0.0); ArrayInitialize(gEdC, 0.0); ArrayInitialize(gEdQ, 0.0);
    gCsv = "abtg_scalper_claudio_" + IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)) + ".csv";
    if(InpWriteCsv && !FileIsExist(gCsv, FILE_COMMON))
      {
@@ -217,7 +251,7 @@ int OnInit()
          FileClose(h);
         }
      }
-   Print("[SCALPER CLAUDIO] 1.00 caricato su ", _Symbol, " - ", (IsTester() ? "TESTER" : "DEMO"),
+   Print("[SCALPER CLAUDIO] 1.03 caricato su ", _Symbol, " - ", (IsTester() ? "TESTER" : "DEMO"),
          " - 1 punto = ", DoubleToString(_Point, _Digits), " (prezzo) - tickvalue ", DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE), 4),
          " - vmin ", DoubleToString(vmin, 2), " - spread ", IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD)), " pt - modo uscita ", IntegerToString((int)InpExitMode));
    return(INIT_SUCCEEDED);
@@ -246,13 +280,18 @@ void OnDeinit(const int reason)
    Print("[SCALPER CLAUDIO] ", s2);
    Print("[SCALPER CLAUDIO] ", s3);
    Print("[SCALPER CLAUDIO] ", s4);
+   string s5 = "RIEPILOGO netto per motivo: target " + DoubleToString(gNetT, 2) + ", cesto " + DoubleToString(gNetC, 2) + ", freno " + DoubleToString(gNetF, 2)
+               + ", a zero " + DoubleToString(gNetZ, 2) + ", altro/giornata " + DoubleToString(gNetO, 2)
+               + "; giornate chiuse a obiettivo " + IntegerToString((int)gDayTargetHits) + ", a limite di perdita " + IntegerToString((int)gDayLossHits);
+   Print("[SCALPER CLAUDIO] ", s5);
+   PrintEdge();
    if(InpWriteCsv)
      {
       int h = FileOpen("abtg_scalper_claudio_riepilogo.csv", FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_COMMON | FILE_SHARE_READ, ';');
       if(h != INVALID_HANDLE)
         {
          FileSeek(h, 0, SEEK_END);
-         FileWrite(h, TimeToString(TimeCurrent(), TIME_DATE | TIME_SECONDS), _Symbol, s1, s2, s3, s4);
+         FileWrite(h, TimeToString(TimeCurrent(), TIME_DATE | TIME_SECONDS), _Symbol, s1, s2, s3, s4, s5);
          FileClose(h);
         }
      }
@@ -335,11 +374,13 @@ void DayRoll(datetime t)
      {
       if(gReqToday > gReqMaxDay) gReqMaxDay = gReqToday;
       gReqToday = 0; gDayKey = key;
+      gDayRealized = 0.0; gDayStop = false;   // giornata nuova (ora server): si riparte
      }
   }
 //+------------------------------------------------------------------+
 void CloseAll(string why)
   {
+   if(gNowMsc < gClosePauseUntil) return;   // dopo un rifiuto (mercato chiuso ecc.) non si ripete a ogni tick
    gCloseReason = why;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
      {
@@ -347,7 +388,14 @@ void CloseAll(string why)
       if(t == 0) continue;
       if(PositionGetString(POSITION_SYMBOL) != _Symbol || PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
       ReqCount();
-      if(!trade.PositionClose(t)) LogV("chiusura rifiutata " + IntegerToString((int)trade.ResultRetcode()));
+      if(!trade.PositionClose(t))
+        {
+         uint rcc = trade.ResultRetcode();
+         gRejects++;
+         gClosePauseUntil = gNowMsc + (rcc == TRADE_RETCODE_MARKET_CLOSED ? 60000 : 3000);
+         LogV("chiusura rifiutata " + IntegerToString((int)rcc));
+         break;
+        }
      }
   }
 //+------------------------------------------------------------------+
@@ -380,6 +428,7 @@ bool ManageExit(const SBasket &b)
       return false;
      }
    bool any = false;
+   if(gNowMsc < gClosePauseUntil) return false;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
      {
       ulong t = PositionGetTicket(i);
@@ -392,6 +441,13 @@ bool ManageExit(const SBasket &b)
          gCloseReason = "target";
          ReqCount();
          if(trade.PositionClose(t)) any = true;
+         else
+           {
+            uint rct = trade.ResultRetcode();
+            gRejects++;
+            gClosePauseUntil = gNowMsc + (rct == TRADE_RETCODE_MARKET_CLOSED ? 60000 : 3000);
+            break;
+           }
         }
      }
    return any;
@@ -404,7 +460,13 @@ bool OpenOne(int dir, double lot, double &entry)
    bool ok = (dir > 0) ? trade.Buy(lot, _Symbol, 0.0, 0.0, 0.0, "SCALPER CLAUDIO")
                        : trade.Sell(lot, _Symbol, 0.0, 0.0, 0.0, "SCALPER CLAUDIO");
    uint rc = trade.ResultRetcode();
-   if(!ok || rc != TRADE_RETCODE_DONE) { gRejects++; LogV("apertura rifiutata " + IntegerToString((int)rc)); return false; }
+   if(!ok || rc != TRADE_RETCODE_DONE)
+     {
+      gRejects++;
+      gOpenPauseUntil = gNowMsc + (rc == TRADE_RETCODE_MARKET_CLOSED ? 300000 : 10000);   // mercato chiuso: 5 min; altri rifiuti: 10 s
+      LogV("apertura rifiutata " + IntegerToString((int)rc));
+      return false;
+     }
    entry = trade.ResultPrice();
    ulong deal = trade.ResultDeal();
    ulong pid = trade.ResultOrder();
@@ -417,6 +479,70 @@ bool OpenOne(int dir, double lot, double &entry)
    CommAdd(pid, comm);
    gOpened++;
    return true;
+  }
+//+------------------------------------------------------------------+
+//| misura del vantaggio (1.03): mossa dopo 5, 30 e 120 s, lorda e al netto dello spread
+void EvPush(long msc, int dir, double mid, double spPts, double movePts, int hour)
+  {
+   if(gEvCnt == SIGQ) { gEvHead = (gEvHead + 1) % SIGQ; gEvCnt--; }
+   int idx = (gEvHead + gEvCnt) % SIGQ;
+   double am = MathAbs(movePts);
+   double r0 = (InpMinMovePoints > 0.0 ? am / InpMinMovePoints : 0.0);
+   int b0 = (r0 < 2.0 ? 0 : (r0 < 3.0 ? 1 : (r0 < 5.0 ? 2 : 3)));
+   int b1 = hour / 4;
+   if(b1 > 5) b1 = 5;
+   if(b1 < 0) b1 = 0;
+   double rr = (am > 0.0 ? spPts / am : 99.0);
+   int b2 = (rr < 0.5 ? 0 : (rr < 1.0 ? 1 : (rr < 2.0 ? 2 : 3)));
+   gEvMsc[idx] = msc; gEvDir[idx] = dir; gEvMid[idx] = mid; gEvSp[idx] = spPts;
+   gEvB0[idx] = b0; gEvB1[idx] = b1; gEvB2[idx] = b2; gEvStage[idx] = 0;
+   gEvCnt++;
+  }
+void EvRecord(int h, int dim, int b, double gross, double net)
+  {
+   int k = (h * EDIM + dim) * EBMAX + b;
+   gEdN[k]++; gEdG[k] += gross; gEdC[k] += net; gEdQ[k] += net * net;
+  }
+void EvCheck(const MqlTick &tk)
+  {
+   long hz[3] = {5000, 30000, 120000};
+   double mid = (tk.bid + tk.ask) / 2.0;
+   for(int k = 0; k < gEvCnt; k++)
+     {
+      int idx = (gEvHead + k) % SIGQ;
+      while(gEvStage[idx] < EH && tk.time_msc - gEvMsc[idx] >= hz[gEvStage[idx]])
+        {
+         int h = gEvStage[idx];
+         gEvStage[idx]++;
+         if(tk.time_msc - gEvMsc[idx] > 3 * hz[h]) continue;   // buco di mercato (chiusura/weekend): quella misura non vale
+         double gross = (double)gEvDir[idx] * (mid - gEvMid[idx]) / _Point;
+         double net = gross - gEvSp[idx];
+         EvRecord(h, 0, gEvB0[idx], gross, net);
+         EvRecord(h, 1, gEvB1[idx], gross, net);
+         EvRecord(h, 2, gEvB2[idx], gross, net);
+        }
+     }
+   while(gEvCnt > 0 && gEvStage[gEvHead] >= EH) { gEvHead = (gEvHead + 1) % SIGQ; gEvCnt--; }
+  }
+void PrintEdge()
+  {
+   string hn[3] = {"5s", "30s", "120s"};
+   string dn[3] = {"velocita", "ora", "spread/mossa"};
+   int nb[3] = {4, 6, 4};
+   for(int h = 0; h < EH; h++)
+      for(int d = 0; d < EDIM; d++)
+         for(int b = 0; b < nb[d]; b++)
+           {
+            int k = (h * EDIM + d) * EBMAX + b;
+            if(gEdN[k] == 0) continue;
+            double n = (double)gEdN[k];
+            double mg = gEdG[k] / n, mc = gEdC[k] / n;
+            double var = gEdQ[k] / n - mc * mc;
+            double sd = (var > 0.0 ? MathSqrt(var) : 0.0);
+            double tt = (sd > 0.0 ? mc / (sd / MathSqrt(n)) : 0.0);
+            Print("[SCALPER CLAUDIO] EDGE ", hn[h], " ", dn[d], " bucket ", b, ": n ", IntegerToString((int)gEdN[k]), ", lordo ", DoubleToString(mg, 2),
+                  " pt, netto spread ", DoubleToString(mc, 2), " pt, t ", DoubleToString(tt, 2));
+           }
   }
 //+------------------------------------------------------------------+
 void SigPush(long msc, int dir, double mid)
@@ -452,7 +578,10 @@ double CurLot(const SBasket &b)
 //+------------------------------------------------------------------+
 void TryEntry(const MqlTick &tk, const SBasket &b)
   {
+   if(gDayStop) return;
    if(TimeCurrent() < gCooldownUntil) return;
+   if(tk.time_msc < gOpenPauseUntil) return;
+   if(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_MODE) != SYMBOL_TRADE_MODE_FULL) return;
    MqlDateTime dt; TimeToStruct(tk.time, dt);
    if(dt.hour < InpStartHour || dt.hour >= InpEndHour) return;
    if(InpMaxSpreadPoints > 0 && (tk.ask - tk.bid) / _Point > InpMaxSpreadPoints) return;
@@ -479,9 +608,6 @@ void TryEntry(const MqlTick &tk, const SBasket &b)
    while(n > 0 && b.lots + n * lot > InpMaxTotalLots + 1e-9) n--;
    if(n <= 0) return;
    gLastStepMsc = tk.time_msc;
-   gSteps++;
-   gBasketSteps++;
-   SigPush(tk.time_msc, dir, (tk.bid + tk.ask) / 2.0);
    double first = 0.0, prev = 0.0;
    int opened = 0;
    for(int k = 0; k < n; k++)
@@ -499,6 +625,13 @@ void TryEntry(const MqlTick &tk, const SBasket &b)
       prev = e;
       opened++;
      }
+   if(opened > 0)
+     {
+      gSteps++;
+      gBasketSteps++;
+      SigPush(tk.time_msc, dir, (tk.bid + tk.ask) / 2.0);
+      EvPush(tk.time_msc, dir, (tk.bid + tk.ask) / 2.0, (tk.ask - tk.bid) / _Point, move, dt.hour);
+     }
    LogV("passo " + IntegerToString((int)gSteps) + ": " + (dir > 0 ? "LONG" : "SHORT") + " movimento " + DoubleToString(move, 1) + " pt, aperte " + IntegerToString(opened) + "/" + IntegerToString(n));
   }
 //+------------------------------------------------------------------+
@@ -507,18 +640,31 @@ void OnTick()
    MqlTick tk;
    if(!SymbolInfoTick(_Symbol, tk)) return;
    if(tk.bid <= 0.0) return;
+   gNowMsc = tk.time_msc;
    RingPush(tk.time_msc, tk.bid);
    DayRoll(tk.time);
    SigCheck(tk);
+   EvCheck(tk);
    SBasket b;
    ReadBasket(b);
    if(b.n == 0) gUnderwater = false;
+   double dayPnl = gDayRealized + b.net;
+   if(!gDayStop)
+     {
+      if(InpDailyTargetEuro > 0.0 && dayPnl >= InpDailyTargetEuro) { gDayStop = true; gDayTargetHits++; }
+      else if(InpDailyLossEuro > 0.0 && dayPnl <= -InpDailyLossEuro) { gDayStop = true; gDayLossHits++; }
+     }
+   if(gDayStop)
+     {
+      if(b.n > 0) CloseAll("giornata");
+      return;   // giornata chiusa: niente aperture fino al giorno dopo (ora server)
+     }
    if(b.n > 0 && ManageExit(b)) return;
    TryEntry(tk, b);
    if(!IsTester() && (ulong)GetTickCount64() - gLastStatusMs > 1000)
      {
       gLastStatusMs = (ulong)GetTickCount64();
-      Comment("ABTG_ScalperClaudio 1.00  ", _Symbol, "  DEMO\n",
+      Comment("ABTG_ScalperClaudio 1.03  ", _Symbol, "  DEMO\n",
               "cesto: ", b.n, " posizioni, ", DoubleToString(b.lots, 2), " lotti, netto ", DoubleToString(b.net, 2), "\n",
               "passi ", (int)gSteps, "  chiuse ", (int)gClosed, "  netto chiuso ", DoubleToString(gSumNet, 2), "  freno ", (int)gBrake, "\n",
               "richieste oggi ", gReqToday, "  (totali ", (int)gReqTotal, ")");
@@ -565,7 +711,12 @@ void OnTradeTransaction(const MqlTradeTransaction &trans, const MqlTradeRequest 
    gClosed++; gSumNet += net; gSumLife += secs;
    if(net > 0.0) { gWins++; gGrossWin += net; } else gGrossLoss += -net;
    if(secs > 3600) gLongLived++;
-   if(why == "target") gCloseTarget++; else if(why == "cesto") gCloseBasket++; else if(why == "freno") gCloseBrake++; else if(why == "zero") gCloseZero++; else gCloseOther++;
+   gDayRealized += net;
+   if(why == "target") { gCloseTarget++; gNetT += net; }
+   else if(why == "cesto") { gCloseBasket++; gNetC += net; }
+   else if(why == "freno") { gCloseBrake++; gNetF += net; }
+   else if(why == "zero") { gCloseZero++; gNetZ += net; }
+   else { gCloseOther++; gNetO += net; }
    gCumProgress += net;
    if(why == "freno" || gCumProgress < 0.0) gCumProgress = 0.0;   // dopo il freno o una perdita si riparte dal lotto di base
    CommDel(pid);
