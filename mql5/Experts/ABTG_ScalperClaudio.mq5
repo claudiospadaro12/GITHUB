@@ -541,7 +541,8 @@ void PrintEdge()
             double sd = (var > 0.0 ? MathSqrt(var) : 0.0);
             double tt = (sd > 0.0 ? mc / (sd / MathSqrt(n)) : 0.0);
             Print("[SCALPER CLAUDIO] EDGE ", hn[h], " ", dn[d], " bucket ", b, ": n ", IntegerToString((int)gEdN[k]), ", lordo ", DoubleToString(mg, 2),
-                  " pt, netto spread ", DoubleToString(mc, 2), " pt, t ", DoubleToString(tt, 2));
+                  " pt, netto spread ", DoubleToString(mc, 2), " pt, t ", DoubleToString(tt, 2),
+                  ", somma lorda ", DoubleToString(gEdG[k], 2), ", somma netta ", DoubleToString(gEdC[k], 2), ", somma quadrati netti ", DoubleToString(gEdQ[k], 2));
            }
   }
 //+------------------------------------------------------------------+
