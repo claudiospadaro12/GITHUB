@@ -5,13 +5,13 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 s = open('gen_riga_ubs_u2.py', encoding='utf-8').read()
 a = s.index("U2SETS = ["); b = s.index("N = len(runs)")
 FX = [  # (percorso nel pacchetto V9.0, timeframe, simbolo, tag): i 7 set a lotto 0,1 che hanno passato la Fase 2 M1
- ('Breakout_Support_Resistance\\\\Advanced Scalper\\\\eurusd_H1_SL17.set','H1','EURUSD','SCALP_EU_SL17'),
- ('Breakout_Support_Resistance\\\\Advanced Scalper\\\\eurusd_H1_SL22.set','H1','EURUSD','SCALP_EU_SL22'),
- ('Breakout_Support_Resistance\\\\Advanced Scalper\\\\gbpusd_H1.set','H1','GBPUSD','SCALP_GU_H1'),
- ('Breakout_Support_Resistance\\\\Advanced Scalper\\\\usdjpy_H1_SL22.set','H1','USDJPY','SCALP_UJ_H1'),
- ('Breakout_Support_Resistance\\\\Advanced Scalper\\\\usdjpy_H4_SL14.set','H4','USDJPY','SCALP_UJ_H4'),
- ('Volatility Breakout\\\\EURUSD\\\\EURUSD_f.set','M15','EURUSD','VOL_f'),
- ('Volatility Breakout\\\\EURUSD\\\\EURUSD_o.set','M15','EURUSD','VOL_o'),
+ ('Breakout_Support_Resistance\\Advanced Scalper\\eurusd_H1_SL17.set','H1','EURUSD','SCALP_EU_SL17'),
+ ('Breakout_Support_Resistance\\Advanced Scalper\\eurusd_H1_SL22.set','H1','EURUSD','SCALP_EU_SL22'),
+ ('Breakout_Support_Resistance\\Advanced Scalper\\gbpusd_H1.set','H1','GBPUSD','SCALP_GU_H1'),
+ ('Breakout_Support_Resistance\\Advanced Scalper\\usdjpy_H1_SL22.set','H1','USDJPY','SCALP_UJ_H1'),
+ ('Breakout_Support_Resistance\\Advanced Scalper\\usdjpy_H4_SL14.set','H4','USDJPY','SCALP_UJ_H4'),
+ ('Volatility Breakout\\EURUSD\\EURUSD_f.set','M15','EURUSD','VOL_f'),
+ ('Volatility Breakout\\EURUSD\\EURUSD_o.set','M15','EURUSD','VOL_o'),
 ]
 assert len(FX) == 7
 nuovo = ("ZNEW = 'UPDATED_SETS_UBS_V9_0.zip'\n"
