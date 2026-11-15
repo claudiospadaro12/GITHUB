@@ -1,0 +1,63 @@
+KARNEK - FULL RESULTS di TradeWithWim (12 conti)
+================================================
+
+Data di acquisizione: 15 novembre 2026 (ora italiana, CET = UTC+1)
+Pagina di partenza: https://app.karnek.com/profile/tradewithwim
+Fonte: pannello "Full results" di ciascun conto, aperto dalla pagina del profilo pubblico.
+Ordine: priorita' indicata nella richiesta (1-12).
+
+Come e' stato fatto
+-------------------
+- Solo lettura. Nessun login, nessun acquisto, nessuna registrazione.
+- Nessun clic su link affiliati, sui broker, su "Start free" o su "Get the EAs".
+- Nessun download di file eseguibili.
+- Il pannello "Full results" si apre come finestra sopra la pagina del profilo: l'indirizzo
+  nella barra non cambia (resta il profilo). Ogni conto e' stato aperto e chiuso in sequenza.
+- Il testo del pannello non e' accessibile come testo della pagina: i valori sono stati
+  trascritti dalle schermate, senza arrotondare. Dove un dato non si legge: "non leggibile".
+  Dove il dato non c'e' nel pannello: "non trovato".
+- Le schermate sono JPEG a risoluzione piena, non ritagliate.
+- Nessun valore inventato. Nessun commento sulla bonta' dei conti.
+
+Conti (in ordine di priorita')
+------------------------------
+N.  Nome                       Broker / societa'                  Live da         Snapshot (ora ita)
+01  UBS Live Portfolio          Raw Trading Ltd                    14 mag 2026     10:51
+02  Darwinex UBS Gold+USTEC     Tradeslide Trading Tech Limited    19 mag 2025     10:52
+03  UBS Scalp SetC              Vantage Markets (Pty) Ltd          4 ago 2026      10:52
+04  Steady Yeti                 Pepperstone EU Limited             27 apr 2022     10:53
+05  Axi Select                  AxiCorp Financial Services Pty Ltd 11 nov 2025     10:53
+06  Daytrade Pro ICM            Raw Trading Ltd                    10 mag 2023     10:53
+07  Pro Stability               Raw Trading Ltd                    30 set 2022     10:54
+08  Stability Pro               Raw Trading Ltd                    8 set 2023      10:54
+09  Luna AI                     Raw Trading Ltd                    17 ott 2018     10:55
+10  indicement                  Capital Point Trading Ltd          2 set 2025      10:55
+11  Combo Setup High Risk ICM   Raw Trading Ltd                    7 gen 2025      10:56
+12  MEX COMBO                   MEX Atlantic Corporation           16 lug 2024     10:56
+
+Note sui dati
+-------------
+- Le "date di inizio" sono quelle della riga "live since" di ciascun pannello. La pagina
+  distingue anche il periodo "monitored live" (monitoraggio in tempo reale), che parte
+  da date diverse e che e' riportato in ciascun file _testo.txt.
+- Per i conti 06 e 08 il pannello segnala in nota che le percentuali mensili non sono mostrate
+  o non compongono il dato totale; per il conto 09 la nota e' esplicita (vedi _testo.txt).
+- Per il conto 11 la pagina segnala che le statistiche per operazione non sono ancora
+  disponibili (la storia trade non copre l'intera finestra di monitoraggio).
+- Il conto 12 mostra TOTAL +582.8% e ABS. GAIN +663.5%: entrambi riportati cosi' come
+  compaiono nella pagina.
+
+Contenuto della cartella
+------------------------
+- 00_info.txt                       questo file
+- 01_indice.md                      indice dei file per conto
+- NN_<nome>_testo.txt               testo trascritto dal pannello (12 file)
+- NN_<nome>_dati_chiave.md          dati richiesti, con "non trovato" dove assenti (12 file)
+- NN_<nome>_schermata_00N.jpg       schermate a risoluzione piena (36 file)
+
+Avvertenze
+----------
+- Questi sono dati pubblici di una pagina di terzi, presi nel momento dello snapshot
+  indicato. Non sono verificati in modo indipendente da chi scrive.
+- La pagina dichiara che i risultati passati non garantiscono quelli futuri. Questo file non
+  contiene valutazioni o consigli.

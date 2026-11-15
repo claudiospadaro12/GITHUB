@@ -1,0 +1,59 @@
+[TESTO TRASCRITTO DALLE SCHERMATE del pannello "Full results" di Stability Pro. Il pannello non e' leggibile come testo dall'albero della pagina: ogni valore e' copiato dallo screenshot, senza riassumere e senza arrotondare. Dove un dato non si legge: "non leggibile".]
+
+Full verified results
+
+Stability Pro
+Raw Trading Ltd · live since 8 Sep 2023 · Live account
+TOTAL RETURN
++14.1%
+Badge: Real account
+Badge: Monitored live since 5 Aug 2026 · 79.5% uptime
+Badge: No login credentials held
+Badge: Live feed
+Verified · read-only
+
+Performance
+Track record since 8 Sep 2023 · monitored live since 5 Aug 2026. From that date every figure is captured in real time from the broker account, never self-reported. Earlier history is imported from the broker's own records.
+Pulsanti grafico: Growth % | Drawdown | 1D | 1W | 1M | YTD | 1Y | All | Drawdown
+Legenda: Growth % | Drawdown from peak | Imported (before live monitoring)
+Asse Y grafico: +25.9% | +13.8% | +1.6% | -10.5% | -22.7%
+Asse X grafico: 8 Sep 2023 | 17 Apr 2024 | 29 Nov 2024 | 23 Jun 2025 | 25 Mar 2026 | 11 Nov 2026
+
+TOTAL +14.1%
+BEST DAY +2.3%
+WORST DAY -38.5%
+MAX DRAWDOWN -38.6%
+
+ABS. GAIN +14.1%
+THIS MONTH +0.4%
+AVG / MONTH +0.3%
+MAX DRAWDOWN -38.6%
+WIN RATE 79.5%
+PROFIT FACTOR 1.12
+EXPECTANCY (POINTS) 27.9
+AVG WIN / LOSS 0.3 : 1
+SHARPE 0.99
+VOLATILITY 17.6%
+TOTAL TRADES 982
+TOTAL POINTS 27,368
+TOTAL LOTS 12.60
+LEVERAGE 1:500
+HOLD TIME 1.5 days
+BEST MONTH +6.3%
+WORST MONTH -33.5%
+WINNING MONTHS 37 / 39
+UPTIME 30D 79.5%
+
+Monthly return (green up · red down)
+Barre mensili (14 mesi), in ordine: OCT (verde), NOV (verde), DEC (verde, piccola), JAN (verde), FEB (verde), MAR (verde, la piu' alta), APR (verde), MAY (verde), JUN (verde), JUL (verde), AUG (verde, quasi zero), SEP (verde), OCT (verde), NOV (verde). Nessuna barra rossa visibile in questo intervallo. Valori numerici delle singole barre: non leggibili (nessuna etichetta sul grafico).
+
+Instrument mix (share of trades) - 3 INSTRUMENTS
+AUDCAD 58.0%
+NZDCAD 35.0%
+AUDNZD 6.9%
+
+Link: See all of TradeWithWim's verified accounts - The full profile, with every public account, strategy and EA in one place
+Box: Monitor your own MetaTrader accounts for free - Karnek connects read-only to MT4 & MT5 and verifies your track record exactly like this page. No login credentials held, nothing can be traded or withdrawn. [pulsante Start free]
+
+How this is verified. These figures are computed by Karnek from a read-only connection to the live trading terminal. The trader cannot edit them. Performance, drawdown and uptime are recorded independently from the account itself. Percentages are shown; account balances are kept private. Past performance does not guarantee future results.
+Snapshot generated 15 Nov 2026 · 09:54 UTC

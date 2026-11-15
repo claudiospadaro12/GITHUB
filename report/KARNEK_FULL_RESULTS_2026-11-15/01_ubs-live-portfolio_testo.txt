@@ -1,0 +1,59 @@
+[TESTO TRASCRITTO DALLE SCHERMATE del pannello "Full results" di UBS Live Portfolio. Il pannello non e' leggibile come testo dall'albero della pagina: ogni valore e' copiato dallo screenshot, senza riassumere e senza arrotondare. Dove un dato non si legge: "non leggibile".]
+
+Full verified results
+
+UBS Live Portfolio
+Raw Trading Ltd · live since 14 May 2026 · Live account
+TOTAL RETURN
++23.8%
+Badge: Real account
+Badge: Monitored live since 5 Aug 2026 · 83.2% uptime
+Badge: No login credentials held
+Badge: Live feed
+
+Performance
+Track record since 14 May 2026 · monitored live since 5 Aug 2026. From that date every figure is captured in real time from the broker account, never self-reported. Earlier history is imported from the broker's own records.
+Pulsanti grafico: Growth % | Drawdown | 1D | 1W | 1M | YTD | 1Y | All | Drawdown
+Legenda: Growth % | Drawdown from peak | Imported (before live monitoring)
+Asse Y grafico: +46.7% | +34.8% | +22.9% | +11.1% | -0.8%
+Asse X grafico: 13 May 2026 | 18 Jun 2026 | 27 Jul 2026 | 2 Sep 2026 | 8 Oct 2026 | 13 Nov 2026
+
+TOTAL +23.8%
+BEST DAY +12.8%
+WORST DAY -7.8%
+MAX DRAWDOWN -26.1%
+
+ABS. GAIN +23.8%
+THIS MONTH +4.0%
+AVG / MONTH +3.1%
+MAX DRAWDOWN -26.1%
+WIN RATE 56.2%
+PROFIT FACTOR 1.10
+SHARPE 1.27
+VOLATILITY 37.7%
+TOTAL TRADES 1,882
+TOTAL LOTS 89.84
+LEVERAGE 1:1000
+HOLD TIME 9h 13m
+BEST MONTH +21.9%
+WORST MONTH -11.2%
+WINNING MONTHS 4 / 7
+UPTIME 30D 83.2%
+
+Monthly return (green up · red down)
+Barre mensili: MAY (verde), JUN (verde), JUL (rosso), AUG (verde), SEP (rosso), OCT (rosso), NOV (verde). Valori numerici delle singole barre: non leggibili (nessuna etichetta sul grafico).
+
+Instrument mix (share of trades) - 8 INSTRUMENTS
+XAUUSD 39.9%
+BTCUSD 28.6%
+USTEC 11.5%
+US30 8.7%
+EURUSD 7.1%
+US500 3.0%
+Other 1.3%
+
+Link: See all of TradeWithWim's verified accounts - The full profile, with every public account, strategy and EA in one place
+Box: Monitor your own MetaTrader accounts for free - Karnek connects read-only to MT4 & MT5 and verifies your track record exactly like this page. No login credentials held, nothing can be traded or withdrawn. [pulsante Start free]
+
+How this is verified. These figures are computed by Karnek from a read-only connection to the live trading terminal. The trader cannot edit them. Performance, drawdown and uptime are recorded independently from the account itself. Percentages are shown; account balances are kept private. Past performance does not guarantee future results.
+Snapshot generated 15 Nov 2026 · 09:51 UTC

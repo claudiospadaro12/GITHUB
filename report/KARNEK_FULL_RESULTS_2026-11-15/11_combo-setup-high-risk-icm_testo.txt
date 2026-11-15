@@ -1,0 +1,51 @@
+[TESTO TRASCRITTO DALLE SCHERMATE del pannello "Full results" di Combo Setup High Risk ICM. Il pannello non e' leggibile come testo dall'albero della pagina: ogni valore e' copiato dallo screenshot, senza riassumere e senza arrotondare. Dove un dato non si legge: "non leggibile".]
+
+Full verified results
+
+Combo Setup High Risk ICM
+Raw Trading Ltd · live since 7 Jan 2025 · Live account
+TOTAL RETURN
++260.1%
+Badge: Real account
+Badge: Monitored live since 5 Aug 2026 · 99.9% uptime
+Badge: No login credentials held
+Badge: Live feed
+Verified · read-only
+
+Performance
+Track record since 7 Jan 2025 · monitored live since 5 Aug 2026. From that date every figure is captured in real time from the broker account, never self-reported. Earlier history is imported from the broker's own records.
+Pulsanti grafico: Growth % | Drawdown | 1D | 1W | 1M | YTD | 1Y | All | Drawdown
+Legenda: Growth % | Drawdown from peak | Imported (before live monitoring)
+Asse Y grafico: +282.4% | +206.5% | +130.6% | +54.8% | -21.1%
+Asse X grafico: 7 Jan 2025 | 15 May 2025 | 19 Sep 2025 | 12 Feb 2026 | 18 Jun 2026 | 12 Nov 2026
+
+TOTAL +260.1%
+BEST DAY +21.8%
+WORST DAY -15.7%
+MAX DRAWDOWN -27.1%
+
+ABS. GAIN +260.1%
+THIS MONTH +1.9%
+AVG / MONTH +5.7%
+MAX DRAWDOWN -27.1%
+SHARPE 1.92
+VOLATILITY 49.3%
+LEVERAGE 1:500
+BEST MONTH +30.4%
+WORST MONTH -9.8%
+WINNING MONTHS 15 / 23
+UPTIME 30D 99.9%
+
+Nota sul pannello (testo esatto della pagina): "Per-trade statistics (win rate, profit factor, trade count) aren't shown for this account yet: its stored trade history doesn't reach back to the start of its monitoring window, so those figures would cover only a fraction of its trades. They'll appear automatically as the full history is collected. The growth curve and drawdown above cover the complete window."
+Statistiche per operazione (win rate, profit factor, numero operazioni): non mostrate dalla pagina per questo conto (vedi nota sopra). TOTAL TRADES, WIN RATE, PROFIT FACTOR, EXPECTANCY, AVG WIN / LOSS, HOLD TIME, TOTAL LOTS, TOTAL POINTS: non presenti nel pannello.
+
+Monthly return (green up · red down)
+Barre mensili (14 mesi), in ordine: OCT (verde), NOV (verde), DEC (verde), JAN (verde, la piu' alta), FEB (rossa), MAR (verde, alta), APR (verde), MAY (rossa), JUN (verde), JUL (rossa), AUG (verde), SEP (verde), OCT (rossa), NOV (verde). Valori numerici delle singole barre: non leggibili (nessuna etichetta sul grafico); i valori estremi sono nel riquadro: best month +30.4%, worst month -9.8%.
+
+Instrument mix: non presente nel pannello.
+
+Link: See all of TradeWithWim's verified accounts - The full profile, with every public account, strategy and EA in one place
+Box: Monitor your own MetaTrader accounts for free - Karnek connects read-only to MT4 & MT5 and verifies your track record exactly like this page. No login credentials held, nothing can be traded or withdrawn. [pulsante Start free]
+
+How this is verified. These figures are computed by Karnek from a read-only connection to the live trading terminal. The trader cannot edit them. Performance, drawdown and uptime are recorded independently from the account itself. Percentages are shown; account balances are kept private. Past performance does not guarantee future results.
+Snapshot generated 15 Nov 2026 · 09:56 UTC

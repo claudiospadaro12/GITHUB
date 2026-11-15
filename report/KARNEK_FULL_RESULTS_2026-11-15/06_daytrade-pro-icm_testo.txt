@@ -1,0 +1,50 @@
+[TESTO TRASCRITTO DALLE SCHERMATE del pannello "Full results" di Daytrade Pro ICM. Il pannello non e' leggibile come testo dall'albero della pagina: ogni valore e' copiato dallo screenshot, senza riassumere e senza arrotondare. Dove un dato non si legge: "non leggibile".]
+
+Full verified results
+
+Daytrade Pro ICM
+Raw Trading Ltd · live since 10 May 2023 · Live account
+TOTAL RETURN
++71.7%
+Badge: Real account
+Badge: Monitored live since 5 Aug 2026 · 99.8% uptime
+Badge: No login credentials held
+Badge: Live feed
+Verified · read-only
+
+Performance
+Track record since 10 May 2023 · monitored live since 5 Aug 2026. From that date every figure is captured in real time from the broker account, never self-reported. Earlier history is imported from the broker's own records.
+Pulsanti grafico: Growth % | Drawdown | 1D | 1W | 1M | YTD | 1Y | All | Drawdown
+Legenda: Growth % | Drawdown from peak | Imported (before live monitoring)
+Asse Y grafico: +98.8% | +73% | +47.2% | +21.4% | -4.4%
+Asse X grafico: 8 May 2023 | 28 Feb 2024 | 21 Jan 2025 | 5 Nov 2025 | 28 May 2026 | 13 Nov 2026
+
+TOTAL +71.7%
+BEST DAY +12.4%
+WORST DAY -14%
+MAX DRAWDOWN -15.5%
+
+ABS. GAIN +71.7%
+MAX DRAWDOWN -15.5%
+WIN RATE 72.0%
+PROFIT FACTOR 1.25
+SHARPE 1.07
+VOLATILITY 25.5%
+TOTAL TRADES 1,241
+TOTAL POINTS 140,251
+TOTAL LOTS 35.87
+LEVERAGE 1:500
+HOLD TIME 4.3 days
+UPTIME 30D 99.8%
+
+(Campi NON presenti in questo conto: THIS MONTH, AVG / MONTH, BEST MONTH, WORST MONTH, WINNING MONTHS.)
+
+Monthly return: non trovato. La pagina riporta questo testo: "Monthly percentages aren't shown for this account: its capital moved substantially over the period, so per-month returns don't compound to the headline figure. The growth curve above is the reliable view."
+
+Instrument mix: non trovato (la sezione non compare nella pagina di questo conto).
+
+Link: See all of TradeWithWim's verified accounts - The full profile, with every public account, strategy and EA in one place
+Box: Monitor your own MetaTrader accounts for free - Karnek connects read-only to MT4 & MT5 and verifies your track record exactly like this page. No login credentials held, nothing can be traded or withdrawn. [pulsante Start free]
+
+How this is verified. These figures are computed by Karnek from a read-only connection to the live trading terminal. The trader cannot edit them. Performance, drawdown and uptime are recorded independently from the account itself. Percentages are shown; account balances are kept private. Past performance does not guarantee future results.
+Snapshot generated 15 Nov 2026 · 09:53 UTC

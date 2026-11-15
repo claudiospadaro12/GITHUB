@@ -1,0 +1,54 @@
+[TESTO TRASCRITTO DALLE SCHERMATE del pannello "Full results" di Steady Yeti. Il pannello non e' leggibile come testo dall'albero della pagina: ogni valore e' copiato dallo screenshot, senza riassumere e senza arrotondare. Dove un dato non si legge: "non leggibile".]
+
+Full verified results
+
+Steady Yeti
+Pepperstone EU Limited · live since 27 Apr 2022 · Live account
+TOTAL RETURN
++296.9%
+Badge: Real account
+Badge: Monitored live since 5 Aug 2026 · 99.9% uptime
+Badge: No login credentials held
+Badge: Live feed
+Verified · read-only
+
+Performance
+Track record since 27 Apr 2022 · monitored live since 5 Aug 2026. From that date every figure is captured in real time from the broker account, never self-reported. Earlier history is imported from the broker's own records.
+Pulsanti grafico: Growth % | Drawdown | 1D | 1W | 1M | YTD | 1Y | All | Drawdown
+Legenda: Growth % | Drawdown from peak | Imported (before live monitoring)
+Asse Y grafico: +342.4% | +253.9% | +165.4% | +76.9% | -11.6%
+Asse X grafico: 27 Apr 2022 | 9 Feb 2023 | 24 Jan 2024 | 28 Nov 2024 | 20 Nov 2025 | 12 Nov 2026
+
+TOTAL +296.9%
+BEST DAY +5.8%
+WORST DAY -10.3%
+MAX DRAWDOWN -19.1%
+
+ABS. GAIN +297.8%
+THIS MONTH +2.4%
+AVG / MONTH +2.5%
+MAX DRAWDOWN -19.1%
+WIN RATE 75.6%
+PROFIT FACTOR 1.40
+SHARPE 2.30
+VOLATILITY 18.9%
+TOTAL TRADES 2,859
+TOTAL POINTS 97,437
+TOTAL LOTS 34.04
+LEVERAGE 1:500
+HOLD TIME 1.3 days
+BEST MONTH +15.8%
+WORST MONTH -16.6%
+WINNING MONTHS 43 / 56
+UPTIME 30D 99.9%
+
+Monthly return (green up · red down)
+Barre mensili (14 mesi), in ordine: OCT (rosso), NOV (verde), DEC (verde), JAN (rosso), FEB (verde), MAR (verde, la piu' alta), APR (verde), MAY (verde), JUN (verde), JUL (verde), AUG (verde), SEP (rosso, la piu' bassa), OCT (verde), NOV (verde). Valori numerici delle singole barre: non leggibili (nessuna etichetta sul grafico).
+
+Instrument mix: non trovato (la sezione non compare nella pagina di questo conto).
+
+Link: See all of TradeWithWim's verified accounts - The full profile, with every public account, strategy and EA in one place
+Box: Monitor your own MetaTrader accounts for free - Karnek connects read-only to MT4 & MT5 and verifies your track record exactly like this page. No login credentials held, nothing can be traded or withdrawn. [pulsante Start free]
+
+How this is verified. These figures are computed by Karnek from a read-only connection to the live trading terminal. The trader cannot edit them. Performance, drawdown and uptime are recorded independently from the account itself. Percentages are shown; account balances are kept private. Past performance does not guarantee future results.
+Snapshot generated 15 Nov 2026 · 09:53 UTC

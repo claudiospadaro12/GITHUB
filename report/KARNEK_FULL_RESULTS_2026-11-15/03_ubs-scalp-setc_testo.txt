@@ -1,0 +1,55 @@
+[TESTO TRASCRITTO DALLE SCHERMATE del pannello "Full results" di UBS Scalp SetC. Il pannello non e' leggibile come testo dall'albero della pagina: ogni valore e' copiato dallo screenshot, senza riassumere e senza arrotondare. Dove un dato non si legge: "non leggibile".]
+
+Full verified results
+
+UBS Scalp SetC
+Vantage Markets (Pty) Ltd · live since 4 Aug 2026 · Live account
+TOTAL RETURN
++200.7%
+Badge: Real account
+Badge: Monitored live since 4 Aug 2026 · 77.2% uptime
+Badge: No login credentials held
+Badge: Live feed
+Verified · read-only
+
+Performance
+Track record since 4 Aug 2026 · monitored live since 4 Aug 2026. From that date every figure is captured in real time from the broker account, never self-reported. Earlier history is imported from the broker's own records.
+Pulsanti grafico: Growth % | Drawdown | 1D | 1W | 1M | YTD | 1Y | All | Drawdown
+Legenda: Growth % | Drawdown from peak
+Asse Y grafico: +201.1% | +150.8% | +100.6% | +50.3% | +0%
+Asse X grafico: 4 Aug 2026 | 24 Aug 2026 | 16 Sep 2026 | 6 Oct 2026 | 23 Oct 2026 | 12 Nov 2026
+
+TOTAL +200.7%
+BEST DAY +14.2%
+WORST DAY -4.4%
+MAX DRAWDOWN -8.3%
+
+ABS. GAIN +204.6%
+THIS MONTH +9.5%
+AVG / MONTH +31.7%
+MAX DRAWDOWN -8.3%
+WIN RATE 80.0%
+PROFIT FACTOR 3.48
+EXPECTANCY (POINTS) 137.5
+AVG WIN / LOSS 1.0 : 1
+VOLATILITY 49.6%
+TOTAL TRADES 95
+TOTAL POINTS 13,065 (etichetta parzialmente coperta dal cursore nello screenshot; leggibile come "TOTAL POINTS")
+TOTAL LOTS 3.21
+LEVERAGE 1:500
+HOLD TIME 54s
+BEST MONTH +122.7%
+WORST MONTH +9.5%
+WINNING MONTHS 4 / 4
+UPTIME 30D 77.2%
+
+Monthly return (green up · red down)
+Barre mensili (4 mesi), in ordine: AUG (verde, la piu' alta), SEP (verde), OCT (verde), NOV (verde). Valori numerici delle singole barre: non leggibili (nessuna etichetta sul grafico).
+
+Instrument mix: non trovato (la sezione non compare nella pagina di questo conto).
+
+Link: See all of TradeWithWim's verified accounts - The full profile, with every public account, strategy and EA in one place
+Box: Monitor your own MetaTrader accounts for free - Karnek connects read-only to MT4 & MT5 and verifies your track record exactly like this page. No login credentials held, nothing can be traded or withdrawn. [pulsante Start free]
+
+How this is verified. These figures are computed by Karnek from a read-only connection to the live trading terminal. The trader cannot edit them. Performance, drawdown and uptime are recorded independently from the account itself. Percentages are shown; account balances are kept private. Past performance does not guarantee future results.
+Snapshot generated 15 Nov 2026 · 09:52 UTC
