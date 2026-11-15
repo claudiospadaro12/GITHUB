@@ -1,0 +1,15 @@
+INFORMAZIONI SULLA CATTURA
+
+Indirizzo esatto:   https://app.karnek.com/profile/tradewithwim?ref=WIM
+Titolo pagina:      TradeWithWim, verified results · Karnek
+Data e ora (IT):    2026-11-15, ore 10:40 (Europe/Rome, CET)
+Browser:            Chrome (estensione Claude in Chrome, scheda aperta dal pannello laterale)
+
+Note sulla cattura:
+- Il campo PAGINA del modulo era un segnaposto non compilato. La pagina usata e' quella gia' aperta nella scheda del pannello laterale.
+- Nessun login, nessun acquisto, nessuna iscrizione, nessun click su link di affiliazione o broker, nessun download.
+- Il pulsante "Full results" di ogni account NON e' stato aperto: contiene lo storico completo e le statistiche estese di ogni conto. Se lo vuoi, va fatto in una seconda passata.
+- Lo scorrimento ha coperto la pagina quasi per intero. Tra lo screenshot 008 e il 009 c'e' un piccolo salto: il banner "Monitor your own MetaTrader accounts for free" e l'intestazione "The robots behind the results" non sono in una schermata dedicata.
+- Il tool JavaScript e' stato bloccato su questa pagina: il testo e' stato letto dall'albero di accessibilita' della pagina (vedi 01_testo_grezzo.txt).
+- Le schermate sono in formato JPEG (non PNG), risoluzione 1471x812, non ritagliate.
+- Non sono stati fatti zoom separati: le tabelle e i numeri sono leggibili direttamente dalle schermate a piena risoluzione.
