@@ -1,0 +1,20 @@
+# FundedNext: cosa dicono le regole pubbliche per i nostri EA (15/11/2026)
+
+Fonte: `PROP_FUNDEDNEXT_REGOLE_ORIGINALE_2026-11-15.md` (report PARZIALE di Claude in Chrome: 9 pagine lette, The5ers NON letto per perdita della connessione del browser, nessuno screenshot, nessuna data di aggiornamento mostrata, la ricerca del centro assistenza bloccata da Cloudflare e non aggirata). Non ho aperto io il sito: le frasi sono quelle riportate dall'estensione.
+
+## Esito per noi
+| Punto | Cosa risulta | Effetto |
+|---|---|---|
+| **EA** | Solo con l'**add-on ufficiale a pagamento**: "EAs and VPS each require their own paid add-on to enable usage." Vietato: "Using a VPS or Expert Advisor (EAs) without prior approval through official FundedNext add-ons." **"Both EAs and VPS are allowed in 5K-25K accounts."** | Gli EA sembrano ammessi solo su conti da 5.000 a 25.000 e con add-on: i nostri conti da 80.000-160.000 sono fuori da quello che e scritto. **NON si dice niente sugli EA acquistati dal Market ne sul sorgente.** AMBIGUO, e sfavorevole |
+| **Copy trading** | Consentito solo fra conti dello stesso titolare. "FundedNext monitors for identical trades, synchronized entries, and shared strategies across accounts." Indizio di violazione: "Se diversi account mostrano strategie o operazioni identiche, specialmente se i proprietari di quegli account non sono gli stessi." | Lo stesso EA commerciale usato da titolari diversi puo essere letto come "strategia condivisa". Non e detto esplicitamente per gli EA: NON CHIARO, ma il rischio e quello della segnalazione del 14/11 |
+| **Conseguenze** | Prima violazione: avviso; poi chiusura conto senza premio ne rimborso; con altri individui: chiusura immediata. **Penale contrattuale di 25.000 USD per ogni violazione**, con compensazione sui pagamenti; applicabile a premi "gia calcolati, accreditati o programmati" (clausole 9.4, 9.8, 9.9 dei termini); appello possibile ma "definitivo nei limiti dei termini" | Rischio economico alto: oltre a perdere il conto, una penale che puo superare il costo della challenge |
+| **Tetto capitale** | 300.000 USD sul totale dei propri Challenge Account (trovato per copy trading e merge). Tetto generale, per strategia, famiglia, IP: NON TROVATO; clausola 8.11 cita "maximum account allocations" senza cifre | Non e il tetto "per strategia" di FTMO (400.000 USD); non sappiamo se valga anche sugli altri trader |
+| **Iperattivita** | 200 operazioni o 2.000 messaggi al giorno; il 3° superamento e violazione; disattivazione a 15.000 messaggi | I nostri EA (soprattutto Daytrade Pro, Scalper) vanno controllati: 200 operazioni al giorno sono tante, ma i 2.000 messaggi si superano facilmente |
+| **Altre regole** | Quick Strike: trade chiusi entro 30 secondi, avviso al 20%, violazione al 30%; grid con ordini a intervalli fissi vietato; HFT, latency arbitrage, tick scalping vietati; hedging ok nello stesso conto; weekend ok; stop news 5 minuti prima e dopo (solo conti funded/instant); oro: leva 1:15 (1-Step) o 1:25 (2-Step e Lite) in challenge; perdita giornaliera sul capitale iniziale (include flottante), 5% per il 2-Step | Lo Scalper Claudio violerebbe Quick Strike e iperattivita. L'oro a 1:25 e piu permissivo dello Swing FTMO (1:15) |
+| **Rimborso** | Solo entro 7 giorni se non c'e stato trading; dopo no, e nessun rimborso in caso di violazione | come FTMO: niente rimborso |
+
+## Conclusione (provvisoria, report parziale)
+- **FundedNext non e una strada migliore di FTMO per i nostri EA.** Per gli EA e scritto un add-on a pagamento e un range 5K-25K; per le strategie condivise c'e la clausola che ha probabilmente colpito l'utente segnalato; c'e una penale di 25.000 USD.
+- **Resta da chiarire con loro per iscritto** (solo se si volesse davvero considerarla): le 7 domande in fondo al report originale.
+- **The5ers resta quella letta il 07/11** (EA di terzi senza sorgente non ammessi): il report di oggi non la copre.
+- **FTMO resta l'unica candidata**, in attesa della risposta alla mail del 14/11.
