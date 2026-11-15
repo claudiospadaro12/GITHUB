@@ -48,8 +48,9 @@ $MODELLO  = $Modello
 $DEPOSITO = $Deposito
 $VALUTA   = 'EUR'
 $LEVA     = 100
-$TETTO_BARRE  = 100000
-$AVVISO_BARRE = 95000
+# 15/11/2026: tetto alzato da 100000 a 400000. UBS C forex ha dato 148468 e 173971 barre M15 con operazioni in OGNI anno della finestra (nessun troncamento), quindi il vecchio tetto era un falso allarme per M15 su 6-7 anni (report/RISULTATI_UBS_C_FOREX_2026-11-15.md). Il controllo di copertura (anni con operazioni) si fa nell'analisi.
+$TETTO_BARRE  = 400000
+$AVVISO_BARRE = 380000
 # NESSUN input imposto: si prova coi default dell'EA, fa fede il report (G1). Tipo: b = bool, i = intero, d = decimale.
 # ATTENZIONE: il referto NON scrive a mano "input imposti: NESSUNO", COSTRUISCE la riga da $INPUT_IMPOSTI (classe 1480,
 # recidiva 1497): se un giorno questa lista si riempie, il referto lo dice da solo invece di mentire.
