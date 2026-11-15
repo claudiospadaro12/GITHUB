@@ -241,8 +241,10 @@ $Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale', 'C:\MT5_Backtest\Mt5_Ft
 # v3 (14/10/2026): una cartella dati con origin.txt = C:\Users\Master\Desktop (nata dopo le 19:28, nessun conto, nessun processo aperto) e ammessa SOLO se
 # il suo common.ini non ha nessun Login= : senza conto non puo operare. Se un giorno ha un Login=, o se common.ini esiste ma non si legge, ci si ferma.
 $CensiteSenzaConto = @('C:\Users\Master\Desktop')
+# 15/11/2026: MT5 PORTABLE per l'UBS Optimizer e le convalide (C:\MT5_BCM_Opt, demo 50503392). Ammesso PER NOME solo se CHIUSO: il controllo dei processi aperti resta in vigore e blocca la riga se quel terminale e aperto.
+$CensiteOpt = @('C:\MT5_BCM_Opt')
 $diversi = @($origini | Where-Object { $_.Inst -ne $InstAttesa })
-$ignote = @($diversi | Where-Object { ($Censite -notcontains $_.Inst.TrimEnd('\')) -and ($CensiteSenzaConto -notcontains $_.Inst.TrimEnd('\')) })
+$ignote = @($diversi | Where-Object { ($Censite -notcontains $_.Inst.TrimEnd('\')) -and ($CensiteSenzaConto -notcontains $_.Inst.TrimEnd('\')) -and ($CensiteOpt -notcontains $_.Inst.TrimEnd('\')) })
 foreach($dv in @($diversi | Where-Object { $CensiteSenzaConto -contains $_.Inst.TrimEnd('\') })){
   $cini = Join-Path $dv.Dir 'config\common.ini'
   if(Test-Path -LiteralPath $cini){
@@ -253,6 +255,7 @@ foreach($dv in @($diversi | Where-Object { $CensiteSenzaConto -contains $_.Inst.
   Dico ('installazione censita il 14/10 SENZA CONTO (nessun Login= in common.ini), nessun processo aperto, NON TOCCATA: ' + $dv.Inst + '  (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ')') 'Yellow'
 }
 foreach($dv in @($diversi | Where-Object { $Censite -contains $_.Inst.TrimEnd('\') })){ Dico ('altra installazione di questo PC, censita il 05/10, CHIUSA e NON TOCCATA: ' + $dv.Inst + '  (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ')') 'Yellow' }
+foreach($dv in @($diversi | Where-Object { $CensiteOpt -contains $_.Inst.TrimEnd('\') })){ Dico ('installazione portable del 15/11 (UBS Optimizer e convalide), CHIUSA e NON TOCCATA: ' + $dv.Inst + '  (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ')') 'Yellow' }
 if($ignote.Count -gt 0){
   foreach($dv in $ignote){ Write-Host ('     installazione NON censita: ' + $dv.Inst) -ForegroundColor Red }
   throw 'Mi fermo: oltre al BCM, alle due censite il 05/10 (C:\MT5_Backtest, C:\FundedNext_Manuale) e a quella senza conto del 14/10 (C:\Users\Master\Desktop) qui ci sono ALTRE installazioni MT5 (regola dei terminali multipli).'
