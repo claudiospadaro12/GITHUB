@@ -33,7 +33,14 @@ Resta in attesa delle tre risposte di Claudio (quali livelli, stop/target, ore).
 ## 6. Cosa non sappiamo
 Il flottante forex; lo spread forex reale; se piu EA di Wim sullo stesso conto si comportano come la somma delle passate singole (margine, ordini simultanei: da provare con una corsa vera combinata, NON verificato); quanti altri utenti usano gli stessi set (non misurabile); cosa conta come "stessa strategia" per il tetto FTMO (in attesa della risposta).
 
-## 7. Decisioni che spettano a Claudio
-1. Obiettivo principale: **meno rischio di fallire** oppure **piu velocita** oppure **meno correlazione con l'oro**? (cambia la misura di F4/F7).
-2. Numero massimo di EA non oro nel portafoglio (proposta: 4).
-3. Le combinazioni devono includere l'oro P1/P3 o essere un portafoglio a parte?
+## 7. Decisioni di Claudio (15/11/2026)
+1. **Obiettivo principale: meno rischio di fallire** la challenge. La misura che decide e il fail-rate (F7); velocita e correlazione con l'oro sono secondarie.
+2. **Massimo 4 EA** nel portafoglio.
+3. **Portafoglio SEPARATO dall'oro**: componenti solo non oro. Il confronto con P1/P3 resta come riferimento e per la correlazione (F3), ma l'oro non entra nella combinazione.
+
+### Conseguenze sul piano
+- **Misura:** il portafoglio non oro si valuta da solo con la stessa simulazione delle challenge (fail-rate su partenze di tutto l'anno); si confronta con il fail-rate dell'oro P1/P3 come riferimento, non come somma.
+- **Soglia di successo (scritta ora):** fail-rate del portafoglio non oro <= quello di P1 negli stessi anni, con **PF del portafoglio >= 1,20** e DD equity sotto il 5% giornaliero/10% totale nel 90% delle partenze. Se nessuna combinazione la raggiunge: nessun candidato, nessun fine-tuning per forzare l'esito.
+- **Rischio di sola quota bassa:** un portafoglio forex a lotto piccolo puo avere fail-rate basso perche non fa quasi nulla e non supera mai il 10% di obiettivo: per questo si misura anche la **quota di partenze che raggiungono l'obiettivo del 10% entro il tempo massimo** (un portafoglio che non passa mai non e "sicuro", e inutile).
+- **Previsione C-4 riscritta:** il fail-rate del portafoglio non oro e <= quello dell'oro P1 AND la quota di partenze che raggiungono il 10% e >= 30%: 25%. Solo la prima condizione: 45%.
+- **Previsione C-7:** con 4 EA al massimo e correlazione <= 0,6, la combinazione migliore ha PF di portafoglio >= 1,20 in entrambi i periodi: 40%.
