@@ -77,3 +77,15 @@ Set base `OPT1_BASE.set` (= `daytrade 2(DAILY)\optimization.set`, valori di defa
 - **Problema risolto:** il portable aveva `MaxBars=1000000` (circa 2,8 anni di barre a 1 minuto), per questo i primi due test partivano da fine 2023 (il test sull'oro del 15/11 vale per 15 mesi, non per 2 anni). Ora `MaxBars=100000000` e storico EURUSD copiato dal terminale principale (56 file, 627 MB).
 - **Il minimo di 150 operazioni resta 150** (il set base ne ha 175: non scatta la regola "meno di 100 operazioni -> minimo 100").
 - **Tempo atteso dell'ottimizzazione (aggiornato dopo la misura):** 69 s per passaggio a un solo core. Con 2.000-8.000 passaggi (genetico veloce, 6 parametri) e 4-6 agenti paralleli sul nostro i7 portatile: circa 6-30 ore. **La mia P-1 "meno di 6 ore: 60%" resta scritta come prima, ma la riscrivo ora a 30%.**
+
+## 12. Avvio dell'ottimizzazione e regola di arresto (15/11/2026 19:10, scritta PRIMA di vedere i passaggi completati)
+- **Avvio:** 18:59 circa, 8 agenti locali (Core 1-8), EURUSD D1 2013-2022, set `OPT1_PILOTA.set`, genetico veloce, Custom max. Tutti i valori controllati da foto (6 parametri attivi, EP 3, RF 1,5, TR 150, `Risk` 0, `StartLots` 0,1).
+- **Stima mostrata da MT5 all'avvio: circa 125 ore.** E la stima dell'algoritmo sul caso peggiore (circa 52.000 passaggi a 8 agenti x 69 s); un genetico veloce con 6 parametri si ferma di norma dopo alcune migliaia di passaggi. Va verificata, non creduta.
+- **Controllo a +60 minuti (circa 20:00):** passaggi completati (scheda "Ottimizzazione Risultati": numero di righe) e stima residua.
+  - **>= 300 passaggi in un'ora:** velocita ok (massimo teorico circa 415): si lascia girare.
+  - **150-300:** velocita ridotta (calore o memoria): si lascia girare ma si prevede il doppio del tempo.
+  - **< 150:** qualcosa frena (calore, RAM, agenti): si interrompe, si guarda Task Manager e si riduce il numero di agenti.
+- **Tempo massimo 12 ore dall'avvio (circa 07:00 del 16/11):** se non e finita, si preme "Interrompi" e si usano i risultati ottenuti fino a quel punto (la tabella resta). Lo dichiaro nel referto: il risultato e "ottimizzazione interrotta a N passaggi", con meno garanzia di aver esplorato bene.
+- **Si interrompe prima** se: la tabella mostra solo passaggi con 0 operazioni o errori; il PC supera il 95% di memoria; compaiono errori di licenza.
+- **Non si cambiano intervalli, soglie o periodo a ottimizzazione in corso.** Se dopo 12 ore il risultato e insufficiente, la decisione e di rifare con una variante scritta prima (passi piu larghi o meno parametri), non di ritoccare questa.
+- **P-1 (meno di 6 ore)** e probabilmente falsa: lo dichiaro adesso, in base alla stima di MT5 e alla velocita misurata.
