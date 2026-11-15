@@ -10,26 +10,26 @@ if($aperti.Count -gt 0){ $aperti | Select-Object Id,ProcessName,Path | Format-Ta
 foreach($f in @($T,$EA,$SRC)){ if(-not (Test-Path -LiteralPath $f)){ Write-Host ('MI FERMO: non trovo ' + $f + '. Non ho avviato niente.') -ForegroundColor Red; return } }
 $h=(Get-FileHash -LiteralPath $EA -Algorithm SHA256).Hash.ToUpperInvariant(); if($h -ne $HEA){ Write-Host ('MI FERMO: l EA ha SHA256 ' + $h + ' invece di ' + $HEA + '. Non ho avviato niente.') -ForegroundColor Red; return }
 $NOMI=@('ST1_MinDist_to_HL','ST1_Expiration_hours','Exit_stop','Exit_limit','Exit_TrailSL_size','Exit_TrailSL_Start')
-$C=@( @('C0_BASE',13,155,175,120,100,160), @('C1_P1',72,190,60,75,5,5), @('C2_P52',70,240,180,235,195,110), @('C3_P45',13,80,235,265,140,120), @('C4_P126',89,160,210,75,55,25), @('C5_P2',87,240,85,75,155,195) )
+$CAND=@( @('C0_BASE',13,155,175,120,100,160), @('C1_P1',72,190,60,75,5,5), @('C2_P52',70,240,180,235,195,110), @('C3_P45',13,80,235,265,140,120), @('C4_P126',89,160,210,75,55,25), @('C5_P2',87,240,85,75,155,195) )
 $SC=@( @('OOS1_M1','1','2023.01.01','2024.12.31'), @('IS','1','2013.01.01','2022.12.31'), @('OOS1_M4','4','2023.01.01','2024.12.31') )
 $bs=[IO.File]::ReadAllBytes($SRC); $uni=($bs.Length -ge 2 -and $bs[0] -eq 255 -and $bs[1] -eq 254)
 $ts=$(if($uni){ [Text.Encoding]::Unicode.GetString($bs) } else { [Text.Encoding]::UTF8.GetString($bs) })
 $nl=$(if($ts.Contains("`r`n")){ "`r`n" } else { "`n" })
-function NuovoSet($c){
+function NuovoSet($cx){
   $out=New-Object System.Collections.ArrayList
   foreach($r in ($ts -split "`r?`n")){
     $x=$r
     $m=[regex]::Match($r,'^(?<n>[A-Za-z0-9_]+)=(?<v>[^|]*)\|\|(?<a>[^|]*)\|\|(?<s>[^|]*)\|\|(?<z>[^|]*)\|\|(?<f>[YN])\s*$')
     if($m.Success){
       $n=$m.Groups['n'].Value; $v=$m.Groups['v'].Value; $i=[array]::IndexOf($NOMI,$n)
-      if($i -ge 0){ $v=[string]$c[$i+1] }
+      if($i -ge 0){ $v=[string]$cx[$i+1] }
       $x=$n + '=' + $v + '||' + $m.Groups['a'].Value + '||' + $m.Groups['s'].Value + '||' + $m.Groups['z'].Value + '||N'
     }
     [void]$out.Add($x)
   }
   $new=($out -join $nl)
   $nb=$(if($uni){ [Text.Encoding]::Unicode.GetBytes($new) } else { (New-Object Text.UTF8Encoding($false)).GetBytes($new) })
-  [IO.File]::WriteAllBytes((Join-Path $STD ('VAL_' + $c[0] + '.set')),$nb)
+  [IO.File]::WriteAllBytes((Join-Path $STD ('VAL_' + $cx[0] + '.set')),$nb)
 }
 function Leggi($rf){
   $r=@{ q='n/d'; n='n/d'; net='n/d'; pf='n/d'; dd='n/d' }
@@ -45,15 +45,15 @@ function Leggi($rf){
 }
 $W=Join-Path $env:TEMP 'abtg_opt_val'; New-Item -ItemType Directory -Force -Path $W | Out-Null
 $stamp=(Get-Date).ToString('yyyyMMdd_HHmmss'); $res=New-Object System.Collections.ArrayList
-$tot=$C.Count * $SC.Count; $k=0; $t00=Get-Date; $stop=$false
+$tot=$CAND.Count * $SC.Count; $k=0; $t00=Get-Date; $stop=$false
 foreach($s in $SC){
   if($stop){ break }
-  foreach($c in $C){
+  foreach($cx in $CAND){
     if($stop){ break }
-    $k++; NuovoSet $c
-    $rep='VAL_' + $c[0] + '_' + $s[0]; $rf=Join-Path 'C:\MT5_BCM_Opt' ($rep + '.htm'); Remove-Item -LiteralPath $rf -Force -ErrorAction SilentlyContinue
+    $k++; NuovoSet $cx
+    $rep='VAL_' + $cx[0] + '_' + $s[0]; $rf=Join-Path 'C:\MT5_BCM_Opt' ($rep + '.htm'); Remove-Item -LiteralPath $rf -Force -ErrorAction SilentlyContinue
     $ini=Join-Path $W ($rep + '.ini')
-    $righe=@('[Experts]','AllowLiveTrading=false','AllowDllImport=false','','[Tester]','Expert=WIM\Ultimate_Breakout_EA_WSC_V9.5.ex5',('ExpertParameters=VAL_' + $c[0] + '.set'),'Symbol=EURUSD','Period=D1',('Model=' + $s[1]),'Optimization=0',('FromDate=' + $s[2]),('ToDate=' + $s[3]),'ForwardMode=0','Deposit=100000','Currency=EUR','Leverage=100','ExecutionMode=0','Visual=0','ReplaceReport=1','ShutdownTerminal=1',('Report=' + $rep),'','[TesterInputs]')
+    $righe=@('[Experts]','AllowLiveTrading=false','AllowDllImport=false','','[Tester]','Expert=WIM\Ultimate_Breakout_EA_WSC_V9.5.ex5',('ExpertParameters=VAL_' + $cx[0] + '.set'),'Symbol=EURUSD','Period=D1',('Model=' + $s[1]),'Optimization=0',('FromDate=' + $s[2]),('ToDate=' + $s[3]),'ForwardMode=0','Deposit=100000','Currency=EUR','Leverage=100','ExecutionMode=0','Visual=0','ReplaceReport=1','ShutdownTerminal=1',('Report=' + $rep),'','[TesterInputs]')
     Set-Content -LiteralPath $ini -Value (($righe -join "`r`n") + "`r`n") -Encoding ASCII -NoNewline
     $t0=Get-Date
     Write-Host ('[' + $k + '/' + $tot + '] ' + $rep + '  (' + $s[2] + ' -> ' + $s[3] + ', Modello ' + $s[1] + ')  avvio ' + $t0.ToString('HH:mm:ss')) -ForegroundColor Cyan
@@ -62,7 +62,7 @@ foreach($s in $SC){
     while(-not $p.HasExited -and (Get-Date) -lt $scade){ Start-Sleep -Seconds 5 }
     if(-not $p.HasExited){ Write-Host ('   TIMEOUT dopo 120 minuti: provo CloseMainWindow (mai la forza).') -ForegroundColor Red; try{ [void]$p.CloseMainWindow() }catch{ }; $a=0; while(-not $p.HasExited -and $a -lt 18){ Start-Sleep -Seconds 5; $a=$a+1 }; if(-not $p.HasExited){ Write-Host ('   Il terminale PID ' + $p.Id + ' NON si e chiuso: chiudilo A MANO (cartella C:\MT5_BCM_Opt). MI FERMO.') -ForegroundColor Red; $stop=$true; break } }
     $x=Leggi $rf; $sec=[math]::Round(((Get-Date)-$t0).TotalSeconds)
-    $o=[pscustomobject]@{ cand=$c[0]; passata=$s[0]; modello=$s[1]; qualita=$x.q; operazioni=$x.n; netto=$x.net; PF=$x.pf; DD=$x.dd; secondi=$sec }
+    $o=[pscustomobject]@{ cand=$cx[0]; passata=$s[0]; modello=$s[1]; qualita=$x.q; operazioni=$x.n; netto=$x.net; PF=$x.pf; DD=$x.dd; secondi=$sec }
     [void]$res.Add($o)
     Write-Host ('   qualita ' + $x.q + ' | operazioni ' + $x.n + ' | netto ' + $x.net + ' | PF ' + $x.pf + ' | DD ' + $x.dd + ' | ' + $sec + ' s') -ForegroundColor Green
   }

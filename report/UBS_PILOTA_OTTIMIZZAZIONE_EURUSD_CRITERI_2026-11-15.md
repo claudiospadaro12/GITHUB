@@ -112,3 +112,17 @@ File: `UBS_PILOTA_dati/G1_genetico_esporto2_2026-11-15.xml` (143 passaggi). **96
 - **Convalida di questo giro (18 passate, nessun uso del 2025):** per ogni candidato (a) IS 2013-2022 Modello 1 = riproduzione del dato del genetico (devono coincidere profitto, PF, operazioni); (b) OOS1 2023-2024 Modello 1: V1 = PF >= 1,20, netto > 0, recovery >= 1; (c) OOS1 2023-2024 TICK REALI: V3 = PF tick/M1 >= 0,7, DD tick <= 1,5 x M1, operazioni +-10%. **Il trailing minuscolo del C1 (5/5 pip) e il punto da guardare a tick reali.**
 - **La griglia da 10 ore del piano B si lancia SOLO se almeno un candidato supera V1 e V3.** Altrimenti si scrive "nessun candidato" per questa famiglia a questi parametri e si sceglie con Claudio cosa fare.
 - **Previsioni (scritte ora):** la riproduzione coincide con il genetico (+-2% su profitto e operazioni) per almeno 5 candidati su 6: 85%; almeno 1 candidato passa V1: 45%; almeno 1 passa V3: 25%; C1 (trailing 5/5) passa V3: 20%.
+
+## 16. Prima convalida (15/11/2026 20:23): 6 passate valide, 12 invalide per un errore dello script
+- **Errore mio:** nello script `VALIDA_CANDIDATI_OPT.ps1` la variabile dell'elenco dei candidati (`$C`) e quella del candidato corrente (`$c`) sono la stessa variabile in PowerShell (nomi non sensibili alle maiuscole). Dopo il primo ciclo l'elenco e stato sovrascritto: le passate IS e a tick reali sono partite con set sbagliati (253 operazioni identiche, netto -78,77; 0 operazioni a tick). **Le 12 passate IS e M4 di questo giro sono INVALIDE e non si usano.** Corretto (`$CAND` e `$cx`), controllati tutti gli script del pilota per collisioni analoghe (solo `$M`/`$m` in `PREPARA_STORICO_OPT`, senza effetto).
+- **Valide: le 6 passate OOS1 a candele (2023-01-01 -> 2024-12-31, EURUSD D1, lotto 0,1, deposito 100.000 EUR, qualita 100%):**
+| Candidato | Operazioni | Netto | PF | DD | Recovery (netto/DD in $) | V1 (PF >= 1,20, netto > 0, recovery >= 1) |
+|---|---:|---:|---:|---:|---:|---|
+| C0_BASE | 30 | +846,05 | 1,62 | 359,95 (0,36%) | 2,35 | passa |
+| C1_P1 | 37 | +166,34 | 3,57 | 62,35 (0,06%) | 2,67 | passa |
+| C2_P52 | 28 | +314,28 | 1,20 | 488,91 (0,49%) | 0,64 | **NON passa** |
+| C3_P45 | 30 | +780,78 | 1,56 | 297,66 (0,29%) | 2,62 | passa |
+| C4_P126 | 25 | -406,16 | 0,59 | 490,15 (0,49%) | negativo | **NON passa** |
+| C5_P2 | 29 | +320,05 | 1,35 | 297,26 (0,30%) | 1,08 | passa |
+- **Lettura:** nel fuori campione nessun candidato ottimizzato batte il set base (+846, PF 1,62); il "migliore" per Custom (C2) e il piu debole dei positivi; C4 perde. Operazioni 25-37 in 2 anni: campione piccolissimo, differenze non solide. **Previsioni:** V1 passato da almeno 1 candidato (45%): vera (4 su 6, ma il base passa).
+- **Le 18 passate si rilanciano tutte** (le 6 valide sono il controllo di riproducibilita).
