@@ -63,3 +63,11 @@ Se i dati BCM EURUSD sono completi per 10 anni (la qualita del download); quale 
 4. Ottimizzazione (ore). Nessuna riga mia nel frattempo.
 5. Claudio esporta i risultati; li leggo e applico la sezione 4.
 6. Convalida V1-V6 con le righe del tester, un blocco alla volta.
+
+## 10. Decisione sul set base e sui parametri (15/11/2026 18:30, PRIMA di qualunque risultato)
+Letti i parametri liberi (riga di sola lettura, output di Claudio): `Range_Optimization_EURUSD.set` ha sessione oraria (`RNG_CheckHour` 0-23, `RNG_TimeZone`) e stop/target fissi; `Other sets\daytrade 2(DAILY)\optimization.set` ha stop e target liberi 30-300 pip (passo 5), nessun orario di sessione, `ST1_Timeframe=0` (timeframe del grafico). **Per la regola del punto 3: base = `daytrade 2(DAILY)\optimization.set`, pilota = EURUSD D1.**
+- **6 parametri liberi (regola: uscite e distanza minima dai massimi/minimi):** `Exit_stop` (30-300, passo 5), `Exit_limit` (30-300, passo 5), `ST1_MinDist_to_HL` (10-100, passo 1), `Exit_TrailSL_size` (0-200, passo 5), `Exit_TrailSL_Start` (0-200, passo 5), `ST1_Expiration_hours` (10-240, passo 5).
+- **Fissi ai valori del set:** `ST1_HL_strength_L=2`, `ST1_HL_strength_R=6`, `ST1_countback=50`, `ST1_UpDiff=2`, `ST1_DownDiff=3`, `Exit_TrailTP_size=200`, `Exit_TrailTP_Start=160`, `Exit_BE_start=35`, `Exit_BE_extra_pips=115`.
+- **Timeframe:** giornaliero (D1), con `Entry_Timing` del set (H1 per il controllo dei segnali). Con D1 le operazioni sono poche: il minimo di 150 in 10 anni (15 l'anno) potrebbe escludere molte combinazioni. Se la passata base mostra meno di 100 operazioni in 10 anni a lotto 0,1, il minimo diventa 100 e lo scrivo nel referto PRIMA di ottimizzare.
+- **Primo passo:** una passata normale (non ottimizzazione) con il set base su EURUSD D1 2013-2022 per scaricare i dati, misurare il tempo e contare le operazioni.
+- **P-1 riscritta per D1:** l'ottimizzazione (6 parametri, genetico veloce) finisce in meno di 6 ore: 60%.
