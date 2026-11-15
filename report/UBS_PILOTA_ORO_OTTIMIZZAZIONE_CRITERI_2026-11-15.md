@@ -98,3 +98,17 @@
 7. **Dove si fa:** ottimizzazione e V0-V2 sul MT5 portable (storico oro da copiare); **V3, V4, V4b sul terminale principale BCM con la pipeline del tester gia collaudata** (ha i tick oro e le nostre guardie), con i candidati passati come input (`-Imposti`).
 8. **Tempo atteso (stima, non misurata):** una passata IS da 10 anni su oro D1 a M1 circa 100-150 s per agente; con il ritmo misurato nel pilota (circa 2,5 agenti effettivi) circa **60-90 passaggi/ora, 625 passaggi in circa 7-10 ore**. Tetto 14 ore come da sezione 4.
 9. **Previsioni aggiornate:** G-1 (storico XAUUSD dal 2013 esiste nel terminale principale): **verificata nell'esistenza dei file**, la qualita dei dati si vede alla prima passata. G-3 (>= 100 passaggi/ora): scendo a **30%**. G-4 (griglia entro 14 ore): sale a **60%**.
+
+## 12. Valori della griglia (15/11/2026 23:15, scritti PRIMA di lanciare; corregge il punto 4 della sezione 11)
+**Correzione:** MT5 accetta per ogni parametro solo un intervallo UNIFORME (inizio, passo, fine): i valori "50/75/100/150/200%" arrotondati NON si possono dare. Si usano passi uniformi centrati sul valore di C0 (GTP E, letto dal set: `Exit_stop=600`, `Exit_limit=1700`, `ST1_MinDist_to_HL=550`, `ST1_Expiration_hours=480`; `Risk=0`, `StartLots=0,1`, `EP=RF=TR=0`, candela di conferma ON, NFP OFF, `ST1_Timeframe=D1`):
+| Parametro | Valori (5) | C0 |
+|---|---|---|
+| `Exit_stop` | 300, 450, **600**, 750, 900 (passo 150; 300 = pavimento 50%) | centro |
+| `Exit_limit` | 900, 1300, **1700**, 2100, 2500 (passo 400; 900 >= 50%) | centro |
+| `ST1_MinDist_to_HL` | 350, 450, **550**, 650, 750 (passo 100) | centro |
+| `ST1_Expiration_hours` | 96, 192, 288, 384, **480** (passo 96, multiplo di 24) | **bordo alto**: il template arriva a 500, quindi 480 e gia il massimo possibile; su questo asse C0 ha vicini solo da un lato |
+- **625 passaggi**; il centro (600/1700/550/480) e esattamente C0.
+- **Criterio Custom max con minimi a zero**: nel template Goldtrade Pro `EP=RF=TR=0`, quindi nessun minimo di Wim da lasciare. Con una griglia completa tutti i 625 passaggi sono eseguiti e salvati: la scelta si fa dopo, con le regole della sezione 5. (La lezione del pilota EURUSD, "il mio minimo di expected payoff penalizzava i profili sicuri", non si ripete.)
+- Nel `.set` del GTP E sono attivi per default 14 parametri (`||Y`): lo script li porta tutti a N tranne i 4 sopra. Il resto vale come in C0.
+- **Nota di lettura:** la zona stabile (sezione 5) sull'asse scadenza avra solo vicini "in giu"; per quell'asse "70% dei vicini" si calcola sui vicini che esistono.
+- Quel che C0 e: la versione GOLD\Goldtrade Pro del GTP E (SHA256 `B56985DA...`, NFP OFF), non quella del portafoglio live (NFP ON, SHA `9035AB4F...`). Dichiarato.
