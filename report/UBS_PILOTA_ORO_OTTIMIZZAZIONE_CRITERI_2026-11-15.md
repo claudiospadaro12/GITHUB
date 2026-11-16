@@ -130,7 +130,7 @@ Regola CLAUDE.md: server BCM = **GMT+1 FISSO** (ora italiana in inverno, un'ora 
 - **Finalisti (gia decisi, sezione "Prossimi passi" del referto):** C0 (Wim), C1, C5, C6. Soglie V3 invariate: PF tick/candele >= 0,7; DD tick <= 1,5 x candele; operazioni +-10%.
 - **Previsione (scritta ora):** V3 non fallisce in modo netto (rapporto PF >= 0,7 e operazioni +-10%) per i quattro finalisti: 70% (set D1 a stop larghi: sulle misure precedenti Reaper/Goldbot/Phantom il rapporto PF era 0,94 e il netto cambiava di 3-8%).
 
-## 15. Prima corsa V3 (16/11/2026 ~17:50): esito tecnico e correzione della finestra (scritta PRIMA di rilanciare)
+## 15. Prima corsa V3 (16/11/2026, ore 16:30 italiane): esito tecnico e correzione della finestra (scritta PRIMA di rilanciare)
 **Output di Claudio (finestra 2024-07-01 -> 2024-12-31, 8 passate):** candele (M1) **tutte valide**, qualita 100%, 698.547 barre; **tick reali (M4): qualita 95% su tutte e quattro e SOLO C1 ha prodotto numeri** (22.760.888 tick, +527,00, 10 operazioni, PF 4,49, DD 238,17); **C0, C5, C6 a tick: 0 tick, 0 operazioni, profitto 0 = passate non riuscite.**
 - **Candele (stessa finestra):** C0 +256,07 / 11 ops / PF 2,12 / DD 326,32; C1 +531,86 / 10 / 4,54 / 241,78; C5 +357,08 / 11 / 2,65 / 307,90; C6 +583,13 / 10 / 6,90 / 204,14.
 - **Unica coppia valida (C1):** profitto tick/candele 527,00 / 531,86 = **0,99**; PF 4,49 / 4,54 = **0,99**; DD 238,17 / 241,78 = **0,99**; operazioni 10 = 10. **Soglie V3 rispettate per C1, ma qualita dei tick 95% (sotto il 98% richiesto) e 10 operazioni: indicazione, non prova.** C0, C5 e C6 NON hanno un confronto: **nessuna conclusione su di loro.**
