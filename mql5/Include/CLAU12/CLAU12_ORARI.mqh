@@ -1,7 +1,7 @@
 //+------------------------------------------------------------------+
-//| ABTG_Time.mqh  -  orari indipendenti dal cambio ora e dal broker |
+//| CLAU12_ORARI.mqh  -  orari indipendenti dal cambio ora e dal broker |
 //| Versione 1.00 (16/11/2026). DA COLLAUDARE nel tester: compila la |
-//| prova ABTG_TestOrari.mq5 e controlla "falliti=0" nel giornale.   |
+//| prova CLAU12_TESTORARI.mq5 e controlla "falliti=0" nel giornale.   |
 //|                                                                  |
 //| IDEA: nel tester TimeGMT() coincide con l'ora del server, quindi |
 //| NON rileva il cambio d'ora. Qui l'ora vera (UTC) si ricava dal   |
@@ -20,94 +20,94 @@
 //| inverno; 13:30 in alcune settimane): per quei test serve un      |
 //| modello dei DATI, non del broker.                                |
 //+------------------------------------------------------------------+
-#ifndef ABTG_TIME_MQH
-#define ABTG_TIME_MQH
-#define ABTG_TIME_VERSION "1.00"
+#ifndef CLAU12_TIME_MQH
+#define CLAU12_TIME_MQH
+#define CLAU12_TIME_VERSION "1.00"
 
-enum ENUM_ABTG_DST { ABTG_DST_NONE=0, ABTG_DST_EU=1, ABTG_DST_US=2 };
+enum ENUM_CLAU12_DST { CLAU12_DST_NONE=0, CLAU12_DST_EU=1, CLAU12_DST_US=2 };
 
-struct ABTG_Zone { int offStd; int offDst; int rule; };  // offset in MINUTI rispetto a UTC
+struct CLAU12_Zone { int offStd; int offDst; int rule; };  // offset in MINUTI rispetto a UTC
 
-ABTG_Zone ABTG_MkZone(int offStdMin,int offDstMin,int rule){ ABTG_Zone z; z.offStd=offStdMin; z.offDst=offDstMin; z.rule=rule; return z; }
-ABTG_Zone ABTG_ZoneBerlin(){ return ABTG_MkZone(60,120,ABTG_DST_EU); }   // anche Roma/Francoforte/Parigi
-ABTG_Zone ABTG_ZoneLondon(){ return ABTG_MkZone(0,60,ABTG_DST_EU); }
-ABTG_Zone ABTG_ZoneNewYork(){ return ABTG_MkZone(-300,-240,ABTG_DST_US); }
-ABTG_Zone ABTG_ZoneTokyo(){ return ABTG_MkZone(540,540,ABTG_DST_NONE); }
-ABTG_Zone ABTG_ZoneBCM(){ return ABTG_MkZone(60,60,ABTG_DST_NONE); }     // server BCM: GMT+1 fisso
-ABTG_Zone ABTG_ZoneFTMO(){ return ABTG_MkZone(120,180,ABTG_DST_EU); }    // server FTMO: ora italiana + 1
+CLAU12_Zone CLAU12_MkZone(int offStdMin,int offDstMin,int rule){ CLAU12_Zone z; z.offStd=offStdMin; z.offDst=offDstMin; z.rule=rule; return z; }
+CLAU12_Zone CLAU12_ZoneBerlin(){ return CLAU12_MkZone(60,120,CLAU12_DST_EU); }   // anche Roma/Francoforte/Parigi
+CLAU12_Zone CLAU12_ZoneLondon(){ return CLAU12_MkZone(0,60,CLAU12_DST_EU); }
+CLAU12_Zone CLAU12_ZoneNewYork(){ return CLAU12_MkZone(-300,-240,CLAU12_DST_US); }
+CLAU12_Zone CLAU12_ZoneTokyo(){ return CLAU12_MkZone(540,540,CLAU12_DST_NONE); }
+CLAU12_Zone CLAU12_ZoneBCM(){ return CLAU12_MkZone(60,60,CLAU12_DST_NONE); }     // server BCM: GMT+1 fisso
+CLAU12_Zone CLAU12_ZoneFTMO(){ return CLAU12_MkZone(120,180,CLAU12_DST_EU); }    // server FTMO: ora italiana + 1
 
-datetime ABTG_Mk(int y,int m,int d,int h=0,int mi=0)
+datetime CLAU12_Mk(int y,int m,int d,int h=0,int mi=0)
 {
    MqlDateTime s; s.year=y; s.mon=m; s.day=d; s.hour=h; s.min=mi; s.sec=0; s.day_of_week=0; s.day_of_year=0;
    return StructToTime(s);
 }
-int ABTG_DaysInMonth(int y,int m)
+int CLAU12_DaysInMonth(int y,int m)
 {
    if(m==2) return ((y%4==0 && y%100!=0) || (y%400==0)) ? 29 : 28;
    if(m==4 || m==6 || m==9 || m==11) return 30;
    return 31;
 }
-int ABTG_Dow(int y,int m,int d){ MqlDateTime s; TimeToStruct(ABTG_Mk(y,m,d),s); return s.day_of_week; }   // 0 = domenica
-int ABTG_LastSunday(int y,int m){ for(int d=ABTG_DaysInMonth(y,m); d>=1; d--) if(ABTG_Dow(y,m,d)==0) return d; return 1; }
-int ABTG_NthSunday(int y,int m,int n)
+int CLAU12_Dow(int y,int m,int d){ MqlDateTime s; TimeToStruct(CLAU12_Mk(y,m,d),s); return s.day_of_week; }   // 0 = domenica
+int CLAU12_LastSunday(int y,int m){ for(int d=CLAU12_DaysInMonth(y,m); d>=1; d--) if(CLAU12_Dow(y,m,d)==0) return d; return 1; }
+int CLAU12_NthSunday(int y,int m,int n)
 {
    int c=0;
-   for(int d=1; d<=ABTG_DaysInMonth(y,m); d++) if(ABTG_Dow(y,m,d)==0){ c++; if(c==n) return d; }
+   for(int d=1; d<=CLAU12_DaysInMonth(y,m); d++) if(CLAU12_Dow(y,m,d)==0){ c++; if(c==n) return d; }
    return 1;
 }
 
 // true se alla data UTC e in vigore l'ora legale secondo la regola
-bool ABTG_IsDST(int rule,datetime utc)
+bool CLAU12_IsDST(int rule,datetime utc)
 {
-   if(rule==ABTG_DST_NONE) return false;
+   if(rule==CLAU12_DST_NONE) return false;
    MqlDateTime u; TimeToStruct(utc,u); int y=u.year; datetime s,e;
-   if(rule==ABTG_DST_EU){ s=ABTG_Mk(y,3,ABTG_LastSunday(y,3),1,0); e=ABTG_Mk(y,10,ABTG_LastSunday(y,10),1,0); }
-   else if(y>=2007){ s=ABTG_Mk(y,3,ABTG_NthSunday(y,3,2),7,0); e=ABTG_Mk(y,11,ABTG_NthSunday(y,11,1),6,0); }
-   else { s=ABTG_Mk(y,4,ABTG_NthSunday(y,4,1),7,0); e=ABTG_Mk(y,10,ABTG_LastSunday(y,10),6,0); }
+   if(rule==CLAU12_DST_EU){ s=CLAU12_Mk(y,3,CLAU12_LastSunday(y,3),1,0); e=CLAU12_Mk(y,10,CLAU12_LastSunday(y,10),1,0); }
+   else if(y>=2007){ s=CLAU12_Mk(y,3,CLAU12_NthSunday(y,3,2),7,0); e=CLAU12_Mk(y,11,CLAU12_NthSunday(y,11,1),6,0); }
+   else { s=CLAU12_Mk(y,4,CLAU12_NthSunday(y,4,1),7,0); e=CLAU12_Mk(y,10,CLAU12_LastSunday(y,10),6,0); }
    return (utc>=s && utc<e);
 }
-int ABTG_Off(const ABTG_Zone &z,datetime utc){ return ABTG_IsDST(z.rule,utc) ? z.offDst : z.offStd; }   // minuti
+int CLAU12_Off(const CLAU12_Zone &z,datetime utc){ return CLAU12_IsDST(z.rule,utc) ? z.offDst : z.offStd; }   // minuti
 
 // ora locale del fuso -> UTC. Ambiguita del cambio d'ora: si sceglie la prima occorrenza (ora legale)
-datetime ABTG_LocalToUTC(const ABTG_Zone &z,datetime local)
+datetime CLAU12_LocalToUTC(const CLAU12_Zone &z,datetime local)
 {
    datetime uS=(datetime)((long)local-(long)z.offStd*60);
    datetime uD=(datetime)((long)local-(long)z.offDst*60);
-   if(z.rule!=ABTG_DST_NONE && ABTG_IsDST(z.rule,uD)) return uD;
+   if(z.rule!=CLAU12_DST_NONE && CLAU12_IsDST(z.rule,uD)) return uD;
    return uS;
 }
-datetime ABTG_UTCToLocal(const ABTG_Zone &z,datetime utc){ return (datetime)((long)utc+(long)ABTG_Off(z,utc)*60); }
+datetime CLAU12_UTCToLocal(const CLAU12_Zone &z,datetime utc){ return (datetime)((long)utc+(long)CLAU12_Off(z,utc)*60); }
 
 // ora del server -> ora del fuso di riferimento (es. TimeTradeServer() -> ora di Berlino)
-datetime ABTG_ServerToRef(const ABTG_Zone &srv,const ABTG_Zone &ref,datetime serverTime){ return ABTG_UTCToLocal(ref,ABTG_LocalToUTC(srv,serverTime)); }
+datetime CLAU12_ServerToRef(const CLAU12_Zone &srv,const CLAU12_Zone &ref,datetime serverTime){ return CLAU12_UTCToLocal(ref,CLAU12_LocalToUTC(srv,serverTime)); }
 // data e ora nel fuso di riferimento -> ora del server (per piazzare ordini o leggere le barre)
-datetime ABTG_RefToServer(const ABTG_Zone &ref,const ABTG_Zone &srv,int y,int m,int d,int h,int mi)
+datetime CLAU12_RefToServer(const CLAU12_Zone &ref,const CLAU12_Zone &srv,int y,int m,int d,int h,int mi)
 {
-   return ABTG_UTCToLocal(srv,ABTG_LocalToUTC(ref,ABTG_Mk(y,m,d,h,mi)));
+   return CLAU12_UTCToLocal(srv,CLAU12_LocalToUTC(ref,CLAU12_Mk(y,m,d,h,mi)));
 }
-int ABTG_MinOfDay(datetime t){ MqlDateTime s; TimeToStruct(t,s); return s.hour*60+s.min; }
+int CLAU12_MinOfDay(datetime t){ MqlDateTime s; TimeToStruct(t,s); return s.hour*60+s.min; }
 
 // riconosce il broker dal nome del server; false se sconosciuto (l'EA deve NON operare e scriverlo)
-bool ABTG_DetectServer(ABTG_Zone &srv,string &nome)
+bool CLAU12_DetectServer(CLAU12_Zone &srv,string &nome)
 {
    string sv=AccountInfoString(ACCOUNT_SERVER); string lo=sv; StringToLower(lo);
-   if(StringFind(lo,"bcm")>=0){ srv=ABTG_ZoneBCM(); nome="BCM (GMT+1 fisso)"; return true; }
-   if(StringFind(lo,"ftmo")>=0){ srv=ABTG_ZoneFTMO(); nome="FTMO (ora italiana + 1, regola UE)"; return true; }
+   if(StringFind(lo,"bcm")>=0){ srv=CLAU12_ZoneBCM(); nome="BCM (GMT+1 fisso)"; return true; }
+   if(StringFind(lo,"ftmo")>=0){ srv=CLAU12_ZoneFTMO(); nome="FTMO (ora italiana + 1, regola UE)"; return true; }
    nome="server sconosciuto: "+sv; return false;
 }
 // controllo dal vivo: l'offset reale (TimeTradeServer - TimeGMT) deve coincidere con il modello
-string ABTG_LiveCheck(const ABTG_Zone &srv)
+string CLAU12_LiveCheck(const CLAU12_Zone &srv)
 {
    if(MQLInfoInteger(MQL_TESTER)) return "tester: controllo dal vivo non applicabile";
    datetime g=TimeGMT(); long d=(long)TimeTradeServer()-(long)g;
-   int dm=(int)MathRound((double)d/1800.0)*30; int atteso=ABTG_Off(srv,g);
+   int dm=(int)MathRound((double)d/1800.0)*30; int atteso=CLAU12_Off(srv,g);
    if(dm==atteso) return "ok (offset "+IntegerToString(dm)+" min)";
    return "ATTENZIONE: offset reale "+IntegerToString(dm)+" min, atteso "+IntegerToString(atteso)+" min";
 }
 
 // ------------------------- collaudo interno ---------------------------
 // Casi calcolati in modo INDIPENDENTE (fusi ufficiali IANA di Python) e incollati qui.
-const long ABTG_T_EU[] = {
+const long CLAU12_T_EU[] = {
    1364688000, 0, 1364691600, 1, 1364695200, 1, 1382832000, 1,
    1382835600, 0, 1382839200, 0, 1396137600, 0, 1396141200, 1,
    1396144800, 1, 1414281600, 1, 1414285200, 0, 1414288800, 0,
@@ -130,7 +130,7 @@ const long ABTG_T_EU[] = {
    1761440400, 0, 1761444000, 0, 1774742400, 0, 1774746000, 1,
    1774749600, 1, 1792886400, 1, 1792890000, 0, 1792893600, 0,
    1736942400, 0, 1752580800, 1, 1584705600, 0, 1603972800, 0 };
-const long ABTG_T_US[] = {
+const long CLAU12_T_US[] = {
    1362895200, 0, 1362898800, 1, 1362902400, 1, 1383454800, 1,
    1383458400, 0, 1383462000, 0, 1394344800, 0, 1394348400, 1,
    1394352000, 1, 1414904400, 1, 1414908000, 0, 1414911600, 0,
@@ -153,7 +153,7 @@ const long ABTG_T_US[] = {
    1762063200, 0, 1762066800, 0, 1772949600, 0, 1772953200, 1,
    1772956800, 1, 1793509200, 1, 1793512800, 0, 1793516400, 0,
    1736942400, 0, 1752580800, 1, 1584705600, 1, 1603972800, 1 };
-const long ABTG_T_REF[] = {
+const long CLAU12_T_REF[] = {
    1, 2024, 3, 8, 9, 0, 1709888400, 1709892000,
    1, 2024, 3, 11, 9, 0, 1710147600, 1710151200,
    1, 2024, 3, 28, 9, 0, 1711616400, 1711620000,
@@ -263,31 +263,31 @@ const long ABTG_T_REF[] = {
    3, 2020, 11, 2, 8, 0, 1604307600, 1604311200,
    3, 2015, 7, 1, 8, 0, 1435737600, 1435744800 };
 
-ABTG_Zone ABTG_RefZoneById(int id){ if(id==1) return ABTG_ZoneBerlin(); if(id==2) return ABTG_ZoneNewYork(); return ABTG_ZoneLondon(); }
+CLAU12_Zone CLAU12_RefZoneById(int id){ if(id==1) return CLAU12_ZoneBerlin(); if(id==2) return CLAU12_ZoneNewYork(); return CLAU12_ZoneLondon(); }
 
 // restituisce il numero di casi FALLITI (0 = tutto corretto); rep contiene i primi errori
-int ABTG_Time_SelfTest(string &rep,int &casi)
+int CLAU12_Time_SelfTest(string &rep,int &casi)
 {
    int bad=0; casi=0; rep="";
-   int sz=ArraySize(ABTG_T_EU);
-   for(int i=0;i+1<sz;i+=2){ casi++; int got=ABTG_IsDST(ABTG_DST_EU,(datetime)ABTG_T_EU[i])?1:0;
-      if(got!=(int)ABTG_T_EU[i+1]){ bad++; if(bad<=12) rep+="EU utc="+TimeToString((datetime)ABTG_T_EU[i],TIME_DATE|TIME_MINUTES)+" atteso="+IntegerToString((int)ABTG_T_EU[i+1])+"\n"; } }
-   sz=ArraySize(ABTG_T_US);
-   for(int i=0;i+1<sz;i+=2){ casi++; int got=ABTG_IsDST(ABTG_DST_US,(datetime)ABTG_T_US[i])?1:0;
-      if(got!=(int)ABTG_T_US[i+1]){ bad++; if(bad<=12) rep+="US utc="+TimeToString((datetime)ABTG_T_US[i],TIME_DATE|TIME_MINUTES)+" atteso="+IntegerToString((int)ABTG_T_US[i+1])+"\n"; } }
-   sz=ArraySize(ABTG_T_REF);
+   int sz=ArraySize(CLAU12_T_EU);
+   for(int i=0;i+1<sz;i+=2){ casi++; int got=CLAU12_IsDST(CLAU12_DST_EU,(datetime)CLAU12_T_EU[i])?1:0;
+      if(got!=(int)CLAU12_T_EU[i+1]){ bad++; if(bad<=12) rep+="EU utc="+TimeToString((datetime)CLAU12_T_EU[i],TIME_DATE|TIME_MINUTES)+" atteso="+IntegerToString((int)CLAU12_T_EU[i+1])+"\n"; } }
+   sz=ArraySize(CLAU12_T_US);
+   for(int i=0;i+1<sz;i+=2){ casi++; int got=CLAU12_IsDST(CLAU12_DST_US,(datetime)CLAU12_T_US[i])?1:0;
+      if(got!=(int)CLAU12_T_US[i+1]){ bad++; if(bad<=12) rep+="US utc="+TimeToString((datetime)CLAU12_T_US[i],TIME_DATE|TIME_MINUTES)+" atteso="+IntegerToString((int)CLAU12_T_US[i+1])+"\n"; } }
+   sz=ArraySize(CLAU12_T_REF);
    for(int i=0;i+7<sz;i+=8)
    {
-      int id=(int)ABTG_T_REF[i],y=(int)ABTG_T_REF[i+1],m=(int)ABTG_T_REF[i+2],d=(int)ABTG_T_REF[i+3],h=(int)ABTG_T_REF[i+4],mi=(int)ABTG_T_REF[i+5];
-      datetime eb=(datetime)ABTG_T_REF[i+6], ef=(datetime)ABTG_T_REF[i+7]; ABTG_Zone rz=ABTG_RefZoneById(id);
-      datetime loc=ABTG_Mk(y,m,d,h,mi);
-      casi++; datetime gb=ABTG_RefToServer(rz,ABTG_ZoneBCM(),y,m,d,h,mi);
+      int id=(int)CLAU12_T_REF[i],y=(int)CLAU12_T_REF[i+1],m=(int)CLAU12_T_REF[i+2],d=(int)CLAU12_T_REF[i+3],h=(int)CLAU12_T_REF[i+4],mi=(int)CLAU12_T_REF[i+5];
+      datetime eb=(datetime)CLAU12_T_REF[i+6], ef=(datetime)CLAU12_T_REF[i+7]; CLAU12_Zone rz=CLAU12_RefZoneById(id);
+      datetime loc=CLAU12_Mk(y,m,d,h,mi);
+      casi++; datetime gb=CLAU12_RefToServer(rz,CLAU12_ZoneBCM(),y,m,d,h,mi);
       if(gb!=eb){ bad++; if(bad<=12) rep+="ref"+IntegerToString(id)+" "+TimeToString(loc)+" -> BCM "+TimeToString(gb)+" atteso "+TimeToString(eb)+"\n"; }
-      casi++; datetime gf=ABTG_RefToServer(rz,ABTG_ZoneFTMO(),y,m,d,h,mi);
+      casi++; datetime gf=CLAU12_RefToServer(rz,CLAU12_ZoneFTMO(),y,m,d,h,mi);
       if(gf!=ef){ bad++; if(bad<=12) rep+="ref"+IntegerToString(id)+" "+TimeToString(loc)+" -> FTMO "+TimeToString(gf)+" atteso "+TimeToString(ef)+"\n"; }
-      casi++; datetime rb=ABTG_ServerToRef(ABTG_ZoneBCM(),rz,eb);
+      casi++; datetime rb=CLAU12_ServerToRef(CLAU12_ZoneBCM(),rz,eb);
       if(rb!=loc){ bad++; if(bad<=12) rep+="inverso BCM "+TimeToString(eb)+" -> "+TimeToString(rb)+" atteso "+TimeToString(loc)+"\n"; }
-      casi++; datetime rf=ABTG_ServerToRef(ABTG_ZoneFTMO(),rz,ef);
+      casi++; datetime rf=CLAU12_ServerToRef(CLAU12_ZoneFTMO(),rz,ef);
       if(rf!=loc){ bad++; if(bad<=12) rep+="inverso FTMO "+TimeToString(ef)+" -> "+TimeToString(rf)+" atteso "+TimeToString(loc)+"\n"; }
    }
    return bad;
