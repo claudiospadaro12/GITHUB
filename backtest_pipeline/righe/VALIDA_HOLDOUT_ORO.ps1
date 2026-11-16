@@ -53,10 +53,10 @@ Write-Host ('=== HOLD-OUT ORO (V4 2025, V4b 2026-01/10): ' + $t00.ToString('dd/M
 Write-Host 'Colonne: candidato;finestra;modello(M1=candele,M4=tick reali);MinDist;Scadenza;Stop;Limit;qualita storico;tick;profitto;operazioni;PF;DD massima equity;fattore di recupero' -ForegroundColor Gray
 $wins=@( @{ n='2025'; da='2025.01.01'; a='2025.12.31' }, @{ n='2026'; da='2026.01.01'; a='2026.10.31' } )
 $out=New-Object System.Collections.ArrayList; $n=0; $tot=$cands.Count*4
-foreach($w in $wins){ foreach($cd in $cands){ foreach($mo in @('1','4')){
-  $fi=@{ n=('M' + $mo); mo=$mo; da=$w.da; a=$w.a }; $n=$n+1; $res=$null
-  for($tent=1; $tent -le 3; $tent++){ $t1=Get-Date; $res=Passata ($cd.n + '_' + $w.n + '_M' + $mo + '_' + $tent) $cd $fi; $qk=Qn $res; if($mo -eq '1' -or $qk[1] -gt 0){ break } else { Write-Host ('   ' + $cd.n + ' ' + $w.n + ' tick tentativo ' + $tent + ' senza tick: ripeto') -ForegroundColor Yellow; LogTick $t1 } }
-  $riga=($cd.n + ';' + $w.n + ';' + $fi.n + ';' + $cd.md + ';' + $cd.ex + ';' + $cd.st + ';' + $cd.li + ';' + $(if($res){ $res } else { 'ERRORE;;;;;;' }))
+foreach($wn in $wins){ foreach($cd in $cands){ foreach($mo in @('1','4')){
+  $fi=@{ n=('M' + $mo); mo=$mo; da=$wn.da; a=$wn.a }; $n=$n+1; $res=$null
+  for($tent=1; $tent -le 3; $tent++){ $t1=Get-Date; $res=Passata ($cd.n + '_' + $wn.n + '_M' + $mo + '_' + $tent) $cd $fi; $qk=Qn $res; if($mo -eq '1' -or $qk[1] -gt 0){ break } else { Write-Host ('   ' + $cd.n + ' ' + $wn.n + ' tick tentativo ' + $tent + ' senza tick: ripeto') -ForegroundColor Yellow; LogTick $t1 } }
+  $riga=($cd.n + ';' + $wn.n + ';' + $fi.n + ';' + $cd.md + ';' + $cd.ex + ';' + $cd.st + ';' + $cd.li + ';' + $(if($res){ $res } else { 'ERRORE;;;;;;' }))
   [void]$out.Add($riga); Write-Host ('[' + (Get-Date).ToString('HH:mm') + ' ' + $n + '/' + $tot + '] ' + $riga) -ForegroundColor Green
 } } }
 [void][MasterSveglia.Win]::SetThreadExecutionState([uint32]2147483648)
