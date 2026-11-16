@@ -146,3 +146,11 @@ C0 = GTP E di Wim (550/480/600/1700). C1 594 (750/384/750/2500) 16,46 · C2 592 
 
 ## Contatore di campagna (oro, pilota GTP E)
 625 (griglia invalida, scartata) + 625 + 33 (V1/V2) + 8 + 8 (V3, due corse) + 16 (V4/V4b) passate; 1 sola griglia valida, 4 finalisti, hold-out aperto una volta.
+
+# V6 (candele FTMO): stato della ricerca dello storico (16/11/2026 19:38, riga di sola lettura di Claudio)
+- **Terminale FTMO di prova** (`C:\MT5_Backtest\Mt5_Ftmo_Prova`, server `FTMO-Demo`): storico XAUUSD **solo 2026, 1 file da 17,2 MB**; nessun tick. **Insufficiente** per confrontare C0 e C1 su 2013-2026.
+- **FundedNext** (`C:\FundedNext_Manuale`, server `FundedNext-Server`): XAUUSD **2019-2026** (8 file, 135,5 MB), tick solo 2026-09. **E un'altra societa, NON FTMO**: non usabile per affermazioni su FTMO; licenza dell'EA non verificata.
+- **BCM** (principale e portable): XAUUSD **2004-2026**, tick 2024-07 -> 2026-11 (29 mesi): quelli gia usati.
+- **Cosa NON so (da verificare prima di V6):** (a) se la licenza UBS funziona sul conto FTMO-Demo; (b) quanti anni di storico M1 oro scarica FTMO-Demo; (c) **la regola dell'ora legale del server FTMO**: CLAUDE.md dice "ora italiana + 1" (confermato il 02/11/2026), ma il 2 novembre e una data in cui Europa e USA sono entrambe in ora solare: **non distingue la regola UE (usata nella libreria `CLAU12_ORARI`) dalla regola USA** (taglio alla chiusura di New York); la differenza cade nelle tre settimane di scarto (marzo e ottobre-novembre).
+- **Stima a priori dell'effetto del taglio D1 (NON misurata):** BCM taglia il giorno alle 23:00 UTC, FTMO alle 22:00 (inverno) o 21:00 UTC (estate): 1-2 ore spostate fra due candele giornaliere, e sono le ore piu tranquille dell'oro (dopo la chiusura di New York, prima dell'Asia). Le candele H1 restano identiche (offset di ore intere). Mi aspetto un effetto piccolo: probabilita che C1 batta ancora Wim con il taglio FTMO: 85%.
+- **Opzione A:** una passata sul terminale FTMO-Demo (scarica lo storico da solo; serve la licenza sul conto FTMO-Demo e l'EA installato li). **Opzione B:** simbolo personalizzato `XAUUSD_FTMOCUT` costruito dai minuti BCM con gli orari convertiti al server FTMO (isola il solo effetto del taglio, indipendente da licenza e profondita dello storico FTMO; richiede export e import via MQL5).
