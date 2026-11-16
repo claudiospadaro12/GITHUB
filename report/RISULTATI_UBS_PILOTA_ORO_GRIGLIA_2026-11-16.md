@@ -36,3 +36,18 @@ La selezione grezza ammette tutti i 625: **candidati = i 10 migliori per Calmar 
 
 ## Cosa NON sappiamo
 La causa della differenza con U5 (sopra); se i 625 passaggi usano davvero tutti gli input del GTP E; il rapporto tra le candele D1 BCM e FTMO (vedi sezione 13 dei criteri); la correlazione dei 625 set con il C0; la qualita storica esatta di XAUUSD 2013-2022 nel portable.
+
+## ESITO DELLA VERIFICA V0 (16/11/2026, output incollato da Claudio): LA GRIGLIA E INVALIDA
+Quattro passate singole nel portable (XAUUSD D1, Modello 1, 100.000 EUR, qualita storico 98%):
+| Passata | Set | Periodo | Profitto | Operazioni | PF | DD massimo equity | Atteso |
+|---|---|---|---|---|---|---|---|
+| A | OPT2_ORO.set | 2013-2022 | **+4.563,35** | **253** | **2,19** | 380,06 (0,37%) | era +1.323,40 / 286 / 1,65 (C0 della griglia) |
+| B | GTP E originale | 2013-2022 | +4.563,35 | 253 | 2,19 | 380,06 (0,37%) | = A |
+| C | GTP E originale | 2013-2018 | **+2.241,79** | **153** | **1,92** | 334,41 (0,33%) | U5: +2.242 / 153 / 1,92 / 334: **IDENTICO** |
+| D | GTP E originale | 2019-2025 | **+3.873,19** | **169** | **2,64** | 380,06 (0,38%) | U5: +3.873 / 169 / 2,64 / 380: **IDENTICO** |
+- **Il portable riproduce esattamente i nostri test U5** (C e D coincidono al centesimo): lo storico, il tester e l'EA sono gli stessi della pipeline principale. **A = B**: il set `OPT2_ORO.set` in passata singola vale come il GTP E originale (con C0 = i valori del GTP E).
+- **Ma la griglia NON misurava il GTP E:** il suo passaggio centrale (stessi 4 valori di C0) dava +1.323 / 286 / PF 1,65 invece di +4.563 / 253 / PF 2,19. **Quindi i 625 passaggi non vanno usati per nessuna scelta.** Il numero "C0 e 99-esimo su 625" e il resto della sezione sopra sono da considerare NON validi.
+- **Causa: NON verificata.** Ipotesi: nell'avvio da `.ini` la sezione `[TesterInputs]` conteneva solo le 4 righe con `||Y`; quando c'e una `[TesterInputs]` gli altri input potrebbero tornare ai valori di default dell'EA invece di quelli del set. Lo script `AVVIA_OTT_ORO2.ps1` lo verifica (passata E: stesso ini della griglia, deve dare circa +1.323) e poi rifa la griglia con TUTTI gli input in `[TesterInputs]`, ma solo se la passata di controllo F (stesso metodo, senza ExpertParameters) riproduce +4.563,35 / 253.
+- **Regola nuova (per tutte le griglie):** il passaggio centrale deve coincidere con una passata singola dello stesso set; se non coincide, la griglia e invalida e non si legge.
+- **Errore mio:** non avevo previsto questo rischio; la riga di avvio era stata scritta senza una passata di controllo con lo stesso metodo. Avrei dovuto notare che C0 non coincideva con U5 ancora prima di leggere i migliori. L'ho notato leggendo C0, ma dopo aver analizzato tutta la griglia.
+- **Dato utile gia da V0:** GTP E a 0,1 lotti su 2013-2022 vale +4.563 (circa +0,46% l'anno, DD massimo 0,37%): rapporto rendimento/DD annuo circa 1,2 (non 0,65 come sembrava dalla griglia sbagliata).
