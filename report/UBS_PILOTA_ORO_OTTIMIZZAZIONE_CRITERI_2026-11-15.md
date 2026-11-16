@@ -153,3 +153,21 @@ Regola CLAUDE.md: server BCM = **GMT+1 FISSO** (ora italiana in inverno, un'ora 
 - **Avvertenza scritta ora:** il 2025 e un anno di forte rialzo dell'oro (come il 2023-2024): un target piu lontano lo favorisce per costruzione; **un successo nel 2025 da solo NON basta**, e per questo conta V4b (2026). Se anche il 2026 e un rialzo, il risultato non distingue "robusto" da "regime favorevole"; **lo dichiarero nel referto.**
 - **Una volta letti i numeri non si cambiano ne finalisti ne soglie.** Contatore di campagna (oro): 625 + 625 (griglia invalida, non usata) + 33 + 8 + 8 + 16 passate.
 - **Previsioni (scritte ora):** almeno 1 finalista ROBUSTO: 55%; tutti e tre i candidati ROBUSTI: 25%; nessun candidato batte C0 nel 2025 a rendimento/DD: 15%; il rapporto tick/candele resta >= 0,9 su PF in tutte le finestre: 80%.
+
+## 17. V6 (trasferimento su dati FTMO): esito della prova di licenza e regole definitive (16/11/2026, scritte PRIMA dei numeri della corsa completa)
+**Prova di licenza e profondita (`PROVA_FTMO_ORO.ps1`, output di Claudio, set C0, XAUUSD D1, Modello 1, un anno per passata):**
+| Anno | Qualita storico | Barre | Profitto | Operazioni | PF | DD equity |
+|---|---|---|---|---|---|---|
+| 2013 | 0% | 0 | 0 | 0 | 0 | - (nessuno storico) |
+| 2016 | 99% | 258 | +463,90 | 18 | 2,67 | 389,98 |
+| 2019 | 100% | 257 | +245,69 | 19 | 1,99 | 203,52 |
+| 2022 | 99% | 258 | +931,05 | 22 | 4,67 | 169,24 |
+| 2025 | 100% | 257 | **+44,68** | 18 | **1,22** | 238,42 |
+- **La licenza funziona sul terminale FTMO** (il set opera: 18-22 operazioni per anno). **Lo storico oro FTMO parte dal 2015-01-02** (log: "history synchronized from 2015.01.02 to 2016.12.30"); il 2013 non esiste.
+- **Dato da non ignorare:** C0 nel 2025 con Modello 1: **BCM +243,59 / 22 operazioni / PF 1,96; FTMO +44,68 / 18 operazioni / PF 1,22.** Stesso EA, stesso set, stesso lotto: il profitto scende dell'82%. Cause possibili (NON separate): taglio della candela D1 (BCM 23:00 UTC, FTMO 22:00/21:00 UTC), prezzi e spread storici del feed FTMO, commissioni/specifiche del simbolo nel tester. **Per gli altri anni non ho ancora il confronto sullo stesso anno su BCM.**
+- **Errore mio da dichiarare:** nel messaggio e nell'intestazione dello script avevo scritto che il conto FTMO-Demo fosse "una demo di prova". **Dal log il login e `1515150476`, lo stesso conto del Guardian di `C:\FTMO` sul VPS (equity 76.847, 30 ordini pendenti).** Il tester NON invia ordini e `AllowLiveTrading=false`; nessun grafico con EA e stato lanciato. Rischio concreto: basso; ma il terminale e collegato al conto reale della challenge. **Raccomandazione: usare per i test un conto FTMO Free Trial separato** (stesso server FTMO-Demo, stessi dati) e lasciare questo terminale spento.
+**Regole V6 (Modello 1 su entrambi i broker; i tick FTMO non sono scaricati):** 4 finalisti x 4 finestre (2015-01-01 -> 2022-12-31; 2023-2024; 2025; 2026-01-01 -> 2026-10-31) su FTMO e BCM, stessi parametri.
+- **Una finestra "passa" per un finalista su FTMO** se profitto > 0, PF >= 1,15 e rendimento/DD (profitto / DD euro) >= quello di C0 **su FTMO nella stessa finestra**.
+- **Trasferimento riuscito** se passa **almeno 3 finestre su 4, inclusa 2015-2022.** Altrimenti "NON TRASFERITO" (non si adotta su FTMO).
+- **Si riportano anche i rapporti FTMO/BCM** (profitto e PF) per ogni finalista e finestra; **il confronto non attribuisce la causa** (taglio, prezzi, spread): per isolare il solo taglio resta l'opzione B (simbolo personalizzato dai minuti BCM).
+- **Previsioni (scritte ora):** C1 trasferito (>= 3 finestre su 4): 55%; C0 su FTMO ha PF piu basso che su BCM in almeno 3 finestre su 4: 80%; il vantaggio di C1 su C0 resta nella finestra 2015-2022 su FTMO: 65%; tutti e tre i candidati trasferiti: 35%.
