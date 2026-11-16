@@ -80,3 +80,39 @@ C0 = GTP E di Wim (550/480/600/1700). C1 594 (750/384/750/2500) 16,46 · C2 592 
 
 ## Previsioni: esito parziale
 - **G-3** (>= 100 passaggi/ora, scritto al 30%): **VERA** (circa 131/ora nella griglia valida; la prima griglia sbagliata era a 82/ora). **G-4** (entro 14 ore): **VERA**. **G-5/G-6:** **VERE, banali** (625 su 625). **G-10 (prima meta)** (il migliore batte C0 di piu del 20% nel dentro-campione): **VERA** (+33%); (seconda meta) rapporto OOS/IS sotto il 60%: **da misurare**. **G-7 ... G-11:** in attesa di V1/V2.
+
+# CONVALIDA V1 / V2 (16/11/2026, output di `VALIDA_CAND_ORO.ps1` incollato da Claudio; 33 passate su 33)
+**Fonte:** `UBS_PILOTA_ORO_dati/valida_cand_oro_2026-11-16.txt`; lettura con `valida_cand_oro.py` (regole del 16/11 scritte PRIMA, nessuna soglia ritoccata). Controllo di coerenza: **C0 H1 + H2 = +4.563,35 con 253 operazioni = la passata singola A e il passaggio centrale della griglia.**
+| Cand. | MinDist/Scad./Stop/Limit | OOS 2023-24: profitto / ops / PF / DD EUR / rend.DD (x C0) | H1 2013-17: profitto / PF | H2 2018-22: profitto / PF | V1 | V2 |
+|---|---|---|---|---|---|---|
+| **C0 (Wim)** | 550/480/600/1700 | 1.309 / 47 / 2,91 / 326 / 4,01 (x1,00) | 1.849 / 1,87 | 2.714 / 2,58 | - | passa |
+| C1 | 750/384/750/2500 | 1.703 / 44 / 3,85 / 242 / 7,05 (x1,76) | 2.172 / 2,10 | 3.326 / 2,98 | **passa** | passa |
+| C2 | 550/384/750/2500 | 1.681 / 47 / 3,54 / 308 / 5,46 (x1,36) | 2.225 / 2,09 | 3.632 / 3,17 | passa | passa |
+| C3 | 650/384/750/2500 | 1.722 / 45 / 3,89 / 242 / 7,12 (x1,78) | 2.166 / 2,06 | 3.604 / 3,14 | passa | passa |
+| C4 | 450/384/750/2500 | 1.697 / 49 / 3,52 / 432 / 3,93 (x0,98) | 2.167 / 2,00 | 3.571 / 3,06 | **NO** (x0,98) | passa |
+| C5 | 550/384/750/2100 | 1.729 / 47 / 3,61 / 308 / 5,62 (x1,40) | 2.168 / 2,06 | 3.588 / 3,18 | passa | passa |
+| C6 | 750/384/900/2500 | 2.051 / 44 / 5,34 / 224 / 9,18 (x2,29) | 2.504 / 2,40 | 3.161 / 2,69 | **passa** | passa |
+| C7 | 650/384/750/2100 | 1.611 / 45 / 3,70 / 242 / 6,66 (x1,66) | 2.109 / 2,04 | 3.560 / 3,15 | passa | passa |
+| C8 | 750/384/750/2100 | 1.592 / 44 / 3,67 / 242 / 6,59 (x1,64) | 2.115 / 2,07 | 3.314 / 3,00 | passa | passa |
+| C9 | 450/384/750/2100 | 1.904 / 49 / 3,83 / 318 / 5,99 (x1,49) | 2.110 / 1,97 | 3.527 / 3,07 | passa | passa |
+| C10 | 550/384/900/2500 | 2.012 / 47 / 4,64 / 283 / 7,10 (x1,77) | 2.547 / 2,37 | 3.467 / 2,86 | passa | passa |
+
+## Esito (regole applicate come scritte)
+- **V1: 9 candidati su 10 passano; C4 no (x0,98).** **V2: tutti e 10 passano** (PF >= 1,97 in entrambe le meta, rapporto DD fra le meta 1,01-1,14).
+- **Nel fuori campione 2023-2024 i candidati battono Wim in profitto (1.592-2.051 contro 1.309), PF (3,5-5,3 contro 2,9) e rendimento/DD (x1,36 - x2,29), e in entrambe le meta del dentro-campione.**
+- **La mia previsione G-7 ("almeno un candidato passa V1": 25%; "nessuno": 75%) era SBAGLIATA.** Non avevo previsto che la direzione tenesse fuori campione.
+
+## Cosa NON dice questo risultato (limiti)
+1. **I nove sono quasi lo stesso test:** stop 750-900, limit 2100-2500, scadenza 384, distanze simili; fanno gli stessi scambi. "9 su 10" e UNA direzione confermata, non nove idee indipendenti.
+2. **Campione piccolo:** 44-49 operazioni in 2 anni; PF 3,5-5,3 con cosi poche operazioni ha un intervallo largo (non calcolato: mancano le liste degli affari).
+3. **2023-2024 e un periodo di forte rialzo dell'oro**, e un target piu lontano lo favorisce per costruzione; **anche il 2025 sara un rialzo**: l'hold-out confermera facilmente per un motivo che non dimostra robustezza. Contro: nella meta 2013-2017 (oro in calo e poi laterale) i candidati migliorano comunque (+14%/+38% di profitto), ma quella meta fa parte del periodo su cui la griglia e stata scelta.
+4. **Il valore migliore del limit (2500) e il bordo della griglia**: l'ottimo non e stato cercato oltre.
+5. **Coerenza H1+H2 contro griglia:** per 4 dei 5 candidati controllati la somma delle meta e **inferiore di 98,60 EUR** al passaggio della griglia con lo stesso numero di operazioni (C9: identico). Causa NON verificata; ipotesi: un'operazione lunga a cavallo del 31/12/2017 che nella passata divisa viene chiusa al termine del test. Non cambia gli esiti.
+6. **Costi e candele:** Modello 1, spread BCM; i test a tick reali vengono dopo.
+7. **Il guadagno assoluto resta piccolo:** a 0,1 lotti C6 vale circa +0,56% l'anno (profitto IS 5.665 su 10 anni, 100.000 EUR) con DD 0,39%.
+
+## Prossimi passi (regole sezione 6; PRIMA di qualunque risultato V3/V4)
+- **Finalisti per V3/V4/V4b (decisi ora, prima dei risultati):** per non testare nove doppioni scelgo **tre rappresentanti del gruppo + il controllo**: **C0** (Wim), **C1** (migliore per rendimento/DD in dentro-campione), **C6** (migliore in OOS, stop 900) e **C5** (limit 2100, il piu moderato del gruppo). C4 (unico bocciato in V1) e gli altri non proseguono, nessuna scelta dopo aver visto il 2025.
+- **V3 (tick reali) - problema scritto prima:** le finestre con tick fuori hold-out (2024-07/2024-12 e 2026-01/2026-10, 16 mesi) conterranno circa 25-30 operazioni per candidato, **sotto il minimo di 30 fissato**: probabile "non valutabile" per C0. Opzioni (decide Claudio): (a) eseguire V3 comunque e dichiarare il campione, (b) usare la regola "un candidato non passa a V4 senza V3" alla lettera e fermarsi. **Consiglio: (a), perche V3 serve a vedere se i tick cambiano il quadro, non a decidere da solo.**
+- **V4 (hold-out 2025 a tick) e V4b (2026-01/2026-10 a tick):** si aprono UNA volta, insieme, per i quattro finalisti. **V6:** candele FTMO, se lo storico del terminale di prova copre.
+- **Nessun secondo esperimento sul limit prima di V4.**
