@@ -115,6 +115,7 @@ function Esegui-Test([string]$setFile,$fin,[int]$modello){
   $riga = (Get-Date).ToString('s') + ';' + $nomeSet + ';' + $fin.nome + ';M' + $modello + ';' + $m.profit.ToString($ci) + ';' + $m.pf.ToString($ci) + ';' + $m.trades.ToString($ci) + ';' + $m.ddEur.ToString($ci) + ';' + $m.ddPct.ToString('0.00',$ci)
   if(-not (Test-Path -LiteralPath $csvRis)){ Add-Content -LiteralPath $csvRis -Value 'ora;set;finestra;modello;profitto;PF;operazioni;DD_eur;DD_pct' -Encoding ASCII }
   Add-Content -LiteralPath $csvRis -Value $riga -Encoding ASCII
+  if($fin.nome -ne 'TICK' -or $modello -eq 1){ & (Join-Path $aqui 'Esporta_Operazioni.ps1') -Report $fileRep -Uscita (Join-Path $dirRis 'serie') | Out-Null }
   Write-Host ('   [' + $n + '] ' + $nomeSet + ' ' + $fin.nome + ' M' + $modello + ': profitto ' + $m.profit.ToString('0.00',$ci) + ', PF ' + $m.pf.ToString('0.00',$ci) + ', operazioni ' + $m.trades + ', DD ' + $m.ddPct.ToString('0.0',$ci) + '%') -ForegroundColor Green
   return $m
 }

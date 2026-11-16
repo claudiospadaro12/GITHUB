@@ -33,6 +33,11 @@ MT5 contiene il compilatore dentro MetaEditor. Due modi:
 6. Solo dopo: `-Cartella .\Set_profili -Modo Esegui`.
 7. Incolla in chat gli esiti (sono negli appunti). Io leggo, scrivo i criteri del giro dopo e rigenero i set.
 
+## Tappa 3 - scorrelazione tra EA (NUOVO, non provato su report reali)
+- `Esporta_Operazioni.ps1 -Report <report.htm> -Uscita .\Risultati\serie` ricava dal report di una passata singola il profitto NETTO per giorno (data;profitto), per qualunque EA. Autocontrollo: la somma deve coincidere con il "Profitto Totale Netto" del report; se no la serie si chiama `..._NONVERIFICATA.csv` e non va usata. Se non riconosce la tabella delle operazioni non scrive niente. `Run_MT5_Engine.ps1` lo chiama da solo dopo ogni passata a candele.
+- `python Correlazione.py Risultati\serie` (Python puro, senza librerie): matrice di correlazione; `--candidato X --squadra A,B` mostra la correlazione di X con la squadra e il PF/DD della squadra con e senza X. Soglie: <= 0,30 diverso, 0,30-0,60 parente, > 0,60 stessa cosa, giudicate sul valore piu alto tra giornaliero e settimanale.
+- **Limiti dichiarati:** misura i profitti REALIZZATI (non il flottante, non le posizioni aperte insieme); gli EA che operano di rado hanno molti zeri in comune e sembrano piu scorrelati di quanto siano (nella prova sintetica due EA con la stessa origine ma 30% dei giorni attivi sono usciti a 0,49 invece di ~0,95). Le serie da confrontare devono coprire lo stesso periodo e lo stesso conto/deposito.
+
 ## Cosa NON e verificato (leggi prima di fidarti)
 - **Formato del report.** Gli script leggono il report **HTML** (come i nostri script dell'oro, che hanno funzionato) con etichette italiane e inglesi. Un report **XML** per una passata singola non l'abbiamo mai visto: il motore lo cerca solo come ripiego, col medesimo metodo, non verificato. L'XML sicuro e quello della griglia di ottimizzazione (diverso, non letto da questi script).
 - **DD in %.** Il motore usa il valore piu alto tra il % della riga "massima", il % "relativo" e (DD in denaro / deposito): prudente, ma le etichette "Relativa" in italiano sono ipotizzate.
