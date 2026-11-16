@@ -51,3 +51,32 @@ Quattro passate singole nel portable (XAUUSD D1, Modello 1, 100.000 EUR, qualita
 - **Regola nuova (per tutte le griglie):** il passaggio centrale deve coincidere con una passata singola dello stesso set; se non coincide, la griglia e invalida e non si legge.
 - **Errore mio:** non avevo previsto questo rischio; la riga di avvio era stata scritta senza una passata di controllo con lo stesso metodo. Avrei dovuto notare che C0 non coincideva con U5 ancora prima di leggere i migliori. L'ho notato leggendo C0, ma dopo aver analizzato tutta la griglia.
 - **Dato utile gia da V0:** GTP E a 0,1 lotti su 2013-2022 vale +4.563 (circa +0,46% l'anno, DD massimo 0,37%): rapporto rendimento/DD annuo circa 1,2 (non 0,65 come sembrava dalla griglia sbagliata).
+
+# SECONDA GRIGLIA (VALIDA), esportata il 16/11/2026 alle 15:25 ora italiana
+**Fonte:** `UBS_PILOTA_ORO_dati/G_ORO_griglia2_625_ReportOptimizer_2026-11-16.xml` (stessa intestazione: `XAUUSD,Daily 2013.01.01-2022.12.31`). Avviata con `AVVIA_OTT_ORO2.ps1` (tutti gli input in `[TesterInputs]`, passata di controllo F bloccante). Durata circa 4 h 45 min (stima di MT5): circa 131 passaggi all'ora.
+**Controllo del passaggio centrale (regola nuova): OK.** C0 (550/480/600/1700, passaggio 322) = **+4.563,35, 253 operazioni, PF 2,19, DD 0,37%** = la passata singola A. **La griglia misura il GTP E di Wim.**
+
+## Cosa mostra
+| | minimo | mediana | massimo |
+|---|---|---|---|
+| Profitto (EUR, 0,1 lotti, 10 anni) | 2.225 | 4.544 | 6.270 |
+| Profit factor | 1,58 | 2,24 | 2,74 |
+| Operazioni | 245 | 253 | 273 |
+- **Tutti i 625 passaggi sono positivi e superano i filtri grezzi; tutti sono "centri di zona stabile"**: la regola di selezione non scarta niente (come nella griglia sbagliata). Si applica la regola di ripiego gia scritta (sezione 12): 10 migliori per rendimento/DD (profitto / DD in euro) fra le combinazioni distinte senza scadenza.
+- **C0 e 197-esimo su 625 per rendimento/DD (12,40).** Il migliore e il passaggio 594 (MinDist 750, Scadenza 384, Stop 750, Limit 2500): **16,46 = 1,33 x C0** (profitto +5.597, PF 2,53, DD 0,34%, 245 operazioni). **83 passaggi su 625 superano C0 di almeno il 10%.** Il migliore per Custom e il 592 (550/384/750/2500): +5.956, PF 2,61, DD 0,37%.
+- **L'effetto e quasi tutto in UN parametro: `Exit_limit` (il target).** Calmar medio per valore: 900 → 6,77; 1300 → 9,56; 1700 → 12,28; 2100 → 12,60; 2500 → 12,96 (a stop 750: 12,64 / 14,62 / 15,30 per 1700 / 2100 / 2500). Stop 750-900 meglio di 300-600. **MinDist ha poco effetto (10,5-11,1)** e la scadenza sotto 288 ore e leggermente peggiore (10,55 contro 11,03).
+- **Il valore migliore del limit (2500) e il bordo della griglia** (il template arriva a 5000): l'ottimo potrebbe stare oltre; **NON l'ho esplorato** (regola "una sola griglia").
+- **Lettura prudente:** la direzione e "lasciar correre i profitti" (target piu lontano, stop piu largo). Sull'oro 2013-2022 con forti rialzi e cio che ci si aspetta da un periodo di trend; **puo valere solo per quel regime** e l'hold-out 2025 (oro in forte rialzo) lo favorirebbe per costruzione. +33% sul rendimento/DD nel dentro-campione, su 625 tentativi, **non e ancora un miglioramento dimostrato.**
+
+## I candidati (regola: 10 migliori per rendimento/DD fra combinazioni distinte senza scadenza) + controllo
+C0 = GTP E di Wim (550/480/600/1700). C1 594 (750/384/750/2500) 16,46 · C2 592 (550/384/750/2500) 15,99 · C3 593 (650/384/750/2500) 15,76 · C4 591 (450/384/750/2500) 15,68 · C5 467 (550/384/750/2100) 15,43 · C6 619 (750/384/900/2500) 15,27 · C7 468 (650/384/750/2100) 15,20 · C8 469 (750/384/750/2100) 15,18 · C9 466 (450/384/750/2100) 15,11 · C10 617 (550/384/900/2500) 14,74.
+**Sono quasi doppioni** (stop 750-900, limit 2100-2500, scadenza 384): in pratica una o due configurazioni, quindi la convalida valuta UNA direzione piu che dieci idee.
+
+## Convalida (regole scritte PRIMA, sezione 6; riscritte qui con la numerazione)
+- **V1 fuori campione 2023-01-01 -> 2024-12-31 (candele, lotto 0,1):** PF >= 1,20, profitto > 0, recovery >= 1 **e** rendimento/DD >= 1,10 x quello di C0 nello STESSO periodo.
+- **V2 stabilita nel tempo:** 2013-2017 e 2018-2022: PF >= 1,15 e profitto > 0 in ENTRAMBE; rapporto fra i DD delle due meta <= 2,5.
+- **Un candidato va avanti solo se passa V1 e V2.** Poi V3 (tick 2024-07/2024-12 e 2026-01/2026-10), V4 e V4b (hold-out 2025 e 2026), V6 (candele FTMO). **Nessuna griglia estesa sul limit prima dell'esito di V1/V2**; se un candidato passa, un secondo esperimento DICHIARATO potra spingere il limit oltre 2500.
+- Script: `VALIDA_CAND_ORO.ps1` (33 passate, tutti gli input, stesso metodo della griglia).
+
+## Previsioni: esito parziale
+- **G-3** (>= 100 passaggi/ora, scritto al 30%): **VERA** (circa 131/ora nella griglia valida; la prima griglia sbagliata era a 82/ora). **G-4** (entro 14 ore): **VERA**. **G-5/G-6:** **VERE, banali** (625 su 625). **G-10 (prima meta)** (il migliore batte C0 di piu del 20% nel dentro-campione): **VERA** (+33%); (seconda meta) rapporto OOS/IS sotto il 60%: **da misurare**. **G-7 ... G-11:** in attesa di V1/V2.
