@@ -1,0 +1,196 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-11-16 03:32:46  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 10
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\MT5_Wim
+=== conto: 50504894
+=====================================================================
+
+--- GIORNO 20261115   (3.8 KB, ultima scrittura 2026-11-15 23:55) ---
+    righe totali: 13
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      IQ023:55:01.458ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=103961.11  dayLoss=0.00%  totDD=-3.96%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261116   (15.2 KB, ultima scrittura 2026-11-16 03:30) ---
+    righe totali: 53
+    RIGHE DI ORDINE / DEAL: 9
+      ID000:00:04.528Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      QI000:00:04.528GoldBot_One_V3.5_WSC (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      RI000:00:04.528GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      HG000:00:04.544The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      LD000:05:02.050GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      LD000:05:02.207GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      HD000:05:02.339GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      GD000:05:02.484GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      ND000:05:02.623GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      LL003:30:03.302ABTG_Guardian (GBPJPY,M5)[GUARDIAN] eq=103961.11  dayLoss=0.00%  totDD=-3.96%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261115   (16.9 KB, ultima scrittura 2026-11-15 23:55) ---
+    righe totali: 66
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261116   (7.9 KB, ultima scrittura 2026-11-16 03:25) ---
+    righe totali: 31
+    RIGHE DI ORDINE / DEAL: 1
+      JD000:01:01.401ABTG_PunteLarry (U30USD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1515150476
+=====================================================================
+
+--- GIORNO 20261115   (3.5 KB, ultima scrittura 2026-11-15 23:56) ---
+    righe totali: 12
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      GF023:55:01.193ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=76847.32  dayLoss=0.00%  totDD=3.94%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261116   (13.9 KB, ultima scrittura 2026-11-16 03:25) ---
+    righe totali: 50
+    RIGHE DI ORDINE / DEAL: 6
+      IF000:05:03.184GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      LF000:05:03.277GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      NF000:05:03.365GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      HF000:05:03.482GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      OF000:05:03.564GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      ND002:00:00.935The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      NK003:30:04.042ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=76847.32  dayLoss=0.00%  totDD=3.94%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\FTMO_P4
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261115   (16 KB, ultima scrittura 2026-11-15 23:55) ---
+    righe totali: 61
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      RF023:55:00.631ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=110377.45  dayLoss=0.00%  totDD=-10.38%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261116   (16.7 KB, ultima scrittura 2026-11-16 03:25) ---
+    righe totali: 60
+    RIGHE DI ORDINE / DEAL: 9
+      FH000:00:04.262GoldBot_One_V3.5_WSC (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      DD000:00:04.262Gold Trade Pro_WSC_V7.2 (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      GI000:00:04.262GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      QG000:00:04.264The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      OI000:05:02.349GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      HI000:05:02.557GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      FI000:05:02.753GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      CI000:05:02.938GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      RI000:05:03.084GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      CG003:30:00.477ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=110377.45  dayLoss=0.00%  totDD=-10.38%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20261114   (108.5 KB, ultima scrittura 2026-11-14 23:50) ---
+    righe totali: 162
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261115   (1393.5 KB, ultima scrittura 2026-11-15 22:50) ---
+    righe totali: 2024
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261115   (3.8 KB, ultima scrittura 2026-11-15 23:55) ---
+    righe totali: 13
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      EE023:55:00.600ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6004.36  dayLoss=0.00%  totDD=3.86%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261116   (14.3 KB, ultima scrittura 2026-11-16 03:25) ---
+    righe totali: 52
+    RIGHE DI ORDINE / DEAL: 8
+      HO000:00:04.246GoldBot_One_V3.5_WSC (XAUUSD,D1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      OR000:00:04.262The_Gold_Phantom_V2.5_WSC (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      LH000:00:04.294GoldReaper_MT5_WSC_V5.6 (XAUUSD,H1)DAYSWITCH -> Market might be closed... waiting 5 minutes before setting order..
+      EK000:05:01.137GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      KK000:05:01.197GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      GK000:05:01.267GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      FK000:05:01.334GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+      IK000:05:01.405GoldBot_One_V3.5_WSC (XAUUSD,D1)Max number of pending buy orders reached... deleting highest buystop order!
+    GUARDIAN, ultima riga del giorno:
+      ON003:30:00.445ABTG_Guardian (E35EUR,M5)[GUARDIAN] eq=6004.36  dayLoss=0.00%  totDD=3.86%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
