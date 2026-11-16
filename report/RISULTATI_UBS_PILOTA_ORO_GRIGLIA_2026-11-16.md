@@ -116,3 +116,33 @@ C0 = GTP E di Wim (550/480/600/1700). C1 594 (750/384/750/2500) 16,46 · C2 592 
 - **V3 (tick reali) - problema scritto prima:** le finestre con tick fuori hold-out (2024-07/2024-12 e 2026-01/2026-10, 16 mesi) conterranno circa 25-30 operazioni per candidato, **sotto il minimo di 30 fissato**: probabile "non valutabile" per C0. Opzioni (decide Claudio): (a) eseguire V3 comunque e dichiarare il campione, (b) usare la regola "un candidato non passa a V4 senza V3" alla lettera e fermarsi. **Consiglio: (a), perche V3 serve a vedere se i tick cambiano il quadro, non a decidere da solo.**
 - **V4 (hold-out 2025 a tick) e V4b (2026-01/2026-10 a tick):** si aprono UNA volta, insieme, per i quattro finalisti. **V6:** candele FTMO, se lo storico del terminale di prova copre.
 - **Nessun secondo esperimento sul limit prima di V4.**
+
+# HOLD-OUT: V4 (2025) e V4b (2026-01 -> 2026-10), aperto il 16/11/2026 (output di `VALIDA_HOLDOUT_ORO.ps1`, 16 passate su 16)
+**Fonte:** `UBS_PILOTA_ORO_dati/holdout_oro_2026-11-16.txt`. Regole applicate come scritte nella sezione 16 dei criteri (prima dei numeri), nessuna soglia ritoccata. Qualita dello storico 100% in tutte le passate, tick reali 65,7 milioni (2025) e 88 milioni (2026). Lotto 0,1, deposito 100.000 EUR, Modello 1 e Modello 4.
+| Finalista | Finestra | Tick reali: profitto / ops / PF / DD EUR | Candele: profitto / PF | tick/candele: profitto / PF | rend./DD (x C0) | Esito finestra |
+|---|---|---|---|---|---|---|
+| **C0 (Wim)** | 2025 | 158,0 / 22 / 1,61 / 222,8 | 243,6 / 1,96 | 0,65 / 0,82 | 0,71 (x1,00) | controllo |
+| C1 | 2025 | 385,9 / 20 / 3,20 / 179,3 | 526,3 / 4,03 | 0,73 / 0,79 | 2,15 (x3,03) | passa |
+| C5 | 2025 | 234,0 / 22 / 1,88 / 179,3 | 372,0 / 2,56 | 0,63 / 0,73 | 1,31 (x1,84) | passa |
+| C6 | 2025 | 359,7 / 20 / 2,79 / 203,1 | 500,0 / 3,50 | 0,72 / 0,80 | 1,77 (x2,50) | passa |
+| **C0 (Wim)** | 2026-01/10 | 251,6 / 17 / 2,35 / 126,4 | 185,0 / 2,00 | 1,36 / 1,18 | 1,99 (x1,00) | controllo |
+| C1 | 2026-01/10 | 398,0 / 17 / 2,74 / 157,7 | 263,2 / 2,16 | 1,51 / 1,27 | 2,52 (x1,27) | passa |
+| C5 | 2026-01/10 | 297,1 / 17 / 2,29 / 137,2 | 203,3 / 1,90 | 1,46 / 1,21 | 2,16 (x1,09) | passa |
+| C6 | 2026-01/10 | 345,5 / 17 / 2,28 / 159,9 | 222,1 / 1,83 | 1,56 / 1,25 | 2,16 (x1,09) | passa |
+
+## Esito (regole applicate come scritte): C1, C5 e C6 sono "ROBUSTI" (passano V4 e V4b)
+- **Profitto a tick reali 2025 + 2026 (22 mesi, 0,1 lotti):** Wim 410; **C1 784 (1,91 x Wim)**; C6 705 (1,72 x); C5 531 (1,30 x). Drawdown massimo 0,16-0,20% in tutti.
+- **Con il fuori campione, i tick 2024-H2 e le due meta del dentro-campione, C1 batte Wim in OGNI finestra misurata** (dentro-campione, OOS 2023-2024, tick 2024-H2, 2025, 2026): una direzione coerente.
+- **Previsioni (scritte prima):** "almeno 1 finalista ROBUSTO: 55%" **VERA**; "tutti e tre i candidati ROBUSTI: 25%" **VERA**; "nessun candidato batte C0 nel 2025: 15%" **FALSA**; **"rapporto tick/candele del PF >= 0,9 in tutte le finestre: 80%" FALSA** (nel 2025 il PF a tick vale 0,73-0,82 di quello a candele e il profitto cala del 27-37%; nel 2026 e MIGLIORE a tick (1,18-1,27 x), nel 2024-H2 0,98-0,99 x). Sommando 2025 e 2026 la differenza tick/candele e piccola: profitto 0,92 (C5), 0,96 (C0), 0,98 (C6), 0,99 (C1) — in linea con la stima precedente (le candele sovrastimano il profitto dell'oro di circa 3-8%).
+
+## Limiti: cosa NON dimostra (da leggere insieme all'esito)
+1. **Campione piccolissimo:** 17-22 operazioni per finestra. I rapporti tra candidati e Wim hanno un'incertezza grande; per C5 e C6 il margine su Wim nel 2026 e solo x1,09 in rendimento/DD (profitto +18% e +37%), e C5 nel 2025 ha un rapporto PF tick/candele di 0,73, vicino alla soglia 0,7.
+2. **I tre sono UNA SOLA direzione** (target piu lontano e stop piu largo): "tre robusti" non sono tre conferme indipendenti.
+3. **Regime:** il 2025 e un anno di forte rialzo dell'oro; **non ho misurato il rialzo del 2026**: se anche il 2026 e stato in rialzo, le due finestre non distinguono "robusto" da "regime favorevole". Da misurare (rendimento annuo dell'oro nelle finestre).
+4. **L'hold-out e ora consumato** per questi parametri: ogni nuova griglia sul limit (ottimo oltre 2500? non esplorato) non ha piu 2025 e 2026 come dati intatti.
+5. **Candele FTMO:** la candela D1 di FTMO e tagliata diversamente da quella BCM (sezione 13 dei criteri); V6 NON e stato fatto. **Il guadagno trovato su candele BCM non e garantito su FTMO.**
+6. **Rendimento assoluto piccolo:** C1, 22 mesi: +784 su 100.000 EUR a 0,1 lotti (circa +0,43% l'anno) con DD massimo 0,16-0,18%: rapporto rendimento annuo / DD circa 2,4 a parita di lotto. Nessun giudizio su lotti o taglie.
+7. **Resta lo stesso EA di Wim (set Gold Trade Pro E) con parametri ritoccati:** correlazione con Wim non misurata, quasi certamente vicina a 1; l'ipotesi di FTMO ("strategia identica?") resta in attesa.
+
+## Contatore di campagna (oro, pilota GTP E)
+625 (griglia invalida, scartata) + 625 + 33 (V1/V2) + 8 + 8 (V3, due corse) + 16 (V4/V4b) passate; 1 sola griglia valida, 4 finalisti, hold-out aperto una volta.
