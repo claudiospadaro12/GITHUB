@@ -21,6 +21,7 @@ for d in data:
     d['cal']=d['Profit']/d['DDeur'] if d['DDeur']>0 else float('nan')
 idx={tuple(d[p] for p in P):d for d in data}
 c0=idx.get((550.0,480.0,600.0,1700.0))
+print('CONTROLLO CENTRO: atteso profit 4563.35, trades 253 (passata singola A); trovato',c0['Profit'],c0['Trades'],'->','OK' if abs(c0['Profit']-4563.35)<0.5 and c0['Trades']==253 else 'GRIGLIA INVALIDA: NON LEGGERE')
 print('C0',{k:c0[k] for k in ['Pass','Profit','Trades','Profit Factor','Recovery Factor','Equity DD %','Expected Payoff','Result','cal']})
 import statistics as S
 pf=[d['Profit Factor'] for d in data]; tr=[d['Trades'] for d in data]; pr=[d['Profit'] for d in data]
