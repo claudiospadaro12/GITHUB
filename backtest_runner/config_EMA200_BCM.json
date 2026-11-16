@@ -1,0 +1,23 @@
+{
+  "_nota": "ESEMPIO per ABTG_EMA200 su EURUSD H4 nel MT5 portable BCM. Prima: compila ABTG_EMA200.mq5 in quel terminale (F7) e copia nel portable lo storico EURUSD (gia fatto per il pilota). Per FTMO: terminale = Mt5_Ftmo_Prova, portable=false, cartellaDati = cartella dati in AppData (usa un conto Free Trial, non la challenge).",
+  "computerAmmesso": "DESKTOP-H4D7CAJ",
+  "terminale": "C:\\MT5_BCM_Opt\\terminal64.exe",
+  "portable": true,
+  "cartellaDati": "C:\\MT5_BCM_Opt",
+  "ea": "ABTG_EMA200.ex5",
+  "simbolo": "EURUSD",
+  "periodo": "H4",
+  "deposito": 100000,
+  "valuta": "EUR",
+  "leva": 100,
+  "timeoutMinuti": 40,
+  "IS":  { "da": "2013.01.01", "a": "2022.12.31" },
+  "OOS": [ { "nome": "OOS23-24", "da": "2023.01.01", "a": "2024.06.30" } ],
+  "TICK": { "da": "2024.07.15", "a": "2024.12.31" },
+  "ruoli": "ruoli_EMA200_EURUSD_H4.json",
+  "cartellaSet": "Set_da_testare",
+  "cartellaValidati": "Validati",
+  "cartellaRisultati": "Risultati",
+  "baseline": "S000_BASE.set",
+  "soglie": { "pfIS": 1.5, "opIS": 100, "ddIS_vs_base": 1.5, "pfOOS": 1.25, "opOOS": 20, "wfe": 0.5, "rapportoPfTick": 0.7, "ddTickMax": 1.5, "opTickTol": 0.10, "vicini_in_profitto": 0.7 }
+}

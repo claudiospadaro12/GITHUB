@@ -1,0 +1,4 @@
+set;profilo;ingresso;rischio_pct;tetto_giorno_pct;tetto_totale_pct;dd_max_validazione_pct
+Wim_PropFirm_LowRisk;Wim_PropFirm_LowRisk;BREAKOUT;0.5;2.0;4.0;4.0
+Wim_Real_MidRisk;Wim_Real_MidRisk;BREAKOUT;1.0;3.0;8.0;8.0
+Wim_Aggressive;Wim_Aggressive;BREAKOUT;2.0;5.0;15.0;15.0

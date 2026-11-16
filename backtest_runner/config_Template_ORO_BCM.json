@@ -1,0 +1,26 @@
+{
+  "_nota": "Config di Run_MT5_Engine.ps1 per Template_EA_Wim su XAUUSD H1 nel MT5 portable BCM (C:\\MT5_BCM_Opt). Prima: Compila_EA.ps1 (o F7 in MetaEditor), poi Run_MT5_Engine.ps1 -Modo Prova. Per FTMO: terminale Mt5_Ftmo_Prova, portable=false, cartellaDati in AppData, conto Free Trial.",
+  "computerAmmesso": "DESKTOP-H4D7CAJ",
+  "terminale": "C:\\MT5_BCM_Opt\\terminal64.exe",
+  "portable": true,
+  "cartellaDati": "C:\\MT5_BCM_Opt",
+  "ea": "CLAU12\\Template_EA_Wim.ex5",
+  "simbolo": "XAUUSD",
+  "periodo": "H1",
+  "deposito": 100000,
+  "valuta": "EUR",
+  "leva": 100,
+  "timeoutMinuti": 40,
+  "IS":  { "da": "2013.01.01", "a": "2022.12.31" },
+  "OOS": [ { "nome": "OOS23-24", "da": "2023.01.01", "a": "2024.06.30" } ],
+  "TICK": { "da": "2024.07.15", "a": "2024.12.31" },
+  "cartellaValidati": "Validati_Pronti_Per_Mercato",
+  "cartellaScartati": "Scartati",
+  "cartellaRisultati": "Risultati",
+  "soglie": { "pfIS": 1.5, "opIS": 100, "pfOOS": 1.25, "opOOS": 20, "rapportoPfTick": 0.7 },
+  "profili": {
+    "Wim_PropFirm_LowRisk": { "ddMaxPct": 4.0 },
+    "Wim_Real_MidRisk":     { "ddMaxPct": 8.0 },
+    "Wim_Aggressive":       { "ddMaxPct": 15.0 }
+  }
+}

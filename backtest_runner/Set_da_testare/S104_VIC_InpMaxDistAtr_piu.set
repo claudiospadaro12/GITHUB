@@ -1,0 +1,45 @@
+; S104_VIC_InpMaxDistAtr_piu - un passo piu su InpMaxDistAtr (perturbazione, regola R2)
+; EA: ABTG_EMA200  simbolo/tf: EURUSD H4  generato da GeneraSet_Wim.py (regole R1-R9, vedi REGOLE_WIM.md)
+; baseline: valori di default di ABTG_EMA200.mq5
+InpTF=16388
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.8
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.10
+InpOrder2Atr=0.35
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=EMA200
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=771501
+InpMaxSpread=0
+InpVerbose=true

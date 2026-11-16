@@ -1,0 +1,19 @@
+set,tipo,tag,InpMinDistAtr,InpMaxDistAtr,InpSLatr,InpTP_RR,rapporto_tp_sl
+S000_BASE,base,baseline: valori di default di ABTG_EMA200.mq5,0.3,1.5,1,2,2.00
+S101_VIC_InpMinDistAtr_meno,vicino,"un passo meno su InpMinDistAtr (perturbazione, regola R2)",0.2,1.5,1,2,2.00
+S102_VIC_InpMinDistAtr_piu,vicino,"un passo piu su InpMinDistAtr (perturbazione, regola R2)",0.4,1.5,1,2,2.00
+S103_VIC_InpMaxDistAtr_meno,vicino,"un passo meno su InpMaxDistAtr (perturbazione, regola R2)",0.3,1.2,1,2,2.00
+S104_VIC_InpMaxDistAtr_piu,vicino,"un passo piu su InpMaxDistAtr (perturbazione, regola R2)",0.3,1.8,1,2,2.00
+S105_VIC_InpSLatr_meno,vicino,"un passo meno su InpSLatr (perturbazione, regola R2)",0.3,1.5,0.8,2,2.00
+S106_VIC_InpSLatr_piu,vicino,"un passo piu su InpSLatr (perturbazione, regola R2)",0.3,1.5,1.2,2,2.00
+S107_VIC_InpTP_RR_meno,vicino,"un passo meno su InpTP_RR (perturbazione, regola R2)",0.3,1.5,1,1.5,1.50
+S108_VIC_InpTP_RR_piu,vicino,"un passo piu su InpTP_RR (perturbazione, regola R2)",0.3,1.5,1,2.5,2.50
+S201_OA9_1,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.2,1.2,0.8,1.5,1.50
+S202_OA9_2,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.2,1.5,1,2,2.00
+S203_OA9_3,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.2,1.8,1.2,2.5,2.50
+S204_OA9_4,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.3,1.2,1,2.5,2.50
+S205_OA9_5,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.3,1.5,1.2,1.5,1.50
+S206_OA9_6,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.3,1.8,0.8,2,2.00
+S207_OA9_7,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.4,1.2,1.2,2,2.00
+S208_OA9_8,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.4,1.5,0.8,2.5,2.50
+S209_OA9_9,ortogonale,combinazione L9 (copre le coppie di livelli senza griglia completa),0.4,1.8,1,1.5,1.50

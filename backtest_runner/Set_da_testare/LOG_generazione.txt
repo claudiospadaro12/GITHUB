@@ -1,0 +1,5 @@
+baseline: valori di default di ABTG_EMA200.mq5
+parametri liberi: InpMinDistAtr, InpMaxDistAtr, InpSLatr, InpTP_RR
+rapporto target/stop baseline R0 = 2.00
+set scritti: 18
+
