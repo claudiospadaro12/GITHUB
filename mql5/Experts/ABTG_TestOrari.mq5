@@ -17,8 +17,8 @@ int OnInit()
    PrintFormat("ABTG_TIME_SERVER: %s riconosciuto=%s account_server=%s tester=%s",nome,(ok?"si":"no"),AccountInfoString(ACCOUNT_SERVER),(MQLInfoInteger(MQL_TESTER)?"si":"no"));
    if(ok) Print("ABTG_TIME_LIVE: "+ABTG_LiveCheck(srv));
    // tabella di esempio: aperture in ora del fuso di riferimento -> ora del server BCM e FTMO
-   int d[][3]={{2026,3,27},{2026,3,30},{2026,10,23},{2026,10,26},{2026,10,30},{2026,11,2},{2026,11,16}};
-   for(int i=0;i<ArrayRange(d,0);i++)
+   int d[7][3]={{2026,3,27},{2026,3,30},{2026,10,23},{2026,10,26},{2026,10,30},{2026,11,2},{2026,11,16}};
+   for(int i=0;i<7;i++)
    {
       datetime dax_b=ABTG_RefToServer(ABTG_ZoneBerlin(),ABTG_ZoneBCM(),d[i][0],d[i][1],d[i][2],9,0);
       datetime dax_f=ABTG_RefToServer(ABTG_ZoneBerlin(),ABTG_ZoneFTMO(),d[i][0],d[i][1],d[i][2],9,0);
