@@ -35,5 +35,23 @@
 4. **In ogni caso** l'esito non cambia il giudizio sul vantaggio futuro di Wim (vedi sezione 1).
 5. Il risultato va in questo file (sezione 6) con la tabella completa, anche se brutto.
 
-## 6. Risultato
-*(da compilare dopo il lancio; nessun numero ancora)*
+## 6. Risultato (18/11/2026, FTMO, 12 passate su 12; dati in `CLAU12_CONTROLLO_POSITIVO_WIM_dati/`)
+Soglie applicate come scritte nella sezione 3, nessuna ritoccata.
+| Passata | Operazioni | Netto EUR | PF netto | Recovery | t | DD EUR |
+|---|---|---|---|---|---|---|
+| **C0 IS 2015-2020 (G1)** | **95** | +1.868 | 2,12 | 5,63 | **2,65** | 390 |
+| C0 2015-17 (G3) | 50 | +1.151 | 2,29 | 3,40 | 2,19 | 390 |
+| C0 2018-20 (G3) | 45 | +717 | 1,93 | 2,53 | 1,51 | 345 |
+| C0 OOS 2021-22 (G4) | 43 | +1.097 | 2,65 | 6,68 | 2,18 | 187 |
+| C0 OOS 2023-24 (G4) | 42 | +962 | 2,66 | 5,08 | 2,48 | 218 |
+Vicini (G2, IS 2015-2020): MinDist 450 e 650 = identici al centro (95 op, +1.868); scadenza 384: +1.818 (PF 2,10); stop 450: +1.569 (1,97); stop 750: +1.937 (2,13); limit 1300: +1.418 (1,85); limit 2100: +1.934 (2,16) ma **DD 1.080 contro 390** (x2,8).
+**Verdetti:**
+- **G1: NON PASSA.** Passano: netto > 0, PF netto 2,12 >= 1,30, recovery 5,63 >= 1,5. **Falliscono due componenti: operazioni 95 < 100 e t 2,65 < 3,3** (anche contro 3,0, solo informativo: 2,65 < 3,0).
+- **G2: PASSA.** 7 vicini su 7 in profitto (>= 5), PF netto mediano 2,12 >= 1,70. Nota dichiarata prima: 2 vicini su 7 sono doppioni del centro, quindi i vicini distinti sono 5 (5 su 5 in profitto).
+- **G3: PASSA.** Entrambe le meta in profitto con PF netto 2,29 e 1,93 (>= 1,10).
+- **G4: PASSA.** PF netto 2,65 e 2,66 (>= 1,20), profitto > 0, 43 e 42 operazioni (>= 20), WFE 1,76 e 1,54 (>= 0,5; profitto/mese IS = 25,9 EUR).
+**Previsioni scritte prima vs risultato:** G1 passa (60%) -> NO; operazioni IS >= 100 (55%) -> NO (95); PF netto >= 1,30 (95%) -> si; recovery >= 1,5 (97%) -> si; t >= 3,3 se le operazioni bastano (75%) -> NO (2,65); G2 (85%) -> si; G3 (75%) -> si; G1+G2+G3 (45%) -> NO; G4 (65%) -> si; "se G1 fallisce e solo per le operazioni" (70%) -> **NO** (falliscono operazioni E t).
+**Lettura con la regola della sezione 5 (punto 3: piu componenti falliti):** la porta **G1 e sospetta per i sistemi a bassa frequenza**, **G2, G3 e G4 si comportano come previsto**. Nessuna soglia viene ritoccata.
+Perche G1 colpisce questo caso: t = (media/dev.std. per operazione) x radice(n): con n = 95 e t = 2,65 l'effetto per operazione e circa 0,27; per arrivare a t = 3,3 a parita di qualita servirebbero **circa 147 operazioni (circa 9 anni al ritmo del 2015-2020, 16 operazioni l'anno)**, per 3,0 circa 122. La soglia 3,3 e stata fissata per correggere il numero di set guardati nell'intera campagna (80 set), non per la qualita del singolo sistema: **un sistema D1 a 16 operazioni l'anno puo essere ottimo e fallire G1 per costruzione.** Ulteriore informazione, non uno scarto di nessun set: **8 dei nostri set (batch 36) avevano netto > 0, PF netto >= 1,30, recovery >= 1,5 e sono stati fermati solo dal t < 3,3** (D1_D1_R2, R3, R5; D1_H4_R3, R5; D2_H4_R5, R7 [PF 1,57, 220 operazioni, t 2,94], R8). **Non si ripescano** (regola della sezione 5 punto 2, set gia contati nel contatore dei looks): servono solo a dire quanto G1 pesa. Contro-osservazione: i tre finalisti del disegno 2 che avevano superato G1 con t 3,36-10,43 sono poi caduti in G4 (PF netto 0,70-0,93): **il t alto non protegge dai falsi positivi, e G4 e la porta che distingue davvero.**
+**Cio che il test dice davvero:** (1) il set di Wim e **molto diverso** dai nostri disegni in G4 (PF netto 2,65 / 2,66 contro 0,70-0,93 dei nostri finalisti): la differenza non e un artefatto di soglie severe; (2) G1 va guardata come porta di screening e non come prova; (3) **non dimostra un vantaggio futuro di Wim** (ottimizzato su 2013-2023, 2025 su FTMO solo +45 EUR e 2026 +150 EUR, informativi).
+**Decisione sulle soglie (da prendere da Claudio, vedi risposta in chat):** nessuna modifica retroattiva; eventuale nuova G1 scritta ex ante e valida solo per famiglie future. **Non si tara su C0:** adattare le soglie per far passare l'unico controllo positivo sarebbe circolare.
