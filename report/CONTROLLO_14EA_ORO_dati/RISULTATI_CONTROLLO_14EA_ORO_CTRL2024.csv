@@ -1,0 +1,5 @@
+ea;finestra;operazioni;rend_totale_pct;PF_su_rendimenti;t_giornaliera;DD_equity_pct;anni_con_uscite;anni_positivi;quota_max_anno_pct;netto_tester_EUR;PF_tester;rendimento_per_anno_pct
+ABTG_SupertrendReversal_Multi_Ottimizzato;W2024_2026;149;47.87;2.86;3.79;3.97;3;3;60.0;47871.72;2.85;2024:13.40|2025:23.76|2026:2.41
+ABTG_SupertrendReversal_Ottimizzato;W2024_2026;93;14.00;2.46;3.13;2.21;3;3;65.7;13999.21;2.45;2024:3.55|2025:8.67|2026:0.97
+ABTG_EMA200_Ottimizzato;W2024_2026;267;13.57;1.71;2.30;3.71;3;3;78.4;13570.78;1.68;2024:10.05|2025:1.81|2026:0.95
+ABTG_GoldenCross_Ottimizzato;W2024_2026;134;19.77;1.72;2.37;8.27;3;3;62.0;19774.54;1.68;2024:11.37|2025:1.37|2026:5.59

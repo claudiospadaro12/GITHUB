@@ -61,5 +61,15 @@ Tutti gli anni interi disponibili prima del 2024-01-01, **con 2015-2023 come mas
 - **Previsioni nuove:** cancello D superato per il DAX: **50%**; per il Nasdaq: **35%**. Numero di EA valutabili in prima ondata: oro 4 + DAX 3 (se D) + NAS 1 (se D) = fino a **8 su 12**; previsione "almeno 6 valutabili": **45%**.
 **Cosa resta come prima:** porte P1-P5, previsioni della sezione 8 (da leggere sugli EA davvero valutabili), regola "nessuna ottimizzazione", correlazione finale.
 
-## 11. Risultato
-*(da compilare dopo i test; ora nessun numero di test)*
+## 11. Risultato, PRIMA ONDATA PARZIALE: i 4 EA su ORO (18/11/2026, BCM portabile, Modello 1, parametri di default dei sorgenti)
+Dati: `CONTROLLO_14EA_ORO_dati/RISULTATI_CONTROLLO_14EA_ORO_2015_2023.csv` e `..._CTRL2024.csv`. PF calcolato sui rendimenti per operazione in % del saldo.
+| EA | 2015-2023: ops / rendimento / PF / t / DD / anni+ | Verdetto | Controllo 2024-2026: PF (classifica) |
+|---|---|---|---|
+| SupertrendReversal_Multi (H4) | 406 / +8,65% / 1,10 / 0,52 / 21,9% / 7 su 9 (un anno = 85% del totale) | **NON REGGE** (P2: PF < 1,20) | 2,85 (3,17) |
+| SupertrendReversal (H4) | 267 / -4,33% / 0,91 / -0,62 / 9,8% / 4 su 9 | **NON REGGE** | 2,45 (2,74) |
+| EMA200 (H4) | 760 / -19,38% / 0,80 / -1,72 / 21,9% / 2 su 9 | **NON REGGE** | 1,68 (1,92) |
+| GoldenCross (H1) | 536 / -8,56% / 0,93 / -0,61 / 19,8% / 5 su 9 | **NON REGGE** | 1,68 (1,58) |
+Informativo 2005-2014: Multi -24,2% (PF 0,72), SupRev -7,6% (0,85), EMA200 -28,9% (0,68), GoldenCross +15,7% (PF 1,15, t 1,1, 6 anni su 10).
+**Controllo di affidabilita superato:** nel periodo di ottimizzazione (2024-01 -> 2026-06) i 4 EA riproducono il PF della classifica entro -12% / +6%: i default del repository sono quelli giusti e il crollo 2015-2023 e reale.
+**Previsioni vs esito:** "almeno 2 su 4 oro REGGONO: 50%" -> NO (0 su 4); "per >= 8 su 12 il PF 2015-2023 e piu basso di quello in classifica: 85%" -> si per tutti e 4 gli oro valutati.
+**Lettura:** il rimbalzo sul Supertrend e le medie su oro funzionano solo nel regime 2024-2026 (oro in forte rialzo); nessuna evidenza di vantaggio generale. **Gli altri 10 EA** restano "non valutati" (indici: serve il cancello D sui dati esterni; Dow e CAC non valutabili). **Stima scritta ora (non misurata):** i 3 DAX Supertrend e il Nasdaq usano lo stesso motore dei due Supertrend su oro che non reggono: probabilita che almeno uno regga su 2015-2023: circa 15-20%. Decisione di Claudio se spendere crediti per importare i dati esterni e verificarlo.
