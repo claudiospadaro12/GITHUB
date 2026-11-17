@@ -16,8 +16,8 @@ $CFG=@{
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ Write-Host ('SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui: ' + $env:COMPUTERNAME) -ForegroundColor Red; return }
 $TRM=Join-Path $CFG.Root 'terminal64.exe'
 foreach($pp in @($TRM,$CFG.BaseSet)){ if(-not (Test-Path -LiteralPath $pp)){ Write-Host ('MI FERMO: non trovo ' + $pp) -ForegroundColor Red; return } }
-$desk=[Environment]::GetFolderPath('Desktop'); $dirOut=Join-Path $desk 'OTTIMIZZATORE_BG'; $dirWin=Join-Path $dirOut 'VINCITORI_PROP'; $logf=Join-Path $dirOut 'Live_Log.csv'; $stopf=Join-Path $dirOut 'STOP.txt'
-New-Item -ItemType Directory -Force -Path $dirWin | Out-Null; $W=Join-Path $env:TEMP 'opt_bg'; New-Item -ItemType Directory -Force -Path $W | Out-Null
+$desk=[Environment]::GetFolderPath('Desktop'); $dirOut=Join-Path $desk 'OTTIMIZZATORE_BG'; $dirWin=Join-Path $dirOut 'VINCITORI_PROP'; $dirDos=Join-Path $dirOut 'Dossier_Gemini'; $logf=Join-Path $dirOut 'Live_Log.csv'; $stopf=Join-Path $dirOut 'STOP.txt'
+New-Item -ItemType Directory -Force -Path $dirWin | Out-Null; New-Item -ItemType Directory -Force -Path $dirDos | Out-Null; $W=Join-Path $env:TEMP 'opt_bg'; New-Item -ItemType Directory -Force -Path $W | Out-Null
 if(-not (Test-Path -LiteralPath $logf)){ Set-Content -LiteralPath $logf -Value 'Timestamp;ID;Fase;Parametri;Operazioni;PF;DD_equity_pct;Netto_EUR;Recovery;Esito' -Encoding UTF8 }
 if(-not ('SvegliaBG.Win' -as [type])){ Add-Type -Namespace SvegliaBG -Name Win -MemberDefinition '[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint esFlags);' }
 [void][SvegliaBG.Win]::SetThreadExecutionState([uint32]2147483651)
@@ -53,10 +53,10 @@ function Prova([string]$id,$ov,$fin){
   if(-not (Test-Path -LiteralPath $rf)){ return @{ stato='NOREPORT' } }
   $tx=[regex]::Replace((LeggiTesto $rf),'<[^>]*>','|'); $tx=[regex]::Replace($tx,'\s*\|[\s|]*','|')
   $ddS=Cerca $tx 'Drawdown Massima:|Equity Drawdown Maximal:'; $dd=[double]::NaN; if($ddS){ $mm=[regex]::Match($ddS,'\(([0-9.,]+)\s*%\)'); if($mm.Success){ $dd=Num ($mm.Groups[1].Value.Replace(',','.')) } }
-  return @{ stato='OK'; rf=$rf; ops=(Num (Cerca $tx 'Numero di Operazioni di Trading Totali:|Total Trades:')); pf=(Num (Cerca $tx 'Fattore di Profitto:|Profit Factor:')); dd=$dd; net=(Num (Cerca $tx 'Profitto Totale Netto:|Total Net Profit:')); rec=(Num (Cerca $tx 'Fattore di Recupero:|Recovery Factor:')) }
+  return @{ stato='OK'; rf=$rf; ops=(Num (Cerca $tx 'Numero di Operazioni di Trading Totali:|Total Trades:')); wr=$(if((Cerca $tx 'Operazioni Redditizie \(% del totale\):|Profit Trades \(% of total\):') -match '\(([0-9.,]+)\s*%\)'){ Num ($Matches[1].Replace(',','.')) } else { [double]::NaN }); pf=(Num (Cerca $tx 'Fattore di Profitto:|Profit Factor:')); dd=$dd; net=(Num (Cerca $tx 'Profitto Totale Netto:|Total Net Profit:')); rec=(Num (Cerca $tx 'Fattore di Recupero:|Recovery Factor:')) }
 }
 function Equity([string]$rf){
-  $html=LeggiTesto $rf; $bal=New-Object System.Collections.ArrayList; $inD=$false; $iDi=-1; $iBa=-1
+  $html=LeggiTesto $rf; $pts=New-Object System.Collections.ArrayList; $inD=$false; $iDi=-1; $iBa=-1
   foreach($rg in [regex]::Split($html,'(?i)<tr')){
     $celle=@(); foreach($mc in [regex]::Matches($rg,'(?is)<t[dh][^>]*>(.*?)</t[dh]>')){ $celle += (([regex]::Replace($mc.Groups[1].Value,'<[^>]*>','') -replace '&nbsp;',' ' -replace '\s+',' ').Trim()) }
     if($celle.Count -lt 8){ continue }
@@ -65,44 +65,68 @@ function Equity([string]$rf){
     if(-not $inD){ continue }
     if($celle[0] -notmatch '^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}:\d{2}$'){ continue }
     if($celle.Count -le $iBa){ continue }
-    if($celle[$iDi] -eq 'out'){ [void]$bal.Add((Num $celle[$iBa])) }
+    if($celle[$iDi] -eq 'out'){ [void]$pts.Add($celle[0].Substring(0,10) + '|' + ((Num $celle[$iBa]).ToString('0.00',$ci))) }
   }
-  return ,@($bal)
+  return ,@($pts)
 }
-function Campiona($v,[int]$k){ $o=@(); if($v.Count -le $k){ foreach($x in $v){ $o += [math]::Round($x,0) }; return ($o -join ' ') }; for($i=0; $i -lt $k; $i++){ $o += [math]::Round($v[[int][math]::Floor($i*($v.Count-1)/($k-1))],0) }; return ($o -join ' ') }
-function ScriviAudit([string]$id,$c,[string]$key,$a,$b1,$b2,[string]$dw){
+function Campiona($pts,[int]$k){ $v=@(); foreach($p in $pts){ $v += [double]($p.Split('|')[1]) }; $o=@(); if($v.Count -le $k){ foreach($x in $v){ $o += [math]::Round($x,0) }; return ($o -join ' ') }; for($i=0; $i -lt $k; $i++){ $o += [math]::Round($v[[int][math]::Floor($i*($v.Count-1)/($k-1))],0) }; return ($o -join ' ') }
+function Stagnazione($pts){
+  if($pts.Count -lt 2){ return @(0,'n.d.') }
+  $picco=-1.0; $dp=$null; $mx=0; $per='n.d.'
+  foreach($p in $pts){ $d=[datetime]::ParseExact($p.Split('|')[0],'yyyy.MM.dd',$ci); $b=[double]$p.Split('|')[1]
+    if($b -gt $picco){ if($dp -ne $null){ $g=($d-$dp).Days; if($g -gt $mx){ $mx=$g; $per=($dp.ToString('yyyy-MM-dd') + ' -> ' + $d.ToString('yyyy-MM-dd')) } }; $picco=$b; $dp=$d } }
+  $ult=[datetime]::ParseExact($pts[$pts.Count-1].Split('|')[0],'yyyy.MM.dd',$ci); if($dp -ne $null){ $g=($ult-$dp).Days; if($g -gt $mx){ $mx=$g; $per=($dp.ToString('yyyy-MM-dd') + ' -> ' + $ult.ToString('yyyy-MM-dd') + ' (in corso a fine finestra)') } }
+  return @($mx,$per)
+}
+function ScriviAudit([string]$id,$c,[string]$key,$a,$b1,$b2,[string]$dd0){
+  $nomeEa=[IO.Path]::GetFileNameWithoutExtension((Split-Path -Leaf $CFG.Expert))
   $st=$(if($c.ContainsKey('Exit_stop')){ Num $c['Exit_stop'] } else { Num (ValBase 'Exit_stop') }); $tg=$(if($c.ContainsKey('Exit_limit')){ Num $c['Exit_limit'] } else { Num (ValBase 'Exit_limit') })
   $prove=@(Get-Content -LiteralPath $logf | Select-Object -Skip 1 | Where-Object { $_ -match ';IS;' }).Count; $nPassati=@(Get-Content -LiteralPath $logf | Select-Object -Skip 1 | Where-Object { $_ -match ';PASSA_IS' }).Count
+  $fin=@(@('IS 2015-2020',$a),@('OOS1 2021-2022',$b1),@('OOS2 2023-2024',$b2)); $stag=@{}; $eq=@{}
+  foreach($z in $fin){ $eq[$z[0]]=(Equity $z[1].rf); $stag[$z[0]]=(Stagnazione $eq[$z[0]]) }
+  $rr=[math]::Round($tg/$st,2)
   $L=@()
-  $L += ('# Gemini_Audit_Request_' + $id + ' - richiesta di revisione critica (Avvocato del Diavolo)')
+  $L += ('# Audit_Gemini_' + $nomeEa + '_' + $id + ' - dossier per la revisione esterna (Risk Manager / Avvocato del Diavolo)')
   $L += ''
-  $L += ('Generato il ' + (Get-Date).ToString('yyyy-MM-dd HH:mm') + ' dal motore in background. COPIA TUTTO questo file in Gemini e incolla in fondo il prompt della sezione 7.')
+  $L += ('Generato il ' + (Get-Date).ToString('yyyy-MM-dd HH:mm') + ' dal motore in background. COPIA TUTTO il file in Gemini. La sezione 8 e una valutazione AUTOMATICA a regole, non il giudizio finale.')
   $L += ''
-  $L += '## 1. Cosa e (setup)'
-  $L += ('EA: ' + $CFG.Expert + ' | simbolo ' + $CFG.Symbol + ' ' + $CFG.Period + ' | tester MT5 Modello 1 (candele 1 minuto), deposito 100000 EUR, lotto fisso 0,1.')
+  $L += '## 1. Setup'
+  $L += ('EA: ' + $nomeEa + ' | simbolo ' + $CFG.Symbol + ' ' + $CFG.Period + ' | tester MT5 Modello 1 (candele da 1 minuto; i tick reali non coprono questi anni), deposito 100000 EUR, lotto fisso 0,1.')
   $L += ('Parametri cambiati rispetto al set base ' + (Split-Path -Leaf $CFG.BaseSet) + ': ' + $key)
   $L += ''
   $L += '## 2. Logica di ingresso e uscita'
   $L += $CFG.Logica
   $L += ''
-  $L += '## 3. Squilibrio stop / target'
-  $L += ('Exit_stop ' + $st + ' punti, Exit_limit ' + $tg + ' punti: rapporto target/stop = ' + ([math]::Round($tg/$st,2)).ToString('0.00',$ci) + ' (con rapporto > 1 la strategia puo guadagnare anche con win rate sotto il 50%).')
+  $L += '## 3. Rapporto rischio/rendimento'
+  $L += ('Exit_stop ' + $st + ' punti, Exit_limit ' + $tg + ' punti: rapporto target/stop = ' + $rr.ToString('0.00',$ci) + '. Con rapporto > 1 l aspettativa puo essere positiva anche con win rate sotto il 50%: breakeven del win rate = 1/(1+rapporto) = ' + ((1/(1+$rr))*100).ToString('0.0',$ci) + '%.')
   $L += ''
-  $L += '## 4. Metriche (tutte al netto del tester; costi aggiuntivi della campagna: 3,6 EUR a operazione NON inclusi)'
-  $L += '| Finestra | Operazioni | PF | DD equity % | Netto EUR | Recovery |'
-  $L += '|---|---|---|---|---|---|'
-  foreach($z in @(@('IS 2015-2020',$a),@('OOS1 2021-2022',$b1),@('OOS2 2023-2024',$b2))){ $x=$z[1]; $L += ('| ' + $z[0] + ' | ' + $x.ops + ' | ' + ([double]$x.pf).ToString('0.00',$ci) + ' | ' + ([double]$x.dd).ToString('0.00',$ci) + ' | ' + ([double]$x.net).ToString('0.00',$ci) + ' | ' + ([double]$x.rec).ToString('0.00',$ci) + ' |') }
-  $L += 'Nota: il DD% dipende dal lotto (0,1 su 100000 EUR e molto piccolo per qualunque set). Il 2025-2026 NON e stato usato (hold-out).'
+  $L += '## 4. Metriche complete (tester, costi aggiuntivi della campagna di 3,6 EUR a operazione NON inclusi)'
+  $L += '| Finestra | Operazioni | Win rate % | PF | DD equity % | Netto EUR | Recovery | Stagnazione max (giorni) |'
+  $L += '|---|---|---|---|---|---|---|---|'
+  foreach($z in $fin){ $x=$z[1]; $L += ('| ' + $z[0] + ' | ' + $x.ops + ' | ' + ([double]$x.wr).ToString('0.0',$ci) + ' | ' + ([double]$x.pf).ToString('0.00',$ci) + ' | ' + ([double]$x.dd).ToString('0.00',$ci) + ' | ' + ([double]$x.net).ToString('0.00',$ci) + ' | ' + ([double]$x.rec).ToString('0.00',$ci) + ' | ' + $stag[$z[0]][0] + ' |') }
+  $L += 'Nota: il DD% dipende dal lotto (0,1 su 100000 EUR e molto piccolo per qualunque set); il 2025-2026 NON e stato usato (hold-out).'
   $L += ''
-  $L += '## 5. Quante prove sono state fatte (contesto di overfitting)'
-  $L += ('Prove dentro-campione registrate finora: ' + $prove + '; passate il filtro IS: ' + $nPassati + '. Piu prove si fanno, piu probabile e che un buon risultato sia fortuna: valuta la significativita con questo numero.')
+  $L += '## 5. Periodi di massima stagnazione (da un massimo del saldo al successivo)'
+  foreach($z in $fin){ $L += ('- ' + $z[0] + ': ' + $stag[$z[0]][0] + ' giorni, ' + $stag[$z[0]][1]) }
   $L += ''
-  $L += '## 6. Equity line vettoriale (saldo dopo ogni operazione chiusa, campionato a max 60 punti)'
-  foreach($z in @(@('IS',$a),@('OOS1',$b1),@('OOS2',$b2))){ $ev=Equity $z[1].rf; $L += ('- ' + $z[0] + ': ' + (Campiona $ev 60)) }
+  $L += '## 6. Quante prove sono state fatte (contesto di overfitting)'
+  $L += ('Prove dentro-campione registrate: ' + $prove + '; passate il filtro IS: ' + $nPassati + '. Piu prove, piu e probabile che un buon risultato sia fortuna.')
   $L += ''
-  $L += '## 7. Prompt da incollare in Gemini'
-  $L += 'Fai l Avvocato del Diavolo su questo Expert Advisor. Cerca: (1) falle logiche nell ingresso/uscita; (2) segni di overfitting e curve fitting (considera il numero di prove della sezione 5 e la regione di parametri); (3) fragilita se spread, slippage e swap aumentano; (4) rischio di coda e giorni di perdita per una prop firm; (5) correlazione probabile con altri EA su oro e con breakout di tendenza (stesso motore: breakout giornaliero); (6) cosa NON ti ho detto e ti servirebbe per fidarti. Rispondi con: verdetto (promuovere/scartare/ritestare), le 3 obiezioni piu gravi, e un test concreto per ciascuna.'
-  Set-Content -LiteralPath (Join-Path $dw ('Gemini_Audit_Request_' + $id + '.md')) -Value ($L -join "`r`n") -Encoding ASCII
+  $L += '## 7. Equity line vettoriale (saldo dopo ogni operazione chiusa, max 60 punti)'
+  foreach($z in $fin){ $L += ('- ' + $z[0] + ': ' + (Campiona $eq[$z[0]] 60)) }
+  $L += ''
+  $L += '## 8. Valutazione critica AUTOMATICA (regole fisse, da confermare)'
+  if($a.ops -lt 100){ $L += ('- Campione IS piccolo: ' + $a.ops + ' operazioni (< 100): la statistica t e poco affidabile.') }
+  if($b1.pf -lt 0.7*$a.pf -or $b2.pf -lt 0.7*$a.pf){ $L += '- Degrado fuori campione: il PF di un blocco OOS e < 70% del PF IS.' }
+  if($prove -gt 30){ $L += ('- Molte prove (' + $prove + '): serve una soglia di significativita piu alta; un vincitore scelto tra tante e probabilmente il migliore per fortuna.') }
+  if($stag['IS 2015-2020'][0] -gt 180 -or $stag['OOS1 2021-2022'][0] -gt 180 -or $stag['OOS2 2023-2024'][0] -gt 180){ $L += '- Stagnazione lunga (> 180 giorni senza nuovo massimo del saldo): difficile da sostenere in una sfida con tempo limitato.' }
+  if($rr -lt 1.5){ $L += '- Rapporto target/stop sotto 1,5: fuori dalla proporzione di Wim.' }
+  $L += '- Il set e un VICINO del set di Wim (stesso motore): correlazione attesa vicina a 1 con quel set e con altri breakout giornalieri su oro.'
+  $L += '- Il tester usa candele da 1 minuto: la differenza con i tick reali non e misurata per questo EA in questi anni.'
+  $L += ''
+  $L += '## 9. Prompt da incollare in Gemini'
+  $L += 'Agisci come Risk Manager istituzionale su questo Expert Advisor. Analizza le serie e le metriche: (1) anomalie nelle serie storiche e nella equity line; (2) debolezza nei periodi di stagnazione; (3) se il rapporto stop/target e il win rate danno una aspettativa matematica positiva reale o se il risultato dipende da overfitting (considera il numero di prove della sezione 6); (4) fragilita se spread, slippage e swap aumentano; (5) rischio di coda per una prop firm; (6) correlazione probabile con altri EA su oro. Rispondi con: verdetto (promuovere / scartare / ritestare), le 3 obiezioni piu gravi con un test concreto per ciascuna, e le correzioni operative esatte per il prossimo giro di backtest.'
+  Set-Content -LiteralPath (Join-Path $dd0 ('Audit_Gemini_' + $nomeEa + '_' + $id + '.md')) -Value ($L -join "`r`n") -Encoding ASCII
 }
 function Log([string]$id,[string]$fase,[string]$par,$x,[string]$esito){ $riga=((Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + ';' + $id + ';' + $fase + ';' + $par + ';' + $x.ops + ';' + ([double]$x.pf).ToString('0.00',$ci) + ';' + ([double]$x.dd).ToString('0.00',$ci) + ';' + ([double]$x.net).ToString('0.00',$ci) + ';' + ([double]$x.rec).ToString('0.00',$ci) + ';' + $esito); Add-Content -LiteralPath $logf -Value $riga -Encoding UTF8 }
 $n=0; $nf=0; $fermo=$false
@@ -126,7 +150,7 @@ foreach($c in $ok){
     $dw=Join-Path $dirWin $id; New-Item -ItemType Directory -Force -Path $dw | Out-Null
     Set-Content -LiteralPath (Join-Path $dw ($id + '.set')) -Value ((@('; VINCITORE ' + $id + ' - passato IS e OOS1+OOS2 (2025-2026 NON usato: hold-out). Parametri cambiati: ' + $key) + (Righe $c)) -join "`r`n") -Encoding ASCII
     foreach($x in @($a,$b1,$b2)){ if($x.rf){ Copy-Item -LiteralPath $x.rf -Destination $dw -Force -ErrorAction SilentlyContinue } }
-    try { ScriviAudit $id $c $key $a $b1 $b2 $dw } catch { Add-Content -LiteralPath $logf -Value ((Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + ';' + $id + ';AUDIT;errore nel rapporto Gemini;;;;;;AVVISO') -Encoding UTF8 }
+    try { ScriviAudit $id $c $key $a $b1 $b2 $dirDos } catch { Add-Content -LiteralPath $logf -Value ((Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + ';' + $id + ';AUDIT;errore nel rapporto Gemini;;;;;;AVVISO') -Encoding UTF8 }
     Add-Content -LiteralPath $logf -Value ((Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + ';' + $id + ';FINALE;' + $key + ';;;;;;SALVATO') -Encoding UTF8
   }
   foreach($x in @($a,$b1,$b2)){ if($x.rf){ Remove-Item -LiteralPath $x.rf -Force -ErrorAction SilentlyContinue } }
