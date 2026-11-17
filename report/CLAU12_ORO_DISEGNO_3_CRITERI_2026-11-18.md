@@ -50,3 +50,21 @@ File: `RIEPILOGO_CONTROLLO_DISEGNO3.txt` (template 1.04, FTMO, XAUUSD D1, 01/01-
 **Difetto bloccante: nessuno.** Previsione scritta "almeno un difetto: 50%" -> **sbagliata** (nessun difetto bloccante; la v1.04 dopo 3 correzioni precedenti passa al primo giro).
 **Osservazione di progetto (non e un difetto del codice):** quando l'ingresso avviene a pochi secondi dalla chiusura della candela H1 (es. entrato 18:59:40, chiuso 19:00:00), il filtro confronta una candela di 20 secondi con il prezzo d'ingresso e chiude quasi a caso, con piccola perdita. Nella riga 2 (H1) **5 operazioni su 10** sono uscite cosi entro 1 ora (-2 / -15 EUR contro i -40 dello stop); nella riga 3 (H4) **1 su 4**. Non so come il fornitore risolva questo caso. **Decisione presa ora, prima dei numeri:** il template NON si cambia; il filtro e un fattore del batch (spento/H1/H4), quindi il suo effetto (anche quello "casuale") e misurato dentro i risultati; se vince il filtro H1 lo segno come limite da verificare. Nessuna variante "ignora le candele quasi chiuse" in questo disegno.
 **Limite dei dati di controllo:** 3 mesi, 10 + 4 operazioni: servono solo a vedere che il codice fa quello che dice, non a giudicare la strategia.
+
+## 9. Risultato del batch da 9 set (FTMO, IS 2015-2020, 18/11/2026) - **NESSUN CANDIDATO**
+Dati: `report/CLAU12_ORO_DISEGNO3_dati/RISULTATI_BATCH9_DISEGNO3_FTMO.csv`. Costo 3,6 EUR/operazione, soglie G1 invariate (non ritoccate dopo i numeri).
+| set | stop % | target % | cb | FBF | ops | netto EUR | PF netto | recovery | t |
+|---|---|---|---|---|---|---|---|---|---|
+| R1 | 0,35 | 1,6 | 5 | spento | 297 | -273 | 0,98 | 0,54 | -0,16 |
+| R2 | 0,35 | 2,1 | 10 | H1 | 214 | +1.124 | 1,17 | 1,80 | 0,77 |
+| R3 | 0,35 | 3,1 | 20 | H4 | 138 | +1.145 | 1,21 | 1,61 | 0,70 |
+| R4 | 0,50 | 1,6 | 10 | H4 | 217 | +69 | 1,01 | 0,67 | 0,05 |
+| R5 | 0,50 | 2,1 | 20 | spento | 145 | +239 | 1,03 | 0,46 | 0,15 |
+| R6 | 0,50 | 3,1 | 5 | H1 | 279 | -1.459 | 0,87 | -0,31 | -0,71 |
+| R7 | 0,70 | 1,6 | 20 | H1 | 163 | -247 | 0,96 | 0,33 | -0,19 |
+| R8 | 0,70 | 2,1 | 5 | H4 | 273 | -2.133 | 0,84 | -0,47 | -1,09 |
+| R9 | 0,70 | 3,1 | 10 | spento | 153 | -2.554 | 0,79 | -0,58 | -1,20 |
+**G1: 0 set su 9.** Il migliore per PF netto e R3 (1,21, t 0,70); nessuno ha PF netto >= 1,30 ne t >= 3,3 (massimo 0,77). 4 set su 9 in profitto, ma con profitti di poche migliaia di euro su 6 anni: indistinguibili dal caso.
+**Previsioni vs risultato:** PF netto >= 1,30 con >= 100 ops: 35% -> NO; almeno un G1: 15% -> NO; G1-G4: 6% -> NO; G6: 3% -> NO; migliore con filtro acceso: 60% -> si (R2 e R3, ma il filtro e confuso con gli altri fattori); migliore sopra PF 1,42: 40% -> NO.
+**Effetti medi (netto EUR per livello, L9, solo descrittivi, NON usati per scegliere):** stop 0,35/0,50/0,70 = +665 / -384 / -1.645; target 1,6/2,1/3,1 = -150 / -257 / -956; countback 5/10/20 = -1.288 / -454 / +379; filtro spento/H1/H4 = -863 / -194 / -306. Direzione coerente (stop stretto, countback lungo), ma con 9 prove e t massimo 0,77 non e un segnale.
+**Regola d'arresto applicata (sezione 6):** nessun set supera G1 -> **"nessun candidato"** per il disegno 3; si chiude la famiglia "breakout sui livelli giornalieri dell'oro, un solo timeframe di livello" **senza secondo batch** e senza G2-G4. Hold-out 2025-2026 non aperto. Contatore: **80 set guardati nella campagna, nessun candidato.**

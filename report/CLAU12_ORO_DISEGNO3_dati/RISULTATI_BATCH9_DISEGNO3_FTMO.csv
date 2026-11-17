@@ -1,0 +1,10 @@
+﻿id;fattori;operazioni;profitto_tester;profitto_netto;PF_tester;PF_netto;DD_eur;recovery;t_giornaliera;G1;motivi
+D3_R1;stop 0.35% target 1.60% cb 5 FBF spento;297;771.74;-272.88;1.07;0.98;1435.2;0.54;-0.16;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D3_R2;stop 0.35% target 2.10% cb 10 FBF H1;214;1876.61;1123.83;1.31;1.17;1041.1;1.80;0.77;NO;PF netto<1,30 | t<3,3
+D3_R3;stop 0.35% target 3.10% cb 20 FBF H4;138;1630.65;1145.22;1.33;1.21;1012.4;1.61;0.70;NO;PF netto<1,30 | t<3,3
+D3_R4;stop 0.50% target 1.60% cb 10 FBF H4;217;832.38;68.92;1.11;1.01;1237.2;0.67;0.05;NO;PF netto<1,30 | recovery<1,5 | t<3,3
+D3_R5;stop 0.50% target 2.10% cb 20 FBF spento;145;748.90;238.88;1.10;1.03;1620.2;0.46;0.15;NO;PF netto<1,30 | recovery<1,5 | t<3,3
+D3_R6;stop 0.50% target 3.10% cb 5 FBF H1;279;-477.49;-1458.80;0.95;0.87;1540.5;-0.31;-0.71;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D3_R7;stop 0.70% target 1.60% cb 20 FBF H1;163;326.46;-246.83;1.05;0.96;999.5;0.33;-0.19;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D3_R8;stop 0.70% target 2.10% cb 5 FBF H4;273;-1172.95;-2133.09;0.91;0.84;2478.7;-0.47;-1.09;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D3_R9;stop 0.70% target 3.10% cb 10 FBF spento;153;-2015.94;-2554.03;0.83;0.79;3485.2;-0.58;-1.20;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
