@@ -40,12 +40,14 @@ class Par:                         # parametri (default = disegno 3, riga 2)
     swap_short_eur = -0.37
     max_trades_day = 1
     gap_fill = False             # False: riempimenti e uscite SEMPRE al livello dell'ordine, anche con gap (verificato su R1 e R5, fase 2)
+    lvl_sec = 86400; entry = 'stop'; sl_mode = 'pct'; tp_mode = 'pct'; sl_pts = 0; tp_pts = 0; sl_atr = 1.0; tp_rr = 1.0
+    rearm = False; exp_bars = None   # fase 3: modalita dei disegni 1 e 2 (livelli D1/H4, ordini limit, SL/TP in punti e ATR/RR, riarmo)
     eventi_in_chiusura = False   # False: nessun riempimento/SL/TP nella finestra di chiusura (ipotesi 1, da verificare col riferimento)
 
-def costruisci_d1(m1):
+def costruisci_d1(m1, sec=DAY):
     giorni = {}
     for i, t in enumerate(m1['t']):
-        k = t // DAY
+        k = t // sec
         g = giorni.get(k)
         if g is None:
             giorni[k] = [m1['o'][i], m1['h'][i], m1['l'][i], m1['c'][i]]
@@ -83,7 +85,7 @@ def unita_swap(giorno_k):          # giorno_k = giorno appena concluso (numero d
 class Sim:
     def __init__(self, m1, eur, p):
         self.m1, self.p = m1, p
-        self.d1 = costruisci_d1(m1)
+        self.d1 = costruisci_d1(m1, p.lvl_sec)
         self.dk = {k: i for i, k in enumerate(self.d1['k'])}
         self.cl_h1 = chiusure_tf(m1, 3600); self.cl_h4 = chiusure_tf(m1, 14400)
         self.eur_t = eur['t']; self.eur_c = eur['c']
@@ -109,25 +111,34 @@ class Sim:
 
     def calcola_sltp(self, buy, entry, atr, dm):
         p = self.p
-        sl_d = p.sl_pct / 100.0 * entry
+        if p.sl_mode == 'pct': sl_d = p.sl_pct / 100.0 * entry
+        elif p.sl_mode == 'pts': sl_d = p.sl_pts * p.point
+        else: sl_d = p.sl_atr * atr
         minimo = max(dm * 1.5, 0.3 * atr)
         sl_d = max(sl_d, minimo)
-        tp_d = max(p.tp_pct / 100.0 * entry, minimo)
+        if p.tp_mode == 'pct': tp_d = p.tp_pct / 100.0 * entry
+        elif p.tp_mode == 'pts': tp_d = p.tp_pts * p.point
+        else: tp_d = p.tp_rr * sl_d
+        tp_d = max(tp_d, minimo)
         r = lambda x: round(x, p.digits)
         return (r(entry - sl_d), r(entry + tp_d)) if buy else (r(entry + sl_d), r(entry - tp_d))
 
-    def piazza(self, t, buy, prezzo, atr, bid, ask, sp_pts):
+    def piazza(self, t, buy, prezzo, atr, bid, ask, sp_pts, limit=False):
         p = self.p
         dm = p.stops_level_pts * p.point + sp_pts * p.point
         prezzo = round(prezzo, p.digits)
-        if buy and prezzo < ask + dm: return 0
-        if (not buy) and prezzo > bid - dm: return 0
+        if not limit:
+            if buy and prezzo < ask + dm: return 0
+            if (not buy) and prezzo > bid - dm: return 0
+        else:
+            if buy and prezzo > ask - dm: return 0
+            if (not buy) and prezzo < bid + dm: return 0
         ref = ask if buy else bid
         if abs(prezzo - ref) < p.mindist_atr * atr: return 0
         sl, tp = self.calcola_sltp(buy, prezzo, atr, dm)
         if self.chiuso(t): return -1
-        scad = prossima_mezzanotte(t + p.exp_days * DAY)
-        o = dict(id=self.n_ordine, t=t, buy=buy, prezzo=prezzo, sl=sl, tp=tp, scad=scad, stato='attivo', t_fine=None)
+        scad = prossima_mezzanotte(t + (p.exp_days * DAY if p.exp_bars is None else p.exp_bars * p.lvl_sec))
+        o = dict(id=self.n_ordine, t=t, buy=buy, limit=limit, prezzo=prezzo, sl=sl, tp=tp, scad=scad, stato='attivo', t_fine=None)
         self.n_ordine += 1
         self.pend.append(o); self.ordini.append(o)
         return 1
@@ -176,10 +187,10 @@ class Sim:
         # riempimenti (lato server)
         if self.pos is None and not chiuso:
             for o in list(self.pend):
-                if o['buy'] and ask >= o['prezzo']:
-                    self.apri(t, o, max(o['prezzo'], ask) if (apertura and p.gap_fill) else o['prezzo']); break
-                if (not o['buy']) and bid <= o['prezzo']:
-                    self.apri(t, o, min(o['prezzo'], bid) if (apertura and p.gap_fill) else o['prezzo']); break
+                if o['buy']: hit = (ask <= o['prezzo']) if o['limit'] else (ask >= o['prezzo'])
+                else: hit = (bid >= o['prezzo']) if o['limit'] else (bid <= o['prezzo'])
+                if hit:
+                    self.apri(t, o, o['prezzo']); break
         # SL / TP (lato server)
         if self.pos is not None and not chiuso:
             pos = self.pos
@@ -204,26 +215,33 @@ class Sim:
             if self.pos is not None and self.pend:
                 self.cancella_pendenti(t)                     # OCO
         # ---- EA: nuova barra e armo ----
-        kd = t // DAY
+        kd = t // p.lvl_sec; kday = t // DAY
         if kd != self.bar_corr:
             self.bar_corr = kd; self.armata = False
         if self.armata: return
         if self.pos is not None: self.armata = True; return
-        if self.pend: self.armata = True; return              # InpRearm=false: pendenti persistenti
+        if (not p.rearm) and self.pend: self.armata = True; return   # InpRearm=false: pendenti persistenti
         if t - self.ult_try < 60: return
         self.ult_try = t
-        oggi = sum(1 for d in self.deals if d['dir'] == 'in' and d['t'] // DAY == kd)
+        oggi = sum(1 for d in self.deals if d['dir'] == 'in' and d['t'] // DAY == kday)
         if p.max_trades_day > 0 and oggi >= p.max_trades_day: self.armata = True; return
         idx = self.dk.get(kd)
         if idx is None: return
         atr = atr_sma(self.d1, idx - 1, p.atr_period)
         if atr <= 0: return
+        if self.pend:                                         # riarmo: i vecchi pendenti si cancellano solo a mercato aperto
+            if self.chiuso(t): return
+            self.cancella_pendenti(t)
         lv = self.livelli(idx)
         if lv is None: self.armata = True; return
         hh, ll = lv
         off = p.offset_atr * atr
-        a = self.piazza(t, True, hh + off, atr, bid, ask, sp_pts)
-        b = self.piazza(t, False, ll - off, atr, bid, ask, sp_pts)
+        if p.entry == 'limit':
+            a = self.piazza(t, False, hh - off, atr, bid, ask, sp_pts, True)
+            b = self.piazza(t, True, ll + off, atr, bid, ask, sp_pts, True)
+        else:
+            a = self.piazza(t, True, hh + off, atr, bid, ask, sp_pts)
+            b = self.piazza(t, False, ll - off, atr, bid, ask, sp_pts)
         if a == -1 or b == -1: return                         # mercato chiuso: riprova al minuto dopo
         self.armata = True
 
