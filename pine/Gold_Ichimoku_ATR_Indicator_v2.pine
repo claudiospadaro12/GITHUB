@@ -1,0 +1,328 @@
+//@version=5
+// =====================================================================================
+//  Gold Ichimoku TK + ATR Exits [Segnali] - Claudio  v2  (INDICATOR con segnali)
+// -------------------------------------------------------------------------------------
+//  Stessa LOGICA della strategy "Gold Ichimoku TK + ATR Exits - Claudio v2".
+//  Pensato per l'ORO (XAUUSD, H1). Mostra SOLO i segnali che passano TUTTI i filtri di
+//  selettivita' ("solo i trade che valgono": trend forti, NON chop).
+//
+//  Essendo un indicator NON piazza ordini: SIMULA lo stato del trade tramite variabili
+//  'var' (posizione corrente, entryPrice, sl, tp) per poter:
+//    - disegnare label LONG/SHORT all'entrata FILTRATA,
+//    - disegnare label EXIT (TP/SL/Cross) all'uscita col motivo,
+//    - tracciare le linee SL (rosso) e TP (verde) mentre la posizione e' aperta,
+//    - generare alert separati di ENTRATA e USCITA (once per bar close).
+//  A parita' di parametri produce gli STESSI segnali della strategy v2.
+//
+//  NUOVI FILTRI v2: ADX (forza trend), Espansione BB (NOT squeeze), gate direzionale,
+//  oltre a Kumo e Kijun gia' presenti. NESSUN filtro di media lenta su TF alto.
+// =====================================================================================
+indicator("Gold Ichimoku TK + ATR Exits [Segnali] - Claudio v2",
+     overlay          = true,
+     max_lines_count  = 300,
+     max_labels_count = 300)
+
+// =====================================================================================
+//  INPUT (identici alla strategy v2)
+// =====================================================================================
+
+// --- Ichimoku ------------------------------------------------------------------------
+grpIchi   = "Ichimoku"
+lenTenkan = input.int(7,  "Tenkan (Donchian)",  minval=1, group=grpIchi)
+lenKijun  = input.int(22, "Kijun (Donchian)",   minval=1, group=grpIchi)
+lenSenkB  = input.int(44, "Senkou B (Donchian)",minval=1, group=grpIchi)
+displace  = input.int(26, "Displacement (proiezione nuvola)", minval=1, group=grpIchi)
+
+// --- Bollinger -----------------------------------------------------------------------
+grpBB     = "Bollinger"
+bbLen     = input.int(20,  "BB Lunghezza",  minval=1,   group=grpBB)
+bbMult    = input.float(2.0,"BB Deviazioni", minval=0.1, step=0.1, group=grpBB)
+sqzLen    = input.int(50,  "Squeeze: media bbWidth", minval=1, group=grpBB)
+sqzFactor = input.float(0.8,"Squeeze: fattore (width < media*fattore)", minval=0.1, step=0.05, group=grpBB)
+
+// --- Filtri di SELETTIVITA' (entrata) ------------------------------------------------
+grpFilt          = "Filtri di selettivita' (entrata)"
+useADXFilter     = input.bool(true,  "Filtro ADX: entra solo se il trend e' forte (ADX > soglia)", group=grpFilt)
+adxLen           = input.int(14,     "ADX: lunghezza (DI/ADX smoothing Wilder)", minval=1, group=grpFilt)
+adxMin           = input.float(22.0, "ADX: soglia minima per entrare", minval=0, step=0.5, group=grpFilt)
+useExpansionFilter = input.bool(true, "Filtro Espansione BB: entra solo con bande ESPANSE (NOT squeeze)", group=grpFilt)
+useKumoFilter    = input.bool(true,  "Filtro nuvola (Kumo): prezzo sopra/sotto la nuvola", group=grpFilt)
+useKijunFilter   = input.bool(false, "Filtro Kijun: close oltre la Kijun", group=grpFilt)
+
+// --- Direzione consentita (gate prima dell'esecuzione) -------------------------------
+grpDir       = "Direzione consentita"
+DIR_BOTH       = "Entrambe (Long + Short)"
+DIR_LONG_ONLY  = "Solo LONG"
+DIR_SHORT_ONLY = "Solo SHORT"
+tradeDirection = input.string(DIR_BOTH, "Direzione dei trade", options=[DIR_BOTH, DIR_LONG_ONLY, DIR_SHORT_ONLY], group=grpDir)
+
+// --- USCITA (gestione del trade) -----------------------------------------------------
+grpExit         = "Uscita (SL/TP ATR + cross opposto)"
+atrLen          = input.int(14,   "ATR Lunghezza",   minval=1, group=grpExit)
+atrMultSL       = input.float(1.5,"ATR x Stop Loss", minval=0.1, step=0.1, group=grpExit)
+rewardRatio     = input.float(2.0,"Reward Ratio (TP = R x distanza stop)", minval=0.1, step=0.1, group=grpExit)
+useOppositeExit = input.bool(true,"Uscita anticipata sul cross opposto", group=grpExit)
+
+// --- Visualizzazioni -----------------------------------------------------------------
+grpViz       = "Visualizzazioni"
+showIchimoku = input.bool(true, "Mostra Ichimoku",        group=grpViz)
+showBB       = input.bool(true, "Mostra Bollinger",       group=grpViz)
+showSqueezeBg= input.bool(true, "Sfondo Squeeze",         group=grpViz)
+showLevels   = input.bool(true, "Mostra livelli chiave",  group=grpViz)
+showTable    = input.bool(true, "Mostra tabella stato",   group=grpViz)
+showSLTP     = input.bool(true, "Mostra linee SL/TP",     group=grpViz)
+showSignals  = input.bool(true, "Mostra label segnali",   group=grpViz)
+
+// =====================================================================================
+//  CALCOLI BASE (identici alla strategy v2)
+// =====================================================================================
+donchian(len) => math.avg(ta.highest(len), ta.lowest(len))
+
+tenkan  = donchian(lenTenkan)
+kijun   = donchian(lenKijun)
+senkouA = math.avg(tenkan, kijun)        // valore "corrente" (NON spostato)
+senkouB = donchian(lenSenkB)             // valore "corrente" (NON spostato)
+chikou  = close
+
+bbBasis = ta.sma(close, bbLen)
+bbDev   = bbMult * ta.stdev(close, bbLen)
+bbUpper = bbBasis + bbDev
+bbLower = bbBasis - bbDev
+bbWidth = bbUpper - bbLower
+inSqueeze = bbWidth < ta.sma(bbWidth, sqzLen) * sqzFactor
+
+atr = ta.atr(atrLen)
+
+// --- ADX (DI+/DI-/ADX) con smoothing di Wilder (RMA) ---------------------------------
+//  Identico alla strategy. up = high-high[1]; down = low[1]-low; +DM/-DM, TR, RMA, DX, ADX.
+f_adx(_len) =>
+    up   = ta.change(high)
+    down = -ta.change(low)
+    plusDM  = (na(up)  ? 0.0 : (up  > down and up  > 0 ? up   : 0.0))
+    minusDM = (na(down)? 0.0 : (down > up   and down > 0 ? down : 0.0))
+    trur   = ta.rma(ta.tr(true), _len)
+    plusDI  = trur == 0 ? 0.0 : 100.0 * ta.rma(plusDM,  _len) / trur
+    minusDI = trur == 0 ? 0.0 : 100.0 * ta.rma(minusDM, _len) / trur
+    sumDI = plusDI + minusDI
+    dx = sumDI == 0 ? 0.0 : 100.0 * math.abs(plusDI - minusDI) / sumDI
+    adxVal = ta.rma(dx, _len)
+    [plusDI, minusDI, adxVal]
+
+[diPlus, diMinus, adx] = f_adx(adxLen)
+
+// =====================================================================================
+//  SEGNALI DI ENTRATA (con filtri) -- valutati su barra chiusa (no repaint)
+// =====================================================================================
+longCross  = ta.crossover(tenkan,  kijun)
+shortCross = ta.crossunder(tenkan, kijun)
+
+kumoTop = math.max(senkouA, senkouB)
+kumoBot = math.min(senkouA, senkouB)
+
+adxOk        = not useADXFilter or (not na(adx) and adx > adxMin)
+expansionOk  = not useExpansionFilter or not inSqueeze
+kumoOkLong   = not useKumoFilter or close > kumoTop
+kumoOkShort  = not useKumoFilter or close < kumoBot
+kijunOkLong  = not useKijunFilter or close > kijun
+kijunOkShort = not useKijunFilter or close < kijun
+
+allowLong  = tradeDirection == DIR_BOTH or tradeDirection == DIR_LONG_ONLY
+allowShort = tradeDirection == DIR_BOTH or tradeDirection == DIR_SHORT_ONLY
+
+longSignal  = longCross  and adxOk and expansionOk and kumoOkLong  and kijunOkLong  and allowLong
+shortSignal = shortCross and adxOk and expansionOk and kumoOkShort and kijunOkShort and allowShort
+
+// =====================================================================================
+//  SIMULAZIONE DELLO STATO DEL TRADE (l'indicator non piazza ordini)
+//   pos:  0 = flat, 1 = long, -1 = short
+//   entryPrice / slPrice / tpPrice fissati all'ingresso (no trailing)
+// =====================================================================================
+var int   pos        = 0
+var float entryPrice = na
+var float slPrice    = na
+var float tpPrice    = na
+
+// Eventi calcolati su questa barra (servono per label/alert dopo l'aggiornamento stato)
+bool evLongEntry  = false
+bool evShortEntry = false
+bool evExitTP     = false
+bool evExitSL     = false
+bool evExitCross  = false
+
+stopDist = atrMultSL * atr
+
+// --- 1) GESTIONE USCITA della posizione gia' aperta ----------------------------------
+//     Verifichiamo prima le uscite, poi le eventuali nuove entrate (come la strategy:
+//     niente inversione nella stessa barra; la nuova entrata avviene quando siamo flat).
+//     NB: l'uscita sul cross opposto usa il CROSS (non il segnale filtrato), coerente
+//         con la strategy: una posizione aperta si chiude sul cross contrario.
+if pos == 1
+    if useOppositeExit and shortCross
+        evExitCross := true
+        pos := 0
+    else if not na(slPrice) and low <= slPrice
+        evExitSL := true
+        pos := 0
+    else if not na(tpPrice) and high >= tpPrice
+        evExitTP := true
+        pos := 0
+
+if pos == -1
+    if useOppositeExit and longCross
+        evExitCross := true
+        pos := 0
+    else if not na(slPrice) and high >= slPrice
+        evExitSL := true
+        pos := 0
+    else if not na(tpPrice) and low <= tpPrice
+        evExitTP := true
+        pos := 0
+
+// Se siamo appena usciti, azzeriamo i livelli
+if pos == 0 and (evExitTP or evExitSL or evExitCross)
+    entryPrice := na
+    slPrice    := na
+    tpPrice    := na
+
+// --- 2) GESTIONE ENTRATA (solo se flat, segnale gia' filtrato) ------------------------
+if pos == 0 and longSignal
+    pos        := 1
+    entryPrice := close
+    slPrice    := close - stopDist
+    tpPrice    := close + rewardRatio * stopDist
+    evLongEntry := true
+else if pos == 0 and shortSignal
+    pos        := -1
+    entryPrice := close
+    slPrice    := close + stopDist
+    tpPrice    := close - rewardRatio * stopDist
+    evShortEntry := true
+
+flat    = pos == 0
+isLong  = pos == 1
+isShort = pos == -1
+
+// =====================================================================================
+//  VISUALIZZAZIONI BASE
+// =====================================================================================
+plot(showIchimoku ? tenkan : na, "Tenkan", color=color.new(color.blue, 0))
+plot(showIchimoku ? kijun  : na, "Kijun",  color=color.new(color.red, 0))
+spanAplot = plot(showIchimoku ? senkouA : na, "Senkou A", offset=displace, color=color.new(color.green, 50))
+spanBplot = plot(showIchimoku ? senkouB : na, "Senkou B", offset=displace, color=color.new(color.maroon, 50))
+fill(spanAplot, spanBplot, color=senkouA >= senkouB ? color.new(color.green, 85) : color.new(color.red, 85), title="Kumo")
+plot(showIchimoku ? chikou : na, "Chikou", offset=-displace, color=color.new(color.fuchsia, 0))
+
+pBasis = plot(showBB ? bbBasis : na, "BB Basis", color=color.new(color.orange, 0))
+pUp    = plot(showBB ? bbUpper : na, "BB Upper", color=color.new(color.gray, 0))
+pLo    = plot(showBB ? bbLower : na, "BB Lower", color=color.new(color.gray, 0))
+fill(pUp, pLo, color=color.new(color.blue, 92), title="BB Fill")
+
+bgcolor(showSqueezeBg and inSqueeze ? color.new(color.yellow, 88) : na, title="Squeeze BG")
+
+// --- Linee SL/TP mentre la posizione e' aperta ---------------------------------------
+plot(showSLTP and not flat ? slPrice : na, "SL", color=color.new(color.red, 0),   style=plot.style_linebr, linewidth=2)
+plot(showSLTP and not flat ? tpPrice : na, "TP", color=color.new(color.green, 0), style=plot.style_linebr, linewidth=2)
+
+// =====================================================================================
+//  LABEL DI ENTRATA / USCITA (col motivo) -- solo i segnali FILTRATI
+// =====================================================================================
+if showSignals and evLongEntry
+    label.new(bar_index, low, "LONG", style=label.style_label_up, color=color.new(color.green, 0), textcolor=color.white, size=size.small)
+if showSignals and evShortEntry
+    label.new(bar_index, high, "SHORT", style=label.style_label_down, color=color.new(color.red, 0), textcolor=color.white, size=size.small)
+if showSignals and evExitTP
+    label.new(bar_index, high, "EXIT (TP)", style=label.style_label_down, color=color.new(color.green, 20), textcolor=color.white, size=size.small)
+if showSignals and evExitSL
+    label.new(bar_index, low, "EXIT (SL)", style=label.style_label_up, color=color.new(color.red, 20), textcolor=color.white, size=size.small)
+if showSignals and evExitCross
+    label.new(bar_index, high, "EXIT (Cross)", style=label.style_label_down, color=color.new(color.orange, 0), textcolor=color.white, size=size.small)
+
+// =====================================================================================
+//  LIVELLI CHIAVE (open D/W/M, max/min giorno e settimana prec., numeri tondi)
+// =====================================================================================
+openD = request.security(syminfo.tickerid, "D", open)
+openW = request.security(syminfo.tickerid, "W", open)
+openM = request.security(syminfo.tickerid, "M", open)
+prevDayHigh = request.security(syminfo.tickerid, "D", high[1])
+prevDayLow  = request.security(syminfo.tickerid, "D", low[1])
+prevWeekHigh= request.security(syminfo.tickerid, "W", high[1])
+prevWeekLow = request.security(syminfo.tickerid, "W", low[1])
+
+f_drawLevel(_price, _txt, _col) =>
+    if showLevels and barstate.islast and not na(_price)
+        line.new(bar_index - 50, _price, bar_index + 10, _price, color=_col, style=line.style_dotted, width=1)
+        label.new(bar_index + 10, _price, _txt + " " + str.tostring(_price, format.mintick), style=label.style_label_left, color=color.new(_col, 80), textcolor=_col, size=size.tiny)
+
+f_drawLevel(openD, "Open D", color.blue)
+f_drawLevel(openW, "Open W", color.purple)
+f_drawLevel(openM, "Open M", color.teal)
+f_drawLevel(prevDayHigh, "PDH", color.green)
+f_drawLevel(prevDayLow,  "PDL", color.red)
+f_drawLevel(prevWeekHigh,"PWH", color.green)
+f_drawLevel(prevWeekLow, "PWL", color.red)
+
+roundStep = 25.0
+if showLevels and barstate.islast
+    baseRound = math.floor(close / roundStep) * roundStep
+    for i = -2 to 2
+        rp = baseRound + i * roundStep
+        line.new(bar_index - 50, rp, bar_index + 10, rp, color=color.new(color.gray, 60), style=line.style_dashed, width=1)
+
+// =====================================================================================
+//  TABELLA STATO (forza trend ADX, espansione, direzione consentita, posizione, SL/TP)
+// =====================================================================================
+dirTxt = tradeDirection == DIR_LONG_ONLY ? "Solo LONG" : tradeDirection == DIR_SHORT_ONLY ? "Solo SHORT" : "Long+Short"
+
+var table st = table.new(position.top_right, 2, 11, border_width=1)
+if showTable and barstate.islast
+    posTxt = isLong ? "LONG" : isShort ? "SHORT" : "FLAT"
+    posCol = isLong ? color.green : isShort ? color.red : color.gray
+    table.cell(st, 0, 0, "STATO", text_color=color.white, bgcolor=color.new(color.black, 0))
+    table.cell(st, 1, 0, posTxt,  text_color=color.white, bgcolor=color.new(posCol, 0))
+    table.cell(st, 0, 1, "Tenkan>Kijun", text_color=color.black)
+    table.cell(st, 1, 1, tenkan > kijun ? "SI" : "NO", text_color=tenkan > kijun ? color.green : color.red)
+    table.cell(st, 0, 2, "Prezzo vs Kumo", text_color=color.black)
+    table.cell(st, 1, 2, close > kumoTop ? "Sopra" : close < kumoBot ? "Sotto" : "Dentro", text_color=color.black)
+    // ADX: valore e se sopra soglia
+    adxAbove = not na(adx) and adx > adxMin
+    table.cell(st, 0, 3, "ADX (" + str.tostring(adxMin, "#.#") + ")", text_color=color.black)
+    table.cell(st, 1, 3, (na(adx) ? "-" : str.tostring(adx, "#.#")) + (adxAbove ? "  OK" : "  NO"), text_color=adxAbove ? color.green : color.red)
+    // Espansione / Squeeze
+    table.cell(st, 0, 4, "Bande", text_color=color.black)
+    table.cell(st, 1, 4, inSqueeze ? "Compresse (squeeze)" : "Espanse", text_color=inSqueeze ? color.orange : color.green)
+    // Direzione consentita
+    table.cell(st, 0, 5, "Direzione", text_color=color.black)
+    table.cell(st, 1, 5, dirTxt, text_color=color.blue)
+    // Entry / SL / TP / ATR
+    table.cell(st, 0, 6, "Entry", text_color=color.black)
+    table.cell(st, 1, 6, na(entryPrice) ? "-" : str.tostring(entryPrice, format.mintick), text_color=color.black)
+    table.cell(st, 0, 7, "SL", text_color=color.black)
+    table.cell(st, 1, 7, na(slPrice) ? "-" : str.tostring(slPrice, format.mintick), text_color=color.red)
+    table.cell(st, 0, 8, "TP", text_color=color.black)
+    table.cell(st, 1, 8, na(tpPrice) ? "-" : str.tostring(tpPrice, format.mintick), text_color=color.green)
+    table.cell(st, 0, 9, "ATR", text_color=color.black)
+    table.cell(st, 1, 9, str.tostring(atr, format.mintick), text_color=color.black)
+    // Riepilogo "setup valido?" (informativo)
+    setupLong  = tenkan > kijun and adxAbove and not inSqueeze and (not useKumoFilter or close > kumoTop) and allowLong
+    setupShort = tenkan < kijun and adxAbove and not inSqueeze and (not useKumoFilter or close < kumoBot) and allowShort
+    table.cell(st, 0, 10, "Setup attivo", text_color=color.black)
+    table.cell(st, 1, 10, setupLong ? "LONG ok" : setupShort ? "SHORT ok" : "Nessuno", text_color=setupLong ? color.green : setupShort ? color.red : color.gray)
+
+// =====================================================================================
+//  ALERT (separati per ENTRATA e USCITA) - su barra chiusa per coerenza coi segnali
+// =====================================================================================
+alertcondition(evLongEntry,  title="Entrata LONG",  message="LONG {{ticker}} {{interval}} @ {{close}}")
+alertcondition(evShortEntry, title="Entrata SHORT", message="SHORT {{ticker}} {{interval}} @ {{close}}")
+alertcondition(evExitTP or evExitSL or evExitCross, title="Uscita (qualsiasi)", message="EXIT {{ticker}} {{interval}} @ {{close}}")
+alertcondition(evExitTP,     title="Uscita TP",    message="EXIT TP {{ticker}} {{interval}} @ {{close}}")
+alertcondition(evExitSL,     title="Uscita SL",    message="EXIT SL {{ticker}} {{interval}} @ {{close}}")
+alertcondition(evExitCross,  title="Uscita Cross", message="EXIT Cross {{ticker}} {{interval}} @ {{close}}")
+
+// alert() runtime (once per bar close) con messaggi chiari
+if barstate.isconfirmed and evLongEntry
+    alert("LONG " + syminfo.ticker + " " + timeframe.period + " @ " + str.tostring(close, format.mintick), alert.freq_once_per_bar_close)
+if barstate.isconfirmed and evShortEntry
+    alert("SHORT " + syminfo.ticker + " " + timeframe.period + " @ " + str.tostring(close, format.mintick), alert.freq_once_per_bar_close)
+if barstate.isconfirmed and (evExitTP or evExitSL or evExitCross)
+    motivo = evExitTP ? "TP" : evExitSL ? "SL" : "Cross"
+    alert("EXIT (" + motivo + ") " + syminfo.ticker + " " + timeframe.period + " @ " + str.tostring(close, format.mintick), alert.freq_once_per_bar_close)
