@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Template_EA_Wim.mq5  -  EA modulare "a input" per la fabbrica    |
-//| di set (CLAU12). Versione 1.01 - 17/11/2026 (aggiunto InpDebug). |
+//| di set (CLAU12). Versione 1.02 - 17/11/2026 (riarmo con ripetizione). |
 //|                                                                  |
 //| NON e il codice di Wim (proprietario, mai visto). E un EA scritto|
 //| da zero che copia la STRUTTURA dei suoi input documentata nei    |
@@ -19,7 +19,7 @@
 //| Orari in ORA SERVER (vedi CLAU12_ORARI.mqh per le sessioni).     |
 //+------------------------------------------------------------------+
 #property copyright "CLAU12"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 #include <Trade/Trade.mqh>
 
@@ -91,6 +91,9 @@ double   gDayEquity   = 0;       // equity a inizio giorno
 int      gDayKey      = 0;
 bool     gHalt        = false;   // fermo per sempre (tetto totale)
 bool     gDayBlock    = false;   // fermo fino a domani (tetto giornaliero)
+datetime gBarraCorr   = 0;       // barra del timeframe dei livelli in corso
+bool     gArmata      = false;   // gli ordini della barra in corso sono stati piazzati (o non servono)
+datetime gUltimoTent  = 0;       // ultimo tentativo di armare (uno al minuto al massimo)
 ulong    gTk[64];                // ticket gia visti
 double   gRk[64];                // rischio iniziale (distanza stop all'ingresso)
 int      gN = 0;
@@ -105,7 +108,7 @@ int OnInit()
    gTrade.SetDeviationInPoints(50);
    gStartEquity = AccountInfoDouble(ACCOUNT_EQUITY);
    gDayEquity   = gStartEquity;
-   PrintFormat("TPL_WIM v1.00: %s %s, ingresso %d, livelli %s countback %d, rischio %s",
+   PrintFormat("TPL_WIM v1.02: %s %s, ingresso %d, livelli %s countback %d, rischio %s",
                _Symbol, EnumToString((ENUM_TIMEFRAMES)_Period), (int)InpEntryMode, EnumToString(InpLevelTF), InpCountback, (InpFixedLot ? "lotto fisso" : "% di rischio"));
    return INIT_SUCCEEDED;
 }
@@ -285,49 +288,59 @@ bool ConsentitoOperare()
 //+------------------------------------------------------------------+
 //| Ordini                                                            |
 //+------------------------------------------------------------------+
-void Piazza(ENUM_ORDER_TYPE tipo, double prezzo, double livelloOpposto, double atr)
+// Esito di Piazza: 1 = ordine piazzato; 0 = non piazzato per una regola (nessun nuovo tentativo in questa barra);
+// -1 = rifiutato per mercato chiuso/senza quotazioni (si RIPROVA al minuto dopo); -2 = rifiutato per altro motivo (non si riprova)
+int Piazza(ENUM_ORDER_TYPE tipo, double prezzo, double livelloOpposto, double atr)
 {
    bool buy = (tipo == ORDER_TYPE_BUY_STOP || tipo == ORDER_TYPE_BUY_LIMIT);
-   if(!TrendOk(buy)) return;
+   if(!TrendOk(buy)) return 0;
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK), bid = SymbolInfoDouble(_Symbol, SYMBOL_BID), dm = DistMinima();
    prezzo = NormalizeDouble(prezzo, _Digits);
    // distanza minima dal mercato richiesta dal broker
-   if(tipo == ORDER_TYPE_BUY_STOP && prezzo < ask + dm) return;
-   if(tipo == ORDER_TYPE_SELL_STOP && prezzo > bid - dm) return;
-   if(tipo == ORDER_TYPE_BUY_LIMIT && prezzo > ask - dm) return;
-   if(tipo == ORDER_TYPE_SELL_LIMIT && prezzo < bid + dm) return;
+   if(tipo == ORDER_TYPE_BUY_STOP && prezzo < ask + dm) return 0;
+   if(tipo == ORDER_TYPE_SELL_STOP && prezzo > bid - dm) return 0;
+   if(tipo == ORDER_TYPE_BUY_LIMIT && prezzo > ask - dm) return 0;
+   if(tipo == ORDER_TYPE_SELL_LIMIT && prezzo < bid + dm) return 0;
    // distanza minima dal livello (in ATR): evita ordini attaccati al prezzo
    double ref = buy ? ask : bid;
-   if(MathAbs(prezzo - ref) < InpMinDistLevelAtr * atr) return;
+   if(MathAbs(prezzo - ref) < InpMinDistLevelAtr * atr) return 0;
    double sl, tp;
-   if(!CalcolaSLTP(buy, prezzo, livelloOpposto, atr, sl, tp)) return;
+   if(!CalcolaSLTP(buy, prezzo, livelloOpposto, atr, sl, tp)) return 0;
    double lot = Lotti(MathAbs(prezzo - sl));
-   if(lot <= 0) return;
+   if(lot <= 0) return 0;
    datetime scad = TimeCurrent() + (datetime)(InpExpirationBars * PeriodSeconds(InpLevelTF));
    if(InpEntryMode == ENTRY_RETEST) scad = TimeCurrent() + (datetime)(InpRetestMaxBars * PeriodSeconds(InpLevelTF));
-   if(!gTrade.OrderOpen(_Symbol, tipo, lot, 0, prezzo, sl, tp, ORDER_TIME_SPECIFIED, scad, InpComment))
-      PrintFormat("TPL_WIM: ordine rifiutato (%d) tipo %d prezzo %.5f", gTrade.ResultRetcode(), (int)tipo, prezzo);
+   if(gTrade.OrderOpen(_Symbol, tipo, lot, 0, prezzo, sl, tp, ORDER_TIME_SPECIFIED, scad, InpComment)) return 1;
+   int rc = (int)gTrade.ResultRetcode();
+   bool transitorio = (rc == TRADE_RETCODE_MARKET_CLOSED || rc == TRADE_RETCODE_PRICE_OFF);
+   if(!transitorio || InpDebug) PrintFormat("TPL_WIM: ordine rifiutato (%d) tipo %d prezzo %.5f%s", rc, (int)tipo, prezzo, transitorio ? " [mercato chiuso: riprovo]" : "");
+   return transitorio ? -1 : -2;
 }
-void IngressoBreakout(double hh, double ll, double atr)
+int Esito(int a, int b){ return (a == -1 || b == -1) ? -1 : 1; }
+int IngressoBreakout(double hh, double ll, double atr)
 {
    double off = InpOffsetAtr * atr;
-   Piazza(ORDER_TYPE_BUY_STOP, hh + off, ll, atr);
-   Piazza(ORDER_TYPE_SELL_STOP, ll - off, hh, atr);
+   int a = Piazza(ORDER_TYPE_BUY_STOP, hh + off, ll, atr);
+   int b = Piazza(ORDER_TYPE_SELL_STOP, ll - off, hh, atr);
+   return Esito(a, b);
 }
-void IngressoLimit(double hh, double ll, double atr)
+int IngressoLimit(double hh, double ll, double atr)
 {
    double off = InpOffsetAtr * atr;
-   Piazza(ORDER_TYPE_SELL_LIMIT, hh - off, ll, atr);   // rimbalzo giu dalla resistenza
-   Piazza(ORDER_TYPE_BUY_LIMIT, ll + off, hh, atr);    // rimbalzo su dal supporto
+   int a = Piazza(ORDER_TYPE_SELL_LIMIT, hh - off, ll, atr);   // rimbalzo giu dalla resistenza
+   int b = Piazza(ORDER_TYPE_BUY_LIMIT, ll + off, hh, atr);    // rimbalzo su dal supporto
+   return Esito(a, b);
 }
-void IngressoRetest(double atr)
+int IngressoRetest(double atr)
 {
    double hh, ll;
-   if(!Livelli(2, hh, ll)) return;                       // livelli SENZA l'ultima barra chiusa
+   if(!Livelli(2, hh, ll)) return 1;                     // livelli SENZA l'ultima barra chiusa
    double c1 = iClose(_Symbol, InpLevelTF, 1), c2 = iClose(_Symbol, InpLevelTF, 2);
    double tol = InpRetestTolAtr * atr;
-   if(c1 > hh && c2 <= hh) Piazza(ORDER_TYPE_BUY_LIMIT, hh + tol, ll, atr);      // rottura al rialzo appena chiusa: aspetta il ritorno sul livello
-   if(c1 < ll && c2 >= ll) Piazza(ORDER_TYPE_SELL_LIMIT, ll - tol, hh, atr);     // rottura al ribasso appena chiusa
+   int a = 0, b = 0;
+   if(c1 > hh && c2 <= hh) a = Piazza(ORDER_TYPE_BUY_LIMIT, hh + tol, ll, atr);      // rottura al rialzo appena chiusa: aspetta il ritorno sul livello
+   if(c1 < ll && c2 >= ll) b = Piazza(ORDER_TYPE_SELL_LIMIT, ll - tol, hh, atr);     // rottura al ribasso appena chiusa
+   return Esito(a, b);
 }
 
 //+------------------------------------------------------------------+
@@ -388,16 +401,37 @@ void OnTick()
    }
    AggiornaTetti();
    GestisciPosizioni();
-   if(!NuovaBarra()) return;
-   if(InpDebug) PrintFormat("TPL_WIM NUOVA BARRA %s alle %s | pos %d pend %d", EnumToString(InpLevelTF), TimeToString(TimeCurrent(), TIME_DATE|TIME_SECONDS), NPosizioni(), NPendenti());
-   if(NPosizioni() > 0){ if(InpDebug) Print("TPL_WIM uscita: posizione aperta"); return; }
-   CancellaPendenti();                                    // si riarma a ogni nuova barra
-   if(!ConsentitoOperare()){ if(InpDebug) Print("TPL_WIM uscita: operativita non consentita"); return; }
+   // Riarmo: a ogni nuova barra si tolgono i vecchi pendenti e si piazzano i nuovi. Se il mercato e chiuso (pausa giornaliera:
+   // il tester dava 10018 alle 00:00 da martedi a venerdi sull'oro BCM) NON si rinuncia: si riprova una volta al minuto fino a riuscirci.
+   datetime barra = iTime(_Symbol, InpLevelTF, 0);
+   if(barra == 0) return;
+   if(barra != gBarraCorr)
+   {
+      gBarraCorr = barra; gArmata = false;
+      if(InpDebug) PrintFormat("TPL_WIM NUOVA BARRA %s alle %s | pos %d pend %d", EnumToString(InpLevelTF), TimeToString(TimeCurrent(), TIME_DATE|TIME_SECONDS), NPosizioni(), NPendenti());
+   }
+   if(gArmata) return;
+   if(NPosizioni() > 0){ gArmata = true; if(InpDebug) Print("TPL_WIM uscita: posizione aperta"); return; }
+   datetime ora = TimeCurrent();
+   if(ora - gUltimoTent < 60) return;                      // un tentativo al minuto al massimo
+   gUltimoTent = ora;
+   if(!ConsentitoOperare())
+   {
+      if(!(InpUseSession || InpMaxSpreadPts > 0)) gArmata = true;   // regole che non cambiano nella barra: non si riprova
+      if(InpDebug) Print("TPL_WIM uscita: operativita non consentita");
+      return;
+   }
    double atr = Atr(); if(atr <= 0){ if(InpDebug) Print("TPL_WIM uscita: ATR non disponibile"); return; }
-   double hh, ll;
-   if(InpEntryMode == ENTRY_RETEST){ IngressoRetest(atr); return; }
-   if(!Livelli(1, hh, ll)) return;
-   if(InpEntryMode == ENTRY_BREAKOUT) IngressoBreakout(hh, ll, atr);
-   else IngressoLimit(hh, ll, atr);
+   CancellaPendenti();
+   if(NPendenti() > 0){ if(InpDebug) Print("TPL_WIM: vecchi pendenti non cancellati (mercato chiuso?): riprovo"); return; }
+   double hh, ll; int esito;
+   if(InpEntryMode == ENTRY_RETEST) esito = IngressoRetest(atr);
+   else
+   {
+      if(!Livelli(1, hh, ll)){ gArmata = true; return; }
+      esito = (InpEntryMode == ENTRY_BREAKOUT) ? IngressoBreakout(hh, ll, atr) : IngressoLimit(hh, ll, atr);
+   }
+   if(esito < 0){ if(InpDebug) Print("TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto"); return; }
+   gArmata = true;
+   if(InpDebug) PrintFormat("TPL_WIM armato alle %s | pendenti %d", TimeToString(TimeCurrent(), TIME_DATE|TIME_SECONDS), NPendenti());
 }
-//+------------------------------------------------------------------+
