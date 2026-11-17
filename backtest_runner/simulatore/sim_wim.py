@@ -39,6 +39,7 @@ class Par:                         # parametri (default = disegno 3, riga 2)
     swap_long_eur = -5.11        # EUR per unita per 0,1 lotto  (STIMATO dal riferimento di fase 1, poi CONGELATO)
     swap_short_eur = -0.37
     max_trades_day = 1
+    gap_fill = False             # False: riempimenti e uscite SEMPRE al livello dell'ordine, anche con gap (verificato su R1 e R5, fase 2)
     eventi_in_chiusura = False   # False: nessun riempimento/SL/TP nella finestra di chiusura (ipotesi 1, da verificare col riferimento)
 
 def costruisci_d1(m1):
@@ -155,7 +156,7 @@ class Sim:
         self.pos = None
 
     # ---------- un tick ----------
-    def tick(self, t, bid, ask, sp_pts, nuova_barra_d1):
+    def tick(self, t, bid, ask, sp_pts, nuova_barra_d1, apertura=False):
         p = self.p
         # swap a ogni mezzanotte attraversata con posizione aperta
         if self.pos is not None:
@@ -176,18 +177,18 @@ class Sim:
         if self.pos is None and not chiuso:
             for o in list(self.pend):
                 if o['buy'] and ask >= o['prezzo']:
-                    self.apri(t, o, max(o['prezzo'], ask) if ask > o['prezzo'] + 1e-9 and False else o['prezzo']); break
+                    self.apri(t, o, max(o['prezzo'], ask) if (apertura and p.gap_fill) else o['prezzo']); break
                 if (not o['buy']) and bid <= o['prezzo']:
-                    self.apri(t, o, o['prezzo']); break
+                    self.apri(t, o, min(o['prezzo'], bid) if (apertura and p.gap_fill) else o['prezzo']); break
         # SL / TP (lato server)
         if self.pos is not None and not chiuso:
             pos = self.pos
             if pos['buy']:
-                if bid <= pos['sl']: self.chiudi(t, pos['sl'], 'sl')
-                elif bid >= pos['tp']: self.chiudi(t, pos['tp'], 'tp')
+                if bid <= pos['sl']: self.chiudi(t, min(pos['sl'], bid) if (apertura and p.gap_fill) else pos['sl'], 'sl')
+                elif bid >= pos['tp']: self.chiudi(t, max(pos['tp'], bid) if (apertura and p.gap_fill) else pos['tp'], 'tp')
             else:
-                if ask >= pos['sl']: self.chiudi(t, pos['sl'], 'sl')
-                elif ask <= pos['tp']: self.chiudi(t, pos['tp'], 'tp')
+                if ask >= pos['sl']: self.chiudi(t, max(pos['sl'], ask) if (apertura and p.gap_fill) else pos['sl'], 'sl')
+                elif ask <= pos['tp']: self.chiudi(t, min(pos['tp'], ask) if (apertura and p.gap_fill) else pos['tp'], 'tp')
         # ---- EA: GestisciPosizioni ----
         if self.pos is not None:
             pos = self.pos
@@ -198,7 +199,8 @@ class Sim:
                     pos['fbf_ok'] = True
                     cl = (self.cl_h1 if p.fbf == 1 else self.cl_h4).get(kin)
                     if cl is not None and ((cl < pos['prezzo']) if pos['buy'] else (cl > pos['prezzo'])):
-                        self.chiudi(t, bid if pos['buy'] else ask, 'fbf')
+                        if not self.chiuso(t):                # a mercato chiuso PositionClose e rifiutata e l'EA non riprova (gia segnato)
+                            self.chiudi(t, bid if pos['buy'] else ask, 'fbf')
             if self.pos is not None and self.pend:
                 self.cancella_pendenti(t)                     # OCO
         # ---- EA: nuova barra e armo ----
@@ -244,7 +246,7 @@ class Sim:
             o, h, l, c, s = m1['o'][i], m1['h'][i], m1['l'][i], m1['c'][i], m1['s'][i]
             seq = (o, l, h, c) if c >= o else (o, h, l, c)
             for sec, px in zip(p.tick_sec, seq):
-                self.tick(t0 + sec, px, px + s * p.point, s, False)
+                self.tick(t0 + sec, px, px + s * p.point, s, False, sec == 0)
             prev_c, prev_s = c, s
             i += 1
         # fine test: cancella pendenti residui, la posizione aperta resta (il tester la chiude a fine test: non conteggiata qui)
