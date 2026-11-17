@@ -42,6 +42,8 @@
 param(
   [Parameter(Mandatory=$true)][ValidatePattern('^[0-9a-f]{40}$')][string]$Pin,
   [Parameter(Mandatory=$true)][ValidatePattern('^[0-9A-Fa-f]{64}$')][string]$ShaMq5,
+  [ValidatePattern('^[A-Za-z0-9,|]+$')][string]$Simboli = 'XAUUSD,EURUSD',
+  [ValidatePattern('^[0-9.,-]+$')][string]$Finestre = '2018.11.01-2019.04.02',
   [switch]$Esegui
 )
 
@@ -182,7 +184,7 @@ $dirSet = Split-Path -Parent $destSet
 $stamp = (Get-Date).ToString('yyyyMMdd_HHmmss', $INV)
 if(Test-Path -LiteralPath $destScr){ Copy-Item -LiteralPath $destScr -Destination ($destScr + '.prima_' + $stamp) -Force }
 Copy-Item -LiteralPath $loc -Destination $destScr -Force
-Set-Content -LiteralPath $destSet -Value ("InpSimboli=XAUUSD,EURUSD`r`nInpFinestre=2018.11.01-2019.04.02`r`nInpChiudiTerminale=true`r`n") -Encoding ASCII
+Set-Content -LiteralPath $destSet -Value ("InpSimboli=" + $Simboli + "`r`nInpFinestre=" + $Finestre + "`r`nInpChiudiTerminale=true`r`n") -Encoding ASCII
 Write-Host '[4/6] script e preset installati; compilo con MetaEditor...'
 $logc = Join-Path $W ('compila_multi_' + $stamp + '.log')
 $tc = Get-Date
