@@ -3,6 +3,7 @@
 ; PROFILO DI PROVA per il tester/demo: non e un consiglio di taglia.
 InpMagic=880001
 InpComment=TPL_WIM
+InpRearm=true
 InpDebug=false
 InpLevelTF=16385
 InpCountback=24

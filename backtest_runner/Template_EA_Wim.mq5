@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Template_EA_Wim.mq5  -  EA modulare "a input" per la fabbrica    |
-//| di set (CLAU12). Versione 1.02 - 17/11/2026 (riarmo con ripetizione). |
+//| di set (CLAU12). Versione 1.03 - 17/11/2026 (aggiunto InpRearm).         |
 //|                                                                  |
 //| NON e il codice di Wim (proprietario, mai visto). E un EA scritto|
 //| da zero che copia la STRUTTURA dei suoi input documentata nei    |
@@ -19,7 +19,7 @@
 //| Orari in ORA SERVER (vedi CLAU12_ORARI.mqh per le sessioni).     |
 //+------------------------------------------------------------------+
 #property copyright "CLAU12"
-#property version   "1.02"
+#property version   "1.03"
 #property strict
 #include <Trade/Trade.mqh>
 
@@ -30,6 +30,7 @@ enum ENUM_TP_MODE    { TP_RR = 0, TP_ATR = 1, TP_FIXED_PTS = 2 };
 input group "=== Identita ==="
 input long   InpMagic            = 880001;      // magic number dell'EA
 input string InpComment          = "TPL_WIM";   // commento degli ordini
+input bool   InpRearm            = true;        // true = a ogni nuova barra si cancellano e rimettono i pendenti; false = i pendenti restano fino a riempimento/scadenza e se ne piazzano di nuovi solo quando non ce ne sono
 input bool   InpDebug            = false;       // true = scrive nel Journal ogni nuova barra, ogni primo tick del giorno e i motivi di uscita (solo per i controlli)
 
 input group "=== Livelli (struttura) ==="
@@ -108,7 +109,7 @@ int OnInit()
    gTrade.SetDeviationInPoints(50);
    gStartEquity = AccountInfoDouble(ACCOUNT_EQUITY);
    gDayEquity   = gStartEquity;
-   PrintFormat("TPL_WIM v1.02: %s %s, ingresso %d, livelli %s countback %d, rischio %s",
+   PrintFormat("TPL_WIM v1.03: %s %s, ingresso %d, livelli %s countback %d, rischio %s",
                _Symbol, EnumToString((ENUM_TIMEFRAMES)_Period), (int)InpEntryMode, EnumToString(InpLevelTF), InpCountback, (InpFixedLot ? "lotto fisso" : "% di rischio"));
    return INIT_SUCCEEDED;
 }
@@ -412,6 +413,7 @@ void OnTick()
    }
    if(gArmata) return;
    if(NPosizioni() > 0){ gArmata = true; if(InpDebug) Print("TPL_WIM uscita: posizione aperta"); return; }
+   if(!InpRearm && NPendenti() > 0){ gArmata = true; if(InpDebug) Print("TPL_WIM uscita: pendenti persistenti ancora attivi"); return; }
    datetime ora = TimeCurrent();
    if(ora - gUltimoTent < 60) return;                      // un tentativo al minuto al massimo
    gUltimoTent = ora;
