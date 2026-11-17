@@ -1,4 +1,4 @@
-# MARCATORE_PASSATA_CONTROLLO_BREAKOUT_v1
+# MARCATORE_PASSATA_CONTROLLO_BREAKOUT_v2
 # Passata di CONTROLLO del breakout oro (criteri CLAU12_BREAKOUT_ORO sezione 1, P2): UNA passata del tester, XAUUSD D1, 2019-01-01 -> 2019-12-31, Modello 1 (candele da 1 minuto), 100000 EUR, lotto fisso 0,1, EA CLAU12\Template_EA_Wim.ex5 (riga 1 della griglia L9 D1: countback 10, stop 1,0 ATR, target 1,5 R, scadenza 3 barre), tutti gli input in [TesterInputs].
 # Serve a VERIFICARE A MANO che l'EA faccia quello che deve (pendenti al livello +/- offset, scadenza, stop/target, una posizione). NON valuta il PF: nessun numero di questo giro si usa per scegliere set.
 # Terminale: portable BCM (C:\MT5_BCM_Opt). Scrive solo il report e il .ini in %TEMP%. Il tester NON invia ordini ai conti (AllowLiveTrading=false). Non chiude MT5 con la forza.
@@ -87,6 +87,7 @@ foreach($rg in $righe){
 }
 [void]$out.Add('Righe ordini nel report: ' + $nOrd + ' | righe deal: ' + $nDeal)
 $testo=($out -join "`r`n")
+$fileTxt=Join-Path ([Environment]::GetFolderPath('Desktop')) 'RIEPILOGO_CONTROLLO_BREAKOUT.txt'; Set-Content -LiteralPath $fileTxt -Value $testo -Encoding UTF8; Write-Host ('Riepilogo salvato anche nel file: ' + $fileTxt + '  (allegalo alla chat se Ctrl+V incolla un immagine)') -ForegroundColor Green
 try { Set-Clipboard -Value $testo; Write-Host 'Risultato COPIATO negli appunti: incollalo nella chat con Ctrl+V.' -ForegroundColor Green } catch { Write-Host 'Appunti non disponibili: mandami la foto di queste righe.' -ForegroundColor Yellow }
 $out | Select-Object -First 14 | ForEach-Object { Write-Host $_ }
 Write-Host ('Report completo: ' + $rf + ' | fine alle ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana).') -ForegroundColor Cyan
