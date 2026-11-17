@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# *** IN LAVORAZIONE (18/11/2026): INCOMPLETO. Manca righe/_modello_controllo_14ea_oro.ps1.txt, quindi il generatore NON funziona ancora e nessuna riga di lancio deriva da questo file. Si completa dopo la risposta di Claudio sullo storico degli indici. ***
+# Il modello PowerShell sta in righe/_modello_controllo_14ea_oro.ps1.txt
 """Genera righe/CONTROLLO_14EA_ORO_BCM.ps1: test fuori campione dei 4 EA su oro tra i 14 'Ottimizzati' (criteri CLAU12_14_EA_..._CRITERI).
 Legge i valori di DEFAULT degli input dai sorgenti (nessun valore a mano) e li scrive tutti in [TesterInputs]."""
 import re, sys, hashlib, subprocess, os
