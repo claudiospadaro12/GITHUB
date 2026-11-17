@@ -67,3 +67,9 @@ Dati FTMO XAUUSD/EURUSD M1 2014-11 -> 2020-12 e serie MT5 dei 9 set (`RISULTATI_
 **Previsioni:** V1 85%, V2 70%, V3 55%, V4 60%, V5 65%; **passano tutte e cinque: 30%**.
 **Uso, se valido:** solo per scartare presto idee nuove (griglia ampia in Python, i migliori N al massimo 10 in MT5 con le porte della famiglia); ogni set provato in Python conta nei "looks"; mai approvare dal solo simulatore.
 **Costo:** i 36 set girano in Python senza il PC di Claudio; nessun file da lui.
+
+### Risultato FASE 3 (18/11/2026): **FILTRO VALIDO** (V1-V5 tutte superate, nessuna correzione usata)
+Codice congelato al commit `7d5977a7` prima della prova completa (4 dei 36 risultati erano stati visti in un test di velocita; nessuna modifica dopo). Output: `CLAU12_SIMULATORE_FASE3_RISULTATI_36SET.txt`. 36 set in 89 secondi con 4 processi.
+V1 **35/36** (>= 30); V2 Spearman **0,99** (>= 0,85); V3 **10/10** (>= 7); V4 R1, R2, R4 (disegno 2 H4) **tutti e tre nei primi 8** per PF; V5 **0** perdenti tra i top 10 (<= 2). Previsione "passano tutte" 30% -> SI.
+Fedelta: disegno 2 H4 quasi identico a MT5 (es. D2_H4_R1: 558 vs 559 operazioni, +17.969 vs +18.081 EUR); disegni con livelli D1 e pendenti persistenti piu lontani (es. D1_D1_R9 +2.321 vs +1.640) ma ordinamento corretto.
+**Limiti dichiarati:** valido SOLO per questo motore (`Template_EA_Wim`: breakout/limit sui massimi-minimi, SL/TP in punti, ATR, R, %) sull'oro FTMO 2015-2020; altri mercati (tick value, spread, swap, orario) e altre logiche vanno riprovati prima di fidarsi; fase 2 (uguaglianza stretta) resta non superata. Ogni set provato in Python conta nei looks; ogni candidato si conferma in MT5.
