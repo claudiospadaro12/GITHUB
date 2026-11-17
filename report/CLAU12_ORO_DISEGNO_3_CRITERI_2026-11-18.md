@@ -38,3 +38,15 @@ IS 2015-2020 (G3: 2015-17 e 2018-20); OOS 2021-22 e 2023-24 (G4); hold-out 2025-
 
 ## 7. Cosa NON sappiamo ancora (limiti dichiarati)
 La regola esatta con cui i sistemi di Wim scelgono i livelli e le "conferme" non e nota: questo disegno e una **nostra ipotesi** ispirata ai fatti pubblici, e puo non riprodurre i loro risultati. I confronti di correlazione con i loro conti (se arriveranno a G4) sono solo un'etichetta.
+
+## 8. Esito della passata di controllo (P2), 18/11/2026 - scritto PRIMA di qualsiasi numero del batch
+File: `RIEPILOGO_CONTROLLO_DISEGNO3.txt` (template 1.04, FTMO, XAUUSD D1, 01/01-01/04/2019, righe L9 n. 2 e n. 3). I numeri di questo giro **non** si usano per scegliere nulla.
+**Verificato a occhio, tutto conforme:**
+- Stop e target in % del prezzo d'ingresso: buy stop 1285,16 -> stop 1280,66 (-0,35%), target 1312,15 (+2,10%) nella riga 2 e 1325,00 (+3,10%) nella riga 3. Idem sui sell.
+- Countback diverso -> livelli diversi (sell stop 1234,33 con 10 giorni, 1220,10 con 20 giorni).
+- Pendenti persistenti: restano fino a riempimento/scadenza; scadenza 6 giorni arrotondata dal tester alla mezzanotte successiva (~7 giorni, noto); dopo la scadenza si riarma alle 00:00, rifiuto 10018 (mercato chiuso) e ordini piazzati alle 01:05.
+- Alla riempita di un lato l'altro viene cancellato; mai due posizioni insieme; nessun ingresso con posizione aperta; a fine test (29/03 22:58) i pendenti residui vengono cancellati.
+- Il filtro fake breakout scatta come scritto (`la candela PERIOD_H1 d'ingresso chiude contro (1297.45 vs 1298.06): chiudo`).
+**Difetto bloccante: nessuno.** Previsione scritta "almeno un difetto: 50%" -> **sbagliata** (nessun difetto bloccante; la v1.04 dopo 3 correzioni precedenti passa al primo giro).
+**Osservazione di progetto (non e un difetto del codice):** quando l'ingresso avviene a pochi secondi dalla chiusura della candela H1 (es. entrato 18:59:40, chiuso 19:00:00), il filtro confronta una candela di 20 secondi con il prezzo d'ingresso e chiude quasi a caso, con piccola perdita. Nella riga 2 (H1) **5 operazioni su 10** sono uscite cosi entro 1 ora (-2 / -15 EUR contro i -40 dello stop); nella riga 3 (H4) **1 su 4**. Non so come il fornitore risolva questo caso. **Decisione presa ora, prima dei numeri:** il template NON si cambia; il filtro e un fattore del batch (spento/H1/H4), quindi il suo effetto (anche quello "casuale") e misurato dentro i risultati; se vince il filtro H1 lo segno come limite da verificare. Nessuna variante "ignora le candele quasi chiuse" in questo disegno.
+**Limite dei dati di controllo:** 3 mesi, 10 + 4 operazioni: servono solo a vedere che il codice fa quello che dice, non a giudicare la strategia.
