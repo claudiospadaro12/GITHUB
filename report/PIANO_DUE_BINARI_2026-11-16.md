@@ -27,3 +27,15 @@
 - **Uso dopo la calibrazione:** solo come pre-filtro (griglia ampia in Python -> i migliori N vanno in MT5 a candele, poi a tick). Un candidato approvato dal solo simulatore non esiste.
 - **Cosa serve da Claudio dopo l'oro:** esportazione dello storico M1 EURUSD da MT5 (la riga la preparo io) e i 3 report MT5 di controllo.
 - **Rischi noti:** spread variabile e regole del broker (distanza minima ordini, valore del tick) non sono modellati finche non sono letti dal terminale; i tick reali non si simulano.
+
+## Risposta di FTMO sulla "stessa strategia" (supporto FTMO, 17/11/2026; testo ricevuto da Claudio)
+**Natura:** informazione di FTMO, non una regola che conosciamo per intero. FTMO dichiara di NON poter rivelare i criteri.
+- **Stesso EA di terzi con set/parametri diversi NON conta automaticamente come strategia diversa.** Anche cambiando rischio e dimensione delle posizioni, la strategia di fondo puo essere giudicata simile. FTMO valuta "piu fattori" con sistemi interni e non conferma se particolari impostazioni bastino.
+- **(a) Limite di allocazione massima di 400.000 USD per trader o per strategia**, in ogni momento (si applica ai FTMO Traders): se piu conti usano la stessa strategia e l'allocazione sommata supera il limite, puo essere una violazione.
+- **(b)** Ogni caso e valutato singolarmente; i conti coinvolti possono essere chiusi. **(c)** Rimborso non confermabile in anticipo. **(d)** FTMO contatta i trader interessati per email, senza garanzia di preavviso o di tempi.
+**Conseguenze sul progetto (decisioni di Claudio, qui solo la lettura):**
+1. Le varianti di set di UN EA di Wim (C0, C1-C10 dell'oro) valgono come UNA strategia: non come componenti diverse di un portafoglio.
+2. Il livello 1 di "diversita" del piano (solo parametri diversi) e confermato come il piu debole e rischioso: la priorita resta la logica e il mercato diversi (livelli 2 e 3).
+3. La correlazione <= 0,30 e il nostro criterio misurabile, ma NON e il criterio di FTMO (sconosciuto): e necessaria come filtro, non sufficiente come garanzia.
+4. Nel registro del sistema ogni strategia-famiglia ha UNA riga di allocazione, e la somma tra conti della stessa famiglia si confronta con il limite di 400.000 USD (valore di FTMO, in USD; le altre prop vanno verificate sulle loro regole ufficiali).
+5. Non e confermato se EA nostri con logica simile tra loro contino come "stessa strategia": rischio da tenere a mente nella scelta delle famiglie.
