@@ -1,0 +1,346 @@
+﻿=== DISEGNO 3 riga 2: stop 0,35% prezzo, target 2,1%, countback 10 giorni, scadenza 6 giorni, pendenti persistenti, FBF H1 ===
+--- ORDINI (primi 45) ---
+2019.01.02 06:00:00 | 2 | XAUUSD | buy stop | 0.1 / 0.1 | 1285.16 | 1280.66 | 1312.15 | 2019.01.02 07:18:40 | filled | TPL_WIM
+2019.01.02 06:00:00 | 3 | XAUUSD | sell stop | 0.1 / 0 | 1234.33 | 1238.65 | 1208.41 | 2019.01.02 07:18:40 | canceled | TPL_WIM
+2019.01.02 20:45:40 | 4 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.01.02 20:45:40 | filled | sl 1280.66
+2019.01.03 01:05:00 | 5 | XAUUSD | sell stop | 0.1 / 0.1 | 1240.47 | 1244.81 | 1214.42 | 2019.01.10 00:00:00 | expired | expired [2019.01.10 00:00]
+2019.01.10 01:05:00 | 6 | XAUUSD | buy stop | 0.1 / 0.1 | 1299.85 | 1295.30 | 1327.15 | 2019.01.17 00:00:00 | expired | expired [2019.01.17 00:00]
+2019.01.10 01:05:00 | 7 | XAUUSD | sell stop | 0.1 / 0.1 | 1263.13 | 1267.55 | 1236.60 | 2019.01.17 00:00:00 | expired | expired [2019.01.17 00:00]
+2019.01.17 01:05:00 | 8 | XAUUSD | buy stop | 0.1 / 0.1 | 1299.60 | 1295.05 | 1326.89 | 2019.01.24 00:00:00 | expired | expired [2019.01.24 00:00]
+2019.01.17 01:05:00 | 9 | XAUUSD | sell stop | 0.1 / 0.1 | 1275.46 | 1279.92 | 1248.68 | 2019.01.24 00:00:00 | expired | expired [2019.01.24 00:00]
+2019.01.24 01:05:00 | 10 | XAUUSD | buy stop | 0.1 / 0.1 | 1298.06 | 1293.52 | 1325.32 | 2019.01.25 17:22:40 | filled | TPL_WIM
+2019.01.24 01:05:00 | 11 | XAUUSD | sell stop | 0.1 / 0 | 1275.71 | 1280.17 | 1248.92 | 2019.01.25 17:22:40 | canceled | TPL_WIM
+2019.01.25 18:00:00 | 12 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.01.25 18:00:00 | filled | 
+2019.01.28 01:05:00 | 13 | XAUUSD | buy stop | 0.1 / 0.1 | 1304.92 | 1300.35 | 1332.32 | 2019.01.29 08:07:40 | filled | TPL_WIM
+2019.01.28 01:05:00 | 14 | XAUUSD | sell stop | 0.1 / 0 | 1275.69 | 1280.15 | 1248.90 | 2019.01.29 08:07:40 | canceled | TPL_WIM
+2019.02.19 15:31:40 | 15 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.02.19 15:31:40 | filled | tp 1332.32
+2019.02.20 01:05:00 | 16 | XAUUSD | buy stop | 0.1 / 0.1 | 1342.86 | 1338.16 | 1371.06 | 2019.02.20 03:19:40 | filled | TPL_WIM
+2019.02.20 01:05:00 | 17 | XAUUSD | sell stop | 0.1 / 0 | 1301.27 | 1305.82 | 1273.94 | 2019.02.20 03:19:40 | canceled | TPL_WIM
+2019.02.20 21:15:40 | 18 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.02.20 21:15:40 | filled | sl 1338.16
+2019.02.21 01:05:00 | 19 | XAUUSD | buy stop | 0.1 / 0.1 | 1347.73 | 1343.01 | 1376.03 | 2019.02.28 00:00:00 | expired | expired [2019.02.28 00:00]
+2019.02.21 01:05:00 | 20 | XAUUSD | sell stop | 0.1 / 0.1 | 1301.26 | 1305.81 | 1273.93 | 2019.02.28 00:00:00 | expired | expired [2019.02.28 00:00]
+2019.02.28 01:05:00 | 22 | XAUUSD | sell stop | 0.1 / 0.1 | 1301.15 | 1305.70 | 1273.83 | 2019.03.01 18:59:40 | filled | TPL_WIM
+2019.02.28 01:05:00 | 21 | XAUUSD | buy stop | 0.1 / 0 | 1347.84 | 1343.12 | 1376.14 | 2019.03.01 18:59:40 | canceled | TPL_WIM
+2019.03.01 19:00:00 | 23 | XAUUSD | buy | 0.1 / 0.1 | 0.00 |  |  | 2019.03.01 19:00:00 | filled | 
+2019.03.04 01:05:00 | 25 | XAUUSD | sell stop | 0.1 / 0.1 | 1288.80 | 1293.31 | 1261.74 | 2019.03.04 10:42:40 | filled | TPL_WIM
+2019.03.04 01:05:00 | 24 | XAUUSD | buy stop | 0.1 / 0 | 1347.99 | 1343.27 | 1376.30 | 2019.03.04 10:42:40 | canceled | TPL_WIM
+2019.03.08 08:29:20 | 26 | XAUUSD | buy | 0.1 / 0.1 | 0.00 |  |  | 2019.03.08 08:29:20 | filled | sl 1293.31
+2019.03.11 01:05:00 | 27 | XAUUSD | buy stop | 0.1 / 0.1 | 1333.81 | 1329.14 | 1361.82 | 2019.03.18 00:00:00 | expired | expired [2019.03.18 00:00]
+2019.03.11 01:05:00 | 28 | XAUUSD | sell stop | 0.1 / 0.1 | 1279.47 | 1283.95 | 1252.60 | 2019.03.18 00:00:00 | expired | expired [2019.03.18 00:00]
+2019.03.18 01:05:00 | 29 | XAUUSD | buy stop | 0.1 / 0.1 | 1312.44 | 1307.85 | 1340.00 | 2019.03.20 20:04:40 | filled | TPL_WIM
+2019.03.18 01:05:00 | 30 | XAUUSD | sell stop | 0.1 / 0 | 1279.53 | 1284.01 | 1252.66 | 2019.03.20 20:04:40 | canceled | TPL_WIM
+2019.03.21 18:17:40 | 31 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.03.21 18:17:40 | filled | sl 1307.85
+2019.03.22 01:05:00 | 32 | XAUUSD | buy stop | 0.1 / 0.1 | 1321.54 | 1316.91 | 1349.29 | 2019.03.25 16:20:40 | filled | TPL_WIM
+2019.03.22 01:05:00 | 33 | XAUUSD | sell stop | 0.1 / 0 | 1283.22 | 1287.71 | 1256.27 | 2019.03.25 16:20:40 | canceled | TPL_WIM
+2019.03.25 17:00:00 | 34 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.03.25 17:00:00 | filled | 
+2019.03.26 01:05:00 | 36 | XAUUSD | sell stop | 0.1 / 0.1 | 1290.78 | 1295.30 | 1263.67 | 2019.03.28 17:39:40 | filled | TPL_WIM
+2019.03.26 01:05:00 | 35 | XAUUSD | buy stop | 0.1 / 0 | 1325.67 | 1321.03 | 1353.51 | 2019.03.28 17:39:40 | canceled | TPL_WIM
+2019.03.28 18:00:00 | 37 | XAUUSD | buy | 0.1 / 0.1 | 0.00 |  |  | 2019.03.28 18:00:00 | filled | 
+2019.03.29 01:05:00 | 39 | XAUUSD | sell stop | 0.1 / 0.1 | 1287.20 | 1291.71 | 1260.17 | 2019.03.29 08:42:40 | filled | TPL_WIM
+2019.03.29 01:05:00 | 38 | XAUUSD | buy stop | 0.1 / 0 | 1325.77 | 1321.13 | 1353.61 | 2019.03.29 08:42:40 | canceled | TPL_WIM
+2019.03.29 09:00:00 | 40 | XAUUSD | buy | 0.1 / 0.1 | 0.00 |  |  | 2019.03.29 09:00:00 | filled | 
+--- OPERAZIONI ---
+2019.01.01 00:00:00 | 1 |  | balance |  |  |  |  | 0.00 | 0.00 | 100 000.00 | 100 000.00 | 
+2019.01.02 07:18:40 | 2 | XAUUSD | buy | in | 0.1 | 1285.16 | 2 | -0.08 | 0.00 | 0.00 | 99 999.92 | TPL_WIM
+2019.01.02 20:45:40 | 3 | XAUUSD | sell | out | 0.1 | 1280.66 | 4 | -0.08 | 0.00 | -39.73 | 99 960.11 | sl 1280.66
+2019.01.25 17:22:40 | 4 | XAUUSD | buy | in | 0.1 | 1298.06 | 10 | -0.08 | 0.00 | 0.00 | 99 960.03 | TPL_WIM
+2019.01.25 18:00:00 | 5 | XAUUSD | sell | out | 0.1 | 1297.45 | 12 | -0.08 | 0.00 | -5.35 | 99 954.60 | 
+2019.01.29 08:07:40 | 6 | XAUUSD | buy | in | 0.1 | 1304.92 | 13 | -0.08 | 0.00 | 0.00 | 99 954.52 | TPL_WIM
+2019.02.19 15:31:40 | 7 | XAUUSD | sell | out | 0.1 | 1332.32 | 15 | -0.08 | -107.93 | 242.62 | 100 089.13 | tp 1332.32
+2019.02.20 03:19:40 | 8 | XAUUSD | buy | in | 0.1 | 1342.86 | 16 | -0.08 | 0.00 | 0.00 | 100 089.05 | TPL_WIM
+2019.02.20 21:15:40 | 9 | XAUUSD | sell | out | 0.1 | 1338.16 | 18 | -0.08 | 0.00 | -41.45 | 100 047.52 | sl 1338.16
+2019.03.01 18:59:40 | 10 | XAUUSD | sell | in | 0.1 | 1301.15 | 22 | -0.08 | 0.00 | 0.00 | 100 047.44 | TPL_WIM
+2019.03.01 19:00:00 | 11 | XAUUSD | buy | out | 0.1 | 1301.52 | 23 | -0.08 | 0.00 | -3.25 | 100 044.11 | 
+2019.03.04 10:42:40 | 12 | XAUUSD | sell | in | 0.1 | 1288.80 | 25 | -0.08 | 0.00 | 0.00 | 100 044.03 | TPL_WIM
+2019.03.08 08:29:20 | 13 | XAUUSD | buy | out | 0.1 | 1293.31 | 26 | -0.08 | -2.23 | -40.26 | 100 001.46 | sl 1293.31
+2019.03.20 20:04:40 | 14 | XAUUSD | buy | in | 0.1 | 1312.44 | 29 | -0.08 | 0.00 | 0.00 | 100 001.38 | TPL_WIM
+2019.03.21 18:17:40 | 15 | XAUUSD | sell | out | 0.1 | 1307.85 | 31 | -0.08 | -15.34 | -40.44 | 99 945.52 | sl 1307.85
+2019.03.25 16:20:40 | 16 | XAUUSD | buy | in | 0.1 | 1321.54 | 32 | -0.08 | 0.00 | 0.00 | 99 945.44 | TPL_WIM
+2019.03.25 17:00:00 | 17 | XAUUSD | sell | out | 0.1 | 1319.78 | 34 | -0.08 | 0.00 | -15.55 | 99 929.81 | 
+2019.03.28 17:39:40 | 18 | XAUUSD | sell | in | 0.1 | 1290.78 | 36 | -0.08 | 0.00 | 0.00 | 99 929.73 | TPL_WIM
+2019.03.28 18:00:00 | 19 | XAUUSD | buy | out | 0.1 | 1292.49 | 37 | -0.08 | 0.00 | -15.22 | 99 914.43 | 
+2019.03.29 08:42:40 | 20 | XAUUSD | sell | in | 0.1 | 1287.20 | 39 | -0.08 | 0.00 | 0.00 | 99 914.35 | TPL_WIM
+2019.03.29 09:00:00 | 21 | XAUUSD | buy | out | 0.1 | 1287.47 | 40 | -0.08 | 0.00 | -2.40 | 99 911.87 | 
+Righe ordini nel report: 39
+--- JOURNAL (TPL_WIM, dalla ultima inizializzazione; senza le righe GIORNO) ---
+ED	0	20:26:01.482	Core 1	2019.01.01 00:00:00   TPL_WIM v1.04: XAUUSD PERIOD_D1, ingresso 0, livelli PERIOD_D1 countback 10, rischio lotto fisso
+FO	0	20:26:01.482	Core 1	2019.01.02 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.02 00:00:00 | pos 0 pend 0
+KQ	0	20:26:01.482	Core 1	2019.01.02 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1234.33000 [mercato chiuso: riprovo]
+PR	0	20:26:01.482	Core 1	2019.01.02 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+NK	0	20:26:01.482	Core 1	2019.01.02 06:00:00   TPL_WIM armato alle 2019.01.02 06:00:00 | pendenti 2
+FG	0	20:26:01.482	Core 1	2019.01.03 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.03 00:00:00 | pos 0 pend 0
+QI	0	20:26:01.482	Core 1	2019.01.03 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1289.84000 [mercato chiuso: riprovo]
+HK	0	20:26:01.482	Core 1	2019.01.03 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1240.47000 [mercato chiuso: riprovo]
+CI	0	20:26:01.482	Core 1	2019.01.03 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+OK	0	20:26:01.482	Core 1	2019.01.03 01:05:00   TPL_WIM armato alle 2019.01.03 01:05:00 | pendenti 1
+KD	0	20:26:01.482	Core 1	2019.01.04 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.04 00:00:00 | pos 0 pend 1
+IK	0	20:26:01.482	Core 1	2019.01.04 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+OD	0	20:26:01.482	Core 1	2019.01.07 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.07 00:00:00 | pos 0 pend 1
+LK	0	20:26:01.482	Core 1	2019.01.07 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+CD	0	20:26:01.482	Core 1	2019.01.08 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.08 00:00:00 | pos 0 pend 1
+EK	0	20:26:01.482	Core 1	2019.01.08 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+GD	0	20:26:01.482	Core 1	2019.01.09 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.09 00:00:00 | pos 0 pend 1
+RH	0	20:26:01.482	Core 1	2019.01.09 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+JP	0	20:26:01.482	Core 1	2019.01.10 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.10 00:00:00 | pos 0 pend 0
+KN	0	20:26:01.482	Core 1	2019.01.10 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1299.85000 [mercato chiuso: riprovo]
+FH	0	20:26:01.482	Core 1	2019.01.10 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1263.13000 [mercato chiuso: riprovo]
+IJ	0	20:26:01.482	Core 1	2019.01.10 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+HK	0	20:26:01.482	Core 1	2019.01.10 01:05:00   TPL_WIM armato alle 2019.01.10 01:05:00 | pendenti 2
+DD	0	20:26:01.482	Core 1	2019.01.11 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.11 00:00:00 | pos 0 pend 2
+KK	0	20:26:01.482	Core 1	2019.01.11 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+HD	0	20:26:01.482	Core 1	2019.01.14 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.14 00:00:00 | pos 0 pend 2
+DH	0	20:26:01.482	Core 1	2019.01.14 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+LE	0	20:26:01.482	Core 1	2019.01.15 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.15 00:00:00 | pos 0 pend 2
+GH	0	20:26:01.482	Core 1	2019.01.15 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+PE	0	20:26:01.482	Core 1	2019.01.16 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.16 00:00:00 | pos 0 pend 2
+NH	0	20:26:01.482	Core 1	2019.01.16 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+HL	0	20:26:01.482	Core 1	2019.01.17 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.17 00:00:00 | pos 0 pend 0
+MS	0	20:26:01.482	Core 1	2019.01.17 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1299.60000 [mercato chiuso: riprovo]
+PM	0	20:26:01.482	Core 1	2019.01.17 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1275.46000 [mercato chiuso: riprovo]
+FN	0	20:26:01.482	Core 1	2019.01.17 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+JO	0	20:26:01.482	Core 1	2019.01.17 01:05:00   TPL_WIM armato alle 2019.01.17 01:05:00 | pendenti 2
+FP	0	20:26:01.482	Core 1	2019.01.18 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.18 00:00:00 | pos 0 pend 2
+FO	0	20:26:01.482	Core 1	2019.01.18 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+JP	0	20:26:01.482	Core 1	2019.01.21 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.21 00:00:00 | pos 0 pend 2
+HL	0	20:26:01.482	Core 1	2019.01.21 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+NQ	0	20:26:01.482	Core 1	2019.01.22 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.22 00:00:00 | pos 0 pend 2
+EL	0	20:26:01.482	Core 1	2019.01.22 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+RQ	0	20:26:01.482	Core 1	2019.01.23 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.23 00:00:00 | pos 0 pend 2
+RL	0	20:26:01.482	Core 1	2019.01.23 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+NI	0	20:26:01.482	Core 1	2019.01.24 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.24 00:00:00 | pos 0 pend 0
+LG	0	20:26:01.482	Core 1	2019.01.24 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1298.06000 [mercato chiuso: riprovo]
+NQ	0	20:26:01.482	Core 1	2019.01.24 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1275.71000 [mercato chiuso: riprovo]
+PR	0	20:26:01.482	Core 1	2019.01.24 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+LP	0	20:26:01.482	Core 1	2019.01.24 01:05:00   TPL_WIM armato alle 2019.01.24 01:05:00 | pendenti 2
+HL	0	20:26:01.482	Core 1	2019.01.25 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.25 00:00:00 | pos 0 pend 2
+FP	0	20:26:01.482	Core 1	2019.01.25 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+KH	0	20:26:01.482	Core 1	2019.01.25 18:00:00   TPL_WIM FBF: la candela PERIOD_H1 d'ingresso chiude contro (1297.45 vs 1298.06): chiudo 10
+LR	0	20:26:01.482	Core 1	2019.01.28 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.28 00:00:00 | pos 0 pend 0
+OL	0	20:26:01.482	Core 1	2019.01.28 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1275.69000 [mercato chiuso: riprovo]
+RM	0	20:26:01.482	Core 1	2019.01.28 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+JN	0	20:26:01.482	Core 1	2019.01.28 01:05:00   TPL_WIM armato alle 2019.01.28 01:05:00 | pendenti 2
+FG	0	20:26:01.482	Core 1	2019.01.29 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.29 00:00:00 | pos 0 pend 2
+DN	0	20:26:01.482	Core 1	2019.01.29 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+IS	0	20:26:01.482	Core 1	2019.01.30 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.30 00:00:00 | pos 1 pend 0
+GS	0	20:26:01.482	Core 1	2019.01.30 00:00:00   TPL_WIM uscita: posizione aperta
+QN	0	20:26:01.482	Core 1	2019.01.31 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.31 00:00:00 | pos 1 pend 0
+PQ	0	20:26:01.482	Core 1	2019.01.31 00:00:00   TPL_WIM uscita: posizione aperta
+IH	0	20:26:01.482	Core 1	2019.02.01 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.01 00:00:00 | pos 1 pend 0
+HD	0	20:26:01.482	Core 1	2019.02.01 00:00:00   TPL_WIM uscita: posizione aperta
+QK	0	20:26:01.482	Core 1	2019.02.04 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.04 00:00:00 | pos 1 pend 0
+KJ	0	20:26:01.482	Core 1	2019.02.04 00:00:00   TPL_WIM uscita: posizione aperta
+IE	0	20:26:01.482	Core 1	2019.02.05 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.05 00:00:00 | pos 1 pend 0
+DI	0	20:26:01.482	Core 1	2019.02.05 00:00:00   TPL_WIM uscita: posizione aperta
+QP	0	20:26:01.482	Core 1	2019.02.06 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.06 00:00:00 | pos 1 pend 0
+MO	0	20:26:01.482	Core 1	2019.02.06 00:00:00   TPL_WIM uscita: posizione aperta
+IR	0	20:26:01.482	Core 1	2019.02.07 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.07 00:00:00 | pos 1 pend 0
+FR	0	20:26:01.482	Core 1	2019.02.07 00:00:00   TPL_WIM uscita: posizione aperta
+QM	0	20:26:01.482	Core 1	2019.02.08 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.08 00:00:00 | pos 1 pend 0
+GP	0	20:26:01.482	Core 1	2019.02.08 00:00:00   TPL_WIM uscita: posizione aperta
+IO	0	20:26:01.482	Core 1	2019.02.11 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.11 00:00:00 | pos 1 pend 0
+GG	0	20:26:01.482	Core 1	2019.02.11 00:00:00   TPL_WIM uscita: posizione aperta
+QJ	0	20:26:01.482	Core 1	2019.02.12 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.12 00:00:00 | pos 1 pend 0
+RE	0	20:26:01.482	Core 1	2019.02.12 00:00:00   TPL_WIM uscita: posizione aperta
+ID	0	20:26:01.482	Core 1	2019.02.13 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.13 00:00:00 | pos 1 pend 0
+IH	0	20:26:01.482	Core 1	2019.02.13 00:00:00   TPL_WIM uscita: posizione aperta
+QG	0	20:26:01.482	Core 1	2019.02.14 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.14 00:00:00 | pos 1 pend 0
+LN	0	20:26:01.482	Core 1	2019.02.14 00:00:00   TPL_WIM uscita: posizione aperta
+IQ	0	20:26:01.482	Core 1	2019.02.15 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.15 00:00:00 | pos 1 pend 0
+CM	0	20:26:01.482	Core 1	2019.02.15 00:00:00   TPL_WIM uscita: posizione aperta
+QL	0	20:26:01.482	Core 1	2019.02.18 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.18 00:00:00 | pos 1 pend 0
+HS	0	20:26:01.482	Core 1	2019.02.18 00:00:00   TPL_WIM uscita: posizione aperta
+IN	0	20:26:01.482	Core 1	2019.02.19 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.19 00:00:00 | pos 1 pend 0
+OF	0	20:26:01.482	Core 1	2019.02.19 00:00:00   TPL_WIM uscita: posizione aperta
+HE	0	20:26:01.482	Core 1	2019.02.20 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.20 00:00:00 | pos 0 pend 0
+EH	0	20:26:01.482	Core 1	2019.02.20 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1342.86000 [mercato chiuso: riprovo]
+RJ	0	20:26:01.482	Core 1	2019.02.20 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1301.27000 [mercato chiuso: riprovo]
+GG	0	20:26:01.482	Core 1	2019.02.20 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+JD	0	20:26:01.482	Core 1	2019.02.20 01:05:00   TPL_WIM armato alle 2019.02.20 01:05:00 | pendenti 2
+PR	0	20:26:01.482	Core 1	2019.02.21 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.21 00:00:00 | pos 0 pend 0
+GL	0	20:26:01.482	Core 1	2019.02.21 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1347.73000 [mercato chiuso: riprovo]
+JN	0	20:26:01.482	Core 1	2019.02.21 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1301.26000 [mercato chiuso: riprovo]
+PK	0	20:26:01.482	Core 1	2019.02.21 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+RI	0	20:26:01.482	Core 1	2019.02.21 01:05:00   TPL_WIM armato alle 2019.02.21 01:05:00 | pendenti 2
+NF	0	20:26:01.482	Core 1	2019.02.22 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.22 00:00:00 | pos 0 pend 2
+DI	0	20:26:01.482	Core 1	2019.02.22 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+RF	0	20:26:01.482	Core 1	2019.02.25 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.25 00:00:00 | pos 0 pend 2
+MI	0	20:26:01.482	Core 1	2019.02.25 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+FF	0	20:26:01.482	Core 1	2019.02.26 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.26 00:00:00 | pos 0 pend 2
+PI	0	20:26:01.482	Core 1	2019.02.26 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+JF	0	20:26:01.482	Core 1	2019.02.27 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.27 00:00:00 | pos 0 pend 2
+CN	0	20:26:01.482	Core 1	2019.02.27 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+RN	0	20:26:01.482	Core 1	2019.02.28 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.28 00:00:00 | pos 0 pend 0
+NP	0	20:26:01.482	Core 1	2019.02.28 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1347.84000 [mercato chiuso: riprovo]
+CR	0	20:26:01.482	Core 1	2019.02.28 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1301.15000 [mercato chiuso: riprovo]
+IO	0	20:26:01.482	Core 1	2019.02.28 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+PM	0	20:26:01.482	Core 1	2019.02.28 01:05:00   TPL_WIM armato alle 2019.02.28 01:05:00 | pendenti 2
+LR	0	20:26:01.482	Core 1	2019.03.01 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.01 00:00:00 | pos 0 pend 2
+FM	0	20:26:01.482	Core 1	2019.03.01 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+KG	0	20:26:01.482	Core 1	2019.03.01 19:00:00   TPL_WIM FBF: la candela PERIOD_H1 d'ingresso chiude contro (1301.33 vs 1301.15): chiudo 22
+LG	0	20:26:01.482	Core 1	2019.03.04 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.04 00:00:00 | pos 0 pend 0
+MI	0	20:26:01.482	Core 1	2019.03.04 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1347.99000 [mercato chiuso: riprovo]
+DK	0	20:26:01.482	Core 1	2019.03.04 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1288.80000 [mercato chiuso: riprovo]
+RH	0	20:26:01.482	Core 1	2019.03.04 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+NJ	0	20:26:01.482	Core 1	2019.03.04 01:05:00   TPL_WIM armato alle 2019.03.04 01:05:00 | pendenti 2
+MF	0	20:26:01.482	Core 1	2019.03.05 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.05 00:00:00 | pos 1 pend 0
+Righe journal (filtrate): 175
+=== DISEGNO 3 riga 3: stop 0,35% prezzo, target 3,1%, countback 20 giorni, scadenza 6 giorni, pendenti persistenti, FBF H4 ===
+--- ORDINI (primi 45) ---
+2019.01.02 06:00:00 | 2 | XAUUSD | buy stop | 0.1 / 0.1 | 1285.16 | 1280.66 | 1325.00 | 2019.01.02 07:18:40 | filled | TPL_WIM
+2019.01.02 06:00:00 | 3 | XAUUSD | sell stop | 0.1 / 0 | 1220.10 | 1224.37 | 1182.28 | 2019.01.02 07:18:40 | canceled | TPL_WIM
+2019.01.02 20:45:40 | 4 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.01.02 20:45:40 | filled | sl 1280.66
+2019.01.03 01:05:00 | 5 | XAUUSD | sell stop | 0.1 / 0.1 | 1229.02 | 1233.32 | 1190.92 | 2019.01.10 00:00:00 | expired | expired [2019.01.10 00:00]
+2019.01.10 01:05:00 | 6 | XAUUSD | buy stop | 0.1 / 0.1 | 1299.85 | 1295.30 | 1340.15 | 2019.01.17 00:00:00 | expired | expired [2019.01.17 00:00]
+2019.01.10 01:05:00 | 7 | XAUUSD | sell stop | 0.1 / 0.1 | 1228.83 | 1233.13 | 1190.74 | 2019.01.17 00:00:00 | expired | expired [2019.01.17 00:00]
+2019.01.17 01:05:00 | 8 | XAUUSD | buy stop | 0.1 / 0.1 | 1299.60 | 1295.05 | 1339.89 | 2019.01.24 00:00:00 | expired | expired [2019.01.24 00:00]
+2019.01.17 01:05:00 | 9 | XAUUSD | sell stop | 0.1 / 0.1 | 1240.53 | 1244.87 | 1202.07 | 2019.01.24 00:00:00 | expired | expired [2019.01.24 00:00]
+2019.01.24 01:05:00 | 10 | XAUUSD | buy stop | 0.1 / 0.1 | 1299.55 | 1295.00 | 1339.84 | 2019.01.25 18:25:40 | filled | TPL_WIM
+2019.01.24 01:05:00 | 11 | XAUUSD | sell stop | 0.1 / 0 | 1263.43 | 1267.85 | 1224.26 | 2019.01.25 18:25:40 | canceled | TPL_WIM
+2019.01.25 20:00:00 | 12 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.01.25 20:00:00 | filled | 
+2019.01.28 01:05:00 | 13 | XAUUSD | buy stop | 0.1 / 0.1 | 1304.92 | 1300.35 | 1345.37 | 2019.01.29 08:07:40 | filled | TPL_WIM
+2019.01.28 01:05:00 | 14 | XAUUSD | sell stop | 0.1 / 0 | 1273.19 | 1277.65 | 1233.72 | 2019.01.29 08:07:40 | canceled | TPL_WIM
+2019.02.20 04:12:40 | 15 | XAUUSD | sell | 0.1 / 0.1 | 0.00 |  |  | 2019.02.20 04:12:40 | filled | tp 1345.37
+2019.02.21 01:05:00 | 16 | XAUUSD | buy stop | 0.1 / 0.1 | 1347.73 | 1343.01 | 1389.51 | 2019.02.28 00:00:00 | expired | expired [2019.02.28 00:00]
+2019.02.21 01:05:00 | 17 | XAUUSD | sell stop | 0.1 / 0.1 | 1275.64 | 1280.10 | 1236.10 | 2019.02.28 00:00:00 | expired | expired [2019.02.28 00:00]
+2019.02.28 01:05:00 | 19 | XAUUSD | sell stop | 0.1 / 0.1 | 1301.15 | 1305.70 | 1260.81 | 2019.03.01 18:59:40 | filled | TPL_WIM
+2019.02.28 01:05:00 | 18 | XAUUSD | buy stop | 0.1 / 0 | 1347.84 | 1343.12 | 1389.62 | 2019.03.01 18:59:40 | canceled | TPL_WIM
+2019.03.13 04:40:40 | 20 | XAUUSD | buy | 0.1 / 0.1 | 0.00 |  |  | 2019.03.13 04:40:40 | filled | sl 1305.70
+2019.03.14 01:05:00 | 21 | XAUUSD | buy stop | 0.1 / 0.1 | 1347.83 | 1343.11 | 1389.61 | 2019.03.21 00:00:00 | expired | expired [2019.03.21 00:00]
+2019.03.14 01:05:00 | 22 | XAUUSD | sell stop | 0.1 / 0.1 | 1279.61 | 1284.09 | 1239.94 | 2019.03.21 00:00:00 | expired | expired [2019.03.21 00:00]
+2019.03.21 01:05:00 | 23 | XAUUSD | buy stop | 0.1 / 0.1 | 1342.68 | 1337.98 | 1384.30 | 2019.03.28 00:00:00 | expired | expired [2019.03.28 00:00]
+2019.03.21 01:05:00 | 24 | XAUUSD | sell stop | 0.1 / 0.1 | 1279.52 | 1284.00 | 1239.85 | 2019.03.28 00:00:00 | expired | expired [2019.03.28 00:00]
+2019.03.28 01:05:00 | 26 | XAUUSD | sell stop | 0.1 / 0 | 1279.54 | 1284.02 | 1239.87 | 2019.03.29 22:58:30 | canceled | TPL_WIM
+2019.03.28 01:05:00 | 25 | XAUUSD | buy stop | 0.1 / 0 | 1328.45 | 1323.80 | 1369.63 | 2019.03.29 22:58:30 | canceled | TPL_WIM
+--- OPERAZIONI ---
+2019.01.01 00:00:00 | 1 |  | balance |  |  |  |  | 0.00 | 0.00 | 100 000.00 | 100 000.00 | 
+2019.01.02 07:18:40 | 2 | XAUUSD | buy | in | 0.1 | 1285.16 | 2 | -0.08 | 0.00 | 0.00 | 99 999.92 | TPL_WIM
+2019.01.02 20:45:40 | 3 | XAUUSD | sell | out | 0.1 | 1280.66 | 4 | -0.08 | 0.00 | -39.73 | 99 960.11 | sl 1280.66
+2019.01.25 18:25:40 | 4 | XAUUSD | buy | in | 0.1 | 1299.55 | 10 | -0.08 | 0.00 | 0.00 | 99 960.03 | TPL_WIM
+2019.01.25 20:00:00 | 5 | XAUUSD | sell | out | 0.1 | 1297.58 | 12 | -0.08 | 0.00 | -17.27 | 99 942.68 | 
+2019.01.29 08:07:40 | 6 | XAUUSD | buy | in | 0.1 | 1304.92 | 13 | -0.08 | 0.00 | 0.00 | 99 942.60 | TPL_WIM
+2019.02.20 04:12:40 | 7 | XAUUSD | sell | out | 0.1 | 1345.37 | 15 | -0.08 | -113.08 | 356.27 | 100 185.71 | tp 1345.37
+2019.03.01 18:59:40 | 8 | XAUUSD | sell | in | 0.1 | 1301.15 | 19 | -0.08 | 0.00 | 0.00 | 100 185.63 | TPL_WIM
+2019.03.13 04:40:40 | 9 | XAUUSD | buy | out | 0.1 | 1305.70 | 20 | -0.08 | -3.71 | -40.31 | 100 141.53 | sl 1305.70
+Righe ordini nel report: 25
+--- JOURNAL (TPL_WIM, dalla ultima inizializzazione; senza le righe GIORNO) ---
+GE	0	20:26:53.932	Core 1	2019.01.01 00:00:00   TPL_WIM v1.04: XAUUSD PERIOD_D1, ingresso 0, livelli PERIOD_D1 countback 20, rischio lotto fisso
+QH	0	20:26:53.932	Core 1	2019.01.02 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.02 00:00:00 | pos 0 pend 0
+LF	0	20:26:53.932	Core 1	2019.01.02 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1220.10000 [mercato chiuso: riprovo]
+KS	0	20:26:53.932	Core 1	2019.01.02 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+IK	0	20:26:53.932	Core 1	2019.01.02 06:00:00   TPL_WIM armato alle 2019.01.02 06:00:00 | pendenti 2
+QP	0	20:26:53.932	Core 1	2019.01.03 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.03 00:00:00 | pos 0 pend 0
+FN	0	20:26:53.932	Core 1	2019.01.03 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1289.84000 [mercato chiuso: riprovo]
+IH	0	20:26:53.932	Core 1	2019.01.03 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1229.02000 [mercato chiuso: riprovo]
+PI	0	20:26:53.932	Core 1	2019.01.03 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+LH	0	20:26:53.932	Core 1	2019.01.03 01:05:00   TPL_WIM armato alle 2019.01.03 01:05:00 | pendenti 1
+HD	0	20:26:53.932	Core 1	2019.01.04 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.04 00:00:00 | pos 0 pend 1
+FH	0	20:26:53.932	Core 1	2019.01.04 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+LE	0	20:26:53.932	Core 1	2019.01.07 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.07 00:00:00 | pos 0 pend 1
+GH	0	20:26:53.932	Core 1	2019.01.07 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+PE	0	20:26:53.932	Core 1	2019.01.08 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.08 00:00:00 | pos 0 pend 1
+JH	0	20:26:53.932	Core 1	2019.01.08 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+DE	0	20:26:53.932	Core 1	2019.01.09 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.09 00:00:00 | pos 0 pend 1
+EH	0	20:26:53.932	Core 1	2019.01.09 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+EQ	0	20:26:53.932	Core 1	2019.01.10 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.10 00:00:00 | pos 0 pend 0
+PO	0	20:26:53.932	Core 1	2019.01.10 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1299.85000 [mercato chiuso: riprovo]
+CI	0	20:26:53.932	Core 1	2019.01.10 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1228.83000 [mercato chiuso: riprovo]
+FK	0	20:26:53.932	Core 1	2019.01.10 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+CH	0	20:26:53.932	Core 1	2019.01.10 01:05:00   TPL_WIM armato alle 2019.01.10 01:05:00 | pendenti 2
+OE	0	20:26:53.932	Core 1	2019.01.11 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.11 00:00:00 | pos 0 pend 2
+PH	0	20:26:53.932	Core 1	2019.01.11 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+CE	0	20:26:53.932	Core 1	2019.01.14 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.14 00:00:00 | pos 0 pend 2
+OH	0	20:26:53.932	Core 1	2019.01.14 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+GE	0	20:26:53.932	Core 1	2019.01.15 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.15 00:00:00 | pos 0 pend 2
+DI	0	20:26:53.932	Core 1	2019.01.15 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+KF	0	20:26:53.932	Core 1	2019.01.16 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.16 00:00:00 | pos 0 pend 2
+II	0	20:26:53.932	Core 1	2019.01.16 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+CM	0	20:26:53.932	Core 1	2019.01.17 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.17 00:00:00 | pos 0 pend 0
+JS	0	20:26:53.932	Core 1	2019.01.17 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1299.60000 [mercato chiuso: riprovo]
+EM	0	20:26:53.932	Core 1	2019.01.17 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1240.53000 [mercato chiuso: riprovo]
+IO	0	20:26:53.932	Core 1	2019.01.17 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+EL	0	20:26:53.932	Core 1	2019.01.17 01:05:00   TPL_WIM armato alle 2019.01.17 01:05:00 | pendenti 2
+QQ	0	20:26:53.932	Core 1	2019.01.18 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.18 00:00:00 | pos 0 pend 2
+IL	0	20:26:53.932	Core 1	2019.01.18 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+EQ	0	20:26:53.932	Core 1	2019.01.21 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.21 00:00:00 | pos 0 pend 2
+KL	0	20:26:53.932	Core 1	2019.01.21 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+IQ	0	20:26:53.932	Core 1	2019.01.22 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.22 00:00:00 | pos 0 pend 2
+JM	0	20:26:53.932	Core 1	2019.01.22 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+MR	0	20:26:53.932	Core 1	2019.01.23 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.23 00:00:00 | pos 0 pend 2
+EM	0	20:26:53.932	Core 1	2019.01.23 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+II	0	20:26:53.932	Core 1	2019.01.24 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.24 00:00:00 | pos 0 pend 0
+FG	0	20:26:53.932	Core 1	2019.01.24 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1299.55000 [mercato chiuso: riprovo]
+CQ	0	20:26:53.932	Core 1	2019.01.24 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1263.43000 [mercato chiuso: riprovo]
+CS	0	20:26:53.932	Core 1	2019.01.24 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+GP	0	20:26:53.932	Core 1	2019.01.24 01:05:00   TPL_WIM armato alle 2019.01.24 01:05:00 | pendenti 2
+CM	0	20:26:53.932	Core 1	2019.01.25 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.25 00:00:00 | pos 0 pend 2
+QP	0	20:26:53.932	Core 1	2019.01.25 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+RK	0	20:26:53.932	Core 1	2019.01.25 20:00:00   TPL_WIM FBF: la candela PERIOD_H4 d'ingresso chiude contro (1297.57 vs 1299.55): chiudo 10
+GR	0	20:26:53.932	Core 1	2019.01.28 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.28 00:00:00 | pos 0 pend 0
+CL	0	20:26:53.932	Core 1	2019.01.28 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1273.19000 [mercato chiuso: riprovo]
+MN	0	20:26:53.932	Core 1	2019.01.28 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+EO	0	20:26:53.932	Core 1	2019.01.28 01:05:00   TPL_WIM armato alle 2019.01.28 01:05:00 | pendenti 2
+QP	0	20:26:53.932	Core 1	2019.01.29 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.29 00:00:00 | pos 0 pend 2
+GO	0	20:26:53.932	Core 1	2019.01.29 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+FL	0	20:26:53.932	Core 1	2019.01.30 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.30 00:00:00 | pos 1 pend 0
+LS	0	20:26:53.932	Core 1	2019.01.30 00:00:00   TPL_WIM uscita: posizione aperta
+NO	0	20:26:53.932	Core 1	2019.01.31 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.01.31 00:00:00 | pos 1 pend 0
+CF	0	20:26:53.932	Core 1	2019.01.31 00:00:00   TPL_WIM uscita: posizione aperta
+FI	0	20:26:53.932	Core 1	2019.02.01 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.01 00:00:00 | pos 1 pend 0
+KD	0	20:26:53.932	Core 1	2019.02.01 00:00:00   TPL_WIM uscita: posizione aperta
+ND	0	20:26:53.932	Core 1	2019.02.04 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.04 00:00:00 | pos 1 pend 0
+HK	0	20:26:53.932	Core 1	2019.02.04 00:00:00   TPL_WIM uscita: posizione aperta
+FF	0	20:26:53.932	Core 1	2019.02.05 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.05 00:00:00 | pos 1 pend 0
+OI	0	20:26:53.932	Core 1	2019.02.05 00:00:00   TPL_WIM uscita: posizione aperta
+NQ	0	20:26:53.932	Core 1	2019.02.06 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.06 00:00:00 | pos 1 pend 0
+JL	0	20:26:53.932	Core 1	2019.02.06 00:00:00   TPL_WIM uscita: posizione aperta
+FS	0	20:26:53.932	Core 1	2019.02.07 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.07 00:00:00 | pos 1 pend 0
+QR	0	20:26:53.932	Core 1	2019.02.07 00:00:00   TPL_WIM uscita: posizione aperta
+NN	0	20:26:53.932	Core 1	2019.02.08 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.08 00:00:00 | pos 1 pend 0
+LQ	0	20:26:53.932	Core 1	2019.02.08 00:00:00   TPL_WIM uscita: posizione aperta
+FH	0	20:26:53.932	Core 1	2019.02.11 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.11 00:00:00 | pos 1 pend 0
+LG	0	20:26:53.932	Core 1	2019.02.11 00:00:00   TPL_WIM uscita: posizione aperta
+NK	0	20:26:53.932	Core 1	2019.02.12 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.12 00:00:00 | pos 1 pend 0
+EJ	0	20:26:53.932	Core 1	2019.02.12 00:00:00   TPL_WIM uscita: posizione aperta
+FE	0	20:26:53.932	Core 1	2019.02.13 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.13 00:00:00 | pos 1 pend 0
+NH	0	20:26:53.932	Core 1	2019.02.13 00:00:00   TPL_WIM uscita: posizione aperta
+NP	0	20:26:53.932	Core 1	2019.02.14 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.14 00:00:00 | pos 1 pend 0
+GO	0	20:26:53.932	Core 1	2019.02.14 00:00:00   TPL_WIM uscita: posizione aperta
+FR	0	20:26:53.932	Core 1	2019.02.15 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.15 00:00:00 | pos 1 pend 0
+PM	0	20:26:53.932	Core 1	2019.02.15 00:00:00   TPL_WIM uscita: posizione aperta
+NM	0	20:26:53.932	Core 1	2019.02.18 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.18 00:00:00 | pos 1 pend 0
+KP	0	20:26:53.932	Core 1	2019.02.18 00:00:00   TPL_WIM uscita: posizione aperta
+FO	0	20:26:53.932	Core 1	2019.02.19 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.19 00:00:00 | pos 1 pend 0
+DF	0	20:26:53.932	Core 1	2019.02.19 00:00:00   TPL_WIM uscita: posizione aperta
+NJ	0	20:26:53.932	Core 1	2019.02.20 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.20 00:00:00 | pos 1 pend 0
+FE	0	20:26:53.932	Core 1	2019.02.20 00:00:00   TPL_WIM uscita: posizione aperta
+KQ	0	20:26:53.932	Core 1	2019.02.21 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.21 00:00:00 | pos 0 pend 0
+LO	0	20:26:53.932	Core 1	2019.02.21 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1347.73000 [mercato chiuso: riprovo]
+QI	0	20:26:53.932	Core 1	2019.02.21 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1275.64000 [mercato chiuso: riprovo]
+KJ	0	20:26:53.932	Core 1	2019.02.21 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+MH	0	20:26:53.932	Core 1	2019.02.21 01:05:00   TPL_WIM armato alle 2019.02.21 01:05:00 | pendenti 2
+ID	0	20:26:53.932	Core 1	2019.02.22 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.22 00:00:00 | pos 0 pend 2
+GH	0	20:26:53.932	Core 1	2019.02.22 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+ME	0	20:26:53.932	Core 1	2019.02.25 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.25 00:00:00 | pos 0 pend 2
+JH	0	20:26:53.932	Core 1	2019.02.25 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+QE	0	20:26:53.932	Core 1	2019.02.26 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.26 00:00:00 | pos 0 pend 2
+KH	0	20:26:53.932	Core 1	2019.02.26 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+EE	0	20:26:53.932	Core 1	2019.02.27 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.27 00:00:00 | pos 0 pend 2
+PH	0	20:26:53.932	Core 1	2019.02.27 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+MM	0	20:26:53.932	Core 1	2019.02.28 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.02.28 00:00:00 | pos 0 pend 0
+QS	0	20:26:53.932	Core 1	2019.02.28 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 4 prezzo 1347.84000 [mercato chiuso: riprovo]
+HM	0	20:26:53.932	Core 1	2019.02.28 00:00:00   TPL_WIM: ordine rifiutato (10018) tipo 5 prezzo 1301.15000 [mercato chiuso: riprovo]
+FN	0	20:26:53.932	Core 1	2019.02.28 00:00:00   TPL_WIM: ordini rifiutati per mercato chiuso: riprovo tra un minuto
+KL	0	20:26:53.932	Core 1	2019.02.28 01:05:00   TPL_WIM armato alle 2019.02.28 01:05:00 | pendenti 2
+GP	0	20:26:53.932	Core 1	2019.03.01 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.01 00:00:00 | pos 0 pend 2
+IL	0	20:26:53.932	Core 1	2019.03.01 00:00:00   TPL_WIM uscita: pendenti persistenti ancora attivi
+PL	0	20:26:53.932	Core 1	2019.03.04 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.04 00:00:00 | pos 1 pend 0
+MS	0	20:26:53.932	Core 1	2019.03.04 00:00:00   TPL_WIM uscita: posizione aperta
+HN	0	20:26:53.932	Core 1	2019.03.05 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.05 00:00:00 | pos 1 pend 0
+FF	0	20:26:53.932	Core 1	2019.03.05 00:00:00   TPL_WIM uscita: posizione aperta
+PI	0	20:26:53.932	Core 1	2019.03.06 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.06 00:00:00 | pos 1 pend 0
+KD	0	20:26:53.932	Core 1	2019.03.06 00:00:00   TPL_WIM uscita: posizione aperta
+HK	0	20:26:53.932	Core 1	2019.03.07 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.07 00:00:00 | pos 1 pend 0
+DK	0	20:26:53.932	Core 1	2019.03.07 00:00:00   TPL_WIM uscita: posizione aperta
+PF	0	20:26:53.932	Core 1	2019.03.08 00:00:00   TPL_WIM NUOVA BARRA PERIOD_D1 alle 2019.03.08 00:00:00 | pos 1 pend 0
+II	0	20:26:53.932	Core 1	2019.03.08 00:00:00   TPL_WIM uscita: posizione aperta
+Righe journal (filtrate): 159
