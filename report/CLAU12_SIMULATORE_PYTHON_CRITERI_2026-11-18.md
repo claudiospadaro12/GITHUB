@@ -54,3 +54,16 @@ Dati FTMO XAUUSD/EURUSD M1 2014-11 -> 2020-12 e serie MT5 dei 9 set (`RISULTATI_
 - **Correzioni usate: 2** (la 1 e la ipotesi respinta = nessuna modifica). **Regola d'arresto applicata: non si allargano le soglie.** Il 4-18% dei giorni di trade (a seconda del set) e presente in una sola delle due serie.
 - **Dati descrittivi (post-hoc, NON porte, nessuna soglia nuova):** sui 9 set il simulatore concorda con MT5 sul segno del profitto 9 su 9, e l'ordine dei set per profitto e per PF ha correlazione di rango 0,92 e 0,93. Con 9 punti e dopo aver guardato i numeri, non basta per dichiararlo un pre-filtro.
 - **Stato:** il simulatore riproduce la logica dell'EA (fase 1: 14/14 trade, 50/50 ordini; finestra 2016-17: 17/18) ma **non e calibrato per sostituire MT5** e non si usa per selezionare nulla. Un uso come pre-filtro grossolano richiederebbe un criterio NUOVO scritto prima e provato su un EA diverso (banco `EMA200` EURUSD H4); **non lo avvio senza il via di Claudio** (costa crediti).
+
+## 10. FASE 3 (scelta di Claudio, 18/11: "2"): il simulatore come FILTRO, provato su 36 set MT5 mai usati per calibrare - criteri scritti PRIMA dei numeri
+**Cosa si prova:** non l'uguaglianza a MT5 (fase 2, fallita) ma la **capacita di ordinare**: i 36 set di `RISULTATI_BATCH36_DISEGNI_FTMO.csv` (disegno 1: breakout, stop e target in punti, pendenti persistenti; disegno 2: ordini limit con stop in ATR e target in R, riarmo a ogni barra; livelli D1 e H4; FTMO, 2015-2020, costo 3,6 EUR a operazione). Nessun parametro del simulatore viene tarato su questi 36: il codice si estende alle modalita mancanti (SL/TP in punti e ATR/RR, ingresso limit, livelli H4, riarmo) **senza vedere i risultati MT5**; lo swap e quello gia congelato.
+**Porte (tutte, scritte ora):**
+- **V1:** segno del profitto netto uguale a MT5 in almeno **30 set su 36**.
+- **V2:** correlazione di rango (Spearman) tra profitto netto simulato e MT5 sui 36 set **>= 0,85**.
+- **V3:** dei **10 migliori per profitto netto di MT5**, almeno **7** sono nei **12 migliori del simulatore**.
+- **V4:** i **3 set che hanno superato G1 in MT5** (disegno 2, H4: R1, R2, R4) sono tutti nei **primi 8** del simulatore per PF netto.
+- **V5:** tra i **10 migliori del simulatore per PF netto**, al massimo **2** hanno profitto netto <= 0 in MT5.
+**Esito:** il simulatore e "FILTRO VALIDO" solo se passano V1-V5 tutte; altrimenti **"non usabile come filtro"** e si chiude. **Una sola correzione ammessa**, solo per un errore di codice dimostrato (non per tarare un parametro), dichiarata qui prima.
+**Previsioni:** V1 85%, V2 70%, V3 55%, V4 60%, V5 65%; **passano tutte e cinque: 30%**.
+**Uso, se valido:** solo per scartare presto idee nuove (griglia ampia in Python, i migliori N al massimo 10 in MT5 con le porte della famiglia); ogni set provato in Python conta nei "looks"; mai approvare dal solo simulatore.
+**Costo:** i 36 set girano in Python senza il PC di Claudio; nessun file da lui.
