@@ -164,7 +164,7 @@ function Passata([string]$nome,$ingressi,[string]$titolo){
   foreach($lf in @(Get-ChildItem -LiteralPath (Join-Path $DATI 'Tester') -Recurse -Filter '*.log' -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0.AddMinutes(-1) } | Sort-Object LastWriteTime)){
     try{
       $bl=[IO.File]::ReadAllBytes($lf.FullName); $tl=$(if($bl.Length -ge 2 -and $bl[0] -eq 255 -and $bl[1] -eq 254){ [Text.Encoding]::Unicode.GetString($bl) } else { [Text.Encoding]::UTF8.GetString($bl) })
-      $linee=@($tl -split "`r?`n" | Where-Object { $_ -match 'TPL_WIM' }); $ini0=0
+      $linee=@($tl -split "`r?`n" | Where-Object { $_ -match 'TPL_WIM' }); $ini0=0; $altre=@($tl -split "`r?`n" | Where-Object { $_ -notmatch 'TPL_WIM' -and $_ -match '(?i)(history|synchron|error|fail|ticks|quality|final balance|passed|cannot|unable|no data|not found|started|disabled|bars)' }); for($k=[Math]::Max(0,$altre.Count-40); $k -lt $altre.Count; $k++){ [void]$tutto.Add('LOG: ' + $altre[$k].Trim()) }
       for($k=0; $k -lt $linee.Count; $k++){ if($linee[$k] -match 'TPL_WIM v1\.\d+:'){ $ini0=$k } }
       for($k=$ini0; $k -lt $linee.Count; $k++){ $ln=$linee[$k].Trim(); if($ln -match 'GIORNO'){ continue }; $nlog=$nlog+1; if($nlog -le 120){ [void]$tutto.Add($ln) } }
     } catch { }
