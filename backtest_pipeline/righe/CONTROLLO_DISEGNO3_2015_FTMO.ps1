@@ -179,3 +179,9 @@ $testo=($tutto -join "`r`n")
 $fileTxt=Join-Path ([Environment]::GetFolderPath('Desktop')) 'RIEPILOGO_CONTROLLO_DISEGNO3_2015.txt'; Set-Content -LiteralPath $fileTxt -Value $testo -Encoding UTF8
 try { Set-Clipboard -Value $testo } catch { }
 Write-Host ('FATTO alle ' + (Get-Date).ToString('HH:mm') + ' (ora italiana). File sul Desktop: ' + $fileTxt + '. Allegalo alla chat.') -ForegroundColor Green
+
+Write-Host ''
+Write-Host '##########  FILE DA ALLEGARE ALLA CHAT  ##########' -ForegroundColor Black -BackgroundColor Yellow
+Write-Host $fileTxt -ForegroundColor Black -BackgroundColor Yellow
+Write-Host '(Esplora file si apre con questo file gia selezionato: trascinalo nella chat)' -ForegroundColor Black -BackgroundColor Yellow
+try { Start-Process -FilePath 'explorer.exe' -ArgumentList ('/select,"' + $fileTxt + '"') } catch { }
