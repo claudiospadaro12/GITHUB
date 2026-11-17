@@ -48,5 +48,18 @@ Tutti gli anni interi disponibili prima del 2024-01-01, **con 2015-2023 come mas
 - Se meno di 3 EA sono "REGGE", si dice che il portafoglio "6-7 scorrelati" non esce da questi 14 e si cercano motori nuovi (l'imitazione di Wim e chiusa a livello di breakout D1; vedi i documenti CLAU12_*).
 - Il risultato si scrive qui (sezione 10) anche se brutto; il contatore dei looks di questa famiglia e **14 EA**.
 
-## 10. Risultato
-*(da compilare dopo i test; ora nessun numero. Prima il passo 0: copertura dello storico.)*
+## 10. Passo 0 eseguito (18/11/2026) e EMENDAMENTO 1 (scritto prima di qualsiasi numero di test)
+**Esito del passo 0** (`COPERTURA_STORICO_14EA.txt`, ricerca dei file in `BUSCA_STORICO_INDICI_ORO_2026-11-18.txt`):
+- **Cache MT5 (BCM):** oro XAUUSD completo 2004-2026 (terminale e portabile); **indici D30EUR, F40EUR, U30USD, NASUSD solo 2024-2026**. FTMO: solo oro (2007-2026).
+- **Fonti esterne sul PC (Claudio: "noi abbiamo lo storico degli indici"):** HistData M1 oro 2018-2025; **D30EUR M1 2019-01-01 -> 2026-07-31**; **NASUSD M1 2010-11-14 -> 2026-07-31** e SPXUSD (stesso periodo); tick D30EUR BCM dal 26/09/2024; tick Dukascopy U30USD solo 10/2024-06/2025. **Nessun M1 del Dow prima del 2025, nessun dato del CAC.**
+**Emendamento 1 (cambia la sezione 3, solo in aggiunta):**
+- **Oro (4 EA):** dati BCM nativi 2004-2026, nessun problema: valutabili.
+- **DAX Supertrend (3 EA: `SupRev_DAX_H4`, `SupRev_DAX_H1`, `SuperWave_DAX_H4`):** valutabili su 2019-2023 (5 anni interi) con i dati esterni **solo se superano il cancello D**. **Nasdaq (`SupRev_NAS_H1`):** 2015-2023 con i dati esterni, **solo se supera il cancello D** (e con il limite dichiarato noto: l'orologio dei file `_EXT` non segue il server BCM).
+- **Dow (3 EA) e CAC (1 EA):** **non valutabili** (nessun M1 prima del 2025).
+- **Seconda ondata (invariata):** `DAX_Apertura_EU`, `MaxMinNotte_DAX_Short`, con due set per anno (ora legale/solare) e cancello D.
+- **Cancello D (equivalenza dei dati, bloccante, scritto ora):** i dati esterni vanno importati come simbolo personalizzato **nell'ora del server BCM** (spostamento di fuso dichiarato e verificato) e con lo **spread mediano del BCM** sullo stesso simbolo (i dati esterni hanno spread 0 e volume 0: senza costo si gonfia il PF). Poi, sul periodo in cui esistono **entrambi** (D30EUR: 2024-09-26 -> 2026-07-31; NASUSD: 2025-01-01 -> 2026-07-31) si fa girare **lo stesso EA** sui dati nativi BCM e su quelli esterni (stessa finestra, a candele M1): **operazioni entro +-15%, PF entro +-20%, profitto entro +-25%**, e prima il controllo di allineamento (differenza mediana della chiusura M1 <= 2 punti e correlazione massima a ritardo zero). Se non passa: **"dati non equivalenti"**, quell'indice resta non valutabile. Nessuna soglia ritoccabile.
+- **Previsioni nuove:** cancello D superato per il DAX: **50%**; per il Nasdaq: **35%**. Numero di EA valutabili in prima ondata: oro 4 + DAX 3 (se D) + NAS 1 (se D) = fino a **8 su 12**; previsione "almeno 6 valutabili": **45%**.
+**Cosa resta come prima:** porte P1-P5, previsioni della sezione 8 (da leggere sugli EA davvero valutabili), regola "nessuna ottimizzazione", correlazione finale.
+
+## 11. Risultato
+*(da compilare dopo i test; ora nessun numero di test)*
