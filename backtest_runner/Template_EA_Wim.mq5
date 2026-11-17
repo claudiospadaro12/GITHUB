@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Template_EA_Wim.mq5  -  EA modulare "a input" per la fabbrica    |
-//| di set (CLAU12). Versione 1.00 - 16/11/2026.                     |
+//| di set (CLAU12). Versione 1.01 - 17/11/2026 (aggiunto InpDebug). |
 //|                                                                  |
 //| NON e il codice di Wim (proprietario, mai visto). E un EA scritto|
 //| da zero che copia la STRUTTURA dei suoi input documentata nei    |
@@ -19,7 +19,7 @@
 //| Orari in ORA SERVER (vedi CLAU12_ORARI.mqh per le sessioni).     |
 //+------------------------------------------------------------------+
 #property copyright "CLAU12"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 #include <Trade/Trade.mqh>
 
@@ -30,6 +30,7 @@ enum ENUM_TP_MODE    { TP_RR = 0, TP_ATR = 1, TP_FIXED_PTS = 2 };
 input group "=== Identita ==="
 input long   InpMagic            = 880001;      // magic number dell'EA
 input string InpComment          = "TPL_WIM";   // commento degli ordini
+input bool   InpDebug            = false;       // true = scrive nel Journal ogni nuova barra, ogni primo tick del giorno e i motivi di uscita (solo per i controlli)
 
 input group "=== Livelli (struttura) ==="
 input ENUM_TIMEFRAMES InpLevelTF = PERIOD_H1;   // timeframe su cui si cercano i livelli
@@ -380,13 +381,19 @@ void GestisciPosizioni()
 //+------------------------------------------------------------------+
 void OnTick()
 {
+   if(InpDebug)
+   {
+      static int ggDbg = 0; int kd = ChiaveGiorno();
+      if(kd != ggDbg){ ggDbg = kd; PrintFormat("TPL_WIM GIORNO %d | primo tick %s | barra %s aperta %s | pos %d pend %d", kd, TimeToString(TimeCurrent(), TIME_DATE|TIME_SECONDS), EnumToString(InpLevelTF), TimeToString(iTime(_Symbol, InpLevelTF, 0), TIME_DATE|TIME_SECONDS), NPosizioni(), NPendenti()); }
+   }
    AggiornaTetti();
    GestisciPosizioni();
    if(!NuovaBarra()) return;
-   if(NPosizioni() > 0) return;
+   if(InpDebug) PrintFormat("TPL_WIM NUOVA BARRA %s alle %s | pos %d pend %d", EnumToString(InpLevelTF), TimeToString(TimeCurrent(), TIME_DATE|TIME_SECONDS), NPosizioni(), NPendenti());
+   if(NPosizioni() > 0){ if(InpDebug) Print("TPL_WIM uscita: posizione aperta"); return; }
    CancellaPendenti();                                    // si riarma a ogni nuova barra
-   if(!ConsentitoOperare()) return;
-   double atr = Atr(); if(atr <= 0) return;
+   if(!ConsentitoOperare()){ if(InpDebug) Print("TPL_WIM uscita: operativita non consentita"); return; }
+   double atr = Atr(); if(atr <= 0){ if(InpDebug) Print("TPL_WIM uscita: ATR non disponibile"); return; }
    double hh, ll;
    if(InpEntryMode == ENTRY_RETEST){ IngressoRetest(atr); return; }
    if(!Livelli(1, hh, ll)) return;

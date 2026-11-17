@@ -13,7 +13,7 @@ SetGenerator.py -> 3 set di profilo ---zip--> Run_MT5_Engine.ps1:
                                                 -> Validati_Pronti_Per_Mercato\  oppure  elimina (-Scartati Sposta: Scartati\)
 Analisi e nuovi set  <--- esiti.csv negli appunti (Ctrl+V in chat)
 ```
-1. **Template_EA_Wim.mq5** - EA con 43 input: ingresso BREAKOUT/RETEST/LIMIT; stop ATR/punti/lato opposto; target in R/ATR/punti; break-even; trailing; rischio a lotto fisso o in %; tetti di perdita; filtri spread/sessione/EMA.
+1. **Template_EA_Wim.mq5** - EA con 44 input: ingresso BREAKOUT/RETEST/LIMIT; stop ATR/punti/lato opposto; target in R/ATR/punti; break-even; trailing; rischio a lotto fisso o in %; tetti di perdita; filtri spread/sessione/EMA.
 2. **SetGenerator.py** - scrive `Set_profili/Wim_PropFirm_LowRisk.set`, `Wim_Real_MidRisk.set`, `Wim_Aggressive.set` (+ `--modalita-tutte` = 9 set con i 3 ingressi). Controlla ogni chiave contro gli input del template: se non coincidono si ferma. Solo il RISCHIO cambia tra i profili: la struttura del trade e uguale, cosi il confronto e pulito. Sono profili di PROVA, non consigli di taglia.
 3. **Run_MT5_Engine.ps1** - il ponte. Per ogni set: dentro-campione (PF > 1,5, >= 100 operazioni, profitto > 0, DD% sotto il tetto del profilo: 4 / 8 / 15), fuori campione (PF >= 1,25, >= 20 operazioni, DD sotto il tetto), tick reali (PF tick/candele >= 0,7). Superato tutto -> `Validati_Pronti_Per_Mercato`. Fallito -> eliminato (default, come chiesto) con il motivo in `Risultati\esiti.csv`; `-Scartati Sposta` li tiene in `Scartati`. **Se il report non si legge non elimina niente.**
 4. **Compila_EA.ps1** - compila senza aprire MetaEditor: copia il .mq5 in `MQL5\Experts\CLAU12\` e lancia `metaeditor64.exe /compile /include /log`.

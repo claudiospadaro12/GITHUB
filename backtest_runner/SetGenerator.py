@@ -45,6 +45,7 @@ PUNTI = {
 COMUNE = {
     "InpMagic": 880001,
     "InpComment": "TPL_WIM",
+    "InpDebug": "false",
     "InpLevelTF": TF["H1"],
     "InpCountback": 24,
     "InpUsePivots": "false",
