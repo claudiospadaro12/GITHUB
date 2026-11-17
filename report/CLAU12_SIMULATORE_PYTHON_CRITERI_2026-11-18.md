@@ -36,5 +36,14 @@ Solo come **pre-filtro**: griglia ampia in Python, i migliori N (al massimo 10) 
 1. Lanciare l'esportazione FTMO della fase 1 (riga in `report/RIGA_EXPORT_M1_FTMO.txt`) e allegare lo zip `EXPORT_M1_FTMO_<data>.zip`.
 2. Solo per la fase 2: allegare le serie giornaliere MT5 e, se il limite di allegato lo consente, i CSV 2015-2020. Prima si prova che lo zip piccolo passa.
 
-## 8. Risultato
-*(da compilare; nessun numero ancora)*
+## 8. Risultato della FASE 1 (17-18/11/2026): SUPERATA dopo 1 correzione
+Dati: export FTMO XAUUSD ed EURUSD M1, 2018-11-01 -> 2019-04-01 (142.282 e 151.362 barre, 0 errori). Riferimento: `CLAU12_ORO_DISEGNO3_dati/RIEPILOGO_CONTROLLO_DISEGNO3_MT5_riferimento.txt`. Codice: `backtest_runner/simulatore/sim_wim.py` + `confronta_fase1.py`.
+- **Primo confronto: FALLITO** (7 trade su 14 con stesso verso/uscita, 3 su 14 con gli orari giusti; ordini 46 su 50). Causa trovata: **ogni giorno nei dati FTMO c'e una barra M1 alle 00:00 che riassume l'intera giornata** (volume 116.133 tick contro ~17 delle altre, spread 0, range di tutto il giorno). Il simulatore riempiva gli ordini e faceva scattare stop e target con quei prezzi; il tester MT5 no. Lo stesso fatto spiega i rifiuti 10018 delle 00:00 (c'e un tick a quell'ora ma il mercato e chiuso).
+- **Correzione 1 (unica):** nella finestra di chiusura **00:00-01:05** nessun riempimento, SL o TP; restano scadenze e rifiuti. Nessun altro parametro cambiato.
+- **Secondo confronto: PASSA TUTTE LE PORTE:** (a) **14 su 14** trade con stesso verso e tipo di uscita (SL, TP, filtro); (b) ordini identici al centesimo e entro 1 minuto: **50 su 50**; (c) orari di ingresso e uscita entro 1 minuto: **14 su 14** (identici al secondo); (d) P&L per trade entro la tolleranza: **14 su 14** (differenze di 0,00-0,03 EUR sui trade senza swap).
+- **Swap:** i due parametri (long e short) sono stati stimati dai deal di questo riferimento, come dichiarato nei criteri; **non sono una verifica indipendente**. La struttura (1 unita, 3 il mercoledi, 0 sabato e domenica, addebito a mezzanotte) e invece verificata su 5 trade con 1, 4, 12, 21 e 22 notti: differenza massima 0,66 EUR su 113 (0,6%).
+- **Previsioni:** primo tentativo passa (25%) -> NO; passa entro 2 correzioni (65%) -> SI (1 correzione); regola OHLC "rialzista O-L-H-C, ribassista O-H-L-C" giusta al primo tentativo (60%) -> SI (i secondi :20/:40 coincidono).
+- **Limiti:** sono 14 trade in 3 mesi (campione piccolo); la fase 2 (9 set sul 2015-2020) e la vera prova. Nessun uso del simulatore per selezione finche non e superata.
+
+## 9. FASE 2 (da fare)
+Servono: barre FTMO XAUUSD ed EURUSD M1 da 2014-11-01 a 2020-12-31 (le settimane prima del 2015 servono per ATR e livelli di gennaio 2015), e le serie giornaliere MT5 dei 9 set (`DISEGNO3_BATCH9_FTMO\serie`). Porte invariate (sezione 4). Previsione: passa la fase 2 entro 2 correzioni **60%** (aggiornata dopo la fase 1: il motore e giusto, i rischi restano nei 6 anni di casi limite: festivi, gap, mercoledi tripli, ritardi di rifiuto 10018).

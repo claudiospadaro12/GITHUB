@@ -39,6 +39,7 @@ class Par:                         # parametri (default = disegno 3, riga 2)
     swap_long_eur = -5.11        # EUR per unita per 0,1 lotto  (STIMATO dal riferimento di fase 1, poi CONGELATO)
     swap_short_eur = -0.37
     max_trades_day = 1
+    eventi_in_chiusura = False   # False: nessun riempimento/SL/TP nella finestra di chiusura (ipotesi 1, da verificare col riferimento)
 
 def costruisci_d1(m1):
     giorni = {}
@@ -170,15 +171,16 @@ class Sim:
         for o in list(self.pend):
             if o['scad'] <= t:
                 o['stato'] = 'expired'; o['t_fine'] = o['scad']; self.pend.remove(o)
+        chiuso = self.chiuso(t) and not p.eventi_in_chiusura
         # riempimenti (lato server)
-        if self.pos is None:
+        if self.pos is None and not chiuso:
             for o in list(self.pend):
                 if o['buy'] and ask >= o['prezzo']:
                     self.apri(t, o, max(o['prezzo'], ask) if ask > o['prezzo'] + 1e-9 and False else o['prezzo']); break
                 if (not o['buy']) and bid <= o['prezzo']:
                     self.apri(t, o, o['prezzo']); break
         # SL / TP (lato server)
-        if self.pos is not None:
+        if self.pos is not None and not chiuso:
             pos = self.pos
             if pos['buy']:
                 if bid <= pos['sl']: self.chiudi(t, pos['sl'], 'sl')
