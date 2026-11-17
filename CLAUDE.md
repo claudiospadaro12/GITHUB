@@ -16,3 +16,7 @@
 - Sviluppo sul branch `claude/creating-agents-SgGpD`.
 - Ottimizzazioni/backtest sul PC di backtest; gli EA girano in forward sul VPS.
 - Regola EA: gli `_Ottimizzato` girano in parallelo agli originali (magic diversi), mai sostituirli.
+
+## REGOLE DI LAVORO CON CLAUDIO (18/11/2026) — DA RICORDARE SEMPRE
+1. **Ogni volta che serve un file da lui, scrivere in grassetto, in un riquadro a parte e IN FONDO alla risposta: COSA allegare (nome esatto, es. `EXPORT_M1_FTMO_<data>.zip`), DOVE si trova (percorso completo sul PC) e che tipo di file e (zip, CSV, TXT, cartella da comprimere).** Se e una cartella, dare anche la riga PowerShell per comprimerla. Non lasciarlo sepolto nel testo.
+2. **Risparmiare crediti: il piano Claude di Claudio deve bastare 1 SETTIMANA.** Risposte brevi, niente riletture di file gia visti, niente output lunghi nelle chiamate, piu comandi in un solo passaggio, niente agenti/workflow o ricerche web se non servono davvero, niente script o documenti piu lunghi del necessario, niente ripetizione di quanto gia detto. Prima di un lavoro grosso dire in una riga quanto pesa e chiedere se vale la pena.
