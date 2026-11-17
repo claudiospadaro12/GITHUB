@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Template_EA_Wim.mq5  -  EA modulare "a input" per la fabbrica    |
-//| di set (CLAU12). Versione 1.03 - 17/11/2026 (aggiunto InpRearm).         |
+//| di set (CLAU12). Versione 1.04 - 18/11/2026 (SL/TP in %, filtro FBF).     |
 //|                                                                  |
 //| NON e il codice di Wim (proprietario, mai visto). E un EA scritto|
 //| da zero che copia la STRUTTURA dei suoi input documentata nei    |
@@ -19,13 +19,13 @@
 //| Orari in ORA SERVER (vedi CLAU12_ORARI.mqh per le sessioni).     |
 //+------------------------------------------------------------------+
 #property copyright "CLAU12"
-#property version   "1.03"
+#property version   "1.04"
 #property strict
 #include <Trade/Trade.mqh>
 
 enum ENUM_ENTRY_MODE { ENTRY_BREAKOUT = 0, ENTRY_RETEST = 1, ENTRY_LIMIT = 2 };
-enum ENUM_SL_MODE    { SL_ATR = 0, SL_FIXED_PTS = 1, SL_LEVEL = 2 };
-enum ENUM_TP_MODE    { TP_RR = 0, TP_ATR = 1, TP_FIXED_PTS = 2 };
+enum ENUM_SL_MODE    { SL_ATR = 0, SL_FIXED_PTS = 1, SL_LEVEL = 2, SL_PCT = 3 };
+enum ENUM_TP_MODE    { TP_RR = 0, TP_ATR = 1, TP_FIXED_PTS = 2, TP_PCT = 3 };
 
 input group "=== Identita ==="
 input long   InpMagic            = 880001;      // magic number dell'EA
@@ -52,10 +52,13 @@ input group "=== Uscite ==="
 input ENUM_SL_MODE InpSLMode     = SL_ATR;      // stop: multiplo di ATR / punti fissi / lato opposto del range
 input double InpSLAtr            = 1.5;         // SL_ATR: moltiplicatore ATR
 input double InpSLPts            = 300;         // SL_FIXED_PTS: punti
+input double InpSLPct            = 0.50;        // SL_PCT: percentuale del prezzo (si adatta al prezzo dell'oro)
 input ENUM_TP_MODE InpTPMode     = TP_RR;       // target: multiplo del rischio / multiplo di ATR / punti fissi
 input double InpTP_RR            = 2.0;         // TP_RR: multiplo dello stop
 input double InpTPAtr            = 3.0;         // TP_ATR: moltiplicatore ATR
 input double InpTPPts            = 600;         // TP_FIXED_PTS: punti
+input double InpTPPct            = 2.10;        // TP_PCT: percentuale del prezzo
+input int    InpFBF              = 0;           // filtro fake breakout: 0 spento; 1 = se la candela H1 su cui e entrato chiude contro, chiude subito; 2 = lo stesso con la candela H4
 input bool   InpUseBE            = true;        // break-even
 input double InpBEStartR         = 1.0;         // break-even quando il profitto raggiunge N volte il rischio
 input double InpBEExtraPts       = 10;          // punti oltre il prezzo d'ingresso
@@ -98,6 +101,8 @@ datetime gUltimoTent  = 0;       // ultimo tentativo di armare (uno al minuto al
 ulong    gTk[64];                // ticket gia visti
 double   gRk[64];                // rischio iniziale (distanza stop all'ingresso)
 int      gN = 0;
+ulong    gFbfTk[64];             // ticket gia controllati dal filtro fake breakout
+int      gFbfN = 0;
 
 //+------------------------------------------------------------------+
 int OnInit()
@@ -109,7 +114,7 @@ int OnInit()
    gTrade.SetDeviationInPoints(50);
    gStartEquity = AccountInfoDouble(ACCOUNT_EQUITY);
    gDayEquity   = gStartEquity;
-   PrintFormat("TPL_WIM v1.03: %s %s, ingresso %d, livelli %s countback %d, rischio %s",
+   PrintFormat("TPL_WIM v1.04: %s %s, ingresso %d, livelli %s countback %d, rischio %s",
                _Symbol, EnumToString((ENUM_TIMEFRAMES)_Period), (int)InpEntryMode, EnumToString(InpLevelTF), InpCountback, (InpFixedLot ? "lotto fisso" : "% di rischio"));
    return INIT_SUCCEEDED;
 }
@@ -187,12 +192,14 @@ bool CalcolaSLTP(bool buy, double entry, double livelloOpposto, double atr, doub
    double slDist;
    if(InpSLMode == SL_ATR) slDist = InpSLAtr * atr;
    else if(InpSLMode == SL_FIXED_PTS) slDist = InpSLPts * _Point;
+   else if(InpSLMode == SL_PCT) slDist = InpSLPct / 100.0 * entry;
    else slDist = MathMin(MathMax(MathAbs(entry - livelloOpposto), 0.5 * atr), 4.0 * atr);
    double minimo = MathMax(DistMinima() * 1.5, 0.3 * atr);
    if(slDist < minimo) slDist = minimo;
    double tpDist;
    if(InpTPMode == TP_RR) tpDist = InpTP_RR * slDist;
    else if(InpTPMode == TP_ATR) tpDist = InpTPAtr * atr;
+   else if(InpTPMode == TP_PCT) tpDist = InpTPPct / 100.0 * entry;
    else tpDist = InpTPPts * _Point;
    if(tpDist < minimo) tpDist = minimo;
    sl = NormalizeDouble(buy ? entry - slDist : entry + slDist, _Digits);
@@ -355,6 +362,12 @@ double RischioIniziale(ulong tk, double apertura, double sl)
    else { for(int i = 1; i < 64; i++){ gTk[i - 1] = gTk[i]; gRk[i - 1] = gRk[i]; } gTk[63] = tk; gRk[63] = r; }
    return r;
 }
+bool FbfControllato(ulong tk){ for(int i = 0; i < gFbfN; i++) if(gFbfTk[i] == tk) return true; return false; }
+void FbfSegna(ulong tk)
+{
+   if(gFbfN < 64){ gFbfTk[gFbfN] = tk; gFbfN++; }
+   else { for(int i = 1; i < 64; i++) gFbfTk[i - 1] = gFbfTk[i]; gFbfTk[63] = tk; }
+}
 void GestisciPosizioni()
 {
    bool aperta = false;
@@ -369,6 +382,22 @@ void GestisciPosizioni()
       double r = RischioIniziale(tk, ap, sl);
       if(r <= 0) continue;
       bool buy = (tipo == POSITION_TYPE_BUY);
+      if(InpFBF > 0 && !FbfControllato(tk))
+      {
+         ENUM_TIMEFRAMES tfF = (InpFBF == 1) ? PERIOD_H1 : PERIOD_H4;
+         int sh = iBarShift(_Symbol, tfF, (datetime)PositionGetInteger(POSITION_TIME), false);
+         if(sh >= 1)                                       // la candela d'ingresso e chiusa
+         {
+            FbfSegna(tk);
+            double clF = iClose(_Symbol, tfF, sh);
+            if(buy ? (clF < ap) : (clF > ap))
+            {
+               if(InpDebug) PrintFormat("TPL_WIM FBF: la candela %s d'ingresso chiude contro (%.2f vs %.2f): chiudo %I64u", EnumToString(tfF), clF, ap, tk);
+               gTrade.PositionClose(tk);
+               continue;
+            }
+         }
+      }
       double px = SymbolInfoDouble(_Symbol, buy ? SYMBOL_BID : SYMBOL_ASK);
       double profittoR = (buy ? px - ap : ap - px) / r;
       double nuovo = sl; double dm = DistMinima();
