@@ -1,0 +1,37 @@
+id;disegno;tf;fattoriL9;operazioni;profitto_tester;profitto_netto;PF_tester;PF_netto;DD_eur;recovery;t_giornaliera;G1;motivi
+D1_D1_R1;1;D1;stop 400pt target 1200pt cb 10 scad 5;257;1770.61;866.46;1.23;1.11;949.1;1.87;0.75;NO;PF netto<1,30 | t<3,3
+D1_D1_R2;1;D1;stop 400pt target 1700pt cb 20 scad 10;158;2710.91;2155.13;1.55;1.41;768.5;3.53;1.87;NO;t<3,3
+D1_D1_R3;1;D1;stop 400pt target 2400pt cb 40 scad 20;104;1633.24;1267.40;1.42;1.30;771.8;2.12;1.09;NO;t<3,3
+D1_D1_R4;1;D1;stop 600pt target 1200pt cb 20 scad 20;154;1280.64;738.88;1.24;1.13;712.1;1.80;0.74;NO;PF netto<1,30 | t<3,3
+D1_D1_R5;1;D1;stop 600pt target 1700pt cb 40 scad 5;117;2147.90;1736.28;1.49;1.38;973.1;2.21;1.60;NO;t<3,3
+D1_D1_R6;1;D1;stop 600pt target 2400pt cb 10 scad 10;194;1153.29;470.79;1.13;1.05;1916.0;0.60;0.29;NO;PF netto<1,30 | recovery<1,5 | t<3,3
+D1_D1_R7;1;D1;stop 800pt target 1200pt cb 40 scad 10;117;547.68;136.14;1.11;1.03;933.1;0.59;0.14;NO;PF netto<1,30 | recovery<1,5 | t<3,3
+D1_D1_R8;1;D1;stop 800pt target 1700pt cb 10 scad 20;180;548.70;-84.50;1.06;0.99;1716.9;0.32;-0.06;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D1_D1_R9;1;D1;stop 800pt target 2400pt cb 20 scad 5;138;2125.45;1640.11;1.29;1.22;1119.2;1.90;1.05;NO;PF netto<1,30 | t<3,3
+D1_H4_R1;1;H4;stop 400pt target 1200pt cb 30 scad 30;403;471.20;-945.93;1.04;0.92;1672.0;0.28;-0.74;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D1_H4_R2;1;H4;stop 400pt target 1700pt cb 60 scad 60;253;2809.35;1919.55;1.39;1.25;790.4;3.55;1.47;NO;PF netto<1,30 | t<3,3
+D1_H4_R3;1;H4;stop 400pt target 2400pt cb 120 scad 120;166;2290.90;1707.13;1.44;1.30;1013.4;2.26;1.30;NO;t<3,3
+D1_H4_R4;1;H4;stop 600pt target 1200pt cb 60 scad 120;235;892.97;66.51;1.11;1.01;1286.2;0.69;0.06;NO;PF netto<1,30 | recovery<1,5 | t<3,3
+D1_H4_R5;1;H4;stop 600pt target 1700pt cb 120 scad 30;173;3289.12;2680.70;1.54;1.42;742.5;4.43;2.09;NO;t<3,3
+D1_H4_R6;1;H4;stop 600pt target 2400pt cb 30 scad 60;273;2461.45;1501.54;1.21;1.12;1415.9;1.74;0.79;NO;PF netto<1,30 | t<3,3
+D1_H4_R7;1;H4;stop 800pt target 1200pt cb 120 scad 60;181;1257.91;621.40;1.17;1.08;1269.2;0.99;0.52;NO;PF netto<1,30 | recovery<1,5 | t<3,3
+D1_H4_R8;1;H4;stop 800pt target 1700pt cb 30 scad 120;248;1596.93;724.78;1.14;1.06;1444.5;1.11;0.44;NO;PF netto<1,30 | recovery<1,5 | t<3,3
+D1_H4_R9;1;H4;stop 800pt target 2400pt cb 60 scad 30;212;2783.61;2037.98;1.25;1.18;1552.8;1.79;1.07;NO;PF netto<1,30 | t<3,3
+D2_D1_R1;2;D1;cb 10 stop 1.0ATR target 1.0R scad 1;212;-3783.42;-4528.90;0.79;0.76;4290.7;-0.88;-1.83;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D2_D1_R2;2;D1;cb 10 stop 1.5ATR target 1.5R scad 3;105;-4195.02;-4564.29;0.75;0.73;6861.4;-0.61;-1.38;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D2_D1_R3;2;D1;cb 10 stop 2.5ATR target 2.0R scad 6;43;-4854.01;-5005.14;0.67;0.66;7891.0;-0.62;-1.16;NO;netto<=0 | PF netto<1,30 | operazioni<100 | recovery<1,5 | t<3,3
+D2_D1_R4;2;D1;cb 20 stop 1.0ATR target 1.5R scad 6;147;-3844.00;-4360.94;0.74;0.71;5111.2;-0.75;-1.88;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D2_D1_R5;2;D1;cb 20 stop 1.5ATR target 2.0R scad 1;89;-3352.98;-3665.95;0.78;0.76;6356.0;-0.53;-1.12;NO;netto<=0 | PF netto<1,30 | operazioni<100 | recovery<1,5 | t<3,3
+D2_D1_R6;2;D1;cb 20 stop 2.5ATR target 1.0R scad 3;70;-3390.78;-3636.98;0.77;0.75;5140.9;-0.66;-1.05;NO;netto<=0 | PF netto<1,30 | operazioni<100 | recovery<1,5 | t<3,3
+D2_D1_R7;2;D1;cb 40 stop 1.0ATR target 2.0R scad 3;96;-1244.74;-1582.39;0.88;0.85;3390.6;-0.37;-0.69;NO;netto<=0 | PF netto<1,30 | operazioni<100 | recovery<1,5 | t<3,3
+D2_D1_R8;2;D1;cb 40 stop 1.5ATR target 1.0R scad 6;86;-3052.19;-3354.61;0.73;0.70;5262.3;-0.58;-1.47;NO;netto<=0 | PF netto<1,30 | operazioni<100 | recovery<1,5 | t<3,3
+D2_D1_R9;2;D1;cb 40 stop 2.5ATR target 1.5R scad 1;50;-482.06;-657.88;0.96;0.94;4296.7;-0.11;-0.17;NO;netto<=0 | PF netto<1,30 | operazioni<100 | recovery<1,5 | t<3,3
+D2_H4_R1;2;H4;cb 30 stop 1.0ATR target 1.0R scad 6;558;20042.97;18081.32;2.76;2.52;1029.0;19.48;10.43;OK;
+D2_H4_R2;2;H4;cb 30 stop 1.5ATR target 1.5R scad 18;363;12165.16;10888.92;1.57;1.50;2429.5;5.01;3.36;OK;
+D2_H4_R3;2;H4;cb 30 stop 2.5ATR target 2.0R scad 36;128;-8707.86;-9158.01;0.61;0.59;9710.7;-0.90;-2.49;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
+D2_H4_R4;2;H4;cb 60 stop 1.0ATR target 1.5R scad 36;340;8856.62;7661.20;1.69;1.58;966.1;9.17;3.79;OK;
+D2_H4_R5;2;H4;cb 60 stop 1.5ATR target 2.0R scad 6;252;6992.56;6106.54;1.38;1.33;1785.4;3.92;1.86;NO;t<3,3
+D2_H4_R6;2;H4;cb 60 stop 2.5ATR target 1.0R scad 18;212;5526.81;4781.52;1.30;1.26;2416.5;2.29;1.50;NO;PF netto<1,30 | t<3,3
+D2_H4_R7;2;H4;cb 120 stop 1.0ATR target 2.0R scad 18;220;6549.35;5775.83;1.67;1.57;1094.1;5.99;2.94;NO;t<3,3
+D2_H4_R8;2;H4;cb 120 stop 1.5ATR target 1.0R scad 36;207;4512.56;3784.79;1.44;1.36;1135.6;3.97;1.98;NO;t<3,3
+D2_H4_R9;2;H4;cb 120 stop 2.5ATR target 1.5R scad 6;124;-906.75;-1342.74;0.94;0.91;4282.0;-0.21;-0.44;NO;netto<=0 | PF netto<1,30 | recovery<1,5 | t<3,3
