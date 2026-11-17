@@ -1,0 +1,26 @@
+righe 625 | valori: {'ST1_MinDist_to_HL': [350.0, 450.0, 550.0, 650.0, 750.0], 'ST1_Expiration_hours': [96.0, 192.0, 288.0, 384.0, 480.0], 'Exit_stop': [450.0, 600.0, 750.0, 900.0, 1050.0], 'Exit_limit': [1300.0, 1700.0, 2100.0, 2500.0, 2900.0]}
+CONTROLLO CENTRO: atteso 3573.72 / 139, trovato 3573.72 / 139 (DD 386 EUR) -> OK
+profitto   min 1906.77 mediana 3456.10 max 5000.24
+PF         min 1.87 mediana 2.58 max 3.47
+operazioni min 118.00 mediana 135.00 max 142.00
+DD EUR     min 281.20 mediana 1039.20 max 2057.50
+centro (Wim): rend/DD 9.25, rango per rend/DD: 10 su 625
+pool (PF>=1.30, ops>=100, RF>=1.5, profitto>0, DD<=585): 233 su 625
+
+TOP 10 combinazioni distinte (senza scadenza) per rend/DD:
+C1 pass 248 | MD 650 Exp 480 Stop 1050 Lim 1700 | prof 3906 PF 2.64 ops 137 DD 400 rend/DD 9.76 (x1.06 centro)
+C2 pass 247 | MD 550 Exp 480 Stop 1050 Lim 1700 | prof 3802 PF 2.53 ops 139 DD 400 rend/DD 9.50 (x1.03 centro)
+C3 pass 246 | MD 450 Exp 480 Stop 1050 Lim 1700 | prof 3802 PF 2.53 ops 139 DD 400 rend/DD 9.50 (x1.03 centro)
+C4 pass 23 | MD 650 Exp 480 Stop 450 Lim 1300 | prof 2744 PF 2.44 ops 137 DD 292 rend/DD 9.41 (x1.02 centro)
+C5 pass 173 | MD 650 Exp 480 Stop 600 Lim 1700 | prof 3634 PF 2.77 ops 137 DD 386 rend/DD 9.40 (x1.02 centro)
+C6 pass 198 | MD 650 Exp 480 Stop 750 Lim 1700 | prof 3627 PF 2.65 ops 137 DD 389 rend/DD 9.32 (x1.01 centro)
+C7 pass 172 | MD 550 Exp 480 Stop 600 Lim 1700 | prof 3574 PF 2.69 ops 139 DD 386 rend/DD 9.25 (x1.00 centro)
+C8 pass 171 | MD 450 Exp 480 Stop 600 Lim 1700 | prof 3574 PF 2.69 ops 139 DD 386 rend/DD 9.25 (x1.00 centro)
+C9 pass 148 | MD 650 Exp 480 Stop 450 Lim 1700 | prof 3402 PF 2.79 ops 137 DD 368 rend/DD 9.24 (x1.00 centro)
+C10 pass 245 | MD 350 Exp 480 Stop 1050 Lim 1700 | prof 3695 PF 2.43 ops 142 DD 402 rend/DD 9.18 (x0.99 centro)
+
+Effetto medio dei parametri (rend/DD medio, profitto medio, DD medio EUR):
+ST1_MinDist_to_HL [(350.0, 4.95, 3369, 875), (450.0, 5.08, 3448, 874), (550.0, 5.11, 3462, 874), (650.0, 5.23, 3544, 874), (750.0, 4.91, 3402, 832)]
+ST1_Expiration_hours [(96.0, 4.15, 2786, 868), (192.0, 5.12, 3510, 866), (288.0, 5.19, 3535, 863), (384.0, 5.3, 3662, 872), (480.0, 5.52, 3731, 859)]
+Exit_stop [(450.0, 5.59, 3298, 745), (600.0, 5.44, 3404, 736), (750.0, 5.3, 3351, 745), (900.0, 4.81, 3506, 846), (1050.0, 4.15, 3666, 1256)]
+Exit_limit [(1300.0, 6.61, 2605, 430), (1700.0, 8.13, 3339, 441), (2100.0, 3.33, 3321, 1035), (2500.0, 3.31, 3671, 1215), (2900.0, 3.91, 4289, 1206)]
