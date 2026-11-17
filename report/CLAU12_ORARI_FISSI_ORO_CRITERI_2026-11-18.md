@@ -23,5 +23,8 @@ FTMO XAUUSD ed EURUSD M1 (export del 17/11): **scelta della direzione: 2015-2017
 ## 5. Regole d'arresto
 Se nessuna fascia supera la validazione: **"nessun candidato"** per la famiglia "orari fissi sull'oro a 4 fasce"; non si cambiano ne fasce ne soglie. Contatore dei "looks": +4 fasce, +4 direzioni (ognuna fascia contata una volta).
 
-## 6. Risultato
-*(da compilare; ora nessun numero)*
+## 6. Risultato (18/11/2026): **NESSUN CANDIDATO**
+Codice `backtest_runner/simulatore/orari_fissi.py` (commit del risultato), output `CLAU12_ORARI_FISSI_ORO_RISULTATI.txt`. Dati FTMO XAUUSD/EURUSD M1.
+**Scelta 2015-2017:** deriva lorda F1 +0,359 USD/oncia (t +1,92), F2 -0,074 (t -0,46), F3 -0,148 (t -0,66), F4 -0,085 (t -0,54): **nessuna fascia con |t| >= 2,3**. Previsione "almeno una candidata: 50%" -> NO. Validazione e fuori campione non aperti (regola d'arresto).
+**Descrittivo (non porte), 2015-2020, dopo i costi, 0,1 lotti:** tutte le 8 varianti (4 fasce x long/short) in perdita, PF 0,60-0,77, t da -3,5 a -6,6, perdite ogni anno (da -7.427 a -13.191 EUR in 6 anni): il costo per operazione (circa 0,66 USD/oncia) supera ogni deriva.
+**Lettura:** su un trade al giorno la deriva oraria dell'oro non copre i costi. Conseguenza per le idee future: servono mosse medie per operazione ben piu grandi dei costi (target dell'ordine di 10-40 USD/oncia), quindi pochi trade grandi, non molti trade piccoli. Looks della famiglia: +4 fasce. Famiglia "orari fissi sull'oro a 4 fasce": **chiusa**.
