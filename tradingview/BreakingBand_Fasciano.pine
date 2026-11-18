@@ -1,0 +1,232 @@
+//@version=5
+// =====================================================================================================
+// BREAKING BAND (Leonardo Fasciano) - segnali di CONTINUAZIONE e di INVERSIONE dopo un BULGE
+// Solo due famiglie di segnali, scritte in ALTO sul grafico: VERDE = LONG, ROSSO = SHORT.
+// Fonti: Guida Operativa 11, Checklist tabellare 15/02/2026, Prompt 15/02/2026, Protocolli di Leonardo.
+// Regola d'oro del corso: Congestione (CS o CDA) -> BULGE valido -> solo allora pattern di continuazione o inversione.
+// Gestione indicata dal corso (NON disegnata): SL = 3 x ATR, TP sulla mediana, aggiornata a ogni candela.
+// I numeri che la Guida lascia "visivi" sono marcati SCELTA NOSTRA negli input: sono parametri, non verita del corso.
+// Il segnale compare a CANDELA CHIUSA (nessun repaint). Non e un consiglio operativo.
+// =====================================================================================================
+indicator("Breaking Band (Fasciano): continuazione / inversione", shorttitle="BB Fasciano", overlay=true, max_labels_count=500)
+
+// ---------------- Indicatori (parametri UFFICIALI della Guida)
+gI = "Indicatori (Guida)"
+bbLen    = input.int(20, "Bollinger: periodo", minval=2, group=gI)
+bbMult   = input.float(2.0, "Bollinger: deviazioni", step=0.1, group=gI)
+sdLen    = input.int(20, "Deviazione standard: periodo", minval=2, group=gI)
+sdSmaLen = input.int(50, "SMA sulla deviazione standard", minval=2, group=gI)
+atrLen   = input.int(14, "ATR (SCELTA NOSTRA: 14)", minval=1, group=gI)
+
+// ---------------- Bulge
+gB = "Bulge (tutti i criteri obbligatori)"
+bulgeMult  = input.float(1.35, "Bande molto aperte: larghezza >= N x media precedente (SCELTA NOSTRA)", step=0.05, group=gB)
+refLen     = input.int(20, "Barre di riferimento per la larghezza media (SCELTA NOSTRA)", minval=5, group=gB)
+minBars    = input.int(3, "Durata minima del bulge, candele (SCELTA NOSTRA: un solo spike non e bulge)", minval=1, group=gB)
+maxBars    = input.int(20, "Durata massima: oltre = band riding (GUIDA: 20)", minval=5, group=gB)
+impATR     = input.float(1.5, "Candela impulsiva: range >= N x ATR (GUIDA: 1.5-3)", step=0.1, group=gB)
+netATR     = input.float(1.0, "Movimento netto minimo, in ATR (SCELTA NOSTRA)", step=0.1, group=gB)
+
+// ---------------- Congestione iniziale (fase preparatoria obbligatoria)
+gC = "Congestione iniziale (CS o CDA)"
+useCong    = input.bool(true, "Richiedi la congestione prima del bulge (GUIDA: condizione necessaria)", group=gC)
+cLen       = input.int(15, "Finestra di congestione, candele (CHECKLIST: 10-15)", minval=8, group=gC)
+csMin      = input.int(4, "CS valida con almeno N criteri su 5 (CHECKLIST: 4)", minval=1, maxval=5, group=gC)
+csCompress = input.float(10.0, "CS: ampiezza bande in calo di almeno %, inizio -> fine finestra (SCELTA NOSTRA)", step=1.0, group=gC)
+lateralATR = input.float(1.0, "CS: lateralita = spostamento netto <= N x ATR (SCELTA NOSTRA)", step=0.1, group=gC)
+prevN      = input.int(50, "CS: barre precedenti per confrontare il range (SCELTA NOSTRA)", minval=10, group=gC)
+cdaStd     = input.int(10, "CDA: deviazione standard in calo per N candele (CHECKLIST: 10-15)", minval=5, group=gC)
+cdaTol     = input.int(1, "CDA: eccezioni ammesse su quelle candele (SCELTA NOSTRA)", minval=0, group=gC)
+cdaDrop    = input.float(15.0, "CDA: ampiezza bande in calo di almeno % (CHECKLIST: 15-30)", step=1.0, group=gC)
+
+// ---------------- Dopo il bulge
+gP = "Dopo il bulge: ritracciamento / rientro"
+postMax    = input.int(30, "Durata massima della fase dopo il bulge, candele (SCELTA NOSTRA)", minval=5, group=gP)
+contImpATR = input.float(1.5, "CONTINUAZIONE: candela impulsiva nel ritracciamento > N x ATR (CHECKLIST: 1.5)", step=0.1, group=gP)
+invImpATR  = input.float(1.0, "INVERSIONE: candela impulsiva nel rientro/test > N x ATR (CHECKLIST: 1.0; la Guida dice 1.5)", step=0.1, group=gP)
+invViolent = input.int(1, "INVERSIONE: quante candele impulsive rendono il rientro violento (SCELTA NOSTRA)", minval=1, group=gP)
+flatTol    = input.float(0.05, "Banda 'piatta': pendenza massima per barra, in ATR (SCELTA NOSTRA)", step=0.01, group=gP)
+reinfl     = input.float(1.05, "La banda non si gonfia: larghezza <= N x massimo del bulge (SCELTA NOSTRA)", step=0.01, group=gP)
+
+// ---------------- Grafica
+gG = "Grafica"
+showBands  = input.bool(false, "Mostra le bande di Bollinger", group=gG)
+
+// =====================================================================================================
+// Serie
+basis = ta.sma(close, bbLen)
+dev   = bbMult * ta.stdev(close, bbLen)
+upper = basis + dev
+lower = basis - dev
+width = upper - lower
+sd    = ta.stdev(close, sdLen)
+sdSma = ta.sma(sd, sdSmaLen)
+atr   = ta.atr(atrLen)
+rng   = high - low
+wRef  = ta.sma(width, refLen)[1]
+
+// deviazione standard "in calo" (PROMPT): 2 candele consecutive di discesa OPPURE sotto la SMA50
+sdFall(int o) =>
+    (sd[o] < sd[o + 1] and sd[o + 1] < sd[o + 2]) or sd[o] < sdSma[o]
+
+// Congestione Standard: valida con almeno csMin criteri su 5. e = barre fa dell'ultima candela della finestra
+congCS(int e) =>
+    int s = e + cLen - 1
+    float avgR = 0.0
+    float maxR = 0.0
+    for k = e to s
+        avgR += rng[k]
+        maxR := math.max(maxR, rng[k])
+    avgR := avgR / cLen
+    float avgP = 0.0
+    for k = s + 1 to s + prevN
+        avgP += rng[k]
+    avgP := avgP / prevN
+    int n = 0
+    n += (width[e] <= width[s] * (1.0 - csCompress / 100.0)) ? 1 : 0          // bande in compressione chiara e progressiva
+    n += (avgR <= avgP and maxR <= 2.0 * avgR) ? 1 : 0                          // range ridotto e omogeneo
+    n += (math.abs(close[e] - close[s]) <= lateralATR * atr[e]) ? 1 : 0         // lateralita
+    n += (maxR < 1.5 * atr[e]) ? 1 : 0                                          // nessun micro-impulso significativo
+    n += (sd[e] <= sdSma[e]) ? 1 : 0                                            // deviazione standard bassa e stabile
+    n >= csMin
+
+// Congestione Direzionale Ammissibile: usata solo se la CS e assente; TUTTI i criteri devono essere veri
+congCDA(int e) =>
+    int s = e + cLen - 1
+    int downs = 0
+    for k = e to e + cdaStd - 1
+        downs += (sd[k] <= sd[k + 1]) ? 1 : 0
+    float maxR = 0.0
+    for k = e to s
+        maxR := math.max(maxR, rng[k])
+    float netDir = math.sign(close[e] - close[s])
+    bool counter = false
+    for k = e to s
+        if (close[k] - open[k]) * netDir < 0 and rng[k] >= atr[e]
+            counter := true
+    (downs >= cdaStd - cdaTol) and (sd[e] < sdSma[e]) and (width[e] <= width[s] * (1.0 - cdaDrop / 100.0)) and (maxR < 1.5 * atr[e]) and (not counter)
+
+// =====================================================================================================
+// Macchina a stati (solo a candela CHIUSA)
+var int   phase   = 0        // 0 = attesa, 1 = bulge in corso, 2 = dopo il bulge
+var int   bStart  = 0
+var int   bLen    = 0
+var float bBase   = 0.0
+var float bAtr    = 0.0
+var float bPeakW  = 0.0
+var bool  bImp    = false
+var bool  bSdAbv  = false
+var bool  bTouchU = false
+var bool  bTouchD = false
+var int   pStart  = 0
+var int   pDir    = 0
+var float pAtr    = 0.0
+var float pPeakW  = 0.0
+var bool  contAlive = false
+var bool  invAlive  = false
+var int   medBar    = -1
+var int   violentN  = 0
+
+bool sContL = false
+bool sContS = false
+bool sInvL  = false
+bool sInvS  = false
+
+if barstate.isconfirmed and not na(wRef) and not na(sdSma) and not na(atr)
+    if phase == 0
+        if width >= bulgeMult * wRef and sd > sd[1]
+            phase   := 1
+            bStart  := bar_index
+            bLen    := 1
+            bBase   := close[1]
+            bAtr    := atr
+            bPeakW  := width
+            bImp    := rng >= impATR * atr
+            bSdAbv  := sd > sdSma
+            bTouchU := high >= upper
+            bTouchD := low <= lower
+    else if phase == 1
+        bLen    += 1
+        bPeakW  := math.max(bPeakW, width)
+        bImp    := bImp or rng >= impATR * bAtr
+        bSdAbv  := bSdAbv or sd > sdSma
+        bTouchU := bTouchU or high >= upper
+        bTouchD := bTouchD or low <= lower
+        bool narrowing = width < width[1] and width[1] < width[2]
+        if bLen > maxBars
+            phase := 0                                   // band riding oltre 20 candele: pattern invalido
+        else if bLen >= minBars and narrowing            // l'espansione e esaurita: il bulge e concluso
+            float net = close - bBase
+            int   dir = net > 0 ? 1 : -1
+            bool  ok  = bLen <= maxBars and bImp and bSdAbv and math.abs(net) >= netATR * bAtr and (dir == 1 ? bTouchU : bTouchD)
+            if ok and useCong
+                int e = bar_index - bStart + 1
+                ok := (bStart - 1 - cLen - prevN >= 0) and (congCS(e) or congCDA(e))
+            if ok
+                phase     := 2
+                pStart    := bar_index
+                pDir      := dir
+                pAtr      := atr
+                pPeakW    := bPeakW
+                contAlive := true
+                invAlive  := true
+                medBar    := -1
+                violentN  := 0
+            else
+                phase := 0
+    else if phase == 2 and bar_index > pStart
+        bool oppT = pDir == 1 ? low <= lower : high >= upper          // tocco della banda OPPOSTA (corpo o spike)
+        bool impT = pDir == 1 ? high >= upper : low <= lower          // tocco della banda dell'IMPULSO
+        bool medT = pDir == 1 ? low <= basis : high >= basis          // il prezzo e tornato alla mediana
+        bool vioC = rng >= contImpATR * pAtr
+        bool vioI = rng >= invImpATR * pAtr
+        if bar_index - pStart > postMax
+            contAlive := false
+            invAlive  := false
+        // ---- CONTINUAZIONE: ritracciamento ordinato fino alla banda opposta; si entra al primo tocco, nella direzione dell'impulso
+        if contAlive
+            if oppT
+                bool narrow = width < width[2] and width < pPeakW
+                if narrow and sdFall(0) and not vioC
+                    sContL := pDir == 1
+                    sContS := pDir == -1
+                contAlive := false
+            else if vioC
+                contAlive := false                                       // ritracciamento violento: invalido
+        // ---- INVERSIONE: rientro verso la mediana SENZA toccare la banda opposta, poi retest della banda dell'impulso, contro l'impulso
+        if invAlive
+            if oppT
+                invAlive := false                                        // tocco della banda opposta: pattern morto
+            else
+                if medBar < 0
+                    if vioI
+                        violentN += 1
+                        if violentN >= invViolent
+                            invAlive := false
+                    if medT
+                        medBar := bar_index
+                else if impT
+                    bool flat = pDir == 1 ? (upper[1] - upper[4] <= flatTol * pAtr * 3.0) : (lower[1] - lower[4] >= -flatTol * pAtr * 3.0)
+                    bool narrow = width[1] < width[3]
+                    if flat and narrow and sdFall(1) and width <= pPeakW * reinfl and not vioI
+                        sInvL := pDir == -1
+                        sInvS := pDir == 1
+                    invAlive := false
+        if not contAlive and not invAlive
+            phase := 0
+
+// =====================================================================================================
+// Segnali: in ALTO, verde = LONG, rosso = SHORT
+plotshape(sContL, title="Continuazione LONG",  style=shape.labelup,   location=location.top, color=color.new(color.green, 0), textcolor=color.white, text="CONTINUAZIONE LONG",  size=size.small)
+plotshape(sContS, title="Continuazione SHORT", style=shape.labeldown, location=location.top, color=color.new(color.red, 0),   textcolor=color.white, text="CONTINUAZIONE SHORT", size=size.small)
+plotshape(sInvL,  title="Inversione LONG",     style=shape.labelup,   location=location.top, color=color.new(color.green, 0), textcolor=color.white, text="INVERSIONE LONG",     size=size.small)
+plotshape(sInvS,  title="Inversione SHORT",    style=shape.labeldown, location=location.top, color=color.new(color.red, 0),   textcolor=color.white, text="INVERSIONE SHORT",    size=size.small)
+
+plot(showBands ? upper : na, "Banda alta",  color=color.new(color.red, 40))
+plot(showBands ? basis : na, "Mediana",     color=color.new(color.blue, 40))
+plot(showBands ? lower : na, "Banda bassa", color=color.new(color.green, 40))
+
+alertcondition(sContL, "BB Continuazione LONG",  "Breaking Band: CONTINUAZIONE LONG")
+alertcondition(sContS, "BB Continuazione SHORT", "Breaking Band: CONTINUAZIONE SHORT")
+alertcondition(sInvL,  "BB Inversione LONG",     "Breaking Band: INVERSIONE LONG")
+alertcondition(sInvS,  "BB Inversione SHORT",    "Breaking Band: INVERSIONE SHORT")
