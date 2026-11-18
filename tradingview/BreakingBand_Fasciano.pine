@@ -51,6 +51,7 @@ reinfl     = input.float(1.05, "La banda non si gonfia: larghezza <= N x massimo
 // ---------------- Grafica
 gG = "Grafica"
 showBands  = input.bool(false, "Mostra le bande di Bollinger", group=gG)
+showDbg    = input.bool(true, "Diagnostica: tabella dei contatori e cerchio blu sul bulge valido", group=gG)
 
 // =====================================================================================================
 // Serie
@@ -126,6 +127,21 @@ var bool  contAlive = false
 var bool  invAlive  = false
 var int   medBar    = -1
 var int   violentN  = 0
+var int nStart = 0
+var int nEnd = 0
+var int rLen = 0
+var int rImp = 0
+var int rSd = 0
+var int rNet = 0
+var int rTch = 0
+var int rCong = 0
+var int nValid = 0
+var int nContT = 0
+var int nContOk = 0
+var int nMed = 0
+var int nInvT = 0
+var int nInvOk = 0
+bool dbgValid = false
 
 bool sContL = false
 bool sContS = false
@@ -135,6 +151,7 @@ bool sInvS  = false
 if barstate.isconfirmed and not na(wRef) and not na(sdSma) and not na(atr)
     if phase == 0
         if width >= bulgeMult * wRef and sd > sd[1]
+            nStart  += 1
             phase   := 1
             bStart  := bar_index
             bLen    := 1
@@ -154,15 +171,26 @@ if barstate.isconfirmed and not na(wRef) and not na(sdSma) and not na(atr)
         bTouchD := bTouchD or low <= lower
         bool narrowing = width < width[1] and width[1] < width[2]
         if bLen > maxBars
+            rLen  += 1
             phase := 0                                   // band riding oltre 20 candele: pattern invalido
         else if bLen >= minBars and narrowing            // l'espansione e esaurita: il bulge e concluso
             float net = close - bBase
             int   dir = net > 0 ? 1 : -1
-            bool  ok  = bLen <= maxBars and bImp and bSdAbv and math.abs(net) >= netATR * bAtr and (dir == 1 ? bTouchU : bTouchD)
+            bool  okNet = math.abs(net) >= netATR * bAtr
+            bool  okTch = dir == 1 ? bTouchU : bTouchD
+            bool  ok  = bLen <= maxBars and bImp and bSdAbv and okNet and okTch
+            nEnd += 1
+            rImp += bImp ? 0 : 1
+            rSd  += bSdAbv ? 0 : 1
+            rNet += okNet ? 0 : 1
+            rTch += okTch ? 0 : 1
             if ok and useCong
                 int e = bar_index - bStart + 1
                 ok := (bStart - 1 - cLen - prevN >= 0) and (congCS(e) or congCDA(e))
+                rCong += ok ? 0 : 1
             if ok
+                nValid += 1
+                dbgValid := true
                 phase     := 2
                 pStart    := bar_index
                 pDir      := dir
@@ -187,7 +215,9 @@ if barstate.isconfirmed and not na(wRef) and not na(sdSma) and not na(atr)
         if contAlive
             if oppT
                 bool narrow = width < width[2] and width < pPeakW
+                nContT += 1
                 if narrow and sdFall(0) and not vioC
+                    nContOk += 1
                     sContL := pDir == 1
                     sContS := pDir == -1
                 contAlive := false
@@ -204,11 +234,14 @@ if barstate.isconfirmed and not na(wRef) and not na(sdSma) and not na(atr)
                         if violentN >= invViolent
                             invAlive := false
                     if medT
+                        nMed += 1
                         medBar := bar_index
                 else if impT
                     bool flat = pDir == 1 ? (upper[1] - upper[4] <= flatTol * pAtr * 3.0) : (lower[1] - lower[4] >= -flatTol * pAtr * 3.0)
                     bool narrow = width[1] < width[3]
+                    nInvT += 1
                     if flat and narrow and sdFall(1) and width <= pPeakW * reinfl and not vioI
+                        nInvOk += 1
                         sInvL := pDir == -1
                         sInvS := pDir == 1
                     invAlive := false
@@ -221,6 +254,15 @@ plotshape(sContL, title="Continuazione LONG",  style=shape.labelup,   location=l
 plotshape(sContS, title="Continuazione SHORT", style=shape.labeldown, location=location.top, color=color.new(color.red, 0),   textcolor=color.white, text="CONTINUAZIONE SHORT", size=size.small)
 plotshape(sInvL,  title="Inversione LONG",     style=shape.labelup,   location=location.top, color=color.new(color.green, 0), textcolor=color.white, text="INVERSIONE LONG",     size=size.small)
 plotshape(sInvS,  title="Inversione SHORT",    style=shape.labeldown, location=location.top, color=color.new(color.red, 0),   textcolor=color.white, text="INVERSIONE SHORT",    size=size.small)
+
+plotshape(showDbg and dbgValid, title="Bulge valido", style=shape.circle, location=location.bottom, color=color.new(color.blue, 0), size=size.tiny)
+var table dbg = table.new(position.top_right, 2, 15, bgcolor=color.new(color.black, 20), border_width=1)
+if showDbg and barstate.islast
+    string[] nm = array.from("Bulge iniziati", "Bulge conclusi", "Scartati: oltre 20 candele", "Scartati: nessuna candela impulsiva", "Scartati: dev. std mai sopra SMA50", "Scartati: movimento netto troppo piccolo", "Scartati: banda dell'impulso non toccata", "Scartati: congestione assente", "BULGE VALIDI", "Continuazione: tocchi banda opposta", "Continuazione: SEGNALI", "Inversione: mediana raggiunta", "Inversione: retest della banda", "Inversione: SEGNALI")
+    int[] vl = array.from(nStart, nEnd, rLen, rImp, rSd, rNet, rTch, rCong, nValid, nContT, nContOk, nMed, nInvT, nInvOk)
+    for i = 0 to 13
+        table.cell(dbg, 0, i, array.get(nm, i), text_color=color.white, text_size=size.small, text_halign=text.align_left)
+        table.cell(dbg, 1, i, str.tostring(array.get(vl, i)), text_color=color.yellow, text_size=size.small)
 
 plot(showBands ? upper : na, "Banda alta",  color=color.new(color.red, 40))
 plot(showBands ? basis : na, "Mediana",     color=color.new(color.blue, 40))
