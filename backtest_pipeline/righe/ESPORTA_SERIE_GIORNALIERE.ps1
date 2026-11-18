@@ -1,4 +1,4 @@
-# MARCATORE_ESPORTA_SERIE_GIORNALIERE_v1
+# MARCATORE_ESPORTA_SERIE_GIORNALIERE_v2
 # SOLA LETTURA: cerca sul PC i risultati archiviati dei test a 4.000 EUR dei 4 EA forex di Wim (cartelle/zip ANNO4K_WIM_FOREX_*) e del trio oro sul conto reale (ANNO_ORO_GRADINI_R21_*), legge i report HTM del tester e ne ricava il profitto REALIZZATO per giorno. Non avvia MT5, non modifica niente, non scrive fuori da Desktop e TEMP. Criteri: report/PROBABILITA_RADDOPPIO_CRITERI_2026-11-18.md
 $ErrorActionPreference='Continue'
 $ci=[Globalization.CultureInfo]::InvariantCulture
@@ -6,7 +6,7 @@ if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ Write-Host ('SOLO sul PC di backtes
 function Num([string]$s){ $c=($s -replace '[^0-9.\-]',''); $v=0.0; if([double]::TryParse($c,[Globalization.NumberStyles]::Float,$ci,[ref]$v)){ return $v } else { return [double]::NaN } }
 function LeggiTesto([string]$p){ $b=[IO.File]::ReadAllBytes($p); if($b.Length -ge 2 -and (($b[0] -eq 255 -and $b[1] -eq 254) -or ($b[0] -eq 254 -and $b[1] -eq 255))){ return [Text.Encoding]::Unicode.GetString($b) } else { return [Text.Encoding]::UTF8.GetString($b) } }
 $desk=[Environment]::GetFolderPath('Desktop'); $roots=@((Join-Path $desk 'ABTG_RISULTATI'),$desk,(Join-Path $env:USERPROFILE 'Downloads'),(Join-Path $env:USERPROFILE 'Documents')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -Unique
-$pat='^(ANNO4K_WIM_FOREX_|ANNO_ORO_GRADINI_R21)'
+$pat='^(ANNO4K_WIM_FOREX_\d{8}_\d{4}|ANNO_ORO_GRADINI_R21_)'
 $dirs=New-Object System.Collections.ArrayList; $zips=New-Object System.Collections.ArrayList
 foreach($r in $roots){
   foreach($d in @(Get-ChildItem -LiteralPath $r -Directory -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object { $_.Name -match $pat })){ [void]$dirs.Add($d.FullName) }
@@ -38,7 +38,7 @@ foreach($d in $dirs){
     }
     $rel=$h.FullName.Substring($d.Length).TrimStart('\')
     foreach($k in ($giorni.Keys | Sort-Object)){ [void]$out.Add((Split-Path $d -Leaf) + ';' + $rel + ';' + $k + ';' + $giorni[$k].ToString('0.00',$ci) + ';' + $dep.ToString('0',$ci)) }
-    $nrep++
+    $nrep++; Write-Host ('[' + (Get-Date).ToString('HH:mm:ss') + '] report ' + $nrep + ': ' + $rel + ' (' + $giorni.Count + ' giorni)') -ForegroundColor Gray
   }
 }
 $dirOut=Join-Path $desk 'SERIE_GIORNALIERE_ROLLING'; New-Item -ItemType Directory -Force -Path $dirOut | Out-Null
