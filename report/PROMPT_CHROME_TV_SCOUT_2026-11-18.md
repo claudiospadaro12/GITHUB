@@ -68,3 +68,33 @@ OUTPUT
 3. Alla fine dimmi quanti script hai estratto con codice completo, quali no e perche, posizione e dimensione dello zip.
 NON dare giudizi su quale sia il migliore e non suggerire parametri o operativita.
 ```
+
+## Risposta all'estensione: 20 link diretti (18/11/2026)
+Link presi dalle pagine di ricerca pubbliche di TradingView (non aperti uno a uno da me; lo stato "open-source" va verificato sulla pagina). Messaggio da incollare all'estensione:
+```
+Ecco 20 link diretti. Aprili uno a uno, SENZA ricerche. Per ciascuno: (1) verifica sulla pagina che sia OPEN-SOURCE (se e protetto, invite-only o chiuso: scrivi "chiuso" e passa al successivo); (2) apri il sorgente e copia TUTTO il codice Pine esattamente come e in <NN>_<nome>.pine; (3) annota nome, autore, link, data, versione Pine, licenza, like/boost, logica in una frase, condizioni di ingresso long/short, uscita/stop; (4) SI/NO per: lookahead, request.security, ta.pivothigh, ta.pivotlow, barstate.isrealtime, calc_on_every_tick, alertcondition, strategy(. Poi crea lo zip TV_SCOUT_<AAAA-MM-GG>.zip con 00_info.txt, 01_tabella.csv (;, UTF-8) e i file .pine, massimo 10 MB, e dimmi quanti hai estratto, quali no e perche. Stesse regole di sicurezza di prima (nessun login, acquisto, Follow/Like/Boost, commento).
+
+BREAKOUT
+1 https://www.tradingview.com/script/KvxtErD5-Breakout-Range-Long-Strategy/
+2 https://www.tradingview.com/script/ecFS6HNX-Breakout-Range-Short-Strategy/
+3 https://www.tradingview.com/script/EvkXjgyw-Breakout-Finder/
+4 https://www.tradingview.com/script/27kn3NDw-Breakout-Detector-Previous-MTF-High-Low-Levels-LuxAlgo/
+5 https://www.tradingview.com/script/G6YAAhmL-Breakout/
+6 https://www.tradingview.com/script/MaFckffw-Breakout-Pattern-Setup-WillyAlgoTrader/
+7 https://www.tradingview.com/script/UEbrJcmh-donchian-channel-strategy/
+8 https://www.tradingview.com/script/SlYz8Ptk-Donchian-Channels-strategy-with-backtest/
+9 https://www.tradingview.com/script/5hV7cFAS-Squeeze-Momentum-Indicator-AGPro-Series/
+MEAN-REVERSION
+10 https://www.tradingview.com/script/RwVTfoTY-Statistical-Mean-Reversion-Engine-SMRE/
+11 https://www.tradingview.com/script/RZ1GZGP3-Jaws-Mean-Reversion-Strategy/
+12 https://www.tradingview.com/script/XRPeqEdA-Bollinger-Bands-Mean-Reversion-using-RSI-Krishna-Peri/
+13 https://www.tradingview.com/script/JFIZkwZR-RSI-Mean-Reversion/
+14 https://www.tradingview.com/script/92rilzXd-Z-Score-Mean-Reversion-Pro/
+15 https://www.tradingview.com/script/tF22td3U-Mean-Reversion-Pro/
+16 https://www.tradingview.com/script/17890vUp-Mean-Reversion-Channel-TradingFinder-ATR-Band-Reversal-Signals/
+17 https://www.tradingview.com/script/rdO5c5yP-Mean-Reversion-and-Momentum-Updated-with-gaussiana-smoothing/
+TREND
+18 https://www.tradingview.com/script/r6dAP7yi/
+19 https://www.tradingview.com/script/6jXh1FKG-Supertrend-Confirmed-Close-forexs/
+20 https://www.tradingview.com/script/dTn0p5mz-Supertrend/
+```
