@@ -12,3 +12,13 @@ Per ciascuna coppia (BLUC_F5 contro BLUC; BLUS_F5 contro BLUS): **MIGLIORA** se 
 - BLUC_F5 MIGLIORA: **12%**; BLUS_F5 MIGLIORA: **12%**; almeno uno dei due: **20%**; qualunque variante con PF aggregato > 1,00: **8%**.
 ## Limiti
 Barre da 1 minuto, un percorso per anno, 22 cross correlati, Viola spento, spread del tester molto basso e nessuna commissione (vedi VOLSPREAD), F5 valutato con una sola finestra (5 barre) senza soglie sull'ampiezza dell'inclinazione.
+
+## Risultato (18/11/2026; 176 passate su 176 OK; `BULGE_F5_dati/RISULTATI_BULGE_F5.csv`; PF aggregato = somma vincite lorde / somma perdite lorde dei report; confronto con `BULGE_S_dati/`)
+| Variante | Operazioni | Netto EUR | PF aggr. | PF per anno 2022/23/24/25 | Cross con PF > 1 | PF delle operazioni scartate da F5 |
+|---|---|---|---|---|---|---|
+| BLUC (base) | 1.620 | -3.160 | 0,851 | 0,84 / 0,85 / 0,83 / 0,88 | 8 | |
+| **BLUC_F5** | 1.217 (75%) | -2.879 | **0,830** | 0,86 / 0,83 / 0,82 / 0,81 | 8 | 0,935 (403 op.) |
+| BLUS (base) | 3.465 | -4.412 | 0,926 | 0,92 / 0,86 / 0,90 / 1,03 | 7 | |
+| **BLUS_F5** | 2.826 (82%) | -4.037 | **0,919** | 0,96 / 0,82 / 0,87 / 1,06 | 7 | 0,963 (639 op.) |
+**Verdetto con le regole scritte: NON MIGLIORA, per entrambe le coppie** ((a) PF +0,10: no, -0,021 e -0,007). **F5 scarta le operazioni migliori, non le peggiori:** il PF degli scartati (0,935 e 0,963) e piu alto di quello delle tenute (0,830 e 0,919). Previsioni: F5 lascia passare il 75-92% (si: 75% e 82%); MIGLIORA (12% + 12%) -> no; PF > 1,00 in una qualunque (8%) -> no.
+**Lettura onesta:** il filtro "bulge simmetrico" del Pine di Claudio non migliora ne il Blu con conferma ne il Blu al segnale S sul tester a 22 cross 2022-2025. Se l'"uccellino" di Leonardo e la simmetria delle bande, questa misura di simmetria (5 barre, solo il verso) non la cattura o non conta. Il Blu resta sotto 1 (0,83-0,93) in tutte le varianti testate.
