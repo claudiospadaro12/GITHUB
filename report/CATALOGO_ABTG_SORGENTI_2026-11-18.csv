@@ -1,0 +1,130 @@
+﻿file;apre_ordini;righe;magic_default;timeframe_default;descrizione_header
+ABTG_AllineaLondra.mq5;si;1280;777600;;ALLINEAMENTO DI CINQUE MEDIE DENTRO LA FINESTRA DI LONDRA | (metti in MQL5\Experts e compila con F7)
+ABTG_AltaVelocita.mq5;si;1422;771401;H4;"EA ""ALTA VELOCITA'"" (metodo Manuela Negro) - MT5 - v2 | (metti in MQL5\Experts e compila con F7: nessuna dipen"
+ABTG_Apertura_3Ingressi.mq5;si;2681;;H1;"EA DI MISURA ""APERTURE - TRE INGRESSI"" (round R83) | MetaTrader 5. Scritto il 18/08/2026 su FIRMA 6 di Claudio"
+ABTG_Apertura_Marco.mq5;si;1299;;H1;"EA ""APERTURA EUROPEA"" (DAX / D30EUR) - MetaTrader 5 | Basato sul piano di trading ""Apertura Europea"":"
+ABTG_Apertura_Study_EA.mq5;no (strumento/sonda);322;;H4;STUDIO dell'APERTURA come EA per lo STRATEGY TESTER (1 passaggio) | > si lancia da PowerShell con un .ini, com
+ABTG_AtrExhaustVol.mq5;si;1142;774401;;"EA ""ATR EXHAUSTION & VOLUME SPIKE"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cart"
+ABTG_BreakinBox.mq5;si;1321;769700;D1;"EA ""BRKBOX"" - BREAKIN DEL BOX NOTTURNO | (falsa rottura del range notturno -> reversal verso il lato"
+ABTG_BreakingBand.mq5;si;1857;772101;H1;"EA di LABORATORIO ""BREAKING BAND"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_BreakoutCorso.mq5;si;808;779100;M15;STRATEGIA DI BREAKOUT DEL CORSO (Manuela Negro, lezioni 34-40) | Implementazione FEDELE alla spec ricostruita 
+ABTG_Bulge.mq5;si;2234;772700;H1;"BULGE -- mean-reversion su Bollinger ""bulge"", basket forex, H1. | PATERNITA': IL MOTORE E' DI CLAUDIO."
+ABTG_BulgeAzzurra.mq5;si;2491;774500;H1;BULGE AZZURRA -- la CONTINUAZIONE del Bulge (08/10/2026). | DA DOVE NASCE. Richiesta di Claudio dell'08/10/202
+ABTG_Bulge_TS.mq5;si;2261;772700;H1;"BULGE -- mean-reversion su Bollinger ""bulge"", basket forex, H1. | PATERNITA': IL MOTORE E' DI CLAUDIO."
+ABTG_Bulge_Telemetria.mq5;si;3379;775100;H1;"BULGE -- mean-reversion su Bollinger ""bulge"", basket forex, H1. | PATERNITA': IL MOTORE E' DI CLAUDIO."
+ABTG_CRT_TurtleSoup.mq5;si;1533;769100;D1;Motore CRT Turtle Soup da Neo Malesa (n30dyn4m1c), licenza MIT. | Fonte: https://github.com/n30dyn4m1c/crt-tur
+ABTG_CanaleLento.mq5;si;838;774301;D1;CANALE LENTO SIMMETRICO - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle,
+ABTG_ChaosLyapunov.mq5;si;872;769200;;MOTORE EMA-CROSS GATED da LYAPUNOV (Chaos Theory) - MT5 | TUTTO-IN-UNO (metti in MQL5\Experts e compila con F7
+ABTG_ContaBarreEXT.mq5;no (strumento/sonda);338;;M1;MARCATORE: CONTA-EXT-v1 | A COSA SERVE (25/08/2026)
+ABTG_CostToCost.mq5;si;1093;772311;H1;"EA di LABORATORIO ""COST-TO-COST SULLE PUNTE DI LARRY"" - MT5 | TUTTO-IN-UNO (metti in MQL5\Experts e compila co"
+ABTG_CrossEma.mq5;si;840;772500;;"EA ""CROSSEMA"" - incrocio EMA 9/21 su barra CHIUSA. | DA DOVE VIENE: richiesta di Claudio (19/08/2026), ispirat"
+ABTG_CrossEmaApertura.mq5;si;1113;779600;;"EA ""INCROCIO DELLE MEDIE DI SESSIONE"" - l'apertura americana | COSTRUISCE il segnale, non lo filtra."
+ABTG_DAX_Apertura_EU.mq5;si;2885;;H1;"EA ""APERTURA EUROPEA"" (DAX / D30EUR) - MetaTrader 5 | Basato sul piano di trading ""Apertura Europea"":"
+ABTG_DAX_Apertura_EU_Ottimizzato.mq5;si;1396;;H1;"EA ""APERTURA EUROPEA"" (DAX / D30EUR) - MetaTrader 5 | Basato sul piano di trading ""Apertura Europea"":"
+ABTG_DAX_Apertura_EU_PREMIGRAZIONE.mq5;si;2333;;H1;"EA ""APERTURA EUROPEA"" (DAX / D30EUR) - MetaTrader 5 | Basato sul piano di trading ""Apertura Europea"":"
+ABTG_DAX_Apertura_EU_Pin9fca.mq5;si;2425;;H1;"EA ""APERTURA EUROPEA"" (DAX / D30EUR) - MetaTrader 5 | Basato sul piano di trading ""Apertura Europea"":"
+ABTG_DAX_Live5m.mq5;si;1258;;H1;"EA ""DAX LIVE 5m"" - variante che applica al DAX la logica della | live di E. Monza (candela 5 minuti pre-apertu"
+ABTG_DAX_Live5m_v2.mq5;si;1372;;H1;"EA ""APERTURA EUROPEA"" (DAX / D30EUR) - MetaTrader 5 | Basato sul piano di trading ""Apertura Europea"":"
+ABTG_DAX_M3.mq5;si;540;770501;H4;"EA ""DAX M3 T-TREND"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente c"
+ABTG_DaxReEntry.mq5;si;1045;769300;;MOTORE DAX RE-ENTRY (sweep + reclaim del range mattutino) | MT5 - TUTTO-IN-UNO (metti in MQL5\Experts e compil
+ABTG_Dow_Apertura_US.mq5;si;2205;;H1;"EA ""APERTURA AMERICANA"" (Nasdaq / NASUSD) - MetaTrader 5 | Basato sul piano di trading ""Apertura Americana - N"
+ABTG_Dow_Apertura_US_Pin9fca.mq5;si;2205;;H1;"EA ""APERTURA AMERICANA"" (Nasdaq / NASUSD) - MetaTrader 5 | Basato sul piano di trading ""Apertura Americana - N"
+ABTG_EMA200.mq5;si;690;771501;H4;"EA ""EMA 200 REVERSAL"" (bounce) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle"
+ABTG_EMA200_Ottimizzato.mq5;si;479;971501;H4;"EA ""EMA 200 REVERSAL"" (bounce) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle"
+ABTG_EasyTrend.mq5;si;1620;772401;H1;"EA di LABORATORIO ""EASY TREND"" (Leonardo Fasciano, Master ABTG) | TUTTO-IN-UNO (metti in MQL5\Experts e compil"
+ABTG_ExportM1.mq5;no (strumento/sonda);92;;M1;v1.01 (27/10/2026) -- SOLA LETTURA. NON COMPILATA. | NESSUNA funzione di trading: esporta le barre M1 di un si
+ABTG_ExportM1_Multi.mq5;no (strumento/sonda);403;;M1;v1.00 (01/11/2026) -- SOLA LETTURA. NON COMPILATA da agenti. | NESSUNA funzione di trading: esporta le barre M
+ABTG_FiboH4_Multi.mq5;si;560;771602;H4;"EA ""FIBO H4 - MULTI-SIMBOLO"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle)"
+ABTG_ForzaFX_Dashboard.mq5;no (strumento/sonda);1881;;D1;Dashboard di SOLA VISIONE (nessun ordine, nessuna rete, nessun | file, nessun accesso al conto):
+ABTG_FvgRetest.mq5;si;1495;775501;H4;"EA ""FAIR VALUE GAP - RITORNO NEL VUOTO"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente"
+ABTG_GapContinuation.mq5;si;1654;774101;M1;EA ADOTTATO - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle)
+ABTG_GapFill.mq5;si;805;772201;H1;"EA di LABORATORIO ""GAP-FILL DEL WEEKEND"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: nient"
+ABTG_GoldBreakoutATR.mq5;si;1105;775800;M1;GBA -- rottura di canale + filtro EMA + gestione in ATR, oro. | PATERNITA': L'IDEA E' DI EMILIANO, IL CODICE E
+ABTG_GoldenCross.mq5;si;952;770301;H1;"EA ""GOLDEN CROSS HA"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (non serve nessun file .mqh ne cartella Include:"
+ABTG_GoldenCross_Ottimizzato.mq5;si;678;970301;H1;"EA ""GOLDEN CROSS HA"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (non serve nessun file .mqh ne cartella Include:"
+ABTG_GoldenCross_V1.mq5;si;782;770301;H1;"EA ""GOLDEN CROSS HA"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (non serve nessun file .mqh ne cartella Include:"
+ABTG_Guardian.mq5;si;899;779001;;GUARDIANO DI PORTAFOGLIO -- fa rispettare le regole di una prop | sull'INTERO conto. Da usare SOLO sul demo 10
+ABTG_Guardian_v117_PROVA.mq5;si;1302;779001;;GUARDIANO DI PORTAFOGLIO -- fa rispettare le regole di una prop | sull'INTERO conto. Da usare SOLO sul demo 10
+ABTG_Guardian_v118_PROVA.mq5;si;1464;779001;;GUARDIANO DI PORTAFOGLIO -- fa rispettare le regole di una prop | sull'INTERO conto. Da usare SOLO sul demo 10
+ABTG_HARSI.mq5;si;496;772001;M5;"EA ""HARSI"" (scalping contro-trend) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cart"
+ABTG_HistoryDownloader.mq5;no (strumento/sonda);272;;M1;Scarica lo STORICO dei prezzi dal broker per tutti i simboli | (cross, indici, valute, metalli...) su piu' tim
+ABTG_ImportaStoricoEsterno.mq5;no (strumento/sonda);679;;H1;IMPORTA storico ESTERNO (CSV M1) dentro MT5 come CUSTOM SYMBOL, | clonando le proprieta' dal simbolo BCM corri
+ABTG_ImportaStoricoEsterno_v2.mq5;no (strumento/sonda);1240;;H1;IMPORTA storico ESTERNO (CSV M1) dentro MT5 come CUSTOM SYMBOL, | clonando le proprieta' dal simbolo BCM corri
+ABTG_ImportaTickEsterno.mq5;no (strumento/sonda);588;;;PASSO 0: BOZZA, NON COMPILATA, NON LANCIATA | Scritta il 31/08/2026 come parte del PASSO 0 Dukascopy tick
+ABTG_InfoBroker.mq5;no (strumento/sonda);773;;H1;IL RICOGNITORE DI UN BROKER (va lanciato su TUTTI E DUE i | terminali: BCM e quello esterno).
+ABTG_IntradayMomentum.mq5;si;1009;772800;M30;"EA ""A1"" - MARKET INTRADAY MOMENTUM. | Il rendimento della PRIMA mezz'ora di cassa predice il verso"
+ABTG_InvEsaurimento.mq5;si;1245;769000;D1;MOTORE D'INVERSIONE DA ESAURIMENTO - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cart
+ABTG_LiquiditySweep.mq5;si;1176;772600;H4;"EA ""LIQSWEEP"" - SWEEP + RECLAIM su livello strutturale. | DA DOVE VIENE -- ATTRIBUZIONE, come da regola di cas"
+ABTG_LondonFx.mq5;si;2142;774001;;IL CONTENITORE DEL ROUND R116 -- UN EA, TRE MOTORI A | INTERRUTTORE. Canale di Londra nudo / canale + RSI / al
+ABTG_Londra_ORB.mq5;si;490;770701;M15;"EA ""STRATEGIA MERCATI DI LONDRA"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: nien"
+ABTG_Look.mq5;no (strumento/sonda);676;;D1;"INDICATORE ""LOOK ABTG"" - tutto-in-uno da trascinare sul grafico. | (metti in MQL5\Indicators, apri MetaEditor "
+ABTG_MaxMinNotte.mq5;si;918;770401;M15;"EA ""MAX-MIN DELLA NOTTE"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: nie"
+ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5;si;619;770411;M15;"EA ""MAX-MIN DELLA NOTTE"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: nie"
+ABTG_MaxMinNotte_DAX_Short_Ottimizzato_MFE.mq5;si;1045;750010;M15;>>> COPIA DI SOLA MISURA (R104). NON E' UNA SEDIA, NON GIRA IN | FORWARD, NON SOSTITUISCE NIENTE.
+ABTG_MaxMinNotte_DAX_Short_Ottimizzato_Vis.mq5;si;640;750411;M15;ABTG_MaxMinNotte_DAX_Short_Ottimizzato_Vis -- VARIANTE DI VISIBILITA' di ABTG_MaxMinNotte_DAX_Short_Ottimizzat
+ABTG_MaxMinNotte_Ticket.mq5;si;981;750402;M15;ABTG_MaxMinNotte_Ticket -- VARIANTE A TICKET di ABTG_MaxMinNotte v1.11 (23/10/2026) | Chiude il difetto C9 sul
+ABTG_MeanRevert.mq5;si;379;773101;H1;FADE DELL'ESTREMO: si compra il minimo di N barre e si punta al | centro del range. Lo short e' lo specchio es
+ABTG_NFP_Study.mq5;no (strumento/sonda);118;;M5;STUDIO del comportamento del NASDAQ (o altro) sull'uscita del | Non-Farm Payrolls (NFP), per capire PRIMA di c
+ABTG_Nasdaq_Apertura_US.mq5;si;2644;;H1;"EA ""APERTURA AMERICANA"" (Nasdaq / NASUSD) - MetaTrader 5 | Basato sul piano di trading ""Apertura Americana - N"
+ABTG_Nasdaq_Apertura_US_Ottimizzato.mq5;si;1385;;H1;"EA ""APERTURA AMERICANA"" (Nasdaq / NASUSD) - MetaTrader 5 | Basato sul piano di trading ""Apertura Americana - N"
+ABTG_Nasdaq_Apertura_US_PREMIGRAZIONE.mq5;si;2355;;H1;"EA ""APERTURA AMERICANA"" (Nasdaq / NASUSD) - MetaTrader 5 | Basato sul piano di trading ""Apertura Americana - N"
+ABTG_Nasdaq_Apertura_US_Pin9fca.mq5;si;2624;;H1;"EA ""APERTURA AMERICANA"" (Nasdaq / NASUSD) - MetaTrader 5 | Basato sul piano di trading ""Apertura Americana - N"
+ABTG_Nasdaq_Apertura_US_Sicuro.mq5;si;2777;;H1;"v1.03 ""SICURO"" (23/10/2026): COPIA di ABTG_Nasdaq_Apertura_US 1.02 | con TRE correzioni OPT-IN, tutte di defau"
+ABTG_Nasdaq_Apertura_US_Vis.mq5;si;2663;750250;H1;ABTG_Nasdaq_Apertura_US_Vis -- VARIANTE DI VISIBILITA' di ABTG_Nasdaq_Apertura_US 1.02 (23/10/2026) | Copia ri
+ABTG_Nasdaq_Live5m.mq5;si;1261;;H1;"EA ""NASDAQ LIVE 5m"" - variante basata sulla LIVE del 17/07/26 | (strategia apertura Nasdaq di E. Monza)."
+ABTG_Nightly.mq5;si;439;771701;H1;"EA ""NIGHTLY"" (fade box notturno) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartel"
+ABTG_Nightly_Ottimizzato.mq5;si;439;971701;H1;"EA ""NIGHTLY"" (fade box notturno) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartel"
+ABTG_Notte_Study.mq5;no (strumento/sonda);351;;M5;"STUDIO DEL MOVIMENTO NOTTURNO - ""prima i dati"". | Domanda di Claudio (05/08): ""Emiliano racconta che l'oro di"
+ABTG_NySessionRetest.mq5;si;1264;769500;H1;MOTORE NY SESSION TREND RETEST - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle
+ABTG_ORB.mq5;si;638;770601;M5;"EA ""ORB semplice"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente car"
+ABTG_ORB_Emiliano.mq5;si;1809;770631;M5;v1.01 (23/10/2026): + InpPlanAHoldRunner, InpPlanABE (default | comportamento v1.00, per i bracci di controllo
+ABTG_ORB_Fibo.mq5;si;564;770602;M5;"EA ""ORB + Fibonacci"" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente "
+ABTG_ORB_Ottimizzato.mq5;si;1483;770611;M5;"LABORATORIO parallelo dell'ORB del corso (che resta INTATTO). | Qui vivono fix e varianti misurabili; magic di"
+ABTG_ORB_Ottimizzato_Vis.mq5;si;1514;750611;M5;ABTG_ORB_Ottimizzato_Vis -- VARIANTE DI VISIBILITA' di ABTG_ORB_Ottimizzato v1.04 (23/10/2026) | Copia riga pe
+ABTG_OutOfNoise.mq5;si;1336;773500;;"EA ""OUT OF THE NOISE INTRADAY con VWAP"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente"
+ABTG_PTE.mq5;si;776;771301;H4;"EA ""PTE"" (Pro Trading Experience) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_PTE_Dashboard_Leggera.mq5;no (strumento/sonda);818;;M15;"Dashboard PTE ""versione nostra, leggera"" (07/10/2026). | SOLO VISIONE: nessun ordine, nessuna rete, nessun fil"
+ABTG_PTE_Ottimizzato.mq5;si;705;771331;H4;"EA ""PTE"" (Pro Trading Experience) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_PostNews.mq5;si;666;771201;M5;"EA ""POST-NEWS"" (ECB / FOMC press conference) - MT5 TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: nie"
+ABTG_PriceAction_AllInOne (1).mq5;no (strumento/sonda);375;;D1;Indicatore overlay price action per XAUUSD / DAX / Forex | Medie 9/21/50/200 - Bollinger - VWAP - SuperTrend
+ABTG_Pulsanti_Grafico.mq5;no (strumento/sonda);2029;;D1;"INDICATORE DI SOLA VISIONE (NON e' un EA): non apre, non | modifica e non chiude ordini; nessuna rete; nessun "
+ABTG_PunteLarry.mq5;si;1214;772301;D1;"EA di LABORATORIO ""LE PUNTE DI LARRY"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente c"
+ABTG_Relativo.mq5;si;2275;774601;;"L'EA OPERATIVO DEL CANDIDATO ""RELATIVO"" -- QUESTO APRE ORDINI. | ATTENZIONE, ED E' LA PRIMA COSA DA SAPERE:"
+ABTG_ST_MTF_Unico.mq5;no (strumento/sonda);1075;;M3;SUPERTREND MULTI-TIMEFRAME con pulsantiera + tasto UNICO. | SOLA VISIONE: nessun ordine, nessun trade, nessun 
+ABTG_ScalperClaudio.mq5;si;736;779902;;"""Scalper Claudio"" - idea di Claudio, 14/11/2026. | Descrizione di Claudio (testuale):"
+ABTG_SondaGapCash.mq5;no (strumento/sonda);1989;;M1;LA SONDA DEL GAP DELLA SESSIONE CASH -- PASSO 0 di GAPCASH_NAS. | E' UN CONTATORE, NON UN EA.
+ABTG_SondaLondonFx.mq5;si;1903;;;LA SONDA DI FREQUENZA DI LONDONFX -- E' UN CONTATORE, NON UN EA. | PASSO 0 del promosso P1 della CACCIA FREQUE
+ABTG_SondaM0PB.mq5;si;1469;;;LA SONDA DI FREQUENZA DI M0PB -- E' UN CONTATORE, NON UN EA. | PASSO 0 del promosso (9/10) della CACCIA FREQUE
+ABTG_SondaMargine.mq5;no (strumento/sonda);88;;;R114 - G-SPEC: la sonda delle specifiche margine (criteri par.4). | NON PIAZZA ORDINI, NON TRADA: al primo tic
+ABTG_SondaOrologio.mq5;si;971;777200;;LA SONDA DELL'OROLOGIO -- STRUMENTO DI MISURA, NON STRATEGIA | (metti in MQL5\Experts e compila con F7: nessun
+ABTG_SondaRelativo.mq5;si;3176;;;"LA SONDA DI CONVERGENZA DEL CANDIDATO ""RELATIVO"" -- E' UN | CONTATORE, NON UN EA. PASSO 0 del promosso (8/10) "
+ABTG_SondaRsiEmaV8.mq5;si;2294;;;"LA SONDA DI CONTEGGIO DI ""RSI + EMA CROSSOVER SIGNALS V8"". | E' UN CONTATORE, NON UN EA."
+ABTG_SondaSessione.mq5;no (strumento/sonda);167;;M1;RISPONDE A UNA DOMANDA SOLA, e la risponde coi dati: | il simbolo ha davvero un GAP fra la chiusura di ieri e
+ABTG_SondeAperture.mq5;no (strumento/sonda);269;;M1;v1.00 (23/10/2026) -- SONDA DI SOLA LETTURA. NON COMPILATA. | NESSUNA funzione di trading: non apre, non modif
+ABTG_SondeSpecifiche.mq5;no (strumento/sonda);54;;;v1.00 (24/10/2026) -- SONDA DI SOLA LETTURA. NON COMPILATA. | NESSUNA funzione di trading: legge le SPECIFICHE
+ABTG_SpreadLogger.mq5;no (strumento/sonda);1018;;;IL LOGGER DELLO SPREAD VIVO -- EA DI SOLA LETTURA. | SCOPO: costruire la mappa VERA dello spread che paghiamo 
+ABTG_SpreadOrario.mq5;no (strumento/sonda);424;;;SPREAD ORARIO MULTI-SIMBOLO v2 -- misura lo SPREAD REALE dai | TICK STORICI gia' sul disco, PER FASCIA ORARIA 
+ABTG_SpreadTick.mq5;no (strumento/sonda);300;;;MISURA LO SPREAD REALE dai TICK STORICI gia' sul disco. | PERCHE' ESISTE (la domanda che decide):
+ABTG_SupRev_CAC_H4_Ottimizzato.mq5;si;606;970915;H4;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SupRev_DAX_H1_Ottimizzato.mq5;si;606;970911;H1;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SupRev_DAX_H4_Ottimizzato.mq5;si;615;970912;H4;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SupRev_DOW_H1_Ottimizzato.mq5;si;606;970916;H1;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SupRev_DOW_H4_Ottimizzato.mq5;si;606;970914;H4;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SupRev_NAS_H1_Ottimizzato.mq5;si;652;970913;H1;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SuperEMA_Riding.mq5;no (strumento/sonda);1178;;;"PORTING IN MT5 di ""ABTG BR+EMA v1.2"" (Pine v5, 31/05/2026) piu' | le due cose che lui non ha e che Claudio ha "
+ABTG_SuperWave.mq5;si;766;770501;H4;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SuperWave_Chart.mq5;no (strumento/sonda);124;;;Disegna sul grafico gli indicatori della strategia SuperWave: | SUPERTREND (ATR 10) a 3 moltiplicatori: 3.5 (s
+ABTG_SuperWave_DAX_H4_Ottimizzato.mq5;si;599;770512;H4;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SuperWave_DOW_H1_Ottimizzato.mq5;si;774;770511;H1;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SuperWave_Dashboard 8.mq5;no (strumento/sonda);936;;M1;"INDICATORE UNICO ""SUPERWAVE"" (strategia Chiari) - tutto in uno: | 1) DASHBOARD: griglia SIMBOLI x TIMEFRAME (B"
+ABTG_SuperWave_Dashboard_v41.mq5;no (strumento/sonda);1826;;M1;"INDICATORE UNICO ""SUPERWAVE"" (strategia Chiari) - versione 4.1 | SOLA VISIONE: nessun ordine, nessuna rete, ne"
+ABTG_SuperWave_EA.mq5;si;376;990001;H4;Versione EA (backtestabile) della strategia SUPERWAVE - variante A: | DIREZIONE: Supertrend (ATR 10, molt. 3.5
+ABTG_SupertrendInvert.mq5;si;567;770801;H1;"EA ""SUPERTREND INVERT"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartell"
+ABTG_SupertrendReversal.mq5;si;794;770901;H4;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_SupertrendReversal_Multi.mq5;si;609;771001;H4;"EA ""SUPERTREND REVERSAL - MULTI (ORO/INDICI/FOREX)"" | MT5 - VERSIONE TUTTO-IN-UNO"
+ABTG_SupertrendReversal_Multi_Ottimizzato.mq5;si;573;971001;H4;"EA ""SUPERTREND REVERSAL - MULTI (ORO/INDICI/FOREX)"" | MT5 - VERSIONE TUTTO-IN-UNO"
+ABTG_SupertrendReversal_Ottimizzato.mq5;si;569;970901;H4;"EA ""SUPERTREND REVERSAL"" - MT5 - VERSIONE TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente carte"
+ABTG_TurnaroundTuesday.mq5;si;919;774201;D1;"EA DI LABORATORIO ""TURNAROUND TUESDAY"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: nessun "
+ABTG_VwapRevert.mq5;si;1755;773400;;"EA ""VWAP MEAN REVERSION"" - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle)"
+ABTG_WOL.mq5;si;520;771401;D1;"EA ""WEEKLY OPEN LINE"" (WOL) - MT5 - TUTTO-IN-UNO | (metti in MQL5\Experts e compila con F7: niente cartelle)"
+BULGE_MASTER.mq5;si;1119;20250100;H1;"BULGE_MASTER.mq5 | Consolidamento di 8 versioni dell'EA ""BULGE MULTI SIGNAL"""
