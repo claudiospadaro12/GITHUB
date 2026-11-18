@@ -1,0 +1,41 @@
+PAGINA 06 - https://www.hybridfinanceinternational.com/cookies
+Titolo: "Cookie policy". Last updated: 09/11/2026 (come pubblicato)
+
+TESTO INTEGRALE:
+
+COOKIE POLICY — Hybrid Finance (A trademark operated by PrimeFuture Consulting LLC)
+
+1. INTRODUCTION
+This Cookie Policy describes the use of cookies and similar technologies (pixels, tags, local storage) by PrimeFuture Consulting LLC on the website, landing pages and funnels used to deliver Hybrid Finance services. Non-essential cookies are activated only with the User's consent.
+
+2. WHAT COOKIES ARE
+Cookies are small text files that websites send to the User's device, where they are stored and sent back on later visits. They allow the site to work properly, to improve the browsing experience, to analyse traffic and to support advertising and remarketing.
+
+3. CATEGORIES USED
+- Essential cookies: needed for the site to work, for login and for storing cookie preferences. No consent required (legitimate interest of the controller).
+- Analytical cookies: aggregated information on how the site is used, to improve it. Consent required.
+- Marketing cookies: measurement of advertising campaigns, personalised ads and remarketing on third-party platforms (Meta, Google). Consent required.
+- Functionality cookies: saving preferences and form pre-filling. Consent required where applicable.
+
+4. THIRD-PARTY TOOLS
+- Meta Pixel (Facebook / Instagram Ads): conversion tracking and remarketing – cookies _fbp, _fbc (about 3 months) – Marketing.
+- Google Analytics (GA4): traffic and behaviour analysis – cookies _ga, _ga_* (up to 2 years) – Analytical.
+- Google Ads: conversion tracking – cookie _gcl_au (about 3 months) – Marketing.
+- Microsoft Clarity: aggregated usage analysis and session replay with masked form fields – cookies _clck (up to 1 year), _clsk (1 day) – Analytical.
+- GoHighLevel (CRM and funnels): forms, booking, session and funnel tracking – cookies ghl_* (variable) – Functional.
+- LearnWorlds: platform hosting the main website and the members-only area – login and session cookies – Essential.
+- Trustpilot (embedded widget): display of reviews – cookies trustpilot_* (variable) – Functional/Marketing.
+- Vimeo or equivalent video players: video playback – session or variable – Functional.
+- Hybrid local storage: cookie-banner preference and form pre-filling – Essential/Functional.
+These providers process data under their own privacy policies. Some are established outside the European Economic Area; transfers take place with the safeguards described in the Privacy Policy. The actual list may vary with the tools active on each page.
+
+5. CONSENT AND MANAGEMENT
+On the first visit the User can accept all cookies or refuse non-essential ones through the cookie banner. Preferences can be changed at any time through the consent tools on the site, by deleting cookies and site data in the browser, or through the browser settings (Chrome, Safari, Firefox, Edge). Refusing non-essential cookies does not prevent browsing; disabling essential cookies may affect some features.
+
+6. SCOPE
+This Policy applies to all Hybrid Finance digital properties: the main website, the landing pages and funnels used for marketing (including those on dedicated domains) and the pages connected to Hybrid services.
+
+7. CHANGES AND CONTACT
+Hybrid may modify this Policy at any time by publishing the new version with its date. For any question: info@hybridfinanceinternational.com
+
+PrimeFuture Consulting LLC — Registered Office: 16192 Coastal Highway, Lewes, DE 19958, USA (Delaware File Number 3402639) — Last updated: 09/11/2026

@@ -1,0 +1,43 @@
+FONTI INDIPENDENTI (Fase 2)
+
+A) Trustpilot - https://it.trustpilot.com/review/hybridfinanceinternational.com
+Metodo: lettura tramite strumento di riepilogo automatico (non copia a schermo di tutte le recensioni). Da verificare a schermo.
+- Punteggio riportato: 4,7 su 5. Recensioni totali riportate: 68 (42 negli ultimi 12 mesi).
+- Distribuzione riportata: 5 stelle 96%, 4 stelle 3%, 3 stelle 0%, 2 stelle 1%, 1 stella 0%.
+- Nota: la landing del sito riporta "4,8/5 · 54 recensioni". Differenza di conteggio da verificare.
+- Il profilo indica di aver risposto al 100% delle recensioni negative, di solito entro 24 ore. Non risultano inviti recenti; molte recensioni sono "Non scritta su invito".
+- Una recensione critica (2 stelle, XAUTRADER IT, 6 nov 2026), testo a schermo, frasi esatte:
+  "Per quello che ho visto finora, se avessi seguito tutti i loro segnali, il mio conto sarebbe in negativo."
+  "La cosa che mi convince meno è la gestione dei take profit."
+  Nel testo l'utente descrive: TP1/TP2/TP3 con chiusure anticipate "circa quattro trade su cinque, spesso intorno a 0,5 RR"; formazione "praticamente impossibile" da seguire per intero; live difficili da seguire.
+- Risposta firmata "Fabio Spallone, Hybrid Finance" (7 nov 2026), frasi esatte rilevanti:
+  "la maggior parte delle chiusure anticipate avviene a pochi pips dal TP1, normalmente impostato con rapporto rischio/rendimento 1:1"
+  "Il programma principale comprende circa 15 ore di lezioni; considerando gli approfondimenti ... arriviamo a 209 ore di contenuti."
+  "Non inviamo ordini pendenti da replicare automaticamente ... Questa scelta tiene conto delle regole sul copytrading previste da alcune società di conti capitalizzati."
+  "I nostri setup hanno finalità formative e non nascono come consulenza finanziaria personalizzata."
+  "La recensione, però, è anonima".
+  ATTENZIONE: la risposta dichiara 209 ore di contenuti; la landing e i Terms dichiarano "oltre 400 ore". Incoerenza da chiedere per iscritto.
+- Altre recensioni positive (testi copiati per estratto nel riepilogo): "Una sola parola: trasparenza", "Ho iniziato il percorso con Hybrid da un mese..." Non verificabili come esperienze reali (le fonti di Trustpilot dichiarano di non verificare le affermazioni).
+
+B) Ricerca web (nessun risultato specifico trovato)
+- Ricerche su "PrimeFuture Consulting" / "PrimeFuture Consulting LLC" / "Hybrid Finance" + truffa/recensioni/Reddit: NESSUNA recensione o fonte indipendente specifica trovata su questa societa.
+- Numero Delaware 3402639 e indirizzo 16192 Coastal Highway, Lewes DE: nel registro risultava un indirizzo condiviso. Un record LEI di Bloomberg per un'altra societa (Prime Number Capital LLC) riporta "C/o HARVARD BUSINESS SERVICES, INC. 16192 COASTAL HWY LEWES, Delaware" come indirizzo di riferimento; anche una societa (GETFUTURE, INC.) risulta con "16192 Coastal Highway, Lewes, DE" come indirizzo principale. Indica un indirizzo di servizio di registered agent usato da piu societa: NON e di per se una prova di irregolarita, ma significa che l'indirizzo non indica una sede operativa.
+- Delaware Division of Corporations (ricerca diretta del numero 3402639): NON VERIFICATO (non aperto il registro ufficiale in questa sessione).
+- Autorita italiana (CONSOB): ricerca web "Consob abusivismo Hybrid Finance Spallone" senza risultati su Hybrid Finance. Il sito dichiara esso stesso (Disclaimer 2.3) che PrimeFuture "non e autorizzata, registrata o supervisionata" da alcun regolatore. La lista completa degli avvisi CONSOB NON e stata consultata in questa sessione.
+- Fabio Spallone: ricerca web senza profili professionali verificabili collegati a Hybrid. NON TROVATO.
+- hybridconsulting.biz: NON LEGGIBILE nel browser (vedi 01_indice.md).
+
+C) Osservazioni sul testo del sito (frasi esatte, con fonte)
+1. Landing: "Access capital without paying any challenge or fee" (home) vs Terms 2.2: "Where a service is offered against payment to Hybrid, the price ... stated in that offer." -> il sito non chiarisce quali servizi siano a pagamento. Ambiguo.
+2. Landing Step 2: "Replica il tuo conto in automatico" e home: "a capitalised account ... that mirrors your own trades" vs Disclaimer 2.2: "Nothing constitutes ... copy trading" e Trustpilot (risposta): "Non inviamo ordini pendenti da replicare automaticamente". Descrizione del meccanismo non chiara. Ambiguo.
+3. Landing: "Costo challenge: 0€" e "Trustpilot 54 recensioni" vs riepilogo Trustpilot "68 recensioni". Da verificare.
+4. Ore di formazione: "Oltre 400 ore" (landing, Terms 2.1) vs "circa 15 ore di lezioni ... 209 ore di contenuti" (risposta su Trustpilot). CONTRADDIZIONE da chiarire.
+5. Hybrid Allocation: Terms 4.1-4.2 e Disclaimer 5.1: il capitale e fornito "exclusively by third-party companies", NON NOMINATE in nessuna pagina letta. Il nome del fornitore del conto capitalizzato NON TROVATO.
+6. Termini 5.3 e 6.3: divieto di recensioni "false, misleading or defamatory, or intended to damage Hybrid without a legitimate basis", penale di €10.000 per violazione del divieto di riproduzione dei contenuti. CHIARO. (Segnale da valutare: le clausole limitano la critica pubblica.)
+7. Garanzia 1.000€ (Terms 7): richiede "documentation proving actual use" e "one-to-one verification call"; "may reject requests ... based on mere knowledge or research". CHIARO.
+8. Disclaimer 2.3 e Terms 3.2: "not authorised, registered or supervised by any financial regulator". CHIARO.
+9. Landing: "Il profitto e garantito? No..." e "Non possiamo garantirti i risultati" -> presenti avvertenze sul rischio (segnale positivo, ma generiche). CHIARO.
+10. Landing: "Capitali limitati questo mese." e "SELEZIONE APERTA", "Access is limited to keep support personalised" (home). Urgenza di scarsita. CHIARO.
+11. Landing: "Trustpilot 4,8/5 - 300+ trader - 3 anni" vs "Membri attivi 300+" con contatore che in una lettura successiva mostrava 299+. Non e un errore grave, ma i numeri non sono verificabili da fonti indipendenti.
+12. Privacy: trattamento di "financial availability" (disponibilita finanziarie) raccolto nei form; trascrizione automatica delle chiamate con AI di terze parti; assistente virtuale su WhatsApp. Nessun DPO. CHIARO.
+13. Il modulo di registrazione richiede nome, email, telefono prima del video. Nessun dato inserito.

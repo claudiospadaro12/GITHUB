@@ -1,0 +1,13 @@
+HYBRID - analisi sito (sola lettura)
+Data/ora (Europa/Roma): 2026-11-18 19:47
+Richiesta: capire cosa offre il sito Hybrid, a quali condizioni, e segnali di allarme.
+
+Cosa e stato fatto:
+- Aperta la pagina pubblica https://go.hybridconsulting.biz/f/cc-h2/index.html (senza parametri di tracciamento).
+- Letto testo visibile, espanse le FAQ, aperta la scheda "Il conto nel dettaglio" e "Incluso col conto gratuitamente".
+- Cliccato "Rifiuta tutti" sul banner cookie (scelta piu riservata).
+- NON compilato il modulo "Accedi al video gratuito", NON cliccato pulsanti di iscrizione o "Guarda il video".
+- Letti i link legali presenti nel footer: Disclaimer, Termini e Condizioni, Privacy Policy, Cookie Policy (dominio hybridfinanceinternational.com).
+- Letta la home hybridfinanceinternational.com/home.
+- Cercate fonti indipendenti (web search) e aperta la pagina Trustpilot del dominio hybridfinanceinternational.com.
+- Tentato hybridconsulting.biz: non leggibile (vedi 01_indice.md).
