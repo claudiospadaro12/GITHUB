@@ -14,7 +14,7 @@
 | Luna AI (4DD) | forex | CON LIMITI | DD 22,7%, 10/12 positivi; saldo min 3.174 (a 4k) | tick -83%; costi FTMO zona grigia; orari GMT non verificati |
 | Apex Trader (Conservative; Ultra) | forex, **griglia** | CON LIMITI | DD 27,1% / 32,9%; 11/12 e 10/12; giorni a -23% | griglia; Cons e Ultra correlati 0,97 (stessa strategia) |
 
-**Correlazione giornaliera con il trio oro** (2013/2020/2025): Apex da 0,00 a +0,08; Daytrade Pro +0,09 a +0,19; Luna -0,03 a -0,01; Stability -0,06 a +0,08 (Stability con Apex 0,25). Giorni di perdita in comune: Daytrade Pro 24-31 osservati contro 14-16 attesi (si perde insieme piu di quanto farebbe il caso). Correlazione fra i set oro tra loro: non riportata in questo quadro.
+**Correlazione giornaliera con il trio oro** (2013/2020/2025): Apex da 0,00 a +0,08; Daytrade Pro +0,09 a +0,19; Luna -0,03 a -0,01; Stability -0,06 a +0,08 (Stability con Apex 0,25). Giorni di perdita in comune: Daytrade Pro 24-31 osservati contro 14-16 attesi. **Causa nota (`CONFRONTO_TRIO_ORO_FOREX_4K_2026-11-05.md` sez. 4): Daytrade Pro opera anche XAUUSD; senza la gamba oro la correlazione col trio e 0,00-0,05, la sola gamba oro e a +0,48-+0,66; nel 2025 tutto l'utile di Daytrade Pro viene dall'oro (senza oro Max9 circa -22, Max50 circa -298).** Quindi Daytrade Pro NON e un diversificatore forex puro: la parte che lo diversifica dall'oro non ha dato utile nel 2025. Correlazione fra i set oro tra loro: non riportata in questo quadro.
 
 ## 2. Famiglie chiuse senza candidati
 | Famiglia | Misura | Esito |
