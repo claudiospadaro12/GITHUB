@@ -28,3 +28,12 @@ filtro EMA {acceso; spento} x corpo ampio {si; no} x buffer SL {5; 10 punti} x u
 - **Porte, per ogni simbolo e variante:** in ENTRAMBI i periodi (2015-17 e 2018-20): netto > 0, PF netto >= 1,20, t >= 2,0, operazioni >= 100, >= 2 anni su 3 in profitto. Contatore looks: 2 simboli x 2 varianti = 4.
 - **Previsioni:** almeno un simbolo+variante supera le porte in entrambi i periodi: **8%**; l'oro e l'EURUSD hanno PF netto < 1 in entrambi i periodi: **75%**; quanto sopra e quanto troviamo sul Nasdaq indicano che l'ORB 30' non ha vantaggio generale: **80%**.
 - **Limiti:** l'ORB del Toolkit e disegnato per indici; su oro e forex e un'estensione esplorativa. Orologio FTMO assunto come da CLAUDE.md (non diagnosticato sul picco di apertura).
+
+### Risultato dell'estensione (18/11/2026; FTMO 2015-2017 e 2018-2020; `ORB_TOOLKIT_MULTI_RISULTATI.txt`)
+| Simbolo, uscita | 2015-17: n / PF / t | 2018-20: n / PF / t | Esito |
+|---|---|---|---|
+| XAUUSD, R/R 2 | 579 / 0,60 / -4,63 | 632 / 0,77 / -2,26 | NO |
+| XAUUSD, EMA21 | 579 / 0,48 / -6,09 | 632 / 0,66 / -3,37 | NO |
+| EURUSD, R/R 2 | 673 / 0,77 / -2,62 | 695 / 0,95 / -0,43 | NO |
+| EURUSD, EMA21 | 673 / 0,71 / -3,22 | 695 / 0,73 / -3,07 | NO |
+**Nasdaq (gia fatto): 0/24, PF 0,74-0,83, t fino a -2,76.** In totale 3 simboli su 3 in perdita sistematica (t negativi fino a -6): **l'ORB a 30 minuti del Toolkit, con le regole scritte, non ha vantaggio su Nasdaq, oro ed EURUSD (2015-2020)**. Previsioni: almeno un simbolo passa (8%) -> NO; oro ed EURUSD PF < 1 in entrambi i periodi (75%) -> si (unica eccezione parziale EURUSD R/R 2 nel 2018-20: PF 0,95, t -0,43); ORB 30' senza vantaggio generale (80%) -> si. **Non si prova l'inversione (fade) come scoperta**: sarebbe una famiglia nuova con costi. Mancano S&P 500 (esempio del Toolkit), DAX, Dow e gli altri forex (dati da procurare).
