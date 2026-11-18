@@ -7,3 +7,7 @@ Natura: solo tester (BCM portabile, Modello 1, XAUUSD nativo), una passata, ness
 ## Previsioni (scritte ora)
 - CONFERMATO: **30%**. NON CONFERMATO: **60%**. NON VALUTABILE: **10%**.
 - Se e CONFERMATO, il DD equity resta sotto il 15%: **70%**.
+
+## Risultato (18/11/2026; 1 passata OK; `PUNTELARRY_2024_26_dati/`)
+**41 operazioni, rendimento +3,87%, PF 1,28, t 0,57, DD equity 5,94%; 2024 +1,04%, 2025 +0,08%, 2026 (gen-ott) +2,92% (72% del totale).** Porte scritte prima: PF >= 1,20 (si), rendimento > 0 (si), >= 8 operazioni (si, 41) -> **CONFERMATO come indizio**. Previsioni: CONFERMATO (30%) -> si; DD sotto il 15% (70%) -> si.
+**Lettura onesta:** PunteLarry ha ora PF > 1,2 in **tre finestre separate dell'oro**: 2005-14 (1,43), 2015-23 (1,66), 2024-26 (1,28). Ma i guadagni sono piccoli (+3,9% in 2,8 anni) e ciascuna finestra ha t < 1,3: combinando le tre (Stouffer su t 0,86, 1,21, 0,57) Z ~ 1,5, p unilaterale ~ 0,06: **suggestivo, non significativo**. Il 2025 e quasi zero e il 2026 pesa il 72%. Non si promuove: serve un secondo mercato (forex/indici) o i tick reali. Modello 1, una passata per finestra.
