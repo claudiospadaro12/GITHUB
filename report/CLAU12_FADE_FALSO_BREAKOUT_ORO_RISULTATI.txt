@@ -1,0 +1,26 @@
+--- SELEZIONE 2015-2017 (24 set): n, netto EUR, PF, t ---
+PD X0.10 W 30 rr1 n= 160 netto   -1029 PF 0.68 t -2.19 
+PD X0.10 W 30 rr2 n= 159 netto    -898 PF 0.75 t -1.54 
+PD X0.10 W 60 rr1 n= 204 netto   -1111 PF 0.73 t -2.02 
+PD X0.10 W 60 rr2 n= 202 netto   -1276 PF 0.72 t -1.94 
+PD X0.10 W120 rr1 n= 268 netto   -1477 PF 0.73 t -2.27 
+PD X0.10 W120 rr2 n= 266 netto   -1931 PF 0.69 t -2.54 
+PD X0.25 W 30 rr1 n=  28 netto    -209 PF 0.74 t -0.69 
+PD X0.25 W 30 rr2 n=  28 netto    -176 PF 0.78 t -0.52 
+PD X0.25 W 60 rr1 n=  47 netto    -439 PF 0.65 t -1.23 
+PD X0.25 W 60 rr2 n=  47 netto    -374 PF 0.71 t -0.95 
+PD X0.25 W120 rr1 n=  87 netto    -257 PF 0.88 t -0.53 
+PD X0.25 W120 rr2 n=  87 netto    -240 PF 0.89 t -0.46 
+AS X0.10 W 30 rr1 n= 273 netto   -1247 PF 0.77 t -1.95 
+AS X0.10 W 30 rr2 n= 272 netto   -1377 PF 0.78 t -1.82 
+AS X0.10 W 60 rr1 n= 383 netto   -2073 PF 0.73 t -2.80 
+AS X0.10 W 60 rr2 n= 380 netto   -2025 PF 0.76 t -2.29 
+AS X0.10 W120 rr1 n= 487 netto   -2275 PF 0.76 t -2.68 
+AS X0.10 W120 rr2 n= 484 netto   -2407 PF 0.77 t -2.43 
+AS X0.25 W 30 rr1 n=  45 netto    -346 PF 0.74 t -0.88 
+AS X0.25 W 30 rr2 n=  45 netto    -476 PF 0.67 t -1.08 
+AS X0.25 W 60 rr1 n=  84 netto    -748 PF 0.66 t -1.56 
+AS X0.25 W 60 rr2 n=  84 netto    -857 PF 0.63 t -1.64 
+AS X0.25 W120 rr1 n= 142 netto    -977 PF 0.71 t -1.68 
+AS X0.25 W120 rr2 n= 142 netto   -1360 PF 0.61 t -2.28 
+passano la selezione: 0 | candidati: NESSUNO

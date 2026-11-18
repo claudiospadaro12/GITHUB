@@ -21,3 +21,9 @@
 - Almeno un candidato passa la validazione: **15%**.
 - Nessun finalista: **85%**. Se passa, il PF netto in validazione sara < 1,5: **75%**.
 - Costo: l'oro ha ~0,66 USD/oncia a operazione; con R tipico 2-4 USD pesa 15-30% di R: e il motivo principale per cui prevedo la chiusura.
+
+## 4. Risultato (18/11/2026; dati FTMO M1 2015-2020; output completo in `CLAU12_FADE_FALSO_BREAKOUT_ORO_RISULTATI.txt`)
+- **Selezione 2015-2017: 0 set su 24 passano.** Tutti e 24 sono in perdita netta (PF netto 0,61-0,89); i piu negativi hanno t -2,5/-2,8 (AS X0,10 W60 rr1 t -2,80; PD X0,10 W120 rr2 t -2,54). Validazione 2018-2020: **non eseguita** (nessun candidato), il periodo non e stato toccato.
+- **Famiglia CHIUSA**, nessuna regola modificata. Previsioni: >=1 set passa la selezione (55%) -> NO; >=1 candidato passa la validazione (15%) -> NO; nessun finalista (85%) -> si.
+- Lettura (descrittiva, non una nuova ipotesi): il costo pesa piu di meta della perdita (es. PD X0,10 W30 rr1: 160 operazioni x ~3,8 EUR = ~600 EUR su -1.029 netti), ma anche al lordo il segno e negativo. **Non si prova l'inversione (entrare nel verso del breakout) come "scoperta" dalla sola perdita del fade: sarebbe una famiglia nuova con 24 looks in piu, e somiglia al breakout di Wim, cioe non scorrelata.**
+- Contatore looks famiglia B: 24 (0 passano).
