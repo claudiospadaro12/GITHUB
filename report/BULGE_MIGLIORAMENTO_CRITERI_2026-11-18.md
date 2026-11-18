@@ -21,3 +21,15 @@ Su tutte le 24 celle (6 cross x 4 anni) per ogni variante si sommano le operazio
 - Le uscite a tempo riducono il numero di vincenti (taglio di vincite lente): **70%**.
 ## Limiti da dichiarare
 Barre da 1 minuto (non tick), un percorso per anno, 6 cross su 22, la Guardian spenta, ADX/ATR/kill switch come da default (non necessariamente uguali al set sul demo), spread e commissioni del tester.
+
+## Risultato (18/11/2026; 120 passate su 120 OK; dati in `BULGE_TS_dati/RISULTATI_BULGE_TS.csv`; PF aggregato = somma vincite / somma perdite lorde dei report, 6 cross x 2016/2019/2022/2025)
+| Variante | Operazioni | Netto EUR | PF aggr. | PF per anno 2016/2019/2022/2025 | Vincenti |
+|---|---|---|---|---|---|
+| **V0 (default)** | 2.466 | -10.016 | **0,765** | 0,67 / 0,67 / 0,81 / 0,91 | 75% |
+| TS2 (2 ore) | 2.582 | -9.774 | 0,666 | 0,62 / 0,54 / 0,70 / 0,81 | 50% |
+| TS4 (4 ore) | 2.543 | -10.466 | 0,705 | 0,63 / 0,66 / 0,68 / 0,85 | 56% |
+| TS8 (8 ore) | 2.514 | -9.962 | 0,754 | 0,67 / 0,67 / 0,76 / 0,93 | 64% |
+| SL2 (stop 2 ATR) | 2.499 | -15.719 | 0,747 | 0,69 / 0,61 / 0,80 / 0,88 | 67% |
+**Verdetto con le regole scritte: NESSUNA VARIANTE MIGLIORA** (nessuna soddisfa (a) PF >= V0+0,15 ne (b) PF > 1; migliorano in 0-1 anni su 4). **V0 da solo ha PF 0,77**: Bulge non ha vantaggio nemmeno nel tester ideale (barre da 1 minuto, 6 cross del suo backtest di riferimento), in linea con il demo (PF 0,76 su 699 operazioni) e con la Sala del Consiglio (forex H1 PF 1,03, non dimostrato). Per cross (V0, 4 anni): GBPUSD 0,94, GBPJPY 0,84, AUDUSD 0,81, NZDJPY 0,76, NZDCAD 0,70, CADJPY 0,60: **nessun cross sopra 1**.
+Previsioni vs esito: V0 < 1,00 (50%) -> si; almeno una TS migliora (35%) -> no; nessuna migliora (40%) -> si; SL2 migliora (15%) -> no; PF >= 1,20 (12%) -> no; le uscite a tempo riducono i vincenti (70%) -> si (75% -> 50/56/64%).
+**Lezione sul metodo:** il gradiente "piu dura, peggio va" visto sul demo era in gran parte **effetto di selezione** (un trade che chiude presto e per definizione uno che ha preso subito il target; tagliare a tempo non lo trasforma): l'ipotesi 1 dell'analisi sul demo NON si conferma. Il backtest di riferimento di Claudio (PF 1,599, qualita storico 40%, nessun IS/OOS) non e riprodotto da questo tester.
