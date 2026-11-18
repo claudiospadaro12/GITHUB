@@ -1,0 +1,20 @@
+--- ROUND 2: selezione su DAX 2019-01..2020-06 (P1) e DAX 2024 (P3); punti equiv. 12.000 ---
+boxA val=S stop=S30 vol=0 | P1 n239    -22 PF0.99 | P3 n188   +367 PF1.11 | tot t+0.42 vinc 53% 
+boxA val=S stop=S30 vol=1 | P1 n203   +152 PF1.05 | P3 n172   +255 PF1.08 | tot t+0.52 vinc 53% 
+boxA val=S stop=OPP vol=0 | P1 n239   +363 PF1.09 | P3 n188    -52 PF0.99 | tot t+0.30 vinc 61% 
+boxA val=S stop=OPP vol=1 | P1 n203   +425 PF1.12 | P3 n172   -205 PF0.95 | tot t+0.22 vinc 62% 
+boxA val=L stop=S30 vol=0 | P1 n298    +17 PF1.00 | P3 n227   +458 PF1.11 | tot t+0.52 vinc 53% 
+boxA val=L stop=S30 vol=1 | P1 n258   +202 PF1.05 | P3 n210   +334 PF1.08 | tot t+0.62 vinc 53% 
+boxA val=L stop=OPP vol=0 | P1 n298   +291 PF1.06 | P3 n227    +95 PF1.02 | tot t+0.34 vinc 62% 
+boxA val=L stop=OPP vol=1 | P1 n258   +521 PF1.12 | P3 n210    -69 PF0.98 | tot t+0.42 vinc 62% 
+boxB val=S stop=S30 vol=0 | P1 n217   +650 PF1.21 | P3 n162   -226 PF0.93 | tot t+0.54 vinc 53% 
+boxB val=S stop=S30 vol=1 | P1 n187   +654 PF1.24 | P3 n141   -315 PF0.89 | tot t+0.46 vinc 53% 
+boxB val=S stop=OPP vol=0 | P1 n217  +1328 PF1.42 | P3 n162   -312 PF0.91 | tot t+1.10 vinc 62% 
+boxB val=S stop=OPP vol=1 | P1 n187  +1114 PF1.39 | P3 n141   -384 PF0.87 | tot t+0.83 vinc 62% 
+boxB val=L stop=S30 vol=0 | P1 n277   +822 PF1.21 | P3 n205    -94 PF0.98 | tot t+0.83 vinc 54% 
+boxB val=L stop=S30 vol=1 | P1 n245   +840 PF1.25 | P3 n180   -265 PF0.92 | tot t+0.70 vinc 54% 
+boxB val=L stop=OPP vol=0 | P1 n277  +1305 PF1.31 | P3 n205   -264 PF0.94 | tot t+1.00 vinc 62% 
+boxB val=L stop=OPP vol=1 | P1 n245  +1107 PF1.29 | P3 n180   -415 PF0.89 | tot t+0.69 vinc 62% 
+passano: 0 
+filtro volatilita migliore in 4 coppie su 8
+validita 18:30 migliore in 5 coppie su 8
