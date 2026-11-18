@@ -18,3 +18,7 @@
 ## 3. Previsioni (scritte ora)
 - >= 1 set passa la selezione: **30%**; candidato passa la validazione: **12%**; finalista supera OOS 2021-24: **5%**.
 - Se passa qualcosa, sara a favore del lato long (il Nasdaq 2015-2024 e salito molto): **80%**; e quindi la scorrelazione con l'oro andra verificata, non assunta.
+
+## 4. Risultato (18/11/2026; usato SOLO 2015-2017; output in `CLAU12_NASDAQ_BREAKOUT_D1_RISULTATI.txt`)
+- **Selezione: 0 set su 8 passano.** PF netto 0,86-1,20, t da -0,78 a +0,77 (nessuno vicino a 2,0); 70-181 operazioni nei 3 anni. I set con rr 3 sono lievemente positivi (PF 1,01-1,20) ma statisticamente indistinguibili da zero. Validazione, OOS 2021-24 e hold-out: non toccati. **Famiglia chiusa**, regole invariate. Previsioni: >=1 set passa la selezione (30%) -> NO; candidato passa validazione (12%) -> NO; finalista (5%) -> no.
+- Nota: il motore e nostro, non quello di Wim; lo stesso schema aveva gia fallito sull'oro (80 set, disegni 0-3) e poi non e un vantaggio generico della struttura "livello D1 + stop + TP largo". Il vantaggio di Wim non e quindi nella struttura ma nei suoi dettagli (non noti) o nel periodo/strumento. Contatore looks: 8 (0 passano).
