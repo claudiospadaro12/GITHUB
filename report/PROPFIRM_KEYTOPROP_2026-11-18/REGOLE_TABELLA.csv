@@ -1,0 +1,68 @@
+Domanda;Risposta breve;Citazione esatta;Indirizzo pagina;Data lettura;Stato
+Profit target 1-step;8%;"Il tuo obiettivo è dell'8%, ovvero 800 dollari.";https://keytoprop.com/one-step-challenges/;2026-11-18 18:45;CHIARO
+Profit target 2-step;Fase 1 10%, fase 2 non indicata;Tabella Profit Target = 10%;https://keytoprop.com/two-step-challenges/;2026-11-18 18:45;AMBIGUO
+Perdita giornaliera 1-step;2% del saldo iniziale;Prelievo giornaliero 2% (tabella confronto);https://keytoprop.com/how-it-works/;2026-11-18 18:45;CHIARO
+Perdita giornaliera 2-step;5%;Prelievo giornaliero 5% (tabella confronto);https://keytoprop.com/how-it-works/;2026-11-18 18:45;CHIARO
+Calcolo perdita giornaliera;Su saldo iniziale, include P/L non realizzato, reset 23:59 UTC+3;"Saldo iniziale * Perdita giornaliera/100 ≥ Valore impostato";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Max drawdown 1-step;4% trailing, non scende;"Il tuo limite di perdita è fissato al 4% al di sotto del valore massimo raggiunto dal tuo conto e può solo aumentare.";https://keytoprop.com/one-step-challenges/;2026-11-18 18:45;CHIARO
+Max drawdown 2-step;9%, statico o trailing non chiaro;Max Drawdown 9% (tabella 2-step);https://keytoprop.com/two-step-challenges/;2026-11-18 18:45;AMBIGUO
+Giorni minimi;5 giorni (1-step: 4 in attivo);Min. Trading Days 5 days;https://keytoprop.com/two-step-challenges/;2026-11-18 18:45;CHIARO
+Limite di tempo;1-step 30 giorni,  2-step 180 giorni per fase;"Hai 30 giorni per le sfide a 1 fase e 180 giorni per ciascuna fase delle sfide a 2 fasi.";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Regola di consistenza;25% 1-step, 2-step non chiaro;"For some Challenges, we apply the Consistency Rule.";https://keytoprop.com/faq/;2026-11-18 18:45;AMBIGUO
+Dimensioni conto;1-step 10k-100k, 2-step 5k-100k;Tabelle sfide;https://keytoprop.com/one-step-challenges/ e /two-step-challenges/;2026-11-18 18:45;CHIARO
+Capitale massimo;250.000 $ via scaling (2-step);"fino a 250.000 dollari di capitale finanziato tramite il nostro Piano di Scalabilità";https://keytoprop.com/;2026-11-18 18:45;CHIARO
+Piattaforma;Non indicata;NON SPECIFICATO;https://keytoprop.com/faq/;2026-11-18 18:45;NON SPECIFICATO
+Broker;Key to Markets International Limited;"Key to Prop è un pacchetto di servizi offerto in esclusiva da KEY TO MARKETS INTERNATIONAL Limited.";footer;2026-11-18 18:45;CHIARO
+Fuso orario server;Non indicato, usato UTC+3;"azzerato alle 23:59 (UTC+3)";https://keytoprop.com/faq/;2026-11-18 18:45;AMBIGUO
+Hedging;Consentito sullo stesso conto;"Yes, we allow hedging on the same account";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Netting;Non indicato;NON SPECIFICATO;tutte;2026-11-18 18:45;NON SPECIFICATO
+Elenco simboli;Categorie note, elenco non indicato;"Forex, Indices, Commodities, Metals, Stocks (CFDs), and Cryptocurrencies.";https://keytoprop.com/faq/;2026-11-18 18:45;NON SPECIFICATO
+Leva 1-step;1:30 tutti gli strumenti;"maximum leverage is 1:30 for all instruments";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Leva 2-step;FAQ Forex 1:50 vs pagina 1:200;"Forex: up to 1:50" vs "1:200";https://keytoprop.com/faq/ e /how-it-works/;2026-11-18 18:45;CONTRADDIZIONE
+Commissioni;Forex e metalli 6 $ a lotto,  crypto 0,1%;"Forex & Metals: $6 per lot";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Spread;Valori non indicati;"Live spreads are available directly within the trading platform";https://keytoprop.com/faq/;2026-11-18 18:45;NON SPECIFICATO
+Swap;Applicati, dipendono da strumento;"Yes, depending on the instrument and platform.";https://keytoprop.com/faq/;2026-11-18 18:45;AMBIGUO
+Limiti di lotto;Lotti aperti illimitati,  limiti per ordine non indicati;Max Open Lots Unlimited;https://keytoprop.com/one-step-challenges/;2026-11-18 18:45;CHIARO
+EA 1-step;Vietati;"not permitted on the 1-Step Challenge, including the Funded Stage";https://keytoprop.com/trading-rules/;2026-11-18 18:45;CHIARO
+EA 2-step;Consentiti se trade o risk manager di terze parti;"as long as it is a trade or risk manager";https://keytoprop.com/trading-rules/;2026-11-18 18:45;AMBIGUO
+Scalping;Vietato,  posizione aperta almeno 60 secondi;"Maintain at all times any position open for at least 60 seconds";https://keytoprop.com/trading-rules/;2026-11-18 18:45;CHIARO
+HFT, arbitraggio, straddling;Vietati;"It is prohibited to perform any sort of High-Frequency Trading, Arbitrage or Straddling strategies";https://keytoprop.com/trading-rules/;2026-11-18 18:45;CHIARO
+Martingala e grid;Non menzionati;nessuna citazione;tutte;2026-11-18 18:45;NON SPECIFICATO
+Copy trading;Vietato copiare altri trader o segnali MQL5,  copy EA consentiti;"directly copying trades from other traders within the Provider or using MQL5 signal services is prohibited.";https://keytoprop.com/trading-rules/;2026-11-18 18:45;CHIARO
+Stesso EA su più conti;Un solo profilo per cliente,  regola EA multi-conto non esplicita;"Clients are allowed to maintain only one (1) account profile.";https://keytoprop.com/trading-rules/;2026-11-18 18:45;NON SPECIFICATO
+Limite ordini/richieste al giorno;Nessun numero,  controllo su ordini anomali;"an unusually large number of orders/instructions ... within an unreasonably short period of time";https://keytoprop.com/trading-rules/;2026-11-18 18:45;NON SPECIFICATO
+Esecuzione identica su più conti;Non trattata;nessuna citazione;tutte;2026-11-18 18:45;NON SPECIFICATO
+Trading sulle news;Vietato lo news straddling,  finestre non indicate;"We prohibit high-frequency trading, news straddling, latency arbitrage";https://keytoprop.com/faq/;2026-11-18 18:45;AMBIGUO
+Posizioni overnight e weekend;Colonne icona non leggibili;tabelle Hold Positions Overnight / weekend senza testo;https://keytoprop.com/two-step-challenges/;2026-11-18 18:45;NON SPECIFICATO
+Ordini pendenti weekend;Non indicato;nessuna citazione;tutte;2026-11-18 18:45;NON SPECIFICATO
+Chiusura fine giornata;Non obbligatoria per quanto letto;reset 23:59 UTC+3;https://keytoprop.com/faq/;2026-11-18 18:45;AMBIGUO
+Orari di trading;24/5 generale;"Trading is generally allowed 24/5";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Split 1-step;80%;"Divisione degli utili dell'80%";https://keytoprop.com/one-step-challenges/;2026-11-18 18:45;CHIARO
+Split 2-step;70% fino a 90% (Classic, Lite),  70% fino a 85% (Elite+);Tabella 2-step "70% up to 85%";https://keytoprop.com/two-step-challenges/;2026-11-18 18:45;CHIARO
+Frequenza payout;1-step ogni 5%, 2-step ogni 5 giorni di trading;"You can request your first payout five trading days after your first funded trade";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Giorni di elaborazione payout;Martedì e venerdì;"We process payouts twice weekly, on Tuesdays and Fridays.";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Minimo payout;1,5% saldo iniziale e minimo 105 $;"Payouts must equal at least 1.5% of your initial balance and not fall below $105.";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Tempi di pagamento;FAQ 24 h lavorative + 2-3 giorni vs rimborso 3 giorni + 5-7 giorni;"Approved within 24 business hours." vs "ulteriori 5-7 giorni lavorativi";https://keytoprop.com/faq/ e /refund-policy/;2026-11-18 18:45;CONTRADDIZIONE
+Metodi e tasse;Accredito su stessi canali di versamento,  tasse non indicate;"sui portafogli elettronici e sulle coordinate bancarie utilizzate dal Cliente";https://keytoprop.com/refund-policy/;2026-11-18 18:45;NON SPECIFICATO
+Requisito payout;Nessuna posizione aperta;"You must have no open trades when you submit a payout request.";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Dopo una violazione;Penale sul payout o fallimento sfida;"apply a penalty to any potential payout";https://keytoprop.com/trading-rules/;2026-11-18 18:45;AMBIGUO
+Rimborso quota 1-step;Dopo il 3° payout (testo) vs solo fase di valutazione (tabella);"your fee is refunded with your 3rd payout";https://keytoprop.com/faq/;2026-11-18 18:45;CONTRADDIZIONE
+Prezzo 1-step;68 $ (10k) fino a 500 $ (100k);"Nova 10 ... 68 $";https://keytoprop.com/one-step-challenges/;2026-11-18 18:45;CHIARO
+Prezzo 2-step;110 $ (5k) fino a 650 $ (100k);"Classic ... $110";https://keytoprop.com/two-step-challenges/;2026-11-18 18:45;CHIARO
+Rimborso iscrizione;Non rimborsabile dopo invio credenziali;"we can't cancel your purchase or refund it.";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Sconti;Non indicati;nessuna citazione;tutte;2026-11-18 18:45;NON SPECIFICATO
+Costo di reset / rinnovo;Non indicato;"Your account then resets to $10,000";https://keytoprop.com/one-step-challenges/;2026-11-18 18:45;NON SPECIFICATO
+Costi nascosti;Non indicati,  chiusura gratuita;"Non è previsto alcun costo aggiuntivo per la chiusura del conto";https://keytoprop.com/refund-policy/;2026-11-18 18:45;NON SPECIFICATO
+Cause di perdita immediata;Rischio eccessivo, EA/copy vietati, scalping, manipolazione;"Risking 50% or more of drawdown limits in a single trade";https://keytoprop.com/trading-rules/;2026-11-18 18:45;CHIARO
+Stop loss obbligatorio;Su ogni trade;"All trades must include a Stop Loss";https://keytoprop.com/faq/;2026-11-18 18:45;CHIARO
+Revisione manuale;Termine assente,  discrezione Key to Prop;"at the sole discretion of Key to Prop";https://keytoprop.com/trading-rules/;2026-11-18 18:45;NON SPECIFICATO
+Modifica regole;Sì, in qualsiasi momento, con email;"We reserve the right to modify/amend/enhance the trading rules";https://keytoprop.com/trading-rules/;2026-11-18 18:45;CHIARO
+Rifiuto payout;Penale o cancellazione scaling,  motivi non indicati;"Reject or cancel scaling.";https://keytoprop.com/trading-rules/;2026-11-18 18:45;AMBIGUO
+Inattività;Sospensione dopo 30 giorni;"Any trading account inactive for 30 days will be automatically suspended.";https://keytoprop.com/trading-rules/;2026-11-18 18:45;CHIARO
+Nome legale;KEY TO MARKETS INTERNATIONAL Limited;"KEY TO MARKETS INTERNATIONAL Limited, 6th floor, Tower 1, Nexteracom Building, Ebene 72201 – Mauritius";footer;2026-11-18 18:45;CHIARO
+Paese;Mauritius;come sopra;footer;2026-11-18 18:45;CHIARO
+Anno fondazione;Non indicato,  "oltre 15 anni" dichiarati;"Con oltre 15 anni di esperienza alle spalle";https://keytoprop.com/about-us/;2026-11-18 18:45;NON SPECIFICATO
+Licenze dichiarate;FSC Mauritius, reg. 169425, lic. GB19024503 (non verificato);"licenza numero GB19024503";footer;2026-11-18 18:45;CHIARO
+Paesi esclusi;USA, Iran, Corea del Nord e altri;"non offre alcun servizio ai residenti di Stati Uniti, Iran, Corea del Nord";footer;2026-11-18 18:45;CHIARO
+Recensioni;Dichiarate dal sito, non verificate;"Direttamente da Trustpilot";https://keytoprop.com/;2026-11-18 18:45;CHIARO
+Contatti;support@keytoprop.com;"support@keytoprop.com";https://keytoprop.com/contact-us/;2026-11-18 18:45;CHIARO
