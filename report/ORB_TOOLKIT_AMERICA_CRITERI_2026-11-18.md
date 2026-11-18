@@ -37,3 +37,10 @@ filtro EMA {acceso; spento} x corpo ampio {si; no} x buffer SL {5; 10 punti} x u
 | EURUSD, R/R 2 | 673 / 0,77 / -2,62 | 695 / 0,95 / -0,43 | NO |
 | EURUSD, EMA21 | 673 / 0,71 / -3,22 | 695 / 0,73 / -3,07 | NO |
 **Nasdaq (gia fatto): 0/24, PF 0,74-0,83, t fino a -2,76.** In totale 3 simboli su 3 in perdita sistematica (t negativi fino a -6): **l'ORB a 30 minuti del Toolkit, con le regole scritte, non ha vantaggio su Nasdaq, oro ed EURUSD (2015-2020)**. Previsioni: almeno un simbolo passa (8%) -> NO; oro ed EURUSD PF < 1 in entrambi i periodi (75%) -> si (unica eccezione parziale EURUSD R/R 2 nel 2018-20: PF 0,95, t -0,43); ORB 30' senza vantaggio generale (80%) -> si. **Non si prova l'inversione (fade) come scoperta**: sarebbe una famiglia nuova con costi. Mancano S&P 500 (esempio del Toolkit), DAX, Dow e gli altri forex (dati da procurare).
+
+### S&P 500 (arrivato 18/11; dati continui, orologio NY verificato: picco 09:30; `ORB_TOOLKIT_SPX_RISULTATI.txt`)
+| Uscita | 2015-17: n / PF / t | 2018-20: n / PF / t | 2021-24: n / PF / t | Esito |
+|---|---|---|---|---|
+| R/R 2 | 620 / 0,65 / -4,17 | 667 / 0,89 / -1,14 | 817 / 1,00 / -0,03 | NO |
+| EMA21 | 620 / 0,60 / -4,77 | 667 / 0,79 / -2,03 | 817 / 0,82 / -1,96 | NO |
+**4 simboli su 4 (Nasdaq, S&P 500, oro, EURUSD) in perdita con la regola del Toolkit alla lettera: l'ORB a 30 minuti non ha vantaggio.** Costo 0,04% del prezzo, buffer 0,2%; esclusione notizie non applicata.

@@ -1,0 +1,17 @@
+--- SELEZIONE DAX 2019-01..2020-06 (punti equiv. 12.000, costo 2,0) ---
+boxA stop=S30 gest=A n=312 netto     +995 PF 1.24 t +1.60 vinc 56% | 2019 +568 2020H1 +427 
+boxA stop=S30 gest=B n=312 netto     +579 PF 1.14 t +1.15 vinc 56% | 2019 +540 2020H1 +40 
+boxA stop=OPP gest=A n=312 netto    +1647 PF 1.37 t +2.09 vinc 67% | 2019 +457 2020H1 +1191 PASSA
+boxA stop=OPP gest=B n=312 netto     +921 PF 1.21 t +1.35 vinc 67% | 2019 +356 2020H1 +565 
+boxB stop=S30 gest=A n=315 netto    +2649 PF 1.74 t +4.05 vinc 62% | 2019 +1291 2020H1 +1358 PASSA
+boxB stop=S30 gest=B n=315 netto    +1618 PF 1.45 t +3.23 vinc 62% | 2019 +1074 2020H1 +544 PASSA
+boxB stop=OPP gest=A n=315 netto    +3223 PF 1.85 t +4.27 vinc 70% | 2019 +1209 2020H1 +2014 PASSA
+boxB stop=OPP gest=B n=315 netto    +2075 PF 1.55 t +3.37 vinc 70% | 2019 +984 2020H1 +1091 PASSA
+passano: 5 | candidati: [{'box': 'B', 'stop': 'OPP', 'gest': 'A'}, {'box': 'B', 'stop': 'S30', 'gest': 'A'}, {'box': 'B', 'stop': 'OPP', 'gest': 'B'}]
+gestione A (scala) PF > gestione B in 4 coppie su 4
+VALIDAZIONE {'box': 'B', 'stop': 'OPP', 'gest': 'A'} 2020-07..2023-11 (altro indice europeo) n=0 netto +0 PF 0.00 t +0.00 vinc 0%
+VALIDAZIONE {'box': 'B', 'stop': 'OPP', 'gest': 'A'} DAX 2024 n=226 netto +1399 PF 1.33 t +1.75 vinc 62%
+VALIDAZIONE {'box': 'B', 'stop': 'S30', 'gest': 'A'} 2020-07..2023-11 (altro indice europeo) n=0 netto +0 PF 0.00 t +0.00 vinc 0%
+VALIDAZIONE {'box': 'B', 'stop': 'S30', 'gest': 'A'} DAX 2024 n=226 netto +1700 PF 1.45 t +2.37 vinc 58%
+VALIDAZIONE {'box': 'B', 'stop': 'OPP', 'gest': 'B'} 2020-07..2023-11 (altro indice europeo) n=0 netto +0 PF 0.00 t +0.00 vinc 0%
+VALIDAZIONE {'box': 'B', 'stop': 'OPP', 'gest': 'B'} DAX 2024 n=226 netto +1316 PF 1.31 t +1.82 vinc 62%
