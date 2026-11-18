@@ -5,7 +5,8 @@ def load(pat):
     for f in sorted(glob.glob(pat)):
         with open(f) as fh:
             r=csv.reader(fh,delimiter=';'); next(r)
-            for t,o,h,l,c,*_ in r:
+            for t,o,h,l,c,tv,*_ in r:
+                if t.endswith('00:00') and float(tv)>2000: continue   # riga aggregata FTMO delle 00:00 (tickvol enorme, prezzi falsi): scartata
                 k=t[:13]; o,h,l,c=float(o),float(h),float(l),float(c)
                 if k not in rows: rows[k]=[o,h,l,c]
                 else:

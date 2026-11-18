@@ -12,6 +12,9 @@
 - **COPERTURA `_EXT` (misurata 18/11/2026, `report/COPERTURA_BTC_INDICI_2026-11-18.txt`):** nel terminale principale BCM (`C:\Program Files\BCM Markets MT5 Terminal`, NON nel portable `C:\MT5_BCM_Opt`) `NASUSD_EXT` e `SPXUSD_EXT` hanno **17 anni (2010-2026)**; l'elenco sotto (2015, 2020, 2025-26) riguarda i blocchi VERIFICATI per orologio. D30EUR/F40EUR/NASUSD/SPXUSD/U30USD nativi solo 2024-2026; nessun dato nativo/EXT per il Dow e il DAX prima del 2024. FTMO: BTCUSD 2016-2026.
 - **ECCEZIONE storico `_EXT` Nasdaq/S&P (verificata 04/11/2026, `sala-del-consiglio/orb_paolo/diagnostica/REFERTO_DIAGNOSTICA_2026-11-04.md`)**: i CSV M1 `NASUSD_EXT`/`SPXUSD_EXT` (2015, 2020, 2025-01..2026-07) NON seguono GMT+1 fisso: l'apertura USA e a **14:30 anche in inverno** (picco di ampiezza a 14:30, non a 15:30). 2015: 14:30 tutto l'anno; 2020 e 2025-26 (ora di Londra): 14:30, ma **13:30** nelle settimane con USA in ora legale e Europa in ora solare (fine marzo e fine ottobre). La convenzione cambia da un blocco di anni all'altro: prima di usare altri anni `_EXT` rifare la diagnostica. Vale per i backtest su `_EXT`; il feed live e il DAX D30EUR restano GMT+1 fisso. `tickvol`=1 e `spread`=0 in questi file.
 
+
+- **DATI FTMO ORO M1 (scoperto 18/11/2026):** i CSV `ABTG_M1_XAUUSD_*` hanno una riga **aggregata alle 00:00** di ogni giorno (tickvol enorme > 2000, spread 0, prezzi falsi che creano spike finti di decine/centinaia di dollari in H1). **Scartarla sempre** (riga a 00:00 con tickvol > 2000) prima di aggregare o testare. Il risultato SMC CHoCH oro (R +0,89) e il Supertrend oro PF 3,8 erano artefatti di questo.
+
 ## Contesto
 - Conto DEMO BCM 50503392, tipo HEDGING.
 - Sviluppo sul branch `claude/creating-agents-SgGpD`.
