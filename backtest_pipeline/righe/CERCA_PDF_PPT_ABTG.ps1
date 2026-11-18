@@ -35,8 +35,8 @@ Set-Content -LiteralPath (Join-Path $dir 'ELENCO_FILE_ABTG.txt') -Value ($elenco
 $al=New-Object System.Collections.ArrayList; foreach($f in ($altri | Sort-Object FullName)){ [void]$al.Add($f.FullName + ' (' + [Math]::Round($f.Length/1MB,1) + ' MB, ' + $f.LastWriteTime.ToString('yyyy-MM-dd') + ')') }
 Set-Content -LiteralPath (Join-Path $dir 'ELENCO_ALTRI_PDF_PPT.txt') -Value ($al -join "`r`n") -Encoding UTF8
 $lotti=New-Object System.Collections.ArrayList; $cur=New-Object System.Collections.ArrayList; $sz=0.0
-foreach($c in $copiati){ if(($sz + $c.Length) -gt 50MB -and $cur.Count -gt 0){ [void]$lotti.Add(,@($cur.ToArray())); $cur=New-Object System.Collections.ArrayList; $sz=0.0 }; [void]$cur.Add($c); $sz += $c.Length }
-if($cur.Count -gt 0){ [void]$lotti.Add(,@($cur.ToArray())) }
+foreach($c in $copiati){ if(($sz + $c.Length) -gt 50MB -and $cur.Count -gt 0){ [void]$lotti.Add($cur.ToArray()); $cur=New-Object System.Collections.ArrayList; $sz=0.0 }; [void]$cur.Add($c); $sz += $c.Length }
+if($cur.Count -gt 0){ [void]$lotti.Add($cur.ToArray()) }
 $zips=New-Object System.Collections.ArrayList; $n=0
 foreach($lt in $lotti){ $n=$n+1; $z=Join-Path $dir ('CORSO_ABTG_parte' + ('{0:00}' -f $n) + '.zip'); Compress-Archive -LiteralPath @($lt | ForEach-Object { $_.FullName }) -DestinationPath $z -Force; [void]$zips.Add($z) }
 Write-Host ('PDF/presentazioni con ABTG: ' + $trovati.Count + ' trovati, ' + $copiati.Count + ' copiati (senza duplicati), ' + $zips.Count + ' zip. Altri PDF/presentazioni in Desktop/Download/Documenti non copiati: ' + $altri.Count) -ForegroundColor Green
