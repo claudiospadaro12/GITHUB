@@ -242,7 +242,7 @@ $Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale', 'C:\MT5_Backtest\Mt5_Ft
 # il suo common.ini non ha nessun Login= : senza conto non puo operare. Se un giorno ha un Login=, o se common.ini esiste ma non si legge, ci si ferma.
 $CensiteSenzaConto = @('C:\Users\Master\Desktop')
 # 15/11/2026: MT5 PORTABLE per l'UBS Optimizer e le convalide (C:\MT5_BCM_Opt, demo 50503392). Ammesso PER NOME solo se CHIUSO: il controllo dei processi aperti resta in vigore e blocca la riga se quel terminale e aperto.
-$CensiteOpt = @('C:\MT5_BCM_Opt')
+$CensiteOpt = @('C:\MT5_BCM_Opt', 'C:\MT5_BCM_Tester2')   # Tester2 visto da Claudio il 18/11 (ultima modifica 17/11): portable BCM, deve essere CHIUSO
 $diversi = @($origini | Where-Object { $_.Inst -ne $InstAttesa })
 $ignote = @($diversi | Where-Object { ($Censite -notcontains $_.Inst.TrimEnd('\')) -and ($CensiteSenzaConto -notcontains $_.Inst.TrimEnd('\')) -and ($CensiteOpt -notcontains $_.Inst.TrimEnd('\')) })
 foreach($dv in @($diversi | Where-Object { $CensiteSenzaConto -contains $_.Inst.TrimEnd('\') })){
