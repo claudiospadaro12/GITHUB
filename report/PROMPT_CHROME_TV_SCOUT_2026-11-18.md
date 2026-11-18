@@ -98,3 +98,24 @@ TREND
 19 https://www.tradingview.com/script/6jXh1FKG-Supertrend-Confirmed-Close-forexs/
 20 https://www.tradingview.com/script/dTn0p5mz-Supertrend/
 ```
+
+## Comando per l'estensione: estrazione ESATTA di 8 script (18/11/2026)
+```
+Ora estrai in modo ESATTO il sorgente di questi 8 script. L'indentazione e vincolante nel Pine, quindi il testo deve conservare spazi e a-capo identici all'originale. Per ciascuno prova i metodi in questo ordine e fermati al primo che funziona:
+METODO A (preferito): nella pagina dello script apri la scheda "Codice sorgente". Il visualizzatore mostra solo le righe visibili: scorri il codice dall'inizio alla fine, a passi di una schermata, e a ogni passo leggi il testo di ogni riga (textContent, non innerText) sostituendo gli spazi non separabili (carattere U+00A0) con spazi normali, e conserva il numero di riga. Unisci le righe in ordine di numero di riga, senza duplicati e senza righe mancanti. Controllo: il numero di righe ricostruito deve coincidere con l'ultimo numero di riga mostrato dal visualizzatore.
+METODO B: premi il pulsante "Copia" del codice sorgente, incolla il contenuto in una casella di testo (textarea) di una pagina vuota che apri tu, e leggi il valore della casella (value): conserva gli spazi. Se non puoi incollare o leggere, passa al metodo C.
+METODO C: se nessuno dei due funziona, scrivi "NON ESATTO" per quello script, salva comunque la versione che hai ottenuto in una cartella "non_esatti" e vai avanti.
+VERIFICA di ogni file prima di salvarlo: la prima riga deve essere "//@version=..." (o un commento di licenza che la precede); le righe dentro if, for, while, funzioni e "=>" devono avere rientro (di solito 4 spazi); nessuna riga deve avere i rientri persi; le parentesi devono essere bilanciate. Se un controllo fallisce, il file e non esatto.
+Salva ogni file come <NN>_<nome>.pine con NN da 21 a 28, SENZA modificare niente. Annota in 01_tabella.csv: NN, nome, autore, link, data, versione Pine, licenza, numero di righe, metodo usato (A/B/C), esatto (SI/NO), strategy( o study/indicator, lookahead, request.security, ta.pivothigh, ta.pivotlow, barstate.isrealtime, calc_on_every_tick, alertcondition (SI/NO).
+Crea lo zip TV_SCOUT_8_<AAAA-MM-GG>.zip con 00_info.txt (quanti esatti, quali non esatti e perche, metodo per ciascuno), 01_tabella.csv (;, UTF-8), i .pine esatti e la cartella non_esatti. Massimo 10 MB. Se arrivi al limite, salva uno zip parziale ogni 3 script.
+Regole di sicurezza invariate: nessun login, acquisto, Follow/Like/Boost, commento. Se uno script risulta protetto o a codice chiuso scrivilo e passa al successivo.
+
+21 https://www.tradingview.com/script/RZ1GZGP3-Jaws-Mean-Reversion-Strategy/
+22 https://www.tradingview.com/script/UEbrJcmh-donchian-channel-strategy/
+23 https://www.tradingview.com/script/SlYz8Ptk-Donchian-Channels-strategy-with-backtest/
+24 https://www.tradingview.com/script/XRPeqEdA-Bollinger-Bands-Mean-Reversion-using-RSI-Krishna-Peri/
+25 https://www.tradingview.com/script/JFIZkwZR-RSI-Mean-Reversion/
+26 https://www.tradingview.com/script/92rilzXd-Z-Score-Mean-Reversion-Pro/
+27 https://www.tradingview.com/script/EvkXjgyw-Breakout-Finder/
+28 https://www.tradingview.com/script/RwVTfoTY-Statistical-Mean-Reversion-Engine-SMRE/
+```
