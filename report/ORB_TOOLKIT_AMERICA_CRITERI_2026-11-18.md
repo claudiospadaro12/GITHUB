@@ -17,3 +17,7 @@ filtro EMA {acceso; spento} x corpo ampio {si; no} x buffer SL {5; 10 punti} x u
 ## Previsioni (scritte ora)
 - >= 1 set passa la selezione: **25%**; candidato passa la validazione: **8%**; finalista passa OOS: **3%**.
 - Il filtro EMA acceso ha PF aggregato (su 12 coppie di set) piu alto di quello spento: **60%**.
+
+## Risultato (18/11/2026; usato SOLO 2015-2017 per la selezione; output in `ORB_TOOLKIT_AMERICA_RISULTATI.txt`)
+- **Selezione: 0 set su 24 passano.** Tutti in perdita netta, PF netto 0,74-0,83 (625-661 operazioni), **t tra -1,75 e -2,76**: la perdita e sistematica, non rumore. Il filtro EMA 9/21 quasi non filtra (625 contro 636 operazioni): i breakout con corpo ampio sono quasi sempre gia allineati alle medie. Filtro EMA acceso migliore dello spento in 8 coppie su 12 (previsione 60%: confermata, ma la differenza e piccola). Validazione e OOS non toccati. **Famiglia chiusa.** Previsioni: >= 1 set passa (25%) -> NO; candidato passa validazione (8%) -> NO.
+- **Solo descrittivo, senza ripescare nulla** (regola del Toolkit alla lettera: filtro acceso, corpo ampio, buffer 10, R/R 2): 2015-17 PF 0,83 (lordo 1,01); 2018-20 PF 0,82 (lordo 0,88); **2021-24 PF 1,16 (t +1,66), ma quasi tutto nel 2022 (+4.545 su +5.576)**. Nessun vantaggio fino al 2020; il 2021-24 e dominato da un solo anno di tendenza: non e un candidato. Costo 2,0 punti inclusi; esclusione per notizie non applicata (limite).
