@@ -1,5 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                              GoldenZoe_H4.mq5    |
+//|  v1.10 (19/11/2026): FILTRO NEWS opzionale (default SPENTO = v1.00)|
 //|  v1.00 (19/11/2026) - TREND FOLLOWING sull'ORO, candele H4.       |
 //|  Strategia (backtest_runner/simulatore/tre_leve.py, leva 3a):     |
 //|   - INGRESSO: la candela H4 chiusa (shift 1) CHIUDE sopra il      |
@@ -19,7 +20,7 @@
 //|  simulatore Python usava la media di Wilder): differenza piccola.  |
 //+------------------------------------------------------------------+
 #property copyright "Claudio - GoldenZoe (strategia propria)"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 #include <Trade/Trade.mqh>
 
@@ -34,11 +35,72 @@ input double InpRiskPercent          = 1.0;    // % equity rischiata sullo stop 
 input long   InpMagic                = 972301;
 input string InpComment              = "GOLDENZOE H4";
 input bool   InpVerbose              = false;
+// --- FILTRO NEWS (v1.10, default spento): niente NUOVI ingressi da N minuti prima a N minuti dopo una notizia ---
+input bool   InpNewsFilter           = false;
+input int    InpNewsBeforeMin        = 120;    // minuti PRIMA della notizia in cui non si entra
+input int    InpNewsAfterMin         = 120;    // minuti DOPO la notizia in cui non si entra
+input int    InpNewsSource           = 0;      // 0 = file CSV (tester e demo), 1 = calendario MT5 (solo demo/live, non nel tester)
+input string InpNewsFile             = "abtg_news_hist.csv"; // cartella Common\Files (FILE_COMMON); formato: Data Ora;Impatto;Valuta;Titolo
+input string InpNewsCurrencies       = "USD";  // valute considerate (elenco, es. USD,EUR)
+input int    InpNewsMinImpact        = 3;      // 3 = alta, 2 = media, 1 = bassa
+input bool   InpNewsBlockTrail       = false;  // se true salta anche lo spostamento dello stop vicino alle notizie (si recupera alla candela dopo)
 
 CTrade gTrade;
 int    hAtr = INVALID_HANDLE;
 datetime gLastBar = 0;
 datetime gLastHadPos = 0;
+datetime gNewsT[]; int gNewsN = 0; int gNewsBlocked = 0;
+
+bool LoadNews()
+  {
+   gNewsN=0; ArrayResize(gNewsT,0);
+   int h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
+   if(h==INVALID_HANDLE){ Print("[GoldenZoe] FILE NEWS NON TROVATO (Common Files ",InpNewsFile,"): errore ",GetLastError()); return false; }
+   while(!FileIsEnding(h))
+     {
+      string sT=FileReadString(h);
+      if(FileIsLineEnding(h) && StringLen(sT)==0) continue;
+      string sI=FileIsLineEnding(h)?"":FileReadString(h);
+      string sC=FileIsLineEnding(h)?"":FileReadString(h);
+      while(!FileIsLineEnding(h) && !FileIsEnding(h)) FileReadString(h);
+      datetime tt=StringToTime(sT);
+      if(tt<=0) continue;
+      string u=sI; StringToUpper(u); int imp=0;
+      if(StringFind(u,"HIGH")>=0||u=="3") imp=3; else if(StringFind(u,"MED")>=0||u=="2") imp=2; else if(StringFind(u,"LOW")>=0||u=="1") imp=1;
+      if(imp<InpNewsMinImpact) continue;
+      if(StringLen(InpNewsCurrencies)>0 && StringFind(InpNewsCurrencies,sC)<0) continue;
+      ArrayResize(gNewsT,gNewsN+1); gNewsT[gNewsN]=tt; gNewsN++;
+     }
+   FileClose(h);
+   ArraySort(gNewsT);
+   Print("[GoldenZoe] news caricate dal file: ",gNewsN);
+   return gNewsN>0;
+  }
+
+// true se t cade tra (notizia - Before) e (notizia + After)
+bool NewsBlocked(const datetime t)
+  {
+   if(!InpNewsFilter) return false;
+   if(InpNewsSource==1)
+     {
+      MqlCalendarValue v[];
+      if(CalendarValueHistory(v,t-InpNewsAfterMin*60,t+InpNewsBeforeMin*60)<=0) return false;
+      for(int i=0;i<ArraySize(v);i++)
+        {
+         MqlCalendarEvent ev; if(!CalendarEventById(v[i].event_id,ev)) continue;
+         if((int)ev.importance<InpNewsMinImpact) continue;
+         MqlCalendarCountry c; if(!CalendarCountryById(ev.country_id,c)) continue;
+         if(StringLen(InpNewsCurrencies)>0 && StringFind(InpNewsCurrencies,c.currency)<0) continue;
+         return true;
+        }
+      return false;
+     }
+   // file: ricerca binaria della prima notizia con E >= t - After
+   datetime lo=t-InpNewsAfterMin*60, hi=t+InpNewsBeforeMin*60;
+   int a=0,b=gNewsN;
+   while(a<b){ int m=(a+b)/2; if(gNewsT[m]<lo) a=m+1; else b=m; }
+   return (a<gNewsN && gNewsT[a]<=hi);
+  }
 
 void Log(const string s){ if(InpVerbose) Print("[GoldenZoe] ",s); }
 
@@ -49,10 +111,11 @@ int OnInit()
    gTrade.SetDeviationInPoints(50);
    hAtr = iATR(_Symbol,InpTF,InpAtrPeriod);
    if(hAtr==INVALID_HANDLE) return INIT_FAILED;
+   if(InpNewsFilter && InpNewsSource==0 && !LoadNews()) return INIT_FAILED;   // filtro acceso ma senza notizie: non parto in silenzio senza filtro
    return INIT_SUCCEEDED;
   }
 
-void OnDeinit(const int reason){ if(hAtr!=INVALID_HANDLE) IndicatorRelease(hAtr); }
+void OnDeinit(const int reason){ if(hAtr!=INVALID_HANDLE) IndicatorRelease(hAtr); if(InpNewsFilter) Print("[GoldenZoe] ingressi bloccati dal filtro news: ",gNewsBlocked); }
 
 bool SelectMyPosition()
   {
@@ -132,12 +195,16 @@ void OnTick()
    double a[]; ArraySetAsSeries(a,true);
    if(CopyBuffer(hAtr,0,1,1,a)<1) return;
    double atr=a[0]; if(atr<=0) return;
-   if(SelectMyPosition()){ ManageTrail(atr); return; }
+   if(SelectMyPosition()){ if(!(InpNewsBlockTrail && NewsBlocked(t0))) ManageTrail(atr); return; }
    if(gLastHadPos>=iTime(_Symbol,InpTF,1)) return;    // posizione chiusa durante la candela appena finita: aspetto
    double c1=iClose(_Symbol,InpTF,1);
    int ih=iHighest(_Symbol,InpTF,MODE_HIGH,InpDonchianN,2);
    int il=iLowest (_Symbol,InpTF,MODE_LOW ,InpDonchianN,2);
    if(ih<0 || il<0) return;
-   if(InpAllowLong  && c1>iHigh(_Symbol,InpTF,ih)) { OpenTrade(true ,atr); return; }
-   if(InpAllowShort && c1<iLow (_Symbol,InpTF,il)) { OpenTrade(false,atr); return; }
+   bool sigL = InpAllowLong  && c1>iHigh(_Symbol,InpTF,ih);
+   bool sigS = InpAllowShort && c1<iLow (_Symbol,InpTF,il);
+   if(!(sigL || sigS)) return;
+   if(NewsBlocked(t0)){ gNewsBlocked++; Log("ingresso saltato: finestra notizie"); return; }
+   if(sigL) { OpenTrade(true ,atr); return; }
+   if(sigS) { OpenTrade(false,atr); return; }
   }
