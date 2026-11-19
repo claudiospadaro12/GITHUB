@@ -34,7 +34,7 @@ foreach($ea in $EAS){
 # 2) test
 if(-not ('SvegliaE14.Win' -as [type])){ Add-Type -Namespace SvegliaE14 -Name Win -MemberDefinition '[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint esFlags);' }
 [void][SvegliaE14.Win]::SetThreadExecutionState([uint32]2147483651)
-$desk=[Environment]::GetFolderPath('Desktop'); $dirOut=Join-Path $desk 'CONTROLLO_14EA_ORO'; $dirSerie=Join-Path $dirOut 'serie'; $dirRep=Join-Path $dirOut 'report'
+$desk=Join-Path ([Environment]::GetFolderPath('Desktop')) 'ABTG_RISULTATI'; New-Item -ItemType Directory -Force -Path $desk | Out-Null; $dirOut=Join-Path $desk 'CONTROLLO_14EA_ORO'; $dirSerie=Join-Path $dirOut 'serie'; $dirRep=Join-Path $dirOut 'report'
 New-Item -ItemType Directory -Force -Path $dirSerie | Out-Null; New-Item -ItemType Directory -Force -Path $dirRep | Out-Null
 $FIN=@( @{ n='W2015_2023'; da='2015.01.01'; a='2023.12.31' }, @{ n='W2005_2014'; da='2005.01.01'; a='2014.12.31' } )
 $righe=New-Object System.Collections.ArrayList
