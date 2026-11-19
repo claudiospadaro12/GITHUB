@@ -14,14 +14,14 @@ def donch(E,length=20,ema_n=None,k=None):
         # fill all'apertura di i
         if pend!=0:
             d=pend; pend=0
-            if pos!=0: tr.append((ent[2],E.R(pos,ent[0],O[i],ent[1])))
+            if pos!=0: tr.append((ent[2],E.R(pos,ent[0],O[i],ent[1]),pos))
             a=atr[i-1]; risk=(k*a if k else 2*a)
             pos=d; ent=[O[i],risk,E.ks[i],O[i]-d*k*a if k else None]
         # stop intrabar
         if pos!=0 and ent[3] is not None:
             sl=ent[3]
-            if pos==1 and L[i]<=sl: tr.append((ent[2],E.R(1,ent[0],min(O[i],sl),ent[1]))); pos=0; il=ish=False
-            elif pos==-1 and H[i]>=sl: tr.append((ent[2],E.R(-1,ent[0],max(O[i],sl),ent[1]))); pos=0; il=ish=False
+            if pos==1 and L[i]<=sl: tr.append((ent[2],E.R(1,ent[0],min(O[i],sl),ent[1]),1)); pos=0; il=ish=False
+            elif pos==-1 and H[i]>=sl: tr.append((ent[2],E.R(-1,ent[0],max(O[i],sl),ent[1]),-1)); pos=0; il=ish=False
         # segnali alla chiusura di i
         if (not il) and U[i]>U[i-1]:
             if U[i-1]>U[i-2] and (em is None or C[i]>em[i]): pend=1; il=True; ish=False
