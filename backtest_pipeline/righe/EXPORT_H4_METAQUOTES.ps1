@@ -2,7 +2,7 @@
 # SOLA LETTURA: trova sul PC di backtest il terminale MT5 collegato al server MetaQuotes-Demo (installazione standard), compila ed esegue lo script ABTG_ExportH4 (barre H4 dal 2010 dei mercati non forex e non azionari), copia i file in C:\ABTG_RISULTATI e li comprime in uno o piu zip. Nessun ordine, nessun conto reale toccato (il terminale usa il conto DEMO MetaQuotes).
 $ErrorActionPreference='Continue'
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ Write-Host ('SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui: ' + $env:COMPUTERNAME) -ForegroundColor Red; return }
-$PINSRC='@@PIN@@'; $SHAMQ5='@@SHA@@'
+$PINSRC='d147178c22bb8dc0180c15a6198b60ba90f8bd13'; $SHAMQ5='6434C8B43DB29A5EC932964BC432C6AD19E118DCC90518BDE77B5D2156F0484B'
 $aperti=@(Get-Process -Name terminal64,metatester64,metaeditor64 -ErrorAction SilentlyContinue)
 if($aperti.Count -gt 0){ $aperti | Select-Object Id,ProcessName,Path | Format-Table -AutoSize | Out-String | Write-Host; Write-Host 'MI FERMO: MT5, MetaEditor o agenti aperti. Chiudili e rilancia. Non ho avviato niente.' -ForegroundColor Red; return }
 function LeggiTesto([string]$p){ $b=[IO.File]::ReadAllBytes($p); if($b.Length -ge 2 -and (($b[0] -eq 255 -and $b[1] -eq 254) -or ($b[0] -eq 254 -and $b[1] -eq 255))){ return [Text.Encoding]::Unicode.GetString($b) } else { return [Text.Encoding]::UTF8.GetString($b) } }
