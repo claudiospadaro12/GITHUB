@@ -28,3 +28,6 @@ Mancano i documenti citati nelle lezioni e inviati per email all'allievo: **"pro
 
 ## Proposta (decide Claudio)
 Il quadro non cambia: la strategia con le sue regole non ha un vantaggio dimostrato. L'unico filone con una possibilita non nulla e **testare i filtri nuovi (orario mattina + notizie + M30) su BreakingBand v4** con un campione piu grande (circa 28 cross, 13 anni). Peso: una riga di passate per simbolo (circa 1-2 ore) e analisi moderata; aspettativa realistica bassa (il filtro dovrebbe portare la vittoria da 73% a oltre 78%).
+
+## Fotogrammi (19/11/2026, 195 + 168 fotogrammi, uno ogni 20 s; visti 3 fogli e 1 fotogramma a piena risoluzione)
+Confermano le trascrizioni, **nessuna regola nuova**. Si vede: TradingView, AUDUSD H1 (Pepperstone), indicatore **"BB 20 SMA close 2"** (Bollinger 20 periodi, 2 deviazioni, media semplice sulla chiusura) e pannello **"ATR 14 RMA"** (ATR di Wilder, non la media semplice dell'iATR di MT5: differenza piccola, gia nota); disegni a mano dell'"uccellino" sulla bulge, linee sul tocco della banda opposta, la scritta "squeeze" e "BULGE"; nella seconda lezione grafici su vari cross, un sito web di **calcolo della size** (EUR/GBP, rischio 2%) e la piattaforma **cTrader** per gli ordini limite.
