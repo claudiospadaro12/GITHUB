@@ -70,3 +70,21 @@ Finestra: dal 01/08/2024 fino ai mesi consecutivi di tick reali BCM disponibili 
 - Il numero di operazioni cresce di piu' del PF cala (t complessivo piu' alto di N=55 H4) per la migliore variante: **60%**.
 ## Altre leve non testate qui (servono dati/tester)
 Altri mercati con lo stesso metodo (argento XAGUSD, indici gia' provati senza esito stabile), piu' EA con parametri diversi sullo stesso oro (molto correlati: non raddoppiano le operazioni indipendenti), vendite (nessun edge). Nessuna delle tre aumenta davvero le occasioni indipendenti senza un test.
+
+## RISULTATI: aumentare le operazioni (`goldenzoe_piu_operazioni.py`; oro FTMO 2004-2026, solo acquisti, stop 3 ATR + Chandelier 3 ATR, costo 0,35 USD + swap 5,5% annuo del valore)
+| TF / canale N | Operazioni (all'anno) | PF | t | PF 2004-14 / 2014-20 / 2021-26 |
+|---|---|---|---|---|
+| **H4 / 55 (GoldenZoe)** | 396 (18) | 1,48 | 2,6 | 1,27 / 1,67 / 1,61 |
+| H4 / 40 | 441 (20) | 1,52 | 2,9 | 1,31 / 1,58 / 1,83 |
+| H4 / 30 | 494 (22) | 1,44 | 2,7 | 1,39 / 1,31 / 1,71 |
+| H4 / 20 | 589 (26) | 1,36 | 2,5 | 1,48 / 1,15 / 1,44 |
+| H4 / 10 | 781 (35) | 1,39 | 3,1 | 1,41 / 1,27 / 1,48 |
+| H2 / 55 | 756 (34) | 1,29 | 2,4 | 1,23 / 1,31 / 1,36 |
+| H2 / 20 | 1.184 (53) | 1,20 | 2,3 | 1,23 / 1,23 / 1,13 |
+| H1 / 55 | 1.364 (61) | 1,12 | 1,5 | 1,06 / 1,26 / 1,08 |
+| H1 / 20 | 2.221 (99) | 1,14 | 2,3 | 1,18 / 1,06 / 1,17 |
+| H1 / 10 | 3.112 (139) | 1,06 | 1,3 | 1,07 / 1,00 / 1,12 |
+- **Porta (>= 1,5x operazioni, PF >= 1,3 in tutti e tre i periodi, t >= 3): nessuna variante passa.** La piu' vicina e' **H4 / 10**: 781 operazioni (quasi il doppio), PF 1,39, t 3,1, ma PF 1,27 nel 2014-2020 (sotto 1,3 di 0,03). H4 / 20 ha x1,49 operazioni ma PF 1,15 nel 2014-20.
+- **Il compromesso e' netto:** su H4 piu' operazioni (canale piu' corto) abbassano il PF di poco (1,48 -> 1,36-1,52) e tengono t 2,5-3,1; scendendo a H2 e H1 il PF cala a 1,06-1,29 e t a 1,3-2,4: i costi e il rumore mangiano il vantaggio. **H4 / 40** e' il solo cambio che migliora PF e t (1,52; 2,9) con +11% di operazioni: guadagno modesto.
+- Previsioni: nessuna variante con x1,5 passa la porta in tutti e tre i periodi (55%) -> si'; H1 con PF < 1,3 in almeno due periodi (75%) -> si' (in tutti e tre); migliore variante con t complessivo piu' alto di H4/55 (60%) -> si' (H4/10: 3,1 contro 2,6).
+**Lettura:** il canale e' l'unica "manopola" che aumenta le operazioni senza rompere il metodo, e rende poco; il rendimento atteso per operazione resta circa +0,11-0,15 R. Per avere piu' occasioni indipendenti serve piu' di un mercato (stesso EA su altri simboli: l'EA usa il simbolo del grafico): da misurare con una scansione sul Market Watch, con le stesse regole di porta.

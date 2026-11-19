@@ -24,7 +24,7 @@ def trail(O,H,L,C,atr,ks,cost,entries,m=3.0):
             hit=(pos==1 and L[i]<=stop) or (pos==-1 and H[i]>=stop)
             if hit:
                 px=min(O[i],stop) if pos==1 else max(O[i],stop)
-                tr.append((t0,pos*(px-ent)/risk-cost/risk,ks[i])); pos=0; continue
+                tr.append((t0,pos*(px-ent)/risk-cost/risk,ks[i],ent,risk)); pos=0; continue
             ext=max(ext,H[i]) if pos==1 else min(ext,L[i])
             a=atr[i]
             stop=max(stop,ext-m*a) if pos==1 else min(stop,ext+m*a)
