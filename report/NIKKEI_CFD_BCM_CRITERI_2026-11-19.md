@@ -16,3 +16,21 @@ Candidato: Nikkei 225 long-only, screening D1 su Yahoo (N=20 e N=55) -> IS, OOS 
 2. Nessun giudizio statistico: troppo poche operazioni. Si riportano PF, DD, swap totale, operazioni.
 3. **H4:** descrittivo; un risultato positivo NON e una validazione e non cambia l'esito dello screening.
 4. Passo successivo (non in questa passata): stesso test su `JP225.cash` FTMO se i dati sono disponibili; nessun demo prima.
+
+---
+## RISULTATO (19/11/2026, zip GOLDENZOE_NIKKEI; 3 passate su BCM `225JPY`, 100.000 EUR, Modello 1, qualita 99%)
+| Passata | Operazioni | PF tester | Netto EUR | Punti (somma) | Swap totale EUR |
+|---|---|---|---|---|---|
+| D1 N=20 | 12 | 0,69 | -15,26 | +2.288 | -28,7 |
+| D1 N=55 | 10 | 0,23 | -46,89 | -2.765 | -21,1 |
+| H4 N=55 (esplorativa) | 41 | 1,22 | +16,09 | positivo | -17,7 circa |
+**Fatti trovati:**
+1. **Storico BCM `225JPY`:** la prima operazione D1 e del 02/05/2025 (472 barre D1) e la prima H4 del 30/10/2024: il confronto col simulatore vale da meta 2025 (simulatore: 9 operazioni per N=20 e 9 per N=55 nella stessa finestra).
+2. **BUG DI DIMENSIONAMENTO (EA v1.10 e precedenti):** su `225JPY` il lotto e SEMPRE 0,1 (minimo): `SYMBOL_TRADE_TICK_VALUE` e 10 non convertito in euro, mentre il profitto reale per punto e circa 0,0057 EUR per 0,1 lotto. Il rischio effettivo e quindi minuscolo (DD 0,07%, rendimenti di centesimi di percento): **in EUR e % i risultati non sono confrontabili**. Corretto in **v1.11** con l'opzione `InpLotMode=1` (lotto da `OrderCalcProfit`); il default 0 lascia invariato il comportamento validato sull'oro. Vale per qualsiasi CFD in valuta diversa dal conto.
+3. **Swap nel tester BCM molto piu alto della specifica:** circa **13% annuo del nozionale** (sommando swap e giorni di tenuta D1 N=20: -28,7 EUR su 251 giorni con nozionale medio circa 312 EUR per 0,1 lotto), contro -1,40% annuo dichiarato dal simbolo; lo swap supera il profitto lordo (+13,5 EUR). Da verificare sul demo reale (il tester applica lo swap della specifica corrente): FTMO `JP225.cash` circa 5,5% annuo.
+4. **Operazioni D1:** 12 (N=20) e 10 (N=55) contro 9 e 9 del simulatore: entro +-3. **Ingressi in comune** con il simulatore: circa la meta (stesse date nel 02/05, 08-11/08, 12/09, 06/01, 08-09/04, 25-26/05 e 16/06; diverse le altre): differenze di dati (CFD BCM contro indice Yahoo) e di ATR (media semplice di MT5 contro Wilder).
+5. **Segno:** N=20 positivo in punti (+2.288) ma negativo in EUR dopo lo swap; N=55 negativo anche in punti (-2.765, penalizzato dall'ultima operazione -3.926 punti). Il simulatore e positivo (+4,6 R e +3,0 R sul campione completo).
+**Esito (regola 1): esecuzione NON confermata** (segno diverso dal simulatore). Previsioni: operazioni +-3 (65%) si; segno positivo (75%) **no**; PF >= 1,2 (60%) **no**; DD <= 8% (80%) si ma privo di significato per il bug dei lotti; H4 positivo (55%) si (esplorativo). Campione di 10-12 operazioni: inconcludente sul vantaggio, concludente sul costo (swap) e sul bug. Il candidato Nikkei resta valido SOLO sul simulatore D1; su CFD BCM il costo dello swap lo penalizza.
+
+## RIPETIZIONE con lotto corretto (EA v1.11, `InpLotMode=1`): previsioni PRIMA dei numeri
+Stesse 3 passate e stessa finestra, rischio 1% vero (circa 1.000 EUR per operazione). Previsioni: lotto medio D1 tra 3 e 12 lotti-indice e rischio per operazione 0,8-1,2% dell'equity: **80%**; swap totale tra 8% e 18% annuo del nozionale (conferma dello swap alto del tester): **70%**; D1 N=20 netto positivo dopo lo swap: **40%**; D1 N=55 netto positivo: **30%**; DD equity D1 N=20 tra 3% e 12%: **65%**. Regola: se lo swap resta > 8% annuo e il netto D1 e <= 0, il Nikkei CFD BCM **non e operativo** a questi costi (nessun test su FTMO finche non si misura lo swap reale sul demo).

@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                              GoldenZoe_H4.mq5    |
+//|  v1.11 (19/11/2026): InpLotMode 1 = lotto con OrderCalcProfit (CFD in|
+//|   valuta diversa dal conto, es. 225JPY); default 0 = v1.00/v1.10.   |
 //|  v1.10 (19/11/2026): FILTRO NEWS opzionale (default SPENTO = v1.00)|
 //|  v1.00 (19/11/2026) - TREND FOLLOWING sull'ORO, candele H4.       |
 //|  Strategia (backtest_runner/simulatore/tre_leve.py, leva 3a):     |
@@ -20,7 +22,7 @@
 //|  simulatore Python usava la media di Wilder): differenza piccola.  |
 //+------------------------------------------------------------------+
 #property copyright "Claudio - GoldenZoe (strategia propria)"
-#property version   "1.10"
+#property version   "1.11"
 #property strict
 #include <Trade/Trade.mqh>
 
@@ -31,7 +33,9 @@ input double InpStopAtr              = 3.0;    // stop iniziale = N x ATR
 input double InpTrailAtr             = 3.0;    // stop mobile = estremo dall'ingresso -/+ N x ATR
 input bool   InpAllowLong            = true;
 input bool   InpAllowShort           = false;  // il test non trova edge sulle vendite
+input int    InpLotMode              = 0;      // 0 = valore del tick (come v1.00), 1 = OrderCalcProfit (consigliato per CFD in valuta diversa dal conto)
 input double InpRiskPercent          = 1.0;    // % equity rischiata sullo stop iniziale
+input int    InpLotMode              = 0;      // 0 = valore del tick (come v1.00), 1 = OrderCalcProfit (consigliato per CFD in valuta diversa dal conto, es. 225JPY)
 input long   InpMagic                = 972301;
 input string InpComment              = "GOLDENZOE H4";
 input bool   InpVerbose              = false;
@@ -138,12 +142,24 @@ bool SelectMyPosition()
    return false;
   }
 
-double CalcLot(const double slDist)
+double CalcLot(const double slDist,const bool isLong=true)
   {
    double tv=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE), ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
-   if(tv<=0 || ts<=0 || slDist<=0) return 0.0;
+   if(slDist<=0) return 0.0;
    double risk=AccountInfoDouble(ACCOUNT_EQUITY)*InpRiskPercent/100.0;
-   double lot=risk/((slDist/ts)*tv);
+   double lot=0.0;
+   if(InpLotMode==1)
+     {
+      double px=isLong?SymbolInfoDouble(_Symbol,SYMBOL_ASK):SymbolInfoDouble(_Symbol,SYMBOL_BID);
+      double p2=isLong?px-slDist:px+slDist, prof=0.0;
+      if(!OrderCalcProfit(isLong?ORDER_TYPE_BUY:ORDER_TYPE_SELL,_Symbol,1.0,px,p2,prof) || MathAbs(prof)<=0) return 0.0;
+      lot=risk/MathAbs(prof);
+     }
+   else
+     {
+      if(tv<=0 || ts<=0) return 0.0;
+      lot=risk/((slDist/ts)*tv);
+     }
    double step=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP), mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN), mx=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);
    if(step<=0) step=0.01;
    lot=MathFloor(lot/step)*step;
@@ -157,7 +173,7 @@ void OpenTrade(const bool isLong,const double atr)
    double price = isLong ? SymbolInfoDouble(_Symbol,SYMBOL_ASK) : SymbolInfoDouble(_Symbol,SYMBOL_BID);
    double sl    = isLong ? price-InpStopAtr*atr : price+InpStopAtr*atr;
    sl = NormalizeDouble(sl,_Digits);
-   double lot = CalcLot(MathAbs(price-sl));
+   double lot = CalcLot(MathAbs(price-sl),isLong);
    if(lot<=0){ Log("lotto non valido"); return; }
    bool ok = isLong ? gTrade.Buy(lot,_Symbol,0,sl,0,InpComment) : gTrade.Sell(lot,_Symbol,0,sl,0,InpComment);
    Log(StringFormat("%s lot=%.2f price=%.2f sl=%.2f atr=%.2f ok=%d",isLong?"BUY":"SELL",lot,price,sl,atr,ok));
