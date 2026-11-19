@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Genera righe/BREAKOUT_CORSO_BCM.ps1 (modello 14ea): ABTG_BreakoutCorso, 28 cross x (H1, M30), 2013-2024, una passata per simbolo e timeframe. Criteri: report/BREAKOUT_CORSO_LEONARDO_CRITERI_2026-11-19.md"""
+"""Genera righe/BREAKOUT_CORSO_BCM.ps1 (modello 14ea): ABTG_BreakoutCorso, 28 cross x (H1, M30), 2013-2024, una passata per simbolo e timeframe. Criteri: report/BREAKOUT_CORSO_CRITERI_2026-11-19.md"""
 import os, sys, re, subprocess
 AQ = os.path.dirname(os.path.abspath(__file__))
 src = open(os.path.join(AQ, "gen_controllo_14ea_oro.py"), encoding="utf-8").read().split("pin = subprocess")[0]
@@ -22,7 +22,7 @@ def R(a, b, n=1):
     assert t.count(a) == n, (t.count(a), a[:100])
     t = t.replace(a, b)
 t = t.replace("MARCATORE_CONTROLLO_14EA_ORO_BCM_v1", "MARCATORE_BREAKOUT_CORSO_BCM_v1")
-t = re.sub(r"^# TEST FUORI CAMPIONE dei 4 EA.*$", "# ABTG_BreakoutCorso (strategia Breakout del corso, default) su 7 cross JPY + XAUUSD, M15, 2013-01-01 -> 2024-12-31, Modello 1, BCM portabile, SOLO tester: 16 passate (modo rettangolo 1 e 0). Criteri: report/BREAKOUT_CORSO_LEONARDO_CRITERI_2026-11-19.md", t, count=1, flags=re.M)
+t = re.sub(r"^# TEST FUORI CAMPIONE dei 4 EA.*$", "# ABTG_BreakoutCorso (strategia Breakout del corso, default) su 7 cross JPY + XAUUSD, M15, 2013-01-01 -> 2024-12-31, Modello 1, BCM portabile, SOLO tester: 16 passate (modo rettangolo 1 e 0). Criteri: report/BREAKOUT_CORSO_CRITERI_2026-11-19.md", t, count=1, flags=re.M)
 R("@@PIN@@", pin); R("@@EAS@@", eas_ps)
 R("$FIN=@( @{ n='W2015_2023'; da='2015.01.01'; a='2023.12.31' }, @{ n='W2005_2014'; da='2005.01.01'; a='2014.12.31' } )\n",
   "$FIN=@( @{ n='W2013_2024'; da='2013.01.01'; a='2024.12.31' } )\n" + VARS + RUNS)
