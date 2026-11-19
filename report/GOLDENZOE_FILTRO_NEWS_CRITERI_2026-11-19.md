@@ -18,3 +18,13 @@ Tester BCM, XAUUSD H4, LONG, Modello 1, 100.000 EUR: stesse finestre della corsa
 2. **Il filtro migliora** solo se il PF con filtro supera quello senza di >= 0,2 in entrambe le finestre (2015-23 e 2024-26): improbabile, non si cercano finestre o parametri diversi per ottenerlo.
 3. Nessun cambio della finestra (120/120) dopo aver visto i numeri.
 4. Il filtro non risolve la regola FTMO dei 2 minuti sui conti funded (modifiche e chiusure incluse): GoldenZoe lavora solo all'apertura della candela H4, quindi la tocca di rado, ma lo stop automatico durante una notizia non e controllabile.
+
+---
+## AGGIORNAMENTO dopo l'esportazione del calendario (PRIMA del test; 19/11/2026)
+Dati: `abtg_news_hist.csv`: 40.658 righe USD+EUR 2013-2026 (calendario pronto, server BCM GMT+1 fisso: ISM alle 10:00 ET e alle 16:00 in inverno e alle 15:00 in estate: orari coerenti col server). **7.165 notizie USD "High"** (circa 510 l'anno): non solo NFP/FOMC/CPI ma anche richieste settimanali di sussidi (718), scorte petrolio EIA (724), PMI, aste del Tesoro, discorsi Fed.
+**Fatto di calendario (non dipende dal test):** con finestra 120+120 minuti il **17% di tutte le candele H4 (2015-2026) cade nella finestra**; la candela delle 16:00 server e colpita nel 57% dei giorni feriali. La mia previsione "3-12% di ingressi saltati" era **sbagliata**: va corretta a **12-22% (70%)** per tutte le notizie High USD.
+**Varianti del test (6 passate: 3 varianti x 2 finestre 2015-2023 e 2024-2026):**
+- **OFF:** filtro spento (riferimento).
+- **ALL_120:** tutte le High USD, 120+120 minuti.
+- **MAIN_120:** solo le principali, titoli (in italiano come nel calendario BCM): `Libri Paga Non Agricoli` (NFP), `Decisione del Tasso di Interesse della Fed`, `Conferenza Stampa del FOMC`, `IPC a/a` (CPI); 120+120 minuti. Previsione: ingressi saltati **<= 6% (75%)**.
+**Regole (invariate, soglia 15% non allentata):** ALL_120 con ingressi saltati > 15% = **non si tiene in questa forma** (la finestra non si cambia dopo aver visto i numeri); MAIN_120 si tiene se ingressi saltati <= 15%, PF 2024-26 >= PF OFF - 0,2 e DD non peggiore di 2 punti. Nuova opzione `InpNewsTitleMatch` (default vuota = tutte).

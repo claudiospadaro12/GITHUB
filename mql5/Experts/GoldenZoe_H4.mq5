@@ -42,6 +42,7 @@ input int    InpNewsAfterMin         = 120;    // minuti DOPO la notizia in cui 
 input int    InpNewsSource           = 0;      // 0 = file CSV (tester e demo), 1 = calendario MT5 (solo demo/live, non nel tester)
 input string InpNewsFile             = "abtg_news_hist.csv"; // cartella Common\Files (FILE_COMMON); formato: Data Ora;Impatto;Valuta;Titolo
 input string InpNewsCurrencies       = "USD";  // valute considerate (elenco, es. USD,EUR)
+input string InpNewsTitleMatch      = "";     // se non vuoto: solo notizie il cui titolo contiene una di queste parti (separate da |)
 input int    InpNewsMinImpact        = 3;      // 3 = alta, 2 = media, 1 = bassa
 input bool   InpNewsBlockTrail       = false;  // se true salta anche lo spostamento dello stop vicino alle notizie (si recupera alla candela dopo)
 
@@ -62,6 +63,7 @@ bool LoadNews()
       if(FileIsLineEnding(h) && StringLen(sT)==0) continue;
       string sI=FileIsLineEnding(h)?"":FileReadString(h);
       string sC=FileIsLineEnding(h)?"":FileReadString(h);
+      string sN=FileIsLineEnding(h)?"":FileReadString(h);
       while(!FileIsLineEnding(h) && !FileIsEnding(h)) FileReadString(h);
       datetime tt=StringToTime(sT);
       if(tt<=0) continue;
@@ -69,6 +71,12 @@ bool LoadNews()
       if(StringFind(u,"HIGH")>=0||u=="3") imp=3; else if(StringFind(u,"MED")>=0||u=="2") imp=2; else if(StringFind(u,"LOW")>=0||u=="1") imp=1;
       if(imp<InpNewsMinImpact) continue;
       if(StringLen(InpNewsCurrencies)>0 && StringFind(InpNewsCurrencies,sC)<0) continue;
+      if(StringLen(InpNewsTitleMatch)>0)
+        {
+         string parts[]; int np=StringSplit(InpNewsTitleMatch,'|',parts); bool ok=false;
+         for(int q=0;q<np;q++) if(StringLen(parts[q])>0 && StringFind(sN,parts[q])>=0){ ok=true; break; }
+         if(!ok) continue;
+        }
       ArrayResize(gNewsT,gNewsN+1); gNewsT[gNewsN]=tt; gNewsN++;
      }
    FileClose(h);
