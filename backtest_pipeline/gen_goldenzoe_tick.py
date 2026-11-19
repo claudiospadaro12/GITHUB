@@ -36,7 +36,7 @@ R("$righe.Add($ea.n + ';' + $f.n + ';ERRORE", "$righe.Add($ea.var + ';' + $f.n +
 R("$riga=($ea.n + ';' + $f.n + ';' + $nT", "$riga=($ea.var + ';' + $f.n + ';' + $nT")
 R("'ea;finestra;operazioni;", "'variante;finestra;operazioni;")
 R("'Model=1'", "('Model=' + $ea.mod)"); R("AddMinutes(60)", "AddMinutes($(if($ea.mod -eq 4){ 300 } else { 60 }))")
-R("TEST 4 EA ORO su BCM portabile", "TEST GOLDENZOE TICK su BCM portabile")
+R("TEST 4 EA ORO su BCM portabile", "TEST GOLDENZOE TICK su BCM portabile"); R("' passate, Modello 1. Avvio", "' passate (LONG a barre da 1 minuto; LONG e LONGSHORT a tick reali). Avvio")
 R("Durata attesa 15-60 minuti (STIMA)", "Durata attesa 1-5 ore (STIMA: le passate a tick sono le piu' lunghe)")
 t = t.replace("CONTROLLO_14EA_ORO", "GOLDENZOE_TICK").replace("controllo_14ea_oro", "goldenzoe_tick")
 open(os.path.join(AQ, "righe", "GOLDENZOE_TICK_BCM.ps1"), "w", encoding="utf-8", newline="").write(t)
