@@ -4,12 +4,12 @@ $ErrorActionPreference='Continue'
 $ci=[Globalization.CultureInfo]::InvariantCulture
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ Write-Host ('SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui: ' + $env:COMPUTERNAME) -ForegroundColor Red; return }
 $ROOT='C:\MT5_BCM_Opt'; $TRM=Join-Path $ROOT 'terminal64.exe'; $MEE=Join-Path $ROOT 'metaeditor64.exe'; $MQL5=Join-Path $ROOT 'MQL5'
-$PINSRC='70cbceceae997a5029acb46aad603d444e6e1ac3'
+$PINSRC='417c436175d322d57a86a9c276b530e05709ff16'
 $aperti=@(Get-Process -Name terminal64,metatester64,metaeditor64 -ErrorAction SilentlyContinue)
 if($aperti.Count -gt 0){ $aperti | Select-Object Id,ProcessName,Path | Format-Table -AutoSize | Out-String | Write-Host; Write-Host 'MI FERMO: MT5, MetaEditor o agenti aperti. Chiudili e rilancia. Non ho avviato niente.' -ForegroundColor Red; return }
 foreach($pp in @($TRM,$MEE,$MQL5)){ if(-not (Test-Path -LiteralPath $pp)){ Write-Host ('MI FERMO: non trovo ' + $pp) -ForegroundColor Red; return } }
 $EAS=@(
-  @{ n='GoldenZoe_H4'; per='H4'; sha='D5D97E4853B50DC82F3C9DBFFA86C85271A2FAABC03656027250DFA992F8D0AE'; inp=@(
+  @{ n='GoldenZoe_H4'; per='H4'; sha='C138FA35AFBD275578B8AE20C1D29032A3A34EB35FCC400E6747039EF8BCE186'; inp=@(
       'InpTF=16388',
       'InpDonchianN=55',
       'InpAtrPeriod=14',
@@ -17,7 +17,6 @@ $EAS=@(
       'InpTrailAtr=3.0',
       'InpAllowLong=true',
       'InpAllowShort=false',
-      'InpLotMode=0',
       'InpRiskPercent=1.0',
       'InpLotMode=0',
       'InpMagic=972301',
