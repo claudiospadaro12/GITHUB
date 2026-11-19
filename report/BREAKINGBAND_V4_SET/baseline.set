@@ -1,0 +1,21 @@
+; BreakingBand_MT5_v4 - valori di default del file (invariati). EURUSD H1.
+BB_Period=20
+BB_Dev=2.0
+Bulge_BWexp=1.12
+Bulge_ImpATR=1.5
+Bulge_MaxBars=20
+Bulge_DistMid=0.40
+Retr_MaxCandleATR=1.5
+Retr_ShadowBody=1.5
+Retr_MaxBars=40
+UseStdDevCut=true
+StdDevSMA=50
+EnableContinuation=true
+EnableReversal=true
+Reversal_MinBulges=2
+SL_ATRmult=3.0
+TP_Mode=1
+TP_ATRmult=2.0
+RiskPercent=0.5
+ATR_Period=14
+MagicNumber=20261119
