@@ -1,0 +1,4 @@
+﻿variante;finestra;operazioni;rend_totale_pct;PF_su_rendimenti;t_giornaliera;DD_equity_pct;anni_con_uscite;anni_positivi;quota_max_anno_pct;netto_tester_EUR;PF_tester;rendimento_per_anno_pct
+LONG_M1;WTICK;50;6.79;1.45;1.01;6.24;3;3;76.1;6786.82;1.43;2024:0.73|2025:5.17|2026:0.89
+LONG_M4;WTICK;50;6.20;1.40;0.92;6.61;3;3;81.1;6198.50;1.39;2024:0.72|2025:5.06|2026:0.46
+LONGSHORT_M4;WTICK;71;3.05;1.15;0.45;8.06;3;2;82.2;3053.47;1.14;2024:-0.68|2025:2.69|2026:1.26

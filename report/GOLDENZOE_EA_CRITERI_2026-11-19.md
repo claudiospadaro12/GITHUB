@@ -49,3 +49,14 @@ Finestra: dal 01/08/2024 fino ai mesi consecutivi di tick reali BCM disponibili 
 **Porte:** LONG a tick: >= 20 operazioni, PF >= 1,3, DD equity <= 15%; scarto del PF tra Modello 4 e Modello 1 entro +-0,3 (altrimenti le barre da 1 minuto non sono una buona approssimazione per questo EA).
 **Previsioni:** PF LONG a tick >= 1,3: **60%**; scarto |PF M4 - PF M1| <= 0,3: **75%**; DD equity LONG <= 15%: **85%**; LONGSHORT a tick con PF inferiore a LONG: **55%**.
 **Limite:** circa 2 anni di finestra (poche decine di operazioni): conferma la qualita' dell'esecuzione, non la persistenza del vantaggio.
+
+## RISULTATI A TICK REALI (zip `GOLDENZOE_TICK.zip`; finestra 2024-08-01 -> 2026-10-01, 26 mesi; dati in `GOLDENZOE_TICK_dati/`)
+| Passata | Qualita' storico | Operazioni | PF | Rend. | DD equity (flottante) | Sharpe | Swap | Commissioni |
+|---|---|---|---|---|---|---|---|---|
+| LONG, barre da 1 minuto (Modello 1) | 99% (3,0 milioni di tick) | 50 | **1,43** | +6,79% | 6,24% | 1,25 | -3.478 | -36 |
+| **LONG, tick reali (Modello 4)** | **100% tick reali (166 milioni)** | **50** | **1,39** | **+6,20%** | **6,61%** | 1,18 | -3.476 | -35 |
+| LONGSHORT, tick reali | 100% tick reali | 71 (21 short) | 1,14 | +3,05% | 8,06% | 0,46 | -3.229 | -45 |
+- **Porte superate:** LONG a tick: >= 20 operazioni (50), PF >= 1,3 (1,39), DD equity <= 15% (6,61%); **scarto del PF tra tick reali e barre da 1 minuto: 0,04** (soglia 0,3): le barre da 1 minuto sono una buona approssimazione per questo EA. Previsioni: PF a tick >= 1,3 (60%) -> si'; scarto <= 0,3 (75%) -> si'; DD equity <= 15% (85%) -> si'; LONGSHORT peggiore di LONG (55%) -> si' (PF 1,14 contro 1,39).
+- Payoff atteso a tick 123,97 EUR per operazione (circa 0,12 R con rischio 1%); anni positivi 3 su 3 (2024: +0,72%, 2025: +5,06%, 2026: +0,46%); swap BCM (-98,78 punti) incluso: il guadagno lordo e' 22.273, le perdite 16.074.
+- **Limiti:** 50 operazioni in 26 mesi; periodo di trend rialzista dell'oro; il rendimento assoluto dipende dal rischio per operazione (1% nel test; scelta di Claudio); con lo swap di FTMO (-56,28) il costo sarebbe piu' basso.
+**Stato di GoldenZoe:** simulatore 2004-2026 PF 1,32-1,66, tester BCM 2024-2026 a tick PF 1,39 con DD 6,6%, riproducibilita' modello-tick verificata, swap FTMO/BCM misurato. **Restano:** regole di rischio FTMO, correlazione con gli EA di Wim su piu' anni, forward demo, e il confronto dei broker (promemoria in CLAUDE.md).
