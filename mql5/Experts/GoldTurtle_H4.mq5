@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                           ABTG_GoldTrend_H4.mq5  |
+//|                                             GoldTurtle_H4.mq5    |
 //|  v1.00 (19/11/2026) - TREND FOLLOWING sull'ORO, candele H4.       |
 //|  Strategia (backtest_runner/simulatore/tre_leve.py, leva 3a):     |
 //|   - INGRESSO: la candela H4 chiusa (shift 1) CHIUDE sopra il      |
@@ -18,6 +18,7 @@
 //|  NOTA: iATR di MT5 e' la media semplice del True Range (il        |
 //|  simulatore Python usava la media di Wilder): differenza piccola.  |
 //+------------------------------------------------------------------+
+#property copyright "Claudio - Gold Turtle (strategia propria)"
 #property version   "1.00"
 #property strict
 #include <Trade/Trade.mqh>
@@ -31,7 +32,7 @@ input bool   InpAllowLong            = true;
 input bool   InpAllowShort           = false;  // il test non trova edge sulle vendite
 input double InpRiskPercent          = 1.0;    // % equity rischiata sullo stop iniziale
 input long   InpMagic                = 972301;
-input string InpComment              = "GOLDTREND H4";
+input string InpComment              = "GOLDTURTLE H4";
 input bool   InpVerbose              = false;
 
 CTrade gTrade;
@@ -39,7 +40,7 @@ int    hAtr = INVALID_HANDLE;
 datetime gLastBar = 0;
 datetime gLastHadPos = 0;
 
-void Log(const string s){ if(InpVerbose) Print("[GoldTrend] ",s); }
+void Log(const string s){ if(InpVerbose) Print("[GoldTurtle] ",s); }
 
 int OnInit()
   {

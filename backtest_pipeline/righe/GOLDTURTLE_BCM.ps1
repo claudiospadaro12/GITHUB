@@ -1,15 +1,15 @@
-# MARCATORE_GOLDTREND_BCM_v1
-# ABTG_GoldTrend_H4 (oro H4, breakout 55 + stop mobile 3 ATR): varianti LONG e LONGSHORT su XAUUSD, finestre 2005-2014, 2015-2023 e 2024-2026, Modello 1, BCM portabile, SOLO tester. Criteri: report/GOLDTREND_EA_CRITERI_2026-11-19.md
+# MARCATORE_GOLDTURTLE_BCM_v1
+# GoldTurtle_H4 (oro H4, breakout 55 + stop mobile 3 ATR): varianti LONG e LONGSHORT su XAUUSD, finestre 2005-2014, 2015-2023 e 2024-2026, Modello 1, BCM portabile, SOLO tester. Criteri: report/GOLDTURTLE_EA_CRITERI_2026-11-19.md
 $ErrorActionPreference='Continue'
 $ci=[Globalization.CultureInfo]::InvariantCulture
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ Write-Host ('SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui: ' + $env:COMPUTERNAME) -ForegroundColor Red; return }
 $ROOT='C:\MT5_BCM_Opt'; $TRM=Join-Path $ROOT 'terminal64.exe'; $MEE=Join-Path $ROOT 'metaeditor64.exe'; $MQL5=Join-Path $ROOT 'MQL5'
-$PINSRC='2873005b683a88f737dbec7312c6b29d2f92ec9c'
+$PINSRC='273eb7b49cc7d24d21ea74a01d22340281b8a704'
 $aperti=@(Get-Process -Name terminal64,metatester64,metaeditor64 -ErrorAction SilentlyContinue)
 if($aperti.Count -gt 0){ $aperti | Select-Object Id,ProcessName,Path | Format-Table -AutoSize | Out-String | Write-Host; Write-Host 'MI FERMO: MT5, MetaEditor o agenti aperti. Chiudili e rilancia. Non ho avviato niente.' -ForegroundColor Red; return }
 foreach($pp in @($TRM,$MEE,$MQL5)){ if(-not (Test-Path -LiteralPath $pp)){ Write-Host ('MI FERMO: non trovo ' + $pp) -ForegroundColor Red; return } }
 $EAS=@(
-  @{ n='ABTG_GoldTrend_H4'; per='H4'; sha='ADB20EAF9A92C197160FCDDD99664664047D434B9A6EF3C9C42AFBAFCD564B3F'; inp=@(
+  @{ n='GoldTurtle_H4'; per='H4'; sha='537A057140792F6B3159145626183B55209C22E6086FB517136919CDAA7CC788'; inp=@(
       'InpTF=16388',
       'InpDonchianN=55',
       'InpAtrPeriod=14',
@@ -19,14 +19,14 @@ $EAS=@(
       'InpAllowShort=false',
       'InpRiskPercent=1.0',
       'InpMagic=972301',
-      'InpComment=GOLDTREND H4',
+      'InpComment=GOLDTURTLE H4',
       'InpVerbose=false'
   ) }
 )
 function Num([string]$s){ $c=($s -replace '[^0-9.\-]',''); $v=0.0; if([double]::TryParse($c,[Globalization.NumberStyles]::Float,$ci,[ref]$v)){ return $v } else { return [double]::NaN } }
 function Cerca([string]$t,[string]$et){ $m=[regex]::Match($t,'(?:' + $et + ')\|([^|]*)\|'); if($m.Success){ return $m.Groups[1].Value } else { return $null } }
 function LeggiTesto([string]$p){ $b=[IO.File]::ReadAllBytes($p); if($b.Length -ge 2 -and (($b[0] -eq 255 -and $b[1] -eq 254) -or ($b[0] -eq 254 -and $b[1] -eq 255))){ return [Text.Encoding]::Unicode.GetString($b) } else { return [Text.Encoding]::UTF8.GetString($b) } }
-$W=Join-Path $env:TEMP 'goldtrend'; New-Item -ItemType Directory -Force -Path $W | Out-Null
+$W=Join-Path $env:TEMP 'goldturtle'; New-Item -ItemType Directory -Force -Path $W | Out-Null
 $dstDir=Join-Path $MQL5 'Experts\TEST14'; New-Item -ItemType Directory -Force -Path $dstDir | Out-Null
 # 1) sorgenti dal repository (SHA256 verificato) e compilazione
 foreach($ea in $EAS){
@@ -46,14 +46,14 @@ foreach($ea in $EAS){
 # 2) test
 if(-not ('SvegliaE14.Win' -as [type])){ Add-Type -Namespace SvegliaE14 -Name Win -MemberDefinition '[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint esFlags);' }
 [void][SvegliaE14.Win]::SetThreadExecutionState([uint32]2147483651)
-$desk=[Environment]::GetFolderPath('Desktop'); $dirOut=Join-Path $desk 'GOLDTREND'; $dirSerie=Join-Path $dirOut 'serie'; $dirRep=Join-Path $dirOut 'report'
+$desk=[Environment]::GetFolderPath('Desktop'); $dirOut=Join-Path $desk 'GOLDTURTLE'; $dirSerie=Join-Path $dirOut 'serie'; $dirRep=Join-Path $dirOut 'report'
 New-Item -ItemType Directory -Force -Path $dirSerie | Out-Null; New-Item -ItemType Directory -Force -Path $dirRep | Out-Null
 $FIN=@( @{ n='W2005_2014'; da='2005.01.01'; a='2014.12.31' }, @{ n='W2015_2023'; da='2015.01.01'; a='2023.12.31' }, @{ n='W2024_2026'; da='2024.01.01'; a='2026.10.31' } )
-$VARS=@( @{ v='LONG'; ea='ABTG_GoldTrend_H4'; ov=@('InpAllowLong=true','InpAllowShort=false') }, @{ v='LONGSHORT'; ea='ABTG_GoldTrend_H4'; ov=@('InpAllowLong=true','InpAllowShort=true') } )
+$VARS=@( @{ v='LONG'; ea='GoldTurtle_H4'; ov=@('InpAllowLong=true','InpAllowShort=false') }, @{ v='LONGSHORT'; ea='GoldTurtle_H4'; ov=@('InpAllowLong=true','InpAllowShort=true') } )
 $RUNS=@(); foreach($v in $VARS){ $e=$null; foreach($x in $EAS){ if($x.n -eq $v.ea){ $e=$x } }; $ovr=@{}; foreach($o in $v.ov){ $ovr[$o.Split('=')[0]]=$o }; $iv=@($e.inp | Where-Object { -not $ovr.ContainsKey($_.Split('=')[0]) }) + @($v.ov); $RUNS += @{ n=$e.n; per=$e.per; var=$v.v; inpv=$iv } }
 $righe=New-Object System.Collections.ArrayList
 [void]$righe.Add('variante;finestra;operazioni;rend_totale_pct;PF_su_rendimenti;t_giornaliera;DD_equity_pct;anni_con_uscite;anni_positivi;quota_max_anno_pct;netto_tester_EUR;PF_tester;rendimento_per_anno_pct')
-Write-Host ('=== TEST GOLDTREND su BCM portabile: ' + ($RUNS.Count * $FIN.Count) + ' passate, Modello 1. Avvio ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana). Durata attesa 30-90 minuti (STIMA, 6 passate). Non aprire MT5; PC alla corrente. ===') -ForegroundColor Cyan
+Write-Host ('=== TEST GOLDTURTLE su BCM portabile: ' + ($RUNS.Count * $FIN.Count) + ' passate, Modello 1. Avvio ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana). Durata attesa 30-90 minuti (STIMA, 6 passate). Non aprire MT5; PC alla corrente. ===') -ForegroundColor Cyan
 $n=0; $stopTutto=$false
 foreach($f in $FIN){
  foreach($ea in $RUNS){
@@ -107,12 +107,12 @@ foreach($f in $FIN){
  }
 }
 [void][SvegliaE14.Win]::SetThreadExecutionState([uint32]2147483648)
-$fileCsv=Join-Path $dirOut 'RISULTATI_GOLDTREND.csv'; Set-Content -LiteralPath $fileCsv -Value ($righe -join "`r`n") -Encoding UTF8
-$zip=Join-Path $desk 'GOLDTREND.zip'; Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
+$fileCsv=Join-Path $dirOut 'RISULTATI_GOLDTURTLE.csv'; Set-Content -LiteralPath $fileCsv -Value ($righe -join "`r`n") -Encoding UTF8
+$zip=Join-Path $desk 'GOLDTURTLE.zip'; Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
 try { Compress-Archive -Path (Join-Path $dirOut '*') -DestinationPath $zip -Force } catch { Write-Host 'ZIP non creato: allega la cartella a mano.' -ForegroundColor Red }
 Write-Host ('FATTO alle ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana).') -ForegroundColor Green
 Write-Host ''
 Write-Host '##########  FILE DA ALLEGARE ALLA CHAT  ##########' -ForegroundColor Black -BackgroundColor Yellow
 Write-Host $zip -ForegroundColor Black -BackgroundColor Yellow
-Write-Host '(contiene: RISULTATI_GOLDTREND.csv + cartella serie + cartella report; Esplora file si apre con lo zip selezionato)' -ForegroundColor Black -BackgroundColor Yellow
+Write-Host '(contiene: RISULTATI_GOLDTURTLE.csv + cartella serie + cartella report; Esplora file si apre con lo zip selezionato)' -ForegroundColor Black -BackgroundColor Yellow
 try { Start-Process -FilePath 'explorer.exe' -ArgumentList ('/select,"' + $zip + '"') } catch { }
