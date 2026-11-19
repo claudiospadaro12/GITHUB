@@ -40,6 +40,7 @@ foreach($f in $FIN){
   $r=@('[Experts]','AllowLiveTrading=false','AllowDllImport=false','','[Tester]','Expert=TESTBB\GoldenZoe_H4.ex5','Symbol=EURUSD',('Period=' + $f.tf),'Model=1','Optimization=3','OptimizationCriterion=0',('FromDate=' + $f.da),('ToDate=' + $f.a),'ForwardMode=0','Deposit=100000','Currency=EUR','Leverage=100','ExecutionMode=0','Visual=0','UseLocal=1','UseRemote=0','UseCloud=0','ReplaceReport=1','ShutdownTerminal=1',('Report=' + $rep),'','[TesterInputs]'); $r += (@($INP | Where-Object { $_ -notlike 'InpTF=*' }) + ('InpTF=' + $f.tfv))
   $ini=Join-Path $W ($rep + '.ini'); Set-Content -LiteralPath $ini -Value (($r -join "`r`n") + "`r`n") -Encoding ASCII -NoNewline
   Get-ChildItem -LiteralPath $ROOT -File -Filter ($rep + '.*') -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+  $w3=Get-Date; while(@(Get-Process -Name metatester64 -ErrorAction SilentlyContinue).Count -gt 0 -and ((Get-Date)-$w3).TotalMinutes -lt 5){ Start-Sleep -Seconds 5 }; Start-Sleep -Seconds 20
   $t0=Get-Date; $pr=Start-Process -FilePath $TRM -ArgumentList ('/portable /config:"' + $ini + '"') -PassThru
   $scade=$t0.AddHours(10); $ultimo=Get-Date
   while(-not $pr.HasExited -and (Get-Date) -lt $scade){ Start-Sleep -Seconds 10; if(((Get-Date)-$ultimo).TotalMinutes -ge 15){ $ultimo=Get-Date; Write-Host ('[' + (Get-Date).ToString('HH:mm') + '] ' + $f.n + ': in corso da ' + [math]::Round(((Get-Date)-$t0).TotalMinutes) + ' minuti') -ForegroundColor Gray } }
@@ -49,6 +50,7 @@ foreach($f in $FIN){
   if(Test-Path -LiteralPath $cache){ $trovati += @(Get-ChildItem -LiteralPath $cache -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 }) }
   foreach($g in $trovati){ Copy-Item -LiteralPath $g.FullName -Destination (Join-Path $out ($f.n + '_' + $g.Name)) -Force }
   Copy-Item -LiteralPath $ini -Destination (Join-Path $out ($f.n + '.ini')) -Force
+  foreach($xx in @($trovati | Where-Object { $_.Extension -eq '.xml' })){ $rc=([regex]::Matches((Get-Content -LiteralPath $xx.FullName -Raw),'<Row>')).Count - 1; Write-Host ('   righe XML: ' + $rc + ' (se sono poche, i risultati completi sono nel file .opt)') -ForegroundColor Gray }
   $minuti=[math]::Round(((Get-Date)-$t0).TotalMinutes)
   if($trovati.Count -eq 0){ Write-Host ('[' + $f.n + '] finito in ' + $minuti + ' minuti ma NESSUN report trovato: apri MT5, scheda Ottimizzazione, tasto destro, Esporta in XML, e mandami quel file.') -ForegroundColor Yellow }
   else { Write-Host ('[' + $f.n + '] finito in ' + $minuti + ' minuti; file raccolti: ' + $trovati.Count) -ForegroundColor Green }
