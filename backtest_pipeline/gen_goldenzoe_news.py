@@ -10,7 +10,7 @@ EA = "GoldenZoe_H4"
 inp, sha = leggi(EA)
 righe = ",\n".join("      '%s=%s'" % (a, b.replace("'", "''")) for a, b in inp)
 eas_ps = "  @{ n='%s'; per='H4'; sha='%s'; inp=@(\n%s\n  ) }" % (EA, sha, righe)
-MAIN = "Libri Paga Non Agricoli|Decisione del Tasso di Interesse della Fed|Conferenza Stampa del FOMC|IPC a/a"
+MAIN = "Libri Paga Non Agricoli~Decisione del Tasso di Interesse della Fed~Conferenza Stampa del FOMC~IPC a/a"
 V = [("OFF", ["InpNewsFilter=false"]), ("ALL_120", ["InpNewsFilter=true"]), ("MAIN_120", ["InpNewsFilter=true", "InpNewsTitleMatch=" + MAIN])]
 VARS = "$VARS=@( " + ", ".join("@{ v='%s'; ea='%s'; ov=@(%s) }" % (n, EA, ",".join("'%s'" % o for o in ov)) for n, ov in V) + " )\n"
 RUNS = ("$RUNS=@(); foreach($v in $VARS){ $e=$null; foreach($x in $EAS){ if($x.n -eq $v.ea){ $e=$x } }; "
