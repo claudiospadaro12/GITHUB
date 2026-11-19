@@ -12,3 +12,17 @@ Finestre mai usate per ottimizzare questi parametri: **2015-2023** e **2005-2014
 - Previsioni: ATR_EQ ~ PIPS (differenza < 0,05 in PF su tutte e due le finestre): **70%** (a 0,013 ATR il pendente e' quasi a mercato: la scala conta poco). ATR_DEF migliore di PIPS in entrambe le finestre: **30%**. Almeno una variante con PF su rendimenti > 1,3 in entrambe le finestre: **5%**.
 ## Limiti
 Un solo EA, un solo mercato, una sola famiglia (Supertrend): non e' una prova generale dell'ipotesi "scala ATR". Non dice nulla sugli orari (stadio 1b: DAX/Nasdaq, dati indici da verificare). Il 2024-2026 non si usa (periodo di ottimizzazione).
+
+## RISULTATI (zip `STADIO1_ATR.zip`, tester BCM, XAUUSD H4, Modello 1; dati in `STADIO1_ATR_dati/`)
+| Variante | 2015-2023: op. / PF / DD / anni positivi | 2005-2014: op. / PF / DD / anni positivi |
+|---|---|---|
+| PIPS (SupertrendReversal, pip fissi) | 267 / 0,91 / 9,8% / 4 su 9 | 265 / 0,85 / 11,1% / 2 su 10 |
+| ATR_EQ (ATR equivalente ai pip) | 267 / 0,90 / 9,8% / 4 su 9 | 265 / 0,85 / 11,2% / 2 su 10 |
+| ATR_DEF (distanze ATR 0,5 / 0,2) | 379 / **1,00** / 20,0% / 4 su 9 | 353 / **1,02** / 13,0% / 4 su 10 |
+| MULTI_DEF (Supertrend ATR 12, RR 3,0) | 406 / 1,10 / 21,9% / 7 su 9 | 342 / 0,72 / 27,9% / 3 su 10 |
+- **Riproducibilita' (porta):** PIPS e MULTI_DEF riproducono esattamente i PF del controllo precedente (0,91 / 0,85 e 1,10 / 0,72): il confronto vale.
+- **La scala non conta:** ATR_EQ ≈ PIPS (stessi trade, PF 0,90 contro 0,91 e 0,85 contro 0,85): previsione 70% -> **si'**. Con distanze quasi nulle (0,20 e 0,03 USD) scalarle con l'ATR non cambia nulla.
+- **Cambiare i valori aiuta un poco:** ATR_DEF batte PIPS in entrambe le finestre (+0,09 e +0,17 di PF; piu' operazioni, piu' anni positivi nel 2005-14): previsione 30% -> **si'**. Ma il PF resta ~1,0 (pareggio, non edge) e il DD 2015-23 e' 20%.
+- **Sensibilita' ai parametri:** ATR_DEF e MULTI_DEF differiscono solo per Supertrend ATR 7 -> 12 e RR 2,5 -> 3,0: PF 1,00 -> 1,10 nel 2015-23 e 1,02 -> 0,72 nel 2005-14. Nessun plateau: il risultato oscilla di 0,3-0,4 PF con due parametri.
+- Nessuna variante ha PF > 1,3 in entrambe le finestre (previsione 5%): confermato.
+**Verdetto stadio 1:** l'ipotesi "i pip fissi fanno perdere, l'ATR sistema" **non e' confermata**. Normalizzare per ATR non crea vantaggio; la differenza vera e' nei valori del pendente e del buffer, e porta da una perdita a un pareggio. Il Supertrend sull'oro H4 resta senza edge stabile (la "scoperta" del PF 3,17 era sul 2024-26 su cui era ottimizzato).
