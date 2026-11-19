@@ -12,12 +12,14 @@ def load():
                 D.setdefault(t[:10],[]).append((int(t[11:13])*60+int(t[14:16]),float(o),float(h),float(l),float(c)))
     # dedup/sort per day
     return {d:np.array(sorted(set(v))) for d,v in D.items()}
-def run(D,N=4,k=0.5,atrp=14):
+def run(D,N=4,k=0.5,atrp=14,fa=None,fb=None):
     days=sorted(D); dh=np.array([D[d][:,2].max() for d in days]); dl=np.array([D[d][:,3].min() for d in days]); dc=np.array([D[d][-1,4] for d in days])
     tr=np.maximum(dh-dl,np.maximum(abs(dh-np.roll(dc,1)),abs(dl-np.roll(dc,1)))); tr[0]=dh[0]-dl[0]
     out=[]
-    for i in range(max(N,atrp)+1,len(days)):
+    for i in range(max(N,atrp,100)+1,len(days)):
         d=days[i]; hi=dh[i-N:i].max(); lo=dl[i-N:i].min(); atr=tr[i-atrp:i].mean(); sl=k*atr
+        if fa is not None and atr/tr[i-100:i].mean()<=fa: continue
+        if fb is not None and (hi-lo)/atr<=fb: continue
         B=D[d]; B=B[(B[:,0]>=600)&(B[:,0]<1320)]
         if len(B)<30: continue
         pos={}; done=set(); 
