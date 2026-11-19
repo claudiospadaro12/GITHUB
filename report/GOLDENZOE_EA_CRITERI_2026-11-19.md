@@ -28,3 +28,18 @@ Un solo mercato; rialzo strutturale dell'oro; costi 2005-2010 del tester dipendo
 **Lettura:** il vantaggio lordo e' reale e riproducibile; **la domanda decisiva e' il swap dell'oro long sul conto dove si opera** (BCM e FTMO, tipo di conto, eventuale conto senza swap). Il 2024-2026 e' l'unica finestra con costi realistici di oggi e passa le porte (PF 1,54, DD 6,2%, 3 anni su 3), ma su sole 62 operazioni. Le finestre vecchie non sono valide per giudicare i costi (swap odierno applicato a prezzi di allora).
 ## PROSSIMI PASSI
 (1) Leggere il swap vero dell'oro long (e short) sui conti: in MT5, Market Watch, XAUUSD, tasto destro, Specifiche: "Swap long", modalita' e giorno del triplo swap, su BCM e su FTMO; (2) rifare la simulazione Python con swap proporzionale al nozionale e ai tassi storici (carry reale per anno) per giudicare 2005-2023 in modo non distorto; (3) test a tick reali sul 2025.
+
+## SWAP VERO DELL'ORO (zip `SWAPINFO_20261119_1528`, letto dai terminali; dati in `SWAPINFO_20261119/`)
+| XAUUSD | modo | swap long | swap short | triplo swap | per 1 lotto (100 oz) a notte | in % annuo del valore (oro 3.710 USD) |
+|---|---|---|---|---|---|---|
+| **BCM** | punti | **-98,78** | **+19,28** (accredito) | mercoledi' | long -98,78 USD (circa -90 EUR); short +19,28 USD | long circa -9,7% annuo |
+| **FTMO** | punti | **-56,28** | **-4,20** | mercoledi' | long -56,28 USD (circa -51 EUR); short -4,20 USD | long circa -5,5% annuo |
+(1 punto = 0,01 USD; il tester BCM misurava circa -85 EUR/lotto/giorno: coincide con -98,78 USD.) Argento: BCM -29,32 / +2,73; FTMO -12,38 / -1,22. Indici BCM: interesse annuo -1,4% / -1,15%. `tick_value` risultava 0 (terminali senza quotazioni in tempo reale): le stime in EUR del CSV sono "n.d." per i modi in punti.
+## Rivalutazione di GoldenZoe LONG con lo swap vero (analisi successiva, NON cambia il verdetto formale della porta)
+| Finestra | Senza swap (PF / rend. / DD chiuso) | FTMO punti -56,28: PF / rend. / DD | FTMO 5,5% annuo del valore: PF / rend. / DD | BCM 9,7% annuo: PF |
+|---|---|---|---|---|
+| 2005-2014 | 1,53 / +21,7% / 4,9% | 0,77 / -12,2% / 16,3% | **1,31** / +13,6% / 8,0% | 1,16 |
+| 2015-2023 | 1,66 / +33,5% / 10,2% | **1,26** / +14,6% / 13,9% | **1,48** / +25,7% / 11,8% | 1,36 |
+| 2024-2026 | 1,82 / +15,8% / 4,6% | **1,64** / +13,0% / 4,8% | **1,67** / +13,4% / 4,8% | 1,56 |
+LONGSHORT con swap FTMO: PF 0,81 / 1,30 / 1,15 (le vendite non aggiungono). DD = saldo dei trade chiusi (non flottante).
+**Lettura:** (1) il swap di FTMO e' circa il 43% piu' basso di quello BCM; sulle vendite BCM accredita, FTMO addebita poco. (2) **Il costo in R dipende dalla distanza dello stop in dollari:** con l'oro a 3.700 e uno stop di circa 120 USD (3 ATR H4) il swap di una tenuta di 4 giorni vale circa 0,02 R; con l'oro a 400-1.200 e stop di 12-40 USD valeva fino a 0,2 R. **Il costante in punti applicato dal tester alle finestre vecchie e' quindi irrealistico** (ecco perche' il 2005-2014 "crolla"); per le condizioni di oggi il costo e' piccolo. (3) Con il swap FTMO e un costo proporzionale al valore (modello piu' realistico per gli anni passati) il PF LONG e' 1,31 / 1,48 / 1,67 nelle tre finestre. (4) Restano: test a tick reali 2025, DD flottante, regole di rischio FTMO, correlazione con gli EA di Wim, forward demo.
