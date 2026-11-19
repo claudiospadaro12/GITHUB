@@ -1,0 +1,23 @@
+# 0) copertura dei TICK REALI XAUUSD (sola lettura sulle cartelle sorgente) e copia dei mesi mancanti nel terminale di test
+$copL=New-Object System.Collections.ArrayList; [void]$copL.Add('cartella;mesi;primo;ultimo;MB')
+$optSrv=@(Get-ChildItem -LiteralPath (Join-Path $ROOT 'bases') -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'BCM' } | Select-Object -First 1)
+if($optSrv.Count -eq 0){ Write-Host ('MI FERMO: in ' + $ROOT + '\bases non c e una cartella server BCM.') -ForegroundColor Red; return }
+$tdst=Join-Path $optSrv[0].FullName 'ticks\XAUUSD'; New-Item -ItemType Directory -Force -Path $tdst | Out-Null
+$cand=New-Object System.Collections.ArrayList; [void]$cand.Add($tdst)
+foreach($o in @(Get-ChildItem -LiteralPath (Join-Path $env:APPDATA 'MetaQuotes\Terminal') -Directory -ErrorAction SilentlyContinue)){ foreach($s in @(Get-ChildItem -LiteralPath (Join-Path $o.FullName 'bases') -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'BCM' })){ $p=Join-Path $s.FullName 'ticks\XAUUSD'; if(Test-Path -LiteralPath $p){ [void]$cand.Add($p) } } }
+$best=@{}
+foreach($p in $cand){
+  $fl=@(Get-ChildItem -LiteralPath $p -Filter '*.tkc' -File -ErrorAction SilentlyContinue | Where-Object { $_.BaseName -match '^\d{6}$' } | Sort-Object Name)
+  $mb=0.0; foreach($x in $fl){ $mb+=($x.Length/1MB) }
+  [void]$copL.Add($p + ';' + $fl.Count + ';' + $(if($fl.Count){ $fl[0].BaseName } else { '' }) + ';' + $(if($fl.Count){ $fl[$fl.Count-1].BaseName } else { '' }) + ';' + $mb.ToString('0.0',$ci))
+  if($p -ne $tdst){ foreach($x in $fl){ if((-not $best.ContainsKey($x.BaseName)) -or ($x.Length -gt $best[$x.BaseName].Length)){ $best[$x.BaseName]=$x } } }
+}
+$nCop=0; foreach($k in ($best.Keys | Sort-Object)){ $d=Join-Path $tdst ($k + '.tkc'); if(-not (Test-Path -LiteralPath $d)){ Copy-Item -LiteralPath $best[$k].FullName -Destination $d -Force; if((Get-Item -LiteralPath $d).Length -ne $best[$k].Length){ Write-Host ('ERRORE copia tick ' + $k) -ForegroundColor Red; return }; $nCop++ } }
+$mesi=@(Get-ChildItem -LiteralPath $tdst -Filter '*.tkc' -File -ErrorAction SilentlyContinue | Where-Object { $_.BaseName -match '^\d{6}$' } | ForEach-Object { $_.BaseName } | Sort-Object)
+$mm=[datetime]'2024-08-01'; $nCont=0; while($mesi -contains $mm.ToString('yyyyMM',$ci)){ $mm=$mm.AddMonths(1); $nCont++ }
+if($mm -gt [datetime]'2026-10-01'){ $mm=[datetime]'2026-10-01' }
+[void]$copL.Add('mesi copiati nel terminale di test: ' + $nCop + '; mesi di tick consecutivi da 2024-08: ' + $nCont + '; ToDate scelto: ' + $mm.ToString('yyyy.MM.dd',$ci))
+$daT='2024.08.01'; $aT=$mm.ToString('yyyy.MM.dd',$ci)
+$deskC=[Environment]::GetFolderPath('Desktop'); $dirC=Join-Path $deskC 'ABTG_RISULTATI'; New-Item -ItemType Directory -Force -Path $dirC | Out-Null; $fC=Join-Path $dirC 'COPERTURA_TICK_XAUUSD.txt'; Set-Content -LiteralPath $fC -Value ($copL -join "`r`n") -Encoding UTF8
+$copL | ForEach-Object { Write-Host $_ }
+if($nCont -lt 12){ Write-Host ('MI FERMO: meno di 12 mesi consecutivi di tick da 2024-08. Allega ' + $fC) -ForegroundColor Black -BackgroundColor Yellow; Start-Process explorer.exe -ArgumentList ('/select,"' + $fC + '"'); return }
