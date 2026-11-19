@@ -17,3 +17,12 @@ Varianti: **LONG** (base, N=55); **SHORT** (solo short, controllo di deriva); **
 5. **Esito:** "candidato" solo se 1+2+3 passano E la deriva NON e confermata. Se 1+2+3 passano ma deriva confermata: "dipendente dalla tendenza, non validato". Altrimenti chiuso.
 6. Anche con "candidato": servono ancora tick reali, correlazione con gli EA di Wim e regole prop prima di qualsiasi forward demo. Nessun consiglio su lotti/taglie.
 7. Prove effettuate: 40; il riferimento di confronto e lo scan da 222 prove (rischio selezione).
+
+---
+## RISULTATO (19/11/2026, zip GOLDENZOE_EURJPY: 40 passate, dati in `GOLDENZOE_EURJPY_dati/RISULTATI_GOLDENZOE_EURJPY.csv`)
+1. **Riproduzione: PASSA.** LONG coincide con lo scan Market Watch (operazioni e PF identici su 10 finestre su 10, es. H2 IS 232/1,32, OOS 134/1,33).
+2. **LONG candidato: PASSA 4/5** (PF tester IS / OOS): H1 1,36/1,34; H2 1,32/1,33; H4 1,20/1,39; H8 1,23/1,89; **H6 non passa** (IS 1,07). OOS operazioni 283/134/72/49/37, profitto sempre >0.
+3. **Plateau N: PASSA 5/5 per entrambi.** OOS PF N40: 1,21/1,35/1,44/1,13/1,87; N80: 1,27/1,35/1,75/1,34/2,04.
+4. **Deriva: CONFERMATA.** SHORT OOS PF 0,73/0,57/0,67/0,65/0,71 (tutti <0,8); SHORT IS 0,95/0,67/0,57/0,91/0,86. Controllo swap (dai report): togliendo lo swap SHORT OOS resta PF 0,82/0,66/0,77/0,78/0,82 (<1 ovunque): non e lo swap. Swap LONG trascurabile (+339..+1060 EUR a TF su 4 anni; PF 1,33-1,87 senza swap).
+5. **Esito (regola 5): "dipendente dalla tendenza, NON validato".** La regola specchio perde ovunque dove la LONG guadagna: il vantaggio e la salita di EURJPY 2013-24 (yen debole) catturata dalla regola, non un vantaggio simmetrico. Previsione (SHORT PF<1, ~70%) confermata.
+Nota: la LONG e robusta nei parametri e nei TF e riproducibile; e il suo valore futuro dipende da una vista sul regime (yen debole che continua). In demo vale come prova fuori campione; non come EA scorrelato validato.
