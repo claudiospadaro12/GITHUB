@@ -34,3 +34,15 @@ Candidato: Nikkei 225 long-only, screening D1 su Yahoo (N=20 e N=55) -> IS, OOS 
 
 ## RIPETIZIONE con lotto corretto (EA v1.11, `InpLotMode=1`): previsioni PRIMA dei numeri
 Stesse 3 passate e stessa finestra, rischio 1% vero (circa 1.000 EUR per operazione). Previsioni: lotto medio D1 tra 3 e 12 lotti-indice e rischio per operazione 0,8-1,2% dell'equity: **80%**; swap totale tra 8% e 18% annuo del nozionale (conferma dello swap alto del tester): **70%**; D1 N=20 netto positivo dopo lo swap: **40%**; D1 N=55 netto positivo: **30%**; DD equity D1 N=20 tra 3% e 12%: **65%**. Regola: se lo swap resta > 8% annuo e il netto D1 e <= 0, il Nikkei CFD BCM **non e operativo** a questi costi (nessun test su FTMO finche non si misura lo swap reale sul demo).
+
+---
+## RISULTATO DELLA RIPETIZIONE con lotto corretto (EA v1.11, `InpLotMode=1`; zip GOLDENZOE_NIKKEI2; dati in `NIKKEI_CFD_BCM_dati/`)
+| Passata | Operazioni | PF | Netto EUR (% su 100k) | DD equity | Profitto lordo | Swap | Lotto medio |
+|---|---|---|---|---|---|---|---|
+| D1 N=20 | 12 | 0,90 | -202 (-0,20%) | 2,66% | +1.431 | -1.634 | 5,7 |
+| D1 N=55 | 10 | 0,41 | -1.703 (-1,70%) | 3,66% | -409 | -1.295 | 5,8 |
+| H4 N=55 (esplorativa) | 41 | 1,08 | +939 (+0,94%) | 5,18% | +3.907 | -2.969 | 16,9 |
+- **Dimensionamento corretto:** lotti D1 3,0-10,3 (previsione 3-12: si). **Swap: circa 14% annuo del nozionale** (stima da giorni di tenuta e prezzi: 14,2% / 14,0% / 14,8%): previsione 8-18% **si**. Lo swap supera il profitto lordo nelle D1 (N=20: +1.431 contro -1.634) e assorbe il 76% di quello H4.
+- **Conferma dal demo reale BCM** (`data/statements/trades_auto.csv`, D30EUR long): swap -3,33 EUR su 0,5 lotti per 1 notte (circa 9,6% annuo), -12,34 su 0,5 lotti per 3 notti (circa 11,7%), -4,80 su 0,6 lotti per 1 notte (circa 11,6%). **Gli indici BCM costano circa 10-14% annuo sul long**, non il -1,40% letto dalla specifica (modo "interesse % annuo": la lettura della cifra era sbagliata).
+- Previsioni: D1 N=20 netto positivo (40%): **no**; D1 N=55 (30%): **no**; DD N=20 tra 3% e 12% (65%): **no** (2,66%, appena sotto); swap 8-18% (70%): **si**.
+- **Esito (regola scritta):** swap > 8% annuo e netto D1 <= 0 -> **Nikkei CFD su BCM NON operativo a questi costi.** Il vantaggio lordo D1 N=20 (+1,4% in 255 giorni di tenuta con 12 operazioni) non copre il finanziamento. Su FTMO `JP225.cash` (swap circa 5,5% annuo, da scalare: swap N=20 circa -630 EUR, netto circa +800 EUR sullo stesso campione) non e stato provato e i dati FTMO non sono disponibili senza login. **Il tema generale e il costo di finanziamento dei long sugli indici e sull'oro: da inserire nel confronto broker.**
