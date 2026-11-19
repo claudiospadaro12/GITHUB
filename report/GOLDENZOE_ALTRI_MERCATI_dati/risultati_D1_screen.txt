@@ -1,0 +1,85 @@
+mercato (classe, inizio) | N dir | IS n PF t | OOS n PF sumR | esito
+Cacao                  agricoli     2000-01-03   N55 S | IS  31 PF  0.53 t  -1.6 | OOS  22 PF  0.46 R   -6.7 | 
+Cacao                  agricoli     2000-01-03   N55 L | IS  43 PF  1.53 t   1.1 | OOS  37 PF  1.15 R   +2.7 | 
+Caffe                  agricoli     2000-01-03   N55 S | IS  43 PF  0.33 t  -3.3 | OOS  31 PF  0.25 R  -12.3 | 
+Caffe                  agricoli     2000-01-03   N55 L | IS  43 PF  1.21 t   0.4 | OOS  33 PF  0.77 R   -2.7 | 
+Cotone                 agricoli     2000-01-03   N55 S | IS  40 PF  1.02 t   0.1 | OOS  25 PF  0.48 R   -5.7 | 
+Cotone                 agricoli     2000-01-03   N55 L | IS  40 PF  1.32 t   0.6 | OOS  30 PF  1.38 R   +4.5 | 
+Grano                  agricoli     2000-07-17   N55 S | IS  44 PF  0.66 t  -1.1 | OOS  29 PF  0.23 R  -10.9 | 
+Grano                  agricoli     2000-07-17   N55 L | IS  41 PF  1.60 t   1.1 | OOS  26 PF  1.05 R   +0.5 | 
+Mais                   agricoli     2000-07-17   N55 S | IS  45 PF  0.73 t  -0.7 | OOS  22 PF  0.61 R   -2.3 | 
+Mais                   agricoli     2000-07-17   N55 L | IS  50 PF  1.47 t   1.0 | OOS  25 PF  2.11 R   +8.4 | 
+Soia                   agricoli     2000-09-15   N55 S | IS  36 PF  0.96 t  -0.1 | OOS  25 PF  1.13 R   +1.1 | 
+Soia                   agricoli     2000-09-15   N55 L | IS  51 PF  1.85 t   1.5 | OOS  21 PF  2.38 R   +9.3 | 
+Zucchero               agricoli     2000-03-01   N55 S | IS  38 PF  1.01 t   0.0 | OOS  24 PF  1.21 R   +1.4 | 
+Zucchero               agricoli     2000-03-01   N55 L | IS  36 PF  1.56 t   0.8 | OOS  25 PF  1.00 R   -0.0 | 
+Benzina                energia      2000-11-01   N55 S | IS  25 PF  1.94 t   1.0 | OOS  24 PF  0.75 R   -2.4 | 
+Benzina                energia      2000-11-01   N55 L | IS  50 PF  0.92 t  -0.3 | OOS  26 PF  1.45 R   +4.5 | 
+Gas_naturale           energia      2000-08-30   N55 S | IS  38 PF  0.99 t  -0.0 | OOS  29 PF  0.26 R   -9.8 | 
+Gas_naturale           energia      2000-08-30   N55 L | IS  37 PF  0.98 t  -0.1 | OOS  34 PF  0.79 R   -3.4 | 
+Gasolio_riscaldamento  energia      2000-09-01   N55 S | IS  29 PF  1.14 t   0.2 | OOS  23 PF  1.33 R   +2.7 | 
+Gasolio_riscaldamento  energia      2000-09-01   N55 L | IS  49 PF  0.79 t  -0.6 | OOS  24 PF  2.18 R   +8.9 | 
+Petrolio_Brent         energia      2007-07-30   N55 S | IS  13 PF  4.51 t   1.3 | OOS  26 PF  0.81 R   -2.3 | storico IS < 8 anni
+Petrolio_Brent         energia      2007-07-30   N55 L | IS  20 PF  1.78 t   1.0 | OOS  24 PF  3.66 R  +10.3 | storico IS < 8 anni
+Petrolio_WTI           energia      2000-08-23   N55 S | IS  27 PF  1.34 t   0.4 | OOS  19 PF  1.82 R   +4.8 | 
+Petrolio_WTI           energia      2000-08-23   N55 L | IS  51 PF  0.52 t  -1.9 | OOS  23 PF  2.62 R   +8.8 | 
+ASX200                 indici       1992-11-22   N55 S | IS  55 PF  0.73 t  -0.9 | OOS  24 PF  0.63 R   -4.7 | 
+ASX200                 indici       1992-11-22   N55 L | IS  93 PF  1.22 t   0.7 | OOS  39 PF  0.67 R   -4.7 | 
+CAC40                  indici       1990-03-01   N55 S | IS  63 PF  0.70 t  -1.2 | OOS  21 PF  1.03 R   +0.3 | 
+CAC40                  indici       1990-03-01   N55 L | IS  84 PF  0.80 t  -0.7 | OOS  34 PF  0.91 R   -1.1 | 
+DAX                    indici       1987-12-30   N55 S | IS  53 PF  1.07 t   0.2 | OOS  23 PF  0.71 R   -2.8 | 
+DAX                    indici       1987-12-30   N55 L | IS  97 PF  1.92 t   2.2 | OOS  37 PF  1.14 R   +1.8 | IS ok
+Dow30                  indici       1992-01-02   N55 S | IS  43 PF  0.69 t  -0.9 | OOS  19 PF  0.62 R   -3.1 | 
+Dow30                  indici       1992-01-02   N55 L | IS  81 PF  1.49 t   1.3 | OOS  38 PF  1.89 R   +9.2 | 
+EuroStoxx50            indici       2007-03-30   N55 S | IS  19 PF  0.68 t  -0.7 | OOS  24 PF  0.76 R   -2.4 | storico IS < 8 anni
+EuroStoxx50            indici       2007-03-30   N55 L | IS  23 PF  0.40 t  -1.9 | OOS  30 PF  1.40 R   +3.5 | storico IS < 8 anni
+FTSE100                indici       1984-01-03   N55 S | IS  66 PF  0.65 t  -1.4 | OOS  24 PF  0.49 R   -6.7 | 
+FTSE100                indici       1984-01-03   N55 L | IS 109 PF  1.54 t   1.5 | OOS  29 PF  0.60 R   -3.5 | 
+HangSeng               indici       1986-12-31   N20 L | IS 149 PF  2.04 t   2.7 | OOS  44 PF  1.32 R   +5.4 | IS ok + OOS ok
+HangSeng               indici       1986-12-31   N55 S | IS  58 PF  0.94 t  -0.2 | OOS  28 PF  0.95 R   -0.4 | 
+HangSeng               indici       1986-12-31   N55 L | IS 107 PF  1.94 t   2.2 | OOS  25 PF  2.16 R   +8.4 | IS ok + OOS ok
+Nasdaq100              indici       1985-10-01   N20 L | IS 152 PF  1.81 t   2.6 | OOS  55 PF  1.98 R  +13.6 | IS ok + OOS ok
+Nasdaq100              indici       1985-10-01   N55 S | IS  59 PF  0.54 t  -1.8 | OOS  20 PF  0.09 R  -10.8 | 
+Nasdaq100              indici       1985-10-01   N55 L | IS 115 PF  1.67 t   2.0 | OOS  46 PF  1.82 R   +9.7 | 
+Nikkei225              indici       1970-01-05   N20 L | IS 250 PF  1.77 t   2.7 | OOS  52 PF  1.47 R   +8.5 | IS ok + OOS ok
+Nikkei225              indici       1970-01-05   N55 S | IS 109 PF  0.97 t  -0.1 | OOS  23 PF  0.40 R   -6.4 | 
+Nikkei225              indici       1970-01-05   N55 L | IS 177 PF  1.84 t   2.3 | OOS  35 PF  1.36 R   +5.2 | IS ok + OOS ok
+Russell2000            indici       1987-09-10   N20 L | IS 146 PF  3.46 t   4.5 | OOS  53 PF  1.18 R   +2.7 | IS ok
+Russell2000            indici       1987-09-10   N55 S | IS  57 PF  1.50 t   1.0 | OOS  21 PF  0.89 R   -0.9 | 
+Russell2000            indici       1987-09-10   N55 L | IS 113 PF  2.96 t   3.6 | OOS  42 PF  0.62 R   -5.8 | IS ok
+SP500                  indici       1970-01-02   N55 S | IS  85 PF  0.62 t  -1.7 | OOS  18 PF  0.29 R   -5.5 | 
+SP500                  indici       1970-01-02   N55 L | IS 155 PF  1.39 t   1.6 | OOS  42 PF  2.20 R  +10.3 | 
+Argento                metalli      2000-08-30   N20 L | IS  80 PF  2.02 t   2.2 | OOS  64 PF  0.92 R   -2.2 | IS ok
+Argento                metalli      2000-08-30   N55 S | IS  30 PF  0.78 t  -0.5 | OOS  32 PF  0.56 R   -6.2 | 
+Argento                metalli      2000-08-30   N55 L | IS  56 PF  1.67 t   1.3 | OOS  37 PF  0.99 R   -0.2 | 
+Oro                    metalli      2000-08-30   N20 L | IS  80 PF  2.52 t   2.9 | OOS  47 PF  1.82 R  +13.2 | IS ok + OOS ok
+Oro                    metalli      2000-08-30   N55 S | IS  32 PF  0.19 t  -4.2 | OOS  21 PF  0.74 R   -1.8 | 
+Oro                    metalli      2000-08-30   N55 L | IS  56 PF  1.96 t   1.9 | OOS  30 PF  2.21 R   +9.7 | 
+Palladio               metalli      1998-09-28   N55 S | IS  29 PF  3.43 t   1.7 | OOS  36 PF  0.36 R  -14.5 | 
+Palladio               metalli      1998-09-28   N55 L | IS  58 PF  1.27 t   0.5 | OOS  39 PF  1.28 R   +5.6 | 
+Platino                metalli      1997-10-29   N55 S | IS  30 PF  1.52 t   0.6 | OOS  38 PF  0.63 R   -6.3 | 
+Platino                metalli      1997-10-29   N55 L | IS  60 PF  0.88 t  -0.4 | OOS  33 PF  0.61 R   -5.6 | 
+Rame                   metalli      2000-08-30   N55 S | IS  34 PF  1.02 t   0.0 | OOS  25 PF  0.81 R   -1.9 | 
+Rame                   metalli      2000-08-30   N55 L | IS  45 PF  2.07 t   1.4 | OOS  31 PF  1.61 R   +7.6 | 
+Treasury_10a           obbligazioni 2000-09-21   N55 S | IS  30 PF  0.62 t  -1.1 | OOS  31 PF  0.86 R   -1.3 | 
+Treasury_10a           obbligazioni 2000-09-21   N55 L | IS  37 PF  0.90 t  -0.3 | OOS  21 PF  1.25 R   +2.0 | 
+Treasury_30a           obbligazioni 2000-09-21   N55 S | IS  26 PF  0.78 t  -0.5 | OOS  27 PF  1.31 R   +2.6 | 
+Treasury_30a           obbligazioni 2000-09-21   N55 L | IS  40 PF  0.99 t  -0.0 | OOS  22 PF  1.16 R   +1.3 | 
+Indice_dollaro         valute       1971-01-04   N20 S | IS 193 PF  3.86 t   2.0 | OOS  41 PF  0.77 R   -4.1 | IS ok
+Indice_dollaro         valute       1971-01-04   N20 L | IS 193 PF  2.17 t   2.6 | OOS  44 PF  0.78 R   -3.3 | IS ok
+Indice_dollaro         valute       1971-01-04   N55 S | IS 119 PF  5.65 t   1.8 | OOS  19 PF  1.15 R   +1.1 | 
+Indice_dollaro         valute       1971-01-04   N55 L | IS 120 PF  2.76 t   3.0 | OOS  32 PF  0.55 R   -5.8 | IS ok
+
+=== passano IS+OOS con ENTRAMBE le N, per classe e direzione ===
+('indici', 1) ['HangSeng', 'Nikkei225']
+prove valide 116; passano IS 13; passano IS+OOS 6
+
+=== CANDIDATI FISSATI (HangSeng, Nikkei225 long): controllo deriva e hold-out 2025+ ===
+HangSeng   N20 L | IS n149 PF  2.04 | OOS n 44 PF  1.32 R  +5.4 | HOLD-OUT 2025+ n11 PF  0.76 R  -1.0
+HangSeng   N20 S | IS n126 PF  0.74 | OOS n 52 PF  0.74 R  -5.0 | HOLD-OUT 2025+ n 8 PF  0.85 R  -0.3
+HangSeng   N55 L | IS n107 PF  1.94 | OOS n 25 PF  2.16 R  +8.4 | HOLD-OUT 2025+ n 5 PF  1.16 R  +0.3
+HangSeng   N55 S | IS n 58 PF  0.94 | OOS n 28 PF  0.95 R  -0.4 | HOLD-OUT 2025+ n 4 PF  0.08 R  -1.6
+Nikkei225  N20 L | IS n250 PF  1.77 | OOS n 52 PF  1.47 R  +8.5 | HOLD-OUT 2025+ n 9 PF  2.99 R  +4.6
+Nikkei225  N20 S | IS n201 PF  1.27 | OOS n 42 PF  0.69 R  -5.2 | HOLD-OUT 2025+ n 6 PF  1.53 R  +0.6
+Nikkei225  N55 L | IS n177 PF  1.84 | OOS n 35 PF  1.36 R  +5.2 | HOLD-OUT 2025+ n 9 PF  1.87 R  +2.4
+Nikkei225  N55 S | IS n109 PF  0.97 | OOS n 23 PF  0.40 R  -6.4 | HOLD-OUT 2025+ n 2 PF  8.04 R  +1.2
