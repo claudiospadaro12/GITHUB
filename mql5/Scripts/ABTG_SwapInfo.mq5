@@ -8,8 +8,13 @@
 //|  (solo per i modi in punti, valuta del conto e interesse %).      |
 //|  Poi scrive ABTG_SWAPINFO_FINE.txt e chiude il terminale.         |
 //+------------------------------------------------------------------+
-#property version "1.00"
+#property version "1.10"
 #property strict
+
+// v1.10 (19/11/2026): InpTutti=true legge TUTTI i simboli del server (non solo il Market Watch) e aggiunge in coda
+// percorso, descrizione e la % ANNUA del nozionale per i modi in punti (indipendente dal valore del tick: corretta anche per i CFD in valuta diversa dal conto).
+input bool InpTutti = true;
+input int  InpMaxQuotazioni = 200;   // simboli (non azioni/ETF) selezionati per leggere il bid
 
 void Scrivi(const string nome, const string testo)
   {
@@ -49,16 +54,32 @@ string Stima(const string sym,const long modo,const double swap)
    return "n.d.";
   }
 
+// % annua del nozionale: modo punti = swap*point*365/bid*100 (il contratto si semplifica); modi interesse = valore dichiarato; altro = n.d.
+string PctAnnuo(const string sym,const long modo,const double swap)
+  {
+   if(modo==SYMBOL_SWAP_MODE_DISABLED) return "0.00";
+   if(modo==SYMBOL_SWAP_MODE_INTEREST_CURRENT || modo==SYMBOL_SWAP_MODE_INTEREST_OPEN) return DoubleToString(swap,3)+"(spec)";
+   double bid=SymbolInfoDouble(sym,SYMBOL_BID), point=SymbolInfoDouble(sym,SYMBOL_POINT);
+   if(modo==SYMBOL_SWAP_MODE_POINTS && bid>0.0) return DoubleToString(swap*point*365.0/bid*100.0,2);
+   return "n.d.";
+  }
+
 void OnStart()
   {
    string forzati[]={"XAUUSD","XAGUSD","EURUSD","NASUSD","SPXUSD","U30USD","D30EUR"};
    for(int k=0;k<ArraySize(forzati);k++) SymbolSelect(forzati[k],true);
    string cur=AccountInfoString(ACCOUNT_CURRENCY), srv=AccountInfoString(ACCOUNT_SERVER), azi=AccountInfoString(ACCOUNT_COMPANY);
-   string out="simbolo;modo_swap;modo_testo;swap_long;swap_short;giorno_triplo_swap_0dom;digits;point;contratto;tick_size;tick_value;bid;stima_long_per_lotto_notte;stima_short_per_lotto_notte;valuta_conto;server;azienda\r\n";
-   int tot=SymbolsTotal(true);
+   string out="simbolo;modo_swap;modo_testo;swap_long;swap_short;giorno_triplo_swap_0dom;digits;point;contratto;tick_size;tick_value;bid;stima_long_per_lotto_notte;stima_short_per_lotto_notte;valuta_conto;server;azienda;percorso;descrizione;pct_annuo_long;pct_annuo_short\r\n";
+   int tot=SymbolsTotal(!InpTutti);
+   int quotati=0;
    for(int i=0;i<tot;i++)
      {
-      string s=SymbolName(i,true);
+      string s=SymbolName(i,!InpTutti);
+      string path=SymbolInfoString(s,SYMBOL_PATH), desc=SymbolInfoString(s,SYMBOL_DESCRIPTION);
+      StringReplace(desc,";",","); StringReplace(path,";",",");
+      string pu=path; StringToUpper(pu);
+      bool azione=(StringFind(pu,"STOCK")==0||StringFind(pu,"SHARE")==0||StringFind(pu,"EQUIT")==0||StringFind(pu,"ETF")==0);
+      if(InpTutti && !azione && quotati<InpMaxQuotazioni){ SymbolSelect(s,true); quotati++; Sleep(150); }
       long modo=SymbolInfoInteger(s,SYMBOL_SWAP_MODE);
       double sl=SymbolInfoDouble(s,SYMBOL_SWAP_LONG), ss=SymbolInfoDouble(s,SYMBOL_SWAP_SHORT);
       long d3=SymbolInfoInteger(s,SYMBOL_SWAP_ROLLOVER3DAYS);
@@ -66,9 +87,9 @@ void OnStart()
            +IntegerToString((int)SymbolInfoInteger(s,SYMBOL_DIGITS))+";"+DoubleToString(SymbolInfoDouble(s,SYMBOL_POINT),8)+";"
            +DoubleToString(SymbolInfoDouble(s,SYMBOL_TRADE_CONTRACT_SIZE),2)+";"+DoubleToString(SymbolInfoDouble(s,SYMBOL_TRADE_TICK_SIZE),8)+";"
            +DoubleToString(SymbolInfoDouble(s,SYMBOL_TRADE_TICK_VALUE),5)+";"+DoubleToString(SymbolInfoDouble(s,SYMBOL_BID),5)+";"
-           +Stima(s,modo,sl)+";"+Stima(s,modo,ss)+";"+cur+";"+srv+";"+azi+"\r\n";
+           +Stima(s,modo,sl)+";"+Stima(s,modo,ss)+";"+cur+";"+srv+";"+azi+";"+path+";"+desc+";"+PctAnnuo(s,modo,sl)+";"+PctAnnuo(s,modo,ss)+"\r\n";
      }
    Scrivi("ABTG_SWAPINFO.csv",out);
-   Scrivi("ABTG_SWAPINFO_FINE.txt","fine "+TimeToString(TimeLocal(),TIME_DATE|TIME_SECONDS)+" simboli="+IntegerToString(tot)+"\r\n");
+   Scrivi("ABTG_SWAPINFO_FINE.txt","fine "+TimeToString(TimeLocal(),TIME_DATE|TIME_SECONDS)+" simboli="+IntegerToString(tot)+" con_quotazione="+IntegerToString(quotati)+"\r\n");
    TerminalClose(0);
   }
