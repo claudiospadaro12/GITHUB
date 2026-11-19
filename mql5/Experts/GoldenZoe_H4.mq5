@@ -33,7 +33,6 @@ input double InpStopAtr              = 3.0;    // stop iniziale = N x ATR
 input double InpTrailAtr             = 3.0;    // stop mobile = estremo dall'ingresso -/+ N x ATR
 input bool   InpAllowLong            = true;
 input bool   InpAllowShort           = false;  // il test non trova edge sulle vendite
-input int    InpLotMode              = 0;      // 0 = valore del tick (come v1.00), 1 = OrderCalcProfit (consigliato per CFD in valuta diversa dal conto)
 input double InpRiskPercent          = 1.0;    // % equity rischiata sullo stop iniziale
 input int    InpLotMode              = 0;      // 0 = valore del tick (come v1.00), 1 = OrderCalcProfit (consigliato per CFD in valuta diversa dal conto, es. 225JPY)
 input long   InpMagic                = 972301;
