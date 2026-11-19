@@ -39,7 +39,7 @@ R("'Symbol=XAUUSD'", "('Symbol=' + $ea.sym)"); R("$r += $ea.inp", "$r += $ea.inp
 R("$ea.n + ';' + $f.n + ';ERRORE", "$ea.var + ';' + $ea.sym + ';' + $f.n + ';ERRORE")
 R("$riga=($ea.n + ';' + $f.n + ';' + $nT", "$riga=($ea.var + ';' + $ea.sym + ';' + $f.n + ';' + $nT")
 R("'controllo_14ea_oro'", "'bulge_fase0'")
-t = t.replace("CONTROLLO_14EA_ORO", "BULGE_S").replace("@@MARC@@", "MARCATORE_BULGE_FASE0_BCM_v1")
+t = t.replace("CONTROLLO_14EA_ORO", "BULGE_FASE0").replace("@@MARC@@", "MARCATORE_BULGE_FASE0_BCM_v1")
 t = t.replace("TEST 4 EA ORO", "TEST BULGE_S")
 open(os.path.join(AQ, "righe", "BULGE_FASE0_BCM.ps1"), "w", encoding="utf-8", newline="").write(t)
 print("scritto", len(t), "pin", pin, "inp", len(inp), file=sys.stderr)

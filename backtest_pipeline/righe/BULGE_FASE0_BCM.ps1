@@ -4,7 +4,7 @@ $ErrorActionPreference='Continue'
 $ci=[Globalization.CultureInfo]::InvariantCulture
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ Write-Host ('SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui: ' + $env:COMPUTERNAME) -ForegroundColor Red; return }
 $ROOT='C:\MT5_BCM_Opt'; $TRM=Join-Path $ROOT 'terminal64.exe'; $MEE=Join-Path $ROOT 'metaeditor64.exe'; $MQL5=Join-Path $ROOT 'MQL5'
-$PINSRC='699e3c4ac937cde1be4987ea3e68f8e11740aaad'
+$PINSRC='5a7c1d6434b96a71722fd3e3de113c3623b24f9b'
 $aperti=@(Get-Process -Name terminal64,metatester64,metaeditor64 -ErrorAction SilentlyContinue)
 if($aperti.Count -gt 0){ $aperti | Select-Object Id,ProcessName,Path | Format-Table -AutoSize | Out-String | Write-Host; Write-Host 'MI FERMO: MT5, MetaEditor o agenti aperti. Chiudili e rilancia. Non ho avviato niente.' -ForegroundColor Red; return }
 foreach($pp in @($TRM,$MEE,$MQL5)){ if(-not (Test-Path -LiteralPath $pp)){ Write-Host ('MI FERMO: non trovo ' + $pp) -ForegroundColor Red; return } }
@@ -87,7 +87,7 @@ foreach($ea in $EAS){
 # 2) test
 if(-not ('SvegliaE14.Win' -as [type])){ Add-Type -Namespace SvegliaE14 -Name Win -MemberDefinition '[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint esFlags);' }
 [void][SvegliaE14.Win]::SetThreadExecutionState([uint32]2147483651)
-$desk='C:\ABTG_RISULTATI'; New-Item -ItemType Directory -Force -Path $desk | Out-Null; $dirOut=Join-Path $desk 'BULGE_S'; $dirSerie=Join-Path $dirOut 'serie'; $dirRep=Join-Path $dirOut 'report'
+$desk='C:\ABTG_RISULTATI'; New-Item -ItemType Directory -Force -Path $desk | Out-Null; $dirOut=Join-Path $desk 'BULGE_FASE0'; $dirSerie=Join-Path $dirOut 'serie'; $dirRep=Join-Path $dirOut 'report'
 New-Item -ItemType Directory -Force -Path $dirSerie | Out-Null; New-Item -ItemType Directory -Force -Path $dirRep | Out-Null
 $FIN=@( @{ n='W2022_2026'; da='2022.01.01'; a='2026.03.30' } )
 $CESTINO='GBPJPY,NZDJPY,AUDUSD,CADJPY,NZDCAD'
@@ -150,12 +150,12 @@ foreach($f in $FIN){
  }
 }
 [void][SvegliaE14.Win]::SetThreadExecutionState([uint32]2147483648)
-$fileCsv=Join-Path $dirOut 'RISULTATI_BULGE_S.csv'; Set-Content -LiteralPath $fileCsv -Value ($righe -join "`r`n") -Encoding UTF8
-$zip=Join-Path $desk 'BULGE_S.zip'; Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
+$fileCsv=Join-Path $dirOut 'RISULTATI_BULGE_FASE0.csv'; Set-Content -LiteralPath $fileCsv -Value ($righe -join "`r`n") -Encoding UTF8
+$zip=Join-Path $desk 'BULGE_FASE0.zip'; Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
 try { Compress-Archive -Path (Join-Path $dirOut '*') -DestinationPath $zip -Force } catch { Write-Host 'ZIP non creato: allega la cartella a mano.' -ForegroundColor Red }
 Write-Host ('FATTO alle ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana).') -ForegroundColor Green
 Write-Host ''
 Write-Host '##########  FILE DA ALLEGARE ALLA CHAT  ##########' -ForegroundColor Black -BackgroundColor Yellow
 Write-Host $zip -ForegroundColor Black -BackgroundColor Yellow
-Write-Host '(contiene: RISULTATI_BULGE_S.csv + cartella serie + cartella report; Esplora file si apre con lo zip selezionato)' -ForegroundColor Black -BackgroundColor Yellow
+Write-Host '(contiene: RISULTATI_BULGE_FASE0.csv + cartella serie + cartella report; Esplora file si apre con lo zip selezionato)' -ForegroundColor Black -BackgroundColor Yellow
 try { Start-Process -FilePath 'explorer.exe' -ArgumentList ('/select,"' + $zip + '"') } catch { }
