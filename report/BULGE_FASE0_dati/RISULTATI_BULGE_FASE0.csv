@@ -1,0 +1,4 @@
+﻿variante;coppia;anno;operazioni;rend_totale_pct;PF_su_rendimenti;t_giornaliera;DD_equity_pct;anni_con_uscite;anni_positivi;quota_max_anno_pct;netto_tester_EUR;PF_tester;rendimento_per_anno_pct
+A_OFF0_APRILE;GBPUSD;W2022_2026;21;4.28;2.42;1.32;1.64;3;2;61.5;427.68;2.37;2024:-0.58|2025:2.21|2026:2.60
+B_OFF1_APRILE;GBPUSD;W2022_2026;3215;-67.50;0.83;-3.22;71.42;5;0;NaN;-6750.18;0.83;2022:-26.83|2023:-11.65|2024:-50.10|2025:-16.89|2026:-2.81
+C_OFF1_DEFAULT_S;GBPUSD;W2022_2026;2317;-54.12;0.84;-2.74;59.57;5;0;NaN;-5411.76;0.83;2022:-22.64|2023:-6.77|2024:-30.36|2025:-11.80|2026:-3.41

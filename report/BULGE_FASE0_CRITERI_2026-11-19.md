@@ -18,3 +18,16 @@
 3. **Se A e riprodotto e B ha PF < 1,15 oppure < 100 operazioni:** il vantaggio veniva dal difetto -> **chiuso**, nessuna fase 1 su questo motore.
 4. **Zona intermedia** (B PF 1,15-1,30, o PF >= 1,3 con < 100 operazioni): nessuna fase 1; eventuale prova a tick reali prima di decidere.
 5. Si riportano per ogni passata: operazioni, PF, rendimento, DD equity, rendimento per anno. Nessun consiglio su taglie. Il demo reale (699 operazioni, PF 0,76) resta il confronto fuori campione.
+
+---
+## RISULTATO (19/11/2026, zip BULGE_FASE0; dati in `BULGE_FASE0_dati/`) - cestino GBPJPY/NZDJPY/AUDUSD/CADJPY/NZDCAD, GBPUSD H1, 2022-01-01 -> 2026-03-30, 10.000 USD, Modello 1
+| Passata | Operazioni | PF tester | Rend. | DD equity | Rendimento per anno |
+|---|---|---|---|---|---|
+| **A** offset 0 (R92), parametri di aprile | **21** | 2,37 | +4,28% | 1,64% | 2024 -0,58; 2025 +2,21; 2026 +2,60 (nessuna operazione nel 2022-2023) |
+| **B** offset 1 (corretto), parametri di aprile | **3.215** | **0,83** | **-67,5%** | **71,4%** | 2022 -26,8; 2023 -11,7; 2024 -50,1; 2025 -16,9; 2026 -2,8 |
+| **C** offset 1, valori standard di Bulge_S | **2.317** | **0,83** | **-54,1%** | **59,6%** | 2022 -22,6; 2023 -6,8; 2024 -30,4; 2025 -11,8; 2026 -3,4 |
+
+1. **Regola 1: A NON riprodotto** (21 operazioni contro 268 dell'Excel; PF 2,37 ma il campione e minuscolo). Quindi la fase 0 e **inconcludente sull'ipotesi "l'Excel veniva dal difetto R92"**: non sappiamo da che motore/versione venisse l'Excel (non e ne il nostro offset 0 ne il corretto).
+2. **B e C: nessun vantaggio.** PF 0,83 su 2.300-3.200 operazioni (campione enorme), **0 anni positivi su 5**, DD equity 60-71% a rischio 1%. Previsione B PF<1,15 (65%): confermata; C PF>=1,3 (15%): no. Previsione "poche operazioni nel 2022-23 in B e C" (60%): **sbagliata** per B e C (circa 250 giorni con uscite l'anno, tutti gli anni); le poche operazioni iniziali sono tipiche della passata A (offset 0): coerente con la nota R92 (con offset 0 mancano i segnali).
+3. **Esito:** **fase 1 NON ammessa** (B < 1,15). Il motore corretto, sullo stesso cestino e periodo, perde in ogni anno e coincide col demo reale (PF 0,76 in EUR, 699 operazioni). Il PF 1,60 dei report di aprile non e riproducibile con nessuna variante del nostro motore e non si usa come base per un EA.
+4. Caveat: Modello 1 (barre da 1 minuto, spread dal feed) con target di pochi pip puo penalizzare piu del tick reale; non cambia il segno (circa 3.000 operazioni, tutti gli anni negativi).
