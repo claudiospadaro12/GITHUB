@@ -29,3 +29,10 @@ Costi all'uscita e all'ingresso come prima (un costo all-in per operazione), in 
 - Nessuna combinazione validata: **96%**.
 - Almeno una combinazione con PF IS >= 1,2 e >= 100 operazioni: **45%** (confronti multipli); tenere l'OOS con PF > 1,2: **4%**.
 - Le uscite B/C (senza stop) migliorano il PF rispetto ad A in almeno la meta' dei casi: **50%**; i TF alti (H1, H4) hanno PF migliore dei bassi (M5, M15) a parita' di uscita: **75%** (costo relativo minore).
+
+## RISULTATI ESTESI (`backtest_runner/simulatore/universal_scalper_all.py`; XAUUSD/EURUSD FTMO 2014-2020, NASUSD/SPXUSD 2015-2024; 100 combinazioni)
+- **0 combinazioni su 100 con PF IS >= 1,2 e >= 100 operazioni; nessuna VALIDATA.** R medio IS negativo in 96 combinazioni su 100 (mediana -0,13).
+- **Per uscita (PF IS mediano):** A (SL 1,5/TP 2) 0,78; B (cambio di segnale) 0,88; B2 (cambio di segnale + stop) 0,88; C (cambio colore Heikin-Ashi) 0,72; C2 0,72. **Il cambio di segnale e' la migliore, ma tutte sotto 1; il cambio colore HA e' la peggiore sui TF bassi** (oro M5: B 0,62 contro C 0,37; M15: 0,84 contro 0,56).
+- **Per TF:** piu' il TF e' alto meno si perde (costo relativo minore): M5 PF 0,35-0,72; M15 0,53-0,88; M30 0,62-0,93; H1 0,77-1,00; H4 0,72-1,20. Le ottime cifre OOS isolate (EURUSD H4 A 1,82; oro H4 C2 1,26) hanno IS < 1,2 e 40-100 operazioni: non convalidano.
+- Previsioni: nessuna validata (96%) -> si'; almeno una IS >= 1,2 con >= 100 op. (45%) -> no; B/C migliorano A in almeno meta' dei casi (50%) -> **B si', C no**; TF alti meglio dei bassi (75%) -> si'.
+**Verdetto: Universal Scalper Pro non ha vantaggio su oro, EURUSD, Nasdaq e S&P a nessun timeframe M5-H4, con nessuna delle tre logiche di uscita.** Non testati gli altri simboli del Market Watch BCM (dati non disponibili qui).
