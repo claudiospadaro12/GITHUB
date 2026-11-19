@@ -60,3 +60,13 @@ Finestra: dal 01/08/2024 fino ai mesi consecutivi di tick reali BCM disponibili 
 - Payoff atteso a tick 123,97 EUR per operazione (circa 0,12 R con rischio 1%); anni positivi 3 su 3 (2024: +0,72%, 2025: +5,06%, 2026: +0,46%); swap BCM (-98,78 punti) incluso: il guadagno lordo e' 22.273, le perdite 16.074.
 - **Limiti:** 50 operazioni in 26 mesi; periodo di trend rialzista dell'oro; il rendimento assoluto dipende dal rischio per operazione (1% nel test; scelta di Claudio); con lo swap di FTMO (-56,28) il costo sarebbe piu' basso.
 **Stato di GoldenZoe:** simulatore 2004-2026 PF 1,32-1,66, tester BCM 2024-2026 a tick PF 1,39 con DD 6,6%, riproducibilita' modello-tick verificata, swap FTMO/BCM misurato. **Restano:** regole di rischio FTMO, correlazione con gli EA di Wim su piu' anni, forward demo, e il confronto dei broker (promemoria in CLAUDE.md).
+
+## AUMENTARE LE OPERAZIONI (richiesta del 19/11) — criteri scritti PRIMA dei numeri
+**Domanda:** GoldenZoe fa circa 23 operazioni l'anno (50 in 26 mesi). Si possono aumentare senza perdere il vantaggio? **Esplorazione con il simulatore** (oro FTMO 2004-2026, solo acquisti, stop iniziale 3 ATR, stop mobile 3 ATR, costo 0,35 USD **piu' swap FTMO come costo proporzionale (5,5% annuo del valore)**): canale N = 10, 20, 30, 40, 55 su H1, H2, H4 = **15 combinazioni**, valutate su tre periodi separati (2004-2014, 2014-2020, 2021-2026).
+**Porta (scritta ora):** una variante "aumenta le operazioni" se ha **almeno 1,5 volte le operazioni di N=55 su H4** e, **in ciascuno dei tre periodi**, PF >= 1,3 e R medio > 0, con t complessivo >= 3. Nessun parametro viene scelto sul periodo che lo giudica; la variante di base (N=55 H4) e' il riferimento.
+## Previsioni
+- Nessuna variante con operazioni x1,5 supera la porta in tutti e tre i periodi: **55%**; ne passa almeno una: **45%** (N=20 H4 e' la candidata: nelle prove precedenti 589 operazioni, PF 1,53, t 3,5 su 23 anni).
+- Su H1 il costo e il rumore abbassano il PF sotto 1,3 in almeno due periodi: **75%**.
+- Il numero di operazioni cresce di piu' del PF cala (t complessivo piu' alto di N=55 H4) per la migliore variante: **60%**.
+## Altre leve non testate qui (servono dati/tester)
+Altri mercati con lo stesso metodo (argento XAGUSD, indici gia' provati senza esito stabile), piu' EA con parametri diversi sullo stesso oro (molto correlati: non raddoppiano le operazioni indipendenti), vendite (nessun edge). Nessuna delle tre aumenta davvero le occasioni indipendenti senza un test.
