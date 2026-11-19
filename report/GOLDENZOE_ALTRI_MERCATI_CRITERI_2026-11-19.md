@@ -37,3 +37,16 @@ Scelta di Claudio: strada "dati D1 da internet" (nessuna installazione di MT5). 
 - **Controllo deriva (SHORT):** SHORT OOS PF 0,74 / 0,95 (Hang Seng N20 / N55) e 0,69 / 0,40 (Nikkei N20 / N55): 3 su 4 sotto 0,8 = **dipendente dalla tendenza rialzista degli indici** (come EURJPY): il long-only e esposizione azionaria con stop, non un vantaggio simmetrico.
 - **Hold-out 2025+ sui due candidati fissati:** **Nikkei 225: N20 long 9 operazioni PF 2,99 (+4,6 R); N55 long 9 operazioni PF 1,87 (+2,4 R): regge.** **Hang Seng: N20 long 11 operazioni PF 0,76 (-1,0 R): non regge; N55 solo 5 operazioni: non valutabile -> chiuso** (regola: PF > 1 e >= 8 operazioni).
 - **Esito:** un solo candidato, **Nikkei 225 long-only (N=20 e N=55), dipendente dalla deriva**, 52 operazioni in 10 anni di OOS con N=20. Da fare prima di qualsiasi demo: (1) conversione in un tester su CFD JP225 del broker (BCM `225JPY` ha storico dal 2024; FTMO `JP225.cash`) con spread e swap; (2) correlazione con GoldenZoe oro; (3) decisione sul rischio di deriva (nessun consiglio su taglie). Limiti: indice spot di Yahoo (no spread/swap/orari CFD), 116 prove, solo 9 operazioni nell'hold-out, 2025 e anno di forte rialzo del Nikkei.
+
+---
+## CORRELAZIONE GoldenZoe oro H4 contro Nikkei 225 D1 long-only (19/11/2026; script `backtest_runner/simulatore/correl_gz_nikkei.py`)
+Serie mensili in R per data di uscita (rischio 1+1), 2005-01 -> 2026-10 (262 mesi). Oro: simulatore H4, N=55, stop 3 ATR + Chandelier 3, costo 0,35 USD + swap FTMO 5,5% annuo (396 operazioni, +60,4 R). Nikkei: D1 Yahoo, stessa regola, costo 0,05% a giro.
+| | Nikkei N=20 | Nikkei N=55 |
+|---|---|---|
+| R totale Nikkei | +28,7 | +17,6 |
+| Correlazione mensile Pearson / Spearman | -0,04 / -0,04 | -0,01 / +0,02 |
+| Correlazione trimestrale | -0,04 | 0,00 |
+| DD (somma R, saldo chiuso): oro / Nikkei / portafoglio 1+1 | 9,6 / 4,8 / **9,7** | 9,6 / 5,6 / **9,3** |
+| Mesi negativi insieme (oro 118, Nikkei 56 / 46) | 24 | 24 |
+Correlazione dei rendimenti mensili dei mercati sottostanti (oro e Nikkei): **-0,06**.
+**Lettura:** correlazione praticamente nulla (mesi negativi simultanei 24, come atteso per serie indipendenti: 118 x 56 / 262 = 25). Il Nikkei aggiunge R senza far salire il DD del portafoglio (9,3-9,7 contro 9,6 dell'oro). **Limiti:** serie a saldo chiuso (non mark-to-market), indice spot di Yahoo senza swap/orari CFD, entrambi long-only (se i mercati azionari e l'oro scendessero insieme in un regime di liquidita la correlazione puo cambiare); non e stata misurata la correlazione con gli EA di Wim (nessuna loro serie giornaliera a disposizione qui).
