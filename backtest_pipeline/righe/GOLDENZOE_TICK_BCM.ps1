@@ -4,7 +4,7 @@ $ErrorActionPreference='Continue'
 $ci=[Globalization.CultureInfo]::InvariantCulture
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ Write-Host ('SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui: ' + $env:COMPUTERNAME) -ForegroundColor Red; return }
 $ROOT='C:\MT5_BCM_Opt'; $TRM=Join-Path $ROOT 'terminal64.exe'; $MEE=Join-Path $ROOT 'metaeditor64.exe'; $MQL5=Join-Path $ROOT 'MQL5'
-$PINSRC='35c1d0ae98ab96e31f8c0e1e8a37b026176e2eb6'
+$PINSRC='e7051cd69263b86374e42ce12993852ac5da33d1'
 $aperti=@(Get-Process -Name terminal64,metatester64,metaeditor64 -ErrorAction SilentlyContinue)
 if($aperti.Count -gt 0){ $aperti | Select-Object Id,ProcessName,Path | Format-Table -AutoSize | Out-String | Write-Host; Write-Host 'MI FERMO: MT5, MetaEditor o agenti aperti. Chiudili e rilancia. Non ho avviato niente.' -ForegroundColor Red; return }
 foreach($pp in @($TRM,$MEE,$MQL5)){ if(-not (Test-Path -LiteralPath $pp)){ Write-Host ('MI FERMO: non trovo ' + $pp) -ForegroundColor Red; return } }
@@ -76,7 +76,7 @@ $VARS=@( @{ v='LONG_M1'; ea='GoldenZoe_H4'; mod=1; ov=@('InpAllowLong=true','Inp
 $RUNS=@(); foreach($v in $VARS){ $e=$null; foreach($x in $EAS){ if($x.n -eq $v.ea){ $e=$x } }; $ovr=@{}; foreach($o in $v.ov){ $ovr[$o.Split('=')[0]]=$o }; $iv=@($e.inp | Where-Object { -not $ovr.ContainsKey($_.Split('=')[0]) }) + @($v.ov); $RUNS += @{ n=$e.n; per=$e.per; var=$v.v; mod=$v.mod; inpv=$iv } }
 $righe=New-Object System.Collections.ArrayList
 [void]$righe.Add('variante;finestra;operazioni;rend_totale_pct;PF_su_rendimenti;t_giornaliera;DD_equity_pct;anni_con_uscite;anni_positivi;quota_max_anno_pct;netto_tester_EUR;PF_tester;rendimento_per_anno_pct')
-Write-Host ('=== TEST GOLDENZOE TICK su BCM portabile: ' + ($RUNS.Count * $FIN.Count) + ' passate (LONG a barre da 1 minuto; LONG e LONGSHORT a tick reali). Avvio ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana). Durata attesa 1-5 ore (STIMA: le passate a tick sono le piu' lunghe). Non aprire MT5; PC alla corrente. ===') -ForegroundColor Cyan
+Write-Host ('=== TEST GOLDENZOE TICK su BCM portabile: ' + ($RUNS.Count * $FIN.Count) + ' passate (LONG a barre da 1 minuto; LONG e LONGSHORT a tick reali). Avvio ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana). Durata attesa 1-5 ore (STIMA, le passate a tick sono le piu lunghe). Non aprire MT5; PC alla corrente. ===') -ForegroundColor Cyan
 $n=0; $stopTutto=$false
 foreach($f in $FIN){
  foreach($ea in $RUNS){
