@@ -20,3 +20,15 @@ Un solo sistema (incrocio EMA), 4 mercati; indicatori calcolati sulla stessa bar
 ## PARTE 3 (richiesta del 19/11: ridurre i trade da pochi punti e quelli che fanno stop) — scritta prima dei numeri
 - **Costo:** si misura quanto del risultato e' dovuto al costo all-in confrontando PF lordo (costo 0) e netto (B2; M15 e H1; 4 mercati). Previsione: il PF lordo su M15 e' >= 0,15 sopra il netto in tutti i casi e il costo spiega piu' della meta' della perdita: **75%**.
 - **Fascia oraria:** si confronta il R medio per blocco di 8 ore dell'ora dei dati (00-08, 08-16, 16-24) In-Sample e Out-of-Sample. **Ipotesi:** il blocco 00-08 (notte, laterale) e' il peggiore sia in IS sia in OOS in almeno 3 mercati su 4 su entrambi i TF; se si' e' un candidato a filtro da testare poi; se no, nessuna regola oraria. Previsione: ipotesi confermata: **20%**.
+
+## RISULTATI PARTE 3 (`universal_scalper_costi_orari.py`, uscita B2)
+| Mercato / TF | PF lordo | PF netto | R medio lordo | R medio netto | costo per operazione |
+|---|---|---|---|---|---|
+| Oro M15 / H1 | 1,08 / 1,12 | 0,83 / 0,99 | +0,048 / +0,076 | -0,134 / -0,008 | 0,18 / 0,08 R |
+| EURUSD M15 / H1 | 0,98 / 1,07 | 0,83 / 0,99 | -0,012 / +0,042 | -0,121 / -0,007 | 0,11 / 0,05 R |
+| Nasdaq M15 / H1 | 1,10 / 1,10 | 0,88 / 0,98 | +0,069 / +0,062 | -0,099 / -0,012 | 0,17 / 0,07 R |
+| S&P M15 / H1 | 1,04 / 0,94 | 0,80 / 0,83 | +0,030 / -0,037 | -0,162 / -0,121 | 0,19 / 0,08 R |
+- **Il costo spiega la perdita:** il segnale lordo e' appena positivo (PF 1,04-1,12 nei casi migliori, R +0,03/+0,08) e il costo per operazione (0,05-0,19 R, dipende dal TF: M15 il doppio di H1) lo azzera. Previsione "PF lordo >= 0,15 sopra il netto su M15 in tutti i casi" (75%) -> si' su M15 (0,15-0,25), meno su H1 (0,08-0,13).
+- **Fascia oraria:** il blocco 00-08 e' il peggiore sia in IS sia in OOS in **1 caso su 8** (previsione 20% di conferma) -> **nessuna regola oraria**; il blocco peggiore cambia tra IS e OOS.
+- **Costo = assunzioni nostre** (oro 0,35 USD, EURUSD 1 pip, Nasdaq 2 punti, S&P 0,7): il costo reale su BCM/FTMO non e' misurato qui. Anche dimezzandolo il PF netto resterebbe attorno a 1,0-1,1, lontano dalle porte (PF >= 1,5).
+**Lettura:** i trade "da pochi punti" non sono laterali riconoscibili: sono trade con un movimento atteso piccolo rispetto al costo. L'unico filtro con un motivo meccanico e' il rapporto movimento/costo (volatilita' del momento contro costo all-in), cioe' ridurre il numero di operazioni piu' sensibili al costo o salire di timeframe; non e' stato ancora testato.
