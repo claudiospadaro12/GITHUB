@@ -1,0 +1,102 @@
+===== XAUUSD
+L1 M15 costo<=0.10: IS n=227 PF 1.12 R +0.069 DD 33% | OOS n=689 PF 0.76 R -0.159   (base IS PF 0.80 n 4030 | OOS PF 0.89)
+L1 M15 costo<=0.06: IS n=13 PF 0.96 R -0.018 DD 5% | OOS n=203 PF 0.68 R -0.205   (base IS PF 0.80 n 4030 | OOS PF 0.89)
+L1 M15 costo<=0.04: IS n=2 PF 1.30 R +0.158 DD 1% | OOS n=52 PF 0.60 R -0.244   (base IS PF 0.80 n 4030 | OOS PF 0.89)
+L1 M30 costo<=0.10: IS n=424 PF 0.90 R -0.068 DD 45% | OOS n=532 PF 0.88 R -0.082   (base IS PF 0.88 n 1981 | OOS PF 1.02)
+L1 M30 costo<=0.06: IS n=40 PF 1.72 R +0.447 DD 7% | OOS n=247 PF 0.77 R -0.153   (base IS PF 0.88 n 1981 | OOS PF 1.02)
+L1 M30 costo<=0.04: IS n=3 PF 0.00 R -0.877 DD 3% | OOS n=65 PF 0.63 R -0.238   (base IS PF 0.88 n 1981 | OOS PF 1.02)
+L1 H1 costo<=0.10: IS n=668 PF 0.90 R -0.065 DD 49% | OOS n=327 PF 1.19 R +0.124   (base IS PF 0.90 n 1028 | OOS PF 1.22)
+L1 H1 costo<=0.06: IS n=122 PF 0.75 R -0.167 DD 20% | OOS n=212 PF 0.94 R -0.043   (base IS PF 0.90 n 1028 | OOS PF 1.22)
+L1 H1 costo<=0.04: IS n=7 PF 0.98 R -0.014 DD 5% | OOS n=100 PF 1.10 R +0.060   (base IS PF 0.90 n 1028 | OOS PF 1.22)
+L2 H2: IS n=567 PF 0.87 R -0.094 DD 55% | OOS n=210 PF 1.16 R +0.095
+L2 H4: IS n=259 PF 0.86 R -0.096 DD 35% | OOS n=128 PF 0.99 R -0.007
+L2 H8: IS n=131 PF 1.20 R +0.130 DD 19% | OOS n=68 PF 0.49 R -0.371
+L2 D1: IS n=44 PF 0.68 R -0.219 DD 14% | OOS n=23 PF 1.41 R +0.268
+L3a H1 breakout 20 + chandelier 3 ATR: IS n=793 PF 0.92 R -0.028 DD 34% | OOS n=340 PF 1.17 R +0.060
+L3a H1 breakout 55 + chandelier 3 ATR: IS n=465 PF 0.97 R -0.010 DD 19% | OOS n=202 PF 1.38 R +0.126
+L3b H1 EMA9/21+chandelier: IS n=694 PF 0.91 R -0.035 DD 29% | OOS n=257 PF 1.24 R +0.079
+L3a H4 breakout 20 + chandelier 3 ATR: IS n=197 PF 1.18 R +0.060 DD 6% | OOS n=89 PF 1.32 R +0.111
+L3a H4 breakout 55 + chandelier 3 ATR: IS n=121 PF 1.33 R +0.110 DD 4% | OOS n=46 PF 2.12 R +0.357
+L3b H4 EMA9/21+chandelier: IS n=170 PF 1.01 R +0.003 DD 10% | OOS n=76 PF 0.91 R -0.030
+L3a D1 breakout 20 + chandelier 3 ATR: IS n=34 PF 0.98 R -0.008 DD 4% | OOS n=14 PF 2.04 R +0.298
+L3a D1 breakout 55 + chandelier 3 ATR: IS n=17 PF 1.78 R +0.206 DD 3% | OOS n=9 PF 4.66 R +0.546
+L3b D1 EMA9/21+chandelier: IS n=27 PF 0.94 R -0.022 DD 5% | OOS n=12 PF 0.60 R -0.149
+===== EURUSD
+L1 M15 costo<=0.10: IS n=2584 PF 0.88 R -0.079 DD 95% | OOS n=650 PF 0.82 R -0.108   (base IS PF 0.88 n 4316 | OOS PF 0.74)
+L1 M15 costo<=0.06: IS n=690 PF 1.03 R +0.019 DD 26% | OOS n=142 PF 1.11 R +0.060   (base IS PF 0.88 n 4316 | OOS PF 0.74)
+L1 M15 costo<=0.04: IS n=112 PF 1.75 R +0.341 DD 9% | OOS n=43 PF 1.06 R +0.035   (base IS PF 0.88 n 4316 | OOS PF 0.74)
+L1 M30 costo<=0.10: IS n=1946 PF 0.88 R -0.080 DD 87% | OOS n=616 PF 0.99 R -0.005   (base IS PF 0.90 n 2078 | OOS PF 0.87)
+L1 M30 costo<=0.06: IS n=978 PF 0.85 R -0.095 DD 70% | OOS n=217 PF 0.90 R -0.064   (base IS PF 0.90 n 2078 | OOS PF 0.87)
+L1 M30 costo<=0.04: IS n=274 PF 1.02 R +0.009 DD 29% | OOS n=58 PF 0.96 R -0.025   (base IS PF 0.90 n 2078 | OOS PF 0.87)
+L1 H1 costo<=0.10: IS n=1073 PF 0.94 R -0.041 DD 57% | OOS n=401 PF 1.17 R +0.116   (base IS PF 0.94 n 1073 | OOS PF 1.12)
+L1 H1 costo<=0.06: IS n=975 PF 0.91 R -0.058 DD 61% | OOS n=224 PF 1.05 R +0.031   (base IS PF 0.94 n 1073 | OOS PF 1.12)
+L1 H1 costo<=0.04: IS n=488 PF 0.85 R -0.092 DD 43% | OOS n=78 PF 0.95 R -0.031   (base IS PF 0.94 n 1073 | OOS PF 1.12)
+L2 H2: IS n=522 PF 0.84 R -0.105 DD 57% | OOS n=192 PF 1.79 R +0.490
+L2 H4: IS n=277 PF 1.22 R +0.133 DD 22% | OOS n=116 PF 1.41 R +0.216
+L2 H8: IS n=145 PF 0.77 R -0.159 DD 23% | OOS n=69 PF 0.54 R -0.295
+L2 D1: IS n=59 PF 0.60 R -0.236 DD 18% | OOS n=21 PF 0.60 R -0.267
+L3a H1 breakout 20 + chandelier 3 ATR: IS n=855 PF 1.05 R +0.015 DD 21% | OOS n=381 PF 0.83 R -0.061
+L3a H1 breakout 55 + chandelier 3 ATR: IS n=520 PF 0.95 R -0.018 DD 23% | OOS n=236 PF 0.82 R -0.064
+L3b H1 EMA9/21+chandelier: IS n=715 PF 0.96 R -0.014 DD 26% | OOS n=286 PF 0.81 R -0.070
+L3a H4 breakout 20 + chandelier 3 ATR: IS n=226 PF 0.83 R -0.062 DD 21% | OOS n=90 PF 1.31 R +0.096
+L3a H4 breakout 55 + chandelier 3 ATR: IS n=138 PF 0.67 R -0.128 DD 21% | OOS n=51 PF 1.19 R +0.063
+L3b H4 EMA9/21+chandelier: IS n=188 PF 1.15 R +0.051 DD 14% | OOS n=77 PF 1.59 R +0.167
+L3a D1 breakout 20 + chandelier 3 ATR: IS n=27 PF 0.97 R -0.012 DD 3% | OOS n=16 PF 0.51 R -0.253
+L3a D1 breakout 55 + chandelier 3 ATR: IS n=15 PF 1.15 R +0.063 DD 3% | OOS n=10 PF 0.52 R -0.241
+L3b D1 EMA9/21+chandelier: IS n=25 PF 0.48 R -0.180 DD 6% | OOS n=12 PF 1.23 R +0.080
+===== NASUSD
+L1 M15 costo<=0.10: IS n=1856 PF 1.03 R +0.023 DD 60% | OOS n=2316 PF 0.98 R -0.013   (base IS PF 0.84 n 6357 | OOS PF 0.97)
+L1 M15 costo<=0.06: IS n=827 PF 0.73 R -0.169 DD 84% | OOS n=1480 PF 0.90 R -0.068   (base IS PF 0.84 n 6357 | OOS PF 0.97)
+L1 M15 costo<=0.04: IS n=324 PF 0.65 R -0.221 DD 56% | OOS n=740 PF 0.98 R -0.014   (base IS PF 0.84 n 6357 | OOS PF 0.97)
+L1 M30 costo<=0.10: IS n=1468 PF 0.93 R -0.046 DD 65% | OOS n=1292 PF 1.07 R +0.050   (base IS PF 0.89 n 3203 | OOS PF 1.12)
+L1 M30 costo<=0.06: IS n=783 PF 0.97 R -0.021 DD 46% | OOS n=1138 PF 1.03 R +0.020   (base IS PF 0.89 n 3203 | OOS PF 1.12)
+L1 M30 costo<=0.04: IS n=341 PF 0.82 R -0.115 DD 36% | OOS n=755 PF 0.97 R -0.020   (base IS PF 0.89 n 3203 | OOS PF 1.12)
+L1 H1 costo<=0.10: IS n=1028 PF 1.08 R +0.055 DD 28% | OOS n=657 PF 1.13 R +0.087   (base IS PF 0.93 n 1653 | OOS PF 1.13)
+L1 H1 costo<=0.06: IS n=618 PF 1.04 R +0.029 DD 34% | OOS n=653 PF 1.13 R +0.088   (base IS PF 0.93 n 1653 | OOS PF 1.13)
+L1 H1 costo<=0.04: IS n=380 PF 1.06 R +0.041 DD 21% | OOS n=605 PF 1.16 R +0.109   (base IS PF 0.93 n 1653 | OOS PF 1.13)
+L2 H2: IS n=891 PF 0.98 R -0.016 DD 52% | OOS n=334 PF 1.06 R +0.040
+L2 H4: IS n=455 PF 1.01 R +0.010 DD 28% | OOS n=209 PF 0.97 R -0.022
+L2 H8: IS n=232 PF 1.10 R +0.069 DD 18% | OOS n=102 PF 1.35 R +0.232
+L2 D1: IS n=82 PF 1.09 R +0.058 DD 14% | OOS n=37 PF 1.35 R +0.203
+L3a H1 breakout 20 + chandelier 3 ATR: IS n=1417 PF 1.06 R +0.020 DD 18% | OOS n=608 PF 1.19 R +0.066
+L3a H1 breakout 55 + chandelier 3 ATR: IS n=873 PF 1.05 R +0.017 DD 18% | OOS n=387 PF 1.18 R +0.056
+L3b H1 EMA9/21+chandelier: IS n=1128 PF 0.97 R -0.012 DD 32% | OOS n=476 PF 1.25 R +0.082
+L3a H4 breakout 20 + chandelier 3 ATR: IS n=379 PF 1.02 R +0.008 DD 15% | OOS n=166 PF 1.11 R +0.037
+L3a H4 breakout 55 + chandelier 3 ATR: IS n=245 PF 1.09 R +0.029 DD 14% | OOS n=96 PF 1.64 R +0.167
+L3b H4 EMA9/21+chandelier: IS n=302 PF 1.08 R +0.031 DD 14% | OOS n=147 PF 1.27 R +0.089
+L3a D1 breakout 20 + chandelier 3 ATR: IS n=79 PF 0.74 R -0.091 DD 9% | OOS n=33 PF 1.11 R +0.032
+L3a D1 breakout 55 + chandelier 3 ATR: IS n=56 PF 0.75 R -0.078 DD 5% | OOS n=20 PF 1.32 R +0.076
+L3b D1 EMA9/21+chandelier: IS n=55 PF 0.83 R -0.059 DD 8% | OOS n=20 PF 1.16 R +0.052
+===== SPXUSD
+L1 M15 costo<=0.10: IS n=1279 PF 0.87 R -0.083 DD 79% | OOS n=1583 PF 0.88 R -0.084   (base IS PF 0.77 n 6431 | OOS PF 0.89)
+L1 M15 costo<=0.06: IS n=400 PF 0.96 R -0.023 DD 37% | OOS n=690 PF 0.88 R -0.077   (base IS PF 0.77 n 6431 | OOS PF 0.89)
+L1 M15 costo<=0.04: IS n=153 PF 0.83 R -0.116 DD 28% | OOS n=225 PF 0.78 R -0.127   (base IS PF 0.77 n 6431 | OOS PF 0.89)
+L1 M30 costo<=0.10: IS n=1180 PF 0.93 R -0.047 DD 53% | OOS n=1160 PF 1.03 R +0.021   (base IS PF 0.82 n 3313 | OOS PF 1.04)
+L1 M30 costo<=0.06: IS n=478 PF 1.10 R +0.062 DD 31% | OOS n=635 PF 0.89 R -0.075   (base IS PF 0.82 n 3313 | OOS PF 1.04)
+L1 M30 costo<=0.04: IS n=173 PF 1.07 R +0.041 DD 18% | OOS n=297 PF 0.81 R -0.125   (base IS PF 0.82 n 3313 | OOS PF 1.04)
+L1 H1 costo<=0.10: IS n=1011 PF 0.90 R -0.066 DD 57% | OOS n=649 PF 1.00 R +0.002   (base IS PF 0.76 n 1723 | OOS PF 1.03)
+L1 H1 costo<=0.06: IS n=521 PF 0.98 R -0.012 DD 37% | OOS n=532 PF 1.05 R +0.031   (base IS PF 0.76 n 1723 | OOS PF 1.03)
+L1 H1 costo<=0.04: IS n=206 PF 1.07 R +0.040 DD 16% | OOS n=302 PF 0.91 R -0.061   (base IS PF 0.76 n 1723 | OOS PF 1.03)
+L2 H2: IS n=899 PF 0.74 R -0.190 DD 86% | OOS n=369 PF 1.05 R +0.031
+L2 H4: IS n=487 PF 0.85 R -0.104 DD 62% | OOS n=211 PF 0.90 R -0.066
+L2 H8: IS n=227 PF 1.02 R +0.011 DD 29% | OOS n=109 PF 0.87 R -0.090
+L2 D1: IS n=78 PF 1.10 R +0.064 DD 10% | OOS n=33 PF 1.57 R +0.296
+L3a H1 breakout 20 + chandelier 3 ATR: IS n=1415 PF 0.88 R -0.046 DD 53% | OOS n=613 PF 1.08 R +0.029
+L3a H1 breakout 55 + chandelier 3 ATR: IS n=848 PF 0.88 R -0.045 DD 39% | OOS n=392 PF 1.02 R +0.008
+L3b H1 EMA9/21+chandelier: IS n=1151 PF 0.86 R -0.051 DD 48% | OOS n=467 PF 1.11 R +0.037
+L3a H4 breakout 20 + chandelier 3 ATR: IS n=366 PF 0.92 R -0.027 DD 16% | OOS n=170 PF 0.93 R -0.024
+L3a H4 breakout 55 + chandelier 3 ATR: IS n=250 PF 0.92 R -0.031 DD 15% | OOS n=106 PF 1.15 R +0.044
+L3b H4 EMA9/21+chandelier: IS n=306 PF 0.95 R -0.016 DD 20% | OOS n=139 PF 0.82 R -0.072
+L3a D1 breakout 20 + chandelier 3 ATR: IS n=71 PF 1.01 R +0.005 DD 5% | OOS n=32 PF 1.37 R +0.090
+L3a D1 breakout 55 + chandelier 3 ATR: IS n=48 PF 1.33 R +0.087 DD 3% | OOS n=22 PF 0.76 R -0.083
+L3b D1 EMA9/21+chandelier: IS n=52 PF 0.85 R -0.060 DD 8% | OOS n=23 PF 1.03 R +0.011
+=== RIEPILOGO ===
+L1 test 36 | con >=100 op IS: 31 | PF IS mediano 0.93 max 1.75 | R IS>0 in 11
+L2 test 16 | con >=100 op IS: 12 | PF IS mediano 0.92 max 1.22 | R IS>0 in 5
+L3a test 24 | con >=100 op IS: 16 | PF IS mediano 0.96 max 1.33 | R IS>0 in 7
+L3b test 12 | con >=100 op IS: 8 | PF IS mediano 0.96 max 1.15 | R IS>0 in 3
+PF IS>=1.2 con n>=100: 3 su 88
+   L1 EURUSD M15 costo<=0.04 IS n=112 PF 1.75 R +0.341 DD 9% | OOS n=43 PF 1.06 R +0.035
+   L3a XAUUSD H4 breakout55 IS n=121 PF 1.33 R +0.110 DD 4% | OOS n=46 PF 2.12 R +0.357
+   L2 EURUSD H4 EMA B2 IS n=277 PF 1.22 R +0.133 DD 22% | OOS n=116 PF 1.41 R +0.216
+VALIDATE: []

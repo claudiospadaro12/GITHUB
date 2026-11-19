@@ -13,3 +13,18 @@ TF **H2, H4, H8, D1** (H1 gia' misurato: PF IS mediano 0,88; H4: 0,85). 16 test.
 **In tutto 88 test** (36 + 16 + 36): per solo caso qualcuno superera' una soglia; **conta solo la porta di Claudio con OOS e piu' mercati concordi**. Per un indice vale l'avvertenza gia' vista (trascinamento del rialzo): separare long e short se un test passa.
 ## Limiti
 Stessi dati e costi assunti dei test precedenti; il 2025-26 degli indici non e' usato qui (hold-out per un eventuale finalista).
+
+## RISULTATI (`backtest_runner/simulatore/tre_leve.py`, log in `TRE_LEVE_risultati.txt`; 88 test)
+| Leva | Test (con >= 100 op. IS) | PF IS mediano / massimo | R IS > 0 |
+|---|---|---|---|
+| 1 movimento/costo | 36 (31) | 0,93 / 1,75 | 11 |
+| 2 TF alti (H2, H4, H8, D1) | 16 (12) | 0,92 / 1,22 | 5 |
+| 3a breakout + Chandelier | 24 (16) | 0,96 / 1,33 | 7 |
+| 3b incrocio EMA + Chandelier | 12 (8) | 0,96 / 1,15 | 3 |
+- **PF IS >= 1,2 con >= 100 operazioni: 3 test su 88; nessuna VALIDATA.** Per solo caso se ne attendono alcuni. I tre: EURUSD M15 costo <= 0,04 R (IS PF 1,75, n 112, DD 9%; **OOS PF 1,06**, n 43); **oro H4 breakout 55 + Chandelier (IS PF 1,33, n 121, DD 4%, R +0,11; OOS PF 2,12, n 46, R +0,36)**; EURUSD H4 EMA B2 (IS 1,22, DD 22%; OOS 1,41).
+- **Leva 1:** il filtro costo riduce molto le operazioni (EURUSD M15 da 4.316 a 690 a soglia 0,06; oro M15 da 4.030 a 13) e porta il R netto verso lo zero (EURUSD M15 0,06: R +0,019, OOS PF 1,11) ma non crea un vantaggio; nell'oro il filtro dipende dal regime di volatilita' (IS 227 contro OOS 689 operazioni). Previsioni: riduzione > 40% e R <= +0,03 (75%) -> si'; OOS PF > 1,2 con >= 100 op. (10%) -> no.
+- **Leva 2:** il PF mediano e' 0,92 (previsione > 0,95: 60% -> no); l'esito e' instabile tra TF vicini (EURUSD: H2 IS 0,84 / OOS 1,79, H4 1,22 / 1,41, H8 0,77 / 0,54): rumore.
+- **Leva 3:** unico filo coerente: **breakout + stop mobile su H4**, OOS PF > 1 in 7 casi su 8 (oro 1,32 / 2,12; EURUSD 1,31 / 1,19; Nasdaq 1,11 / 1,64; S&P 0,93 / 1,15), ma IS misto (EURUSD 0,83 / 0,67; S&P 0,92 / 0,92) e il fuori campione degli indici e' un periodo di rialzo. Previsioni: PF IS < 1,3 ovunque (70%) -> no (oro H4 55: 1,33); PF IS >= 1,5 con >= 100 op. (8%) -> no.
+**Verdetto: nessuna validazione.** Le tre leve da sole non portano un incrocio EMA o un breakout a PF 1,5. L'unico candidato da guardare e' **oro H4 breakout 55 barre con stop mobile 3 ATR** (positivo in IS e OOS, DD 4%).
+## SEGUITO: candidato congelato (scritto ora, prima di nuovi dati)
+Oro XAUUSD H4: breakout 55 barre (long e short), stop iniziale 3 ATR, stop mobile Chandelier 3 ATR, costo 0,35 USD; vicino di controllo: breakout 20. Da giudicare su **oro FTMO 2021-2026 (mai usato)** quando arriva `EXPORT_M1_FTMO_*` (riga `RIGA_EXPORT_M1_FTMO_ORO_2021_26.txt`). **Porta:** >= 30 operazioni, PF > 1,2, R > 0 per 55 barre e PF > 1,1 per il vicino a 20; nessun parametro toccato. Previsioni: PF 2021-26 > 1,2: **35%** (e' un regime di trend forte per l'oro: favorevole, ma e' il quarto test con questo esito su 88); PF tra 1,0 e 1,2: 30%; < 1,0: 35%.
