@@ -119,3 +119,6 @@ Regole di sicurezza invariate: nessun login, acquisto, Follow/Like/Boost, commen
 27 https://www.tradingview.com/script/EvkXjgyw-Breakout-Finder/
 28 https://www.tradingview.com/script/RwVTfoTY-Statistical-Mean-Reversion-Engine-SMRE/
 ```
+
+## Comando per l estensione: estrazione SMRE (19/11/2026)
+Testo in `report/PROMPT_CHROME_SMRE_2026-11-19.txt`.
