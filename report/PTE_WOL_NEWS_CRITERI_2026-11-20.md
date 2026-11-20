@@ -13,3 +13,15 @@
 - Una candidata (porte sotto): **3%**. PF IS < 1,0 per entrambe: **85%**.
 ## Regole di esito (invariate dopo i numeri)
 **MIGLIORA LA BASE** = PF IS e OOS sopra la base, >= 100 operazioni IS. **CANDIDATA** = PF IS >= 1,3 con >= 100 operazioni; OOS PF > 1,2 con >= 50 operazioni; IC90 inferiore del R medio > 0 su IS+OOS; >= 8 anni su 12 non negativi; leave-one-out PF > 1,0; prova di deriva. Meno di 100 operazioni IS = NON VALUTABILE. Con le 5 varianti del batch 1 e queste 2 sono 7 tentativi in tutto: lettura esplorativa finche' non c'e' una conferma su dati nuovi. Nessun consiglio di taglie. Il file calendario puo' contenere errori d'orario: nessuna verifica della precisione oltre l'NFP (13:30 server d'estate, 14:30 d'inverno, gia' controllato nel file).
+
+## RISULTATI (56 passate ricevute 20/11, nessun errore; 28 cross sommati, serie giornaliere, R = rendimento / 1%)
+| Variante | IS 2013-2020 | OOS 2021-2024 | Anni positivi | Contro la base |
+|---|---|---|---|---|
+| base PTE | PF 0,76 (n 1.066) | PF 1,31 (n 508) | 4/12 | - |
+| **V1** PTE senza notizie (120 min dopo, 30 prima) | PF 0,73, R -0,12 (n 1.005) | PF 1,29, IC90 inf +0,035 (n 473) | 3/12 | peggiora in IS e OOS (-0,03 / -0,02) |
+| base WOL | PF 0,66 (n 1.335) | PF 0,75 (n 633) | 3/12 | - |
+| **W1** WOL senza notizie (24 ore dopo, 30 prima) | PF 0,61, win 20% (n 774) | PF 0,62, win 16% (n 360) | 2/12 | peggiora in IS e OOS (-0,05 / -0,13) |
+- **Il filtro notizie, comunque lo si implementi con queste finestre, non migliora ne' PTE ne' WOL: li peggiora entrambi.** Nessuna candidata (PF IS 0,73 e 0,61).
+- Operazioni tolte: PTE -6% in IS e -7% in OOS (le notizie ad impatto alto sono poche nelle ore dell'ingresso H4); WOL -42% e -43%.
+- Previsioni: V1 toglie 10-35% (60%): **no, 6-7%**; W1 toglie > 40% (70%): si'; V1 migliora (35%): no; W1 migliora (40%): no; candidata (3%): no; PF IS < 1,0 per entrambe (85%): si'.
+- **Chiusura del filone fedelta' PTE/WOL con quello misurato:** 7 varianti (V1, V2, V4a, V4b, W1, W2, W3) piu' le 2 basi, 28 cross, 2013-2024 + PTE 2025-26: **nessuna candidata, nessuna con IS PF >= 1,0; unica a migliorare la base, W3 (WOL fine trend), resta PF 0,80/0,96.** Non testate: V3 (canali per coppia, serve il PDF e la mappatura), V5-V7, W4-W6 (modifiche strutturali). Limite: le finestre notizie sono mie, i documenti non le danno.
