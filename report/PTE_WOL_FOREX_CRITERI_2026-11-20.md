@@ -1,0 +1,10 @@
+# PTE (H4) e WOL (D1) sui 28 cross forex: criteri PRIMA dei numeri (20/11/2026)
+
+**Correzione a quanto detto prima:** PTE e WOL **erano gia' stati provati sull'oro** (`FAMIGLIA1_ORO_CRITERI_2026-11-18.md`): PTE H4 2015-2023 92 operazioni, PF 0,48, NON REGGE (2005-2014: PF 1,02); WOL D1 **0 operazioni** ai default (NON VALUTABILE: doji Heikin Ashi sulla linea di apertura settimanale non scatta mai sull'oro). **Mai provati sul forex**, che e' il mercato dove il corso/le live li applicano. E' quello che si misura ora.
+**Test:** EA `ABTG_PTE` (H4) e `ABTG_WOL` (D1) invariati, parametri di default dei sorgenti (nessuna ottimizzazione; filtro news spento; `InpVerbose=false` solo per ridurre il log), 28 cross forex, **2013-01-01 -> 2024-12-31**, BCM portabile, Modello 1, spread del tester, rischio 1% degli EA. 56 passate (hold-out 2025-26 non usato). **IS 2013-2020 / OOS 2021-2024** per data di chiusura. Le tabelle dei canali TMA per coppia della guida PTE (`Setting_canali_PTE`) non sono nel repository: si usano i default (56/100/2,0), limite dichiarato.
+## Previsioni
+- PTE: PF pooled sui 28 cross in IS tra 0,8 e 1,15: **65%**; in OOS < 1,2: **85%**.
+- WOL: operazioni totali sui 28 cross in 12 anni >= 100: **45%**; < 30 (NON VALUTABILE di nuovo): **25%**.
+- Un EA supera le porte sotto (pooled): **10%**.
+## Regole di esito (invariate dopo i numeri)
+**CANDIDATO** (per EA, sull'insieme dei cross con le operazioni sommate) se: IS PF >= 1,3 con >= 100 operazioni; OOS PF > 1,2 con >= 50 operazioni; R medio per operazione con IC90 inferiore > 0 su IS+OOS; almeno 8 anni su 12 non negativi sul pooled; **il risultato non dipende da un solo cross ne da un solo anno** (leave-one-out: PF sempre > 1,0); prova di deriva (long contro short non entrambi dipendenti da un solo lato). Meno di 100 operazioni IS pooled = **NON VALUTABILE** (si dice, non e' un no). Cross singoli: solo descrittivi (28 cross vicini non indipendenti, 56 prove: qualcuno sembrera' buono per caso). Nessun consiglio di taglie. Nessun parametro cambiato dopo i numeri: una variante e' una prova nuova.
