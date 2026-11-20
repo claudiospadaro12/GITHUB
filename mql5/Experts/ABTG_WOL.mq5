@@ -81,6 +81,8 @@ input int    InpNewsBeforeMin  = 60;
 input int    InpNewsAfterMin   = 30;
 input int    InpNewsShiftMinutes = 0;
 input string InpNewsCurrencies = "";
+input bool   InpNewsCommon     = false; // legge il file da Common\Files (calendario MT5 esportato, formato "Data Ora;Impatto;Valuta;Titolo", ora server)
+input bool   InpNewsPairOnly   = false; // conta solo le notizie delle due valute del simbolo (base e quotazione)
 
 input group "=== Generali ==="
 input string InpComment   = "WOL";
@@ -376,7 +378,7 @@ int CountPositions()
 void LoadNews()
   {
    gNewsCount=0; ArrayResize(gNewsTime,0); ArrayResize(gNewsImpact,0); ArrayResize(gNewsCcy,0);
-   int h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI,';');
+   int h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI|(InpNewsCommon?FILE_COMMON:0),';');
    if(h==INVALID_HANDLE){ Log("file news non trovato: filtro di fatto spento."); return; }
    while(!FileIsEnding(h))
      {
@@ -389,12 +391,20 @@ void LoadNews()
       if(t<=0) continue;
       t+=InpNewsShiftMinutes*60;
       int imp=ImpactToInt(sImp);
+      if(imp<InpNewsMinImpact) continue;
+      if(InpNewsPairOnly && !CcyInPair(sCcy)) continue;
       int n=gNewsCount;
       ArrayResize(gNewsTime,n+1); ArrayResize(gNewsImpact,n+1); ArrayResize(gNewsCcy,n+1);
       gNewsTime[n]=t; gNewsImpact[n]=imp; gNewsCcy[n]=sCcy; gNewsCount=n+1;
      }
    FileClose(h);
    Log(StringFormat("news caricate: %d.",gNewsCount));
+  }
+
+bool CcyInPair(string c)
+  {
+   string b=SymbolInfoString(_Symbol,SYMBOL_CURRENCY_BASE), q=SymbolInfoString(_Symbol,SYMBOL_CURRENCY_PROFIT);
+   return(c==b || c==q);
   }
 
 int ImpactToInt(string s)
