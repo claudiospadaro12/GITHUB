@@ -28,3 +28,16 @@ Dati: `abtg_news_hist.csv`: 40.658 righe USD+EUR 2013-2026 (calendario pronto, s
 - **ALL_120:** tutte le High USD, 120+120 minuti.
 - **MAIN_120:** solo le principali, titoli (in italiano come nel calendario BCM): `Libri Paga Non Agricoli` (NFP), `Decisione del Tasso di Interesse della Fed`, `Conferenza Stampa del FOMC`, `IPC a/a` (CPI); 120+120 minuti. Previsione: ingressi saltati **<= 6% (75%)**.
 **Regole (invariate, soglia 15% non allentata):** ALL_120 con ingressi saltati > 15% = **non si tiene in questa forma** (la finestra non si cambia dopo aver visto i numeri); MAIN_120 si tiene se ingressi saltati <= 15%, PF 2024-26 >= PF OFF - 0,2 e DD non peggiore di 2 punti. Nuova opzione `InpNewsTitleMatch` (default vuota = tutte).
+
+## RISULTATI (6 passate ricevute 20/11, BCM portabile, XAUUSD H4 LONG, `GOLDENZOE_NEWS.zip`)
+| Variante | 2015-2023 operazioni / PF / netto / DD | 2024-2026 operazioni / PF / DD |
+|---|---|---|
+| OFF | 154 / 1,02 / -0,14% / 19,0% | 62 / 1,54 / 6,2% |
+| ALL_120 (tutte le High USD, 120+120 min) | **129 (-16%)** / **1,25** / **+11,8%** / 14,8% | 62 / 1,54 / 6,2% (**identico a OFF**) |
+| MAIN_120 (NFP, Fed, FOMC, CPI) | 152 (-1,3%) / 1,02 / -0,28% / 19,2% | 62 / 1,54 / 6,2% (identico a OFF) |
+- **Anomalia da risolvere prima di concludere:** nel 2024-26 le tre varianti sono IDENTICHE, ma usando il nostro calendario (`abtg_news_hist_G8.csv`) **19 delle 62 entrate cadono entro 120 minuti da una notizia USD ad alto impatto**: nel 2015-2023 il filtro funziona (ALL_120: 0 entrate in finestra su 129), nel 2024-26 no. **Nel secondo periodo il filtro non era attivo** (probabile copertura del calendario `abtg_news_hist.csv` dopo il 2023, non verificata). Quindi la seconda finestra non vale come prova.
+- **2015-2023:** ALL_120 migliora PF 1,02 -> 1,25 (+0,23), DD 19,0 -> 14,8%, ma salta il 16% degli ingressi (oltre il 15% di soglia delle regole) e gli anni positivi scendono da 4 a 3. MAIN_120 non cambia nulla (salta l'1,3%).
+- **Esito secondo le regole scritte:** ALL_120 con ingressi saltati > 15% = **non si tiene in questa forma**; "il filtro migliora" richiede PF +0,2 in ENTRAMBE le finestre: **non dimostrabile** (seconda finestra non valida). MAIN_120: nessun effetto.
+- Previsioni: ingressi saltati 3-12% (70%): **no, 16% e 1,3%**; PF 2024-26 entro +-0,15 (75%): si' (identico, per un difetto); il filtro non rende piu' redditizio l'EA (80%): **non verificato**.
+- **Nota di contesto:** la base GoldenZoe su BCM 2015-2023 e' piatta (PF 1,02, 4 anni su 9 positivi, netto -0,14%): il vantaggio dell'EA poggia sul 2024-26 (oro in forte rialzo), non su 2015-2023.
+- Passo successivo possibile: ripetere ALL_120 con il calendario G8 (`InpNewsFile=abtg_news_hist_G8.csv`, `InpNewsCurrencies=USD`) sul 2024-26 e sul 2015-23 per controllare che il filtro lavori in entrambe le finestre.
