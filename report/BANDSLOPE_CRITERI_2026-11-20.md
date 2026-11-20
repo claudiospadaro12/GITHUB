@@ -1,0 +1,18 @@
+# Filtro pendenza/espansione delle bande sui segnali IN-BULGE/POST-BULGE: criteri PRIMA dei numeri (20/11/2026)
+
+**Richiesta di Claudio (20/11):** estrarre in modo matematico quando i segnali dell'indicatore `IN-BULGE + POST-BULGE [Claudio]` (Pine v5, `sala-del-consiglio/breaking_band/materiali/da_branch_lavoro/indicatore_inbulge_claudio.pine`) sono "SI" (bande inclinate, impulso pulito) o "NO" (laterale), e trovare i parametri di un filtro `isBandInclined`. Script: `backtest_runner/simulatore/BandSlope_Analyzer.py` (riproduce il segnale dal Pine, barre chiuse, ingresso all'apertura successiva).
+**Dati disponibili qui:** M1 di NASUSD e SPXUSD (2015-2024, storico esterno), XAUUSD ed EURUSD (FTMO 2014-2020, riga 00:00 scartata), D1 Yahoo per DAX e Dow. **US30 e DE40 non hanno M1 qui**; gli altri simboli del Market Watch non sono in questa sessione.
+**Definizione di SI/NO (mia, scritta ora):** dal segnale, ingresso all'apertura dopo; SI = il prezzo percorre +1,0 ATR(14) a favore prima di -1,0 ATR contro, entro 30 barre; tutto il resto NO (stop, tempo scaduto). Target = 1 ATR (equivale a 10-20 punti su Nasdaq M5/M15: la tabella riporta l'ATR mediano per leggere i punti). R netto dei costi (NAS 2,0, SPX 0,7, XAU 0,35, EUR 1 pip; DAX 2 e Dow 3 punti stimati). Stop e target hanno lo stesso valore: il win rate di riferimento e' ~50%.
+**Caratteristiche per segnale:** pendenza = (SMA - SMA 6 barre fa)/ATR (la media delle pendenze delle due bande esterne coincide con la SMA; la loro differenza e' l'espansione, gia' nel secondo parametro); espansione = ampiezza bande / media 50 barre.
+**Griglia:** BB periodo 14/20/30 x deviazione 1,5/2,0/2,5; pendenza minima 0,25/0,5/1,0 ATR in tre modi (ABS, WITH = nel verso del trade, AGAINST = contro); espansione minima 1,0/1,1/1,25 o nessuna. **9 x 40 = 360 combinazioni per cella (simbolo x timeframe M5/M15/M30/H1/H4/D1, 26 celle): per solo caso molte sembreranno buone in-sample.**
+**IS = primo 70% delle barre, OOS = ultimo 30%.** Scelta SOLO su IS (R medio massimo con >= 100 segnali tenuti IS); si riporta cosa fa la stessa combinazione in OOS.
+## Regole di esito
+1. Una combinazione e' "FILTRO UTILE" in una cella se in IS **e** OOS: R medio dei tenuti > R medio senza filtro, almeno 30 segnali tenuti in OOS, e i NO rimossi >= 60% con i SI mantenuti >= 30%. L'obiettivo dell'80% di NO rimossi lo riporto ma non lo uso come soglia: un filtro puo' rimuovere l'80% dei NO solo tagliando la maggior parte di tutti i segnali.
+2. **Un risultato che conta:** una combinazione (periodo, deviazione, modo, soglie) uguale su almeno meta' delle celle di un gruppo (4 mercati M1) con R OOS > 0 netto dei costi nella meta' delle celle. Altrimenti nessun setting universale: le "scelte per cella" sono rumore da multiple testing.
+3. Nessun R OOS netto > 0 con l'ipotesi nulla "non c'e' vantaggio" = il filtro non va in Pine/MQL5 come regola di trading; il codice si scrive comunque come strumento visivo, dichiarandolo.
+## Previsioni
+- R medio netto dei segnali senza filtro < 0 in almeno 20 celle su 24 (target = stop e costi): **85%**.
+- Per ogni cella la migliore combinazione IS ha R OOS < R IS: **90%**; R OOS > 0 netto: **25%** delle celle.
+- Esiste una combinazione unica con regola 2 soddisfatta: **10%**.
+- Le pendenze WITH (nel verso del trade) sono migliori di AGAINST (contro) in OOS in almeno il 60% delle celle: **60%** (il Bulge di Leonardo e' un ritorno alla media, ma il filtro di pendenza premia il trend).
+- Limite: un solo tipo di bersaglio (1 ATR / 1 ATR, 30 barre); la tua definizione "10-20 punti" e' resa in ATR; altri bersagli = altra prova.
