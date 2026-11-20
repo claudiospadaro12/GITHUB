@@ -18,3 +18,19 @@
 - Una variante supera tutte le porte sotto: **4%**.
 ## Regole di esito (invariate dopo i numeri)
 **MIGLIORA LA BASE** = PF IS e PF OOS entrambi sopra quelli della base, con >= 100 operazioni IS. **CANDIDATA** = stesse porte della base (PF IS >= 1,3 con >= 100 operazioni; OOS PF > 1,2 con >= 50 operazioni; IC90 inferiore del R medio > 0 su IS+OOS; >= 8 anni su 12 non negativi; leave-one-out PF > 1,0; prova di deriva). Meno di 100 operazioni IS = NON VALUTABILE. Cross singoli solo descrittivi. Nessun consiglio di taglie. Risultato che passa = si ripete su dati nuovi prima di usarlo.
+
+## RISULTATI (140 passate ricevute 20/11, nessun errore; 28 cross sommati, serie giornaliere, R = rendimento / 1%)
+| Variante | IS 2013-2020 | OOS 2021-2024 | Anni positivi | Miglioramento rispetto alla base |
+|---|---|---|---|---|
+| base PTE | PF 0,76 (n 1.066) | PF 1,31 (n 508) | 4/12 | - |
+| **V2** corpo Doji 20% | PF 0,77, R -0,10 (n 1.867) | PF 1,18, IC90 inf +0,016 (n 874) | 2/12 | IS +0,01, OOS -0,13: **no** |
+| **V4a** stop Doji 5 pip | PF 0,80, R -0,10 (n 1.074) | PF 1,20, IC90 inf -0,002 (n 507) | 4/12 | IS +0,04, OOS -0,11: **no** |
+| **V4b** stop Doji 10 pip | PF 0,81, R -0,09 (n 1.076) | PF 1,24, IC90 inf +0,014 (n 511) | 3/12 | IS +0,05, OOS -0,07: **no** |
+| base WOL | PF 0,66 (n 1.335) | PF 0,75 (n 633) | 3/12 | - |
+| **W2** Doji dentro i canali | PF 0,65, win 18% (n 789) | PF 0,69, win 14% (n 407) | 2/12 | peggiora in IS e OOS: **no** |
+| **W3** fine trend (EMA200) | PF 0,80, win 27% (n 616) | PF 0,96, win 19% (n 289) | 5/12 | **IS +0,14, OOS +0,21: migliora la base** (ma PF < 1) |
+- **Nessuna variante e' CANDIDATA** (nessuna con IS PF >= 1,3; tutte sotto 1,0 in IS). **Una sola variante "migliora la base": W3** (taglia le operazioni WOL del 54% in IS e del 54% in OOS e porta il PF da 0,66/0,75 a 0,80/0,96): resta negativa (R IS -0,010, IC90 inf negativo). Su 5 tentativi un miglioramento e' compatibile col caso; lettura esplorativa.
+- **PTE: le varianti dai documenti non cambiano il quadro:** perdita in 2013-2022, utile solo nel 2023-24 (V2 +41%/+35%, V4a +35%/+23%, V4b +37%/+18% somma dei 28 cross), come la base. Le due varianti con lo stop sulla Doji hanno meno rischio in IS (PF 0,80-0,81) ma un OOS piu' basso della base (1,20-1,24 contro 1,31).
+- **Test a tick reali e costi: non fatto, perche' nessuna variante supera le porte.**
+- Previsioni: almeno una variante migliora la base (30%): **si' (W3)**; PF IS < 1,0 in tutte e cinque (75%): **si'**; V2 operazioni +30-150% (65%): si' (+75%); PF IS V2 entro +-0,15 (60%): si'; W2 e W3 riducono le operazioni di >= 30% (80%): si'; una candidata (4%): no.
+- Non ancora testate dalla tabella della Sala: V1/W1 (notizie, "sine qua non" nei documenti: richiede di adattare il filtro news degli EA al calendario MT5), V3 (canali per coppia: serve il PDF), V5-V7, W4-W6 (modifiche strutturali).
