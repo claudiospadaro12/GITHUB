@@ -1,0 +1,53 @@
+--- a/agent/statement.py	2026-11-21 09:07:32.324569974 +0000
++++ b/agent/statement.py	2026-11-21 09:08:18.010197689 +0000
+@@ -23,6 +23,8 @@
+ def classify_asset(symbol: str) -> str:
+     """Classifica un simbolo in: Metalli / Valute / Cross / Indici."""
+     s = (symbol or "").upper()
++    if s.startswith("(SIMBOLO NON"):
++        return "Non classificato"
+     if any(m in s for m in ("XAU", "XAG", "XPT", "XPD")):
+         return "Metalli"
+     if len(s) == 6 and s[:3] in _CURRENCIES and s[3:] in _CURRENCIES:
+@@ -117,6 +119,14 @@
+ 
+ 
+ def _add_trade(st: Stats, t: Trade, since, all_opens, all_closes) -> None:
++    # normalizza '2026-10-19 09:04:10' -> '2026.10.19 09:04:10' (il confronto con 'since' e con la
++    # data attesa e' fra stringhe con il punto: '-' < '.' faceva risultare vecchio qualsiasi file con il trattino)
++    t.open_time = str(t.open_time).replace("-", ".", 2) if str(t.open_time)[4:5] == "-" else str(t.open_time)
++    t.close_time = str(t.close_time).replace("-", ".", 2) if str(t.close_time)[4:5] == "-" else str(t.close_time)
++    import re as _re
++    if not _re.match(r"^\d{4}\.\d{2}\.\d{2}", t.open_time):
++        st.bad_rows = getattr(st, "bad_rows", 0) + 1   # colonne spostate / riga non valida: NON entra mai nel report
++        return
+     st.total_in_file += 1
+     all_opens.append(t.open_time[:10])
+     if t.close_time and t.close_time[:1].isdigit():
+@@ -159,8 +169,26 @@
+         for row in _csv.reader(fh, delimiter=";"):
+             if not row or len(row) < 11:
+                 continue
++            head = [c.strip().lower() for c in row]
++            if "ora_apertura" in head and "ticket" in head:
++                # layout 'Posizioni_reale' (VPS): ora_apertura;ticket;tipo;volume;prezzo_apertura;sl_tp;
++                # ora_chiusura;prezzo_chiusura;commissione;swap;profitto;netto  (NESSUN simbolo, NESSUNA strategia)
++                _layout_reale = {h: i for i, h in enumerate(head)}
++                continue
+             if row[0].strip().lower() in ("pid", "position", "posizione"):
+                 continue  # header
++            if "_layout_reale" in locals():
++                try:
++                    g = lambda k: row[_layout_reale[k]]
++                    t = Trade(pid=str(g("ticket")), symbol="(simbolo non nel CSV)", side=str(g("tipo")), volume=_num(g("volume")),
++                              open_time=str(g("ora_apertura")), open_price=_num(g("prezzo_apertura")),
++                              close_time=str(g("ora_chiusura")), close_price=_num(g("prezzo_chiusura")),
++                              commission=_num(g("commissione")), swap=_num(g("swap")), profit=_num(g("profitto")),
++                              net=0.0, strategy="")
++                except (KeyError, IndexError, ValueError):
++                    continue
++                _add_trade(st, t, since, all_opens, all_closes)
++                continue
+             try:
+                 t = Trade(
+                     pid=str(row[0]), symbol=str(row[1]), side=str(row[2]), volume=_num(row[3]),
