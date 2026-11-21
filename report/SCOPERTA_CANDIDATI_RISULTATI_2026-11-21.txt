@@ -1,0 +1,131 @@
+=== A: overnight (chiusura->apertura) contro intraday (apertura->chiusura), long, netti di costi (+ swap 0,04%/notte sull'overnight)
+mercato classe n | overnight lordo medio%, netto%, t IS/OOS | intraday netto%, t IS/OOS
+ASX200                indici      6675 | on lordo +0.008 netto -0.081 t -15.0/-8.1 | id netto -0.030 t -1.6/-1.3
+Argento               metalli     3981 | on lordo +0.078 netto -0.010 t -1.2/+0.7 | id netto -0.077 t -2.3/-1.1
+Benzina               energia     6486 | on lordo -0.016 netto -0.104 t -6.7/-1.9 | id netto +0.041 t +1.5/+0.3
+Bitcoin               cripto      4388 | on lordo +0.006 netto -0.064 t -15.4/-61.3 | id netto +0.148 t +2.5/+1.2
+CAC40                 indici      9269 | on lordo +0.027 netto -0.060 t -5.7/-4.7 | id netto -0.032 t -2.5/-1.5
+Cacao                 agricoli    6684 | on lordo +0.024 netto -0.064 t -2.5/-3.0 | id netto -0.009 t -1.2/+0.8
+Caffe                 agricoli    6682 | on lordo +0.104 netto +0.015 t +2.0/-0.9 | id netto -0.100 t -4.2/-0.5
+Cotone                agricoli    6684 | on lordo +0.099 netto +0.010 t +1.5/-1.3 | id netto -0.089 t -3.6/-1.4
+DAX                   indici      8290 | on lordo +0.041 netto -0.047 t -6.1/-3.3 | id netto -0.031 t -1.8/-1.7
+Dow30                 indici      8725 | on lordo +0.004 netto -0.084 t -118.9/-6.3 | id netto +0.004 t +0.8/-0.7
+Ethereum              cripto      3239 | on lordo +0.007 netto -0.063 t -13.1/-64.5 | id netto +0.073 t +1.2/-0.3
+EuroStoxx50           indici      4866 | on lordo +0.014 netto -0.074 t -9.7/-9.7 | id netto -0.027 t -1.8/+0.1
+FTSE100               indici     10775 | on lordo +0.025 netto -0.063 t -7.2/-18.0 | id netto +0.007 t +0.4/+0.4
+Gas_naturale          energia     6528 | on lordo +0.142 netto +0.054 t +1.2/+1.7 | id netto -0.105 t -2.5/-1.1
+Gasolio_riscaldamento energia     6525 | on lordo +0.068 netto -0.020 t -1.7/-0.6 | id netto -0.044 t -1.6/-0.5
+Grano                 agricoli    6546 | on lordo +0.106 netto +0.017 t +0.6/+1.7 | id netto -0.099 t -3.2/-2.2
+HangSeng              indici      9593 | on lordo +0.046 netto -0.043 t -3.6/-2.4 | id netto -0.045 t -2.0/-3.8
+Indice_dollaro        tassi_usd  10415 | on lordo -0.001 netto -0.088 t -27.8/-39.3 | id netto -0.029 t -6.0/-2.1
+Mais                  agricoli    6358 | on lordo -0.004 netto -0.093 t -6.8/-3.8 | id netto -0.014 t -0.7/+0.1
+Nasdaq100             indici     10306 | on lordo +0.032 netto -0.056 t -4.7/-3.1 | id netto -0.005 t -0.4/+0.1
+Nikkei225             indici      9419 | on lordo +0.040 netto -0.050 t -7.5/-3.0 | id netto -0.054 t -4.1/-1.6
+Oro                   metalli     4676 | on lordo +0.051 netto -0.037 t -3.3/-3.8 | id netto -0.043 t -3.0/-0.6
+Palladio               escluso da A (open non affidabile: troppe barre piatte)
+Petrolio_Brent        energia     4749 | on lordo +0.019 netto -0.070 t -2.9/-3.4 | id netto -0.018 t -0.8/+0.2
+Petrolio_WTI          energia     6530 | on lordo +0.005 netto -0.083 t -6.1/-0.8 | id netto -0.032 t +0.1/-1.0
+Platino               metalli     6433 | on lordo +0.003 netto -0.094 t -4.3/+1.2 | id netto +0.050 t +2.5/-0.4
+Rame                  metalli     6490 | on lordo -0.004 netto -0.092 t -5.8/-3.6 | id netto +0.012 t +0.5/+0.5
+Russell2000           indici      9815 | on lordo +0.014 netto -0.074 t -12.5/-7.7 | id netto -0.012 t -0.3/-0.8
+SP500                 indici     14285 | on lordo +0.012 netto -0.076 t -23.2/-9.3 | id netto -0.008 t -0.5/-0.3
+Soia                  agricoli    6526 | on lordo -0.027 netto -0.116 t -11.0/-4.7 | id netto +0.010 t +1.1/-1.0
+Treasury_10a          tassi_usd   6512 | on lordo -0.006 netto -0.094 t -37.3/-24.8 | id netto -0.023 t -2.9/-4.6
+Treasury_30a          tassi_usd   6518 | on lordo -0.004 netto -0.092 t -22.3/-10.4 | id netto -0.029 t -2.0/-3.1
+Zucchero              agricoli    6645 | on lordo +0.072 netto -0.016 t -1.2/-0.6 | id netto -0.059 t -1.8/-1.5
+indici con overnight LORDO positivo in IS e OOS: 9 su 11
+A celle con t>=2 netto in IS e OOS: 0 []
+
+=== B: giorno della settimana (5) e turn-of-month, lato scelto dal segno IS del lordo; t netto IS/OOS
+celle B valutabili (n IS>=100, OOS>=40): 197 (su 198 possibili: i mercati con storia corta cadono)
+celle B con t netto >=2 in IS e OOS: 0
+B coerenza >=3 mercati stessa classe/giorno/lato: []
+  (B: celle con t IS>=2: 8 ; attese per caso su 197 ~ 4.5 )
+
+=== C: RSI(2)<10 & close>SMA200 long / RSI(2)>90 & close<SMA200 short; uscita close>SMA5 (long) o <SMA5 (short), max 10 barre
+--- LONG: mercato n_IS PF_IS ret%_IS | n_OOS PF_OOS ret%_OOS
+ASX200                   77  0.80 -0.13 |   29  1.79 +0.23
+Argento                  31  0.71 -0.43 |   30  0.86 -0.18
+Benzina                 126  1.63 +0.76 |   41  0.99 -0.02
+Bitcoin                  72  1.46 +0.87 |   40  2.84 +1.39
+CAC40                   166  1.72 +0.38 |   84  0.68 -0.23
+Cacao                    91  0.79 -0.33 |   39  1.69 +0.61
+Caffe                    85  0.86 -0.21 |   46  0.68 -0.63
+Cotone                  117  1.21 +0.23 |   32  0.65 -0.60
+DAX                     154  1.12 +0.10 |   71  1.04 +0.03
+Dow30                   184  1.41 +0.20 |   98  1.46 +0.21
+Ethereum                 45  0.81 -0.58 |   19  1.84 +1.17
+EuroStoxx50              73  0.98 -0.01 |   48  1.42 +0.21
+FTSE100                 117  1.04 +0.03 |   11  1.22 +0.07
+Gas_naturale             91  1.18 +0.32 |   36  1.34 +0.61
+Gasolio_riscaldamento   110  0.81 -0.31 |   39  0.81 -0.29
+Grano                    99  1.61 +0.59 |   41  0.75 -0.40
+HangSeng                205  1.03 +0.03 |   58  0.64 -0.34
+Indice_dollaro          129  0.69 -0.14 |   76  1.01 +0.00
+Mais                     80  0.80 -0.37 |   28  0.72 -0.53
+Nasdaq100               129  1.69 +0.49 |  107  1.24 +0.14
+Nikkei225               133  0.69 -0.30 |   88  1.46 +0.29
+Oro                      76  1.20 +0.13 |   32  0.83 -0.15
+Petrolio_Brent           55  0.70 -0.56 |   25  1.11 +0.21
+Petrolio_WTI            107  0.84 -0.29 |   28  0.93 -0.15
+Platino                  62  1.07 +0.06 |   11  2.55 +1.06
+Rame                    100  1.70 +0.46 |   43  0.93 -0.07
+Russell2000             102  0.84 -0.14 |   81  1.27 +0.17
+SP500                    83  1.04 +0.02 |  142  1.21 +0.10
+Soia                     96  0.85 -0.22 |   38  0.81 -0.19
+Treasury_10a             95  0.76 -0.07 |   29  0.49 -0.15
+Treasury_30a             90  0.72 -0.16 |   25  0.45 -0.34
+Zucchero                 83  1.26 +0.32 |   37  0.61 -0.72
+  CLASSE indici LONG: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 2 ['Dow30', 'Nasdaq100']
+  CLASSE energia LONG: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 0 []
+  CLASSE metalli LONG: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 0 []
+  CLASSE agricoli LONG: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 0 []
+  CLASSE cripto LONG: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 1 ['Bitcoin']
+  CLASSE tassi_usd LONG: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 0 []
+--- SHORT: mercato n_IS PF_IS ret%_IS | n_OOS PF_OOS ret%_OOS
+ASX200                   35  1.23 +0.15 |   14  2.76 +0.69
+Argento                  57  0.55 -0.80 |   13  0.82 -0.31
+Benzina                  71  1.31 +0.44 |   47  1.11 +0.14
+Bitcoin                  52  0.79 -0.62 |   19  0.55 -0.91
+CAC40                   101  1.66 +0.47 |   42  0.61 -0.55
+Cacao                    78  1.16 +0.22 |   27  0.78 -0.50
+Caffe                   109  1.59 +0.71 |   28  0.44 -1.60
+Cotone                   77  1.00 -0.00 |   47  1.56 +0.42
+DAX                      80  1.08 +0.09 |   32  1.54 +0.39
+Dow30                    56  1.19 +0.14 |   19  0.68 -0.35
+Ethereum                 38  0.58 -1.71 |   26  0.65 -1.12
+EuroStoxx50              67  1.10 +0.09 |   14  0.86 -0.14
+FTSE100                  38  0.71 -0.25 |    0  0.00 +0.00
+Gas_naturale            100  2.06 +1.51 |   40  1.25 +0.54
+Gasolio_riscaldamento    64  1.03 +0.05 |   44  0.97 -0.05
+Grano                    90  0.80 -0.36 |   33  0.92 -0.11
+HangSeng                 93  0.89 -0.13 |   57  1.23 +0.18
+Indice_dollaro          168  0.92 -0.03 |   47  0.82 -0.05
+Mais                     91  1.40 +0.33 |   47  2.20 +0.52
+Nasdaq100                54  1.08 +0.09 |   24  1.23 +0.23
+Nikkei225               141  1.26 +0.20 |   40  0.67 -0.37
+Oro                      48  0.66 -0.32 |   14  0.50 -0.62
+Petrolio_Brent           62  0.89 -0.18 |   34  0.98 -0.02
+Petrolio_WTI             65  1.41 +0.53 |   56  0.93 -0.12
+Platino                  36  0.49 -0.83 |   13  2.13 +0.72
+Rame                     77  1.18 +0.21 |   26  1.95 +0.42
+Russell2000              53  1.69 +0.53 |   44  1.74 +0.48
+SP500                    58  1.73 +0.50 |   30  1.02 +0.02
+Soia                     94  0.75 -0.31 |   44  0.83 -0.16
+Treasury_10a             89  0.58 -0.12 |   43  1.65 +0.09
+Treasury_30a             82  1.12 +0.04 |   43  1.08 +0.03
+Zucchero                106  0.90 -0.15 |   31  0.39 -1.39
+  CLASSE indici SHORT: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 1 ['Russell2000']
+  CLASSE energia SHORT: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 1 ['Gas_naturale']
+  CLASSE metalli SHORT: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 0 []
+  CLASSE agricoli SHORT: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 1 ['Mais']
+  CLASSE cripto SHORT: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 0 []
+  CLASSE tassi_usd SHORT: mercati con IS PF>=1,3 (n>=50) e OOS PF>1,2 (n>=20): 0 []
+
+=== D: momentum cross-sectional (252-21), long top5/short bottom5, ribilanciamento 21 giorni, costi 0,03%/gamba + swap 0,04%/notte sul long
+ribilanciamenti 348 1998-10-16 2026-09-23
+net     IS media -0.90%/mese t -1.79 | OOS media -2.01% t -1.84 | tutti -1.23%
+noswap  IS media +0.28%/mese t +0.55 | OOS media -0.83% t -0.76 | tutti -0.06%
+gross   IS media +0.34%/mese t +0.67 | OOS media -0.77% t -0.71 | tutti +0.00%
+profitto netto per anno (somma mensili %): {1998: 9.3, 1999: -8.5, 2000: -12.6, 2001: 5.0, 2002: 12.8, 2003: -18.4, 2004: -48.8, 2005: -27.0, 2006: -14.3, 2007: -1.7, 2008: -27.9, 2009: -32.8, 2010: -31.9, 2011: -31.1, 2012: -32.7, 2013: 16.0, 2014: 11.3, 2015: -1.3, 2016: -49.5, 2017: 65.7, 2018: -40.6, 2019: -91.4, 2020: -0.7, 2021: 0.9, 2022: -3.3, 2023: -25.8, 2024: 17.6, 2025: -15.1, 2026: -52.9}
+quota del miglior anno sul totale netto: n/d (totale <= 0)
