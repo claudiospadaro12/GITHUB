@@ -1,0 +1,19 @@
+# UBS oro D1 su dati FTMO: convalide V1/V2 (21/11/2026): risultati
+**Natura:** misura dal tester (FTMO-Demo, XAUUSD D1, Modello 1, 100.000 EUR, lotto 0,1, 55 passate, qualita storico 98-100%). Dati: `UBS_PILOTA_ORO_dati/VALIDA_FTMO_ORO_20261121_1904.csv`. Criteri: `UBS_PILOTA_ORO_OTTIMIZZAZIONE_CRITERI_2026-11-15.md` sezione 18 (scritti prima dei numeri). Rendimento/DD = profitto / DD massima di equity in EUR. **Contatore di campagna: 1.972 + 55 = 2.027 passate.**
+## C0 = set di Wim su FTMO (riferimento)
+IS 2015-18: +1.585, 64 op., PF 2,51, DD 390 (rend/DD 4,06) | IS 2019-22: +1.983, 75 op., PF 2,86, DD 259 (7,65) | **2023-24: +1.102, 42 op., PF 3,12, DD 223 (4,95)** | 2025: +45, 18 op., PF 1,22, DD 238 (0,19) | 2026 (gen-ott): +150, 16 op., PF 1,94, DD 128 (1,17).
+## Esito delle convalide
+- **V2 (2015-18 e 2019-22: PF >= 1,15, profitto > 0, rapporto DD <= 2,5): passano tutti gli 11** (rapporto DD 1,14-1,50).
+- **V1 (2023-24: PF >= 1,20, profitto > 0, recovery >= 1, rend/DD >= 1,10 x C0 = 5,45): passano 6 su 10: C1 (rend/DD 7,92; PF 7,58), C2 (8,53; 7,99), C3 (9,77; 8,80), C10 (9,77; 8,80), C6 (5,90; 4,07), C8 (6,29; 3,65).** Non passano C4 (4,08), C5 (4,28), C7 (4,95, identico a C0), C9 (3,60).
+- **Controllo informativo 2025 e 2026 (profitto > 0 e rend/DD >= C0):** **C3 e C8 lo superano in entrambi**; C1, C2, C10 lo superano nel 2026 ma non nel 2025 (rend/DD 0,14 / 0,14 / 0,02 contro 0,19); C6 lo supera nel 2025 ma non nel 2026.
+- **Passano V1+V2: C1, C2, C3, C6, C8, C10. Passano V1+V2+controllo 2025-26: C3 e C8.** Previsioni: almeno un candidato passa V1+V2 (40%): **si'**; V1+V2+2025-26 (30%): **si'** (due); aspettativa scritta "nessun candidato supera C0 di >= 10% in V1, 30% di probabilita'": **sbagliata, 6 su 10**.
+## Letture e cautele (da leggere prima di fidarsi)
+1. **Campioni piccoli:** V1 e' una sola finestra di 2 anni con **40-45 operazioni**; i PF 7,6-8,8 di C1-C3/C10 su 40-45 operazioni sono instabili. 2025-26 hanno 16-21 operazioni per candidato.
+2. **I candidati non sono indipendenti:** C1, C2, C3 coincidono in IS 2015-18 (stessi 64 trade); C3 e C10 sono identici in V1 e nel 2026; C7 e' identico a C0 in tutte le finestre. I "6 passati" sono in pratica **3 famiglie** (stop 1050 con target 1700 e scadenza 480 per C1-C3/C10; C6 e C8 varianti vicine), non 6 prove separate.
+3. **Tutte le varianti con "stop 1050, scadenza 480" hanno un 2025 debole** (+8,84 a +67,7 EUR su 18-21 operazioni, rend/DD 0,02-0,27). **Anche il set di Wim nel 2025, un anno in cui l'oro e' salito moltissimo, ha guadagnato solo +45 EUR (PF 1,22):** il motore breakout D1 non ha catturato il 2025. Il vantaggio 2023-24 e 2026 e' in anni di movimenti con ritracciamenti, non in trend puliti: dipende dal regime.
+4. **Selezione:** i candidati sono stati scelti nella griglia 2015-2022 con range spostati verso la zona buona dopo aver visto la griglia BCM (dichiarato nei criteri). V1 e' la sola prova fuori campione, su una finestra. Tick non scaricati su FTMO: **V3 (tick reali) non valutabile**.
+5. **Nessun confronto con costi reali FTMO su D1:** nel Modello 1 lo spread non e' quello vero.
+## Cosa si puo' dire
+Il set di Wim regge su FTMO in tutte le finestre (PF 1,2-3,1). **Una famiglia di varianti (stop 1050, target 1700, scadenza 480; C1/C2/C3/C10, con C3 migliore) fa meglio del set di Wim in 2023-24 (rend/DD 8-10 contro 5) e nel 2026, ma non nel 2025 (tranne C3): vantaggio possibile ma non dimostrato**, su 40-45 operazioni. **Finalisti scritti nei criteri (migliori 3-4 per V1+V2):** C3, C10 (identici), C2, C1; il controllo 2025-26 favorisce **C3 e C8**. Per la challenge conta il DD: 0,2-0,4% su 100.000 EUR a lotto 0,1 (lotto non confrontabile con un conto reale: nessun consiglio di taglie).
+## Prossimo passo proposto
+Mancano V3 (tick) e una prova in avanti: **demo forward con set e magic separati** (da novembre 2026, V4) o scaricare i tick FTMO 2023-2024 per V3. **Decide Claudio.**
