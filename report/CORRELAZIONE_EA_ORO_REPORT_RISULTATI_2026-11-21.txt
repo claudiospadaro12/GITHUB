@@ -1,0 +1,39 @@
+PHANTOM26_5k: giorni con deal 103, P&L realizzato totale 2118 EUR, dal 2026-01-12 al 2026-11-12
+PHANTOM26_80k: giorni con deal 108, P&L realizzato totale 7975 EUR, dal 2026-01-12 al 2026-11-12
+GOLDBOT25: giorni con deal 68, P&L realizzato totale 6028 EUR, dal 2025-01-02 al 2025-12-23
+GTP25: giorni con deal 99, P&L realizzato totale 8047 EUR, dal 2025-01-02 al 2025-12-31
+
+== GOLDBOT25 (2025-01-01..2025-12-31) giorni lavorativi 258, giorni con deal 66
+       giornaliera  settimanale  mensile
+ST_H1         0.19         0.15     0.77
+ST_H4         0.26         0.40     0.60
+DON55         0.19         0.16     0.56
+ORO           0.14         0.17     0.66
+n osservazioni: {'giornaliera': 258, 'settimanale': 53, 'mensile': 12}
+
+== GTP25 (2025-01-01..2025-12-31) giorni lavorativi 258, giorni con deal 96
+       giornaliera  settimanale  mensile
+ST_H1         0.22         0.15     0.35
+ST_H4         0.24         0.29     0.29
+DON55         0.04         0.07     0.26
+ORO           0.10         0.13     0.29
+n osservazioni: {'giornaliera': 258, 'settimanale': 53, 'mensile': 12}
+
+== PHANTOM26_5k (2026-01-01..2026-11-12) giorni lavorativi 224, giorni con deal 100
+       giornaliera  settimanale  mensile
+ST_H1         0.17         0.02    -0.02
+ST_H4         0.23         0.34     0.32
+DON55         0.05         0.14     0.07
+ORO          -0.00         0.03    -0.07
+n osservazioni: {'giornaliera': 224, 'settimanale': 46, 'mensile': 11}
+
+== PHANTOM26_80k (2026-01-01..2026-11-12) giorni lavorativi 224, giorni con deal 105
+       giornaliera  settimanale  mensile
+ST_H1         0.19         0.08     0.19
+ST_H4         0.26         0.38     0.46
+DON55         0.08         0.17     0.20
+ORO           0.03         0.04     0.11
+n osservazioni: {'giornaliera': 224, 'settimanale': 46, 'mensile': 11}
+Goldbot-GTP giornaliera: 0.50
+Goldbot-GTP settimanale: 0.73
+Goldbot-GTP mensile: 0.81
