@@ -1,0 +1,18 @@
+H1 X0 IS n1061 PF 1.16 t+1.7 | OOS n 429 PF 1.42 t+2.2 | HO n105 PF 1.32 ok | durata media 42.8 barre ret +0.09% p0.028 | riferimento | porte no 
+H1 X1 IS n1061 PF 0.94 t-0.7 | OOS n 429 PF 0.97 t-0.2 | HO n105 PF 1.12 ok | durata media 5.4 barre ret -0.00% p0.070 | coppie vs X0: IS dif -0.07% t-1.8 | OOS dif -0.14% t-2.3 | porte no 
+H1 X2 IS n1061 PF 0.99 t-0.1 | OOS n 429 PF 0.99 t-0.1 | HO n105 PF 1.03 ok | durata media 9.5 barre ret -0.00% p0.147 | coppie vs X0: IS dif -0.07% t-1.8 | OOS dif -0.14% t-2.4 | porte no 
+H1 X3 IS n1061 PF 0.97 t-0.4 | OOS n 429 PF 0.99 t-0.1 | HO n105 PF 1.04 ok | durata media 6.7 barre ret +0.00% p0.054 | coppie vs X0: IS dif -0.06% t-1.7 | OOS dif -0.13% t-2.2 | porte no 
+H1 X4 IS n1061 PF 0.92 t-0.9 | OOS n 429 PF 0.97 t-0.2 | HO n105 PF 1.06 ok | durata media 6.4 barre ret -0.01% p0.118 | coppie vs X0: IS dif -0.07% t-1.9 | OOS dif -0.14% t-2.3 | porte no 
+H4 X0 IS n 286 PF 1.38 t+1.7 | OOS n 127 PF 1.50 t+1.5 | HO n 26 PF 2.58 ok | durata media 41.4 barre ret +0.36% p0.058 | riferimento | porte no 
+H4 X1 IS n 286 PF 1.02 t+0.2 | OOS n 127 PF 1.13 t+0.5 | HO n 26 PF 6.07 ok | durata media 5.8 barre ret +0.05% p0.161 | coppie vs X0: IS dif -0.29% t-1.8 | OOS dif -0.29% t-1.5 | porte no 
+H4 X2 IS n 286 PF 1.21 t+1.2 | OOS n 127 PF 1.03 t+0.1 | HO n 26 PF 2.77 ok | durata media 10.4 barre ret +0.06% p0.240 | coppie vs X0: IS dif -0.24% t-1.5 | OOS dif -0.30% t-1.6 | porte no 
+H4 X3 IS n 286 PF 1.14 t+0.8 | OOS n 127 PF 1.26 t+0.9 | HO n 26 PF 4.44 ok | durata media 7.9 barre ret +0.09% p0.081 | coppie vs X0: IS dif -0.24% t-1.5 | OOS dif -0.25% t-1.3 | porte no 
+H4 X4 IS n 286 PF 1.16 t+0.9 | OOS n 127 PF 1.22 t+0.7 | HO n 26 PF 4.51 ok | durata media 7.7 barre ret +0.09% p0.070 | coppie vs X0: IS dif -0.23% t-1.4 | OOS dif -0.26% t-1.3 | porte no 
+D1 X0 IS n  50 PF 1.62 t+1.2 | OOS n  24 PF 1.24 t+0.4 | HO n  3 PF 82.74 NV | durata media 38.1 barre ret +1.14% p0.379 | riferimento | porte no 
+D1 X1 IS n  50 PF 1.32 t+0.7 | OOS n  24 PF 1.22 t+0.4 | HO n  3 PF inf NV | durata media 5.8 barre ret +0.34% p0.235 | coppie vs X0: IS dif -0.56% t-0.8 | OOS dif -0.61% t-0.6 | porte no 
+D1 X2 IS n  50 PF 1.51 t+0.9 | OOS n  24 PF 1.15 t+0.3 | HO n  3 PF inf NV | durata media 11.2 barre ret +0.63% p0.194 | coppie vs X0: IS dif -0.39% t-0.6 | OOS dif -0.68% t-0.7 | porte no 
+D1 X3 IS n  50 PF 1.20 t+0.5 | OOS n  24 PF 1.42 t+0.6 | HO n  3 PF inf NV | durata media 8.5 barre ret +0.55% p0.139 | coppie vs X0: IS dif -0.61% t-0.9 | OOS dif -0.35% t-0.4 | porte no 
+D1 X4 IS n  50 PF 1.21 t+0.5 | OOS n  24 PF 1.51 t+0.7 | HO n  3 PF inf NV | durata media 8.2 barre ret +0.58% p0.118 | coppie vs X0: IS dif -0.60% t-0.9 | OOS dif -0.33% t-0.3 | porte no 
+
+celi che passano le porte: []
+uscite migliori (porte + coppie + p<=0.05): []
