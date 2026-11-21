@@ -1,14 +1,17 @@
 # Criteri: report/SCALPING_ORO_SCANSIONE_CRITERI_2026-11-21.md
-import glob,sys
+import glob,sys,time
+T0=time.time()
 import numpy as np, pandas as pd
 HO=pd.Timestamp('2025-06-01'); COST=0.00011; out=[]
 def P(*a):
     s=' '.join(str(x) for x in a); out.append(s); print(s,flush=True)
+def TT(m): print(f'[{time.time()-T0:.0f}s] {m}',flush=True)
 dd=[]
 for f in sorted(glob.glob('/tmp/claude-0/dati_ftmo*/ABTG_M1_XAUUSD_*.csv')):
     d=pd.read_csv(f,sep=';',header=0,usecols=[0,1,2,3,4,5,6]); d.columns=['t','o','h','l','c','tv','sp']; d=d[~(d.t.str.endswith('00:00')&(d.tv>2000))]; dd.append(d)
 d1=pd.concat(dd); d1['t']=pd.to_datetime(d1.t,format='%Y.%m.%d %H:%M'); d1=d1.drop_duplicates('t').set_index('t').sort_index()
 T1=d1.index.values; O=d1.o.values.astype(float); H=d1.h.values.astype(float); L=d1.l.values.astype(float); C=d1.c.values.astype(float); SP=d1.sp.values.astype(float); N=len(O)
+TT('caricato M1 %d righe'%len(d1))
 M5=d1.resample('5min').agg({'o':'first','h':'max','l':'min','c':'last','tv':'sum','sp':'mean'}).dropna(); t5=M5.index.values
 i0=np.searchsorted(T1,t5)   # indice M1 di inizio di ogni barra M5
 o5,h5,l5,c5=[M5[x].values.astype(float) for x in 'ohlc']; tv5=M5.tv.values; sp5=M5.sp.values; n5=len(o5)
@@ -26,7 +29,10 @@ def simulate(a,dire,stop,target,maxm1,endidx):
     if s<=t and s<10**9: return stop,a+s
     if t<10**9: return target,a+t
     return C[b],b
-def ends(j):  # fine sessione: ultimo M1 prima delle 22:00 dello stesso giorno della barra j
+T1i=T1.astype('int64'); t5i=t5.astype('int64')
+E5=np.searchsorted(T1i,(t5.astype('datetime64[D]')+np.timedelta64(22,'h')).astype('datetime64[ns]').astype('int64'))-1
+def ends(j): return int(E5[j])
+def ends_old(j):  # fine sessione: ultimo M1 prima delle 22:00 dello stesso giorno della barra j
     day=t5[j].astype('datetime64[D]'); return int(np.searchsorted(T1,(day+np.timedelta64(22,'h')).astype('datetime64[ns]')))-1
 def run(sig,stopf,targf,maxbars,costmult=1.0):
     rows=[]; free=0
@@ -35,6 +41,7 @@ def run(sig,stopf,targf,maxbars,costmult=1.0):
         a=i0[j+1]; e=O[a]; A=atr[j]; stop,target=stopf(e,A,dire,j),targf(e,A,dire,j); x,bx=simulate(a,dire,stop,target,maxbars*5,ends(j+1))
         ret=dire*(x/e-1)-COST*costmult; rows.append((pd.Timestamp(t5[j+1]),dire,ret/(abs(e-stop)/e),ret)); free=bx+1
     return pd.DataFrame(rows,columns=['t','side','R','ret'])
+TT('M5 pronto %d barre'%n5)
 ok=~np.isnan(z)&~np.isnan(atr)
 s1=[(j,1 if z[j]<=-2.5 else -1) for j in range(20,n5-1) if ok[j] and abs(z[j])>=2.5]
 rng=(h5-l5); pa=np.r_[np.nan,atr[:-1]]
@@ -44,17 +51,19 @@ for j in range(20,n5-1):
     pos=(c5[j]-l5[j])/rng[j] if rng[j]>0 else .5
     if pos>=0.75: s2.append((j,1))
     elif pos<=0.25: s2.append((j,-1))
+TT('segnali F1 %d, F2 %d'%(len(s1),len(s2)))
 f1s=lambda e,A,d,j:e-d*2*A; f1t=lambda e,A,d,j:sma[j]
 f2s=lambda e,A,d,j:e-d*1*pa[j]; f2t=lambda e,A,d,j:e+d*1.5*pa[j]
 cells={'F1':run(s1,f1s,f1t,12),'F2':run(s2,f2s,f2t,6),
  'F1+vol':run([x for x in s1 if volok[x[0]]],f1s,f1t,12),'F1+spread':run([x for x in s1 if spok[x[0]]],f1s,f1t,12),
  'F2+vol':run([x for x in s2 if volok[x[0]]],f2s,f2t,6),'F2+spread':run([x for x in s2 if spok[x[0]]],f2s,f2t,6)}
+TT('celle F1/F2/F4 fatte')
 # F3 notizie
 nw=pd.read_csv('/tmp/claude-0/news/69284184_abtg_news_hist.csv',sep=';',encoding='utf-8-sig'); nw.columns=['t','imp','cur','tit']
 nw=nw[(nw.cur=='USD')&(nw.imp=='High')].copy(); nw['t']=pd.to_datetime(nw.t,format='%Y.%m.%d %H:%M')
-utc=nw.t.dt.tz_localize('Etc/GMT-1').dt.tz_convert('UTC'); nw['ft']=utc.dt.tz_convert('Europe/Helsinki').dt.tz_localize(None); ev=np.sort(nw.ft.unique())
+utc=nw.t.dt.tz_localize('Etc/GMT-1').dt.tz_convert('UTC'); nw['ft']=utc.dt.tz_convert('Europe/Helsinki').dt.tz_localize(None); ev=np.sort(nw.ft.values.astype('datetime64[ns]')); ev=np.unique(ev)
 # verifica allineamento: ampiezza media M1 per offset attorno all'evento
-idxe=np.searchsorted(T1,ev); rg=(H-L)/C; offs=range(-6,11); prof={o:np.nanmean([rg[i+o] for i in idxe if 0<=i+o<N and T1[i+o]==ev[k]+np.timedelta64(o,'m')]) for o in offs for k in [0]} if False else {}
+idxe=np.searchsorted(T1i,ev.astype('int64')); rg=(H-L)/C; offs=range(-6,11); prof={o:np.nanmean([rg[i+o] for i in idxe if 0<=i+o<N and T1[i+o]==ev[k]+np.timedelta64(o,'m')]) for o in offs for k in [0]} if False else {}
 vals={o:[] for o in offs}
 for k,i in enumerate(idxe):
     for o in offs:
@@ -65,9 +74,9 @@ pk=max(vals,key=lambda o:np.mean(vals[o]) if vals[o] else 0); P('  picco al minu
 def run_news(follow):
     rows=[]; free=0
     for k,e0 in enumerate(ev):
-        i=np.searchsorted(T1,e0)
+        i=int(np.searchsorted(T1i,e0.astype('int64')))
         if i+6>=N or T1[i]!=e0: continue
-        j=np.searchsorted(t5,e0)-1
+        j=int(np.searchsorted(t5i,e0.astype('int64')))-1
         if j<20 or np.isnan(atr[j]): continue
         a=i+5
         if T1[a]!=e0+np.timedelta64(5,'m') or a<free: continue
@@ -76,9 +85,10 @@ def run_news(follow):
         react=C[i+4]-O[i]; A=atr[j]
         if abs(react)<0.5*A: continue
         dire=int(np.sign(react))*(1 if follow else -1); e=O[a]; stop=e-dire*A; target=e+dire*A
-        x,bx=simulate(a,dire,stop,target,30,ends(np.searchsorted(t5,T1[a])))
+        x,bx=simulate(a,dire,stop,target,30,ends(int(np.searchsorted(t5i,T1i[a]))))
         ret=dire*(x/e-1)-COST*3; rows.append((pd.Timestamp(T1[a]),dire,ret/(A/e),ret)); free=bx+1
     return pd.DataFrame(rows,columns=['t','side','R','ret'])
+TT('allineamento fatto')
 cells['F3a segue']=run_news(True); cells['F3b fade']=run_news(False)
 def stt(x):
     n=len(x)
