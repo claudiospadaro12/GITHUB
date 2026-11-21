@@ -43,3 +43,8 @@ Se i dati `_EXT` 2010-2014 e 2016-2019 sono affidabili (verificati solo 3 blocch
 
 ## 8. Peso
 Passo 0 (sola lettura, pochi secondi) + passata di fumo + 2 ottimizzazioni da circa 5 ore ciascuna + circa 40 passate di convalida: **circa 12 ore di PC**, da lanciare solo a test a tick finito.
+
+## 9. Aggiunta del 21/11 sera (dopo la lettura del Library pack di Wim, PRIMA di qualunque numero nostro)
+- **IS di Wim per gli indici = 2020-2023** (non 2010-2019). Quindi 2010-2019 e **fuori campione per i suoi set Indicement**: il controllo C0 su 2010-2019 e un vero fuori campione per C0, ma NON per i candidati ottimizzati da noi su quella finestra.
+- **I numeri di Wim (post-IS 05/2025-11/2026, tick):** Indicement mediana PF 0,98 su 14 set, solo 2 sopra 1,1. Nuova previsione **I-8 (scritta ora):** i set Indicement di Wim (C0) hanno PF >= 1,2 sulla finestra 2010-2019: 15%; **I-9:** un ottimizzato nostro con IS 2010-2019 supera OOS 2020-23 con PF >= 1,2: 20%. Le previsioni I-1..I-7 restano com'erano.
+- **Priorita:** i candidati piu promettenti dal Library pack sugli indici sono i volatility M15 su US30 (vedi `UBS_TELEGRAM_ANALISI_2026-11-21.md`); da testare sui tick nativi BCM `U30USD` prima di ottimizzare altro.

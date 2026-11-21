@@ -11,3 +11,11 @@ Fonte: `UBS_TELEGRAM_TRASCRIZIONE_2026-11-21.txt` (letta in sola lettura da Clau
 ## Conseguenze sui criteri degli indici (aggiunta del 21/11 sera, prima dei numeri)
 - I set Indicement di Wim (C0) sulle finestre 2010-2023 **non sono fuori campione per lui**: il controllo C0 e un riferimento, non una prova; l'unico fuori campione vero per C0 e 2024+ (hold-out 2024 e test a tick 2025-26) finche non si legge la Library pack.
 - Se si usa l'app: serve MT5 fuori da Program Files; i simboli `_EXT` sono solo nel terminale principale (in Program Files): l'app non si puo usare direttamente su quei dati.
+
+## Library pack (zip ridotto, 21/11 sera): `UBS_LIBRARY_PACK_POSTIS_2026-11-21.csv`
+Il pacchetto contiene 397 strategie in 25 collezioni, con i **periodi IS dichiarati** e i **report di Wim** (1 minuto e tick, finestra 13/05/2025-13/11/2026, deposito 100000 USD, i suoi dati/broker; 393 coppie). Sono numeri di Wim, non nostri; **esplorativi** (393 confronti, nessun criterio scritto prima).
+- **IS dichiarati:** Indicement, Orb Master, Bitcoin Reaper, Bitcoin Scalp Pro, Various-NAS100 e 20 Volatility Breakout = **2020-2023**; oro, forex, Daytrade Pro, Advanced Scalper, 17 Volatility Breakout, 44strategy = **2012-2023**; i set "Clients" e Xmas: **non dichiarato**.
+- **Indicement post-IS (tick, 18 mesi):** 14 set distinti, solo US30_3 (PF 1,37) e US100_4 (1,10) sopra 1,1; mediana 0,98 (US500: 0,76-1,06). Orb Master mediana 0,98; Advanced Scalper 0,93; Various-NAS100 1,04. **Sugli indici cash i set pubblicati non reggono fuori campione.**
+- **Mediana PF tick post-IS** di tutte le coppie con >= 30 operazioni: 1,29 (201 su 325 >= 1,2): quasi tutto e oro/argento, TSLA e US30 M15 volatility. **L'oro 2025-26 e un rialzo: i set long sono correlati e il PF alto e in gran parte deriva dell'oro** (nostra misura del 20-21/11).
+- **Distorsione di selezione:** molti set "Clients" sono stati scelti dopo i risultati dal vivo/in gara; la finestra e unica per tutti.
+- **Da guardare (indici, non-oro):** US30 volatility M15 (US30_VOL_M15_a/c/g, U3V12, U3V08: PF tick 1,5-5,8, 74-106 operazioni), US500 M15 (VolUS500_g 1,26, U5W10 1,25), US30 H1 scalp B/C/D (1,3-1,8); sul BCM esistono tick nativi `U30USD`/`SPXUSD` da 07/2024.
