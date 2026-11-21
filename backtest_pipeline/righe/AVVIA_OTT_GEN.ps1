@@ -19,6 +19,10 @@ param(
   [double]$AttesoProfitto = [double]::NaN,
   [int]$AttesoOps = -1,
   [int]$TettoOre = 12,
+  [double]$EP = -1,
+  [double]$RF = -1,
+  [int]$TR = -1,
+  [double]$MTR = -1,
   [string]$ZipNome = 'Ultimate-Breakout-System-Set-Files*.zip',
   [switch]$Esegui
 )
@@ -57,6 +61,8 @@ $ys=@($tutte | Where-Object { $_ -match '^[A-Za-z0-9_]+=[^|]*\|\|[^|]*\|\|[^|]*\
 if($ys.Count -lt 2 -or $ys.Count -gt 25){ Muori ('i parametri liberi (||Y) sono ' + $ys.Count + ' (attesi da 2 a 25).') }
 $tutte=@($tutte | Where-Object { $_ -notmatch '^(Risk|StartLots)=' }); $tutte += 'Risk=0'; $tutte += 'StartLots=0.1'
 Write-Host '    lotto forzato: Risk=0, StartLots=0.1 (lotto fisso 0,1 come i set di Wim).' -ForegroundColor Cyan
+$ov=@{ 'EP'=$EP; 'RF'=$RF; 'TR'=$TR; 'MTR'=$MTR }
+foreach($k in @('EP','RF','TR','MTR')){ if($ov[$k] -ge 0){ $tutte=@($tutte | Where-Object { $_ -notmatch ('^' + $k + '=') }); $tutte += ($k + '=' + ([double]$ov[$k]).ToString($INV)); Write-Host ('    Custom max: ' + $k + ' imposto a ' + ([double]$ov[$k]).ToString($INV) + ' (override del set).') -ForegroundColor Cyan } }
 function Num([string]$s){ $c=($s -replace '[^0-9.\-]',''); $v=0.0; if([double]::TryParse($c,[Globalization.NumberStyles]::Float,$INV,[ref]$v)){ return $v } else { return [double]::NaN } }
 $comb=1.0; $righeY=@()
 foreach($y in $ys){ $p=$y.Split('='); $f=$p[1].Split('|') | Where-Object { $_ -ne '' }; $v0=Num $f[0]; $lo=Num $f[1]; $stp=Num $f[2]; $hi=Num $f[3]
@@ -87,8 +93,8 @@ function Passata([string]$nome){
   $p=Start-Process -FilePath $T -ArgumentList ('/portable /config:"' + $ini + '"') -PassThru
   $scade=$t0.AddMinutes(90); while(-not $p.HasExited -and (Get-Date) -lt $scade){ Start-Sleep -Seconds 5 }
   if(-not $p.HasExited){ Write-Host ('TIMEOUT: il terminale PID ' + $p.Id + ' e ancora aperto: chiudilo a mano.') -ForegroundColor Red; return $null }
-  $rf=Join-Path 'C:\MT5_BCM_Opt' ($rep + '.htm'); if(-not (Test-Path -LiteralPath $rf)){ Write-Host ('Report ' + $rep + ' NON trovato.') -ForegroundColor Red; return $null }
-  $b=[IO.File]::ReadAllBytes($rf); $tx=$(if($b.Length -ge 2 -and (($b[0] -eq 255 -and $b[1] -eq 254) -or ($b[0] -eq 254 -and $b[1] -eq 255))){ [Text.Encoding]::Unicode.GetString($b) } else { [Text.Encoding]::UTF8.GetString($b) })
+  $repf=Join-Path 'C:\MT5_BCM_Opt' ($rep + '.htm'); if(-not (Test-Path -LiteralPath $repf)){ Write-Host ('Report ' + $rep + ' NON trovato.') -ForegroundColor Red; return $null }
+  $b=[IO.File]::ReadAllBytes($repf); $tx=$(if($b.Length -ge 2 -and (($b[0] -eq 255 -and $b[1] -eq 254) -or ($b[0] -eq 254 -and $b[1] -eq 255))){ [Text.Encoding]::Unicode.GetString($b) } else { [Text.Encoding]::UTF8.GetString($b) })
   $tx=[regex]::Replace($tx,'<[^>]*>','|'); $tx=[regex]::Replace($tx,'\s*\|[\s|]*','|')
   $g1=[regex]::Match($tx,'Profitto Totale Netto:\|([^|]*)\|'); $g2=[regex]::Match($tx,'Numero di Operazioni di Trading Totali:\|([^|]*)\|'); $g3=[regex]::Match($tx,'Fattore di Profitto:\|([^|]*)\|')
   return @{ prof=$(if($g1.Success){ Num $g1.Groups[1].Value } else { [double]::NaN }); ops=$(if($g2.Success){ Num $g2.Groups[1].Value } else { [double]::NaN }); pf=$(if($g3.Success){ Num $g3.Groups[1].Value } else { [double]::NaN }) }
