@@ -1,0 +1,18 @@
+# Francesco Bartiromo: due regole sull'oro, criteri PRIMA dei numeri (21/11/2026)
+
+**Fonte:** 197 video del canale (trascrizioni `YT_BARTIROMO.zip`), letti per intero i video NsYH (Asian range su 100 mattine) e yDB8 (conferma H1 alle 14-16). I suoi "backtest" sono manuali su 6-20 trade e il take profit e' a occhio: **qui si testano solo le parti scrivibili come regola oggettiva; le scelte di "zona" e di target a occhio sono sostituite da definizioni fisse, quindi e' una versione NOSTRA delle sue regole, non la sua operativita' discrezionale.**
+## Dati e convenzioni
+Oro FTMO M1 2004-2026 (stessi file dei test precedenti, righe 00:00 aggregate scartate). **Orario = ora italiana = ora server FTMO - 1 ora** (il suo grafico e' in ora italiana: "alle 8 di mattina", H1 delle 14-16 = apertura USA 15:30). Le settimane di sfasamento USA/Europa non sono corrette (limite dichiarato). **Costo 0,35 $ a operazione**, R = netto / distanza dello stop. **IS = primo 70% dei giorni, OOS = ultimo 30%.** Stop e target nella stessa barra M1: vale lo stop. Un solo trade al giorno, lun-ven. ADR14 = media dei range giornalieri dei 14 giorni precedenti.
+## Regola 1: Asian range (00:00-08:00) e comportamento dopo le 8
+Range = massimo/minimo M1 00:00-07:59. Salta il giorno se ampiezza < 0,15 x ADR14. Dalle 08:00 alle 11:55 si guarda la **prima barra M5 che esce dal range**:
+- **R1-SWEEP:** la barra supera UN lato ma **chiude dentro** il range -> entra al close in direzione OPPOSTA (high sweepato = short). Stop = estremo della barra (almeno 0,2 x ADR14 dall'entrata). Target: **1R, 2R, lato opposto del range** (3 celle).
+- **R1-BREAK:** la barra **chiude fuori** -> entra al close nella direzione del breakout. Stop = meta' del range (almeno 0,2 x ADR14). Target **1R, 2R** (2 celle).
+- Uscita forzata 17:30 ora italiana. Descrittivo: quante volte sweep contro breakout sulle 22 stagioni (lui: 34 sweep su 100 mattine, 55 "direzionali", 11 doppi: classificazione soggettiva, non confrontabile).
+## Regola 2: conferma H1 alle 14, 15, 16 (candele H1 che iniziano 13:00, 14:00, 15:00)
+**Livelli (oggettivi, al posto del "massimo di riferimento" a occhio):** massimo/minimo del giorno precedente, massimo/minimo asiatico, massimo/minimo di Londra 08:00 fino all'inizio della candela. **Segnale SHORT:** il massimo della candela H1 supera almeno un livello e la candela **chiude sotto quel livello**, ed e' ribassista (close < open) ed e' **engulfing** (apre >= max(open,close) della precedente e chiude < min(open,close) della precedente) oppure **doji** (corpo <= 20% del range). Long speculare. **Ingresso:** doji = al close; engulfing = limite a close +/- 25% del range della candela (verso il ritracciamento) valido 60 minuti. **Stop:** estremo della candela +/- 0,27 x range (il "-0,27 Fibonacci"); salta se distanza stop < 0,1 x ADR14. **Target 1R, 1,5R, 2R** (3 celle). Uscita forzata 20:00 ora italiana.
+## Previsioni (prima dei numeri)
+- **Nessuna delle 8 celle e' candidata: 90%.** R-SWEEP IS PF < 1,0 in almeno 2 celle su 3: 75%. R1-BREAK IS PF < 1,0 in 2 celle su 2: 70% (e' un breakout, gia' misurato negativo).
+- Regola 2: win rate al target 1R < 60%: 80%; PF IS < 1,0 in almeno 2 celle su 3: 75%.
+- Almeno una cella con PF IS > 1,0 per caso (8 prove): 50%.
+## Regole di esito (invariate dopo)
+**CANDIDATA:** IS PF >= 1,3 (n >= 100), OOS PF > 1,2 (n >= 50) e R medio OOS > 0, lato opposto non peggiore di PF 0,8, almeno 60% degli anni con R >= 0. 8 prove: una cella isolata senza conferma su un'altra variante vicina (altro target) = non promossa. Nessun consiglio di taglie.
