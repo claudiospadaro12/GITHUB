@@ -1,0 +1,8 @@
+# Correlazione del Supertrend long / trend D1 dell'oro con gli EA oro della flotta (criteri PRIMA dei numeri, 21/11/2026)
+**Dati disponibili (limite dichiarato):** solo il **forward del conto 100k dry-run** (`data/statements/trades_100k.csv` del ramo `lavoro`): XAUUSD 119 operazioni dal 10/08 al 18/11/2026 (83 sell, 36 buy) di The Gold Reaper, The Gold Phantom, Gold Trade Pro. **Nessuna serie giornaliera di backtest degli EA oro e' disponibile qui** (solo riepiloghi): il confronto copre ~3 mesi, un solo regime (oro in discesa da ~4.300 a ~3.700). Script `backtest_runner/simulatore/correlazione_ea_oro.py`.
+## Misure
+P&L realizzato giornaliero (in EUR) degli EA oro per giorno di chiusura (totale, solo sell, solo buy) contro le serie giornaliere del 21/11: Supertrend H1 long, Supertrend H4 long, Donchian 55 D1 long, oro fermo (stesse serie di `supertrend_correlazione.py`, FTMO M1, rendimento % pesato per esposizione). **Correlazione di Pearson giornaliera e settimanale**, solo sui giorni con almeno un'operazione chiusa degli EA (e confronto con tutti i giorni). Un solo valore per misura, nessuna soglia ottimizzata.
+## Previsioni (prima dei numeri)
+- P&L totale EA oro contro **oro fermo: negativa**: 70% (prevalgono i sell e l'oro scende). Contro Supertrend H4 long: **<= 0,1**: 60%. Contro Donchian D1 long: **|r| < 0,3**: 65%. Il solo lato buy degli EA: correlazione con oro fermo > 0,3: 60%.
+## Lettura (fissata ora)
+|r| >= 0,7: "stesso rischio"; 0,4-0,7: "diversifica poco"; < 0,4: "diversifica" **solo per questo periodo**: con ~60 giorni e un solo regime il margine d'errore e' grande (il coefficiente a 60 giorni ha un intervallo di +/- 0,25 circa) e **non e' una stima della correlazione di lungo periodo**. Nessun consiglio di taglie.
