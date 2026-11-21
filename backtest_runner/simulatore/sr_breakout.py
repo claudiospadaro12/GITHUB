@@ -14,13 +14,14 @@ def levels(h,l):
     for p in np.nonzero(pl)[0]:
         if p+16<n: sup[p+16]=l[p]
     return pd.Series(res).ffill().values,pd.Series(sup).ffill().values
-def sim(o,h,l,c,cost,k,mode):
+def sim(o,h,l,c,cost,k,mode,allow=None):
     n=len(c); a=atr(h,l,c); res,sup=levels(h,l); out=[]; t=40
     while t<n-2:
         R=res[t]; S=sup[t]
         if np.isnan(R) or np.isnan(S) or a[t-1]<=0: t+=1; continue
         buy=h[t]>=R and R>S; sell=l[t]<=S and R>S
         if buy==sell: t+=1; continue   # nessuno o entrambi
+        if allow is not None and not allow[t]: t+=1; continue   # filtro di regime (opzionale, default nessuno)
         d=1 if buy else -1; en=max(R,o[t]) if d==1 else min(S,o[t]); A=a[t-1]; R0=1.5*A; stop=en-d*R0; tp=en+d*k*A; mfe=0.0
         half=False; resR=0.0; j=t; done=False; ext=en
         while j<n-1:
