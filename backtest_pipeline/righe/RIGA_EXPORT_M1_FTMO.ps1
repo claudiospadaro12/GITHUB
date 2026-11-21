@@ -42,7 +42,7 @@
 param(
   [Parameter(Mandatory=$true)][ValidatePattern('^[0-9a-f]{40}$')][string]$Pin,
   [Parameter(Mandatory=$true)][ValidatePattern('^[0-9A-Fa-f]{64}$')][string]$ShaMq5,
-  [ValidatePattern('^[A-Za-z0-9,|]+$')][string]$Simboli = 'XAUUSD,EURUSD',
+  [ValidatePattern('^[A-Za-z0-9,|.]+$')][string]$Simboli = 'XAUUSD,EURUSD',
   [ValidatePattern('^[0-9.,-]+$')][string]$Finestre = '2018.11.01-2019.04.02',
   [switch]$Esegui
 )
