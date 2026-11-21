@@ -10,3 +10,16 @@
 - I TF piu' alti (M30) hanno PF migliore di M5 (costi relativi minori): **70%**.
 ## Regole di esito (invariate dopo i numeri)
 **CANDIDATO** (per set, TF e gruppo): IS PF >= 1,3 con >= 100 operazioni; OOS PF > 1,2 con >= 50 operazioni; IC90 inferiore del R medio > 0 su IS+OOS; >= 8 anni su 12 non negativi; leave-one-out PF > 1,0; prova di deriva (long contro short non entrambi dipendenti da un lato; sul forex il lungo non e' favorito, sull'oro si'). Meno di 100 operazioni IS = NON VALUTABILE. Simboli singoli solo descrittivi. Nessun consiglio di taglie. Hold-out 2025-26 non usato.
+
+## RISULTATI (174 passate ricevute 21/11, nessun errore; serie giornaliere sommate, R = rendimento / 1%)
+| Gruppo | IS 2013-2020 (n / R / PF / win) | OOS 2021-2024 (n / R / PF) | Anni + |
+|---|---|---|---|
+| V10 M5, 28 cross | 4.575 / -0,30 / 0,59 / 33% | 2.384 / -0,21 / 0,70 | 0/12 |
+| V10 M15, 28 cross | 1.596 / -0,19 / 0,73 / 34% | 857 / -0,08 / 0,88 | 1/12 |
+| V10 M30, 28 cross | 884 / -0,18 / 0,74 / 33% | 484 / -0,12 / 0,82 | 2/12 |
+| WIDE M5 / M15 / M30, 28 cross | PF 0,59 / 0,75 / 0,80 (n 9.576 / 3.155 / 1.680) | PF 0,69 / 0,84 / 0,84 | 0 / 1 / 1 su 12 |
+| V10 XAUUSD M5 / M15 / M30 | PF 0,48 / 0,52 / 0,62 (n 132 / 70 / 33) | PF 0,79 / 1,19 (n 41, IC90 inf -0,24) / 0,80 | 2-3 su 12 |
+| WIDE XAUUSD M5 / M15 / M30 | PF 0,67 / 0,57 / 0,67 | PF 0,71 / 1,02 / 0,76 | 0-2 su 12 |
+- **12 gruppi su 12 con PF IS < 1 (0,48-0,80); nessun candidato.** R medio negativo ovunque in IS; in OOS l'unico PF > 1 sono due celle oro con 41 e 80 operazioni (IC90 inferiore negativo). Win rate 27-35%.
+- Previsioni: tutti i 12 gruppi con PF IS < 1,10 (80%): **si'**; un candidato (7%): no; WIDE ha almeno +50% di operazioni (75%): **si'** (+98% a M15); WIDE ha PF peggiore di V10 sui 28 cross (60%): **no** (0,75 contro 0,73 a M15, 0,80 contro 0,74 a M30; uguali a M5); M30 meglio di M5 (70%): **si'** (0,74 contro 0,59).
+- **Conclusione: HAM (motore di Emiliano + filtri di Claudio, con i filtri H1/H4/D1 sull'ultima candela chiusa, quindi senza il futuro che gonfia il backtest di TradingView) non ha vantaggio su 28 cross e oro, M5-M30, 2013-2024.** Il Pine di TradingView mostra risultati migliori perche' i suoi filtri H4/D1 su storico vedono la chiusura finale della candela superiore. Non testati: indici e DAX (nessun M1 sul tester per il periodo lungo). Chiuso.
