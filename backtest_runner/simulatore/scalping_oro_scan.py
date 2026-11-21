@@ -10,9 +10,9 @@ dd=[]
 for f in sorted(glob.glob('/tmp/claude-0/dati_ftmo*/ABTG_M1_XAUUSD_*.csv')):
     d=pd.read_csv(f,sep=';',header=0,usecols=[0,1,2,3,4,5,6]); d.columns=['t','o','h','l','c','tv','sp']; d=d[~(d.t.str.endswith('00:00')&(d.tv>2000))]; dd.append(d)
 d1=pd.concat(dd); d1['t']=pd.to_datetime(d1.t,format='%Y.%m.%d %H:%M'); d1=d1.drop_duplicates('t').set_index('t').sort_index()
-T1=d1.index.values; O=d1.o.values.astype(float); H=d1.h.values.astype(float); L=d1.l.values.astype(float); C=d1.c.values.astype(float); SP=d1.sp.values.astype(float); N=len(O)
+T1=d1.index.values.astype('datetime64[ns]'); O=d1.o.values.astype(float); H=d1.h.values.astype(float); L=d1.l.values.astype(float); C=d1.c.values.astype(float); SP=d1.sp.values.astype(float); N=len(O)
 TT('caricato M1 %d righe'%len(d1))
-M5=d1.resample('5min').agg({'o':'first','h':'max','l':'min','c':'last','tv':'sum','sp':'mean'}).dropna(); t5=M5.index.values
+M5=d1.resample('5min').agg({'o':'first','h':'max','l':'min','c':'last','tv':'sum','sp':'mean'}).dropna(); t5=M5.index.values.astype('datetime64[ns]')
 i0=np.searchsorted(T1,t5)   # indice M1 di inizio di ogni barra M5
 o5,h5,l5,c5=[M5[x].values.astype(float) for x in 'ohlc']; tv5=M5.tv.values; sp5=M5.sp.values; n5=len(o5)
 pc=np.r_[c5[0],c5[:-1]]; tr=np.maximum(h5-l5,np.maximum(abs(h5-pc),abs(l5-pc))); atr=pd.Series(tr).ewm(alpha=1/14,adjust=False).mean().values
@@ -59,7 +59,7 @@ cells={'F1':run(s1,f1s,f1t,12),'F2':run(s2,f2s,f2t,6),
  'F2+vol':run([x for x in s2 if volok[x[0]]],f2s,f2t,6),'F2+spread':run([x for x in s2 if spok[x[0]]],f2s,f2t,6)}
 TT('celle F1/F2/F4 fatte')
 # F3 notizie
-nw=pd.read_csv('/tmp/claude-0/news/69284184_abtg_news_hist.csv',sep=';',encoding='utf-8-sig'); nw.columns=['t','imp','cur','tit']
+nw=pd.read_csv('/tmp/claude-0/news/69284184_abtg_news_hist.csv',sep=';',encoding='cp1252'); nw.columns=['t','imp','cur','tit']
 nw=nw[(nw.cur=='USD')&(nw.imp=='High')].copy(); nw['t']=pd.to_datetime(nw.t,format='%Y.%m.%d %H:%M')
 utc=nw.t.dt.tz_localize('Etc/GMT-1').dt.tz_convert('UTC'); nw['ft']=utc.dt.tz_convert('Europe/Helsinki').dt.tz_localize(None); ev=np.sort(nw.ft.values.astype('datetime64[ns]')); ev=np.unique(ev)
 # verifica allineamento: ampiezza media M1 per offset attorno all'evento
@@ -100,8 +100,8 @@ P('cella            lettura IS n PF t | OOS n PF | HO n PF | anni R>=0 | esito')
 passed=[]
 for nm,T in cells.items():
     for lab,sel in (('long',T.side==1),('short',T.side==-1),('both',T.side!=0)):
-        x=T[sel]; a=x[x.t<cut]; b=x[(x.t>=cut)&(x.t<HO)]; h=x[x.t>=HO]; sa,sb,sh=stt(a),stt(b),stt(h)
-        yr=x.groupby(x.t.dt.year).R.sum(); yp=(yr>=0).mean() if len(yr) else 0
+        x=T[sel].copy(); x['t']=pd.to_datetime(x.t); a=x[x.t<cut]; b=x[(x.t>=cut)&(x.t<HO)]; h=x[x.t>=HO]; sa,sb,sh=stt(a),stt(b),stt(h)
+        yr=x.groupby(pd.to_datetime(x.t).dt.year).R.sum() if len(x) else pd.Series(dtype=float); yp=(yr>=0).mean() if len(yr) else 0
         okc=sa[0]>=100 and sa[1]>=1.3 and sa[2]>=2 and sb[0]>=50 and sb[1]>1.2 and yp>=0.6
         if lab=='both': okc=okc and stt(T[T.side==1])[1]>=0.9 and stt(T[T.side==-1])[1]>=0.9
         ho='NV' if sh[0]<20 else ('ok' if sh[1]>1.0 else 'KO')

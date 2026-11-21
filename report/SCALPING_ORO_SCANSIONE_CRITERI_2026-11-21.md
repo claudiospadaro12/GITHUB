@@ -14,3 +14,20 @@ Hold-out dal 01/06/2025; prima: IS = primo 70% del tempo, OOS = ultimo 30%. **Ce
 ## Previsioni (prima dei numeri)
 - **Nessuna cella candidata: 88%.** PF IS < 1,0 in almeno 6 delle 8 celle 'long+short': **70%**. I filtri F4 migliorano il PF in almeno 2 dei 4 confronti ma restano sotto 1,0: **55% / 80%**. F3a e F3b entrambi con PF IS < 1,0: **75%**.
 - **Limiti dichiarati:** costi costanti in % (ottimistici sul vecchio), nessun tick reale (SL/TP intrabar M1 con stop prima), spread medio di una serie (non quello reale dell'istante), nessuna verifica delle regole prop su scalping/notizie.
+
+## RISULTATI (script `scalping_oro_scan.py`; output `SCALPING_ORO_SCANSIONE_RISULTATI_2026-11-21.txt`; taglio IS/OOS 04/06/2019, hold-out dal 01/06/2025)
+**Allineamento calendario/oro verificato:** per 4.661 eventi USD ad alto impatto l'ampiezza media M1 e' 14,6 x 10^-4 al minuto dell'evento contro ~4,6 nei minuti precedenti (picco al minuto 0): la conversione BCM -> ora FTMO e' corretta.
+| Cella (long+short) | Operazioni IS | PF IS (t) | PF OOS | PF hold-out | Anni con R >= 0 |
+|---|---|---|---|---|---|
+| F1 rimbalzo | 16.525 | 0,83 (-10,6) | 0,87 | 0,94 | 9% |
+| F1 + volume | 14.620 | 0,84 (-9,7) | 0,88 | 0,91 | 4% |
+| F1 + spread | 12.151 | 0,83 (-9,4) | 0,88 | 0,97 | 9% |
+| F2 impulso | 9.421 | 0,77 (-12,8) | 0,55 | 0,78 | 0% |
+| F2 + volume | 9.035 | 0,76 (-12,9) | 0,55 | 0,79 | 0% |
+| F2 + spread | 7.022 | 0,78 (-10,2) | 0,54 | 0,44 | 0% |
+| F3a notizie, segue la reazione | 1.386 | 0,39 (-16,0) | 0,45 | 0,49 | 0% |
+| F3b notizie, contrasta (fade) | 1.386 | 0,37 (-16,9) | 0,43 | 0,58 | 0% |
+- **Nessuna cella supera le porte (0 su 24 letture).** Anche i lati long e short presi da soli sono sotto 1 in IS e OOS; l'unico PF >= 1,0 e' F1 long in hold-out (1,03, ma il lato short 0,84 e l'IS 0,83). **Previsioni:** nessuna candidata (88%): **si'**; PF IS < 1 in almeno 6 delle 8 celle (70%): **si', in tutte e 8**; i filtri migliorano di poco il PF ma restano sotto 1 (55% / 80%): **si'** (F1: +0,01; F2: +0,00-0,01); F3a e F3b entrambi sotto 1 (75%): **si', molto sotto (0,37-0,49)**.
+- **Perche':** il costo (0,011% = 0,45 $ a 4.000) e' una frazione grande del movimento a 5 minuti; sulle notizie (costo x3 per l'allargamento dello spread) vale circa mezza R a operazione, e segue e contrasta perdono allo stesso modo: **non c'e' direzione sfruttabile nei 5-35 minuti dopo l'evento a quei costi.** Questi PF sono lordi di nessun tick reale: se il costo reale fosse piu' basso il risultato migliorerebbe, ma restano distanti da 1,3.
+- **Nota tecnica:** il primo avvio e' stato rallentato e (nella prima versione) l'uscita forzata alle 22:00 era sbagliata per un confronto di unita' di tempo (microsecondi contro nanosecondi) nelle ricerche; corretto, risultati sopra dalla versione corretta.
+- **Limiti:** costi costanti in % (ottimistici sul vecchio), M1 senza tick (stop prima del target), spread dell'istante non usato, regole prop su scalping/notizie non verificate. **Non esclude uno scalping con vantaggio di tipo diverso (microstruttura, tick, orari specifici) ne' una griglia con coda lunga: esclude queste quattro famiglie con regole fisse a questi costi.**
