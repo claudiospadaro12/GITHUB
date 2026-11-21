@@ -13,3 +13,11 @@ Hold-out dal 01/06/2025; prima: IS = primo 70% delle barre, OOS = ultimo 30%. **
 - **Nessun candidato: 80%.** Celle-lato che passano IS+OOS su 159: **3-10: 60%**, 0-2: 25%, oltre 10: 15%. Le passanti sono quasi tutte D1/H4 e long: **85%**. Almeno uno short passa: **15%**. Oro D1 o H4 long passa: **40%**. Tutte le celle M15 e M30 sono PF < 1 in IS: **90%** (costi a ogni inversione).
 ## Limiti dichiarati
 Costi moderni su storia lunga (ottimistici sul vecchio); D1 Yahoo con aperture a volte finte; D1 da M1 con barre alle 00:00 server; ora legale e fusi non corretti.
+
+## RISULTATI (script `supertrend_test.py`; output `SUPERTREND_RISULTATI_2026-11-21.txt`)
+**150 valutazioni** (50 celle mercato x TF x 3 letture; il contatore dichiarato era 159: i mercati Yahoo validi erano 32, non 33). Operazioni: oro M15 13.236, M30 6.450, H1 3.192, H4 878, D1 154; EURUSD D1 39; Nasdaq H4 577; S&P H4 547.
+- **1 cella-lato passa IS+OOS: Bitcoin D1 solo long** (IS n 36, PF 11,5, t +2,4; OOS n 18, PF 2,10; hold-out n 7 = non valutabile, PF 0,61). **Isolata** (Ethereum non passa): "da guardare", non candidato. Nessun'altra cella-lato passa. **Nessun candidato.**
+- **PF mediano per TF e lato (IS / OOS):** D1 Yahoo long 1,07 / 1,00, short 0,76 / 0,54, long+short 0,90 / 0,79; D1 da M1 (oro, EURUSD) long 1,20 / 1,17; H4 long 0,96 / 1,35, short 0,75 / 0,68; H1 long 1,12 / 1,08; M30 long 0,94 / 1,00; M15 long 0,85 / 1,01; tutti gli short sotto 1 su ogni TF.
+- **Le piu' vicine (IS PF, OOS, hold-out):** Bitcoin D1 long+short 4,69 / 1,16 / 0,93; Ethereum long+short 3,61 / 0,72; Brent short 2,44 / 0,30; Russell2000 long 1,64 / 0,58. L'oro non e' fra le prime otto (PF IS sotto 1,7).
+- **Previsioni:** nessun candidato (80%): **si'**. Celle che passano 3-10 (60%): **no (1)**; 0-2 (25%): si'. Le passanti quasi tutte D1/H4 e long (85%): si' (l'unica). Short passa (15%): no. Oro D1/H4 long passa (40%): **no**. M15/M30: PF mediano sotto 1 in IS (0,85 e 0,94); non ho verificato "tutte le celle".
+- **Lettura onesta:** il Supertrend standard non ha vantaggio su nessun TF di nessun mercato testato, a parte il long su Bitcoin D1 (36+18 operazioni, un solo mercato su 150 valutazioni: compatibile col caso). Il lato short perde ovunque (deriva), il sistema sempre sul mercato paga ogni inversione. Nessun EA.
