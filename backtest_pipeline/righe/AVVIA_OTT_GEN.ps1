@@ -52,10 +52,11 @@ Write-Host ('[2] set letto da ' + $zf.FullName + ' : ' + $m[0].FullName + ' (SHA
 $tutte=@(); foreach($r in ($st -split "`r?`n")){ $x=$r.Trim([char]0xFEFF).Trim(); if($x -ne '' -and -not $x.StartsWith(';') -and $x.Contains('=')){ $tutte += $x } }
 # ForceSymbol = simbolo del test
 $fs=0; for($i=0; $i -lt $tutte.Count; $i++){ if($tutte[$i] -match '^ForceSymbol='){ $tutte[$i]='ForceSymbol=' + $Simbolo; $fs++ } }
-if($fs -ne 1){ Muori ('il set ha ' + $fs + ' righe ForceSymbol (ne attendo 1).') }
+if($fs -eq 0){ $tutte += ('ForceSymbol=' + $Simbolo) } elseif($fs -gt 1){ Muori ('il set ha ' + $fs + ' righe ForceSymbol (ne attendo 0 o 1).') }
 $ys=@($tutte | Where-Object { $_ -match '^[A-Za-z0-9_]+=[^|]*\|\|[^|]*\|\|[^|]*\|\|[^|]*\|\|Y$' })
 if($ys.Count -lt 2 -or $ys.Count -gt 25){ Muori ('i parametri liberi (||Y) sono ' + $ys.Count + ' (attesi da 2 a 25).') }
-if(@($tutte | Where-Object { $_ -match '^Risk=0\|\|' }).Count -ne 1 -or @($tutte | Where-Object { $_ -match '^StartLots=0\.1\|\|' }).Count -ne 1){ Muori 'nel set Risk non e 0 o StartLots non e 0.1 (lotto fisso 0,1 richiesto).' }
+$tutte=@($tutte | Where-Object { $_ -notmatch '^(Risk|StartLots)=' }); $tutte += 'Risk=0'; $tutte += 'StartLots=0.1'
+Write-Host '    lotto forzato: Risk=0, StartLots=0.1 (lotto fisso 0,1 come i set di Wim).' -ForegroundColor Cyan
 function Num([string]$s){ $c=($s -replace '[^0-9.\-]',''); $v=0.0; if([double]::TryParse($c,[Globalization.NumberStyles]::Float,$INV,[ref]$v)){ return $v } else { return [double]::NaN } }
 $comb=1.0; $righeY=@()
 foreach($y in $ys){ $p=$y.Split('='); $f=$p[1].Split('|') | Where-Object { $_ -ne '' }; $v0=Num $f[0]; $lo=Num $f[1]; $stp=Num $f[2]; $hi=Num $f[3]
