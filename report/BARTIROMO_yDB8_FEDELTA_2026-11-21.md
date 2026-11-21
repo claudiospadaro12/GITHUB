@@ -41,3 +41,11 @@ ogni chiusura H1 con ora in {14,15,16} (InpOraIT1..3, offset server InpOffsetSer
 ```
 ## Stato
 Test gia' fatto (21/11, `BARTIROMO_REGOLE_CRITERI_2026-11-21.md`): versione NOSTRA con livelli oggettivi (PDH/PDL, asiatico, Londra), ritracciamento 25% e target 1R/1,5R/2R: oro 2004-2026 PF IS 0,79-0,82, OOS 0,88-0,95, win rate 1R 49%. Le definizioni 1, 3, 4, 5 e 7 qui sopra sono scelte nostre, non sue.
+
+## 6. Video MWZ3 (08/08/2026) e qouD (16/08/2026): cosa e' il "punto liquido" per lui
+Letti MWZ3 (19.635 car.) e qouD (18.296 car.): lunghi ma discorsivi, **nessuna definizione numerica**.
+- **Punto liquido (da D1/H4/H1):** massimo/minimo di un movimento "impulso-ritracciamento-impulso", origine di una rottura di struttura; e' piu' "pulito" se **raggruppa massimi/minimi sottostanti, ha accanto un'inefficienza (imbalance/FVG)** e **non e' stato ancora preso** ("e' appoggiato senza prenderlo", "calamita vivente"). Lo definisce "la parte piu' complicata di tutto il video... con tanta applicazione, con tanta visione dei miei video".
+- **Regola operativa:** (1) trovare il punto liquido su D1/H4/H1, (2) chiedersi **se e' stato preso**; se si', cerca **price action dal lato opposto** (costruzione ribassista dopo sbilanciamento di un massimo) su M15/M5 e si posiziona (anche "alla chiusura della candela H1 con stop un pelino piu' in alto"); se no, cerca una **"liquidita' nemica"** opposta che il prezzo deve prendere prima, poi riparte. **Target = il punto liquido successivo** (soggettivo).
+- **Multi-TF:** selezione H4/H1/M15, esecuzione M5/M1/M15. Orario: cita "l'orario non era perfetto" (nessun elenco di orari). 
+- **Esito sull'oggettivita':** la selezione del livello, la scelta dello "sbilanciamento corretto", la zona di ingresso e il target sono **discrezionali per sua stessa ammissione** (non codificabili alla lettera). Il "90% oggettiva" del video yDB8 vale solo per candela di conferma + stop; il filtro che decide se il trade c'e' e' il punto liquido, che non lo e'. Per questo **non e' possibile un EA fedele**: ogni versione sarebbe una nostra interpretazione (come il test del 21/11, PF 0,79-0,95).
+- Rimandato nei video: lo "schemino" (non visibile), le liste di step, i video del Discord/one-to-one (a pagamento). Non presenti nelle trascrizioni.
