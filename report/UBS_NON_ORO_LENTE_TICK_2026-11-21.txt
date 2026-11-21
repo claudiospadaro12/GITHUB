@@ -1,0 +1,19 @@
+[10s] proxy oro pronto
+
+=== F3: correlazione settimanale con il trend D1 dell'oro (proxy) e fra i set del pool A, per periodo (costo 0,5 EUR/operazione)
+P1: n settimane 314; corr con oro: SCALP_EU_SL17:+0.06 SCALP_EU_SL22:+0.08 SCALP_GU_H1:-0.08 SCALP_UJ_H1:+0.15 SCALP_UJ_H4:+0.04 VOL_f:-0.06 VOL_o:+0.01
+   coppie con corr settimanale > 0,60: 2 su 21: [('SCALP_EU_SL17', 'SCALP_EU_SL22', np.float64(0.74)), ('VOL_f', 'VOL_o', np.float64(0.64))]
+   operazioni (out) per set: SCALP_EU_SL17:1230 SCALP_EU_SL22:1221 SCALP_GU_H1:1038 SCALP_UJ_H1:1333 SCALP_UJ_H4:1523 VOL_f:187 VOL_o:199
+P2: n settimane 366; corr con oro: SCALP_EU_SL17:-0.07 SCALP_EU_SL22:-0.09 SCALP_GU_H1:+0.03 SCALP_UJ_H1:+0.01 SCALP_UJ_H4:+0.03 VOL_f:-0.11 VOL_o:-0.12
+   coppie con corr settimanale > 0,60: 0 su 21: []
+   operazioni (out) per set: SCALP_EU_SL17:1192 SCALP_EU_SL22:1204 SCALP_GU_H1:1041 SCALP_UJ_H1:1632 SCALP_UJ_H4:1729 VOL_f:156 VOL_o:171
+
+=== LENTE TICK (informativa, post hoc): scalper 2,5 EUR/operazione, VOL 0,5; stesse combinazioni costruite sopra
+Pool A P1->P2 ['SCALP_GU_H1', 'SCALP_UJ_H1', 'SCALP_EU_SL22', 'VOL_f']: PF 1.03, netto -14808, DD realizzato 25026, 2 fasi 11%, fase 1 19%, falliscono 69%
+Pool A P2->P1 ['SCALP_UJ_H1', 'SCALP_GU_H1', 'SCALP_EU_SL22', 'VOL_o']: PF 1.53, netto 73827, DD realizzato 9342, 2 fasi 59%, fase 1 61%, falliscono 0%
+Pool C P1->P2 ['SCALP_GU_H1', 'SCALP_UJ_H1', 'SCALP_EU_SL22', 'VOL_e']: PF 1.06, netto -8192, DD realizzato 21197, 2 fasi 13%, fase 1 22%, falliscono 51%
+Pool C P2->P1 ['SCALP_UJ_H1', 'SCALP_GU_H1', 'SCALP_EU_SL22', 'CLI_HJP10']: PF 1.59, netto 67479, DD realizzato 5855, 2 fasi 59%, fase 1 60%, falliscono 0%
+VOL_f P1 da solo, a 0,1 lotti: netto 807 EUR, DD realizzato 120, operazioni 187
+VOL_f P2 da solo, a 0,1 lotti: netto 480 EUR, DD realizzato 142, operazioni 156
+VOL_o P1 da solo, a 0,1 lotti: netto 365 EUR, DD realizzato 230, operazioni 199
+VOL_o P2 da solo, a 0,1 lotti: netto 733 EUR, DD realizzato 206, operazioni 171

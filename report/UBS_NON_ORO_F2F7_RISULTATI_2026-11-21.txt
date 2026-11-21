@@ -1,0 +1,35 @@
+[21s] proxy oro pronto
+
+=== F3: correlazione settimanale con il trend D1 dell'oro (proxy) e fra i set del pool A, per periodo (costo 0,5 EUR/operazione)
+P1: n settimane 314; corr con oro: SCALP_EU_SL17:+0.06 SCALP_EU_SL22:+0.08 SCALP_GU_H1:-0.08 SCALP_UJ_H1:+0.15 SCALP_UJ_H4:+0.04 VOL_f:-0.06 VOL_o:+0.01
+   coppie con corr settimanale > 0,60: 2 su 21: [('SCALP_EU_SL17', 'SCALP_EU_SL22', np.float64(0.74)), ('VOL_f', 'VOL_o', np.float64(0.64))]
+   operazioni (out) per set: SCALP_EU_SL17:1230 SCALP_EU_SL22:1221 SCALP_GU_H1:1038 SCALP_UJ_H1:1333 SCALP_UJ_H4:1523 VOL_f:187 VOL_o:199
+P2: n settimane 366; corr con oro: SCALP_EU_SL17:-0.07 SCALP_EU_SL22:-0.09 SCALP_GU_H1:+0.03 SCALP_UJ_H1:+0.01 SCALP_UJ_H4:+0.03 VOL_f:-0.11 VOL_o:-0.12
+   coppie con corr settimanale > 0,60: 0 su 21: []
+   operazioni (out) per set: SCALP_EU_SL17:1192 SCALP_EU_SL22:1204 SCALP_GU_H1:1041 SCALP_UJ_H1:1632 SCALP_UJ_H4:1729 VOL_f:156 VOL_o:171
+
+=== F4/F5/F7: costruzione e verifica incrociata (costruzione con costo 0,5; valutazione a 0 / 0,5 / 1,0 EUR per operazione a 0,1 lotto)
+
+Pool A costruito su P1 -> valutato su P2: componenti ['SCALP_GU_H1', 'SCALP_UJ_H1', 'SCALP_EU_SL22', 'VOL_f']  (rec.factor, DD EUR a 0,1 lotti: {'SCALP_GU_H1': (np.float64(56.51), 61), 'SCALP_UJ_H1': (np.float64(56.5), 51), 'SCALP_EU_SL22': (np.float64(50.45), 66), 'VOL_f': (np.float64(6.72), 120)}); moltiplicatori di lotto sul 0,1: [np.float64(27.6), np.float64(32.8), np.float64(25.7), np.float64(14.0)]
+   costo 0.0: PF 2.63, netto 266510, DD realizzato 2758, operazioni 4033, partenze 603: completano 2 fasi 93%, fase 1 95%, falliscono 0%, giorni mediani fase 1 72
+   costo 0.5: PF 2.27, netto 209382, DD realizzato 3155, operazioni 4033, partenze 603: completano 2 fasi 89%, fase 1 93%, falliscono 0%, giorni mediani fase 1 88
+   costo 1.0: PF 1.92, netto 152253, DD realizzato 3884, operazioni 4033, partenze 603: completano 2 fasi 87%, fase 1 89%, falliscono 0%, giorni mediani fase 1 120
+
+Pool A costruito su P2 -> valutato su P1: componenti ['SCALP_UJ_H1', 'SCALP_GU_H1', 'SCALP_EU_SL22', 'VOL_o']  (rec.factor, DD EUR a 0,1 lotti: {'SCALP_UJ_H1': (np.float64(44.48), 66), 'SCALP_GU_H1': (np.float64(31.77), 72), 'SCALP_EU_SL22': (np.float64(16.5), 104), 'VOL_o': (np.float64(3.55), 206)}); moltiplicatori di lotto sul 0,1: [np.float64(32.5), np.float64(29.9), np.float64(20.5), np.float64(10.4)]
+   costo 0.0: PF 3.32, netto 319270, DD realizzato 2468, operazioni 3791, partenze 515: completano 2 fasi 96%, fase 1 97%, falliscono 0%, giorni mediani fase 1 49
+   costo 0.5: PF 2.94, netto 269361, DD realizzato 2710, operazioni 3791, partenze 515: completano 2 fasi 94%, fase 1 96%, falliscono 0%, giorni mediani fase 1 58
+   costo 1.0: PF 2.56, netto 219452, DD realizzato 2952, operazioni 3791, partenze 515: completano 2 fasi 93%, fase 1 96%, falliscono 0%, giorni mediani fase 1 70
+
+Pool C costruito su P1 -> valutato su P2: componenti ['SCALP_GU_H1', 'SCALP_UJ_H1', 'SCALP_EU_SL22', 'VOL_e']  (rec.factor, DD EUR a 0,1 lotti: {'SCALP_GU_H1': (np.float64(56.51), 61), 'SCALP_UJ_H1': (np.float64(56.5), 51), 'SCALP_EU_SL22': (np.float64(50.45), 66), 'VOL_e': (np.float64(10.71), 81)}); moltiplicatori di lotto sul 0,1: [np.float64(26.0), np.float64(31.0), np.float64(24.2), np.float64(19.6)]
+   costo 0.0: PF 2.71, netto 257202, DD realizzato 2602, operazioni 3983, partenze 603: completano 2 fasi 92%, fase 1 94%, falliscono 0%, giorni mediani fase 1 76
+   costo 0.5: PF 2.34, netto 203302, DD realizzato 2977, operazioni 3983, partenze 603: completano 2 fasi 89%, fase 1 93%, falliscono 0%, giorni mediani fase 1 92
+   costo 1.0: PF 1.98, netto 149402, DD realizzato 3351, operazioni 3983, partenze 603: completano 2 fasi 87%, fase 1 89%, falliscono 0%, giorni mediani fase 1 119
+
+Pool C costruito su P2 -> valutato su P1: componenti ['SCALP_UJ_H1', 'SCALP_GU_H1', 'SCALP_EU_SL22', 'CLI_HJP10']  (rec.factor, DD EUR a 0,1 lotti: {'SCALP_UJ_H1': (np.float64(44.48), 66), 'SCALP_GU_H1': (np.float64(31.77), 72), 'SCALP_EU_SL22': (np.float64(16.5), 104), 'CLI_HJP10': (np.float64(6.58), 290)}); moltiplicatori di lotto sul 0,1: [np.float64(25.5), np.float64(23.4), np.float64(16.1), np.float64(5.8)]
+   costo 0.0: PF 3.47, netto 260748, DD realizzato 2613, operazioni 3712, partenze 515: completano 2 fasi 94%, fase 1 96%, falliscono 0%, giorni mediani fase 1 59
+   costo 0.5: PF 3.06, netto 221026, DD realizzato 2955, operazioni 3712, partenze 515: completano 2 fasi 93%, fase 1 95%, falliscono 0%, giorni mediani fase 1 72
+   costo 1.0: PF 2.67, netto 181303, DD realizzato 3298, operazioni 3712, partenze 515: completano 2 fasi 92%, fase 1 94%, falliscono 0%, giorni mediani fase 1 90
+
+=== ESITO F5 (a costi centrali e prudenti, in entrambi i sensi)
+Pool A: combinazione che supera tutte le soglie in entrambi i sensi a costi 0,5 e 1,0: SI
+Pool C: combinazione che supera tutte le soglie in entrambi i sensi a costi 0,5 e 1,0: SI

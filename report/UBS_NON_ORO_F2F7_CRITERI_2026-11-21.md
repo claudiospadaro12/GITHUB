@@ -20,3 +20,24 @@ Si costruisce con P1 e si valuta su P2, e si inverte (costruzione P2, valutazion
 - La quota che raggiunge +10% entro 3 anni e' < 30% per la maggior parte delle combinazioni (il rendimento a DD 3% e' basso): 55%.
 ## Regola di esito
 **Successo di F5** solo se TUTTE le soglie sono rispettate in entrambi i sensi, a costi centrali **e** prudenti (PF >= 1,20 dopo i costi prudenti: 1,10 e' "da guardare"). Altrimenti: **nessun candidato non-oro dall'UBS in questa fase**; nessun fine-tuning per forzare l'esito. **Anche un successo non basta:** servono costi reali (foto spread forex), tick reali per i sopravvissuti (F6) e forward demo (F8). Contatore: nessuna passata nuova (simulazione su report esistenti), combinazioni provate registrate nell'output.
+
+## RISULTATI (script `ubs_non_oro.py`; output `UBS_NON_ORO_F2F7_RISULTATI_2026-11-21.txt`; lente tick: `ubs_non_oro_lente_tick.py`, `UBS_NON_ORO_LENTE_TICK_2026-11-21.txt`)
+**F3 (pool A, correlazione settimanale con il trend D1 dell'oro):** tutti e 7 i set tra -0,12 e +0,15 (soglia 0,30) in P1 e P2. Fra loro: P1 2 coppie su 21 sopra 0,60 (SCALP_EU_SL17-SL22 0,74; VOL_f-VOL_o 0,64), P2 nessuna. Operazioni: scalper 1.038-1.729 per periodo, VOL 156-199. **Previsioni C-1: giuste (7 su 7; coppie > 0,60 sotto il 20%).**
+**F4 (costruzione, regole fisse):** pool A costruito su P1: SCALP_GU_H1, SCALP_UJ_H1, SCALP_EU_SL22, VOL_f; costruito su P2: SCALP_UJ_H1, SCALP_GU_H1, SCALP_EU_SL22, VOL_o. Pool C: gli stessi tre scalper piu VOL_e (da P1) e CLI_HJP10 (da P2). **Tre componenti su quattro sono scalper in ogni combinazione.** Scala fissata dal DD del 3% in costruzione (lotti molto sopra 0,1: la scala e' un parametro di simulazione, non un consiglio).
+**F5/F7 a barre M1 (valutazione sull'altro periodo, a 0 / 0,5 / 1,0 EUR per operazione):**
+| Pool | Costruzione -> valutazione | PF | DD realizzato (EUR) | 2 fasi completate | Falliscono |
+|---|---|---|---|---|---|
+| A | P1 -> P2 | 2,63 / 2,27 / 1,92 | 2.758 / 3.155 / 3.884 | 93% / 89% / 87% | 0% |
+| A | P2 -> P1 | 3,32 / 2,94 / 2,56 | 2.468 / 2.710 / 2.952 | 96% / 94% / 93% | 0% |
+| C | P1 -> P2 | 2,71 / 2,34 / 1,98 | 2.602 / 2.977 / 3.351 | 92% / 89% / 87% | 0% |
+| C | P2 -> P1 | 3,47 / 3,06 / 2,67 | 2.613 / 2.955 / 3.298 | 94% / 93% / 92% | 0% |
+**Esito F5 scritto prima: SUPERATO** (PF >= 1,20, fail-rate <= 3%, quota fase 1 >= 30%) **in entrambi i sensi e a costi 0,5 e 1,0, per i pool A e C.** Previsione C-3 (30% / 20%): **sbagliata, passa.** Previsione "PF scende di almeno il 15% con i costi centrali": **no (-11/-14%)**; "quota che raggiunge +10% < 30%": **no (89-96%)**.
+**MA a tick reali questo esito non regge (lente tick, scritta dopo aver visto F5, dichiarata informativa):** il test a tick del 15/11 sul 2025 ha dimostrato che gli scalper perdono 1,4-2,0 EUR a operazione a 0,1 lotti rispetto al Modello 1 (netto EU_SL17 288 -> 37, EU_SL22 386 -> 55, GU_H1 304 -> 5, UJ_H1 544 -> -90, UJ_H4 556 -> -7), mentre VOL_f e VOL_o restano uguali (15 -> 10; 51 -> 58). Applicando questo extra (scalper a 2,5 EUR a operazione, VOL 0,5) alle stesse combinazioni:
+| Pool | Costruzione -> valutazione | PF | Netto (EUR) | DD realizzato | 2 fasi | Falliscono |
+|---|---|---|---|---|---|---|
+| A | P1 -> P2 | 1,03 | -14.808 | 25.026 | 11% | **69%** |
+| A | P2 -> P1 | 1,53 | +73.827 | 9.342 | 59% | 0% |
+| C | P1 -> P2 | 1,06 | -8.192 | 21.197 | 13% | **51%** |
+| C | P2 -> P1 | 1,59 | +67.479 | 5.855 | 59% | 0% |
+**Con la lente tick l'esito F5 NON e' superato** (PF 1,03-1,06 in un senso, fail-rate 51-69%). **Il solo contributo che sopravvive ai tick sono VOL_f e VOL_o (EURUSD volatility breakout): da soli a 0,1 lotti +365 / +807 EUR in 6-7 anni (DD 120-230 EUR), troppo poco per una combinazione, e la regola un set per simbolo e famiglia ne ammette uno solo.**
+**Lettura onesta:** a barre da 1 minuto una combinazione di scalper forex UBS sembra eccellente (PF 2-3, 0% di fallimenti): **e' un artefatto del Modello 1 sugli scalper**, gia smentito a tick reali sul 2025. Nessun candidato non-oro da questa fase. Cosa servirebbe per rialzare la possibilita': (1) tick reali per piu anni (BCM forex solo da luglio 2024: non possibile per 2013-2023); (2) altri set UBS non scalper con piu operazioni (VOL su altri simboli, CLI D1) a tick; (3) misura dello spread forex reale (foto lunedi, non fatta). **Limiti:** realizzato senza flottante; lente tick calibrata su un solo anno (2025) e su quattro-cinque set; correlazione con l'oro misurata sul proxy Donchian D1, non sugli EA oro di Wim in forward.
