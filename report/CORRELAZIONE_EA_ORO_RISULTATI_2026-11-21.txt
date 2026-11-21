@@ -1,0 +1,22 @@
+XAUUSD operazioni 119 (sell 83, buy 36), giorni lavorativi 41 dal 2026-09-23 al 2026-11-18, giorni con chiusure 9
+P&L realizzato EA oro: totale 22308 EUR, sell 14161, buy 8147
+
+--- correlazione GIORNALIERA (tutti i giorni lavorativi del periodo)
+         ST_H1_long  ST_H4_long  DON55_D1_long  ORO_FERMO
+EA_tot         0.11        0.08            NaN      -0.06
+EA_sell        0.01       -0.03            NaN      -0.18
+EA_buy         0.14        0.12            NaN       0.07
+
+--- solo i giorni con almeno una chiusura (n=9)
+         ST_H1_long  ST_H4_long  DON55_D1_long  ORO_FERMO
+EA_tot         0.28        0.13            NaN       0.14
+EA_sell       -0.02       -0.01            NaN      -0.11
+EA_buy         0.35        0.16            NaN       0.24
+
+--- correlazione SETTIMANALE (n=9 settimane)
+         ST_H1_long  ST_H4_long  DON55_D1_long  ORO_FERMO
+EA_tot         0.74        0.58            NaN       0.39
+EA_sell        0.29        0.07            NaN      -0.31
+EA_buy         0.67        0.68            NaN       0.80
+
+rendimento oro fermo nel periodo (somma giornaliera): -15.4%; Supertrend H4 long -6.3%; Donchian D1 long 0.0%
