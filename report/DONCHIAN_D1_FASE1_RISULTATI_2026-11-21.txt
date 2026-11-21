@@ -1,0 +1,38 @@
+mercato classe N | dati | IS n/PF/t | OOS n/PF | HO n/PF | esito
+Oro            metalli N20 | 2008-04-22 (4676) | IS  60  1.50 +1.2 | OOS  24  1.24 | HO  7  2.67 NV | -
+Oro            metalli N55 | 2008-04-22 (4676) | IS  41  1.51 +1.1 | OOS  15  2.25 | HO  4  5.17 NV | -
+Argento        metalli N20 | 2011-01-21 (3981) | IS  60  0.79 -0.6 | OOS  28  0.47 | HO 10  5.72 ok | -
+Argento        metalli N55 | 2011-01-21 (3981) | IS  40  0.61 -1.3 | OOS  16  0.27 | HO  8  5.08 ok | -
+Bitcoin        cripto  N20 | 2014-11-15 (4388) | IS  85  1.73 +1.8 | OOS  31  1.01 | HO 10  0.42 KO | -
+Bitcoin        cripto  N55 | 2014-11-15 (4388) | IS  67  1.37 +0.9 | OOS  19  1.51 | HO  7  0.22 NV | -
+Ethereum       cripto  N20 | 2018-01-07 (3239) | IS  42  2.40 +2.1 | OOS  19  0.61 | HO 12  0.49 KO | -
+Ethereum       cripto  N55 | 2018-01-07 (3239) | IS  30  1.68 +1.1 | OOS  14  0.84 | HO  7  0.66 NV | -
+Petrolio_Brent energia N20 | 2007-10-22 (4749) | IS  49  1.15 +0.4 | OOS  20  1.18 | HO 11  0.79 KO | -
+Petrolio_Brent energia N55 | 2007-10-22 (4749) | IS  30  1.82 +1.4 | OOS  11  3.39 | HO  6  0.70 NV | -
+Petrolio_WTI   energia N20 | 2000-11-15 (6530) | IS  73  1.09 +0.3 | OOS  25  1.12 | HO 10  1.26 ok | -
+Petrolio_WTI   energia N55 | 2000-11-15 (6530) | IS  58  0.52 -2.0 | OOS  19  1.57 | HO  6  2.80 NV | -
+Nikkei225      indici  N20 | 1988-07-04 (9419) | IS 116  0.94 -0.3 | OOS  45  1.65 | HO  5  2.62 NV | -
+Nikkei225      indici  N55 | 1988-07-04 (9419) | IS  70  1.14 +0.4 | OOS  33  1.29 | HO 10  0.97 KO | -
+Nasdaq100      indici  N20 | 1985-12-24 (10306) | IS 132  1.50 +1.7 | OOS  48  1.61 | HO  3  1.96 NV | -
+Nasdaq100      indici  N55 | 1985-12-24 (10306) | IS 101  1.38 +1.2 | OOS  45  1.39 | HO  3  1.56 NV | -
+SP500          indici  N20 | 1970-03-30 (14285) | IS 167  0.85 -0.8 | OOS  63  1.38 | HO  3  0.80 NV | -
+SP500          indici  N55 | 1970-03-30 (14285) | IS 123  0.86 -0.7 | OOS  54  1.10 | HO  5  0.86 NV | -
+DAX            indici  N20 | 1994-03-07 (8290) | IS  89  1.28 +0.9 | OOS  43  0.67 | HO  5  0.11 NV | -
+DAX            indici  N55 | 1994-03-07 (8290) | IS  66  1.25 +0.7 | OOS  35  0.66 | HO  7  0.00 NV | -
+FTSE100        indici  N20 | 1984-03-26 (10775) | IS 133  1.04 +0.2 | OOS  49  0.37 | HO  5  1.32 NV | -
+FTSE100        indici  N55 | 1984-03-26 (10775) | IS  98  1.05 +0.2 | OOS  27  0.39 | HO  5  3.01 NV | -
+EuroStoxx50    indici  N20 | 2007-06-29 (4866) | IS  52  0.34 -3.5 | OOS  24  0.66 | HO  8  0.06 KO | -
+EuroStoxx50    indici  N55 | 2007-06-29 (4866) | IS  34  0.32 -3.0 | OOS  14  1.03 | HO  6  0.00 NV | -
+CAC40          indici  N20 | 1990-05-30 (9269) | IS 104  0.69 -1.3 | OOS  43  0.56 | HO  9  0.08 KO | -
+CAC40          indici  N55 | 1990-05-30 (9269) | IS  76  0.56 -1.7 | OOS  30  0.51 | HO  7  0.00 NV | -
+Russell2000    indici  N20 | 1987-12-03 (9815) | IS 125  2.47 +3.3 | OOS  50  0.98 | HO  2   inf NV | -
+Russell2000    indici  N55 | 1987-12-03 (9815) | IS 100  2.22 +2.6 | OOS  40  0.46 | HO  7  0.38 NV | -
+HangSeng       indici  N20 | 1988-01-07 (9593) | IS 137  1.45 +1.4 | OOS  48  1.06 | HO  5  0.16 NV | -
+HangSeng       indici  N55 | 1988-01-07 (9593) | IS 100  1.43 +1.2 | OOS  29  1.48 | HO  4  0.08 NV | -
+Dow30          indici  N20 | 1992-03-26 (8725) | IS 104  0.71 -1.4 | OOS  32  2.09 | HO  2  2.50 NV | -
+Dow30          indici  N55 | 1992-03-26 (8725) | IS  79  0.73 -1.2 | OOS  31  1.06 | HO  7  0.06 NV | -
+ASX200         indici  N20 | 2000-06-28 (6675) | IS  77  0.85 -0.5 | OOS  35  0.61 | HO  7  0.08 NV | -
+ASX200         indici  N55 | 2000-06-28 (6675) | IS  57  0.88 -0.4 | OOS  31  0.28 | HO  4  0.00 NV | -
+
+=== riepilogo
+celle che passano IS+OOS: 0 su 34
