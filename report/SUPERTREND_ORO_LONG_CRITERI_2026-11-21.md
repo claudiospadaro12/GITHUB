@@ -15,3 +15,18 @@ Hold-out dal 01/06/2025; prima: IS = primo 70% delle barre, OOS = ultimo 30%.
 - Almeno una cella supera tutte le porte (sotto): **35%**. Spunto confermato (p <= 0,05 sul periodo intero E porte superate, stessa cella): **25%**.
 ## Regole di esito (invariate dopo)
 **Porte della cella:** IS n >= 30, PF >= 1,3, t >= 2; OOS n >= 15, PF > 1,2; hold-out PF > 1,0 se n >= 8 (altrimenti non valutabile). **SPUNTO CONFERMATO** = una cella passa le porte **e** ha p <= 0,05 contro gli ingressi casuali sul periodo intero. Altrimenti: "non confermato" (deriva non esclusa). Anche se confermato: **spunto da confrontare con GoldenZoe (stesso motore long-only sull'oro), non un EA nuovo**; serve un test a tick sul vero EA. Nessun consiglio di taglie.
+
+## RISULTATI (script `supertrend_oro_long.py`; output `SUPERTREND_ORO_LONG_RISULTATI_2026-11-21.txt`; 2.000 simulazioni, seme 12345)
+| Cella | IS n / PF / t | OOS n / PF | HO n / PF | Tutto n / PF / t / ret per operazione | p (ingressi casuali, periodo intero) |
+|---|---|---|---|---|---|
+| H1 BASE | 1061 / 1,16 / +1,7 | 429 / 1,42 | 105 / 1,32 | 1595 / 1,24 / +2,9 / +0,09% | **0,033** |
+| H1 CHIUSURA | 1062 / 1,16 / +1,7 | 429 / 1,42 | 105 / 1,32 | 1596 / 1,24 / +2,9 / +0,09% | **0,029** |
+| H1 SMA200 | 634 / 1,25 / +2,0 | 317 / 1,54 | 72 / 1,64 | 1023 / 1,37 / +3,3 / +0,14% | **0,006** |
+| H4 BASE | 286 / 1,38 / +1,7 | 127 / 1,50 | 26 / 2,58 | 439 / 1,48 / +2,6 / +0,36% | 0,057 |
+| H4 CHIUSURA | 286 / 1,35 / +1,6 | 127 / 1,49 | 26 / 2,59 | 439 / 1,46 / +2,5 / +0,34% | 0,076 |
+| H4 SMA200 | 167 / 1,32 / +1,0 | 93 / 1,68 | 17 / 5,25 | 277 / 1,57 / +2,3 / +0,42% | 0,035 |
+| D1 (3 varianti) | 31-50 / 1,57-1,96 / +1,2-1,3 | 17-24 / 1,24-1,48 | 2-3 NV | 50-77 / 1,68-2,10 / +1,6-1,9 | 0,14-0,39 |
+- **Porte (IS PF >= 1,3 e t >= 2, OOS PF > 1,2): nessuna cella le supera.** Il piu' vicino e' H1 SMA200 (IS PF 1,25 < 1,3, t 2,0) e H4 BASE (IS PF 1,38 ma t 1,7). **Spunti confermati: 0.** Esito scritto: **non confermato**.
+- **Controllo deriva:** sul periodo intero il Supertrend long **batte gli ingressi casuali di pari durata** su H1 (p 0,029-0,033; con SMA200 p 0,006) e sul filo su H4 (p 0,057-0,076; con SMA200 0,035); **su D1 no** (p 0,14-0,39, poche operazioni). **Presi a pezzi (IS, OOS, HO) quasi mai p <= 0,05** (2 casi su 27: H1 SMA200 IS 0,030, H4 SMA200 HO 0,049): meno operazioni, meno potenza. **Con 9 celle (Bonferroni x 9) nessuna p resta sotto 0,05 tranne H1 SMA200 (0,054, sul filo).**
+- **Previsioni:** base H1 batte i casuali (45%) **si'** (0,033); H4 (45%) **no (0,057)**; D1 (20%) no; almeno uno fra H1/H4 (55%) **si'**; CHIUSURA migliora H4 (40%): **no** (1,46 contro 1,48); SMA200 migliora PF IS e t su H4 (45%): **no** (PF 1,32 contro 1,38, t 1,0 contro 1,7), su H1 si'; almeno una cella supera le porte (35%): **no**; spunto confermato (25%): **no**.
+- **Lettura onesta:** sull'oro il Supertrend long ha un vantaggio **piccolo ma non solo di deriva sul H1** (+0,09% a operazione, p ~0,03; con filtro SMA200 +0,14% a operazione, p 0,006 non corretto, 0,054 corretto), **debole** e sotto le nostre porte. E' lo stesso lato long dell'oro di GoldenZoe e di tutta la famiglia trend D1: **probabilmente molto correlato** (non misurato), quindi non e' un EA scorrelato da aggiungere. Nessun parametro scansionato.
