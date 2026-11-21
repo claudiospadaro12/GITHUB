@@ -8,8 +8,8 @@ Fonte del metodo: manuale UBS (`UBS_MANUALE_PROCEDURA_2026-11-21.md`) + video ap
 - Tick reali BCM solo da 07/2024 e solo sui simboli nativi (`NASUSD`, `SPXUSD`).
 - Wim stesso dice che i dati MetaQuotes sugli indici non bastano (usa IC Markets): rischio di dati.
 
-## 2. Passo 0 (prima di ogni passata, sola lettura/preparazione)
-Il portable non ha i simboli `_EXT`: serve una riga che li esporti dal terminale principale (CSV M1 2010-2026, `NASUSD_EXT` e `SPXUSD_EXT`) e li importi come simboli personalizzati nel portable, con **controllo di conteggio barre e di un campione di prezzi**. Se il controllo fallisce, non si parte.
+## 2. Passo 0 (CORRETTO prima dei numeri: nessuna esportazione/importazione)
+`ANNO80K_WIM_TESTER.ps1` ha come bersaglio il terminale PRINCIPALE BCM, dove `NASUSD_EXT`/`SPXUSD_EXT` esistono gia (17 anni). **Le ottimizzazioni sugli indici girano nel terminale principale, non nel portable**: nessuna copia di simboli. Il Passo 0 e una riga di sola lettura (`RIGA_PREP_INDICI_UBS.txt`): anni dello storico `_EXT`, tick nativi, presenza dell'EA V9.5, dei set Indicement e dei file di ottimizzazione, MT5 aperti, spazio libero. Resta da fare, prima della passata: copiare i set di ottimizzazione nel terminale e una passata di prova di pochi giorni (fumo) che dimostri che l'EA apre operazioni su `NASUSD_EXT`.
 
 ## 3. Finestre (fisse, non si cambiano)
 - **Dentro-campione IS: 2010-01-01 -> 2019-12-31** (10 anni, come Wim). **OOS: 2020-01-01 -> 2023-12-31.** **Hold-out: 2024-01-01 -> 2024-12-31**, aperto UNA volta, solo sui finalisti. **Test a tick (V3): 2025-01-01 -> 2026-10-31 su `NASUSD`/`SPXUSD` nativi**, Modello 4 contro Modello 1 stessa finestra (non si sovrappone all'hold-out).
@@ -30,7 +30,7 @@ Genetica veloce, criterio **Custom max** (6), intervalli e minimi (EP, RF, TR) *
 - Se due finalisti hanno correlazione giornaliera > 0,7, se ne tiene uno.
 
 ## 6. Previsioni (scritte ora)
-- **I-1** Passo 0 riesce al primo tentativo: 60%.
+- **I-1** La passata di fumo apre operazioni su `NASUSD_EXT` al primo tentativo: 70%.
 - **I-2** I set di Wim (C0) hanno PF >= 1,30 in IS su NASUSD_EXT: 35%; su SPXUSD_EXT: 35%.
 - **I-3** Almeno un ottimizzato passa i filtri IS: 85% (ottimizzare lo garantisce).
 - **I-4** Almeno un candidato per simbolo passa V1: 30%.
@@ -42,4 +42,4 @@ Genetica veloce, criterio **Custom max** (6), intervalli e minimi (EP, RF, TR) *
 Se i dati `_EXT` 2010-2014 e 2016-2019 sono affidabili (verificati solo 3 blocchi); spread reale; se il nativo e confrontabile con l'EXT nel 2025-26; se 5 ore per simbolo bastano.
 
 ## 8. Peso
-Passo 0 (breve) + 2 ottimizzazioni da circa 5 ore ciascuna + circa 40 passate di convalida: **circa 12 ore di PC**, da lanciare solo a test a tick finito.
+Passo 0 (sola lettura, pochi secondi) + passata di fumo + 2 ottimizzazioni da circa 5 ore ciascuna + circa 40 passate di convalida: **circa 12 ore di PC**, da lanciare solo a test a tick finito.
