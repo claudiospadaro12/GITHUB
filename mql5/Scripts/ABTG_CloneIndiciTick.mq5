@@ -130,12 +130,28 @@ void OnStart()
         }
       double k=InpTickSize/ts;
       bool pr=true;
-      pr=pr && CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_SIZE,InpTickSize);
-      pr=pr && CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_VALUE,tv*k);
-      pr=pr && CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_VALUE_PROFIT,tvp*k);
-      pr=pr && CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_VALUE_LOSS,tvl*k);
+      string ep="";
+      ResetLastError();
+      if(!CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_SIZE,InpTickSize)) { ep+=" TICK_SIZE(err="+IntegerToString(GetLastError())+")"; pr=false; }
+      ResetLastError();
+      if(!CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_VALUE,tv*k)) { ep+=" TICK_VALUE(err="+IntegerToString(GetLastError())+")"; pr=false; }
+      if(!pr)
+        {
+         // secondo tentativo: ordine invertito (valore poi passo)
+         ResetLastError();
+         bool b1=CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_VALUE,tv*k);
+         int e1=GetLastError();
+         ResetLastError();
+         bool b2=CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_SIZE,InpTickSize);
+         int e2=GetLastError();
+         Riga("  secondo tentativo (valore poi passo): valore="+(b1?"ok":"err="+IntegerToString(e1))+" passo="+(b2?"ok":"err="+IntegerToString(e2)));
+         pr=(b1 && b2);
+        }
+      if(tvp>0.0) { ResetLastError(); if(!CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_VALUE_PROFIT,tvp*k)) Riga("  nota: TICK_VALUE_PROFIT non impostabile err="+IntegerToString(GetLastError())+" (non bloccante)"); }
+      if(tvl>0.0) { ResetLastError(); if(!CustomSymbolSetDouble(dst,SYMBOL_TRADE_TICK_VALUE_LOSS,tvl*k)) Riga("  nota: TICK_VALUE_LOSS non impostabile err="+IntegerToString(GetLastError())+" (non bloccante)"); }
       CustomSymbolSetString(dst,SYMBOL_DESCRIPTION,"ABTG clone di "+src+" con tick size "+DoubleToString(InpTickSize,4)+" (solo tester)");
-      if(!pr) { Riga("  ERRORE: impostazione delle proprieta fallita err="+IntegerToString(GetLastError())); problemi++; continue; }
+      Riga("  dopo le impostazioni: tick_size="+DoubleToString(SymbolInfoDouble(dst,SYMBOL_TRADE_TICK_SIZE),8)+" tick_value="+DoubleToString(SymbolInfoDouble(dst,SYMBOL_TRADE_TICK_VALUE),8)+(pr?"":"  PROBLEMA:"+ep));
+      if(!pr) { problemi++; continue; }
       SymbolSelect(dst,true);
       long tot; datetime pri,ult;
       bool cp=CopiaBarre(src,dst,tot,pri,ult);
