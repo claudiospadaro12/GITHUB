@@ -1,0 +1,54 @@
+--- a/agent/verify.py	2026-11-21 09:14:06.927085024 +0000
++++ b/agent/verify.py	2026-11-21 09:15:33.242623270 +0000
+@@ -10,7 +10,10 @@
+ from datetime import datetime, timedelta
+ 
+ import pandas as pd
+-import yfinance as yf
++try:
++    import yfinance as yf
++except ImportError:  # ambiente senza yfinance: si usano solo le chiusure degli snapshot
++    yf = None
+ 
+ 
+ def _expected_dir(bias: str) -> str | None:
+@@ -53,6 +56,27 @@
+     return out
+ 
+ 
++def _changes_from_snapshots(snapshots: list[dict]) -> dict:
++    """{ticker: {giorno: var% close-su-close del GIORNO}} ricavata dagli snapshot stessi.
++    'last_close' dello snapshot del giorno D e' la chiusura del giorno precedente, quindi la
++    variazione del giorno D = last_close(snapshot D+1) / last_close(snapshot D) - 1. Stessa fonte
++    e stessa definizione di bias (chiusure giornaliere): nessun download esterno, nessun problema
++    di fuso orario fra FX/futures/indici. L'ultimo snapshot non ha il giorno dopo: quel giorno
++    resta a yfinance."""
++    snaps = sorted(snapshots, key=lambda s: s["date"])
++    out: dict[str, dict] = {}
++    for a, b in zip(snaps, snaps[1:]):
++        for g, lst in a.get("instruments", {}).items():
++            nxt = {i.get("ticker"): i for i in b.get("instruments", {}).get(g, [])}
++            for inst in lst:
++                tk = inst.get("ticker"); j = nxt.get(tk)
++                if not tk or not j: continue
++                c0, c1 = inst.get("last_close"), j.get("last_close")
++                if c0 and c1:
++                    out.setdefault(tk, {})[a["date"]] = (c1 / c0 - 1.0) * 100.0
++    return out
++
++
+ def verify(snapshots: list[dict]) -> dict:
+     """Confronta bias vs realta'. Ritorna un riepilogo strutturato.
+ 
+@@ -71,7 +95,10 @@
+                 if inst.get("ticker"):
+                     tickers.add(inst["ticker"])
+ 
+-    changes = _actual_changes(sorted(tickers), min(dates), max(dates))
++    changes = _actual_changes(sorted(tickers), min(dates), max(dates)) if yf else {}
++    # PRIORITA' alle chiusure degli snapshot (vedi _changes_from_snapshots): yfinance solo per i giorni mancanti
++    for tk, days in _changes_from_snapshots(snapshots).items():
++        changes.setdefault(tk, {}).update(days)
+ 
+     rows = []
+     by_inst: dict[str, dict] = {}
