@@ -1,0 +1,53 @@
+
+Oro (trend) barre 6582
+  base IS n 209 PF  1.30 R   +36.0 DD  20.6 | OOS n  75 PF  1.80 R   +34.2 DD   7.6
+  F1   IS n  88 PF  1.82 R   +35.7 DD   7.7 | OOS n  35 PF  2.03 R   +21.3 DD   6.8
+  F2   IS n 187 PF  1.29 R   +30.7 DD  19.9 | OOS n  67 PF  1.94 R   +35.0 DD   7.1
+  F3   IS n  69 PF  2.04 R   +34.2 DD   4.8 | OOS n  28 PF  2.62 R   +25.7 DD   5.4
+
+Argento (trend) barre 6583
+  base IS n 228 PF  1.31 R   +42.8 DD  18.5 | OOS n 115 PF  1.26 R   +18.4 DD  21.3
+  F1   IS n 131 PF  1.81 R   +57.9 DD   9.2 | OOS n  65 PF  1.26 R   +10.1 DD  16.8
+  F2   IS n 201 PF  1.30 R   +37.1 DD  17.8 | OOS n  92 PF  1.34 R   +18.8 DD  18.1
+  F3   IS n 113 PF  1.93 R   +56.5 DD   8.3 | OOS n  50 PF  1.26 R    +8.1 DD  15.2
+
+Bitcoin (trend) barre 4447
+  base IS n 144 PF  1.49 R   +47.2 DD  36.4 | OOS n  58 PF  1.34 R    +9.1 DD   9.8
+  F1   IS n 135 PF  1.54 R   +48.4 DD  34.6 | OOS n  48 PF  1.41 R    +8.6 DD   5.0
+  F2   IS n 122 PF  1.51 R   +40.8 DD  25.2 | OOS n  54 PF  1.47 R   +11.3 DD   9.0
+  F3   IS n 113 PF  1.57 R   +42.0 DD  23.4 | OOS n  44 PF  1.60 R   +10.9 DD   5.0
+
+Ethereum (trend) barre 3298
+  base IS n  84 PF  1.72 R   +29.9 DD  13.5 | OOS n  36 PF  1.58 R    +9.8 DD   5.5
+  F1   IS n  87 PF  1.34 R   +16.4 DD  15.4 | OOS n  30 PF  1.46 R    +6.6 DD   5.5
+  F2   IS n  83 PF  1.69 R   +29.7 DD  11.2 | OOS n  33 PF  1.71 R   +11.2 DD   4.2
+  F3   IS n  86 PF  1.33 R   +16.1 DD  13.2 | OOS n  24 PF  2.11 R   +11.0 DD   3.3
+
+Nikkei225 (trend) barre 13984
+  base IS n 421 PF  2.66 R  +369.7 DD   9.2 | OOS n 196 PF  1.26 R   +31.8 DD  15.8
+  F1   IS n 206 PF  3.09 R  +202.5 DD   8.5 | OOS n  97 PF  1.31 R   +18.6 DD  14.7
+  F2   IS n 349 PF  2.78 R  +328.2 DD   9.3 | OOS n 169 PF  1.45 R   +45.3 DD  11.0
+  F3   IS n 170 PF  3.11 R  +174.0 DD   5.8 | OOS n  86 PF  1.56 R   +28.3 DD  13.7
+
+Nasdaq100 (controllo) barre 10365
+  base IS n 284 PF  1.04 R    +7.8 DD  35.4 | OOS n 137 PF  1.19 R   +15.1 DD   9.9
+  F1   IS n 203 PF  0.96 R    -6.1 DD  31.3 | OOS n  87 PF  1.40 R   +20.0 DD   7.9
+  F2   IS n 259 PF  1.04 R    +7.1 DD  36.3 | OOS n 109 PF  1.39 R   +25.2 DD   8.6
+  F3   IS n 184 PF  0.92 R    -9.9 DD  29.4 | OOS n  81 PF  1.47 R   +22.0 DD   6.9
+
+DAX (controllo) barre 9836
+  base IS n 256 PF  1.65 R  +103.9 DD  15.4 | OOS n 115 PF  0.96 R    -2.8 DD  12.5
+  F1   IS n 160 PF  1.72 R   +65.8 DD   8.8 | OOS n  62 PF  0.64 R   -14.7 DD  19.5
+  F2   IS n 215 PF  1.70 R   +95.2 DD  14.2 | OOS n 103 PF  0.81 R   -12.3 DD  20.7
+  F3   IS n 135 PF  1.76 R   +59.3 DD   8.3 | OOS n  56 PF  0.72 R   -10.5 DD  18.3
+
+Petrolio_WTI (controllo) barre 6589
+  base IS n 149 PF  1.30 R   +23.9 DD   9.1 | OOS n  74 PF  1.17 R    +6.9 DD  12.5
+  F1   IS n 108 PF  1.01 R    +0.6 DD  11.2 | OOS n  53 PF  1.18 R    +5.3 DD  10.4
+  F2   IS n 137 PF  1.24 R   +18.6 DD  11.8 | OOS n  61 PF  1.10 R    +3.2 DD  11.3
+  F3   IS n  99 PF  0.86 R    -8.5 DD  15.3 | OOS n  38 PF  1.07 R    +1.4 DD   7.9
+
+=== regola di esito: UTILE se in IS e OOS: n>=20, PF>=base, DD<=0.8*DD base, R totale>=0.7*R base
+F1: mercati trend UTILI 0/5 [] | controllo []
+F2: mercati trend UTILI 0/5 [] | controllo []
+F3: mercati trend UTILI 2/5 ['Oro', 'Bitcoin'] | controllo []
