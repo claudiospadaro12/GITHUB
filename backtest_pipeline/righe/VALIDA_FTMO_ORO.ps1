@@ -67,4 +67,9 @@ foreach($wn in $wins){ foreach($cd in $cands){
 [void][MasterSveglia.Win]::SetThreadExecutionState([uint32]2147483648)
 Write-Host '=== FINE ===' -ForegroundColor Cyan
 try { Set-Clipboard -Value ($out -join "`r`n"); Write-Host 'Tabella COPIATA negli appunti: incollala nella chat con Ctrl+V.' -ForegroundColor Green } catch { Write-Host 'Appunti non disponibili: mandami la foto.' -ForegroundColor Yellow }
+$dirR='C:\ABTG_RISULTATI'; if(-not (Test-Path -LiteralPath $dirR)){ New-Item -ItemType Directory -Force -Path $dirR | Out-Null }
+$fo=Join-Path $dirR ('VALIDA_FTMO_ORO_' + (Get-Date).ToString('yyyyMMdd_HHmm') + '.csv')
+Set-Content -LiteralPath $fo -Value (@('broker;candidato;finestra;qualita storico;barre;profitto;operazioni;PF;DD massima equity') + $out) -Encoding UTF8
+Write-Host ('>>> ALLEGA QUESTO FILE: ' + $fo + ' <<<') -ForegroundColor Black -BackgroundColor Yellow
+Start-Process explorer.exe -ArgumentList ('/select,"' + $fo + '"')
 Write-Host ('Fine alle ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana).') -ForegroundColor Cyan
