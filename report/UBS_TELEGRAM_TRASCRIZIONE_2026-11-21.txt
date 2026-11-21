@@ -1,0 +1,380 @@
+TRASCRIZIONE - "Ultimate Breakout System Chat" (491 membri, gruppo a argomenti)
+Letta in sola lettura da Telegram Web il 21/11/2026 (ora locale Europa/Roma, circa 23:00).
+
+NOTE SUL METODO
+- Trascrizione dei messaggi visibili nel browser, con data, ora, autore e testo originale (in inglese quando è in inglese).
+- Allegati: solo nome e dimensione, nessun file scaricato. Link: solo indirizzo, nessun link aperto.
+- Due annunci molto lunghi postati nel gruppo (Portfolio Manager 4.0 e Strategy Ledger Pro 5.00) sono stati abbreviati con una sintesi, per evitare di riprodurre per intero un testo pubblicitario di terzi.
+- Il pannello "Mostra come topic" è stato attivato per vedere l'elenco degli argomenti. È un'impostazione di visualizzazione di Telegram sul tuo account.
+
+ELENCO ARGOMENTI (in ordine di priorità richiesto) E NUMERO APPROSSIMATIVO DI MESSAGGI
+(a) UBS Optimizer App ............ circa 30 messaggi (18-21 novembre)
+(b) Usefull Tools ................. circa 20 messaggi (8-21 novembre)
+(c) My new set files that have potential ... circa 25 messaggi (20-21 novembre)
+(d) sets for sale ................. circa 45 messaggi (18-20 novembre)
+(e) General ....................... oltre 150 messaggi caricati, storia che risale al 7 agosto. Trascritto solo il tratto del 20 novembre (vedi sotto)
+(f) Monthly Competition ........... circa 85 messaggi (15 settembre - 2 novembre)
+Nota: l'elenco degli argomenti del gruppo contiene sei voci. Non ci sono altri argomenti oltre a queste sei.
+
+=====================================================================
+ARGOMENTO 1 - UBS OPTIMIZER APP
+=====================================================================
+Messaggio fissato: "UBS Library pack 2026-11-16.zip, added the in-sample period for all my strategies..." (testo abbreviato da Telegram)
+
+18 novembre
+[14:22] wim schrynemakers (proprietario): I will add the option to pre-fill it when not known or skip, but still the warning
+[14:27] AK: In the settings, I had to add it manually using the exact same server name, and only then was I able to save
+[14:52] wim schrynemakers (proprietario): yes, I'm adding a skip
+[14:52] (autore non visibile): how many times a day do you save set files?
+[21:03] Kevin: I also think parallelising many optimizations would be great also,not only parallelising the Backtests. So you can try many permutations automatically and don't have to wait
+[21:32] Jens L: î am trying to run a backtest on a portfolio that i created from the library pack on my broker . But i constantly get this error, after it is finished:
+        "the backtest made no trades: check in the tester's Experts log which sets the autoloader loaded"
+        what am i doing wrong ?
+[21:32] Jens L: do i need to run all single backtests first on my broker ?
+
+19 novembre
+[06:21] wim schrynemakers (proprietario), in risposta a Jens L: send me your log please (in the settings, you can zip the log and then send it to me)
+
+20 novembre
+[17:07] Chris: Can someone help me understand how to update the UBS optimizer? Or provide resources for doing so.
+        All my optimizations fail, i cant update it, and i cant upload setfiles for backtests. Im sure this is user error, but im stuck.
+[18:27] wim schrynemakers (proprietario), in risposta a Chris: simply install the app again in the same folder
+        make sure your MT5 is installed in a normal folder outside of the windows program structure
+[19:05] StoryG: @strueli An optimization queue would be a great addition, allowing us to run multiple optimizations overnight. Since optimization is the most time-consuming part of the process, it would be a very useful feature for the next update! Thanks
+[19:13] wim schrynemakers (proprietario): I'll add it to the list to do!
+[19:30] Ash, in risposta a StoryG: Use Claude. I've been running it on auto since the mcp update
+[19:32] StoryG: (messaggio di richiamo al post precedente, senza testo nuovo)
+
+Oggi (21 novembre)
+[10:30] StoryG: @strueli Would it be possible to increase the step size for the Portfolio Max Drawdown Target slider from 0.5% to 0.1%? thanks
+[11:52] wim schrynemakers (proprietario): kinda irrelevant I think? but I can ask Claude next week
+[12:11] StoryG: With UBS strats alone, it's indeed irrelevant. But for a multi-EA portfolio with correlated strategies, it becomes relevant. Thanks for asking Claude
+[13:41] Jens L: the report is missing the pictures
+        GET /api/portfolios/20261115-071210/backtest/UBS_Portfolio_20261115-071210.png -> 404: not found
+        GET /api/portfolios/20261115-071210/backtest/UBS_Portfolio_20261115-071210-hst.png -> 404: not found
+        GET /api/portfolios/20261115-071210/backtest/UBS_Portfolio_20261115-071210-mfemae.png -> 404: not found
+        GET /api/portfolios/20261115-071210/backtest/UBS_Portfolio_20261115-071210-holding.png -> 404: not found
+[15:50] wim schrynemakers (proprietario), in risposta a Jens L: your MT5 in english?
+[15:54] Jens L: Now Yes
+[18:39] Jens L: but it seems, the pictures are just not there
+[21:08] Tobias: First weekend I am sitting with the optimizer. Great work, Wim! The little helpers are such a great idea, never want to go back. Thank you!
+
+RIASSUNTO - UBS OPTIMIZER APP
+- Cos'è: l'ottimizzatore UBS (Ultimate Breakout System), un'app per MT5 che gira sul tuo terminale. Serve a ottimizzare i set file e fare backtest di portafogli costruiti dalla library pack.
+- Come si ottiene: la library pack ufficiale è il file "UBS Library pack 2026-11-16.zip", fissato nel gruppo. Per aggiornare si reinstalla l'app nella stessa cartella (consiglio di Wim).
+- Problemi segnalati: backtest che non fanno trade ("the backtest made no trades", Jens L), ottimizzazioni che falliscono (Chris), impossibilità di caricare i set, grafici mancanti nei report (404 sulle immagini, Jens L).
+- Causa indicata per le immagini mancanti: MT5 in inglese (Wim). Jens L conferma di averlo risolto ma le immagini restano assenti.
+- Consigli di Wim: installare MT5 in una cartella normale fuori dalla struttura di Windows; salvare il log zippato in impostazioni e inviarlo per diagnosi; Wim aggiungerà un'opzione "skip" e il pre-compilamento del campo quando il valore non è noto.
+- Richieste di funzioni: coda di ottimizzazioni (StoryG, Wim: "I'll add it to the list to do!"), parallelizzazione delle ottimizzazioni (Kevin), passo 0.1% per lo slider del Portfolio Max Drawdown (StoryG, Wim: "kinda irrelevant").
+- Soglie o regole di valutazione dei set citate in questo argomento: nessuna soglia numerica esplicita. Si cita solo il drawdown massimo del portafoglio.
+- Link: nessuno in questo argomento.
+- Feedback positivo: Tobias sul primo weekend con l'ottimizzatore.
+
+=====================================================================
+ARGOMENTO 2 - USEFULL TOOLS
+=====================================================================
+Messaggio fissato: "I will probably next week send out 10-15 more test versions, so I get more feedback and bugs fixes..." (testo abbreviato da Telegram)
+
+8 novembre
+[23:04] Mistermember: quick one pagers to set up the alerts, the others are pretty self speaking I believe
+
+15 novembre
+[15:54] "Strategy Ledger Pro 5.00 is out" (post senza nome visibile). Sintesi del post: versione 5.00 con nuovo pannello, demo interattiva nel visual mode dello Strategy Tester, share card per singola strategia e per l'intero account, miglioramenti a Sizing Optimizer e conteggio ordini. Dichiara di essere in sola lettura, senza piazzare né modificare o chiudere operazioni.
+        Link: https://www.mql5.com/en/market/product/192540
+        Link: https://www.mql5.com/en/blogs/post/780741 (walkthrough interattivo)
+        Reazioni: 3, 2 (cuore/pollice, numero non leggibile con certezza)
+
+19 novembre
+[21:21] Jonathan: [file HTML allegato: metatrader-setfile-editor v7.8.html, 194 KB]
+        Good evening everyone,
+        Little update to the Online UBS Manual.
+        Added all the latest parameters until UBS v9.8
+        https://fxlive.trading/ubs-manual.php
+        The Setfile Editor follows as usual and the "Format" button apply and save your setfiles as if they where saved with ubs.
+        Still hosted on FX Live with some nice additional features
+        https://fxlive.trading/metatrader-setfile-editor.php
+        Bellow the stand alone file
+        Have a sweet end of day
+        Reazioni: 13
+
+20 novembre
+[16:54] xInfinitYz: Just released Terminal Manager
+        https://www.youtube.com/watch?v=pjPPrhrAnpc
+        Enjoy!
+        Reazioni: 7
+[17:44] Maurice: Awesome work mate, thank you
+
+Oggi (21 novembre)
+[13:45] xInfinitYz: "Portfolio Manager 4.0 is out!" Annuncio lungo, sintesi: versione 4.0 gratuita per chi ha la licenza v3. Novità principali: nuova pagina Brokers e scelta del broker per backtest; Portfolio Builder che unisce più strategie con EA, simbolo e timeframe propri; Risk Balancer e Calibration per il drawdown; apertura del portafoglio in StrategyLens; coda dei backtest che sopravvive ai crash; supporto per assistenti AI sperimentale (disattivato di default, chiede conferma prima di fermare o rimuovere). Licenza lifetime non più legata alla v3. La v3 non riceve più aggiornamenti, compresi i fix di sicurezza. Prima di aggiornare, terminare i lavori in corso: i lavori creati in v4 non si aprono in v3.
+        Link: trendsurfers.io/portfolio-manager/lifetime
+        Link: trendsurfers.io/portfolio-manager (download)
+        Firmato: Oleksandr, TrendSurfers
+        Reazioni: 1 (M)
+[21:14] Maurice, in risposta a xInfinitYz: @xInfinitYz works smooth as it should. Will play further around with it tomorrow and check out all features. Good job with UI also
+[22:35] xInfinitYz, in risposta a Maurice: Thanks mate! Love to hear such feedback
+
+Messaggio senza data visibile (8-21 novembre)
+[?] N: Anyone know of any mt5 risk management programmes that can be added to your mt5 terminal . For example I want all EAs to be turned off and all working orders and open trades closed and cancelled at. Certain overall portfolio percentage drawdown
+[20:55] Ash, in risposta a N: There's a few available on the mql5 marketplace and I am sure there's some in the useful tools section in the community. You could also build one using Claude that is custom to what you want
+
+RIASSUNTO - USEFULL TOOLS
+- Cos'è: l'argomento raccoglie strumenti esterni e di supporto all'ecosistema UBS (editor di set file, manuale online, gestori di terminale e portafoglio, strumenti di rischio).
+- Come si ottiene: i link portano ai prodotti. Il setfile editor è disponibile su fxlive.trading e come file HTML allegato. Portfolio Manager 4.0 si scarica da trendsurfers.io (gratuito per chi ha la licenza v3).
+- Problemi: nessun problema tecnico segnalato direttamente. Maurice conferma che Portfolio Manager 4.0 funziona bene.
+- Richiesta: un gestore di rischio per MT5 che disattivi gli EA e chiuda ordini e posizioni a una soglia di drawdown di portafoglio (N). Ash suggerisce il marketplace MQL5 o di costruirne uno con Claude.
+- Consigli: nessun consiglio specifico di Wim in questo argomento.
+- Soglie o regole di valutazione dei set: nessuna. Il drawdown di portafoglio è citato come soglia di rischio.
+- Link utili: https://www.mql5.com/en/market/product/192540 ; https://www.mql5.com/en/blogs/post/780741 ; https://fxlive.trading/ubs-manual.php ; https://fxlive.trading/metatrader-setfile-editor.php ; https://www.youtube.com/watch?v=pjPPrhrAnpc ; trendsurfers.io/portfolio-manager ; trendsurfers.io/portfolio-manager/lifetime
+
+=====================================================================
+ARGOMENTO 3 - MY NEW SET FILES THAT HAVE POTENTIAL
+=====================================================================
+Messaggio fissato: "6 6 Just as a reminder: ALWAYS check the magicnumbers for different EAs running. I can't guarantee that..." (testo abbreviato da Telegram)
+
+20 novembre
+[09:12] Kevin, in risposta a Juliano (domanda): Hi guys, these set file btc scalp are free?
+        Yes (risposta, autore non visibile)
+
+Oggi (21 novembre)
+[15:08] Till: [ZIP allegato: Community_Share_2026-11.zip, 151 KB]
+        "Today, I would like to share some sets with the community again. This time, its 10 gold sets for H1. You can find details like IS/OOS times and correlation of the sets with each other in the README.md file and there are also two HTML files that show the performance of the sets."
+[15:08] Till: [file: UBS-XAUUSD-H1-G80482.set, 18 KB]
+        "And here the individual files for those who don't want to download the whole zip archive."
+[15:10] Till: [file: README.md, 6 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G50449.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G50455.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G50482.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G50561.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G50601.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G80381.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G80388.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G80449.set, 18 KB]
+[15:10] Till: [file: UBS-XAUUSD-H1-G80480.set, 18 KB]
+[15:14] Ba Sa: Thanks for sharing, @projektfarm !
+[15:17] Dr. Khairy Shahin: Thanks for sharing
+[15:22] Donhou8251: Thank you for sharing these @projektfarm
+[17:24] Tomasz Trader, in risposta a Till: [album: Album, README.md] Is this the same like in UBS zip from Wim ? There are Till catalogue with gold sets
+[17:25] Till, in risposta a Tomasz Trader: No. I do not publish the same sets twice :)
+[17:25] Tomasz Trader: (nel topic General) Did you share those sets ?
+[17:26] Till: But if Wim likes the sets, he will probably add them to his UBS archive where he added my other sets.
+[17:26] Auyllon, in risposta a Till: [album: Album, UBS-XAUUSD-H1-G80480.set] Thank you!!
+[18:18] Tomasz Trader, in risposta a Till: But if Wim likes the sets, he will probably add them to his UBS archive where he added my other sets.
+        Ok thanks
+[18:54] Christoph, in risposta a Till: [file: Community_Share_2026-11.zip] Today, I would like to share some sets with the community again. This time, its 10 gold sets for H1.
+        Appreciate your work!
+
+RIASSUNTO - MY NEW SET FILES THAT HAVE POTENTIAL
+- Cos'è: l'argomento per condividere set file nuovi tra i membri. Il contributo di Till è un pacchetto di 10 set per XAUUSD su H1.
+- Come si ottiene: il file "Community_Share_2026-11.zip" (151 KB) e i singoli .set, con il README.md che riporta periodi IS/OOS e correlazioni tra i set. Ci sono anche due HTML con le performance (non allegati nella trascrizione).
+- Problemi: nessuno segnalato. Gli utenti chiedono se i set sono gli stessi già nel pacchetto di Wim (Tomasz). Till risponde che non pubblica due volte gli stessi set.
+- Consigli: Wim, a detta di Till, probabilmente aggiungerà i set all'archivio UBS se gli piacciono.
+- Avviso di Wim (fissato): controllare SEMPRE i magic number dei diversi EA in esecuzione.
+- Soglie o regole di valutazione: il README indica i periodi IS/OOS e le correlazioni tra set. I valori numerici non sono leggibili dal testo.
+- Link: nessuno nel testo. Il messaggio di Tomasz cita un profilo MyFXBook nel topic General (vedi argomento 5).
+
+=====================================================================
+ARGOMENTO 4 - SETS FOR SALE
+=====================================================================
+Messaggio fissato: "Got some good sets that you think are worth purchasing? you can post here"
+
+18 novembre
+[07:08] Tomasz Trader, in risposta a wim schrynemakers: what do you mean exactly? With the UBS App, you can do a lot without the need for optimization. and...
+        (testo abbreviato da Telegram)
+        350 ? Where they are ?
+[07:16] wim schrynemakers (proprietario): in the official UBS set files zip
+[07:16] discord (testo senza link)
+[07:16] [file: UPDATED SETS UBS_V9.8.zip, 5.6 MB]
+[07:28] finsato: @Akaitrade is your Range Trader Pro including all the sets for the strategies that will be in Range Reaper?
+[09:02] Donhou8251, in risposta a wim: @strueli are there any newly developed sets since the last list was provided Wim?
+[09:05] wim schrynemakers (proprietario): nope.
+[11:55] BK, in risposta a finsato: To be knowledge yes. But keep in mind that the sets are well balanced inside the EA. That balance needs to be done by the user itself in UBS with the sets.
+[11:58] BK, in risposta a BK: If you are looking for Plug and Play better use the EA
+[11:59] Mistermember, in risposta a BK: Will you be continuing to release new versions of the sets or do future updates go to the EA only?
+[12:01] BK, in risposta a Mistermember: So the pack contains 32 strategies from where RangeReaper uses 11. I will keep updating the pack if i find more strategies. Up to Wim to decide if he wants to add them or not. But i think RangeReaper how it is configured currently does not need new strategies
+[14:46] finsato: Thanks!
+
+19 novembre
+[16:03] Hervé, in risposta a BK: Hello BK, so in your package you didn't enter HistoricalMaxDD for each set ? Knowing you, I'm surprised...
+[16:11] BK, in risposta a Hervé: Those values are present but this risk method is not recommended as this is related to max risk per strat which does not account for SL sizes. And for range breakout the SL size is based on the Range it is in. So if you have big Range and big lotsize because of max risk per strat you have big loss
+[16:17] Hervé: Oh ok, so if I buy your package on your website instead of Range Reaper, do you provide a guide to balance the strategies ? Or do we only use Risk per Trade ?
+[16:21] youknowho, in risposta a Hervé: If you dont confident in your balance skill then grab the range reaper
+[16:21] (testo "Plug and play") [16:21] (testo "Easy to use")
+[16:23] Hervé: Understood but I'm not new to UBS. I just wanted to know what you advise. Or maybe it's in the UBS manual that I haven't read in a while
+[18:04] Hervé, in risposta a BK: @Akaitrade : So I guess that a way to do it is to backtest the strategies with Risk Per Trade, then check the max drawdown in %, and balance accordingly, is that correct ?
+[20:09] BK, in risposta a Hervé: Yeah that is certainly a way to do it. Eventually i will add some balancing settings to the pack as well
+
+20 novembre
+[15:01] Kn Pleeeee: [file: BOOMONEstats.zip, 712 KB]
+        "BOOMONE pack, 7 sets for Wim's UBS. You get Boom1000 on H1, H4 and D1, Boom600 on H4 and D1, and Boom300 on H1 and H4. Heads up, they only work on ICTrading, since they're optimized on their Boom indices. Everything's tested on real ticks. I optimized from 09/07 to 05/10, then validated out of sample from 06/10 to 16/11. There are 3 types of strategies (S/R breakout, volatility, range), and they're not very correlated with each other. Quick note though: the history on Boom is pretty short, so that's about 3 months of optimization and 6 weeks of out-of-sample testing. Keep that in mind. If you're interested, DM me"
+        Reazioni: 3, 2
+
+RIASSUNTO - SETS FOR SALE
+- Cos'è: argomento per proporre set in vendita. Il pacchetto più recente è BOOMONE (7 set per gli indici Boom, di Kn Pleeeee).
+- Come si ottiene: i set di Wim sono nel file "UPDATED SETS UBS_V9.8.zip" (5.6 MB), indicati come ufficiali. Il pack di BK (Range Reaper / Range Trader Pro) è venduto sul suo sito o tramite EA Range Reaper.
+- Problemi discussi: i set di BK vanno bilanciati dall'utente in UBS; Hervé chiede se esista una guida al bilanciamento. BK non ha ancora una guida e pensa di aggiungere impostazioni di bilanciamento.
+- Consigli: BK dice che chi non sa bilanciare dovrebbe usare l'EA Range Reaper (plug and play).
+- Regole e soglie citate: HistoricalMaxDD per set (Hervé); il rischio per strategia "max risk per strat" non considera la dimensione dello SL, quindi BK sconsiglia questo metodo; BK suggerisce di backtestare con Risk per Trade, verificare il drawdown massimo in % e bilanciare di conseguenza.
+- BOOMONE: test su ticks reali, ottimizzazione dal 09/07 al 05/10, validazione out-of-sample dal 06/10 al 16/11. Storia Boom breve (circa 3 mesi di ottimizzazione, 6 settimane di OOS). Funziona solo su ICTrading.
+- Link: nessuno nel testo. "discord" è citato senza link.
+- Note: la vendita avviene per messaggio privato (DM).
+
+=====================================================================
+ARGOMENTO 5 - GENERAL
+=====================================================================
+Messaggio fissato: "I'm looking for optimization sets that some of you used to create good strategies. Mostly for non..." (testo abbreviato da Telegram)
+
+Storia: il topic General contiene messaggi dal 7 agosto. Ho caricato la cronologia fino a quella data ma NON l'ho trascritta per intero, perché è molto lunga. Di seguito trascrivo solo il tratto del 20-21 novembre visibile nella lettura diretta.
+
+20 novembre
+[15:50] Van Snowpea: yeah, but for 20k account , min lot is very safe
+[15:52] Jim: Yeah, I'm checking if the EA is calculating lot size correctly?
+[15:53] Van Snowpea: this is bt on one broker (no eth) with default 1mohlc from 2025
+[15:53] (testo "20k")
+[15:56] Van Snowpea: that is if live close to bt, the default is safe , but if we run on small account eg 500 u, still undertake risk
+[15:56] Jim: Yes I've got similar tests, just saw the warnings on lot size rounding in the journal
+[15:58] Van Snowpea: just like one account of mine from 877 at beginning a bigger dd as I put more range sub system inside it
+[16:58] PipHunter2026: @strueli what happens if you make an update for Rangereaper will the update be automatically available for ORB Master owners?
+[16:58] James Beadle: si è unito al gruppo tramite il link d'invito
+[21:30] Zwadde, in risposta a Wim: There is no way for me to update the ORB master as it has been removed? At least I don't see the option anywhere on the terminal or or on MQL5
+        (in risposta a Zwadde, reply di BK) https://t.me/c/2348148294/1/17434
+[21:37] Zwadde: not for me I guess
+[21:39] wim schrynemakers (proprietario), in risposta a Zwadde: you simply go to MT5 -> Market -> My purchases -> Orb Master -> update / don't do the update on MQL5
+[21:48] Zwadde: Well ok for those using MT5 in Dutch, its actually not market (which is a seperate section) but marktplaats. Hence the confusion
+[21:53] Zwadde: @strueli how to use the remaining activations? I can't find orb master under my purchases on the devices on which i hadn't installed it yet.
+
+Oggi (21 novembre)
+[02:41] Oleg, in risposta a Zwadde: I think it should already be called Range Reaper in your purchases, not the orb master.
+[02:48] Matt: Just fyi guys. It will still be called ORB master. When you load it you will see that it's actually range reaper.
+[02:57] Indra P, in risposta a Zwadde: Same stuff, just go from "My Purchases" section. Don't search on the mql5 search tab, because it will show that it is removed (the webpage is removed, but EA is still there). Scroll to orb master, then install
+[17:25] Tomasz Trader, in risposta a Clen: https://www.myfxbook.com/members/clenfx/clens-portfolio/12213808 Did you share those sets ?
+[--] Idsme dev: si è unito al gruppo tramite il link d'invito
+[--] Claudio: si è unito al gruppo tramite il link d'invito
+
+RIASSUNTO - GENERAL
+- Cos'è: discussione generale del gruppo, con temi su rischio, broker e aggiornamenti dell'EA.
+- Come si ottiene: l'EA ORB Master è stato rinominato o sostituito da Range Reaper. Va aggiornato da MT5 nella sezione My Purchases (Market), non dal sito MQL5, dove la pagina risulta rimossa.
+- Problemi segnalati: Zwadde non trova ORB Master nei suoi acquisti; si spiega che nella versione olandese la sezione si chiama marktplaats. Dubbio sull'uso delle attivazioni rimanenti.
+- Rischio e lotti: Van Snowpea e Jim discutono il calcolo della dimensione del lotto (warning di arrotondamento nel journal) con conti da 20k e da 500 USD.
+- Soglie e regole citate: nessuna soglia numerica esplicita oltre a quelle del lotto minimo.
+- Link: https://t.me/c/2348148294/1/17434 (messaggio interno al gruppo); https://www.myfxbook.com/members/clenfx/clens-portfolio/12213808 (portafoglio pubblico di Clen, citato da Tomasz Trader)
+
+=====================================================================
+ARGOMENTO 6 - MONTHLY COMPETITION
+=====================================================================
+Messaggio fissato: "Monthly competition results will be posted here"
+
+15 settembre
+[15:52] Виктор Минаев: Let me repeat: For the XAGUSD broker. In the XAGUSD file
+[15:52] (file: UBS-XAGUSD-H2-AGA04.set)
+[15:53] Виктор Минаев: Where did you get that from? It's not in the file I sent.
+[15:53] Remo: this file is correct, as i told you. check the XAUUSD files!
+[15:53] Till: The message says the XAGUSD file was loaded, so the error is in the next file, which is a XAUUSD set.
+[15:54] Виктор Минаев: Thanks, I found it. But the error points to a different file.
+[15:55] Remo: you will get errors, as long as symbol names are not correct related to your broker
+[15:55] Till: The error does not mention the file it occured in.
+[15:56] Виктор Минаев: Thanks! I see what the problem is.
+[15:56] Remo: your welcome
+[15:57] Van Snowpea: btw, how many broker U tried on Christmas sets? except vantage
+
+1 ottobre
+[--] StrathCole: Another month gone already. Time flies
+[08:25] IP
+[09:54] wim schrynemakers (proprietario): will do it today!
+        I'm gonna have to rethink the "scalpers on demo" though, because it's become unrealistic in my opinion. I think that Scalpers are going to have to move to live accounts, cause scalpers always perform well in demo, but has much less value in live trading. so from next month, scalp sets performance will only count at 50%
+[09:56] BS / TD: Congrats!
+[10:21] Ba Sa: Thank you Wim!
+[10:22] StrathCole, in risposta a Wim: Cool. Thank you very much. Which positions in the list are scalpers? Can you disclose that?
+[10:23] wim schrynemakers (proprietario): I think the top 6 and snowpea
+[10:24] StrathCole: Mine isn't (#5)
+[10:27] Ba Sa: @strueli I agree. And that makes sense
+[10:30] xInfinitYz, in risposta a Wim: In my opinion is hard to judge, sometimes performance is not even close demo vs real. I have many scalper sets which work great in demo but failed to deliver in real
+[11:09] Jim, in risposta a Wim: All live accounts would keep it fair across the board
+[11:17] Blades: Yeah. Need to be strictly on live for real world performance..
+[11:17] Tran Thien Huy: Hi Wim, just want to make sure I got this right. From next month, can scalping sets still run on demo and just get 50% of the performance counted, or do they have to move to live? And if they run on live, do they get counted 100% as normal, or is the 50% rule for scalpers either way? @strueli
+[11:27] Adebayo Ojo: @strueli I have watched this with admiration but don't really understand it very much. It seems people develop new sets, put it to test on a live account and show you the result? How does it work, do you welcome new contributors, what are the steps? Thanks
+[11:34] Till, in risposta a Adebayo Ojo: Take a look at profalgo website, you find the info incl. pdf contract download there.
+[11:50] Royston Cartwright: yes is there anywhere i can get some information on making strategies for this competition please thanks
+[12:00] wim schrynemakers (proprietario), in risposta a Tran Thien Huy: for demo accounts running scalpers: 50% of performance will be used. The idea is that strategies that have good chance of making actual money (not just paper money) should be rewarded the most
+[14:16] Tran Thien Huy: Thanks Wim, got it now. Yeah, I think that's fair.
+[14:19] Van Snowpea: well done, guys
+[14:20] wim schrynemakers (proprietario): We'll evaluate as we go.
+[14:24] Tran Thien Huy: And for the live accounts we talked about before, the x2 ratio still applies, right?
+[14:27] wim schrynemakers (proprietario): yes
+[15:06] wim schrynemakers (proprietario): so live account running well, has 4X bigger chance than a scalper on demo
+[15:14] Tran Thien Huy: Got it, Wim. That makes sense. Definitely gives a much stronger reason to run live now.
+
+2 ottobre
+[02:13] Classical Trading: Hi all, is there a join link and information on how to enter the competition? Thanks
+[02:43] Ba Sa, in risposta a Classical Trading: Here you go: https://www.tradewithwim.com/bonus-scheme
+[02:52] Ba Sa: @adebayo_ojo I think you've been looking for the above content (bonus-scheme) as well too.
+
+4 ottobre
+[12:34] Tomasz Trader, in risposta a wim: Do you akceptacji UBS grid ?
+
+5 ottobre
+[03:36] youknowho, in risposta a Tomasz Trader: i think any strategies acceptable as you are running from your side
+[12:41] ∆ndre ▼ ǝɹpuɐ, in risposta a Tomasz Trader: I would like to see good grid strategies for UBS, maybe I will try.
+
+9 ottobre
+[05:23] Van Snowpea: hi, Guys, I report one broker, though I can not 100% sure problem from the EBC broker, but now I Run CNew1 Gold Portfolio VT new account as I stopped all EBC accounts there, because all of my ebc accounts suddenly became invalid account on different VPSs. This happened after my 10k account doubled on EBC. I do not get a satisfied response from EBC still.
+[05:24] Van Snowpea: 8 accounts of ebc, placed on different VPS, all suddenly invalid and algo can not manage account. So I leave EBC now. Even worse: my friends' small account of EBC, on the same VPS, is all ok.
+[09:46] Tomasz Trader: What is EBC?
+[09:46] Van Snowpea: a broker
+[09:47] Tomasz Trader: Shit broker ?
+[09:47] Van Snowpea: this thing is very bad to all trader, I think
+[16:33] Tomasz Trader, in risposta a Van Snowpea: this is like years ago XM broker does. You can copy from demo running algo
+[16:34] Van Snowpea: EBC told me they restarted the server, but my account should login automatically as my MT5 is all opened on VPS. They do not reply why my account was logged out, but say problem on the EA I run. It's utterly ridiculous: EA might have problems causing some order issues, but what gives it the authority to disconnect my own account from the server?
+[17:26] Van Snowpea: and 8 account differents systems, that means some our own system, some based on ubs or reaper + different vps, how could all EA make 8 accounts off server. :)
+[17:28] Van Snowpea: so, just do not use EBC, I accept loss and I don't hold out any hope that they'll compensate me for my losses.
+[17:37] Tomasz Trader, in risposta a Van Snowpea: At least let you withdraw
+[18:13] Van Snowpea: btw, why the UKOusd, some broker price is 102.x some is 108.x
+[20:50] Andrew Soma (BORING Capital): we should probably move to another chat of this group, but I did this analysis in the past with US Oil, and some brokers have their own completely different price feed. I'd not trade with them. Major brokers like Vantage, IC, FM, Pepperstone, TMGM have low deviation between each other. Data was updated end of July, I should probably refresh that
+[21:59] Andrew Soma: I noticed it on darwinex
+
+21 ottobre
+[18:32] Van Snowpea: After further investigation, the EBC platform acknowledged that the previous invalid account issue was their fault and has compensated me. They also said they would give me an additional gift as compensation. I had originally given up hope on this matter because I had already withdrawn my funds and closed my trading account on the platform, and several signal accounts were also terminated accordingly. Given that the situation has changed, I am retracting my previous negative comments about EBC. Of course, I do not wish to encounter such problems again, as I plan to keep one account (reducing the number for easier management). This statement is hereby made for clarification.
+
+1 novembre
+[08:27] youknowho: Interesting to see gold sets that having profits this month :)
+
+2 novembre
+[08:01] wim schrynemakers (proprietario): will run it today
+[08:33] Van Snowpea: hard on oct. lucky this not lose
+
+RIASSUNTO - MONTHLY COMPETITION
+- Cos'è: la competizione mensile dei set di UBS. I risultati vengono pubblicati in questo topic da Wim.
+- Come si partecipa: Classical Trading ha chiesto come entrare. Ba Sa ha risposto con il link alla pagina bonus scheme (tradewithwim.com/bonus-scheme). Nessuna procedura dettagliata nel testo.
+- Regole di valutazione (annuncio di Wim, 1 ottobre): dal mese successivo le performance dei set scalper in demo contano solo al 50%. Per i conti demo che usano scalper si applica il 50%. Un conto live che va bene ha 4 volte più probabilità di uno scalper in demo. Il rapporto x2 per i live si applica ancora (Wim, 27 settembre).
+- Problemi: errori di simboli nei file dei set con broker diversi (Remo, Till, 15 settembre). Van Snowpea ha segnalato il broker EBC per account invalidati; ha poi ritrattato il giudizio il 21 ottobre dopo il risarcimento.
+- Prezzi del petrolio (UKOUSD): differenze di prezzo tra broker (Andrew Soma), con Vantage, IC, FM, Pepperstone e TMGM più allineati.
+- Link: https://www.tradewithwim.com/bonus-scheme ; nessun link a sito di EBC.
+
+=====================================================================
+LINK E FILE CITATI (con autore e data)
+=====================================================================
+LINK
+- https://www.mql5.com/en/market/product/192540 - Strategy Ledger Pro, Usefull Tools, 15 nov (autore non visibile)
+- https://www.mql5.com/en/blogs/post/780741 - walkthrough Strategy Ledger Pro, Usefull Tools, 15 nov (autore non visibile)
+- https://fxlive.trading/ubs-manual.php - Manuale UBS online, Jonathan, 19 nov (Usefull Tools)
+- https://fxlive.trading/metatrader-setfile-editor.php - Setfile editor, Jonathan, 19 nov (Usefull Tools)
+- https://www.youtube.com/watch?v=pjPPrhrAnpc - Terminal Manager, xInfinitYz, 20 nov (Usefull Tools)
+- trendsurfers.io/portfolio-manager - download Portfolio Manager 4.0, xInfinitYz, 21 nov (Usefull Tools)
+- trendsurfers.io/portfolio-manager/lifetime - licenza lifetime, xInfinitYz, 21 nov (Usefull Tools)
+- https://t.me/projektfarm - profilo citato da Ba Sa e Donhou8251, 21 nov (My new set files)
+- https://t.me/xInfinitYz - profilo citato da Maurice, 21 nov (Usefull Tools)
+- https://t.me/c/2348148294/1/17434 - messaggio interno al gruppo, BK, 21 nov (General)
+- https://www.myfxbook.com/members/clenfx/clens-portfolio/12213808 - portafoglio di Clen, citato da Tomasz Trader, 21 nov (General)
+- https://www.tradewithwim.com/bonus-scheme - pagina del bonus scheme, Ba Sa, 2 ott (Monthly Competition)
+- "discord" - parola citata da Wim senza link, 18 nov (sets for sale)
+
+FILE ALLEGATI (solo nomi, nessun file scaricato)
+- UBS Library pack 2026-11-16.zip - messaggio fissato, data 16 nov (UBS Optimizer App)
+- UPDATED SETS UBS_V9.8.zip (5.6 MB) - Wim, 18 nov (sets for sale)
+- Community_Share_2026-11.zip (151 KB) - Till, 21 nov (My new set files)
+- README.md (6 KB) - Till, 21 nov (My new set files)
+- UBS-XAUUSD-H1-G80482.set, G50449, G50455, G50482, G50561, G50601, G80381, G80388, G80449, G80480 (18 KB ciascuno) - Till, 21 nov (My new set files)
+- UBS-XAUUSD-H1-G80480.set - Auyllon (risposta a Till), 21 nov (My new set files)
+- Album (con README.md) - Tomasz Trader, 21 nov (My new set files)
+- metatrader-setfile-editor v7.8.html (194 KB) - Jonathan, 19 nov (Usefull Tools)
+- BOOMONEstats.zip (712 KB) - Kn Pleeeee, 20 nov (sets for sale)
+- UBS-XAGUSD-H2-AGA04.set (17 KB) - Виктор Минаев, 15 set (Monthly Competition)
