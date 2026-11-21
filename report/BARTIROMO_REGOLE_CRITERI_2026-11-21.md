@@ -16,3 +16,9 @@ Range = massimo/minimo M1 00:00-07:59. Salta il giorno se ampiezza < 0,15 x ADR1
 - Almeno una cella con PF IS > 1,0 per caso (8 prove): 50%.
 ## Regole di esito (invariate dopo)
 **CANDIDATA:** IS PF >= 1,3 (n >= 100), OOS PF > 1,2 (n >= 50) e R medio OOS > 0, lato opposto non peggiore di PF 0,8, almeno 60% degli anni con R >= 0. 8 prove: una cella isolata senza conferma su un'altra variante vicina (altro target) = non promossa. Nessun consiglio di taglie.
+
+## RISULTATI (script `bartiromo_regole.py`; output completo `BARTIROMO_REGOLE_RISULTATI_2026-11-21.txt`; oro 2004-2026, taglio IS/OOS 09/03/2020)
+- **Regola 1 (Asian range):** su 4.859 giorni validi, primo movimento dopo le 8 = sweep 1.898, breakout 2.098, nessuno 863. **SWEEP (inversione):** IS PF 0,74 (1R) / 0,83 (2R) / 0,79 (lato opposto); OOS 0,79 / 0,84 / 0,82; anni con R >= 0: 2-5 su 20; **peggio del long** (long IS PF 0,65-0,70). **BREAK:** IS PF 0,85 (1R) / 0,88 (2R), OOS 0,99 / 0,91; anni R >= 0: 6 su 23.
+- **Regola 2 (conferma H1 14-16):** 1.957 operazioni; IS PF 0,79 / 0,82 / 0,80 (1R / 1,5R / 2R), OOS 0,88 / 0,90 / 0,95; anni con R >= 0: 3-5 su 21. **Win rate al 1R: 49%** (lui: 60-83% su 6-20 trade manuali). Doji IS PF 0,81 / OOS 0,98; engulfing IS 0,75 / OOS 0,63.
+- **Esito: nessuna cella candidata (0 su 8).** Nessuna cella con PF IS >= 1,0, quindi anche la previsione "almeno una per caso" (50%) e' no. Tutte le previsioni confermate (nessuna candidata 90%; sweep PF IS < 1 in 3 su 3; win rate 1R < 60% si').
+- **Limiti:** versione oggettiva nostra delle sue regole (livelli e candele definiti a macchina; il suo take profit "a occhio" e la scelta della zona discrezionale non sono testati); orario = server FTMO - 1 (nessuna correzione per le settimane di sfasamento USA/Europa); costo fisso 0,35 $. Non esclude che un suo operato discrezionale funzioni: dice che le sue regole scritte non danno un vantaggio meccanico.
