@@ -1,0 +1,78 @@
+segnali 855
+Dow trade 127 netto a 0,1 lotti 306.05 primo 2024-09-30 14:45:00 ultimo 2026-11-12 14:20:31
+###### Premier 5%/7%
+ oro PROP  solo, dal 2015, nessuna  : n603 passate 80% | 3/6/12 mesi pass/fall: 0/0 0/0 8/0 | fall DD 0, inatt 0, aperte 119 | mediana gg 955
+ oro PROP  solo, ult.4 anni      : n191 passate 38% | 3/6/12 mesi pass/fall: 0/0 0/0 17/0 | fall DD 0, inatt 0, aperte 119 | mediana gg 413
+ oro PROP  solo, dal 2015, inatt.A  : n603 passate 21% | 3/6/12 mesi pass/fall: 0/7 0/27 8/52 | fall DD 0, inatt 475, aperte 0 | mediana gg 470
+ oro PROP  solo, dal 2015, inatt.B  : n603 passate 21% | 3/6/12 mesi pass/fall: 0/7 0/27 8/52 | fall DD 0, inatt 475, aperte 0 | mediana gg 470
+ oro MEDIO solo, dal 2015, nessuna  : n603 passate 81% | 3/6/12 mesi pass/fall: 2/0 10/1 30/8 | fall DD 72, inatt 0, aperte 42 | mediana gg 508
+ oro MEDIO solo, ult.4 anni      : n191 passate 76% | 3/6/12 mesi pass/fall: 4/0 16/0 63/0 | fall DD 0, inatt 0, aperte 45 | mediana gg 300
+ oro MEDIO solo, dal 2015, inatt.A  : n603 passate 37% | 3/6/12 mesi pass/fall: 2/7 10/28 26/53 | fall DD 30, inatt 352, aperte 0 | mediana gg 264
+ oro MEDIO solo, dal 2015, inatt.B  : n603 passate 37% | 3/6/12 mesi pass/fall: 2/7 10/28 26/53 | fall DD 30, inatt 352, aperte 0 | mediana gg 264
+ oro ALTO  solo, dal 2015, nessuna  : n603 passate 68% | 3/6/12 mesi pass/fall: 9/0 21/4 47/15 | fall DD 158, inatt 0, aperte 35 | mediana gg 268
+ oro ALTO  solo, ult.4 anni      : n191 passate 81% | 3/6/12 mesi pass/fall: 10/0 35/1 78/0 | fall DD 1, inatt 0, aperte 35 | mediana gg 230
+ oro ALTO  solo, dal 2015, inatt.A  : n603 passate 44% | 3/6/12 mesi pass/fall: 9/7 21/28 38/46 | fall DD 35, inatt 304, aperte 0 | mediana gg 194
+ oro ALTO  solo, dal 2015, inatt.B  : n603 passate 44% | 3/6/12 mesi pass/fall: 9/7 21/28 38/46 | fall DD 35, inatt 304, aperte 0 | mediana gg 194
+ oro PROP  + Dow PROP  (26 mesi)      : n90 passate 54% | 3/6/12 mesi pass/fall: 0/0 0/0 47/0 | fall DD 0, inatt 0, aperte 41 | mediana gg 357
+ oro MEDIO + Dow MEDIO (26 mesi)      : n90 passate 82% | 3/6/12 mesi pass/fall: 11/1 33/1 98/2 | fall DD 1, inatt 0, aperte 15 | mediana gg 210
+ oro ALTO  + Dow MEDIO (26 mesi)      : n90 passate 88% | 3/6/12 mesi pass/fall: 21/1 51/1 98/2 | fall DD 1, inatt 0, aperte 10 | mediana gg 166
+ oro ALTO  + Dow ALTO  (26 mesi)      : n90 passate 88% | 3/6/12 mesi pass/fall: 28/12 58/13 88/12 | fall DD 11, inatt 0, aperte 0 | mediana gg 127
+ oro MEDIO + Dow PROP  (26 mesi)      : n90 passate 62% | 3/6/12 mesi pass/fall: 2/0 21/0 90/0 | fall DD 0, inatt 0, aperte 34 | mediana gg 210
+ [Dow in finestra: solo oro per confronto] oro ALTO solo (26 mesi): n90 passate 66% | 3/6/12 mesi pass/fall: 8/0 29/0 92/0 | fall DD 1, inatt 0, aperte 30 | mediana gg 217
+###### Empire 10%/10%
+ oro PROP  solo, dal 2015, nessuna  : n603 passate 79% | 3/6/12 mesi pass/fall: 0/0 0/0 0/0 | fall DD 0, inatt 0, aperte 124 | mediana gg 1713
+ oro PROP  solo, ult.4 anni      : n191 passate 35% | 3/6/12 mesi pass/fall: 0/0 0/0 0/0 | fall DD 0, inatt 0, aperte 124 | mediana gg 798
+ oro PROP  solo, dal 2015, inatt.A  : n603 passate 14% | 3/6/12 mesi pass/fall: 0/7 0/27 0/54 | fall DD 0, inatt 521, aperte 0 | mediana gg 728
+ oro PROP  solo, dal 2015, inatt.B  : n603 passate 14% | 3/6/12 mesi pass/fall: 0/7 0/27 0/54 | fall DD 0, inatt 521, aperte 0 | mediana gg 728
+ oro MEDIO solo, dal 2015, nessuna  : n603 passate 91% | 3/6/12 mesi pass/fall: 0/0 3/0 18/0 | fall DD 0, inatt 0, aperte 54 | mediana gg 785
+ oro MEDIO solo, ult.4 anni      : n191 passate 71% | 3/6/12 mesi pass/fall: 0/0 8/0 38/0 | fall DD 0, inatt 0, aperte 55 | mediana gg 393
+ oro MEDIO solo, dal 2015, inatt.A  : n603 passate 33% | 3/6/12 mesi pass/fall: 0/7 3/27 16/49 | fall DD 0, inatt 403, aperte 0 | mediana gg 387
+ oro MEDIO solo, dal 2015, inatt.B  : n603 passate 33% | 3/6/12 mesi pass/fall: 0/7 3/27 16/49 | fall DD 0, inatt 403, aperte 0 | mediana gg 387
+ oro ALTO  solo, dal 2015, nessuna  : n603 passate 87% | 3/6/12 mesi pass/fall: 2/0 10/0 30/1 | fall DD 37, inatt 0, aperte 41 | mediana gg 537
+ oro ALTO  solo, ult.4 anni      : n191 passate 77% | 3/6/12 mesi pass/fall: 4/0 16/0 64/0 | fall DD 0, inatt 0, aperte 44 | mediana gg 294
+ oro ALTO  solo, dal 2015, inatt.A  : n603 passate 37% | 3/6/12 mesi pass/fall: 2/7 10/27 26/48 | fall DD 11, inatt 370, aperte 0 | mediana gg 263
+ oro ALTO  solo, dal 2015, inatt.B  : n603 passate 37% | 3/6/12 mesi pass/fall: 2/7 10/27 26/48 | fall DD 11, inatt 370, aperte 0 | mediana gg 263
+ oro PROP  + Dow PROP  (26 mesi)      : n90 passate 30% | 3/6/12 mesi pass/fall: 0/0 0/0 0/0 | fall DD 0, inatt 0, aperte 63 | mediana gg 629
+ oro MEDIO + Dow MEDIO (26 mesi)      : n90 passate 67% | 3/6/12 mesi pass/fall: 0/0 17/0 87/0 | fall DD 0, inatt 0, aperte 30 | mediana gg 267
+ oro ALTO  + Dow MEDIO (26 mesi)      : n90 passate 72% | 3/6/12 mesi pass/fall: 7/0 24/0 98/0 | fall DD 0, inatt 0, aperte 25 | mediana gg 218
+ oro ALTO  + Dow ALTO  (26 mesi)      : n90 passate 98% | 3/6/12 mesi pass/fall: 12/0 40/0 100/0 | fall DD 0, inatt 0, aperte 2 | mediana gg 195
+ oro MEDIO + Dow PROP  (26 mesi)      : n90 passate 54% | 3/6/12 mesi pass/fall: 0/0 5/0 60/0 | fall DD 0, inatt 0, aperte 41 | mediana gg 287
+ [Dow in finestra: solo oro per confronto] oro ALTO solo (26 mesi): n90 passate 60% | 3/6/12 mesi pass/fall: 0/0 12/0 65/0 | fall DD 0, inatt 0, aperte 36 | mediana gg 273
+###### Foundation fase1 6%/10%
+ oro PROP  solo, dal 2015, nessuna  : n603 passate 79% | 3/6/12 mesi pass/fall: 0/0 0/0 0/0 | fall DD 0, inatt 0, aperte 124 | mediana gg 1713
+ oro PROP  solo, ult.4 anni      : n191 passate 35% | 3/6/12 mesi pass/fall: 0/0 0/0 0/0 | fall DD 0, inatt 0, aperte 124 | mediana gg 798
+ oro PROP  solo, dal 2015, inatt.A  : n603 passate 14% | 3/6/12 mesi pass/fall: 0/7 0/27 0/54 | fall DD 0, inatt 521, aperte 0 | mediana gg 728
+ oro PROP  solo, dal 2015, inatt.B  : n603 passate 14% | 3/6/12 mesi pass/fall: 0/7 0/27 0/54 | fall DD 0, inatt 521, aperte 0 | mediana gg 728
+ oro MEDIO solo, dal 2015, nessuna  : n603 passate 83% | 3/6/12 mesi pass/fall: 0/0 3/0 18/6 | fall DD 48, inatt 0, aperte 54 | mediana gg 658
+ oro MEDIO solo, ult.4 anni      : n191 passate 71% | 3/6/12 mesi pass/fall: 0/0 8/0 38/0 | fall DD 0, inatt 0, aperte 55 | mediana gg 393
+ oro MEDIO solo, dal 2015, inatt.A  : n603 passate 33% | 3/6/12 mesi pass/fall: 0/7 3/27 16/54 | fall DD 24, inatt 379, aperte 0 | mediana gg 387
+ oro MEDIO solo, dal 2015, inatt.B  : n603 passate 33% | 3/6/12 mesi pass/fall: 0/7 3/27 16/54 | fall DD 24, inatt 379, aperte 0 | mediana gg 387
+ oro ALTO  solo, dal 2015, nessuna  : n603 passate 77% | 3/6/12 mesi pass/fall: 2/0 10/2 30/10 | fall DD 99, inatt 0, aperte 41 | mediana gg 462
+ oro ALTO  solo, ult.4 anni      : n191 passate 77% | 3/6/12 mesi pass/fall: 4/0 16/0 64/0 | fall DD 0, inatt 0, aperte 44 | mediana gg 294
+ oro ALTO  solo, dal 2015, inatt.A  : n603 passate 37% | 3/6/12 mesi pass/fall: 2/7 10/29 26/52 | fall DD 34, inatt 347, aperte 0 | mediana gg 263
+ oro ALTO  solo, dal 2015, inatt.B  : n603 passate 37% | 3/6/12 mesi pass/fall: 2/7 10/29 26/52 | fall DD 34, inatt 347, aperte 0 | mediana gg 263
+ oro PROP  + Dow PROP  (26 mesi)      : n90 passate 30% | 3/6/12 mesi pass/fall: 0/0 0/0 0/0 | fall DD 0, inatt 0, aperte 63 | mediana gg 629
+ oro MEDIO + Dow MEDIO (26 mesi)      : n90 passate 67% | 3/6/12 mesi pass/fall: 0/0 17/0 87/0 | fall DD 0, inatt 0, aperte 30 | mediana gg 267
+ oro ALTO  + Dow MEDIO (26 mesi)      : n90 passate 72% | 3/6/12 mesi pass/fall: 7/0 24/0 98/0 | fall DD 0, inatt 0, aperte 25 | mediana gg 218
+ oro ALTO  + Dow ALTO  (26 mesi)      : n90 passate 90% | 3/6/12 mesi pass/fall: 12/8 37/8 95/5 | fall DD 7, inatt 0, aperte 2 | mediana gg 194
+ oro MEDIO + Dow PROP  (26 mesi)      : n90 passate 54% | 3/6/12 mesi pass/fall: 0/0 5/0 60/0 | fall DD 0, inatt 0, aperte 41 | mediana gg 287
+ [Dow in finestra: solo oro per confronto] oro ALTO solo (26 mesi): n90 passate 60% | 3/6/12 mesi pass/fall: 0/0 12/0 65/0 | fall DD 0, inatt 0, aperte 36 | mediana gg 273
+###### Foundation fase2 6%/5%
+ oro PROP  solo, dal 2015, nessuna  : n603 passate 92% | 3/6/12 mesi pass/fall: 0/0 4/0 21/0 | fall DD 0, inatt 0, aperte 51 | mediana gg 704
+ oro PROP  solo, ult.4 anni      : n191 passate 73% | 3/6/12 mesi pass/fall: 0/0 8/0 42/0 | fall DD 0, inatt 0, aperte 51 | mediana gg 379
+ oro PROP  solo, dal 2015, inatt.A  : n603 passate 34% | 3/6/12 mesi pass/fall: 0/7 4/27 19/49 | fall DD 0, inatt 400, aperte 0 | mediana gg 343
+ oro PROP  solo, dal 2015, inatt.B  : n603 passate 34% | 3/6/12 mesi pass/fall: 0/7 4/27 19/49 | fall DD 0, inatt 400, aperte 0 | mediana gg 343
+ oro MEDIO solo, dal 2015, nessuna  : n603 passate 86% | 3/6/12 mesi pass/fall: 8/0 21/0 46/6 | fall DD 48, inatt 0, aperte 36 | mediana gg 369
+ oro MEDIO solo, ult.4 anni      : n191 passate 81% | 3/6/12 mesi pass/fall: 9/0 34/0 76/0 | fall DD 0, inatt 0, aperte 36 | mediana gg 231
+ oro MEDIO solo, dal 2015, inatt.A  : n603 passate 42% | 3/6/12 mesi pass/fall: 8/7 20/24 36/47 | fall DD 24, inatt 323, aperte 0 | mediana gg 193
+ oro MEDIO solo, dal 2015, inatt.B  : n603 passate 42% | 3/6/12 mesi pass/fall: 8/7 20/24 36/47 | fall DD 24, inatt 323, aperte 0 | mediana gg 193
+ oro ALTO  solo, dal 2015, nessuna  : n603 passate 79% | 3/6/12 mesi pass/fall: 15/0 31/2 55/10 | fall DD 99, inatt 0, aperte 26 | mediana gg 236
+ oro ALTO  solo, ult.4 anni      : n191 passate 87% | 3/6/12 mesi pass/fall: 24/0 48/0 90/0 | fall DD 0, inatt 0, aperte 25 | mediana gg 159
+ oro ALTO  solo, dal 2015, inatt.A  : n603 passate 46% | 3/6/12 mesi pass/fall: 15/7 29/27 43/45 | fall DD 34, inatt 290, aperte 0 | mediana gg 138
+ oro ALTO  solo, dal 2015, inatt.B  : n603 passate 46% | 3/6/12 mesi pass/fall: 15/7 29/27 43/45 | fall DD 34, inatt 290, aperte 0 | mediana gg 138
+ oro PROP  + Dow PROP  (26 mesi)      : n90 passate 67% | 3/6/12 mesi pass/fall: 0/0 19/0 92/0 | fall DD 0, inatt 0, aperte 30 | mediana gg 256
+ oro MEDIO + Dow MEDIO (26 mesi)      : n90 passate 100% | 3/6/12 mesi pass/fall: 23/0 55/0 100/0 | fall DD 0, inatt 0, aperte 0 | mediana gg 146
+ oro ALTO  + Dow MEDIO (26 mesi)      : n90 passate 100% | 3/6/12 mesi pass/fall: 36/0 71/0 100/0 | fall DD 0, inatt 0, aperte 0 | mediana gg 112
+ oro ALTO  + Dow ALTO  (26 mesi)      : n90 passate 92% | 3/6/12 mesi pass/fall: 43/8 79/8 95/5 | fall DD 7, inatt 0, aperte 0 | mediana gg 96
+ oro MEDIO + Dow PROP  (26 mesi)      : n90 passate 77% | 3/6/12 mesi pass/fall: 13/0 36/0 98/0 | fall DD 0, inatt 0, aperte 21 | mediana gg 196
+ [Dow in finestra: solo oro per confronto] oro ALTO solo (26 mesi): n90 passate 77% | 3/6/12 mesi pass/fall: 29/0 48/0 98/0 | fall DD 0, inatt 0, aperte 21 | mediana gg 134
