@@ -101,7 +101,8 @@ Write-Host '====================================================================
 
 # PASSO 1 -- macchina, processi, cartella dati
 if($env:COMPUTERNAME -ne $PC_ATTESO){ Muori ('questa macchina si chiama ' + $env:COMPUTERNAME + ', non ' + $PC_ATTESO + '.') }
-$vivi = @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)
+function Mio($p){ (-not $p.Path) -or $p.Path.StartsWith('C:\MT5_Backtest\Mt5_Ftmo_Prova\',[StringComparison]::OrdinalIgnoreCase) }  # guardia selettiva 22/11: conta solo il terminale FTMO (altri MT5, es. l'ottimizzazione nel portatile BCM, possono restare aperti)
+$vivi = @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Where-Object { Mio $_ })
 if($vivi.Count -gt 0){ Muori 'MT5 risulta APERTO su questo PC. Guarda i grafici, chiudilo a mano e rilancia.' }
 $exe = Join-Path $PROG 'terminal64.exe'
 $med = Join-Path $PROG 'metaeditor64.exe'
