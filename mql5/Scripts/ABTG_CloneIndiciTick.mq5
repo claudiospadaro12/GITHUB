@@ -18,6 +18,7 @@
 
 input string InpCoppie = "U30USD>U30USD_T,SPXUSD>SPXUSD_T,NASUSD>NASUSD_T,NASUSD_EXT>NASUSD_EXT_T,SPXUSD_EXT>SPXUSD_EXT_T";
 input double InpTickSize = 0.01;      // nuovo passo prezzo del clone
+input string InpDaEXT = "2010.01.01"; // inizio della copia per i simboli _EXT (la serie caricata parte piu tardi)
 input bool   InpChiudiTerminale = false;
 
 const string F_PROGRESSO = "ABTG_CLONI_PROGRESSO.txt";
@@ -68,6 +69,8 @@ bool CopiaBarre(const string src,const string dst,long &totale,datetime &prima,d
    if(!SymbolSelect(src,true)) { Riga("  ERRORE: SymbolSelect("+src+") fallita"); return false; }
    Sincronizza(src);
    datetime t0=(datetime)SeriesInfoInteger(src,PERIOD_M1,SERIES_FIRSTDATE);
+   int lun=StringLen(src);
+   if(lun>=4 && StringSubstr(src,lun-4,4)=="_EXT") t0=StringToTime(InpDaEXT+" 00:00");
    datetime t1=(datetime)SeriesInfoInteger(src,PERIOD_M1,SERIES_LASTBAR_DATE);
    if(t0<=0 || t1<=0 || t1<t0) { Riga("  ERRORE: intervallo barre M1 non valido per "+src); return false; }
    datetime passo=30*86400;
@@ -77,12 +80,12 @@ bool CopiaBarre(const string src,const string dst,long &totale,datetime &prima,d
       datetime b=(datetime)MathMin((double)(t+passo-1),(double)t1);
       MqlRates r[];
       int c=-1;
-      for(int k=0;k<10;k++)
+      for(int k=0;k<4;k++)
         {
          c=CopyRates(src,PERIOD_M1,a,b,r);
          if(c>0) break;
          if(c==0) break;   // intervallo senza barre
-         Sleep(400);
+         Sleep(300);
         }
       if(c<=0) continue;
       int rr=CustomRatesReplace(dst,r[0].time,r[c-1].time,r);
