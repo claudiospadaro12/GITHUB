@@ -1,0 +1,705 @@
+<meta charset="utf-8">
+<title>Zairex Community Pack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --ground: #EEF1F4; --surface: #FFFFFF; --ink: #13202B; --muted: #5B6875; --faint: #8794A0;
+  --rule: #D3DAE1; --brass: #9A6B12; --brass-soft: #F1E4C8; --good: #1F7A4D; --bad: #A23B2A;
+  --track: #E3E8ED;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0E151C; --surface: #151F29; --ink: #E6ECF1; --muted: #9AA8B5; --faint: #6F7D8A;
+    --rule: #26333F; --brass: #D9A441; --brass-soft: #3A2E16; --good: #52C58E; --bad: #E07A66;
+    --track: #22303C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0E151C; --surface: #151F29; --ink: #E6ECF1; --muted: #9AA8B5; --faint: #6F7D8A;
+  --rule: #26333F; --brass: #D9A441; --brass-soft: #3A2E16; --good: #52C58E; --bad: #E07A66;
+  --track: #22303C; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font: 15px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  padding-inline: clamp(16px, 4vw, 48px); padding-block: 40px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 28px; }
+.mono, .mono-s, .orig, .zx, .facts dd, .num { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
+header { display: grid; gap: 14px; }
+.by { font: 500 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+h1 {
+  margin: 0; font-family: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif; font-weight: 800;
+  font-size: clamp(44px, 7vw, 76px); line-height: .92; letter-spacing: .01em; text-wrap: balance;
+}
+.lede { margin: 0; max-width: 64ch; color: var(--muted); font-size: 17px; }
+.lede strong { color: var(--ink); font-weight: 600; }
+.facts {
+  margin: 6px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.facts div { padding: 14px 16px 14px 0; display: grid; gap: 4px; }
+.facts dt { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.facts dd { margin: 0; font-size: 15px; font-variant-numeric: tabular-nums; }
+.facts dd b { font-weight: 500; color: var(--good); }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+h2.sec { margin: 0 0 2px; font-family: "Big Shoulders Display", "Arial Narrow", sans-serif; font-weight: 600; font-size: 28px; letter-spacing: .02em; }
+.seclede { margin: 0 0 16px; color: var(--muted); max-width: 70ch; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+.pcard { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 14px; align-content: start; }
+.pcard.lead { border-color: var(--brass); box-shadow: inset 3px 0 0 var(--brass); }
+.phead { display: grid; gap: 4px; }
+.phead h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.pnote { font-size: 13px; color: var(--muted); }
+.pdates { font: 12px "IBM Plex Mono", monospace; color: var(--faint); letter-spacing: .02em; }
+.pbig { margin: 0; font-size: 15px; color: var(--muted); }
+.pbig span { font-family: "Big Shoulders Display", "Arial Narrow", sans-serif; font-weight: 800; font-size: 46px; line-height: .9; color: var(--good); margin-right: 8px; vertical-align: -4px; }
+.curve { width: 100%; max-width: 100%; height: auto; display: block; border: 1px solid var(--rule); border-radius: 3px; background: #fff; }
+.pstats { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px 16px; }
+.pstats div { display: grid; gap: 2px; }
+.pstats dt { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.pstats dd { margin: 0; font: 500 14px "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+.share { width: 210px; min-width: 170px; }
+.sbar { display: inline-block; width: calc(100% - 52px); height: 9px; background: var(--track); border-radius: 5px; overflow: hidden; vertical-align: middle; }
+.sbar span { display: block; height: 100%; background: var(--brass); border-radius: 5px; }
+.spct { display: inline-block; width: 46px; text-align: right; font: 12px "IBM Plex Mono", monospace; color: var(--muted); vertical-align: middle; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; font-variant-numeric: tabular-nums; }
+thead th {
+  text-align: left; font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); padding: 14px 14px 10px; border-bottom: 1px solid var(--rule); vertical-align: bottom;
+}
+thead th.num { text-align: right; font-family: inherit; }
+tbody td { padding: 14px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: color-mix(in srgb, var(--brass-soft) 35%, transparent); }
+.names { display: grid; gap: 1px; min-width: 260px; }
+.orig { font-size: 12px; color: var(--muted); word-break: break-all; }
+.arrow { font-size: 11px; color: var(--faint); line-height: 1; }
+.zx { font-size: 13px; font-weight: 500; color: var(--ink); word-break: break-all; }
+.sym {
+  display: inline-block; font: 500 11px/1 "IBM Plex Mono", monospace; letter-spacing: .04em;
+  padding: 5px 7px; border-radius: 3px; background: var(--brass-soft); color: var(--brass); white-space: nowrap;
+}
+.num { text-align: right; white-space: nowrap; font-size: 13px; }
+.was { color: var(--faint); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--faint) 60%, transparent); }
+.now { color: var(--ink); font-weight: 500; }
+.up { color: var(--good); } .down { color: var(--bad); } .flat, .plain { color: var(--muted); }
+.mono-s { font-size: 12px; }
+.dumb { width: 230px; min-width: 200px; }
+.track { position: relative; height: 14px; background: var(--track); border-radius: 7px; }
+.span { position: absolute; top: 6px; height: 2px; background: var(--good); opacity: .55; }
+.dot { position: absolute; top: 2px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; }
+.dot.b { background: var(--surface); border: 2px solid var(--faint); }
+.dot.t { background: var(--good); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--good); }
+.dvals { display: flex; justify-content: space-between; margin-top: 5px; font: 12px/1 "IBM Plex Mono", monospace; }
+.axis { position: relative; height: 14px; margin-top: 6px; font: 10px/1 "IBM Plex Mono", monospace; color: var(--faint); letter-spacing: 0; text-transform: none; }
+.axis span { position: absolute; transform: translateX(-50%); }
+.legend { display: flex; flex-wrap: wrap; gap: 18px; padding: 12px 14px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; }
+.legend .lb { border: 2px solid var(--faint); background: var(--surface); }
+.legend .lt { background: var(--good); }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px 40px; }
+.notes section { display: grid; gap: 8px; align-content: start; }
+.notes h2 { margin: 0; font-family: "Big Shoulders Display", "Arial Narrow", sans-serif; font-weight: 600; font-size: 24px; letter-spacing: .02em; }
+.notes p, .notes li { margin: 0; color: var(--muted); max-width: 62ch; }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.notes code { font: 12.5px "IBM Plex Mono", monospace; color: var(--ink); background: var(--track); padding: 1px 5px; border-radius: 3px; }
+footer { font-size: 13px; color: var(--faint); border-top: 1px solid var(--rule); padding-top: 18px; }
+@media (max-width: 560px) { body { padding-block: 24px 40px; } .lede { font-size: 16px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="by">By Zairex</span>
+    <h1>Zairex Community Pack</h1>
+    <p class="lede">14 Ultimate Breakout set files with <strong>re-tuned exits</strong>. Every set here beat its own original
+    on a stretch of history the tuning never saw &mdash; same entries, same account settings, only the exits changed.
+    Loaded together they returned <strong>+53%</strong> over that unseen period, with a worst drawdown of
+    4.35%.</p>
+    <dl class="facts">
+      <div><dt>Sets</dt><dd>14</dd></div>
+      <div><dt>Test period (unseen)</dt><dd>2024.03.08 &ndash; 2026.08.22</dd></div>
+      <div><dt>Profit per drawdown</dt><dd><b>&times;1.79</b> median</dd></div>
+      <div><dt>Profit factor up</dt><dd>13 of 14</dd></div>
+      <div><dt>Drawdown lower</dt><dd>11 of 14</dd></div>
+      <div><dt>Symbols</dt><dd>BTCUSD, XAUUSD</dd></div>
+    </dl>
+  </header>
+
+  <section>
+    <h2 class="sec">All 14 sets on one account</h2>
+    <p class="seclede">Every set in this pack loaded together on a single 100,000 account at 1:500 leverage,
+    every tick based on real ticks, with the AutoLoader using each set&rsquo;s own lot settings. These two runs also carried one
+    extra set that was later dropped from the pack for being too small to matter &mdash; it made 26 over the
+    unseen period, under a tenth of a percent of the total.</p>
+    <div class="pgrid">
+      <article class="pcard">
+        <div class="phead">
+          <h3>Full history</h3>
+          <span class="pnote">Tuning period included</span>
+          <span class="pdates">2021.01.01 &ndash; 2026.09.14</span>
+        </div>
+        <p class="pbig"><span>+109%</span> on 100,000</p>
+        <img class="curve" alt="Balance curve, full history: 100,000 rising to 209,458"
+             src="data:image/png;base64,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">
+        <dl class="pstats"><div><dt>Net profit</dt><dd>109,458</dd></div><div><dt>Balance at end</dt><dd>209,458</dd></div><div><dt>Worst equity drawdown</dt><dd>4,871 (2.9%)</dd></div><div><dt>Profit factor</dt><dd>1.59</dd></div><div><dt>Trades</dt><dd>10,343</dd></div><div><dt>Winning trades</dt><dd>68.2%</dd></div><div><dt>Recovery factor</dt><dd>22.47</dd></div></dl>
+      </article>
+      <article class="pcard lead">
+        <div class="phead">
+          <h3>Unseen test</h3>
+          <span class="pnote">No tuning ever used this period</span>
+          <span class="pdates">2024.03.08 &ndash; 2026.09.14</span>
+        </div>
+        <p class="pbig"><span>+53%</span> on 100,000</p>
+        <img class="curve" alt="Balance curve, unseen test: 100,000 rising to 153,296"
+             src="data:image/png;base64,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">
+        <dl class="pstats"><div><dt>Net profit</dt><dd>53,296</dd></div><div><dt>Balance at end</dt><dd>153,296</dd></div><div><dt>Worst equity drawdown</dt><dd>4,871 (4.35%)</dd></div><div><dt>Profit factor</dt><dd>1.74</dd></div><div><dt>Trades</dt><dd>3,984</dd></div><div><dt>Winning trades</dt><dd>69.1%</dd></div><div><dt>Recovery factor</dt><dd>10.94</dd></div></dl>
+      </article></div>
+  </section>
+
+  <section>
+    <h2 class="sec">Each set on its own</h2>
+    <p class="seclede">The same unseen period, one set per backtest on its own 100,000 account &mdash; so these
+    figures are directly comparable with each other. Together these 14 add up to 53,207, against
+    53,296 for the one-account run &mdash; which also included the dropped set. The two ways of testing agree
+    to within a tenth of a percent, so nothing here depends on the others being loaded.</p>
+    <div class="panel">
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Set</th><th>Symbol</th><th class="num">Net profit</th><th>Share of the pack</th>
+              <th class="num">Worst drawdown</th><th class="num">Profit factor</th><th class="num">Trades</th><th class="num">Won</th>
+            </tr>
+          </thead>
+          <tbody>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_MT5_longterm_S.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">9,781</td>
+        <td class="share"><div class="sbar"><span style="width:100.0%"></span></div>
+            <span class="spct">18.4%</span></td>
+        <td class="num plain">2,046</td>
+        <td class="num plain">1.98</td>
+        <td class="num plain">416</td>
+        <td class="num plain">78%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_MT5_C.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">6,707</td>
+        <td class="share"><div class="sbar"><span style="width:68.6%"></span></div>
+            <span class="spct">12.6%</span></td>
+        <td class="num plain">1,386</td>
+        <td class="num plain">1.38</td>
+        <td class="num plain">1,006</td>
+        <td class="num plain">84%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_BTCUSD_BitcoinReaper5.set</span></td>
+        <td><span class="sym">BTCUSD</span></td>
+        <td class="num now">6,510</td>
+        <td class="share"><div class="sbar"><span style="width:66.6%"></span></div>
+            <span class="spct">12.2%</span></td>
+        <td class="num plain">1,056</td>
+        <td class="num plain">1.47</td>
+        <td class="num plain">497</td>
+        <td class="num plain">56%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_MT5_longterm_O.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">5,364</td>
+        <td class="share"><div class="sbar"><span style="width:54.8%"></span></div>
+            <span class="spct">10.1%</span></td>
+        <td class="num plain">1,260</td>
+        <td class="num plain">2.48</td>
+        <td class="num plain">301</td>
+        <td class="num plain">61%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_MT5_longterm_M.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">4,952</td>
+        <td class="share"><div class="sbar"><span style="width:50.6%"></span></div>
+            <span class="spct">9.3%</span></td>
+        <td class="num plain">1,053</td>
+        <td class="num plain">2.26</td>
+        <td class="num plain">335</td>
+        <td class="num plain">45%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_GOLD_Goldbot_One__dailyH.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">3,390</td>
+        <td class="share"><div class="sbar"><span style="width:34.7%"></span></div>
+            <span class="spct">6.4%</span></td>
+        <td class="num plain">550</td>
+        <td class="num plain">2.00</td>
+        <td class="num plain">104</td>
+        <td class="num plain">61%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_MT4A.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">3,211</td>
+        <td class="share"><div class="sbar"><span style="width:32.8%"></span></div>
+            <span class="spct">6.0%</span></td>
+        <td class="num plain">938</td>
+        <td class="num plain">1.90</td>
+        <td class="num plain">264</td>
+        <td class="num plain">77%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_BTCUSD_H1_N.set</span></td>
+        <td><span class="sym">BTCUSD</span></td>
+        <td class="num now">2,948</td>
+        <td class="share"><div class="sbar"><span style="width:30.1%"></span></div>
+            <span class="spct">5.5%</span></td>
+        <td class="num plain">859</td>
+        <td class="num plain">1.59</td>
+        <td class="num plain">138</td>
+        <td class="num plain">42%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_MT5_longterm_C.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">2,459</td>
+        <td class="share"><div class="sbar"><span style="width:25.1%"></span></div>
+            <span class="spct">4.6%</span></td>
+        <td class="num plain">873</td>
+        <td class="num plain">2.08</td>
+        <td class="num plain">141</td>
+        <td class="num plain">70%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_GOLD_Goldbot_One__dailyI.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">2,101</td>
+        <td class="share"><div class="sbar"><span style="width:21.5%"></span></div>
+            <span class="spct">3.9%</span></td>
+        <td class="num plain">438</td>
+        <td class="num plain">1.93</td>
+        <td class="num plain">102</td>
+        <td class="num plain">58%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_MT5_longterm_A.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">1,781</td>
+        <td class="share"><div class="sbar"><span style="width:18.2%"></span></div>
+            <span class="spct">3.3%</span></td>
+        <td class="num plain">496</td>
+        <td class="num plain">7.26</td>
+        <td class="num plain">76</td>
+        <td class="num plain">12%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_c.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">1,780</td>
+        <td class="share"><div class="sbar"><span style="width:18.2%"></span></div>
+            <span class="spct">3.3%</span></td>
+        <td class="num plain">1,364</td>
+        <td class="num plain">1.42</td>
+        <td class="num plain">156</td>
+        <td class="num plain">63%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_GOLD_Goldtrade_Pro__GOLDTRADEPRO_F.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">1,302</td>
+        <td class="share"><div class="sbar"><span style="width:13.3%"></span></div>
+            <span class="spct">2.4%</span></td>
+        <td class="num plain">364</td>
+        <td class="num plain">1.94</td>
+        <td class="num plain">53</td>
+        <td class="num plain">47%</td>
+      </tr>
+      <tr>
+        <td class="names"><span class="zx">Zairex_XAUUSD_GOLD_Goldbot_One__dailyA.set</span></td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num now">922</td>
+        <td class="share"><div class="sbar"><span style="width:9.4%"></span></div>
+            <span class="spct">1.7%</span></td>
+        <td class="num plain">141</td>
+        <td class="num plain">2.26</td>
+        <td class="num plain">58</td>
+        <td class="num plain">55%</td>
+      </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend"><span>2024.03.08 &ndash; 2026.09.14 &middot; 100,000 per test &middot; Vantage Markets &middot; 100% real ticks</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Set by set, against the original</h2>
+    <p class="seclede">Each set against its own original, tested one at a time on the unseen period 2024.03.08 &ndash; 2026.08.22.</p>
+  <div class="panel">
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Original set &rarr; Zairex set</th>
+            <th>Symbol</th>
+            <th class="num">Profit factor</th>
+            <th>Net profit &divide; max drawdown
+              <div class="axis" aria-hidden="true"><span style="left:0.00%">0</span><span style="left:28.57%">2</span><span style="left:57.14%">4</span><span style="left:85.71%">6</span></div>
+            </th>
+            <th class="num">Net profit</th>
+            <th class="num">Max drawdown</th>
+            <th class="num">Trades</th>
+            <th class="num">Magic</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <td class="names">
+          <span class="orig">BitcoinReaper5.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_BTCUSD_BitcoinReaper5.set</span>
+        </td>
+        <td><span class="sym">BTCUSD</span></td>
+        <td class="num"><span class="was">1.34</span> <span class="now">1.44</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.58, Zairex 5.99">
+            <span class="span" style="left:36.80%;width:48.73%"></span>
+            <span class="dot b" style="left:36.80%"></span>
+            <span class="dot t" style="left:85.53%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.58</span><span class="now">5.99</span></div>
+        </td>
+        <td class="num up">+15%</td>
+        <td class="num up">−50%</td>
+        <td class="num plain">435</td>
+        <td class="num plain mono-s">9639001</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">GOLD_Goldbot_One__dailyH.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_GOLD_Goldbot_One__dailyH.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.14</span> <span class="now">1.93</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 0.72, Zairex 5.37">
+            <span class="span" style="left:10.24%;width:66.47%"></span>
+            <span class="dot b" style="left:10.24%"></span>
+            <span class="dot t" style="left:76.70%"></span>
+          </div>
+          <div class="dvals"><span class="was">0.72</span><span class="now">5.37</span></div>
+        </td>
+        <td class="num up">+872%</td>
+        <td class="num down">+30%</td>
+        <td class="num plain">103</td>
+        <td class="num plain mono-s">9639005</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">Breakout_Support_Resistance_GOLD_Goldbot_One__dailyA.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_GOLD_Goldbot_One__dailyA.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.82</span> <span class="now">2.13</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.37, Zairex 5.12">
+            <span class="span" style="left:33.83%;width:39.24%"></span>
+            <span class="dot b" style="left:33.83%"></span>
+            <span class="dot t" style="left:73.08%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.37</span><span class="now">5.12</span></div>
+        </td>
+        <td class="num up">+20%</td>
+        <td class="num up">−44%</td>
+        <td class="num plain">58</td>
+        <td class="num plain mono-s">9639004</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">MT5_longterm_S.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_MT5_longterm_S.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.70</span> <span class="now">2.00</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.95, Zairex 4.74">
+            <span class="span" style="left:42.17%;width:25.58%"></span>
+            <span class="dot b" style="left:42.17%"></span>
+            <span class="dot t" style="left:67.75%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.95</span><span class="now">4.74</span></div>
+        </td>
+        <td class="num up">+32%</td>
+        <td class="num up">−18%</td>
+        <td class="num plain">410</td>
+        <td class="num plain mono-s">9639014</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">MT5_longterm_M.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_MT5_longterm_M.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.49</span> <span class="now">2.23</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.88, Zairex 4.57">
+            <span class="span" style="left:41.15%;width:24.08%"></span>
+            <span class="dot b" style="left:41.15%"></span>
+            <span class="dot t" style="left:65.23%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.88</span><span class="now">4.57</span></div>
+        </td>
+        <td class="num down">−12%</td>
+        <td class="num up">−44%</td>
+        <td class="num plain">330</td>
+        <td class="num plain mono-s">9639012</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">MT5_C.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_MT5_C.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.37</span> <span class="now">1.37</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.69, Zairex 4.55">
+            <span class="span" style="left:38.40%;width:26.60%"></span>
+            <span class="dot b" style="left:38.40%"></span>
+            <span class="dot t" style="left:65.01%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.69</span><span class="now">4.55</span></div>
+        </td>
+        <td class="num up">+14%</td>
+        <td class="num up">−33%</td>
+        <td class="num plain">986</td>
+        <td class="num plain mono-s">9639009</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">MT5_longterm_O.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_MT5_longterm_O.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.60</span> <span class="now">2.43</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.93, Zairex 4.12">
+            <span class="span" style="left:41.82%;width:17.08%"></span>
+            <span class="dot b" style="left:41.82%"></span>
+            <span class="dot t" style="left:58.89%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.93</span><span class="now">4.12</span></div>
+        </td>
+        <td class="num down">−9%</td>
+        <td class="num up">−35%</td>
+        <td class="num plain">297</td>
+        <td class="num plain mono-s">9639013</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">H1_N.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_BTCUSD_H1_N.set</span>
+        </td>
+        <td><span class="sym">BTCUSD</span></td>
+        <td class="num"><span class="was">1.44</span> <span class="now">1.68</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.65, Zairex 3.74">
+            <span class="span" style="left:37.90%;width:15.52%"></span>
+            <span class="dot b" style="left:37.90%"></span>
+            <span class="dot t" style="left:53.42%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.65</span><span class="now">3.74</span></div>
+        </td>
+        <td class="num up">+406%</td>
+        <td class="num down">+259%</td>
+        <td class="num plain">136</td>
+        <td class="num plain mono-s">9639002</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">c.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_c.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.74</span> <span class="now">1.91</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 1.94, Zairex 3.68">
+            <span class="span" style="left:27.74%;width:24.83%"></span>
+            <span class="dot b" style="left:27.74%"></span>
+            <span class="dot t" style="left:52.57%"></span>
+          </div>
+          <div class="dvals"><span class="was">1.94</span><span class="now">3.68</span></div>
+        </td>
+        <td class="num down">−22%</td>
+        <td class="num up">−59%</td>
+        <td class="num plain">155</td>
+        <td class="num plain mono-s">9639015</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">MT5_longterm_A.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_MT5_longterm_A.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">3.16</span> <span class="now">7.27</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 1.55, Zairex 3.59">
+            <span class="span" style="left:22.12%;width:29.22%"></span>
+            <span class="dot b" style="left:22.12%"></span>
+            <span class="dot t" style="left:51.34%"></span>
+          </div>
+          <div class="dvals"><span class="was">1.55</span><span class="now">3.59</span></div>
+        </td>
+        <td class="num up">+13%</td>
+        <td class="num up">−51%</td>
+        <td class="num plain">76</td>
+        <td class="num plain mono-s">9639010</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">MT4A.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_MT4A.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.41</span> <span class="now">1.86</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 1.06, Zairex 3.26">
+            <span class="span" style="left:15.11%;width:31.52%"></span>
+            <span class="dot b" style="left:15.11%"></span>
+            <span class="dot t" style="left:46.63%"></span>
+          </div>
+          <div class="dvals"><span class="was">1.06</span><span class="now">3.26</span></div>
+        </td>
+        <td class="num up">+44%</td>
+        <td class="num up">−53%</td>
+        <td class="num plain">259</td>
+        <td class="num plain mono-s">9639008</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">GOLD_Goldbot_One__dailyI.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_GOLD_Goldbot_One__dailyI.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.62</span> <span class="now">1.95</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 2.60, Zairex 3.21">
+            <span class="span" style="left:37.13%;width:8.73%"></span>
+            <span class="dot b" style="left:37.13%"></span>
+            <span class="dot t" style="left:45.86%"></span>
+          </div>
+          <div class="dvals"><span class="was">2.60</span><span class="now">3.21</span></div>
+        </td>
+        <td class="num up">+42%</td>
+        <td class="num down">+15%</td>
+        <td class="num plain">101</td>
+        <td class="num plain mono-s">9639006</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">MT5_longterm_C.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_MT5_longterm_C.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.96</span> <span class="now">2.13</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 1.78, Zairex 2.87">
+            <span class="span" style="left:25.44%;width:15.63%"></span>
+            <span class="dot b" style="left:25.44%"></span>
+            <span class="dot t" style="left:41.07%"></span>
+          </div>
+          <div class="dvals"><span class="was">1.78</span><span class="now">2.87</span></div>
+        </td>
+        <td class="num down">−21%</td>
+        <td class="num up">−51%</td>
+        <td class="num plain">140</td>
+        <td class="num plain mono-s">9639011</td>
+      </tr>
+      <tr>
+        <td class="names">
+          <span class="orig">Breakout_Support_Resistance_GOLD_Goldtrade_Pro__GOLDTRADEPRO_F.set</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <span class="zx">Zairex_XAUUSD_GOLD_Goldtrade_Pro__GOLDTRADEPRO_F.set</span>
+        </td>
+        <td><span class="sym">XAUUSD</span></td>
+        <td class="num"><span class="was">1.51</span> <span class="now">1.84</span></td>
+        <td class="dumb">
+          <div class="track" role="img" aria-label="Net profit per unit of drawdown: original 1.02, Zairex 2.06">
+            <span class="span" style="left:14.57%;width:14.83%"></span>
+            <span class="dot b" style="left:14.57%"></span>
+            <span class="dot t" style="left:29.40%"></span>
+          </div>
+          <div class="dvals"><span class="was">1.02</span><span class="now">2.06</span></div>
+        </td>
+        <td class="num up">+61%</td>
+        <td class="num up">−20%</td>
+        <td class="num plain">53</td>
+        <td class="num plain mono-s">9639007</td>
+      </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span><i class="lb"></i>Original set</span>
+      <span><i class="lt"></i>Zairex set</span>
+      <span>Net profit and drawdown columns show the change against the original on the same test.</span>
+    </div>
+  </div>
+  </section>
+
+  <div class="notes">
+    <section>
+      <h2>How these were tested</h2>
+      <p>Each strategy was tuned on 2021.01.01 &ndash; 2024.03.01, then both versions &mdash; original and Zairex &mdash; were
+      backtested on 2024.03.08 &ndash; 2026.08.22, a period the tuning never touched, with every tick based on real ticks.
+      A set only made this pack if it came out ahead there.</p>
+      <p>Only the ten exit settings were changed. Entries, filters and sizing are exactly the original author&rsquo;s.</p>
+      <p>Every backtest on this page was run on <strong>Vantage Markets</strong> (Build 6182) at <strong>100% real ticks</strong> history quality,
+      with <code>overrideAutoLoadLotsSettings</code> set to <code>false</code> so each set used its own lot settings.</p>
+      <p>The two account tests above ran the whole pack together to 2026.09.14. Read the unseen one first: the
+      full-history test starts inside the tuning period, so it flatters these sets by design. Both hit the same worst
+      drawdown of 4,871 &mdash; it happened after 2024.03.08, inside the unseen stretch.</p>
+    </section>
+    <section>
+      <h2>Reading the numbers</h2>
+      <ul>
+        <li>Compare a set with <strong>its own original</strong>, row by row. Account settings differed between test batches, so raw
+        profit is not comparable between rows &mdash; that is why this page shows ratios and changes.</li>
+        <li>Profit &divide; drawdown does not depend on lot size, so those dots share one scale.</li>
+        <li>Every set shown traded at least 50 times in the test period.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Before you load them</h2>
+      <ul>
+        <li><strong>Set <code>overrideAutoLoadLotsSettings</code> to <code>false</code></strong> in the AutoLoader, so every set
+        uses its own lot settings. Leave it on and the AutoLoader overrides them, and you are no longer trading what was tested.</li>
+        <li><strong>Check the symbol names.</strong> These use <code>XAUUSD+</code>, <code>GBPUSD+</code> and <code>BTCUSD</code>. If your broker
+        names them differently, change <code>ForceSymbol</code> first or the AutoLoader will not trade them.</li>
+        <li>Magic numbers <code>9639001</code>&ndash;<code>9639015</code> are reserved for this pack, so they will not clash with each other.</li>
+        <li>Trade comments start with <code>Zairex</code>, so you can spot these trades in the terminal.</li>
+        <li>Past results do not guarantee future ones. Test on demo before running real money.</li>
+      </ul>
+    </section>
+  </div>
+
+  <footer>Zairex Community Pack &middot; exits tuned by Zairex &middot; exit settings changed: Exit_stop, Exit_limit, Exit_TrailSL_Start, Exit_TrailSL_size, Exit_TrailTP_Start, Exit_TrailTP_size, Exit_BE_start, Exit_BE_extra_pips, Exit_TrailSL_after_X_Minutes, Exit_TrailSL_after_X_Minutes_size</footer>
+</div>
