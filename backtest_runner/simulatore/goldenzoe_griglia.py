@@ -1,4 +1,5 @@
-import sys,datetime as dt,itertools,csv
+import sys,os,datetime as dt,itertools,csv
+SW=float(os.environ.get('SW','0.055'))
 import numpy as np
 sys.path.insert(0,'/home/user/GITHUB/backtest_runner/simulatore')
 from universal_scalper_all import load_m1,resample,prep
@@ -17,7 +18,7 @@ def trade(entries,mi,mt,cost=0.35):
         if pos==1 and i>=start:
             if L[i]<=stop:
                 px=min(O[i],stop); days=(P(ks[i])-P(t0)).total_seconds()/86400
-                R=(px-ent)/risk-cost/risk-(0.055/360)*days*ent/risk
+                R=(px-ent)/risk-cost/risk-(SW/360)*days*ent/risk
                 out.append((t0,R)); pos=0; continue
             ext=max(ext,H[i]); stop=max(stop,ext-mt*atr[i])
     return out
@@ -62,7 +63,7 @@ print('best AB',bestAB,'best C',bestC,'idonee',sum(1 for r in rows if r[2]),'su 
 for name,pos,vals in (('N',0,Ns),('mi',1,MI),('mt',2,MT)):
     print(name,{v:round(np.mean([min(res[k]['A'][1],res[k]['B'][1]) for k in res if k[pos]==v]),3) for v in vals})
 import os; os.makedirs('/home/user/GITHUB/report/GOLDENZOE_GRIGLIA_dati',exist_ok=True)
-with open('/home/user/GITHUB/report/GOLDENZOE_GRIGLIA_dati/griglia.csv','w',newline='') as f:
+with open('/home/user/GITHUB/report/GOLDENZOE_GRIGLIA_dati/griglia%s.csv'%('' if SW==0.055 else '_swap%d'%round(SW*1000)),'w',newline='') as f:
     w=csv.writer(f,delimiter=';'); w.writerow(['N','mi','mt','nA','pfA','nB','pfB','nC','pfC','RC','idonea','plateau','frac','candidato','confermato'])
     for k,v,idon,pl,fr,cand,conf in rows: w.writerow(list(k)+[v['A'][0],round(v['A'][1],3),v['B'][0],round(v['B'][1],3),v['C'][0],round(v['C'][1],3),round(v['C'][2],4),idon,pl,round(fr,2),cand,conf])
 print('--- confronto base / confermati (tutto 2004-2026): n PF R t ; AB n PF')
