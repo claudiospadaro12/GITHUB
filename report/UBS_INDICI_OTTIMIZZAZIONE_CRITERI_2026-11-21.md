@@ -48,3 +48,8 @@ Passo 0 (sola lettura, pochi secondi) + passata di fumo + 2 ottimizzazioni da ci
 - **IS di Wim per gli indici = 2020-2023** (non 2010-2019). Quindi 2010-2019 e **fuori campione per i suoi set Indicement**: il controllo C0 su 2010-2019 e un vero fuori campione per C0, ma NON per i candidati ottimizzati da noi su quella finestra.
 - **I numeri di Wim (post-IS 05/2025-11/2026, tick):** Indicement mediana PF 0,98 su 14 set, solo 2 sopra 1,1. Nuova previsione **I-8 (scritta ora):** i set Indicement di Wim (C0) hanno PF >= 1,2 sulla finestra 2010-2019: 15%; **I-9:** un ottimizzato nostro con IS 2010-2019 supera OOS 2020-23 con PF >= 1,2: 20%. Le previsioni I-1..I-7 restano com'erano.
 - **Priorita:** i candidati piu promettenti dal Library pack sugli indici sono i volatility M15 su US30 (vedi `UBS_TELEGRAM_ANALISI_2026-11-21.md`); da testare sui tick nativi BCM `U30USD` prima di ottimizzare altro.
+
+## 10. Nota del 22/11 (dopo i cloni con tick size 0,01, `CLONI_INDICI_20261122_052535.txt`)
+- Gli indici BCM hanno tick size 0,1: gli stop a 2 decimali dell'EA UBS venivano rifiutati ("Invalid stops"; `UBS_VM15_DIAGNOSI_ORDINI_2026-11-22.md`). Cloni personalizzati `U30USD_T`, `SPXUSD_T`, `NASUSD_T`, `NASUSD_EXT_T`, `SPXUSD_EXT_T` con tick size 0,01 creati con successo (barre M1 con spread; tick non copiati; `tick_value_profit/loss` non impostabili).
+- **Lo storico `_EXT` inizia il 14/11/2010** (5,23 milioni di barre su NASUSD_EXT, 4,60 su SPXUSD_EXT, fino al 31/07/2026): la finestra IS del criterio (2010-01-01) parte di fatto da quella data. Il periodo IS e di 9 anni e 1 mese, non 10.
+- Le passate sui cloni usano Modello 1 (nessun tick): niente controllo tick/1 minuto sugli indici finche non si copiano i tick nel clone.
