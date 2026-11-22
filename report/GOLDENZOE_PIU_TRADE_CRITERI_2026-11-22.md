@@ -5,3 +5,14 @@ Richiesta di Claudio: "dobbiamo aumentare i trade, trova il modo". Gia misurato 
 - **Porta (la STESSA del 19/11, nessun allentamento):** >= 1,5x le operazioni della base (396, quindi >= 594) E PF >= 1,3 in ciascuno dei tre periodi E t >= 3. Per le celle che passano: ripetizione con swap BCM 9,7%.
 - **Previsioni:** P-1 almeno una cella passa la porta: 15%. P-2 almeno una cella F1 con >= 1,5x operazioni ha t >= 3 (anche se un periodo e sotto 1,3): 35%. P-3 F2 non passa: 85%. P-4 nessuna cella migliora il PF totale oltre 1,60: 80%. Contatore di campagna +13.
 - **Limiti:** 20 anni di oro in salita, un solo mercato; piu operazioni sullo stesso oro sono in gran parte la stessa tendenza ripetuta (correlate), non prove indipendenti. Qualunque risultato va poi confermato nel tester BCM con tick e swap vero.
+
+## RISULTATI (`backtest_runner/simulatore/goldenzoe_piu_trade.py`; dati `GOLDENZOE_PIU_TRADE_dati/`). Base 394 operazioni (partenza dopo il riscaldamento della EMA 300: 394 invece di 396), porta >= 591.
+| Cella | Operazioni (x base) | PF | t | PF A / B / C | Porta (FTMO) | Con swap BCM 9,7%: PF / t / A-B-C |
+|---|---|---|---|---|---|---|
+| base N55 | 394 | 1,48 | 2,60 | 1,27 / 1,67 / 1,61 | - | 1,35 / 2,03 / 1,15-1,53-1,49 |
+| **F1 N10 + EMA100** | **653 (1,66x)** | **1,42** | **3,07** | **1,40 / 1,31 / 1,58** | **PASSA** | 1,30 / 2,32 / 1,28-1,20-1,45: non passa |
+| F1 N10 + EMA300 | 603 (1,53x) | 1,40 | 2,83 | 1,32 / 1,40 / 1,55 | no (t 2,83) | 1,28 / 2,12 |
+| F1 N10 senza filtro | 778 (1,97x) | 1,38 | 3,08 | 1,40 / 1,27 / 1,48 | no (B 1,27) | 1,26 / 2,25 |
+| F2 rientro N10 K50 | 599 (1,52x) | 1,40 | 2,82 | 1,34 / 1,28 / 1,64 | no | 1,28 / 2,12 |
+Altre celle (N20, N30, rientri N20, K20): meno di 1,5x operazioni o PF < 1,3 in un periodo. Previsioni: P-1 (almeno una passa, 15%) si; P-2 (F1 con >= 1,5x operazioni e t >= 3, 35%) si; P-3 (F2 non passa, 85%) si; P-4 (nessuna cella oltre PF 1,60 totale, 80%) si.
+**Lettura onesta:** con i costi FTMO una cella supera la STESSA porta che il 19/11 nessuna superava: N=10 con filtro EMA100 (+66% operazioni, PF 1,42 contro 1,48, t 3,07 contro 2,60). E coerente con le celle vicine (N10 senza filtro e con EMA300 quasi passano). Pero: 1 cella su 13 e un esito che il caso puo dare; con swap BCM non passa (PF 1,30, t 2,32, periodo B 1,20); sono operazioni correlate (stessa tendenza dell'oro); il PF scende, il t sale solo perche i trade sono di piu. Da confermare nel tester BCM a tick con swap vero prima di qualunque uso.
