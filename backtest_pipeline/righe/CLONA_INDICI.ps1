@@ -246,7 +246,7 @@ $fo = Join-Path $out ('CLONI_INDICI_' + $stamp + '.txt')
 $rg = @('CLONI INDICI -- esito della corsa ' + $stamp, 'terminale chiuso da solo: ' + $chiuso, 'file di fine scritto: ' + $fatto, '')
 $rilievi = 0
 if(Test-Path -LiteralPath $fine){
-  foreach($r2 in @(Get-Content -LiteralPath $fine -ErrorAction SilentlyContinue)){ $rg += $r2; if($r2 -match 'PROBLEMI|ERRORE|NON TROVATO|NON VALIDA|problemi=[1-9]'){ $rilievi++ } }
+  foreach($r2 in @(Get-Content -LiteralPath $fine -ErrorAction SilentlyContinue)){ $rg += $r2; if($r2 -cmatch 'PROBLEMI|ERRORE|NON TROVATO|NON VALIDA|problemi=[1-9]'){ $rilievi++ } }
 } else { $rg += 'MANCA il file di fine (lo script non e arrivato in fondo).'; $rilievi++ }
 $rg += ''
 $rg += '--- log MQL5 dell esecuzione (ultime righe) ---'
