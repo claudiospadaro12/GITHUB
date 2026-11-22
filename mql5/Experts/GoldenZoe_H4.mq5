@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                              GoldenZoe_H4.mq5    |
+//|  v1.13 (22/11/2026): DUE INGRESSI OPZIONALI, SPENTI DI DEFAULT (= v1.12 identica): InpEntryN (canale d'ingresso, 0 = usa InpDonchianN) e |
+//|   InpTrendEMA (filtro: solo se la chiusura e sopra/sotto la EMA di N candele, 0 = spento). Stop e stop mobile invariati. Test: report/GOLDENZOE_PIU_TRADE_CRITERI_2026-11-22.md |
 //|  v1.12 (22/11/2026): SOLO ETICHETTE: commento ordine = InpComment + " Buy"/" Sell" (es. "GoldenZoe Buy"); logica, lotti e stop IDENTICI a v1.11. |
 //|  v1.11 (19/11/2026): InpLotMode 1 = lotto con OrderCalcProfit (CFD in|
 //|   valuta diversa dal conto, es. 225JPY); default 0 = v1.00/v1.10.   |
@@ -23,12 +25,14 @@
 //|  simulatore Python usava la media di Wilder): differenza piccola.  |
 //+------------------------------------------------------------------+
 #property copyright "Claudio - GoldenZoe (strategia propria)"
-#property version   "1.12"
+#property version   "1.13"
 #property strict
 #include <Trade/Trade.mqh>
 
 input ENUM_TIMEFRAMES InpTF          = PERIOD_H4;
 input int    InpDonchianN            = 55;     // candele precedenti per il massimo/minimo
+input int    InpEntryN               = 0;      // 0 = usa InpDonchianN; >0 = canale d'ingresso (es. 10); stop e trail non cambiano
+input int    InpTrendEMA             = 0;      // 0 = spento; >0 = acquisto solo se la chiusura e sopra la EMA di N candele (es. 100)
 input int    InpAtrPeriod            = 14;
 input double InpStopAtr              = 3.0;    // stop iniziale = N x ATR
 input double InpTrailAtr             = 3.0;    // stop mobile = estremo dall'ingresso -/+ N x ATR
@@ -52,6 +56,7 @@ input bool   InpNewsBlockTrail       = false;  // se true salta anche lo spostam
 
 CTrade gTrade;
 int    hAtr = INVALID_HANDLE;
+int    hEma = INVALID_HANDLE;
 datetime gLastBar = 0;
 datetime gLastHadPos = 0;
 datetime gNewsT[]; int gNewsN = 0; int gNewsBlocked = 0;
@@ -123,11 +128,12 @@ int OnInit()
    gTrade.SetDeviationInPoints(50);
    hAtr = iATR(_Symbol,InpTF,InpAtrPeriod);
    if(hAtr==INVALID_HANDLE) return INIT_FAILED;
+   if(InpTrendEMA>0){ hEma = iMA(_Symbol,InpTF,InpTrendEMA,0,MODE_EMA,PRICE_CLOSE); if(hEma==INVALID_HANDLE) return INIT_FAILED; }
    if(InpNewsFilter && InpNewsSource==0 && !LoadNews()) return INIT_FAILED;   // filtro acceso ma senza notizie: non parto in silenzio senza filtro
    return INIT_SUCCEEDED;
   }
 
-void OnDeinit(const int reason){ if(hAtr!=INVALID_HANDLE) IndicatorRelease(hAtr); if(InpNewsFilter) Print("[GoldenZoe] ingressi bloccati dal filtro news: ",gNewsBlocked); }
+void OnDeinit(const int reason){ if(hAtr!=INVALID_HANDLE) IndicatorRelease(hAtr); if(hEma!=INVALID_HANDLE) IndicatorRelease(hEma); if(InpNewsFilter) Print("[GoldenZoe] ingressi bloccati dal filtro news: ",gNewsBlocked); }
 
 bool SelectMyPosition()
   {
@@ -215,18 +221,26 @@ void OnTick()
    if(SelectMyPosition()) gLastHadPos=t0;            // c'e' una posizione in questa candela
    if(t0==gLastBar) return;                           // lavoro solo alla nuova candela
    gLastBar=t0;
-   if(Bars(_Symbol,InpTF)<InpDonchianN+InpAtrPeriod+10) return;
+   int N = (InpEntryN>0 ? InpEntryN : InpDonchianN);
+   if(Bars(_Symbol,InpTF)<MathMax(N,InpTrendEMA)+InpAtrPeriod+10) return;
    double a[]; ArraySetAsSeries(a,true);
    if(CopyBuffer(hAtr,0,1,1,a)<1) return;
    double atr=a[0]; if(atr<=0) return;
    if(SelectMyPosition()){ if(!(InpNewsBlockTrail && NewsBlocked(t0))) ManageTrail(atr); return; }
    if(gLastHadPos>=iTime(_Symbol,InpTF,1)) return;    // posizione chiusa durante la candela appena finita: aspetto
    double c1=iClose(_Symbol,InpTF,1);
-   int ih=iHighest(_Symbol,InpTF,MODE_HIGH,InpDonchianN,2);
-   int il=iLowest (_Symbol,InpTF,MODE_LOW ,InpDonchianN,2);
+   int ih=iHighest(_Symbol,InpTF,MODE_HIGH,N,2);
+   int il=iLowest (_Symbol,InpTF,MODE_LOW ,N,2);
    if(ih<0 || il<0) return;
    bool sigL = InpAllowLong  && c1>iHigh(_Symbol,InpTF,ih);
    bool sigS = InpAllowShort && c1<iLow (_Symbol,InpTF,il);
+   if(InpTrendEMA>0)
+     {
+      double em[]; ArraySetAsSeries(em,true);
+      if(CopyBuffer(hEma,0,1,1,em)<1) return;
+      if(c1<=em[0]) sigL=false;
+      if(c1>=em[0]) sigS=false;
+     }
    if(!(sigL || sigS)) return;
    if(NewsBlocked(t0)){ gNewsBlocked++; Log("ingresso saltato: finestra notizie"); return; }
    if(sigL) { OpenTrade(true ,atr); return; }
