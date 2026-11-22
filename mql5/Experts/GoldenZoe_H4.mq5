@@ -1,5 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                              GoldenZoe_H4.mq5    |
+//|  v1.12 (22/11/2026): SOLO ETICHETTE: commento ordine = InpComment + " Buy"/" Sell" (es. "GoldenZoe Buy"); logica, lotti e stop IDENTICI a v1.11. |
 //|  v1.11 (19/11/2026): InpLotMode 1 = lotto con OrderCalcProfit (CFD in|
 //|   valuta diversa dal conto, es. 225JPY); default 0 = v1.00/v1.10.   |
 //|  v1.10 (19/11/2026): FILTRO NEWS opzionale (default SPENTO = v1.00)|
@@ -22,7 +23,7 @@
 //|  simulatore Python usava la media di Wilder): differenza piccola.  |
 //+------------------------------------------------------------------+
 #property copyright "Claudio - GoldenZoe (strategia propria)"
-#property version   "1.11"
+#property version   "1.12"
 #property strict
 #include <Trade/Trade.mqh>
 
@@ -36,7 +37,7 @@ input bool   InpAllowShort           = false;  // il test non trova edge sulle v
 input double InpRiskPercent          = 1.0;    // % equity rischiata sullo stop iniziale
 input int    InpLotMode              = 0;      // 0 = valore del tick (come v1.00), 1 = OrderCalcProfit (consigliato per CFD in valuta diversa dal conto, es. 225JPY)
 input long   InpMagic                = 972301;
-input string InpComment              = "GOLDENZOE H4";
+input string InpComment              = "GoldenZoe"; // il comando aggiunge " Buy" o " Sell"
 input bool   InpVerbose              = false;
 // --- FILTRO NEWS (v1.10, default spento): niente NUOVI ingressi da N minuti prima a N minuti dopo una notizia ---
 input bool   InpNewsFilter           = false;
@@ -174,7 +175,7 @@ void OpenTrade(const bool isLong,const double atr)
    sl = NormalizeDouble(sl,_Digits);
    double lot = CalcLot(MathAbs(price-sl),isLong);
    if(lot<=0){ Log("lotto non valido"); return; }
-   bool ok = isLong ? gTrade.Buy(lot,_Symbol,0,sl,0,InpComment) : gTrade.Sell(lot,_Symbol,0,sl,0,InpComment);
+   bool ok = isLong ? gTrade.Buy(lot,_Symbol,0,sl,0,InpComment+" Buy") : gTrade.Sell(lot,_Symbol,0,sl,0,InpComment+" Sell");
    Log(StringFormat("%s lot=%.2f price=%.2f sl=%.2f atr=%.2f ok=%d",isLong?"BUY":"SELL",lot,price,sl,atr,ok));
   }
 
