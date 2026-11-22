@@ -77,3 +77,18 @@ _t6 = _t6.replace('100000 EUR', '80000 EUR')
 assert '100000' not in _t6
 open('righe/RIGA_LANCIA_UBS_DR.txt', 'w', encoding='ascii').write(_t6)
 print('deposito 80000 ok')
+
+# --- GUARDIA SELETTIVA (22/11): la riga convive con un'ottimizzazione nel portatile C:\MT5_BCM_Opt; conta solo i processi del terminale PRINCIPALE
+import re as _re2
+_t7 = open('righe/RIGA_LANCIA_UBS_DR.txt', encoding='ascii').read()
+_pat = _re2.compile(r"@\(Get-Process -Name (terminal64,metaeditor64,metatester64|terminal64,metaeditor64) -ErrorAction SilentlyContinue\)")
+_n = len(_pat.findall(_t7)); assert _n >= 4, _n
+_t7 = _pat.sub(lambda m: "@(Get-Process -Name %s -ErrorAction SilentlyContinue | Where-Object { Mio $_ })" % m.group(1), _t7)
+assert _t7.count("Get-Process -Name terminal64") == _t7.count("Where-Object { Mio $_ }")
+assert _t7.count("ANNO80K_WIM_TESTER.ps1") == 1
+_t7 = _t7.replace("ANNO80K_WIM_TESTER.ps1", "ANNO80K_WIM_TESTER_SEL.ps1")
+_f = "function Mio($p){ (-not $p.Path) -or $p.Path.StartsWith('C:\\Program Files\\BCM Markets MT5 Terminal\\',[StringComparison]::OrdinalIgnoreCase) }; "
+assert _t7.startswith("& { ")
+_t7 = "& { " + _f + _t7[len("& { "):]
+open('righe/RIGA_LANCIA_UBS_DR.txt', 'w', encoding='ascii').write(_t7)
+print('guardia selettiva: sostituzioni', _n)

@@ -18,5 +18,8 @@ assert m
 t = t.replace(m.group(1) + ": 18 passate, solo tester", "UBS US30 g, MISURA DEL DRAWDOWN a 4 taglie (sul clone U30USD_T a tick reali, Modello 4, deposito 80.000 EUR; i cloni devono essere a posto): 4 passate, solo tester")
 sost("report/OTT1_GOLDBOT_PROP_CRITERI_2026-11-13.md", "report/DOWRAPTOR_PROFILI_CRITERI_2026-11-22.md")
 sost("(22 KB, passata dal cancello)", "(%d KB, passata dal cancello)" % round(os.path.getsize('righe/RIGA_LANCIA_UBS_DR.txt') / 1024))
+_a = "con MT5 CHIUSO (tutti e QUATTRO: BCM, C:\\MT5_Backtest, C:\\FundedNext_Manuale e C:\\MT5_Backtest\\Mt5_Ftmo_Prova)"
+assert t.count(_a) == 1, t.count(_a)
+t = t.replace(_a, "con il terminale PRINCIPALE BCM (C:\\Program Files\\BCM Markets MT5 Terminal) CHIUSO e senza altri test del tester in corso: il portatile C:\\MT5_BCM_Opt con l ottimizzazione PUO restare aperto (guardia selettiva: conta solo i processi del terminale principale)")
 open('righe/BOOT_RIGA_UBS_DR.txt', 'w', encoding='ascii').write(t)
 print('boot', len(t))
