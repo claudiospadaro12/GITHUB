@@ -1,0 +1,29 @@
+segnali 855
+Dow trade 127 netto a 0,1 lotti 306.05 primo 2024-09-30 14:45:00 ultimo 2026-11-12 14:20:31
+correlazione P&L giornaliero (chiuso) oro/Dow: 0.009 | mensile: 0.131
+partenze 90
+peggiori giorni Dow a 0,1 lotti (perdita chiusa): [('2025-12-11', -108.4), ('2025-03-28', -98.3), ('2026-03-25', -17.8), ('2026-05-18', -7.0)] -> con moltiplicatori {'PROP': 15.5, 'MEDIO': 31.0, 'ALTO': 51.6}
+obiettivo 10% oro PROP + Dow NESSUNO | passate 0/90 (0%) fallite 0 (giorn 0, totale 0) non concluse 90 | giorni 25/50/75: -
+obiettivo 10% oro PROP + Dow PROP | passate 27/90 (30%) fallite 0 (giorn 0, totale 0) non concluse 63 | giorni 25/50/75: [566, 629, 672]
+obiettivo 10% oro PROP + Dow MEDIO | passate 50/90 (56%) fallite 0 (giorn 0, totale 0) non concluse 40 | giorni 25/50/75: [317, 364, 396]
+obiettivo 10% oro PROP + Dow ALTO | passate 38/90 (42%) fallite 46 (giorn 46, totale 0) non concluse 6 | giorni 25/50/75: [154, 185, 224]
+obiettivo 10% oro MEDIO + Dow NESSUNO | passate 41/90 (46%) fallite 0 (giorn 0, totale 0) non concluse 49 | giorni 25/50/75: [224, 350, 420]
+obiettivo 10% oro MEDIO + Dow PROP | passate 49/90 (54%) fallite 0 (giorn 0, totale 0) non concluse 41 | giorni 25/50/75: [225, 287, 371]
+obiettivo 10% oro MEDIO + Dow MEDIO | passate 60/90 (67%) fallite 0 (giorn 0, totale 0) non concluse 30 | giorni 25/50/75: [180, 267, 317]
+obiettivo 10% oro MEDIO + Dow ALTO | passate 46/90 (51%) fallite 42 (giorn 42, totale 0) non concluse 2 | giorni 25/50/75: [121, 161, 192]
+obiettivo 10% oro ALTO + Dow NESSUNO | passate 54/90 (60%) fallite 0 (giorn 0, totale 0) non concluse 36 | giorni 25/50/75: [203, 273, 389]
+obiettivo 10% oro ALTO + Dow PROP | passate 55/90 (61%) fallite 0 (giorn 0, totale 0) non concluse 35 | giorni 25/50/75: [156, 253, 312]
+obiettivo 10% oro ALTO + Dow MEDIO | passate 65/90 (72%) fallite 0 (giorn 0, totale 0) non concluse 25 | giorni 25/50/75: [161, 218, 294]
+obiettivo 10% oro ALTO + Dow ALTO | passate 46/90 (51%) fallite 42 (giorn 42, totale 0) non concluse 2 | giorni 25/50/75: [105, 154, 186]
+obiettivo 5% oro PROP + Dow NESSUNO | passate 44/90 (49%) fallite 0 (giorn 0, totale 0) non concluse 46 | giorni 25/50/75: [229, 335, 414]
+obiettivo 5% oro PROP + Dow PROP | passate 60/90 (67%) fallite 0 (giorn 0, totale 0) non concluse 30 | giorni 25/50/75: [173, 256, 301]
+obiettivo 5% oro PROP + Dow MEDIO | passate 90/90 (100%) fallite 0 (giorn 0, totale 0) non concluse 0 | giorni 25/50/75: [141, 188, 278]
+obiettivo 5% oro PROP + Dow ALTO | passate 49/90 (54%) fallite 41 (giorn 41, totale 0) non concluse 0 | giorni 25/50/75: [67, 88, 118]
+obiettivo 5% oro MEDIO + Dow NESSUNO | passate 59/90 (66%) fallite 0 (giorn 0, totale 0) non concluse 31 | giorni 25/50/75: [116, 238, 284]
+obiettivo 5% oro MEDIO + Dow PROP | passate 69/90 (77%) fallite 0 (giorn 0, totale 0) non concluse 21 | giorni 25/50/75: [133, 196, 280]
+obiettivo 5% oro MEDIO + Dow MEDIO | passate 90/90 (100%) fallite 0 (giorn 0, totale 0) non concluse 0 | giorni 25/50/75: [100, 146, 244]
+obiettivo 5% oro MEDIO + Dow ALTO | passate 52/90 (58%) fallite 38 (giorn 38, totale 0) non concluse 0 | giorni 25/50/75: [43, 78, 128]
+obiettivo 5% oro ALTO + Dow NESSUNO | passate 69/90 (77%) fallite 0 (giorn 0, totale 0) non concluse 21 | giorni 25/50/75: [70, 134, 231]
+obiettivo 5% oro ALTO + Dow PROP | passate 72/90 (80%) fallite 0 (giorn 0, totale 0) non concluse 18 | giorni 25/50/75: [61, 118, 225]
+obiettivo 5% oro ALTO + Dow MEDIO | passate 90/90 (100%) fallite 0 (giorn 0, totale 0) non concluse 0 | giorni 25/50/75: [61, 112, 187]
+obiettivo 5% oro ALTO + Dow ALTO | passate 54/90 (60%) fallite 36 (giorn 36, totale 0) non concluse 0 | giorni 25/50/75: [42, 77, 117]
