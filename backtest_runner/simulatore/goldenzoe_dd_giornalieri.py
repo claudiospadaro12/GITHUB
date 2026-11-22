@@ -23,7 +23,7 @@ for i in range(120,len(C)-1):
 t0=pd.Timestamp(D0); m=d.loc[d.index>=t0]
 mi=m.index.values; lo=m['low'].values; cl=m['close'].values; op=m['open'].values
 res={}
-for RISK in (0.45,0.9,1.0,1.5):
+for RISK in [float(x) for x in os.environ.get('RISCHI','0.45,0.9,1.0,1.5').split(',')]:
     B0=80000.0; B=B0; eq=np.full(len(m),np.nan); last=0
     for (s,i,ent,risk,px) in rec:
         ts=idx4[s]; te=idx4[i]
@@ -69,7 +69,7 @@ for RISK in (0.45,0.9,1.0,1.5):
             if v<th/2: arm=True
         return n
     res[RISK]=dict(ndays=int(dd.shape[0]),maxdaily=dd.max(),days1=int((dd>=1).sum()),days2=int((dd>=2).sum()),days3=int((dd>=3).sum()),days4=int((dd>=4).sum()),days5=int((dd>=5).sum()),days10=int((dd>=10).sum()),
-        maxstat=stat.max(),maxpt=pt.max(),ep5s=ep(stat,5),ep10s=ep(stat,10),ep5p=ep(pt,5),ep10p=ep(pt,10),fin=(s_.iloc[-1]/B0-1)*100,ntr=sum(1 for x in rec if idx4[x[1]]>=t0),worstday=dd.idxmax())
-    if RISK==1.0: dd.to_csv('/home/user/GITHUB/report/GOLDENZOE_DD_GIORNALIERI_dati_1pct.csv',sep=';',header=['dd_giornaliero_pct'])
+        maxstat=stat.max(),maxpt=pt.max(),ep5s=ep(stat,5),ep10s=ep(stat,10),ep5p=ep(pt,5),ep10p=ep(pt,10),fin=(s_.iloc[-1]/B0-1)*100,ntr=sum(1 for x in rec if idx4[x[1]]>=t0),worstday=dd.idxmax(),firstfail5=(str(dd[dd>=5].index[0].date()) if (dd>=5).any() else '-'),firstfail10=(str(stat[stat>=10].index[0].date()) if (stat>=10).any() else '-'),dd35=int((dd>=3.5).sum()))
+    if RISK==1.0 and 'RISCHI' not in os.environ: dd.to_csv('/home/user/GITHUB/report/GOLDENZOE_DD_GIORNALIERI_dati_1pct.csv',sep=';',header=['dd_giornaliero_pct'])
 print('finestra dal',D0,'a',m.index[-1])
 for k,v in res.items(): print(k,{a:(round(b,2) if isinstance(b,float) else b) for a,b in v.items()})
