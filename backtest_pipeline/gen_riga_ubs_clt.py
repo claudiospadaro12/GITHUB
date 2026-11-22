@@ -91,3 +91,9 @@ assert _t4.count("[int]$nfail[$n] -ge 2") == 1
 _t4 = _t4.replace("[int]$nfail[$n] -ge 2", "[int]$nfail[$n] -ge 99")
 open('righe/RIGA_LANCIA_UBS_CLT.txt', 'w', encoding='ascii').write(_t4)
 print('skip-dopo-2-KO disattivato')
+
+_t5 = open('righe/RIGA_LANCIA_UBS_CLT.txt', encoding='ascii').read()
+assert _t5.count("$TO=300;") == 1
+_t5 = _t5.replace("$TO=300;", "$TO=40;").replace("timeout 300 minuti", "timeout 40 minuti")
+open('righe/RIGA_LANCIA_UBS_CLT.txt', 'w', encoding='ascii').write(_t5)
+print('TO 40 ok')
