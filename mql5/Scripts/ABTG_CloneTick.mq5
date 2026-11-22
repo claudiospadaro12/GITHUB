@@ -13,8 +13,8 @@
 #property version "1.00"
 
 input string InpCoppie = "U30USD>U30USD_T";
-input string InpDa = "2025.01.01";        // inizio (incluso)
-input string InpA  = "2026.11.14";        // fine (esclusa)
+input string InpDa = "2024.09.20";        // inizio (incluso)
+input string InpA  = "2025.01.01";        // fine (esclusa)
 input bool   InpChiudiTerminale = false;
 
 const string F_PROGRESSO = "ABTG_TICKCLONI_PROGRESSO.txt";

@@ -18,6 +18,7 @@
 
 input string InpCoppie = "U30USD>U30USD_T,SPXUSD>SPXUSD_T,NASUSD>NASUSD_T,NASUSD_EXT>NASUSD_EXT_T,SPXUSD_EXT>SPXUSD_EXT_T";
 input double InpTickSize = 0.01;      // nuovo passo prezzo del clone
+input string InpDaNativi = "2024.09.20"; // inizio della copia per i simboli nativi del broker (la serie caricata puo partire piu tardi)
 input string InpDaEXT = "2010.01.01"; // inizio della copia per i simboli _EXT (la serie caricata parte piu tardi)
 input bool   InpChiudiTerminale = false;
 
@@ -71,6 +72,7 @@ bool CopiaBarre(const string src,const string dst,long &totale,datetime &prima,d
    datetime t0=(datetime)SeriesInfoInteger(src,PERIOD_M1,SERIES_FIRSTDATE);
    int lun=StringLen(src);
    if(lun>=4 && StringSubstr(src,lun-4,4)=="_EXT") t0=StringToTime(InpDaEXT+" 00:00");
+   else { datetime tn=StringToTime(InpDaNativi+" 00:00"); if(tn>0 && tn<t0) t0=tn; }
    datetime t1=(datetime)SeriesInfoInteger(src,PERIOD_M1,SERIES_LASTBAR_DATE);
    if(t0<=0 || t1<=0 || t1<t0) { Riga("  ERRORE: intervallo barre M1 non valido per "+src); return false; }
    datetime passo=30*86400;
