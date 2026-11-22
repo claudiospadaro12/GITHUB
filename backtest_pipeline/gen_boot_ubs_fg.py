@@ -27,5 +27,7 @@ t = t.replace(_x, r"con il terminale FTMO di prova (C:\MT5_Backtest\Mt5_Ftmo_Pro
 _y = "terminale BCM demo 50503392 del PC di backtest"
 assert t.count(_y) == 1, t.count(_y)
 t = t.replace(_y, "terminale FTMO di prova del PC di backtest (sola lettura)")
+assert t.count('MARCATORE_ANNO80K_WIM_TESTER_v1') >= 2, t.count('MARCATORE_ANNO80K_WIM_TESTER_v1')
+t = t.replace('MARCATORE_ANNO80K_WIM_TESTER_v1', 'MARCATORE_ANNO80K_WIM_FTMO_TESTER_v1')
 open('righe/BOOT_RIGA_UBS_FG.txt', 'w', encoding='ascii').write(t)
 print('boot', len(t))
