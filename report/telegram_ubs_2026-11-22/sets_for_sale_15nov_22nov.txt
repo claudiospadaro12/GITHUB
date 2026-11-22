@@ -1,0 +1,65 @@
+=== SETS FOR SALE (set in vendita) - dal 13 novembre 2026 12:00 ad oggi (22 novembre) ===
+(testi copiati dalla chat; ore di Telegram)
+NOTA: nel periodo 13-14 novembre non ci sono messaggi in questo argomento.
+
+15 NOVEMBRE
+- 15:49 BK, in risposta a Sebastian Deyter: "No the signalcombo setfiles in the pack"
+- 15:49 Sebastian Deyter: "Are you running all provided Setfiles for this live signal?"
+- 16:01 Malek: "Anyone has sets for sale that were ran specifically on TMGM?"
+
+16 NOVEMBRE
+- 04:34 youknowho, in risposta a Malek: "i am running XTIUSD sets on TMGM, and those sets are free shared in community mate,"
+- 04:35 youknowho: "if you appreciate my works, you could donate for my via crypto wallet :)"
+- 17:58 Marco: "Hi everyone! Does anyone have a UBS set file they've tested on a $50k FTMO Swing account on MT5 and would be willing to share? My account is currently at around $48,400, so I'm down about $1,600 (3.2%). Given where I'm at, would you start with UBS or Gold Reaper if you wanted to keep the risk low? If you've tested either EA on FTMO Swing, I'd be interested to hear what risk per trade you used and what maximum drawdown you saw. Thanks!"  [ore 17:58 nella finestra]
+- 23:30 Malek, in risposta a youknowho: "I reached out to you in private"
+
+17 NOVEMBRE
+- 01:04 youknowho: "i see it mate"
+- 22:10 Aleksei Fedorov, in risposta a arielg0184 (domanda prop firm): "Hello, I'd like to know: are the .set file settings for the prop firm that Wim provided not working?"
+- 22:16 Aleksei Fedorov: "I'd like to see strategy presets for profitable trades, without the hassle of optimization and testing. I'm willing to pay for them."
+
+18 NOVEMBRE
+- 00:19 Malek: "That would be an awesome service if it existed."
+- 06:39 wim schrynemakers (proprietario), in risposta a Aleksei Fedorov: "there are no prop firms set files for UBS"
+- 06:40 wim schrynemakers, in risposta a Aleksei Fedorov: "what do you mean exactly? With the UBS App, you can do a lot without the need for optimization." / "and there are +350 sets already there in the app, tested"
+
+19 NOVEMBRE
+- 16:11 BK, in risposta a Hervé: "Those values are present but this risk method is not recommended as this is related to max risk per strat which does not account for SL sizes. And for range breakout the SL size is based on the Range it is in. So if you have big Range and big lotsize because of max risk per strat you have big loss"
+- 16:17 Hervé: "Oh ok, so if I buy your package on your website instead of Range Reaper, do you provide a guide to balance the strategies ? Or do we only use Risk per Trade ?"
+- 16:21 youknowho, in risposta a Hervé: "If you dont confident in your balance skill then grab the range reaper" (+ "Plug and play", "Easy to use")
+- 16:23 Hervé: "Understood but I'm not new to UBS. I just wanted to know what you advise. Or maybe it's in the UBS manual that I haven't read in a while"
+- 18:04 Hervé, in risposta a BK: "@Akaitrade : So I guess that a way to do it is to backtest the strategies with Risk Per Trade, then check the max drawdown in %, and balance accordingly, is that correct ?"
+- 20:09 BK, in risposta a Hervé: "Yeah that is certainly a way to do it. Eventually i will add some balancing settings to the pack as well"
+
+20 NOVEMBRE
+- 15:01 Kn Pleeeee: allegato "BOOMONEstats.zip" (712 KB). Testo: "BOOMONE pack, 7 sets for Wim's UBS. You get Boom1000 on H1, H4 and D1, Boom600 on H4 and D1, and Boom300 on H1 and H4. Heads up, they only work on ICTrading, since they're optimized on their Boom indices. Everything's tested on real ticks. I optimized from 09/07 to 05/10, then validated out of sample from 06/10 to 16/11. There are 3 types of strategies (S/R breakout, volatility, range), and they're not very correlated with each other. Quick note though: the history on Boom is pretty short, so that's about 3 months of optimization and 6 weeks of out-of-sample testing. Keep that in mind. If you're interested, DM me"
+
+OGGI (22 NOVEMBRE)
+- 07:42 Marco (risposta alla sua domanda FTMO): "4% on Gold Reaper / 3% GTP / But I got banned in the end / And had about 6% total DD at one point but usually came back and I closed out at 1-2% profit but that could take a month and a half or a week depending the movement / FTMO are nasty when you make money from them."
+- 07:44 J B: "FTMO is not the best for EAs. You are better off with ifunds and concept trading"
+- 07:45 MC: "You got banned because you used one of the most famous EAs there is!!!!!"
+- 07:47 (utente non visibile): "FTMO is great for manual trading, I've been using it for many years and never had a payout rejected…but with manual trading. I wouldn't trust EAs on it but that's just my view."
+- 07:49 J B: "Same goes for fundingpips and alpha capital, both have been good for me on manual trading but not useable for EAs"
+- 07:49 (utente non visibile): "Fundednext allow EAs but the max account size with an EA is 25k, so pointless"
+- 07:49 (utente non visibile): "GFT also great for manual but not EAs"
+- 07:50 J B: "Concept and iFunds are among the most EA-friendly prop firms I've come across. Their rules are refreshingly straightforward, with the primary requirement being that you stay within the 10% maximum drawdown limit. EAs, news trading and weekend holding are all permitted, giving traders a high degree of flexibility. For anyone running automated strategies, I'd have no hesitation recommending them."
+- 07:53 (utente non visibile): "No daily drawdown limit either, so you have the flexibility to increase risk if you're comfortable doing so. Personally, I prefer to run a highly diversified portfolio of strategies at relatively low risk and focus on consistency rather than pushing for maximum returns."
+- 07:54 (utente non visibile): "One note about concept, the scaling is very nice :)"
+- 07:55 J B: "Prop firms can be extremely lucrative once you understand the mathematics behind the rules and learn how to structure your trading around them."
+- 07:58 Tomasz Trader, in risposta a J B: "Can you let us know your typical payout ?"
+- 08:53 Eugen, in risposta a Tomasz Trader: "FTMO ban me (for nothing as usual lol - no EAs) but my typical payout about 2-3k. on some props (FTM, CFT) I go big like 9k+ but it's very rare occasion."
+- 09:44 Tomasz Trader, in risposta a Eugen: "Thanks" (13:59)
+
+RIFERIMENTI A "INVALID STOPS" E VERSIONE 9.8 IN QUESTO ARGOMENTO
+- Nessun messaggio con "Invalid stops" trovato nel periodo.
+- Versione 9.8: citata in questo argomento solo in file "UPDATED SETS UBS_V9.8.zip" del 18 novembre 2026 (vedi file precedenti del 18/11 07:16).
+
+LINK
+- nessun link nel periodo.
+
+FILE ALLEGATI (nel periodo)
+- 20 nov 15:01: BOOMONEstats.zip (712 KB) - Kn Pleeeee
+- 22 nov: nessun file visibile
+
+NOVITA' RISPETTO A IERI (ultime 24 ore)
+- 22 nov 07:42-13:59: discussione prop firm (FTMO, Concept, iFunds, Fundednext, GFT, FundingPips, Alpha Capital) e ban per EA.

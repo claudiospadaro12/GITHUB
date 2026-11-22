@@ -1,0 +1,124 @@
+=== GENERALE (General) - dal 15 novembre 2026 ad oggi (22 novembre) ===
+(testi copiati dalla chat; ore di Telegram. Non c'è nessun messaggio del 13 o 14 novembre in questo argomento.)
+
+15 NOVEMBRE
+- 22:58 Zairex_: "Full back test UBS.rar, Hello everyone, I took the 320 set files from the UBS system and ran a full backtest on each set fi..." (allegato: Full back test UBS.rar; testo troncato da Telegram)
+- 22:59 Till: allegato "Community_Share_UBSChristmas_2026-09.zip". Testo: "@m1st3rm3mb3r I hope you don't mind that I've worked a bit on your UBSChristmas portfolio. I've conv..." (troncato da Telegram)
+
+16 NOVEMBRE
+- 13:10 Richard Lehner: "Hi everyone! I'm new here. Quick question: is it possible to pass IQ Capital challenges using the UBS? If so, does anyone have any set files?"
+- 17:15 (annuncio, testo esatto): "!! THE RANGE REAPER IS COMING !! / !! LAUNCH THIS FRIDAY ON MQL5 !! / The proven strategy of range breakouts, perfected to my standards. Gold, crypto, forex and indices. / Eleven markets, eleven strategies, each one built and calibrated for the market it trades, / and then calibrated against each other, so they work as one portfolio instead of eleven separate bets fighting for the same account. / !! DON'T MISS OUT ON MY LEGENDARY 99$ LAUNCH PRICE - 24HOURS ONLY !! / IMPORTANT: Those that bought ORB Master in the past → this will replace it for free! (not for ORB Master in bundle offers or as free EA received)"
+  17:15 (Wim, risposta): "Based on BK's Range Breakout sets!!" / "so if you have them, you don't need this one"
+- 17:16 xInfinitYz: "How the process to replace ORB Master will be?"
+- 17:16 Thomas, in risposta a Wim: "Is 1:1 the exact same or did you tweak it to your standards?"
+- 17:16 Wim: "tweaked a bit obviously. my balancing. Easy adjusted to each broker"
+- 17:29 Wim, in risposta a xInfinitYz: "ORB Master will be remove from MQL5 marketplace and Range Reaper will be uploaded as ORB Master update"
+- 17:30 xInfinitYz: "So for a person having ORB master doesn't need make sense to purchase it again. Understood, thank you"
+- 17:30 Satty Singh: "If we have bks sets how would we achieve your balancing"
+- 17:38 Kenny: "@strueli I got the ORB Master and BK's Range Breakout sets. Are there any specific differences between BK's set files and TRR's?"
+- 18:04 Malek: "Is this a separate EA or set files for ubs. Where can we learn more about this. Thanks."
+- 18:52 Bruh hurB: "EA"
+- 19:09 Frederic: "what is it BK's Range Breakout ?"
+- 19:48 Mistermember: "Off topic. This chat is for UBS"
+- 19:48 wim schrynemakers: "it's made by UBS"
+- 20:18 Satty Singh: "Slightly more off topic. Will indicement and dtp recieve an update?"
+- 08:03 (17 nov) Clen: "For the one who shared the Silver sets pff thanks alot."
+
+17 NOVEMBRE
+- 08:03 Clen: "For the one who shared the Silver sets pff thanks alot."
+- 08:03 Razvan: "@strueli Do you have any additional performance statistics you could share with us? I'd like to review them before Friday so we can have a better idea of whether this EA would be a good fit for us."
+- 08:08 wim schrynemakers: "sure, some backtests" - allegato RangeReaper.zip (6.3 MB)
+- 08:10 wim schrynemakers: "for those wondering about correlation with Jimmy's range breakout, you can see it's quite limited"
+- 23:31 Elias FJ: "Is the Range Reaper also available for sale as UBS sets so that you don't need to run an extra EA?"
+
+18 NOVEMBRE
+- 02:11 Chris, in risposta a Elias FJ: "Yes, contact BK. They are his sets"
+- 08:37 Eugen: "As far as I see there are only some of the sets and fine tunned by Wim so I would like to buy those also"
+- 08:37 Clen: link https://www.myfxbook.com/members/clenfx/clens-portfolio/12213808
+- 08:46 BH: "ATH thanks @strueli"
+- 08:55 wim schrynemakers: "what happened in September?"
+- 11:19 Clen: "Reaper yolo" / "Detached it haha nicely spotted" / "Recovered nicely"
+- 13:50 Elias FJ: "Does UBS automatically recognize open positions and continue to manage them if MT5 was closed and opened again?"
+- 13:55 wim schrynemakers: "yes"
+- 14:09 (utente C, nuovo): "I need help pls. I'm struggling with the basics. I'm trying to load the '44 strategies' with one chart setup in the backtester. I watched the video, read the manual but lokks like I'm missing something. I attached the screenshots of my settings and the panel in the backtester"
+- 14:11 Mistermember → Chania: "Maybe there is another folder with the same name it is picking from? Try to change the folder name smth unique and reattach, to a new chart if possible"
+- 14:16 Chania: "tried, backtester stops immediately"
+- 14:22 wim schrynemakers: "what's the messages in the journal tab in the tester"
+- 14:35 Ba Sa: "Your 'Sets' is not in correct path. Should be like my attachment" / "in Terminal, open Data folder -> go up up untill you see the Common folder -> Files -> place the 'sets' there (could be any name if it's inside 'Files')"
+- 14:36 Chania: "Thx my friend, that was the mistake!!"
+- 14:43 Dr. Khairy Shahin: "Thank you Spada Thank you Basa Thank you Till Thank you all mates" (+ ringraziamenti)
+- 14:58 Donhou8251: "Afternoon all (in UK) can anyone recommend a EURUSD set or two to add to a portfolio? Have Daytrade pro only currently"
+- 15:37 GY / (commento ringraziamenti): "i want 50K"
+- 20:57 Jonasz Dlugolecki: "Hi guys quite new to UBS. Was wondering if there's any decent set files for equities. Paid or free. TIA :)"
+
+19 NOVEMBRE
+- (nessun messaggio di testo; solo ingressi nel gruppo)
+
+20 NOVEMBRE
+- 06:56 (annuncio, testo esatto): "IT'S LIVE / The Range Reaper is out now on the MQL5 Market! / Range breakouts… taken to the next level and built exactly to my standards. / Gold • Crypto • Forex • Indices / 11 markets. 11 purpose-built strategies. / Each one individually calibrated for its market — then fine-tuned to work together as a single, unified portfolio instead of competing against each other. / No set files to hunt down. No per-pair configuration. One chart, one risk setting, eleven markets. / Already live and trading: / See the results for yourself → https://www.mql5.com/en/signals/2399599 / (+36% growth | Profit Factor 2.10) / $99 LAUNCH PRICE — 24 HOURS ONLY / GET IT HERE NOW: https://www.mql5.com/en/market/product/204259 / Once it's gone, it's gone."
+- 07:14 Frederic: "For those who had already purchased The Orb Master via MQL5, what should they do?"
+- 07:15 WDW: allegato image_2026-11-20_07-15-53.png (12 KB) - "Morning gents, I have the same question"
+- 08:15 wim schrynemakers: "just updated Orb Master. it's now Range Reaper when you do the update"
+- 08:16 Mistermember: "That's a nice gesture Wim, thanks"
+- 09:12 Razvan: "You can buy it from Mql5 only, or also from Wim site ? On Wim site I don't see it, I still see the ORB EA"
+- 09:27 wim schrynemakers: "only on MQL5"
+- 10:43 Robert McDonell: "Thanks for making this free for us old ORB users!"
+- 11:07 Wisam: "100%. Thanks alot Wim.."
+- 12:53 João Jara: "Hi Wim, i bought But cannot download, says 99" / "bought ORB Master"
+- 13:04 João Jara: "just updated Orb Master. it's now Range Reaper when you do the update" (testo come citazione) / "ok its going to be there in few minutes"
+- 13:41 wim schrynemakers: "just update ORB Master. you will NOT see Range Reaper at 0$. The update for ORB Master is Range Reaper"
+- 14:02 João Jara: "YES tried to do that but is missing" / "just need to wait"
+- 14:02 Indra P: "My purchases / Update from there" / "Is it because you cannot open the market page, because its removed?"
+- 14:03 Ândre: "MQL5 CDN is slow for replication. Takes a few hours."
+- 14:05 Indra P: "On your navigation panel / Market > my purchases, there should be a button to update?"
+- 14:06 PipHunter2026: "Seems like autodect time from worldtimeserver is not working. 'GMT Offset not Confirmed (clock=manual)' i get this message i already added the url to webrequests"
+- 14:15 wim schrynemakers: "it's working ,but some MT5 versions have issues with URLs. try downloading the metaquotes MT5 directly from metaquotes" / "double check your URL as well"
+- 14:43 PipHunter2026: "Seems to work now it took some time but it says confirmed web header validated"
+- 15:14 Scott H: "Most of my strategies on the Range Reaper are showing lot size as 'TBA' for now. Is this normal?"
+- 15:15 BK, in risposta a Scott H: "There isn't a range to determine the lotsize as Riskpertrade needs SL distance to calcuate the loss based on lotsize"
+- 15:15 Jonasz Dlugolecki: "When will the range be determined?"
+- 15:16 BK: "Session opens of London/Asia/Newyork"
+- 15:47 Jim: "The Range Reaper (EURUSD,H1) The Range Reaper: GER40 wants 0.0243 lots for the configured risk but the broker minimum is 0.1000 - this market will risk about 4.1x its share until the balance grows. Is this normal on default settings for a 20k account?"
+- 15:48 Van Snowpea: "u can set even lower risk eg fixed lot"
+- 15:50 Jim: "fixed lots would still be broker minimum"
+- 15:50 Van Snowpea: "yeah, but for 20k account , min lot is very safe"
+- 15:52 Jim: "Yeah, I'm checking if the EA is calculating lot size correctly?"
+- 15:53 Van Snowpea: "this is bt on one broker (no eth) with default 1mohlc from 2025"
+- 15:56 Van Snowpea: "that is if live close to bt, the default is safe , but if we run on small account eg 500 u, still undertake risk"
+- 15:56 Jim: "Yes I've got similar tests, just saw the warnings on lot size rounding in the journal"
+- 15:58 Van Snowpea: "just like one account of mine from 877 at beginning a bigger dd as I put more range sub system inside it"
+- 21:30 Zwadde: "There is no way for me to update the ORB master as it has been removed? At least I don't see the option anywhere on the terminal or or on MQL5"
+- 21:31 BK: https://t.me/c/2348148294/1/17434
+- 21:37 Zwadde: "not for me I guess"
+- 21:39 wim schrynemakers, in risposta a Zwadde: "you simply go to MT5 -> Market -> My purchases -> Orb Master -> update / don't do the update on MQL5"
+- 21:48 Zwadde: "Well ok for those using MT5 in Dutch, its actually not market (which is a seperate section) but marktplaats. Hence the confusion"
+- 21:53 Zwadde: "@strueli how to use the remaining activations? I can't find orb master under my purchases on the devices on which i hadn't installed it yet."
+
+21 NOVEMBRE
+- 02:41 Oleg: "I think it should already be called Range Reaper in your purchases, not the orb master."
+- 02:48 Matt: "Just fyi guys. It will still be called ORB master. When you load it you will see that it's actually range reaper."
+- 02:57 Indra P: "Same stuff, just go from 'My Purchases' section / Don't search on the mql5 search tab, because it will show that it is removed (the webpage is removed, but EA is still there) / Scroll to orb master, then install"
+- 17:25 Tomasz Trader (in risposta a Clen): "Did you share those sets ?"  (+ link myfxbook citato in precedenza)
+
+OGGI (22 NOVEMBRE)
+- Ingressi nel gruppo: Shean Gannon, Traders Network G, Simon Newman (nessun testo).
+- 08:53 Ruben Spaander E V Lee: "Is there someone here that lives in Korea?"
+- 08:56 Yi Sang: "Me here. ^^"
+
+RISPOSTE AI TEMI RICHIESTI
+- EA: Range Reaper (EA) è uscito il 20 novembre su MQL5 a 99 $ per 24 ore; sostituisce ORB Master per chi lo possedeva (Wim: aggiornamento da MT5 → Market → My purchases, non dal sito MQL5). Range Reaper è basato sui set di BK (Range Breakout), con bilanciamento di Wim. Limite noto: il lot size mostra "TBA" finché non si determina il range (BK, 20 nov).
+- Versione 9.8: nessun messaggio in General sulla versione 9.8 nel periodo.
+- "Invalid stops" sugli indici: nessun messaggio nel periodo in General (né in sets for sale né negli altri argomenti letti finora).
+- Regole prop firm: in General nessuna regola ufficiale da Wim nel periodo; la discussione prop firm è in "sets for sale" (22 nov).
+
+LINK
+- https://www.mql5.com/en/signals/2399599 (segnale live Range Reaper, 20 nov)
+- https://www.mql5.com/en/market/product/204259 (Range Reaper su MQL5, 20 nov)
+- https://www.myfxbook.com/members/clenfx/clens-portfolio/12213808 (18 nov)
+- https://t.me/c/2348148294/1/17434 (messaggio interno del gruppo, 21 nov)
+
+FILE ALLEGATI (nel periodo)
+- 15 nov 22:58: Full back test UBS.rar - Zairex_
+- 15 nov 22:59: Community_Share_UBSChristmas_2026-09.zip - Till
+- 17 nov 08:08: RangeReaper.zip (6.3 MB) - wim schrynemakers
+- 20 nov 07:15: image_2026-11-20_07-15-53.png (12 KB) - WDW

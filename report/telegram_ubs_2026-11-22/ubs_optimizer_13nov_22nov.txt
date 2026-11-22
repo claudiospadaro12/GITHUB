@@ -1,0 +1,94 @@
+=== APP UBS OPTIMIZER - dal 13 novembre 2026 12:00 ad oggi (22 novembre) ===
+(testi copiati dalla chat, in inglese quando sono in inglese; ore di Telegram)
+
+DOVE SI SCARICA
+- Nessun link esterno nei messaggi. L'app viene distribuita come file .exe allegato da wim schrynemakers nel topic.
+- 13 nov 19:26 - Ash: "Where can we download it?" (messaggio fissato) - 19:40 RoyTradesFX: "Thanks"
+- 16 nov 08:41 - Ba Sa: "Try again. I can download just fine"
+- 16 nov 08:59 - Denis Josh (No DM): "previous version is downloadable for me" - youknowho: "change the browser"
+
+VERSIONI E RILASCI
+- 14 nov 15:49 - wim schrynemakers, allegati:
+    zip "UBS Library pack 2026-11-14.zip" (43.5 MB)
+    exe "UBS Optimizer…p_20261114.exe" (71.1 MB)
+  Testo: "Version 1.4 compared with the 1.3 build of 12 November; the most important changes:"
+  New: "UBS Library pack: all stress tests of your set library in one file, imported with 'Import zip…'. Clients see every test and can use any strategy in the portfolio builder. The pack is read-only; changes happen in a copy."
+  New: "Collection picker on the Stress tests tab: a drop-down with three folding groups (collections of set files, runs, UBS Library pack) and a search box."
+  Stress tests: "Other modelling for test A: the out-of-sample / full-history test can run on real ticks instead of 1-minute OHLC." / "Broker to run on: a batch can run at another broker account than the one in Settings, and the batch list shows the broker server of each batch." / "Remove the ticked: ticked sets can be taken out of a collection in one go." / "Loading bar while 'Candidates, all tests' loads."
+  Portfolio: "All ticked strategies by default: the 'least correlated N' field starts at 0 (= all) instead of 10." / "Bulk actions: copy or remove all ticked strategies at once." / "Magic number column: type another number per strategy and it is remembered." / "Autoloader backtests: an imported backtest of one chart running many set files is split into its strategies." / "Variable lot sizes: backtests whose lots vary with price or ATR are handled, and a strategy the balancing cannot rescale yet is marked 'not ready for balancing'." / "Broker badge on strategies imported from an MT5 report."
+  General: "Resizable charts: every growth curve can be stretched by its bottom-right corner." / "AI assistant (MCP): set files and MT5 reports can be added by file path, without a dialog."
+  Fixed: "Symbols with small letters (GBPUSD.p, UK100.p) failed in Auto-detect and in the measuring of specifications; the app now uses the broker's exact spelling."
+  "The full list is in the app under Settings → Changes, in the 1.4 block."
+- 15 nov 16:28 - Wim: "so now you have +350 strategies tested to make your own portfolios" / "Next, I will try to make the app create 'random' but balanced portfolios. Ofcourse, you can do already with MCP using an AI agent for that"
+- 15 nov 16:42 - exe "UBS Optimizer…p_20261114.exe" (71.1 MB) - Wim: "improved the portfolio section, where you now select for which broker you are making the portfolio at the top (instead of only when saving). that way, that app will know already the broker's minimum lotsize, contract size etc before balancing. which will be more accurate"
+- 15 nov 14:08 - exe "UBS Optimizer…p_20261115.exe" (71.3 MB) - Wim (versione 1.5 e 1.6 insieme, rispetto alla 1.41):
+  New: "Run backtest in MT5 (Portfolio): the whole portfolio runs as one backtest through the EA's autoloader, with the sizes, deposit and fixed or compounding balance of the page, at the broker the portfolio is for. It asks only the period, the modelling (with speed on ticks) and the chart the autoloader runs on (EURUSD by default)."
+  New: "Backtest against the page: the result is shown next to what the page calculated: net profit, max drawdown, trades, both curves and a table per strategy. The panel folds away and its chart can be stretched."
+  New: "Chart zoom: drag across the portfolio chart to zoom in on a period; 'Reset zoom' or a double-click shows everything again."
+  New (1.6): "Exact split of an autoloader backtest (1.6): sets that entered the same symbol in the same second, at the same price and lots could get each other's TP or SL. The app now reads from MT5's tester log which exit belongs to which set, or otherwise from each entry's SL and TP. What it still cannot tell apart is marked 'n trades uncertain'."
+  Improved: "'Run backtest in MT5' and 'Save full portfolio setup' are now the last thing on the page, under the portfolio's numbers." / "A backtest that MT5 ended early because the account was stopped out says so at the top." / "'Find the symbols at this broker' tells when MT5 could not log in, and marks the symbols as the copy saved from the last login." / "The 'Max DD at 0.01 lots' column shows the value for the portfolio's broker next to the tested one where the contract differs."
+  Fixed: "Very small max-risk percentages (below 1 %) were rounded too coarsely when saved or sent to the backtest."
+- 18 nov 06:16 - exe "UBS Optimizer…p_20261117.exe" (71.3 MB) - Wim: "updated for UBS 9.8"
+- 18 nov 10:17 - exe "UBS Optimizer…p_20261118.exe" (71.4 MB) - Wim: "update"
+  Kevin Yaooooooo: "so fast" / "If the app can check the latest version , and click to install the latest version, would be little better"
+
+FUNZIONI RICHIESTE / DOMANDE IMPORTANTI
+- 13-14 nov - Kevin: "currently 44 strategy is in portfolio mode already, will the rest of the ubs set file be uploaded too? ... Do you use 1m ohlc or real ticks for the 44 set file?"
+  Wim (14 nov 15:49): "the full UBS Set library will become available in the app soon yes. with stress tests" / "you don't need to do all tests in the same way. the App can 'normalize' them for balancing (there is a button for that in the portfolio tab -> make all strategies ready for balancing)" / "I do 1M OHLC for longterm tests, and realticks for comparison"
+- 15 nov 06:35 - Wim: "you can ask anything you want. It's talking to the app through AI, so you can ask you claude for example: 'I want some new stratetgies for EURUSD Daily (breakout support/resistance). I want you to run the optimization, select candidates (60) and run stress tests on those, and let me know your top 10 and why'" / "and when he's done, you can see everything in the app"
+- 15 nov 07:05 - Adebayo Ojo: "What....Hey Claude, I want to break the bank, create me a portfolio that sends prop firms packing or darwinex zero thinking twice" - Wim: "hahaha you can try"
+- 15 nov 08:06 - Wim: "added the option to actual run a backtest of your portfolio in MT5 and then see how it compares to the one made in the app. Some slight difference is normal. but this is a great and fast way to do a final check before going live with a portfolio"
+- 15 nov 10:05 - Wim: "ok, latest UBS version (EA) fixed some issues in autoloader for range breakout. now the portfolio and actual backtest are almost 100% the same! very nice"
+- 15 nov 10:22 - Till: "@strueli I see you and Claude are very productive You are making great progress in the past weeks! And what's next? Replace MT5 as backtest engine and optimizer and build one in Python inside your app that uses just the data from MT5 (unless you have built that already). It's way faster and you can do better stability testing."
+  Thomas: "I'm diving into that and I can tell you its a pain to maintain 2 systems. At the end you still have to deploy and check on MT5 backtester. It is faster but needs more maintenance. Python and Nodejs works."
+  Till: "I run my pipeline fully with AI, so a test against MT5 is a part of it anyway and nothing I have to take care of or maintain manually."
+- 15 nov 10:27 - BK: "I think the biggest gain would be to optimize the backtest speed of UBS @strueli i have already methods which greatly improve backtest speed. I can share with you in private if you are interested"
+- 15 nov 13:44 - Wim: "yes, I was thinking about that, to speed things up and cheaper"
+- 15 nov 13:53 - Kenny: "@strueli Great job! I'm building a PC only for the UBS Optimizer app. What are the best RAM and CPU specs you'd suggest?" (nessuna risposta visibile)
+- 15 nov 15:10 - Zairex_ (risposta alla 1.6): "Hi Wim, thanks for 1.6. The exit matching for autoloader backtests is a really good catch. Two things I'd check: 1. The fallback (matching by the SL/TP each entry was placed with) can pick the wrong strategy when breakeven or trailing has moved the stop before the exit. ... 2. Exact matching uses the tester log. The daily log holds every backtest of that day, so please make sure the app reads only the section of THIS backtest. If the log for that run is missing or cut short, it would be good to say so on screen ('matched by SL/TP, not by log'). Thanks!"
+  15 nov 15:23 - Wim: "Dissecting an autoloader backtest purely based on backtest and set files is not always possible to do 100% correct. Best way is to simply run the individual backtest for best matching." / "Indeed maybe by adding the log it could work, but who keeps their logs? And remembers which log was linked to which backtest? Claude proposed to have the ea log everything, but that wouldn't help for older backtests either. The issue is only if using similar strategies on the same symbol. (And only for importing an autoloader backtest into the portfolio section)"
+- 15 nov 15:20 - Christoph: "@strueli is it possible to backtest a bunch of community sets within your UBS Optimizer app that backtests run in parallel like your little helpers?" - 15 nov 15:20 (risposta Wim, circa 15:23): "Yes. Simply load the sets into a new collection and run the stress tests"
+- 15 nov 15:55 - C (con screenshot): "@strueli by searching for the smoothest portfolio the proposed recovery factor is 276,72. After accepting the recovery factor does not reach that value see other screenshot" / "after a while it updates the values but does not reach the proposed one." / "Maybe would be nice to see a message that the smoothest portfolio is loading"
+- 16 nov 12:42 - Kevin: "Would be a great addition if you guys would share client sets IS sample period too @basa2021 @Akaitrade @projektfarm @sangjunHan @StoryG83"
+  BK 12:43: "I think every setfile i posted contains already the IS windows in the post itself" / Ba Sa 12:43: "same for me. File name should contain IS period" / Till 12:47: "My set bundles contain a readme file which describe the IS/OOS times."
+- 16 nov 13:50 - (utente non visibile, "O"): "@strueli do you know what issue can it be? I already ran ubs optimizer as admin to proceed creation of little helpers terminals, but I created temp/EBWebView manually for every helper, then it works, but maybe it is good to fix in optimizer app"
+  16 nov 14:54 - Gy F: "Program Files is a restricted area for userspace programs. You can either move the whole thing elsewhere (like straight to C:) or give your user ownershio of the MT5 folder"
+  16 nov 14:55 - Wim: "yes, install the MT5 in a seperate folder outside of the windows structure (so not in program files...)"
+  16 nov 15:12 - Oleg: "true, creating folders temp/EBWebView make the job too, even in program files"
+- 16 nov 20:43 - Jens L: "Is the Output from Optimizer always to have Sets where each has to be loaded on a separate Chart ? So autoloader cannot be used l After that anymore ?"
+  17 nov 08:02 - Wim: "No, you have all sets ready to be loaded in the autoloader. No need to override lotsize settings or anything"
+  17 nov 11:54 - Oleg: "@strueli can you add the feature of forwarding 'delays' in milliseconds field to mt5, please? in next versions of usb optimizer"  - 12:01 Wim: "what do you mean exactly?"
+  17 nov 12:01 - Jens L: "What Setting should be choosed then in the App ? Because I only get files where the Info.txt says I Need to manuelle Place them on the Chart."
+  17 nov 16:21 - Wim: "in the portfolio tab, when you made your portfolio and are happy with the portfolio performance, you click on 'save full portfolio'. then it will save all set files exactly with the correct settings. then you put those set files in the sets folder (explained in the UBS manual), and then you simply run the autoloader setup on 1 chart which will load all those set files"
+- 17 nov 21:51 - Kevin: "Do you have estimate when this update is coming?" - 21:56 Wim: "nope"
+- 18 nov 11:19 - youknowho: "Hi @strueli can you add option that balance porfolio follow the rule of darwinex ?" - 11:27 "Not exactly but general"
+- 18 nov 13:27 - AK: "Where exactly should I click 'confirm' in this UBS Optimizer interface? @strueli" - 13:54 Wim: "Metaquotes is also GMT+2/+3, so you can fill that in/leave it"
+- 18 nov 13:58 - AK: "But a warning dialog like this always appears when I click save @strueli" - 14:02 Wim: "yes, because you are saving set files that use a 'trading time' in the set files, so saving it just without adjusting to another broker might risk having the EA trade at the wrong times on that broker. If you have Metaquotes also in your MT5 that you use in the app, it will recognise the timezone of Metaquotes as well (so you don't need to fill it in)"
+- 18 nov 14:22 - Wim: "I will add the option to pre-fill it when not known or skip, but still the warning" / AK 14:27: "In the settings, I had to add it manually using the exact same server name, and only then was I able to save" / Wim 14:52: "yes, I'm adding a skip"
+- 18 nov 21:03 - Kevin: "I also think parallelising many optimizations would be great also, not only parallelising the Backtests. So you can try many permutations automatically and don't have to wait"
+- 18 nov 21:32 - Jens L: "i am trying to run a backtest on a portfolio that i created from the library pack on my broker . But i constantly get this error, after it is finished: 'the backtest made no trades: check in the tester's Experts log which sets the autoloader loaded' what am i doing wrong ? / do i need to run all single backtests first on my broker ?"
+- 19 nov 06:21 - Wim: "send me your log please (in the settings, you can zip the log and then send it to me)"
+- 20 nov 17:07 - Chris: "Can someone help me understand how to update the UBS optimizer? ... All my optimizations fail, i cant update it, and i cant upload setfiles for backtests." - 18:27 Wim: "simply install the app again in the same folder / make sure your MT5 is installed in a normal folder outside of the windows program structure"
+- 20 nov 19:05 - StoryG: "@strueli An optimization queue would be a great addition ..." - 19:13 Wim: "I'll add it to the list to do!"
+- 20 nov 19:30 - Ash: "Use Claude. I've been running it on auto since the mcp update"
+- 21 nov 10:30 - StoryG: "@strueli Would it be possible to increase the step size for the Portfolio Max Drawdown Target slider from 0.5% to 0.1%? thanks" - 11:52 Wim: "kinda irrelevant I think? but I can ask Claude next week" - 12:11 StoryG: "With UBS strats alone, it's indeed irrelevant. But for a multi-EA portfolio with correlated strategies, it becomes relevant. Thanks for asking Claude"
+- 21 nov 13:41 - Jens L: "the report is missing the pictures / GET /api/portfolios/20261115-071210/backtest/UBS_Portfolio_20261115-071210.png -> 404: not found" (+ altri 3 PNG, 404) - 15:50 Wim: "your MT5 in english?" - 15:54 Jens L: "Now Yes" - 18:39 Jens L: "but it seems, the pictures are just not there"
+- 21 nov 21:08 - Tobias: "First weekend I am sitting with the optimizer. Great work, Wim! The little helpers are such a great idea, never want to go back. Thank you!"
+- 22 nov 06:20 - Wim: "credit where credit is due: xInfinityz came with that idea!" (GIF allegata alle 09:02)
+- 22 nov 09:07 - Jens L: "is it somehow possible to create variations of a portfolio ? i am looking for something like duplication of a portfolio. I only see export and reimport as possibility for now." - 11:08 Wim: "what do you mean exactly? like 'randomize' portfolio? not yet, but I'm planning that"
+- 22 nov 16:13 - Jens L: "if i have a portfolio of set files that can be mixed together in several ways. So it would be interesting to check different weightings. Currently one need to generate a complete new portfolio."
+
+FILE ALLEGATI (solo nomi, date)
+- 14 nov: UBS Library pack 2026-11-14.zip (43.5 MB); UBS Optimizer…p_20261114.exe (71.1 MB) (wim)
+- 15 nov: UBS Optimizer…p_20261114.exe (71.1 MB) (wim, 16:42 ripubblicato); UBS Optimizer Setup_20261115.exe (71.3 MB) (wim, fissato)
+- 18 nov: UBS Optimizer…p_20261117.exe (71.3 MB) (wim, 06:16); UBS Optimizer…p_20261118.exe (71.4 MB) (wim, 10:17)
+- 22 nov 09:02: GIF (wim)
+- 13-16 nov: nessun altro file visibile
+
+NOVITA' RISPETTO A "IERI" (22 nov, ultime 24 ore)
+- 22 nov 06:20 Wim: credit a xInfinityz per l'idea dei little helpers
+- 22 nov 09:02 Wim: GIF
+- 22 nov 09:07 Jens L: richiesta di duplicare/variare portafogli
+- 22 nov 11:08 Wim: "randomize" portfolio pianificato
+- 22 nov 16:13 Jens L: richiesta di pesi diversi tra set
+- 21 nov 21:08 Tobias: primo weekend con l'ottimizzatore (già nel file precedente)

@@ -1,0 +1,69 @@
+=== BACKTEST DI ZAIREX_ (file "Full back test UBS.rar") E RISPOSTE ===
+Sola lettura. NON scaricato il file .rar. Nessun link esterno aperto.
+
+NOTA SULLA DATA
+Il messaggio del 15 novembre 2026 alle 22:58 di Zairex_ è una RISPOSTA a Razvan (22:57), che cita il messaggio ORIGINALE di Zairex_ del 26 agosto 2026 alle 14:37. Il testo completo è quello dell'originale, qui sotto.
+
+--- 0. MESSAGGIO DI RAZVAN (15 nov 2026, 22:57, argomento General) ---
+"Hi! I recently purchased UBS and I'm looking for some additional SET files to test.
+Someone recommended the UBS Christmas setup, but I couldn't find it in the official package.
+Would you be able to share the latest Christmas sets or recommend other reliable community setups?
+I'm interested in both moderate-risk portfolios and higher-risk configurations. Any backtests, drawdown information or setup recommendations would be appreciated.
+Thanks!"
+
+--- 1. MESSAGGIO ORIGINALE DI ZAIREX_ (26 agosto 2026, 14:37, General) ---
+File allegato: "Full back test UBS.rar", 41.8 MB.
+Testo ESATTO:
+"Hello everyone,
+
+I took the 320 set files from the UBS system and ran a full backtest on each set file individually using MetaTrader 5 with Vantage broker, using real tick data with 100% modelling quality.
+
+The delay was set to 5 milliseconds, and I backtested everything from 2020 up to 22 August 2026.
+
+The ZIP file contains the individual set files, and inside each one you will find the backtest report along with the exact set file that was used for the test.
+
+Note: There were originally 320 files, but the ZIP file now contains 312 files. The missing files were optimization files, and there was nothing relevant/working in the backtest results for those optimization files.
+
+Another note: You may notice that when you open a report, the symbol shown at the top might be something like BTCUSD, while further down in the report you may see a different symbol, such as Tesla, EURUSD, or another symbol you because of the auto loader"
+(NOTA: l'ultima frase appare troncata nel testo originale: "...or another symbol you because of the auto loader".)
+
+RISPOSTA AI DATI RICHIESTI
+- Broker: Vantage
+- Periodo: dal 2020 al 22 agosto 2026
+- Modello: tick reali, qualità di modellazione 100%
+- Ritardo (delay): 5 millisecondi
+- Set: 320 originali, 312 nello zip (gli 8 mancanti erano file di ottimizzazione senza risultati utili)
+- Deposito e lotti: NON INDICATI nel messaggio. NON LETTO.
+- Lotti dei test: Zairex_ (26 ago 20:32) scrive che l'autoloader usato è quello di default di Wim, con "risk per strategy = 3".
+
+--- 2. RISPOSTE E COMMENTI AL MESSAGGIO (tutti del 26 agosto 2026) ---
+- 15:17 Sergio: allegato "UBS_sets_profit_factor.xlsx" (39 KB). Testo: "ordered by profit factor". 11 reazioni.
+- 15:52 Tobias (risposta): "hi, thanks for sharing! did you run each oth them with Risk per strategy? for evaluation fixed Manual lot = 0.1 should have been set, no?"
+- 20:32 Zairex_ (risposta a Tobias): allegato "ubs_onechart_li…EA_Settings.set" (9 KB). Testo: "heya i am sorry that i forget to mention the autoloader settings its the default one by wim which is risk per strategy = 3 and here the set file for the autoloader"
+- 20:39 Tobias: "Just know, if you want to implement any of the strategies, test them first first with 0.1lot manual lot size to figure the max hist dd."
+- 21:01 Chris (risposta a Tobias): "^ 0.01lot * If you are following wims format"
+- 22:24 Zairex_ (risposta a Tobias): "If you want to compare strategies using different lot sizes, you can calculate it proportionally from the backtest. New Profit = Original Profit × (New Lot ÷ Original Lot). New DD = Original DD × (New Lot ÷ Original Lot). For example, if a strategy made $22,312 profit and had $3,011 max DD using approximately 0.22 lot, then at 0.10 lot: Profit ≈ $10,142, Max DD ≈ $1,369. And at 0.01 lot: Profit ≈ ~$1,014, Max DD ≈ ~$137. So you can use the original backtest to estimate the profit and historical DD for any fixed lot size. Just keep in mind these are proportional estimates, not a new MT5 backtest."
+
+Altri messaggi del 26 agosto non legati a Zairex (es. BK 14:53 sul LUNA/CPI, BK 21:55 sul feed Dukascopy/MetaQuotes) non sono risposte al suo messaggio.
+
+--- 3. MESSAGGIO DI TILL (15 nov 2026, 22:59, General) ---
+Il messaggio è un inoltro: nella chat appare come "Inoltrato da TTill" con file "Community_Share_UBSChristmas_2026-09.zip" (454 KB). È anch'esso una risposta a Razvan (22:57) e cita un messaggio originale del 23 settembre 2026, ore 02:06.
+Testo ESATTO dell'originale del 23 settembre (02:06):
+"@m1st3rm3mb3r I hope you don't mind that I've worked a bit on your UBSChristmas portfolio. I've converted it to risk per strategy mode while keeping the strategy weights you have chosen and I tested all sets using my test routines and created an alternative but smaller portfolio variant. You can find all information, the sets and results in the attached zip archive. Please note that all credits for this work go to Mistermember. Thanks a lot for sharing your work here."
+
+--- 4. FILE DI BACKTEST / RISULTATI CONDIVISI DAL 13 NOVEMBRE 2026 ---
+- 14 nov 15:49 - wim schrynemakers (UBS Optimizer App): "UBS Library pack 2026-11-14.zip", 43.5 MB. Contiene tutti gli stress test della libreria di set.
+- 15 nov 22:58 - (citato) Zairex_: "Full back test UBS.rar", 41.8 MB. È l'originale del 26 agosto, citato nella risposta del 15 nov.
+- 15 nov 22:59 - (citato) Till: "Community_Share_UBSChristmas_2026-09.zip", 454 KB. È l'originale del 23 settembre, citato nella risposta del 15 nov.
+- 17 nov 08:08 - wim schrynemakers (General): "RangeReaper.zip", 6.3 MB. Testo: "sure, some backtests".
+- 20 nov 15:01 - Kn Pleeeee (set in vendita): "BOOMONEstats.zip", 712 KB. Ottimizzazione e validazione OOS su tick reali.
+- 21 nov 15:08 - Till (My new set files): "Community_Share_2026-11.zip", 151 KB, con README.md (6 KB) e due HTML con le performance dei set.
+- 21 nov 15:08-15:10 - Till: 10 file .set (18 KB ciascuno): UBS-XAUUSD-H1-G80482, G50449, G50455, G50482, G50561, G50601, G80381, G80388, G80449, G80480.
+- 21 nov 17:24 - Tomasz Trader (My new set files): album "Album, README.md" (dimensione non visibile).
+- 18 nov 07:16 - wim schrynemakers (sets for sale): "UPDATED SETS UBS_V9.8.zip", 5.6 MB. È un pacchetto di set, non di backtest.
+
+Non risultano altri file con backtest condivisi nel periodo.
+
+--- 5. NON LETTO ---
+- Deposito e lotti del backtest originale di Zairex_: non indicati nel messaggio.
+- Contenuto dei file .rar e .zip: non letto (non scaricato per decisione).
