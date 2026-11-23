@@ -1,0 +1,17 @@
+# Analisi dei progetti claude.ai di Claudio: stato al 23/11/2026
+Fonti: `analisi_progetti.zip` (Claude in Chrome, analisi PARZIALE) e `BreakingBand_EA_Completi.zip` (17 file, identici a quelli di `codici/` del primo zip: verificato con cmp). Copie utili in `progetti_claude/`.
+## Cosa e stato letto
+Solo il progetto BREAKING BAND AGGIORNATO LEONARDO (1 chat, 108 messaggi, 16 versioni di codice, guida .docx). Degli altri 8 progetti: letta solo la lista (REGISTRAZIONI: 3 file, circa 20 chat in elenco). L'estensione Chrome e andata in timeout.
+## EA semiautomatico MT4 (priorita): ritrovato solo come descrizione
+Nome: `EA_BOLL_BULGE_Manager_PRO_H1_FIXED.mq4`, poi `..._MULTI_TF_FINAL.mq4` (chat "Spiegazione funzionalita file", 18/03/2026); esiste anche la conversione MT5 (chat "Conversione EA da MT4 a MT5"). Descrizione: non apre ordini; gestisce le posizioni aperte a mano (filtro magic, default -1 = solo magic 0); SL ATR(14) x 3 se mancante; TP = mediana Bollinger (20, 2,0) aggiornata a ogni nuova barra (nella MULTI_TF sulla barra chiusa, distanza minima 10 punti); break even a 1R (offset 2 punti); trailing da 1,5R con passo 0,25R. **Il codice .mq4/.mq5 completo NON e arrivato**: serve recuperarlo (vedi prompt successivo).
+## Breaking Band di Leonardo (v4.2, `BreakingBand_ALLCROSSES_v42.mq5`, 593 righe)
+- EA nostro (Claudio + Claude), multi-simbolo (28 cross) su un solo grafico, H1, barre CHIUSE (shift 1: nessuna lettura della barra in formazione).
+- Bulge: il prezzo tocca la banda; si salvano banda di impulso, banda opposta, mediana, ATR. 1a e 2a bulge = continuazione (BuyLimit/SellLimit sul livello SALVATO della banda opposta), 3a = inversione (ordine contro, sul ritorno alla banda originale dopo la mediana). SL 3 x ATR salvato, TP = mediana corrente aggiornata a ogni barra, rischio 2% per operazione, massimo 10 posizioni, break even a 1 ATR, timeout 40 barre, magic 20250001.
+- Risultati dichiarati nella guida (H1, 2022-2026): 86-179 operazioni, +247 / +485 / +1.346 / +1.977 / +737 dollari secondo la versione, Sharpe 0,78-4,27, DD 1,6-11,2%. **Versione migliore dichiarata = v2.3 (14 coppie, SL 2 x ATR): scelta guardando i risultati, quindi non fuori campione.** Nessun test OOS ne tick reali nelle chat lette. Deposito del test non indicato.
+- Discrepanze (dal riepilogo): SL 2 x o 3 x ATR, rischio 1% o 2%, 9 / 10 / 14 / 28 coppie; filtro "banda piatta" della guida non mostrato nelle prime righe del codice.
+## Lettura (misure, non giudizi)
+1. La logica e la stessa famiglia del Bulge / Breaking Band gia testata da noi (Bulge motore corretto PF 0,83 su 2.300-3.200 operazioni; replica di Massimo: OOS debole; filtri di Leonardo chiusi). La v4.2 differisce perche entra con ordini LIMIT sul livello salvato e ha il contatore 1a/2a/3a bulge: **questa variante non e mai stata testata da noi**.
+2. I risultati dichiarati sono piccoli (qualche centinaio o poco piu di mille dollari in 4 anni) e scelti sul periodo in cui sono stati visti.
+3. Per la parte semiautomatica la v4.2 contiene gia il "TP dinamico = mediana a ogni barra", quindi il gestore e riusabile.
+## Proposta
+A) Recuperare il codice MT4/MT5 del Manager con un prompt corto (una chat per volta). B) Con quel codice scrivere il gestore MT5 nostro. C) Se Claudio vuole, test pre-registrato della v4.2 nel nostro tester (28 coppie, H1, IS/OOS/hold-out, barre da 1 minuto): e una candidata al terzo EA, scorrelata in teoria perche forex a mean reversion; costo: ore di tester sul PC e un 15-20% di probabilita realistica di passare i cancelli.
