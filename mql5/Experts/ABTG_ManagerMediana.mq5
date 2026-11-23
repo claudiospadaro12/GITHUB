@@ -98,6 +98,10 @@ void Gestisci(const string s,ulong tk,bool nuovaBarra)
    double stopLiv=SymbolInfoInteger(s,SYMBOL_TRADE_STOPS_LEVEL)*pt;
    double bid=SymbolInfoDouble(s,SYMBOL_BID), ask=SymbolInfoDouble(s,SYMBOL_ASK);
    string gv="ABTGM_SL_"+(string)tk;
+   string gvv="ABTGM_V_"+(string)tk;
+   bool primo=!GlobalVariableCheck(gvv);          // prima volta che vedo questa posizione
+   if(primo) GlobalVariableSet(gvv,1.0);
+   if(!primo && !nuovaBarra) return;              // il resto avviene solo alla prima visita o al cambio di candela (niente spam nel diario)
 
    //--- STOP: una sola volta, mai spostato
    double nuovoSL=sl;
@@ -117,7 +121,7 @@ void Gestisci(const string s,ulong tk,bool nuovaBarra)
 
    //--- TARGET: mediana, aggiornata al cambio di candela (o subito alla prima volta)
    double nuovoTP=tp;
-   if(InpAggiornaTP && (nuovaBarra || tp==0.0))
+   if(InpAggiornaTP)
      {
       double m;
       if(Mediana(s,m))
