@@ -23,7 +23,8 @@ param(
   [string]$Simbolo = 'XAUUSD',
   [string]$Fine = '',
   [string]$Base = '',
-  [string]$SetFile = ''
+  [string]$SetFile = '',
+  [double]$Deposito = 80000   # 23/11: accettato per compatibilita con la riga (la riga lo passa); il valore NON puo essere diverso da 80000
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,7 +45,8 @@ $SIMBOLO  = $Simbolo
 # NIENTE $PERIODO qui: questo giro ha DUE periodi del grafico e li porta ognuna la sua voce di $SONDE ($s.Per). Una variabile
 # unica di periodo sarebbe falsa e finirebbe nei titoli e nel referto (classe 1499: i conteggi e le etichette si COSTRUISCONO).
 $MODELLO  = $Modello
-$DEPOSITO = 80000
+if([math]::Abs($Deposito - 80000) -gt 0.005){ Write-Host 'FERMO: in questo terminale FTMO il deposito e fisso a 80000.' -ForegroundColor Red; exit 1 }
+$DEPOSITO = $Deposito
 $VALUTA   = 'EUR'
 $LEVA     = 100
 $TETTO_BARRE  = 100000
