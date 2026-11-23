@@ -36,7 +36,7 @@ Anni negativi: 3 su 12 (2017, 2018, 2021); il 2020 da solo vale il 36% della som
 | 2024 | 3 | -362 | -1.450 | -1.812 |
 | **Somma 2013-2024** | 58 | **+5.826** | **+23.302** | **+29.128** |
 **Numeri dichiarati da Massimo** (2020-2026, su 100.000 scalati a 80.000): rischio 0,5% +1.920 in 7 anni (+274 all'anno); 2% +9.587 (+1.370 all'anno); 2,5% +11.961 (+1.709 all'anno).
-**Lettura:** nella replica nostra il vantaggio c'e fino al 2020 (+4.557 a 0,5% nel 2013-2020) e **poi sparisce**: 2021-2024 sommano -727 a 0,5%. Massimo sul periodo 2020-2026 dichiara invece un risultato positivo (PF 1,41-2,34): la differenza non e spiegata (dati MetaQuotes contro BCM, ogni tick contro 1 minuto, 2025-26 che la nostra serie non copre); i due test non coincidono nel 2021-2024. **Pochissime operazioni** (2-9 all'anno su 3 mercati): campione piccolo, un anno storto pesa molto.
+**Lettura:** nella replica nostra il vantaggio c'e fino al 2020 (+6.554 a 0,5% nel 2013-2020) e **poi sparisce**: 2021-2024 sommano -727 a 0,5%. Massimo sul periodo 2020-2026 dichiara invece un risultato positivo (PF 1,41-2,34): la differenza non e spiegata (dati MetaQuotes contro BCM, ogni tick contro 1 minuto, 2025-26 che la nostra serie non copre); i due test non coincidono nel 2021-2024. **Pochissime operazioni** (2-9 all'anno su 3 mercati): campione piccolo, un anno storto pesa molto.
 ## Insieme (somma aritmetica, non e una simulazione di portafoglio)
 GoldenZoe MEDIO + Breaking Band 2% (replica nostra), 2015-2024: 4.078 / 3.929 / 1.886 / 3.555 / 6.076 / 17.651 / **-5.454** / 409 / 5.202 / 4.967 (somma +42.299). Il 2021 e negativo per entrambi.
 ## Limiti
