@@ -1,0 +1,12 @@
+# Telegram UBS, topic "sets for sale" (13/03/2026 - 23/11/2026, 734 messaggi): sintesi (23/11/2026)
+Fonte: `SET_FOR_SALE.zip` (messages.html + 2 zip + 1 html + 1 pdf + 2 mp4 + 190 immagini). Non aperti: i due `.mp4`, il PDF `TrendSurfers_*` (marketing), nessun file eseguito. Tutto cio che dicono gli utenti e non verificato.
+## Fatti verificabili sui file
+- **`UPDATED SETS UBS_V9.8.zip`** (Wim, 18/11/2026 07:16, "nello zip ufficiale dei set UBS e su Discord"): 425 file; contiene `Volatility Breakout/US30/US30_VOL_M15_a, b, c, g.set`. **Il `g` ufficiale V9.8 e identico al nostro `forward_demo/DowRaptor_g.set` (187 parametri) tranne le 3 modifiche nostre: commento, magic number e ForceSymbol (US30 -> U30USD).** Il set non e cambiato nella V9.8: il problema "Invalid stops" non dipende dal set ma dall'EA; l'EA V9.8 non e nel topic.
+- Altri set V9.8 per i nostri temi: `ORB Master` (US30/USTEC/DAX/US500 M15), `Indicement` (US30), `Volatility Breakout` (EURUSD M15, NAS100, US500, BTCUSD, xauusd), `Client sets` (Till, BK, Basa, StoryG, MisterMember, hangsan), `UBS live portfolio`.
+## Discussione del 22-23/11 (prop firm)
+- 22/11: ban FTMO riferiti (uno con Gold Reaper + GTP; un altro "senza EA"); un utente consiglia Concept e iFunds per gli EA ("nessun limite giornaliero, solo il 10% totale"); FundedNext EA ammessi ma conto massimo 25k; FundingPips, Alpha Capital, GFT "non per gli EA" (testimonianze).
+- 23/11: Claudio chiede a un utente se gli EA di terzi sono ammessi su Concept o contano come copy trading e se c'e un tetto per lo stesso EA: **la domanda non riceve risposta diretta**. Lo stesso utente dice che Concept "ha di fatto nessuna regola, basta non toccare il 10% totale", che servono "un portafoglio diversificato di EA robusti" e di evitare gli scalper veloci, e che **"usa software per manipolare gli EA per usarli su FTMO, Blueberry, FundedNext e 5ers"**.
+## Valutazione
+- La frase sul software per "manipolare gli EA" descrive proprio la strategia di nascondere EA di terzi alle prop firm: **non e un metodo che usiamo** e rischia il ban e la perdita dei profitti.
+- La risposta autorevole sul tetto per EA di terzi resta quella scritta del supporto di Concept (e di FTMO): le domande sono pronte, non inviate.
+- Claudio ha scritto nel gruppo (pubblico) dettagli sul proprio metodo (test su 3 anni, EA propri): in un gruppo di venditori di set conviene non dare dettagli di strategie, conti o prop usate.
