@@ -1,0 +1,103 @@
+=== FOREX H1 (10 cross) ===
+  minRR 0.0  IS n= 25916 PF 0.79 | OOS n= 10945 PF 0.79
+  minRR 0.3  IS n= 22926 PF 0.80 | OOS n=  9786 PF 0.80
+  minRR 0.5  IS n= 16304 PF 0.80 | OOS n=  7336 PF 0.81
+  minRR 0.7  IS n=  8658 PF 0.81 | OOS n=  4276 PF 0.82
+  minRR 1.0  IS n=  2014 PF 0.76 | OOS n=  1243 PF 0.76
+  minRR 1.2  IS n=   539 PF 0.72 | OOS n=   454 PF 0.79
+  minRR 1.5  IS n=    56 PF 0.98 | OOS n=    66 PF 0.69
+  minRR migliore in-sample: 1.5
+  CLASSIFICA per PF in-sample (minRR 1.5): simbolo | IS PF (n) | OOS PF (n)
+    1. EURJPY_H1    IS 5.55 (6) | OOS 0.04 (4)
+    2. GBPJPY_H1    IS 1.50 (7) | OOS 0.48 (7)
+    3. USDCHF_H1    IS 1.24 (7) | OOS 0.50 (6)
+    4. USDJPY_H1    IS 0.93 (12) | OOS 0.16 (10)
+    5. AUDUSD_H1    IS 0.91 (2) | OOS 1.49 (9)
+    6. EURGBP_H1    IS 0.52 (3) | OOS 0.00 (1)
+    7. NZDUSD_H1    IS 0.27 (2) | OOS 0.76 (11)
+    8. GBPUSD_H1    IS 0.16 (10) | OOS 5.15 (4)
+    9. EURUSD_H1    IS 0.00 (6) | OOS 0.52 (7)
+   10. USDCAD_H1    IS 0.00 (1) | OOS 0.86 (7)
+  correlazione di rango IS vs OOS (Spearman): -0.58
+=== FOREX D1 (28 cross) ===
+  minRR 0.0  IS n=  2512 PF 0.97 | OOS n=  2102 PF 1.08
+  minRR 0.3  IS n=  2311 PF 0.95 | OOS n=  1861 PF 1.07
+  minRR 0.5  IS n=  1786 PF 0.95 | OOS n=  1406 PF 1.06
+  minRR 0.7  IS n=  1046 PF 0.98 | OOS n=   856 PF 1.11
+  minRR 1.0  IS n=   284 PF 0.94 | OOS n=   233 PF 1.00
+  minRR 1.2  IS n=    93 PF 0.89 | OOS n=    73 PF 0.82
+  minRR 1.5  IS n=    12 PF 1.64 | OOS n=    12 PF 0.14
+  minRR migliore in-sample: 1.5
+  CLASSIFICA per PF in-sample (minRR 1.5): simbolo | IS PF (n) | OOS PF (n)
+    1. EURCHF       IS inf (1) | OOS nan (0)
+    2. GBPJPY       IS inf (1) | OOS nan (0)
+    3. GBPUSD       IS inf (1) | OOS 0.00 (1)
+    4. USDCAD       IS inf (1) | OOS 0.00 (1)
+    5. USDJPY       IS 0.79 (3) | OOS 0.00 (1)
+    6. CADCHF       IS 0.70 (2) | OOS nan (0)
+    7. AUDUSD       IS 0.00 (1) | OOS nan (0)
+    8. GBPCHF       IS 0.00 (1) | OOS nan (0)
+    9. NZDJPY       IS 0.00 (1) | OOS inf (1)
+   10. AUDCAD       IS nan (0) | OOS nan (0)
+   11. AUDCHF       IS nan (0) | OOS nan (0)
+   12. AUDJPY       IS nan (0) | OOS 0.00 (2)
+   13. AUDNZD       IS nan (0) | OOS nan (0)
+   14. CADJPY       IS nan (0) | OOS 0.00 (1)
+   15. CHFJPY       IS nan (0) | OOS nan (0)
+   16. EURAUD       IS nan (0) | OOS 0.00 (1)
+   17. EURCAD       IS nan (0) | OOS nan (0)
+   18. EURGBP       IS nan (0) | OOS nan (0)
+   19. EURJPY       IS nan (0) | OOS 0.00 (1)
+   20. EURNZD       IS nan (0) | OOS 1.11 (2)
+   21. EURUSD       IS nan (0) | OOS nan (0)
+   22. GBPAUD       IS nan (0) | OOS nan (0)
+   23. GBPCAD       IS nan (0) | OOS nan (0)
+   24. GBPNZD       IS nan (0) | OOS nan (0)
+   25. NZDCAD       IS nan (0) | OOS nan (0)
+   26. NZDCHF       IS nan (0) | OOS nan (0)
+   27. NZDUSD       IS nan (0) | OOS 0.00 (1)
+   28. USDCHF       IS nan (0) | OOS nan (0)
+  correlazione di rango IS vs OOS (Spearman): -0.82
+=== H1 oro, Bitcoin, EURUSD, Nasdaq, S&P, DAX ===
+  minRR 0.0  IS n=  3727 PF 0.74 | OOS n=  5330 PF 0.75
+  minRR 0.3  IS n=  3414 PF 0.74 | OOS n=  4773 PF 0.74
+  minRR 0.5  IS n=  2745 PF 0.71 | OOS n=  3727 PF 0.71
+  minRR 0.7  IS n=  1718 PF 0.74 | OOS n=  2307 PF 0.73
+  minRR 1.0  IS n=   536 PF 0.62 | OOS n=   798 PF 0.68
+  minRR 1.2  IS n=   203 PF 0.41 | OOS n=   317 PF 0.63
+  minRR 1.5  IS n=    40 PF 0.42 | OOS n=    52 PF 0.72
+  minRR migliore in-sample: 0.7
+  CLASSIFICA per PF in-sample (minRR 0.7): simbolo | IS PF (n) | OOS PF (n)
+    1. NASUSD_H1    IS 0.90 (255) | OOS 0.82 (490)
+    2. SPXUSD_H1    IS 0.87 (249) | OOS 0.76 (466)
+    3. EURUSD_H1    IS 0.87 (218) | OOS 0.51 (112)
+    4. XAUUSD_H1    IS 0.76 (852) | OOS 0.64 (443)
+    5. BTCUSD_H1    IS 0.59 (144) | OOS 0.75 (529)
+    6. D30EUR_H1    IS nan (0) | OOS 0.64 (267)
+  correlazione di rango IS vs OOS (Spearman): 0.60
+
+=== EXTRA: forex H1, classifica a minRR scelto per NUMERO di segnali (>= 1.000 IS), non per PF ===
+ minRR 0.7: simbolo | IS PF (n) | OOS PF (n)
+   1. NZDUSD_H1  IS 0.89 (751) | OOS 0.91 (453)
+   2. GBPJPY_H1  IS 0.86 (846) | OOS 0.80 (416)
+   3. USDJPY_H1  IS 0.82 (909) | OOS 0.71 (487)
+   4. USDCHF_H1  IS 0.80 (955) | OOS 0.75 (409)
+   5. EURJPY_H1  IS 0.80 (875) | OOS 0.74 (439)
+   6. AUDUSD_H1  IS 0.80 (887) | OOS 0.92 (468)
+   7. EURGBP_H1  IS 0.80 (669) | OOS 0.94 (331)
+   8. USDCAD_H1  IS 0.79 (801) | OOS 0.80 (426)
+   9. GBPUSD_H1  IS 0.75 (948) | OOS 0.85 (402)
+  10. EURUSD_H1  IS 0.74 (1017) | OOS 0.85 (445)
+  Spearman IS-OOS: -0.24
+ minRR 1.0: simbolo | IS PF (n) | OOS PF (n)
+   1. EURGBP_H1  IS 0.91 (158) | OOS 0.87 (80)
+   2. AUDUSD_H1  IS 0.91 (200) | OOS 0.74 (122)
+   3. USDJPY_H1  IS 0.89 (232) | OOS 0.58 (152)
+   4. EURJPY_H1  IS 0.86 (194) | OOS 0.72 (122)
+   5. USDCHF_H1  IS 0.75 (224) | OOS 0.66 (132)
+   6. GBPJPY_H1  IS 0.72 (215) | OOS 0.68 (125)
+   7. USDCAD_H1  IS 0.72 (190) | OOS 0.83 (134)
+   8. GBPUSD_H1  IS 0.69 (239) | OOS 1.01 (115)
+   9. NZDUSD_H1  IS 0.59 (139) | OOS 0.86 (133)
+  10. EURUSD_H1  IS 0.57 (223) | OOS 0.84 (128)
+  Spearman IS-OOS: -0.33
