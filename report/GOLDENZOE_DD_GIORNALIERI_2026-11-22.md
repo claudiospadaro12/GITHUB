@@ -20,3 +20,5 @@ Giorno peggiore: 24/02/2026 (1,0% e 1,5%), 08/07/2024 (0,45% e 0,9%). Serie gior
 | 4,0% | 10,59% | 80 / 53 / 30 / 1 | 55,6% | 25 | 5,20% | +165% | 10/04/2024 |
 | 5,0% | 16,74% | 125 / 86 / 65 / 10 | 86,2% | 52 | 6,52% | +228% | 31/01/2024 |
 **Lettura (solo misura, nessun consiglio):** il DD giornaliero cresce circa 1,8 volte il rischio per operazione (il giorno peggiore e sempre il 24/02/2026): il 5% giornaliero si raggiunge fra 2,5% (4,56%) e 3,0% (6,21%, 2 giorni sopra 5%). **Ma il DD dal picco cresce molto piu in fretta**: a 2,5% e 24,6% (6 episodi sopra 10%), a 3% e 33%. Il DD statico dal capitale iniziale resta basso (3-4%) solo perche l'equity si e gia alzata (+88-112% in 4 anni): in una challenge che parte da 80.000 senza cuscinetto il quadro e diverso (una sola data di partenza simulata). Costi FTMO, 76 operazioni, una sola finestra: la coda reale e piu grossa.
+
+**Aggiunta 24/11/2026 - r² della curva:** su 12 anni 0,85-0,88 a 0,5-1,3 0i rischio, su 4 anni 0,90-0,93 (soglia di riferimento 0,93, non un nostro cancello). Dettagli: `GOLDENZOE_R2_2026-11-24.md`.

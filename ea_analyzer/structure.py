@@ -29,6 +29,10 @@ def analyze_structure(tr, tf_minutes=None):
         r["lotti_vs_1/sl_correlazione"] = round(float(np.corrcoef(tr.volume[sld.notna()], 1 / sld.dropna())[0, 1]), 2) if sld.notna().sum() > 3 else None
     cv = tr.volume.std() / tr.volume.mean() if tr.volume.mean() else 0
     r["lotti"] = dict(min=tr.volume.min(), max=tr.volume.max(), cv=round(float(cv), 3), tipo=("fisso" if cv < 1e-3 else "variabile"))
+    # r2 della curva (linearita del saldo): P&L netto cumulato contro il numero di operazione; 1,000 = retta perfetta
+    net = (tr.profit + tr.swap + tr.commission).values.astype(float)
+    if len(net) >= 3 and np.std(np.cumsum(net)) > 0:
+        r["r2_curva_saldo"] = round(float(np.corrcoef(np.arange(len(net)), np.cumsum(net))[0, 1] ** 2), 3)
     win = (tr.profit + tr.swap + tr.commission) > 0
     after_loss = tr.volume.shift(-1)[~win]; after_win = tr.volume.shift(-1)[win]
     if len(after_loss.dropna()) and len(after_win.dropna()) and after_win.mean() > 0:
