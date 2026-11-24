@@ -97,7 +97,7 @@ $SONDE = @(
   [pscustomobject]@{ Nome = 'TRANCHE22'; Per = 'H1'; Da = '2025.01.01'; A = '2026.10.01'; Timeout = ($TimeoutTrancheMin * 4); Cosa = 'corsa CONTINUA 21 mesi, H1' }
 )
 # v1 (26/10/2026): UN SOLO ANNO SOLARE a conto vuoto (80000 EUR), scelto con -Anno AAAA, -Modello (default 1 = OHLC 1 minuto; 0 = tutti i tick generati; 4 = tick reali) e -Periodo (default H1). La passata si chiama ancora TRANCHE22 per il lettore.
-if($Anno -notmatch '^20(0[5-9]|1[0-9]|2[0-6])$'){ throw ('-Anno "' + $Anno + '" non valido: serve un anno fra 2005 e 2026, per esempio 2013') }
+if($Anno -notmatch '^20(0[4-9]|1[0-9]|2[0-6])$'){ throw ('-Anno "' + $Anno + '" non valido: serve un anno fra 2004 e 2026, per esempio 2013') }
 if($Modello -notin @(0,1,4)){ throw ('-Modello ' + $Modello + ' non ammesso (0, 1 o 4)') }
 if($Fine -ne '' -and $Fine -notmatch '^\d{4}\.\d\d\.\d\d$'){ throw ('-Fine "' + $Fine + '" non valida (attesa AAAA.MM.GG, data esclusa)') }
 if($Periodo -notmatch '^(M1|M5|M15|M30|H1|H4|D1)$'){ throw ('-Periodo "' + $Periodo + '" non ammesso (M1, M5, M15, M30, H1, H4, D1)') }
