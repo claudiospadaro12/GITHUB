@@ -1,0 +1,5 @@
+# GTP oro D1: prova V2 dei 10 candidati su 2023-2026 (dopo l'ottimizzazione) - CRITERI scritti PRIMA dei numeri (24/11/2026)
+Stessi 10 candidati della V1 (`GTP_D1_CANDIDATI_10_2026-11-24.csv`), stessi parametri, nessuna ottimizzazione. Finestra: **XAUUSD D1, 2023-01-01 -> 2026-11-01 (esclusa)**, mai usata (l'ottimizzazione e 2013-2022, la V1 2004-2012). Modello 1, deposito 100.000 EUR, lotto fisso 0,1.
+**Cancello V2 (per candidato), identico alla V1:** PF >= 1,20, profitto > 0, operazioni >= 20, anni non negativi >= 60% (con 4 anni solari: servono 3 su 4; il 2026 e parziale).
+**Previsioni:** almeno 5 candidati su 10 passano V2: 50%; i candidati che passano la V1 e la V2 sono almeno 4: 45%; PF mediano V2 minore del PF mediano V1 (1,44): 55%; il candidato 05 passa: 60%; i 3 candidati 01, 07, 10 (non passati in V1) passano tutti: 5%.
+**Cautela:** anche 2023-2026 e un rialzo forte dell'oro: un esito positivo non separa il vantaggio dalla direzione. EA e set di Wim: ricerca, fuori dal progetto prop. Nessun consiglio su taglie.
