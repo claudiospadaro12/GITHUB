@@ -1,0 +1,29 @@
+=== POOLED per cella (tutti i simboli D1 insieme; H1 a parte) ===
+D1 forex
+  mediana  IS n=    0 PF nan | OOS n=    0 PF nan
+  R=0.3    IS n=    0 PF nan | OOS n=    0 PF nan
+  R=0.5    IS n=    0 PF nan | OOS n=    0 PF nan
+  R=0.7    IS n=    0 PF nan | OOS n=    0 PF nan
+  R=1.0    IS n=    0 PF nan | OOS n=    0 PF nan
+  R=1.2    IS n=    0 PF nan | OOS n=    0 PF nan
+  R=1.5    IS n=    0 PF nan | OOS n=    0 PF nan
+H1 (gruppo dei simboli caricati)
+  mediana  IS n=27416 PF 0.74 | OOS n=11561 PF 0.74
+  R=0.3    IS n=27791 PF 0.76 | OOS n=11784 PF 0.76
+  R=0.5    IS n=26483 PF 0.80 | OOS n=11263 PF 0.82
+  R=0.7    IS n=25382 PF 0.82 | OOS n=10839 PF 0.82
+  R=1.0    IS n=23956 PF 0.84 | OOS n=10240 PF 0.84
+  R=1.2    IS n=23125 PF 0.84 | OOS n= 9884 PF 0.85
+  R=1.5    IS n=22201 PF 0.85 | OOS n= 9491 PF 0.85
+Cella migliore in-sample (D1 forex): R=1.5 PF IS 0.85
+=== PF per simbolo: [mediana] e [migliore R=1.5] (IS | OOS, n) ===
+AUDUSD_H1  | mediana IS 0.74(2776) OOS 0.88(1161) || R=1.5 IS 0.88(2216) OOS 0.96(943)
+EURGBP_H1  | mediana IS 0.77(2728) OOS 0.69(1116) || R=1.5 IS 0.80(2167) OOS 0.86(894)
+EURJPY_H1  | mediana IS 0.72(2690) OOS 0.74(1188) || R=1.5 IS 0.86(2182) OOS 0.86(973)
+EURUSD_H1  | mediana IS 0.69(2745) OOS 0.67(1150) || R=1.5 IS 0.88(2259) OOS 0.80(956)
+GBPJPY_H1  | mediana IS 0.74(2732) OOS 0.70(1155) || R=1.5 IS 0.83(2202) OOS 0.88(965)
+GBPUSD_H1  | mediana IS 0.72(2782) OOS 0.71(1146) || R=1.5 IS 0.83(2277) OOS 0.85(943)
+NZDUSD_H1  | mediana IS 0.76(2745) OOS 0.82(1189) || R=1.5 IS 0.83(2172) OOS 0.88(948)
+USDCAD_H1  | mediana IS 0.75(2659) OOS 0.77(1138) || R=1.5 IS 0.80(2193) OOS 0.81(932)
+USDCHF_H1  | mediana IS 0.78(2747) OOS 0.73(1137) || R=1.5 IS 0.93(2238) OOS 0.79(935)
+USDJPY_H1  | mediana IS 0.71(2812) OOS 0.63(1181) || R=1.5 IS 0.88(2295) OOS 0.75(1002)

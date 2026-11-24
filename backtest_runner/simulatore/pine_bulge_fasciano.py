@@ -84,16 +84,25 @@ def load_h1_ext():
         h=load_csv_h1(f)
         if h is not None and len(h)>5000: out[k]=(h,2018); print(k,'barre H1',len(h),h.index[0].date(),h.index[-1].date(),file=sys.stderr)
     return out
+def load_forex_h1():
+    out={}
+    for f in sorted(glob.glob('/tmp/claude-0/fxh1/ABTG_H1_*.csv')):
+        k=os.path.basename(f)[8:-4]
+        d=pd.read_csv(f,sep=';'); d['t']=pd.to_datetime(d['date'],format='%Y.%m.%d %H:%M'); d=d.set_index('t')[['open','high','low','close']]
+        d=d[(d.index>=pd.Timestamp('2000-01-01'))&(d.index<pd.Timestamp('2026-11-24'))&(d.high>d.low)]
+        out[k+'_H1']=(d,2018)
+    return out
 sets={}
-sets.update(load_d1()); 
-if '--solo-d1' not in sys.argv: sets.update(load_h1()); sets.update(load_h1_ext())
+if '--forex-h1' in sys.argv: sets.update(load_forex_h1())
+else: sets.update(load_d1()); 
+if '--solo-d1' not in sys.argv and '--forex-h1' not in sys.argv: sets.update(load_h1()); sets.update(load_h1_ext())
 res={}
 for s,(d,iy) in sets.items():
     O,H,L,C=[d[c].values for c in ('open','high','low','close')]; pre=prep(O,H,L,C,d.index)
     for rr in RRS: res[(s,rr)]=(run(O,H,L,C,d.index,pre,rr),iy)
 name=lambda rr:'mediana' if rr is None else 'R=%.1f'%rr
 print('=== POOLED per cella (tutti i simboli D1 insieme; H1 a parte) ===')
-for grp,filt in (('D1 forex',lambda s:not s.endswith('_H1')),('H1 tutti (oro, BTC, EURUSD, indici)',lambda s:s.endswith('_H1'))):
+for grp,filt in (('D1 forex',lambda s:(not s.endswith('_H1')) and '--forex-h1' not in sys.argv),('H1 (gruppo dei simboli caricati)',lambda s:s.endswith('_H1'))):
     print(grp)
     for rr in RRS:
         i=[];o=[]
@@ -104,7 +113,7 @@ for grp,filt in (('D1 forex',lambda s:not s.endswith('_H1')),('H1 tutti (oro, BT
 best=None
 bi=-1
 for rr in RRS:
-    i=[x for (s,r),(tr,iy) in res.items() if r==rr and not s.endswith('_H1') for d_,x in tr if d_.year<=iy]
+    i=[x for (s,r),(tr,iy) in res.items() if r==rr and (not s.endswith('_H1') or '--forex-h1' in sys.argv) for d_,x in tr if d_.year<=iy]
     if len(i)>=150 and pf(i)>bi: bi=pf(i); best=rr
 print('Cella migliore in-sample (D1 forex):',name(best),'PF IS %.2f'%bi)
 print('=== PF per simbolo: [mediana] e [migliore %s] (IS | OOS, n) ==='%name(best))
