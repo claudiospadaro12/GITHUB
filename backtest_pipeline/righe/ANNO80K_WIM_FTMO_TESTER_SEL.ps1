@@ -237,7 +237,7 @@ foreach($d in @(Get-ChildItem -Path $DataRoot -Directory -ErrorAction SilentlyCo
   }
 }
 # le ALTRE installazioni di questo PC, censite il 05/10/2026 (risultati_archivio/DUKA_P0_20261005_171046/REFERTO_DUKA_P0.txt, sez. 5): AMMESSE PER NOME, chiuse, non toccate
-$Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale', 'C:\Program Files\BCM Markets MT5 Terminal')
+$Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale', 'C:\Program Files\BCM Markets MT5 Terminal', 'C:\MT5_BCM_Opt', 'C:\MT5_BCM_Tester2')  # v4 (25/11/2026): aggiunte le due installazioni BCM nostre create dopo il 05/10 (portatile dell ottimizzazione e Tester2), ammesse per nome, non toccate
 # v3 (14/10/2026): una cartella dati con origin.txt = C:\Users\Master\Desktop (nata dopo le 19:28, nessun conto, nessun processo aperto) e ammessa SOLO se
 # il suo common.ini non ha nessun Login= : senza conto non puo operare. Se un giorno ha un Login=, o se common.ini esiste ma non si legge, ci si ferma.
 $CensiteSenzaConto = @('C:\Users\Master\Desktop')
