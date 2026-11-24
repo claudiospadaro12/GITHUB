@@ -25,7 +25,7 @@ $EAS=@(
       'InpLotMode=1',
       'InpMagic=972301',
       'InpComment=GOLDENZOE SWAP',
-      'InpVerbose=false'
+      'InpVerbose=true'
   ) }
 )
 function Num([string]$s){ $c=($s -replace '[^0-9.\-]',''); $v=0.0; if([double]::TryParse($c,[Globalization.NumberStyles]::Float,$ci,[ref]$v)){ return $v } else { return [double]::NaN } }
@@ -53,10 +53,10 @@ if(-not ('SvegliaE14.Win' -as [type])){ Add-Type -Namespace SvegliaE14 -Name Win
 [void][SvegliaE14.Win]::SetThreadExecutionState([uint32]2147483651)
 $desk=[Environment]::GetFolderPath('Desktop'); $dirOut=Join-Path $desk 'GOLDENZOE_SWAP_BTC_FTMO'; $dirSerie=Join-Path $dirOut 'serie'; $dirRep=Join-Path $dirOut 'report'
 New-Item -ItemType Directory -Force -Path $dirSerie | Out-Null; New-Item -ItemType Directory -Force -Path $dirRep | Out-Null
-$FIN=@( @{ n='BTC_2021_2023'; s='BTCUSD'; da='2021.01.01'; a='2023.12.31' }, @{ n='BTC_2024_2026'; s='BTCUSD'; da='2024.01.01'; a='2026.10.31' }, @{ n='ETH_2021_2023'; s='ETHUSD'; da='2021.01.01'; a='2023.12.31' }, @{ n='ETH_2024_2026'; s='ETHUSD'; da='2024.01.01'; a='2026.10.31' } )
+$FIN=@( @{ n='BTC_2021_2023'; s='BTCUSD'; da='2021.01.01'; a='2023.12.31' }, @{ n='BTC_2024_2026'; s='BTCUSD'; da='2024.01.01'; a='2026.10.31' } )
 $righe=New-Object System.Collections.ArrayList
 [void]$righe.Add('ea;finestra;operazioni;rend_totale_pct;PF_su_rendimenti;t_giornaliera;DD_equity_pct;anni_con_uscite;anni_positivi;quota_max_anno_pct;netto_tester_EUR;PF_tester;rendimento_per_anno_pct')
-Write-Host ('=== MISURA SWAP BTC/ETH su terminale FTMO di prova (80.000 EUR): ' + ($EAS.Count * $FIN.Count) + ' passate, Modello 1. Avvio ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana). Durata attesa 5-20 minuti (STIMA, 4 passate D1). Non aprire MT5; PC alla corrente. ===') -ForegroundColor Cyan
+Write-Host ('=== MISURA SWAP BTC/ETH su terminale FTMO di prova (80.000 EUR): ' + ($EAS.Count * $FIN.Count) + ' passate, Modello 1. Avvio ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora italiana). Durata attesa 5-15 minuti (STIMA, 2 passate D1, log del tester inclusi). Non aprire MT5; PC alla corrente. ===') -ForegroundColor Cyan
 $n=0; $stopTutto=$false
 foreach($f in $FIN){
  foreach($ea in $EAS){
@@ -70,6 +70,7 @@ foreach($f in $FIN){
   if(-not $pr.HasExited){ Write-Host ('TIMEOUT su ' + $rep + ': il terminale e ancora aperto. Non lo chiudo io: mi fermo qui.') -ForegroundColor Red; $stopTutto=$true; break }
   if(-not (Test-Path -LiteralPath $rf)){ [void]$righe.Add($ea.n + ';' + $f.n + ';ERRORE report non trovato;;;;;;;;;;'); Write-Host ('[' + $n + '] ' + $rep + ': report non trovato (mi serve il log del tester)') -ForegroundColor Red; continue }
   Copy-Item -LiteralPath $rf -Destination $dirRep -Force
+  $dirLog=Join-Path $dirOut 'log'; New-Item -ItemType Directory -Force -Path $dirLog | Out-Null; foreach($lg in @(Get-ChildItem -LiteralPath (Join-Path $DATI 'Tester') -Recurse -Filter '*.log' -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0.AddSeconds(-5) })){ try { Copy-Item -LiteralPath $lg.FullName -Destination (Join-Path $dirLog ($rep + '__' + $lg.Directory.Name + '__' + $lg.Name)) -Force } catch { } }
   $html=LeggiTesto $rf
   $tx=[regex]::Replace($html,'<[^>]*>','|'); $tx=[regex]::Replace($tx,'\s*\|[\s|]*','|')
   $pT=Num (Cerca $tx 'Profitto Totale Netto:|Total Net Profit:'); $pfT=Num (Cerca $tx 'Fattore di Profitto:|Profit Factor:'); $nT=Num (Cerca $tx 'Numero di Operazioni di Trading Totali:|Total Trades:')
@@ -117,5 +118,5 @@ Write-Host ('FATTO alle ' + (Get-Date).ToString('dd/MM/yyyy HH:mm') + ' (ora ita
 Write-Host ''
 Write-Host '##########  FILE DA ALLEGARE ALLA CHAT  ##########' -ForegroundColor Black -BackgroundColor Yellow
 Write-Host $zip -ForegroundColor Black -BackgroundColor Yellow
-Write-Host '(contiene: RISULTATI_GOLDENZOE_SWAP_BTC_FTMO.csv + cartella serie + cartella report; Esplora file si apre con lo zip selezionato)' -ForegroundColor Black -BackgroundColor Yellow
+Write-Host '(contiene: RISULTATI_GOLDENZOE_SWAP_BTC_FTMO.csv + cartella serie + cartella report + cartella log; Esplora file si apre con lo zip selezionato)' -ForegroundColor Black -BackgroundColor Yellow
 try { Start-Process -FilePath 'explorer.exe' -ArgumentList ('/select,"' + $zip + '"') } catch { }
