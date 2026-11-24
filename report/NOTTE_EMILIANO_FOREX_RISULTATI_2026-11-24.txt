@@ -1,0 +1,88 @@
+CONTROLLO FUSO ora del picco di tickvol EURUSD per anno: {2005: 14, 2010: 14, 2015: 15, 2020: 15, 2025: 15}
+celle 24
+cella 1 ('A', 'S1', 'X1', 'W1', False) operazioni 13942
+cella 2 ('A', 'S1', 'X1', 'W2', False) operazioni 18171
+cella 3 ('A', 'S1', 'X2', 'W1', False) operazioni 13942
+cella 4 ('A', 'S1', 'X2', 'W2', False) operazioni 18171
+cella 5 ('A', 'S2', 'X1', 'W1', False) operazioni 14910
+cella 6 ('A', 'S2', 'X1', 'W2', False) operazioni 19480
+cella 7 ('A', 'S2', 'X2', 'W1', False) operazioni 14910
+cella 8 ('A', 'S2', 'X2', 'W2', False) operazioni 19480
+cella 9 ('B', 'S1', 'X1', 'W1', False) operazioni 12015
+cella 10 ('B', 'S1', 'X1', 'W2', False) operazioni 19193
+cella 11 ('B', 'S1', 'X2', 'W1', False) operazioni 12015
+cella 12 ('B', 'S1', 'X2', 'W2', False) operazioni 19193
+cella 13 ('B', 'S2', 'X1', 'W1', False) operazioni 12702
+cella 14 ('B', 'S2', 'X1', 'W2', False) operazioni 20416
+cella 15 ('B', 'S2', 'X2', 'W1', False) operazioni 12702
+cella 16 ('B', 'S2', 'X2', 'W2', False) operazioni 20416
+cella 17 ('A', 'S1', 'X1', 'W1', True) operazioni 45543
+cella 18 ('A', 'S1', 'X2', 'W1', True) operazioni 45543
+cella 19 ('A', 'S2', 'X1', 'W1', True) operazioni 49137
+cella 20 ('A', 'S2', 'X2', 'W1', True) operazioni 49137
+cella 21 ('B', 'S1', 'X1', 'W1', True) operazioni 37173
+cella 22 ('B', 'S1', 'X2', 'W1', True) operazioni 37173
+cella 23 ('B', 'S2', 'X1', 'W1', True) operazioni 39879
+cella 24 ('B', 'S2', 'X2', 'W1', True) operazioni 39879
+
+cella                  |   nIS  PFis     t |  nOOS  PFoo  Rmed | OOS x2 PF | coppie>0 OOS | 2025-26 R | gate
+AS1X1W1                |  6259  0.84  -4.5 |  7683  0.78 -0.095 |  0.69 | 0 |    -91.7 | no
+AS1X1W2                |  8463  0.82  -5.7 |  9708  0.76 -0.108 |  0.67 | 0 |   -124.5 | no
+AS1X2W1                |  6259  0.82  -5.5 |  7683  0.77 -0.099 |  0.68 | 0 |    -97.8 | no
+AS1X2W2                |  8463  0.81  -6.4 |  9708  0.75 -0.114 |  0.66 | 0 |   -134.4 | no
+AS2X1W1                |  6948  0.47 -22.7 |  7962  0.46 -0.359 |  0.39 | 0 |   -413.7 | no
+AS2X1W2                |  9390  0.47 -26.2 | 10090  0.44 -0.382 |  0.37 | 0 |   -573.6 | no
+AS2X2W1                |  6948  0.45 -25.9 |  7962  0.46 -0.364 |  0.38 | 0 |   -426.1 | no
+AS2X2W2                |  9390  0.45 -29.4 | 10090  0.43 -0.390 |  0.36 | 0 |   -590.7 | no
+BS1X1W1                |  5555  0.82  -4.8 |  6460  0.76 -0.109 |  0.68 | 0 |   -101.0 | no
+BS1X1W2                |  8978  0.80  -6.9 | 10215  0.76 -0.109 |  0.68 | 0 |   -128.7 | no
+BS1X2W1                |  5555  0.79  -6.3 |  6460  0.75 -0.115 |  0.66 | 0 |   -104.6 | no
+BS1X2W2                |  8978  0.78  -7.9 | 10215  0.75 -0.115 |  0.66 | 0 |   -136.8 | no
+BS2X1W1                |  6024  0.43 -24.0 |  6678  0.45 -0.377 |  0.38 | 0 |   -342.1 | no
+BS2X1W2                |  9824  0.42 -30.6 | 10592  0.44 -0.390 |  0.37 | 0 |   -606.5 | no
+BS2X2W1                |  6024  0.40 -27.6 |  6678  0.44 -0.385 |  0.36 | 0 |   -343.5 | no
+BS2X2W2                |  9824  0.40 -34.4 | 10592  0.43 -0.397 |  0.36 | 0 |   -624.4 | no
+CTRL AS1X1             | 21347  0.93  -3.0 | 24196  0.91 -0.035 |  0.81 | 3 |    -97.2 | 
+CTRL AS1X2             | 21347  0.92  -3.8 | 24196  0.90 -0.042 |  0.79 | 2 |   -117.5 | 
+CTRL AS2X1             | 23802  0.54 -30.5 | 25335  0.54 -0.294 |  0.45 | 0 |  -1075.1 | 
+CTRL AS2X2             | 23802  0.52 -34.4 | 25335  0.52 -0.304 |  0.44 | 0 |  -1117.0 | 
+CTRL BS1X1             | 17391  0.91  -3.7 | 19782  0.89 -0.048 |  0.79 | 1 |   -143.3 | 
+CTRL BS1X2             | 17391  0.90  -4.4 | 19782  0.87 -0.054 |  0.77 | 1 |   -160.5 | 
+CTRL BS2X1             | 19246  0.50 -32.1 | 20633  0.53 -0.307 |  0.44 | 0 |   -997.1 | 
+CTRL BS2X2             | 19246  0.48 -36.2 | 20633  0.51 -0.315 |  0.43 | 0 |  -1042.0 | 
+
+PF OOS mediano delle 16 celle: 0.606 | celle con IS PF>=1.15 e t>=2.5: 0
+filtro batte il controllo (PF OOS) in 0 celle su 16
+S2 > S1 (PF IS) in 0 confronti su 8
+
+DIAGNOSTICA (non e una cella): PF LORDO (costi 0), IS / OOS, e quota di operazioni chiuse a -1R esatto
+AS1X1W1                | PF lordo IS 0.93 OOS 0.89 | -1R esatto 34% | rischio mediano 36.1 pip
+AS1X1W2                | PF lordo IS 0.91 OOS 0.86 | -1R esatto 36% | rischio mediano 36.5 pip
+AS1X2W1                | PF lordo IS 0.91 OOS 0.88 | -1R esatto 34% | rischio mediano 36.1 pip
+AS1X2W2                | PF lordo IS 0.89 OOS 0.85 | -1R esatto 36% | rischio mediano 36.5 pip
+AS2X1W1                | PF lordo IS 0.54 OOS 0.56 | -1R esatto 60% | rischio mediano 20.4 pip
+AS2X1W2                | PF lordo IS 0.54 OOS 0.53 | -1R esatto 61% | rischio mediano 20.5 pip
+AS2X2W1                | PF lordo IS 0.52 OOS 0.55 | -1R esatto 60% | rischio mediano 20.4 pip
+AS2X2W2                | PF lordo IS 0.52 OOS 0.52 | -1R esatto 61% | rischio mediano 20.5 pip
+BS1X1W1                | PF lordo IS 0.91 OOS 0.86 | -1R esatto 39% | rischio mediano 35.1 pip
+BS1X1W2                | PF lordo IS 0.88 OOS 0.86 | -1R esatto 39% | rischio mediano 35.2 pip
+BS1X2W1                | PF lordo IS 0.87 OOS 0.85 | -1R esatto 39% | rischio mediano 35.1 pip
+BS1X2W2                | PF lordo IS 0.86 OOS 0.85 | -1R esatto 39% | rischio mediano 35.2 pip
+BS2X1W1                | PF lordo IS 0.49 OOS 0.54 | -1R esatto 63% | rischio mediano 19.7 pip
+BS2X1W2                | PF lordo IS 0.48 OOS 0.52 | -1R esatto 63% | rischio mediano 19.9 pip
+BS2X2W1                | PF lordo IS 0.47 OOS 0.52 | -1R esatto 63% | rischio mediano 19.7 pip
+BS2X2W2                | PF lordo IS 0.46 OOS 0.51 | -1R esatto 63% | rischio mediano 19.9 pip
+CTRL AS1X1             | PF lordo IS 1.04 OOS 1.03 | -1R esatto 31% | rischio mediano 37.0 pip
+CTRL AS1X2             | PF lordo IS 1.02 OOS 1.02 | -1R esatto 31% | rischio mediano 37.0 pip
+CTRL AS2X1             | PF lordo IS 0.62 OOS 0.64 | -1R esatto 57% | rischio mediano 21.0 pip
+CTRL AS2X2             | PF lordo IS 0.60 OOS 0.62 | -1R esatto 57% | rischio mediano 21.0 pip
+CTRL BS1X1             | PF lordo IS 1.01 OOS 1.00 | -1R esatto 35% | rischio mediano 36.0 pip
+CTRL BS1X2             | PF lordo IS 0.99 OOS 0.99 | -1R esatto 35% | rischio mediano 36.0 pip
+CTRL BS2X1             | PF lordo IS 0.57 OOS 0.62 | -1R esatto 60% | rischio mediano 20.5 pip
+CTRL BS2X2             | PF lordo IS 0.55 OOS 0.61 | -1R esatto 60% | rischio mediano 20.5 pip
+
+LETTURA (24/11/2026), confronto con le previsioni scritte prima:
+- 0 celle su 16 passano il cancello IS (previsto 20% che almeno una passasse): famiglia CHIUSA nella lettura breakout del 23/11. PF OOS mediano 0,61 (previsto < 1,00: giusto). Il filtro weekly+daily non batte il controllo in nessuna cella (previsto: maggioranza 30%: giusto). S2 > S1 in 0 confronti su 8 (previsto 50%: sbagliato).
+- Il PF LORDO del controllo (long e short senza filtro, stop opposto della notte) e 1,00-1,04: nessun vantaggio nemmeno senza costi. Il filtro weekly+daily concordi PEGGIORA il lordo (0,85-0,93): entrare nella direzione delle candele chiuse ha anticipato il ritorno, non il trend. Osservazione, NON testata come regola (sarebbe una cella nuova e il fade era l'altra lettura della live del 18/11).
+- LIMITE: lo stop S2 (meta range, rischio mediano 20 pip) ha PF lordo 0,5-0,6 con il 60% delle operazioni a -1R esatto: su H1 la regola prudente "stop prima" pesa molto con rischi corti, quindi S2 NON e giudicabile con questi dati (servirebbe M1 forex, che non abbiamo). S1 (rischio 36 pip) e meno sensibile e dice zero vantaggio.
+- Costi fissi non misurati su BCM; spread H1 non usato. Fuso coerente (picco tickvol 14-15 server nel 2005, 2010, 2015, 2020, 2025).
