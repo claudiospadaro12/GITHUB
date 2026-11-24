@@ -60,16 +60,40 @@ def load_h1():
     g=sorted(glob.glob('/tmp/claude-0/dati_ftmo*/ABTG_M1_XAUUSD_*.csv')); out['XAUUSD_H1']=(m1_h1(g),2018)
     b=[f for f in sorted(glob.glob('/tmp/claude-0/btc/ABTG_M1_BTCUSD_*.csv')) if int(f[-8:-4])>=2017]; out['BTCUSD_H1']=(m1_h1(b),2018)
     return out
+def load_csv_h1(files):
+    ds=[]
+    for f in files:
+        d=pd.read_csv(f,sep=None,engine='python')
+        d.columns=[c.strip().lower() for c in d.columns]
+        tc=d.columns[0]; d['t']=pd.to_datetime(d[tc],format='%Y.%m.%d %H:%M',errors='coerce'); d=d.dropna(subset=['t'])
+        if len(d)<100000: continue                      # anni con sole barre giornaliere: scartati
+        if 'tickvol' in d.columns: d=d[~((d.t.dt.hour==0)&(d.t.dt.minute==0)&(d.tickvol>2000))]
+        ds.append(d.set_index('t')[['open','high','low','close']])
+    if not ds: return None
+    d=pd.concat(ds).sort_index()
+    return d.resample('1h').agg({'open':'first','high':'max','low':'min','close':'last'}).dropna()
+def load_h1_ext():
+    out={}
+    G=lambda *pp: sorted(sum([glob.glob(p) for p in pp],[]))
+    spec={'EURUSD_H1':G('/tmp/claude-0/dati_ftmo*/ABTG_M1_EURUSD_20*.csv'),
+          'NASUSD_H1':G('/tmp/claude-0/nas/NASUSD_M1_20*.csv','/tmp/claude-0/ext2526/NASUSD_M1_202[56].csv'),
+          'SPXUSD_H1':G('/tmp/claude-0/spx/SPXUSD_M1_20*.csv','/tmp/claude-0/ext2526/SPXUSD_M1_202[56].csv'),
+          'D30EUR_H1':G('/tmp/claude-0/dax/D30EUR_M1_20*.csv')}
+    for k,f in spec.items():
+        f=[x for x in f if 'cop' not in x]
+        h=load_csv_h1(f)
+        if h is not None and len(h)>5000: out[k]=(h,2018); print(k,'barre H1',len(h),h.index[0].date(),h.index[-1].date(),file=sys.stderr)
+    return out
 sets={}
 sets.update(load_d1()); 
-if '--solo-d1' not in sys.argv: sets.update(load_h1())
+if '--solo-d1' not in sys.argv: sets.update(load_h1()); sets.update(load_h1_ext())
 res={}
 for s,(d,iy) in sets.items():
     O,H,L,C=[d[c].values for c in ('open','high','low','close')]; pre=prep(O,H,L,C,d.index)
     for rr in RRS: res[(s,rr)]=(run(O,H,L,C,d.index,pre,rr),iy)
 name=lambda rr:'mediana' if rr is None else 'R=%.1f'%rr
 print('=== POOLED per cella (tutti i simboli D1 insieme; H1 a parte) ===')
-for grp,filt in (('D1 forex',lambda s:not s.endswith('_H1')),('H1 oro+BTC',lambda s:s.endswith('_H1'))):
+for grp,filt in (('D1 forex',lambda s:not s.endswith('_H1')),('H1 tutti (oro, BTC, EURUSD, indici)',lambda s:s.endswith('_H1'))):
     print(grp)
     for rr in RRS:
         i=[];o=[]

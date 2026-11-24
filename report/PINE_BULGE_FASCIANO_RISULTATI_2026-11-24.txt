@@ -1,3 +1,7 @@
+EURUSD_H1 barre H1 37276 2015-01-02 2020-12-31
+NASUSD_H1 barre H1 67997 2015-01-01 2026-07-31
+SPXUSD_H1 barre H1 67848 2015-01-01 2026-07-31
+D30EUR_H1 barre H1 26713 2019-01-01 2024-12-31
 === POOLED per cella (tutti i simboli D1 insieme; H1 a parte) ===
 D1 forex
   mediana  IS n= 2634 PF 0.89 | OOS n= 2212 PF 1.11
@@ -7,14 +11,14 @@ D1 forex
   R=1.0    IS n= 2350 PF 1.04 | OOS n= 1937 PF 1.13
   R=1.2    IS n= 2272 PF 1.02 | OOS n= 1865 PF 1.12
   R=1.5    IS n= 2188 PF 1.04 | OOS n= 1779 PF 1.13
-H1 oro+BTC
-  mediana  IS n= 2317 PF 0.58 | OOS n= 2683 PF 0.76
-  R=0.3    IS n= 2349 PF 0.68 | OOS n= 2700 PF 0.79
-  R=0.5    IS n= 2274 PF 0.70 | OOS n= 2592 PF 0.80
-  R=0.7    IS n= 2196 PF 0.69 | OOS n= 2505 PF 0.82
-  R=1.0    IS n= 2096 PF 0.77 | OOS n= 2382 PF 0.87
-  R=1.2    IS n= 2053 PF 0.79 | OOS n= 2314 PF 0.89
-  R=1.5    IS n= 1968 PF 0.80 | OOS n= 2226 PF 0.91
+H1 tutti (oro, BTC, EURUSD, indici)
+  mediana  IS n= 4002 PF 0.63 | OOS n= 5669 PF 0.73
+  R=0.3    IS n= 4067 PF 0.70 | OOS n= 5734 PF 0.74
+  R=0.5    IS n= 3935 PF 0.74 | OOS n= 5524 PF 0.78
+  R=0.7    IS n= 3806 PF 0.73 | OOS n= 5347 PF 0.81
+  R=1.0    IS n= 3637 PF 0.79 | OOS n= 5093 PF 0.83
+  R=1.2    IS n= 3556 PF 0.82 | OOS n= 4940 PF 0.84
+  R=1.5    IS n= 3406 PF 0.83 | OOS n= 4742 PF 0.86
 Cella migliore in-sample (D1 forex): R=1.0 PF IS 1.04
 === PF per simbolo: [mediana] e [migliore R=1.0] (IS | OOS, n) ===
 AUDCAD     | mediana IS 1.27(99) OOS 1.50(82) || R=1.0 IS 1.05(91) OOS 1.41(68)
@@ -47,3 +51,7 @@ USDCHF     | mediana IS 0.64(115) OOS 1.16(78) || R=1.0 IS 0.99(104) OOS 1.00(67
 USDJPY     | mediana IS 0.87(110) OOS 0.96(81) || R=1.0 IS 0.88(102) OOS 0.86(74)
 XAUUSD_H1  | mediana IS 0.70(1985) OOS 0.78(1118) || R=1.0 IS 0.87(1788) OOS 0.76(980)
 BTCUSD_H1  | mediana IS 0.47(332) OOS 0.76(1565) || R=1.0 IS 0.65(308) OOS 0.90(1402)
+EURUSD_H1  | mediana IS 0.69(566) OOS 0.53(293) || R=1.0 IS 0.85(513) OOS 0.56(261)
+NASUSD_H1  | mediana IS 0.83(557) OOS 0.90(1032) || R=1.0 IS 0.87(519) OOS 0.99(945)
+SPXUSD_H1  | mediana IS 0.80(562) OOS 0.92(1029) || R=1.0 IS 0.90(509) OOS 0.96(934)
+D30EUR_H1  | mediana IS nan(0) OOS 0.39(632) || R=1.0 IS nan(0) OOS 0.48(571)
