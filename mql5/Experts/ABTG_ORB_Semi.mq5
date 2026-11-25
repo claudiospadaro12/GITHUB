@@ -151,16 +151,16 @@ void PlaceOrders()
    if(InpEntryMode==1){ Say("modo AVVISO: entra tu quando rompe; li gestisco io dopo"); return; }
    double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
    double minD=(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
-   datetime exp=gCancelSrv;
+   datetime expT=gCancelSrv;
    if(gBuyTrg>ask+minD)
      {
       double sl=StopFor(true,gBuyTrg), tp=(InpTpR>0)?NormalizeDouble(gBuyTrg+InpTpR*(gBuyTrg-sl),_Digits):0.0;
-      if(trade.BuyStop(CalcLot(gBuyTrg,sl,true),gBuyTrg,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" Buy")) Diary("ORDINE","BuyStop "+DoubleToString(gBuyTrg,_Digits)+" sl "+DoubleToString(sl,_Digits)); else Say("BuyStop rifiutato: "+trade.ResultRetcodeDescription());
+      if(trade.BuyStop(CalcLot(gBuyTrg,sl,true),gBuyTrg,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,expT,InpComment+" Buy")) Diary("ORDINE","BuyStop "+DoubleToString(gBuyTrg,_Digits)+" sl "+DoubleToString(sl,_Digits)); else Say("BuyStop rifiutato: "+trade.ResultRetcodeDescription());
      } else Say("livello BUY gia superato o troppo vicino: nessun BuyStop");
    if(gSellTrg<bid-minD)
      {
       double sl=StopFor(false,gSellTrg), tp=(InpTpR>0)?NormalizeDouble(gSellTrg-InpTpR*(sl-gSellTrg),_Digits):0.0;
-      if(trade.SellStop(CalcLot(gSellTrg,sl,false),gSellTrg,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" Sell")) Diary("ORDINE","SellStop "+DoubleToString(gSellTrg,_Digits)+" sl "+DoubleToString(sl,_Digits)); else Say("SellStop rifiutato: "+trade.ResultRetcodeDescription());
+      if(trade.SellStop(CalcLot(gSellTrg,sl,false),gSellTrg,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,expT,InpComment+" Sell")) Diary("ORDINE","SellStop "+DoubleToString(gSellTrg,_Digits)+" sl "+DoubleToString(sl,_Digits)); else Say("SellStop rifiutato: "+trade.ResultRetcodeDescription());
      } else Say("livello SELL gia superato o troppo vicino: nessun SellStop");
   }
 void CancelPendings(string why)
