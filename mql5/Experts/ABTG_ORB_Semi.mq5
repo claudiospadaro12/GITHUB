@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|  ABTG_ORB_Semi.mq5  v1.00  (25/11/2026)                           |
+//|  ABTG_ORB_Semi.mq5  v1.01  (25/11/2026)                           |
 //|  EXPERT SEMI-AUTOMATICO PER L'ORB (oro, Nasdaq, Dow, altri).      |
 //|  1) Orario del range in ORA ITALIANA (conversione automatica).    |
 //|  2) Traccia il massimo/minimo della candela (finestra) del range. |
@@ -9,13 +9,17 @@
 //|  4) Gestisce la posizione (sua o aperta a mano, magic 0):        |
 //|     stop dal range, parziale + stop a pari, trailing, chiusura    |
 //|     a fine giornata. Diario CSV in Common\Files.                  |
+//|  v1.01: REGISTRAZIONE "OMBRA" a fine giornata (nessun ordine):   |
+//|  scrive nel diario cosa avrebbero fatto le regole (pendenti,      |
+//|  chiusura M5 nuda e con filtri; stop a meta range e sul lato     |
+//|  opposto) e, a parte, gli ingressi e le uscite REALI (tuoi).     |
 //|  Regole di partenza dalle live di Emiliano/Paolo (registro unico) |
 //|  Le regole MANCANTI nelle live sono input MODIFICABILI, non fatti.|
 //|  SOLO DEMO/TESTER finche Claudio non decide altro. Nessun consiglio|
 //|  su lotti: il lotto lo sceglie Claudio.                           |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 #include <Trade\Trade.mqh>
 
@@ -76,7 +80,7 @@ input bool     InpDiary         = true;
 CTrade   trade;
 int      hEma=INVALID_HANDLE, hFast=INVALID_HANDLE, hA=INVALID_HANDLE, hB=INVALID_HANDLE;
 datetime gDay=0;                 // giorno italiano (mezzanotte) gia elaborato
-bool     gTraded=false; int gBreakDir=0; double gBreakLevel=0;
+bool     gTraded=false, gShadowDone=false; int gBreakDir=0; double gBreakLevel=0;
 bool     gRangeDone=false, gOrdersDone=false, gAlertBuy=false, gAlertSell=false, gSkipDay=false;
 double   gHi=0, gLo=0, gBuyTrg=0, gSellTrg=0;
 datetime gRangeEndSrv=0, gCancelSrv=0, gCloseSrv=0;
@@ -312,6 +316,104 @@ void CloseAll(string why)
      }
   }
 
+
+//------------------------------------------------ registrazione "ombra" (NESSUN ordine)
+void SimExit(MqlRates &m1[],int n1,int startIdx,bool isBuy,double sl,string &reason,double &exitPx,datetime &exitT)
+  {
+   reason="EOD"; exitPx=m1[n1-1].close; exitT=m1[n1-1].time;
+   for(int i=startIdx;i<n1;i++)
+     {
+      if(isBuy && m1[i].low<=sl)  { reason="STOP"; exitPx=sl; exitT=m1[i].time; return; }
+      if(!isBuy && m1[i].high>=sl){ reason="STOP"; exitPx=sl; exitT=m1[i].time; return; }
+     }
+  }
+void LogVariant(string name,bool isBuy,datetime et,double entry,double sl,string reason,double exitPx,datetime xt)
+  {
+   double risk=MathAbs(entry-sl), pts=isBuy?exitPx-entry:entry-exitPx, rr=(risk>0)?pts/risk:0.0;
+   Diary("OMBRA",StringFormat("%s;%s;ingresso=%s;prezzo=%.5f;stop=%.5f;uscita=%s;%s;prezzo_uscita=%.5f;punti=%.2f;R=%.2f",name,isBuy?"BUY":"SELL",TimeToString(et,TIME_MINUTES),entry,sl,reason,TimeToString(xt,TIME_MINUTES),exitPx,pts,rr));
+  }
+void ShadowOne(string tag,MqlRates &m1[],int n1,MqlRates &m5[],int n5,int bar,int dir,double mid)
+  {
+   if(bar<0 || bar+1>=n5){ Diary("OMBRA",tag+";nessun ingresso"); return; }
+   bool isBuy=(dir>0); double en=m5[bar+1].open; datetime et=m5[bar+1].time; int idx=-1;
+   for(int i=0;i<n1;i++) if(m1[i].time>=et){ idx=i; break; }
+   if(idx<0){ Diary("OMBRA",tag+";dati M1 mancanti"); return; }
+   for(int k=0;k<2;k++)
+     {
+      double sl=(k==0)?(isBuy?mid-P_stopExtra:mid+P_stopExtra):(isBuy?gLo-P_stopExtra:gHi+P_stopExtra);
+      string rs; double xp; datetime xt; SimExit(m1,n1,idx,isBuy,sl,rs,xp,xt);
+      LogVariant(tag+(k==0?"_STOP_META":"_STOP_OPPOSTO"),isBuy,et,en,sl,rs,xp,xt);
+     }
+  }
+void ShadowDay()
+  {
+   gShadowDone=true;
+   if(!gRangeDone || gHi<=gLo) return;
+   datetime t0=gRangeEndSrv, t1=gCloseSrv;
+   MqlRates m1[], m5[]; ArraySetAsSeries(m1,false); ArraySetAsSeries(m5,false);
+   int n1=CopyRates(_Symbol,PERIOD_M1,t0,t1,m1), n5=CopyRates(_Symbol,PERIOD_M5,t0-200*300,t1,m5);
+   if(n1<20 || n5<40){ Diary("OMBRA","dati insufficienti per la registrazione ombra"); return; }
+   double mid=(gHi+gLo)/2.0;
+   // modo 0: primo tocco dei livelli (a precisione di minuto)
+   int fi=-1, fdir=0, si=-1; bool amb=false;
+   for(int i=0;i<n1;i++)
+     {
+      bool ub=(m1[i].high>=gBuyTrg), us=(m1[i].low<=gSellTrg);
+      if(fi<0 && (ub||us)){ fi=i; if(ub&&us) amb=true; else fdir=ub?1:-1; }
+      else if(fi>=0 && si<0 && fdir!=0){ if((fdir==1 && us) || (fdir==-1 && ub)) si=i; }
+     }
+   double px=m1[n1-1].close;
+   Diary("OMBRA_GIORNO",StringFormat("ampiezza=%.2f;pct_prezzo=%.2f;primo_tocco=%s@%s;secondo_tocco=%s;chiusura_giornata=%.5f",gHi-gLo,100.0*(gHi-gLo)/px,fi<0?"nessuno":(amb?"ambiguo":(fdir>0?"BUY":"SELL")),fi<0?"-":TimeToString(m1[fi].time,TIME_MINUTES),si<0?"nessuno":TimeToString(m1[si].time,TIME_MINUTES),px));
+   if(fi>=0 && !amb)
+     {
+      bool isBuy=(fdir>0); double en=isBuy?gBuyTrg:gSellTrg;
+      for(int k=0;k<2;k++)
+        {
+         double sl=(k==0)?(isBuy?mid-P_stopExtra:mid+P_stopExtra):(isBuy?gLo-P_stopExtra:gHi+P_stopExtra);
+         string rs; double xp; datetime xt; SimExit(m1,n1,fi,isBuy,sl,rs,xp,xt);
+         LogVariant(k==0?"M0_STOP_META":"M0_STOP_OPPOSTO",isBuy,m1[fi].time,en,sl,rs,xp,xt);
+        }
+     }
+   else Diary("OMBRA",amb?"M0;ambiguo: entrambi i livelli nello stesso minuto":"M0;nessun tocco dei livelli");
+   // modo 2: prima chiusura M5 oltre il livello, nuda e con i filtri (volume sugli indici, EMA)
+   double ea=0, eb=0, pea=0, peb=0, ka=2.0/(InpEmaA+1), kb=2.0/(InpEmaB+1);
+   int barN=-1, dirN=0, barF=-1, dirF=0;
+   for(int j=0;j<n5;j++)
+     {
+      pea=ea; peb=eb;
+      if(j==0){ ea=m5[0].close; eb=m5[0].close; pea=ea; peb=eb; } else { ea=m5[j].close*ka+ea*(1.0-ka); eb=m5[j].close*kb+eb*(1.0-kb); }
+      if(m5[j].time<t0) continue;
+      bool up=(m5[j].close>gBuyTrg), dn=(m5[j].close<gSellTrg); if(!up && !dn) continue;
+      if(barN<0){ barN=j; dirN=up?1:-1; }
+      if(barF<0)
+        {
+         bool volOk=true;
+         if(P_useVol){ double sv=0; int cv=0; for(int q=j-InpVolBars;q<j;q++){ if(q>=0){ sv+=(double)m5[q].tick_volume; cv++; } } volOk=(cv<5) || ((double)m5[j].tick_volume>=InpVolMult*sv/cv); }
+         bool emaOk=true;
+         if(InpUseEma){ if(up) emaOk=(m5[j].close>ea && ea>eb && ea>pea && eb>=peb); else emaOk=(m5[j].close<ea && ea<eb && ea<pea && eb<=peb); }
+         if(volOk && emaOk){ barF=j; dirF=up?1:-1; }
+        }
+      if(barN>=0 && barF>=0) break;
+     }
+   ShadowOne("M2_NUDO",m1,n1,m5,n5,barN,dirN,mid);
+   ShadowOne("M2_FILTRI",m1,n1,m5,n5,barF,dirF,mid);
+  }
+//------------------------------------------------ ingressi e uscite REALI (tuoi o dell'Expert) nel diario
+void OnTradeTransaction(const MqlTradeTransaction &trans,const MqlTradeRequest &req,const MqlTradeResult &res)
+  {
+   if(trans.type!=TRADE_TRANSACTION_DEAL_ADD) return;
+   if(!HistoryDealSelect(trans.deal)) return;
+   if(HistoryDealGetString(trans.deal,DEAL_SYMBOL)!=_Symbol) return;
+   long mg=HistoryDealGetInteger(trans.deal,DEAL_MAGIC); if(!(mg==InpMagic || mg==0)) return;
+   long ty=HistoryDealGetInteger(trans.deal,DEAL_TYPE); if(ty!=DEAL_TYPE_BUY && ty!=DEAL_TYPE_SELL) return;
+   long en=HistoryDealGetInteger(trans.deal,DEAL_ENTRY);
+   double pr=HistoryDealGetDouble(trans.deal,DEAL_PRICE), vol=HistoryDealGetDouble(trans.deal,DEAL_VOLUME);
+   double pf=HistoryDealGetDouble(trans.deal,DEAL_PROFIT)+HistoryDealGetDouble(trans.deal,DEAL_SWAP)+HistoryDealGetDouble(trans.deal,DEAL_COMMISSION);
+   string chi=(mg==0)?"manuale":"expert";
+   if(en==DEAL_ENTRY_IN) Diary("REALE_INGRESSO",StringFormat("%s;%s;lotti=%.2f;prezzo=%.5f;posizione=%I64u",ty==DEAL_TYPE_BUY?"BUY":"SELL",chi,vol,pr,(ulong)HistoryDealGetInteger(trans.deal,DEAL_POSITION_ID)));
+   else if(en==DEAL_ENTRY_OUT || en==DEAL_ENTRY_OUT_BY) Diary("REALE_USCITA",StringFormat("%s;%s;lotti=%.2f;prezzo=%.5f;profitto_netto=%.2f;posizione=%I64u",ty==DEAL_TYPE_BUY?"chiude SELL":"chiude BUY",chi,vol,pr,pf,(ulong)HistoryDealGetInteger(trans.deal,DEAL_POSITION_ID)));
+  }
+
 //------------------------------------------------ eventi
 int OnInit()
   {
@@ -333,7 +435,7 @@ void OnTick()
    datetime it0=ItalyDay0();
    if(it0!=gDay)   // nuovo giorno italiano
      {
-      gDay=it0; gRangeDone=false; gTraded=false; gBreakDir=0; gBreakLevel=0; gOrdersDone=false; gAlertBuy=false; gAlertSell=false; gSkipDay=false; gTries=0; gHi=0; gLo=0;
+      gDay=it0; gRangeDone=false; gShadowDone=false; gTraded=false; gBreakDir=0; gBreakLevel=0; gOrdersDone=false; gAlertBuy=false; gAlertSell=false; gSkipDay=false; gTries=0; gHi=0; gLo=0;
       gCloseSrv=ItToSrv(it0,InpCloseH,InpCloseM);
       ObjectsDeleteAll(0,"ORBS_");
      }
@@ -362,4 +464,6 @@ void OnTick()
    ManagePositions(newM5);
    // chiusura di fine giornata
    if(gCloseSrv>0 && now>=gCloseSrv && now<gCloseSrv+600) CloseAll("fine giornata");
+   // registrazione ombra a fine giornata (nessun ordine)
+   if(!gShadowDone && gCloseSrv>0 && now>=gCloseSrv+60 && now<gCloseSrv+7200) ShadowDay();
   }
