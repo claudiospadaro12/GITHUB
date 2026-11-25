@@ -68,7 +68,7 @@ def signals_B(d, pair, trig):
         mid = c.rolling(20).mean(); sd = c.rolling(20).std(ddof=0); w = 4 * sd / mid * 100
         bsl = (mid - mid.shift(5)) / 5 / mt; exp = (w - w.shift(3)) / w.shift(3) * 100
         cl = (bsl > 2.0) & (exp >= 5.0); cs = (bsl < -2.0) & (exp >= 5.0)
-        armL = (cl & ~cl.shift(1).fillna(False)) & up_ok; armS = (cs & ~cs.shift(1).fillna(False)) & dn_ok
+        armL = (cl & ~cl.shift(1, fill_value=False).astype(bool)) & up_ok; armS = (cs & ~cs.shift(1, fill_value=False).astype(bool)) & dn_ok
     body = (c - o).abs() >= d.atr * 0.5
     L = armL.shift(1).fillna(False) & (c > o) & (c > c.shift(1)) & body; S = armS.shift(1).fillna(False) & (c < o) & (c < c.shift(1)) & body
     res = []
@@ -99,11 +99,11 @@ def trade_loop(d, pair, L, S, k, ema_exit):
             nextgap = (idx[m + 1] - idx[m]) if m + 1 < n else pd.Timedelta(days=9)
             if long_:
                 if l[m] <= sl: pnl = (sl - SLIP * pip) - entry; exit_j = m; break
-                if m > j and h[m] >= tp: pnl = tp - entry; exit_j = m; break
+                if h[m] >= tp: pnl = tp - entry; exit_j = m; break
                 if m > j and ema_exit and c[m] < e21[m]: pnl = c[m] - entry; exit_j = m; break
             else:
                 if h[m] + sp >= sl: pnl = ref - (sl + SLIP * pip); exit_j = m; break
-                if m > j and l[m] + sp <= tp: pnl = ref - tp; exit_j = m; break
+                if l[m] + sp <= tp: pnl = ref - tp; exit_j = m; break
                 if m > j and ema_exit and c[m] > e21[m]: pnl = ref - (c[m] + sp); exit_j = m; break
             if nextgap > pd.Timedelta(hours=30) or (idx[m].weekday() == 4 and idx[m].hour >= 20):
                 pnl = (c[m] - entry) if long_ else (ref - (c[m] + sp)); exit_j = m; break
