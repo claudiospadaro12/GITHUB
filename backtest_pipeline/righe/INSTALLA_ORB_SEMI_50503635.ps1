@@ -1,4 +1,4 @@
-# MARCATORE_INSTALLA_ORB_SEMI_50503635_v1
+# MARCATORE_INSTALLA_ORB_SEMI_50503635_v2
 # Per il terminale MT5 del conto 50503635 (trovato in automatico dal Login): copia ABTG_ORB_Semi.mq5 v1.01 in MQL5\Experts, i 3 preset in MQL5\Presets e COMPILA con MetaEditor. NON attacca l'Expert a nessun grafico e non apre ordini. RIFIUTA i conti protetti (challenge FTMO 541452707 e reale 10105439). SHA256 di ogni file verificato.
 $ErrorActionPreference='Continue'
 $PROTETTI=@('541452707','10105439')
@@ -23,15 +23,15 @@ if(-not (Test-Path -LiteralPath $MEE)){ Write-Host ('MI FERMO: non trovo MetaEdi
 New-Item -ItemType Directory -Force -Path $pre | Out-Null
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 $PIN='594551594a4efda45b32455c4f3fefc32233a13f'
-$F=@( @{ src='mql5/Experts/ABTG_ORB_Semi.mq5'; dst=(Join-Path $exp 'ABTG_ORB_Semi.mq5'); h='D1FE2532350137DC3A48B18EA9608D0A77E3F9265D606484DE6713381840C806' }, @{ src='mql5/Presets/ABTG_ORB_Semi_XAUUSD.set'; dst=(Join-Path $pre 'ABTG_ORB_Semi_XAUUSD.set'); h='7A32DDF681C17AC9E2C194D050183AEF5365AD20BFFCDBA6D926C38747C49057' }, @{ src='mql5/Presets/ABTG_ORB_Semi_NASUSD.set'; dst=(Join-Path $pre 'ABTG_ORB_Semi_NASUSD.set'); h='187633850C6D6C831E03CED09F2CE7ECD1A7B0133A33CCCE0C11CEAEC48A2CF0' }, @{ src='mql5/Presets/ABTG_ORB_Semi_U30USD.set'; dst=(Join-Path $pre 'ABTG_ORB_Semi_U30USD.set'); h='7DF1700D4248347E15F0F64E38C91083B8F8AB058EADE51B94A4AFBF8FD8EEA7' } )
+$FILES=@( @{ src='mql5/Experts/ABTG_ORB_Semi.mq5'; dst=(Join-Path $exp 'ABTG_ORB_Semi.mq5'); h='D1FE2532350137DC3A48B18EA9608D0A77E3F9265D606484DE6713381840C806' }, @{ src='mql5/Presets/ABTG_ORB_Semi_XAUUSD.set'; dst=(Join-Path $pre 'ABTG_ORB_Semi_XAUUSD.set'); h='7A32DDF681C17AC9E2C194D050183AEF5365AD20BFFCDBA6D926C38747C49057' }, @{ src='mql5/Presets/ABTG_ORB_Semi_NASUSD.set'; dst=(Join-Path $pre 'ABTG_ORB_Semi_NASUSD.set'); h='187633850C6D6C831E03CED09F2CE7ECD1A7B0133A33CCCE0C11CEAEC48A2CF0' }, @{ src='mql5/Presets/ABTG_ORB_Semi_U30USD.set'; dst=(Join-Path $pre 'ABTG_ORB_Semi_U30USD.set'); h='7DF1700D4248347E15F0F64E38C91083B8F8AB058EADE51B94A4AFBF8FD8EEA7' } )
 $W=Join-Path $env:TEMP 'orb_semi_vps'; New-Item -ItemType Directory -Force -Path $W | Out-Null
-foreach($f in $F){
-  $tmp=Join-Path $W ([IO.Path]::GetFileName($f.dst)); Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
-  irm ('https://raw.githubusercontent.com/claudiospadaro12/GITHUB/' + $PIN + '/' + $f.src + '?cb=' + [Guid]::NewGuid().ToString('N')) -OutFile $tmp
-  $H=(Get-FileHash -LiteralPath $tmp -Algorithm SHA256).Hash.ToUpperInvariant(); if($H -ne $f.h){ Write-Host ('MI FERMO: SHA256 diverso per ' + $f.src) -ForegroundColor Red; return }
+foreach($x in $FILES){
+  $tmp=Join-Path $W ([IO.Path]::GetFileName($x.dst)); Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+  irm ('https://raw.githubusercontent.com/claudiospadaro12/GITHUB/' + $PIN + '/' + $x.src + '?cb=' + [Guid]::NewGuid().ToString('N')) -OutFile $tmp
+  $H=(Get-FileHash -LiteralPath $tmp -Algorithm SHA256).Hash.ToUpperInvariant(); if($H -ne $x.h){ Write-Host ('MI FERMO: SHA256 diverso per ' + $x.src) -ForegroundColor Red; return }
 }
-foreach($f in $F){ $tmp=Join-Path $W ([IO.Path]::GetFileName($f.dst)); if(Test-Path -LiteralPath $f.dst){ Copy-Item -LiteralPath $f.dst -Destination ($f.dst + '.bak_' + (Get-Date).ToString('yyyyMMdd_HHmmss')) -Force }; Copy-Item -LiteralPath $tmp -Destination $f.dst -Force; Write-Host ('Copiato: ' + $f.dst) -ForegroundColor Green }
-$dst=$F[0].dst; $ex5=[IO.Path]::ChangeExtension($dst,'.ex5'); Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+foreach($x in $FILES){ $tmp=Join-Path $W ([IO.Path]::GetFileName($x.dst)); if(Test-Path -LiteralPath $x.dst){ Copy-Item -LiteralPath $x.dst -Destination ($x.dst + '.bak_' + (Get-Date).ToString('yyyyMMdd_HHmmss')) -Force }; Copy-Item -LiteralPath $tmp -Destination $x.dst -Force; Write-Host ('Copiato: ' + $x.dst) -ForegroundColor Green }
+$dst=$FILES[0].dst; $ex5=[IO.Path]::ChangeExtension($dst,'.ex5'); Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
 $desk=[Environment]::GetFolderPath('Desktop'); $od=Join-Path $desk 'ABTG_RISULTATI'; New-Item -ItemType Directory -Force -Path $od | Out-Null
 $log=Join-Path $od ('ORB_Semi_50503635_compilazione_' + (Get-Date).ToString('yyyyMMdd_HHmm') + '.log')
 [void](Start-Process -FilePath $MEE -ArgumentList ('/compile:"' + $dst + '" /include:"' + (Join-Path $T.Dati 'MQL5') + '" /log:"' + $log + '"') -PassThru -Wait)
