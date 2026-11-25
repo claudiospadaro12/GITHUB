@@ -15,3 +15,6 @@ Cella primaria = aggregato 10 coppie. IS 2005-2015 PF >= 1,3 con >= 150 setup; O
 
 ## Previsione (scritta ora)
 Il rimbalzo c'e' ma l'asimmetria lo uccide: con TP 10 e SL 2 ATR (circa 30-35 pip) servono circa 77% di rimbalzi per il pareggio. Previsione: percentuale di rimbalzi 60-75%, PF(R) 0,8-1,05 sul limite ottimistico, nessuna candidata. Probabilita' di candidata: circa 10%.
+
+## Aggiunta (25/11, prima di vedere i dati M1): risoluzione della barra di scatto
+Risultato H1: limite pessimistico PF 0,60 / 0,42 / 0,50 (IS/OOS/HO), limite ottimistico 4,35 / 2,93 / 2,01; il "rigoroso" (chiusura oltre TP) coincide col pessimistico. Il pareggio sta a circa 83-87% di rimbalzi, il pessimistico ne da' 84%, l'ottimistico 97%: la risposta e' dentro la barra di scatto. Si esportano le barre M1 delle sole 2.253 ore (coppia, ora) in cui scatta un ordine (`report/EMA200_RIMBALZO_dati/barre_di_scatto_H1.csv`, tutte le varianti hanno le stesse barre di scatto). Con l'M1 la barra di scatto si risolve minuto per minuto (spread reale M1, SL prima di TP dentro lo stesso minuto). Verdetto sulle stesse soglie; se mancano M1 per una parte delle barre si usa il limite pessimistico su quelle e si dichiara la copertura.
