@@ -1,0 +1,34 @@
+
+=== CHECKLIST DI LEONARDO su 6967 setup v4.2 (misura prudente), VARIANTE ESPLORATIVA B: A + ritracciamento sulle ultime 10 barre ===
+score non calcolabile (storia insufficiente): 6
+setup valutati: 6961 | validi: 3 (0%) | invalidi per motivo: {'bulge': 6745, 'ritracciamento': 210, 'invalidazione': 3}
+
+--- IS 2005-2015 ---
+Ottimo >=85                        n=0
+Buono 70-84                        n=    2 win 0% R medio -1.022 PF 0.00 t +0.0
+Medio 55-69                        n=    1 win 100% R medio +0.444 PF 99.00 t +0.0
+Debole <55                         n=0
+INVALIDO                           n= 4206 win 39% R medio -0.012 PF 0.95 t -1.1
+validi CONT                        n=    2 win 50% R medio -0.295 PF 0.43 t +0.0
+validi INV                         n=    1 win 0% R medio -1.010 PF 0.00 t +0.0
+validi con solidita >= 70          n=    2 win 0% R medio -1.022 PF 0.00 t +0.0
+validi (tutti)                     n=    3 win 33% R medio -0.533 PF 0.22 t -1.1
+invalidi (tutti)                   n= 4206 win 39% R medio -0.012 PF 0.95 t -1.1
+R medio per numero di bonus: {1.0: {'count': 1, 'mean': 0.444}, 2.0: {'count': 1, 'mean': -1.034}, 3.0: {'count': 1, 'mean': -1.01}}
+
+--- OOS 2016-2026 ---
+Ottimo >=85                        n=0
+Buono 70-84                        n=0
+Medio 55-69                        n=0
+Debole <55                         n=0
+INVALIDO                           n= 2752 win 39% R medio -0.034 PF 0.87 t -2.5
+validi CONT                        n=0
+validi INV                         n=0
+validi con solidita >= 70          n=0
+validi (tutti)                     n=0
+invalidi (tutti)                   n= 2752 win 39% R medio -0.034 PF 0.87 t -2.5
+R medio per numero di bonus: {}
+
+DIAGNOSTICA criteri del bulge (quota SI su 13932 setup; NON cambia le soglie): B1 apertura 24% | B2 sd>SMA50 15% | B3 candele impulsive 32% | B4 movimento netto 12% | B5 mediana lontana 39% | B6 durata 100% | tutti 3.1%
+DIAGNOSTICA ritracciamento CONT (416 setup con bulge valido): r1 range ridotto 13% | r2 nessuna >1.5ATR 12% | r3 ombre 25% | r4 no engulfing 17% | r5 direzione 100% | r6 bande restringono 42% | barre medie 9.4
+DIAGNOSTICA ritracciamento INV (16 setup con bulge valido): r1 range ridotto 38% | r2 nessuna >1.5ATR 50% | r3 ombre 38% | r4 no engulfing 88% | r5 direzione 75% | r6 bande restringono 88% | barre medie 9.5

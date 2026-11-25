@@ -1,0 +1,41 @@
+
+=== CHECKLIST DI LEONARDO su 6967 setup v4.2 (misura prudente), VARIANTE PRIMARIA (criteri scritti) ===
+score non calcolabile (storia insufficiente): 6
+setup valutati: 6961 | validi: 0 (0%) | invalidi per motivo: {'bulge': 6745, 'ritracciamento': 216}
+
+--- IS 2005-2015 ---
+Ottimo >=85                        n=0
+Buono 70-84                        n=0
+Medio 55-69                        n=0
+Debole <55                         n=0
+INVALIDO                           n= 4209 win 39% R medio -0.012 PF 0.95 t -1.2
+validi CONT                        n=0
+validi INV                         n=0
+validi con solidita >= 70          n=0
+validi (tutti)                     n=0
+invalidi (tutti)                   n= 4209 win 39% R medio -0.012 PF 0.95 t -1.2
+R medio per numero di bonus: {}
+
+--- OOS 2016-2026 ---
+Ottimo >=85                        n=0
+Buono 70-84                        n=0
+Medio 55-69                        n=0
+Debole <55                         n=0
+INVALIDO                           n= 2752 win 39% R medio -0.034 PF 0.87 t -2.5
+validi CONT                        n=0
+validi INV                         n=0
+validi con solidita >= 70          n=0
+validi (tutti)                     n=0
+invalidi (tutti)                   n= 2752 win 39% R medio -0.034 PF 0.87 t -2.5
+R medio per numero di bonus: {}
+
+DIAGNOSTICA criteri del bulge (quota SI su 13932 setup; NON cambia le soglie): B1 apertura 24% | B2 sd>SMA50 15% | B3 candele impulsive 32% | B4 movimento netto 12% | B5 mediana lontana 39% | B6 durata 100% | tutti 3.1%
+DIAGNOSTICA ritracciamento CONT (416 setup con bulge valido): r1 range ridotto 19% | r2 nessuna >1.5ATR 3% | r3 ombre 6% | r4 no engulfing 6% | r5 direzione 100% | r6 bande restringono 42% | barre medie 23.7
+DIAGNOSTICA ritracciamento INV (16 setup con bulge valido): r1 range ridotto 25% | r2 nessuna >1.5ATR 25% | r3 ombre 12% | r4 no engulfing 50% | r5 direzione 75% | r6 bande restringono 88% | barre medie 17.1
+
+LETTURA (25/11/2026), confronto con le previsioni scritte prima (criteri `BB_CHECKLIST_LEONARDO_CRITERI_2026-11-25.md`):
+- **Primaria (criteri come scritti): 0 setup VALIDI su 6.961.** 6.745 (97%) falliscono i criteri del bulge: solo il 3,1% soddisfa insieme tutti e sei (B1 apertura 24%, B2 sd > SMA50 15%, B3 candele impulsive 32%, B4 movimento netto 12%, B5 mediana lontana 39%, B6 durata 100%). Dei bulge validi, tutti falliscono il ritracciamento (>= 80% dei criteri): il ritracciamento della continuazione dura in media 23,7 barre e le condizioni "nessuna barra > 1,5 ATR" (3% passa), "ombre <= 1,5 x corpo" (6%) e "nessun engulfing impulsivo" (6%) vanno rispettate su tutte le barre.
+- **Cancelli G1-G4: NON VALUTABILI** (nessun setup valido e quindi nessun grado). Previsione "validi < 30%": giusta (0%). Le altre previsioni non sono valutabili.
+- **Esplorative dichiarate DOPO aver visto i numeri** (non contano come cancelli): A (ombra del singolo lato): 0 validi; B (A + ritracciamento sulle ultime 10 barre): 3 validi su 6.961 (2 Buono, 1 Medio; non interpretabile).
+- **Lettura:** la checklist di Leonardo letta alla lettera e codificata con queste soglie e una condizione quasi mai soddisfatta: o le mie soglie (scelte per "bocca di coccodrillo", "candele impulsive", ecc.) sono piu severe del suo occhio, o il suo occhio e piu largo della sua checklist. In entrambi i casi **i "setup di Leonardo" non sono un sottoinsieme che si possa separare in modo oggettivo con questi dati**. Gli ingressi v4.2 (tutti i tocchi) hanno R medio -0,012 in IS e -0,034 in OOS.
+- **Strada per calibrare senza guardare gli esiti:** scegliere le soglie in modo che gli ESEMPI di Leonardo (schermate AUDNZD e EURUSD, `esempi_operativi.pdf`) risultino validi, e poi rifare la misura con criteri nuovi scritti prima; costerebbe un nuovo giro di celle.
