@@ -1,6 +1,6 @@
 # MARCATORE_LEZIONE_SCREEN_v1
 # Lezione registrata -> un fotogramma ogni N secondi + trascrizione (Whisper locale, oppure SRT/VTT di TurboScribe) collegati; fogli di contatto per la chat. TUTTO IN LOCALE: nessun upload. Non tocca MT5, conti, VPS. Uso: .\LEZIONE_SCREEN_TRASCRIZIONE.ps1 -Video "C:\percorso\lezione.mp4" [-Srt "C:\percorso\lezione.srt"] [-Ogni 15] [-Modello medium]
-param([Parameter(Mandatory=$true)][string]$Video,[string]$Srt='',[double]$Ogni=15,[string]$Modello='medium',[string]$Ritaglio='')
+param([Parameter(Mandatory=$true)][string]$Video,[string]$Srt='',[double]$Ogni=5,[string]$Modello='medium',[string]$Ritaglio='')
 $ErrorActionPreference='Continue'
 if(-not (Test-Path -LiteralPath $Video)){ Write-Host ('MI FERMO: video non trovato: ' + $Video) -ForegroundColor Red; return }
 if(-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)){ Write-Host 'MI FERMO: ffmpeg non installato. Apri un PowerShell e lancia: winget install Gyan.FFmpeg   poi CHIUDI e riapri PowerShell.' -ForegroundColor Red; return }
@@ -9,7 +9,7 @@ if(-not $py){ Write-Host 'MI FERMO: Python non installato. Lancia: winget instal
 & $py -c "import PIL" 2>$null; if($LASTEXITCODE -ne 0){ Write-Host 'Installo Pillow (pip)...' -ForegroundColor Yellow; & $py -m pip install --quiet pillow }
 if($Srt -eq ''){ & $py -c "import faster_whisper" 2>$null; if($LASTEXITCODE -ne 0){ Write-Host 'Installo faster-whisper (pip, circa 200 MB piu il modello al primo avvio)...' -ForegroundColor Yellow; & $py -m pip install --quiet faster-whisper } }
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-$PIN='77576088982f9669bda80f69286a1a6a7da7a360'; $SHA='6FC7640005E3EE07926E16324059A0202C505E4BE55678863B790D8D75A060C2'; $t=Join-Path $env:TEMP 'lezione_pipeline.py'; Remove-Item -LiteralPath $t -Force -ErrorAction SilentlyContinue
+$PIN='b2e9f0938dafa3996a98f66c7f8491684718a6f8'; $SHA='BBF1AF0993248C6DB1AAD448482957B4063B05A0C34C1C0911B9F21AD5564565'; $t=Join-Path $env:TEMP 'lezione_pipeline.py'; Remove-Item -LiteralPath $t -Force -ErrorAction SilentlyContinue
 irm ('https://raw.githubusercontent.com/claudiospadaro12/GITHUB/' + $PIN + '/ubs_campagna/lezione_pipeline.py?cb=' + [Guid]::NewGuid().ToString('N')) -OutFile $t
 $H=(Get-FileHash -LiteralPath $t -Algorithm SHA256).Hash.ToUpperInvariant(); if($H -ne $SHA){ Write-Host ('MI FERMO: SHA256 diverso: ' + $H) -ForegroundColor Red; return }
 $desk=[Environment]::GetFolderPath('Desktop'); $nome=[IO.Path]::GetFileNameWithoutExtension($Video); $out=Join-Path (Join-Path $desk 'ABTG_LEZIONI') $nome; New-Item -ItemType Directory -Force -Path $out | Out-Null
