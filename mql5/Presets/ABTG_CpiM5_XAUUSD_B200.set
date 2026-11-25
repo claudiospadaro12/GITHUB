@@ -1,0 +1,25 @@
+; ABTG_CpiM5 - XAUUSD BCM, tester. Livelli: max/min della M5 precedente + buffer. Uscita T+299 s.
+InpNewsMode=0
+InpCsvFile=abtg_cpi_dates.csv
+InpNewsKeyword=CPI
+InpOnlyHigh=true
+InpTimeShiftSec=0
+InpPreSec=300
+InpExitSec=299
+InpExitNextBar=false
+InpLevelMode=1
+InpFixedPoints=400
+InpBufferPoints=200
+InpRepriceSec=0
+InpFreezeSec=10
+InpExtraStopsPts=10
+InpUseOCO=true
+InpSlMode=0
+InpSlPoints=600
+InpMaxSpreadPts=0
+InpLots=0.10
+InpRiskPct=0.0
+InpMagic=770801
+InpComment=CPI M5
+InpDraw=false
+InpVerbose=true
