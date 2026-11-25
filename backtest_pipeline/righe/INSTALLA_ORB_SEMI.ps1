@@ -9,7 +9,7 @@ foreach($o in @(Get-ChildItem -LiteralPath $baseT -Directory -ErrorAction Silent
 if(-not $DATI){ Write-Host 'MI FERMO: non trovo la cartella dati del terminale BCM principale.' -ForegroundColor Red; return }
 $exp=Join-Path $DATI 'MQL5\Experts'; if(-not (Test-Path -LiteralPath $exp)){ Write-Host ('MI FERMO: non esiste ' + $exp) -ForegroundColor Red; return }
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-$PIN='7cbdad8322c2df3e188464c70d513feed26a5a09'; $SHA='189901F5DFBE415A039651B7EE6521821301026ACBFB041447C0B52555B392D7'; $W=Join-Path $env:TEMP 'orb_semi'; New-Item -ItemType Directory -Force -Path $W | Out-Null
+$PIN='fe69797cd7f4e5a7cf42474cf923d56d022e9e1b'; $SHA='D1FE2532350137DC3A48B18EA9608D0A77E3F9265D606484DE6713381840C806'; $W=Join-Path $env:TEMP 'orb_semi'; New-Item -ItemType Directory -Force -Path $W | Out-Null
 $tmp=Join-Path $W 'ABTG_ORB_Semi.mq5'; Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
 irm ('https://raw.githubusercontent.com/claudiospadaro12/GITHUB/' + $PIN + '/mql5/Experts/ABTG_ORB_Semi.mq5?cb=' + [Guid]::NewGuid().ToString('N')) -OutFile $tmp
 $H=(Get-FileHash -LiteralPath $tmp -Algorithm SHA256).Hash.ToUpperInvariant(); if($H -ne $SHA){ Write-Host ('MI FERMO: SHA256 diverso: ' + $H) -ForegroundColor Red; return }
