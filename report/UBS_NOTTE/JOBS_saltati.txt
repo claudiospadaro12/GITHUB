@@ -1,0 +1,21 @@
+UBS-XAGUSD-H2-AGA04.set;XAGUSD;H2;TF non ammesso/ignoto
+9637038_Till_UBS-XAGUSD-H2-AGA09.set;XAGUSD;H2;TF non ammesso/ignoto
+9637036_Till_UBS-XAGUSD-H2-AGA04.set;XAGUSD;H2;TF non ammesso/ignoto
+UBS-XAGUSD-H8-AGX09.set;XAGUSD;H8;TF non ammesso/ignoto
+9637037_Till_UBS-XAGUSD-H2-AGA06.set;XAGUSD;H2;TF non ammesso/ignoto
+UBS-XAGUSD-H2-AGA12.set;XAGUSD;H2;TF non ammesso/ignoto
+Range_Optimization_EURUSD.set;EURUSD;;TF non ammesso/ignoto
+RANGE_USDJPY.set;USDJPY;;TF non ammesso/ignoto
+EURUSD_l.set;EURUSD;;TF non ammesso/ignoto
+EURUSD_i.set;EURUSD;;TF non ammesso/ignoto
+EURUSD_f.set;EURUSD;;TF non ammesso/ignoto
+EURUSD_e.set;EURUSD;;TF non ammesso/ignoto
+EURUSD_m.set;EURUSD;;TF non ammesso/ignoto
+EURUSD_k.set;EURUSD;;TF non ammesso/ignoto
+EURUSD_o.set;EURUSD;;TF non ammesso/ignoto
+UBS-XAGUSD-H2-AGA04.set;XAGUSD;H2;TF non ammesso/ignoto
+UBS-XAGUSD-H2-AGA06.set;XAGUSD;H2;TF non ammesso/ignoto
+RANGE_USDJPY.set;USDJPY;;file non trovato
+UBS-XAGUSD-H2-AGA04 (3).set;XAGUSD;H2;TF non ammesso/ignoto
+UBS-XAGUSD-H2-AGA04.set;XAGUSD;H2;TF non ammesso/ignoto
+UBS-XAGUSD-H2-AGA09.set;XAGUSD;H2;TF non ammesso/ignoto

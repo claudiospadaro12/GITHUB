@@ -1,0 +1,99 @@
+job;file;simbolo;tf;provenienza;pf_excel;op_excel;dd_excel;origine
+J001;J001_AUDUSD_D1_DaytradePro_AUDUSD.set;AUDUSD;D1;pacchetto_V9.8_di_Wim;1.31;171;1.21;DaytradePro_AUDUSD.set
+J002;J002_EURJPY_D1_DaytradePro_EURJPY.set;EURJPY;D1;pacchetto_V9.8_di_Wim;1.22;80;2.76;DaytradePro_EURJPY.set
+J003;J003_EURJPY_D1_DaytradePro_EURJPY.set;EURJPY;D1;pacchetto_set_di_Wim;1.22;80;2.76;DaytradePro_EURJPY.set
+J004;J004_EURUSD_D1_9637068_storyG_eurusd_f356_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;2.12;60;1.47;9637068_storyG_eurusd f356 d1 storyg.set
+J005;J005_EURUSD_D1_9637069_storyG_eurusd_g357_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;2.91;31;1.31;9637069_storyG_eurusd g357 d1 storyg.set
+J006;J006_EURUSD_D1_9637071_storyG_eurusd_o3515_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;2.3;94;2.34;9637071_storyG_eurusd o3515 d1 storyg.set
+J007;J007_EURUSD_D1_9637072_storyG_eurusd_p3516_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;1.87;81;1.14;9637072_storyG_eurusd p3516 d1 storyg.set
+J008;J008_EURUSD_D1_DaytradePro_EURUSD.set;EURUSD;D1;pacchetto_V9.8_di_Wim;5.24;393;1.8;DaytradePro_EURUSD.set
+J009;J009_EURUSD_D1_eurusd_a.set;EURUSD;D1;pacchetto_V9.8_di_Wim;1.25;169;1.56;eurusd_a.set
+J010;J010_EURUSD_D1_eurusd_b.set;EURUSD;D1;pacchetto_V9.8_di_Wim;1.43;96;2.31;eurusd_b.set
+J011;J011_EURUSD_D1_eurusd_c.set;EURUSD;D1;pacchetto_V9.8_di_Wim;1.37;109;1.86;eurusd_c.set
+J012;J012_EURUSD_D1_eurusd_d.set;EURUSD;D1;pacchetto_V9.8_di_Wim;1.43;96;2.31;eurusd_d.set
+J013;J013_EURUSD_H1_eurusd_H1_SL14.set;EURUSD;H1;pacchetto_V9.8_di_Wim;1.13;1138;7.23;eurusd_H1_SL14.set
+J014;J014_EURUSD_H1_eurusd_H1_SL17.set;EURUSD;H1;pacchetto_V9.8_di_Wim;1.17;1167;7.27;eurusd_H1_SL17.set
+J015;J015_EURUSD_H1_eurusd_H1_SL18.set;EURUSD;H1;pacchetto_V9.8_di_Wim;1.1;1201;5.87;eurusd_H1_SL18.set
+J016;J016_EURUSD_H1_eurusd_H1_SL22.set;EURUSD;H1;pacchetto_V9.8_di_Wim;1.18;1162;6.25;eurusd_H1_SL22.set
+J017;J017_EURUSD_H4_9637070_storyG_eurusd_h368_h4_storyg.set;EURUSD;H4;pacchetto_V9.8_di_Wim;1.36;39;0.94;9637070_storyG_eurusd h368 h4 storyg.set
+J018;J018_GBPJPY_D1_DaytradePro_GBPJPY.set;GBPJPY;D1;pacchetto_V9.8_di_Wim;1.37;82;4.29;DaytradePro_GBPJPY.set
+J019;J019_GBPUSD_D1_DaytradePro_GBPUSD.set;GBPUSD;D1;pacchetto_V9.8_di_Wim;3.01;195;1.92;DaytradePro_GBPUSD.set
+J020;J020_GBPUSD_D1_gbpusd_a.set;GBPUSD;D1;pacchetto_V9.8_di_Wim;1.59;127;2.6;gbpusd_a.set
+J021;J021_GBPUSD_H1_gbpusd_H1.set;GBPUSD;H1;pacchetto_V9.8_di_Wim;1.22;995;4.82;gbpusd_H1.set
+J022;J022_NZDUSD_D1_DaytradePro_NZDUSD.set;NZDUSD;D1;pacchetto_V9.8_di_Wim;2.72;84;1.63;DaytradePro_NZDUSD.set
+J023;J023_USDCAD_D1_DaytradePro_USDCAD.set;USDCAD;D1;pacchetto_V9.8_di_Wim;1.13;136;4.55;DaytradePro_USDCAD.set
+J024;J024_USDJPY_D1_9637034_Till_UBS-USDJPY-D1-HJP09.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.64;94;35.32;9637034_Till_UBS-USDJPY-D1-HJP09.set
+J025;J025_USDJPY_D1_9637035_Till_UBS-USDJPY-D1-HJP10.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.67;95;45.26;9637035_Till_UBS-USDJPY-D1-HJP10.set
+J026;J026_USDJPY_D1_9637057_hangsan_1.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.36;272;3.1;9637057_hangsan_1.set
+J027;J027_USDJPY_D1_9637058_hangsan_4.set;USDJPY;D1;pacchetto_V9.8_di_Wim;0.95;202;4.96;9637058_hangsan_4.set
+J028;J028_USDJPY_D1_9637059_hangsan_JPYc.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.44;102;2.89;9637059_hangsan_JPYc.set
+J029;J029_USDJPY_D1_9637061_hangsan_b.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.49;76;2.68;9637061_hangsan_b.set
+J030;J030_USDJPY_D1_9637062_hangsan_bojpy1.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.44;40;3.27;9637062_hangsan_bojpy1.set
+J031;J031_USDJPY_D1_9637063_hangsan_bojpy3.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.44;40;3.27;9637063_hangsan_bojpy3.set
+J032;J032_USDJPY_D1_9637064_hangsan_bojpy4.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.56;40;2.53;9637064_hangsan_bojpy4.set
+J033;J033_USDJPY_D1_9637073_storyG_usdjpy_a341_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.12;132;2.17;9637073_storyG_usdjpy a341 d1 storyg.set
+J034;J034_USDJPY_D1_9637074_storyG_usdjpy_d343_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;0.85;50;4.72;9637074_storyG_usdjpy d343 d1 storyg.set
+J035;J035_USDJPY_D1_9637075_storyG_usdjpy_e345_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;0.91;37;3.63;9637075_storyG_usdjpy e345 d1 storyg.set
+J036;J036_USDJPY_D1_9637076_storyG_usdjpy_g347_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.31;91;2.44;9637076_storyG_usdjpy g347 d1 storyg.set
+J037;J037_USDJPY_D1_DaytradePro_USDJPY.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.14;218;1.78;DaytradePro_USDJPY.set
+J038;J038_USDJPY_H1_usdjpy_H1_SL22.set;USDJPY;H1;pacchetto_V9.8_di_Wim;0.91;1360;14.31;usdjpy_H1_SL22.set
+J039;J039_USDJPY_H4_9637060_hangsan_R3.set;USDJPY;H4;pacchetto_V9.8_di_Wim;1.49;207;2.99;9637060_hangsan_R3.set
+J040;J040_USDJPY_H4_usdjpy_H4_SL14.set;USDJPY;H4;pacchetto_V9.8_di_Wim;0.78;1255;13.59;usdjpy_H4_SL14.set
+J041;J041_XAGUSD_D1_9637065_hangsan_DS.set;XAGUSD;D1;pacchetto_V9.8_di_Wim;1.92;127;13.31;9637065_hangsan_DS.set
+J042;J042_XAGUSD_D1_9637066_hangsan_Kg.set;XAGUSD;D1;pacchetto_V9.8_di_Wim;1.83;156;10.38;9637066_hangsan_Kg.set
+J043;J043_XAGUSD_H4_9637067_hangsan_SILVERR3.set;XAGUSD;H4;pacchetto_V9.8_di_Wim;1.13;456;17.96;9637067_hangsan_SILVERR3.set
+J044;J044_EURJPY_D1_DaytradePro_EURJPY_old.set;EURJPY;D1;pacchetto_V9.8_di_Wim;;;;DaytradePro_EURJPY_old.set
+J045;J045_EURUSD_D1_eurusd_f356_d1_storyg.set;EURUSD;D1;UBSChristmas;;;;eurusd f356 d1 storyg.set
+J046;J046_EURUSD_D1_eurusd_g357_d1_storyg.set;EURUSD;D1;UBSChristmas;;;;eurusd g357 d1 storyg.set
+J047;J047_EURUSD_D1_eurusd_o3515_d1_storyg.set;EURUSD;D1;UBSChristmas;;;;eurusd o3515 d1 storyg.set
+J048;J048_EURUSD_D1_eurusd_p3516_d1_storyg.set;EURUSD;D1;UBSChristmas;;;;eurusd p3516 d1 storyg.set
+J049;J049_EURUSD_D1_eurusd_f356_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;;;;eurusd_f356_d1_storyg.set
+J050;J050_EURUSD_D1_eurusd_p3516_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;;;;eurusd_p3516_d1_storyg.set
+J051;J051_EURUSD_H1_2025_advscalper_eurusd_h1-tomasw-grid.set;EURUSD;H1;telegram_topic_set_potential;;;;2025_advscalper_eurusd_h1-tomasw-grid.set
+J052;J052_EURUSD_H4_eurusd_h368_h4_storyg.set;EURUSD;H4;UBSChristmas;;;;eurusd h368 h4 storyg.set
+J053;J053_EURUSD_H4_eurusd_h368_h4_storyg.set;EURUSD;H4;pacchetto_V9.8_di_Wim;;;;eurusd_h368_h4_storyg.set
+J054;J054_EURUSD_M15_EURUSD_M15_VolBrk_C10.set;EURUSD;M15;pacchetto_V9.8_di_Wim;;;;EURUSD_M15_VolBrk_C10.set
+J055;J055_EURUSD_M15_EURUSD_M15_VolBrk_C20.set;EURUSD;M15;pacchetto_V9.8_di_Wim;;;;EURUSD_M15_VolBrk_C20.set
+J056;J056_EURUSD_M15_EURUSD_M15_VolBrk_C35.set;EURUSD;M15;pacchetto_V9.8_di_Wim;;;;EURUSD_M15_VolBrk_C35.set
+J057;J057_EURUSD_M15_EURUSD_M15_VolBrk_C37.set;EURUSD;M15;pacchetto_V9.8_di_Wim;;;;EURUSD_M15_VolBrk_C37.set
+J058;J058_EURUSD_M15_EURUSD_M15_VolBrk_C55.set;EURUSD;M15;pacchetto_V9.8_di_Wim;;;;EURUSD_M15_VolBrk_C55.set
+J059;J059_EURUSD_M15_EURUSD_M15_VolBrk_C63.set;EURUSD;M15;pacchetto_V9.8_di_Wim;;;;EURUSD_M15_VolBrk_C63.set
+J060;J060_GBPJPY_D1_DaytradePro_GBPJPYold.set;GBPJPY;D1;pacchetto_V9.8_di_Wim;;;;DaytradePro_GBPJPYold.set
+J061;J061_USDJPY_D1_JPY_1_.set;USDJPY;D1;telegram_topic_set_potential;;;;JPY (1).set
+J062;J062_USDJPY_D1_JPY_2_.set;USDJPY;D1;telegram_topic_set_potential;;;;JPY (2).set
+J063;J063_USDJPY_D1_JPY_3_.set;USDJPY;D1;telegram_topic_set_potential;;;;JPY (3).set
+J064;J064_USDJPY_D1_JPY_4_.set;USDJPY;D1;telegram_topic_set_potential;;;;JPY (4).set
+J065;J065_USDJPY_D1_JPY_5_.set;USDJPY;D1;telegram_topic_set_potential;;;;JPY (5).set
+J066;J066_USDJPY_D1_JPY_6_.set;USDJPY;D1;telegram_topic_set_potential;;;;JPY (6).set
+J067;J067_USDJPY_D1_JPY_7_.set;USDJPY;D1;telegram_topic_set_potential;;;;JPY (7).set
+J068;J068_USDJPY_D1_UBS-USDJPY-D1-HJP09.set;USDJPY;D1;telegram_topic_set_potential;;;;UBS-USDJPY-D1-HJP09.set
+J069;J069_USDJPY_D1_UBS-USDJPY-D1-HJP10.set;USDJPY;D1;telegram_topic_set_potential;;;;UBS-USDJPY-D1-HJP10.set
+J070;J070_USDJPY_D1_usdjpy_a341_d1_storyg.set;USDJPY;D1;telegram_topic_set_potential;;;;usdjpy a341 d1 storyg.set
+J071;J071_USDJPY_D1_usdjpy_d343_d1_storyg.set;USDJPY;D1;telegram_topic_set_potential;;;;usdjpy d343 d1 storyg.set
+J072;J072_USDJPY_D1_usdjpy_e345_d1_storyg.set;USDJPY;D1;telegram_topic_set_potential;;;;usdjpy e345 d1 storyg.set
+J073;J073_USDJPY_D1_usdjpy_g347_d1_storyg.set;USDJPY;D1;telegram_topic_set_potential;;;;usdjpy g347 d1 storyg.set
+J074;J074_USDJPY_H1_UBS-USDJPY-H1-SPD-20260903-02.set;USDJPY;H1;UBSChristmas;;;;UBS-USDJPY-H1-SPD-20260903-02.set
+J075;J075_USDJPY_H1_usdjpy17.set;USDJPY;H1;telegram_topic_set_potential;;;;usdjpy17.set
+J076;J076_USDJPY_H1_usdjpy_H1_SL30.set;USDJPY;H1;pacchetto_V9.8_di_Wim;;;;usdjpy_H1_SL30.set
+J077;J077_USDJPY_H1_usdjpy_H1_SL30.set;USDJPY;H1;pacchetto_set_di_Wim;;;;usdjpy_H1_SL30.set
+J078;J078_USDJPY_H4_R3_148.set;USDJPY;H4;pacchetto_V9.8_di_Wim;;;;R3_148.set
+J079;J079_USDJPY_H4_R3_148.set;USDJPY;H4;UBSChristmas;;;;R3_148.set
+J080;J080_USDJPY_H4_usdjpy_H4_SL17.set;USDJPY;H4;pacchetto_V9.8_di_Wim;;;;usdjpy_H4_SL17.set
+J081;J081_USDJPY_H4_usdjpy_H4_SL17.set;USDJPY;H4;pacchetto_set_di_Wim;;;;usdjpy_H4_SL17.set
+J082;J082_XAGUSD_D1_4d1xag.set;XAGUSD;D1;telegram_topic_set_potential;;;;4d1xag.set
+J083;J083_XAGUSD_D1_DS_149.set;XAGUSD;D1;UBSChristmas;;;;DS_149.set
+J084;J084_XAGUSD_D1_Kg_150.set;XAGUSD;D1;UBSChristmas;;;;Kg_150.set
+J085;J085_XAGUSD_D1_XAG_2_.set;XAGUSD;D1;telegram_topic_set_potential;;;;XAG (2).set
+J086;J086_XAGUSD_D1_XAG_3_.set;XAGUSD;D1;telegram_topic_set_potential;;;;XAG (3).set
+J087;J087_XAGUSD_D1_XAG_4_.set;XAGUSD;D1;telegram_topic_set_potential;;;;XAG (4).set
+J088;J088_XAGUSD_D1_XAUGUSD_D1_C463_STORYG_KillPending-Open_Friday_2.set;XAGUSD;D1;UBSChristmas;;;;XAUGUSD D1 C463 STORYG KillPending-Open Friday 22u50 .set
+J089;J089_XAGUSD_D1_XAUGUSD_D1_D464_STORYG_KillPending-Open_Friday_2.set;XAGUSD;D1;UBSChristmas;;;;XAUGUSD D1 D464 STORYG KillPending-Open Friday 22u50 .set
+J090;J090_XAGUSD_D1_XAUGUSD_D1_G467_STORYG_KillPending-Open_Friday_2.set;XAGUSD;D1;UBSChristmas;;;;XAUGUSD D1 G467 STORYG KillPending-Open Friday 22u50 .set
+J091;J091_XAGUSD_D1_XAUGUSD_D1_H468_STORYG_KillPending-Open_Friday_2.set;XAGUSD;D1;UBSChristmas;;;;XAUGUSD D1 H468 STORYG KillPending-Open Friday 22u50 .set
+J092;J092_XAGUSD_H1_4h1xag.set;XAGUSD;H1;telegram_topic_set_potential;;;;4h1xag.set
+J093;J093_XAGUSD_H4_10h4xag.set;XAGUSD;H4;telegram_topic_set_potential;;;;10h4xag.set
+J094;J094_XAGUSD_H4_4h4xag.set;XAGUSD;H4;telegram_topic_set_potential;;;;4h4xag.set
+J095;J095_XAGUSD_H4_5h4xag.set;XAGUSD;H4;telegram_topic_set_potential;;;;5h4xag.set
+J096;J096_XAGUSD_H4_8h4xag.set;XAGUSD;H4;telegram_topic_set_potential;;;;8h4xag.set
+J097;J097_XAGUSD_H4_SILVERR3_151.set;XAGUSD;H4;UBSChristmas;;;;SILVERR3_151.set
+J098;J098_XAGUSD_H4_XAG_1_.set;XAGUSD;H4;telegram_topic_set_potential;;;;XAG (1).set
