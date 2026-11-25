@@ -1,0 +1,22 @@
+# Golden Cross HA e Golden Cross di Paolo: test su forex, criteri scritti PRIMA dei numeri (25/11/2026)
+
+**Materiale (Claudio, 25/11):** `Piano Trading - GOLDEN CROSS HA Strategy 1` (Masterclass ABTG v1.0, 01/07/2026: EMA 9/21/50 + Heiken Ashi + ADX/DI), indicatore Pine `Paolo Golden Cross v0.9 BANDSLOPE` (SuperTrend 10/3 + incrocio EMA 9/21 + candela di conferma + bande di Bollinger) e `DASHBOARD_GOLDEN_CROSS_V03.ex5`. **Il file .ex5 e' compilato di terzi: non lo eseguo ne' lo ricostruisco** (regola del progetto); si usano solo le regole scritte.
+**Precedente (01/11/2026, `GOLDEN_CROSS_HA_TEST_*`):** solo oro, 4 periodi, traduzione rigida: 1-13 operazioni, non misurabile; con regole allentate PF 0,96-1,09 (80-105 operazioni), spread 8-11R. Qui: stesso PDF su un campione molto piu' grande (10 coppie forex, 2005-2026, H1 e H4) e per la prima volta il Pine di Paolo.
+
+## Dati e costi
+H1 BCM 10 coppie (EXPORT_H1_BCM_20261124), H4 derivato, 2005-2026. Segnale alla chiusura della barra, ingresso all'apertura della barra successiva con spread fisso per coppia (EURUSD 0,8 pip, USDJPY 1,0, GBPUSD 1,2, AUDUSD 1,2, EURGBP 1,5, USDCAD 1,5, USDCHF 1,5, NZDUSD 1,8, EURJPY 1,8, GBPJPY 2,8), slippage 0,5 pip su SL. SL prima di TP nella stessa barra. Nessuna chiusura nel weekend (uscita al close dell'ultima barra della settimana). Una posizione alla volta per coppia, massimo 2 trade al giorno per coppia, stop del giorno dopo 2 perdite consecutive (limiti del PDF).
+
+## Famiglia A: PDF (Heiken Ashi + ADX), traduzione dichiarata
+- Long: close > EMA50; EMA50[i] >= EMA50[i-3]; EMA9 > EMA21; EMA9 e EMA21 maggiori di 2 barre prima; incrocio rialzista EMA9/21 nelle ultime 6 barre; **ultime 3 candele Heiken Ashi rialziste** con stoppino inferiore della terza <= **25%** del corpo (il 10% del 01/11 bloccava quasi tutto); **ADX(14) >= 20** e ADX[i] >= ADX[i-1] - 0,5; DI+ > DI-; close - EMA21 <= 1 ATR(14). Short speculare. **Scelte dichiarate:** nessun requisito di "corpo HA stabile o crescente" (la traduzione del 01/11 che azzerava i segnali); EMA ordinate = EMA9 > EMA21 e close > EMA50 (non anche EMA21 > EMA50); nessun filtro di sessione, news o "spazio tecnico".
+- Stop = minimo (massimo) delle ultime 3 barre -/+ 0,1 ATR; trade scartato se distanza stop < 0,3 ATR o > 2 ATR. Target = k x R. **Uscita anticipata:** chiusura sotto EMA21 (sopra, per gli short), come da PDF sez. 11.
+- **Cella primaria:** H1, ADX 20, target 1,5R, uscita EMA21 attiva. **Sensibilita':** H4; ADX 25; target 1R; target 2R; senza uscita EMA21 (6 celle in totale).
+
+## Famiglia B: Pine di Paolo (preset AUTO, parametri dello script)
+- SuperTrend(10, 3) con ATR di Wilder; trigger FLIP+CROSS = (flip SuperTrend e incrocio EMA9/21 nello stesso verso nelle 3 barre successive o precedenti); pendenza EMA9 e EMA21 su 3 barre oltre soglia 0,5 tick; qualita' = spread medio EMA >= 0,02% e pendenza EMA9 >= 1 tick; **candela di conferma** la barra dopo il trigger (close > open, close > close precedente, corpo >= 0,5 ATR) -> segnale; nessun doppio segnale entro 6 barre. Trigger BANDE (variante): pendenza media BB(20,2) su 5 barre > 2 tick e allargamento della BB width >= 5% su 3 barre, con pendenza EMA coerente.
+- Il Pine non definisce stop ne' target: si usano **gli stessi della famiglia A** (stop 3 barre, 1,5R, uscita EMA21). Celle: B1 FLIP+CROSS H1 (**primaria**), B2 H4, B3 trigger bande H1.
+
+## Soglie (invariate nello spirito, adattate al campione piu' grande)
+Cella primaria = aggregato 10 coppie, PF in R. **IS 2005-2015:** PF >= 1,3 con >= 300 operazioni. **OOS 2016-2021:** PF > 1,2 con >= 150. **Hold-out 2022-2026:** PF > 1,0 con >= 100. Candidata = tutte e tre sulla primaria. Una variante che passa mentre la primaria no non e' una candidata. Con 9 celle un passaggio isolato e' atteso per caso.
+
+## Previsione (scritta ora)
+Nessuna candidata. Trend-following con filtri multipli su forex H1: PF 0,85-1,05, perche' i filtri (ADX, HA, incrocio recente) entrano tardi e il R:R 1,5 con win rate 40% non copre spread e whipsaw. Probabilita' di candidata: A 8%, B 8%. Il numero di operazioni sara' alto (migliaia): il PDF e' misurabile se le regole sono allentate come sopra.
