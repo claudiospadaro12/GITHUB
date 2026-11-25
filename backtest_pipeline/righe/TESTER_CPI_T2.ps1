@@ -21,7 +21,7 @@ if($sedie.Count -gt 0){ Fermo ('nel profilo "' + $profilo + '" ci sono EA attacc
 Write-Host ('Profilo "' + $profilo + '": nessun EA attaccato. Avvio il tester...') -ForegroundColor Green
 $stamp=(Get-Date).ToString('yyyyMMdd_HHmmss',$INV); $rep='CPI_T2_' + $stamp; $W=Join-Path $env:USERPROFILE 'abtg_sonde'; New-Item -ItemType Directory -Force -Path $W | Out-Null
 $iniRun=Join-Path $W ('cpi_t2_' + $stamp + '.ini')
-$L=@('[Tester]','Expert=ABTG_CpiM5','ExpertParameters=' + $SET,'Symbol=XAUUSD','Period=M5','Optimization=0','Model=1','FromDate=2018.01.01','ToDate=2024.06.30','ForwardMode=0','Deposit=100000','Currency=EUR','Leverage=100','ExecutionMode=0','Visual=0','Report=' + $rep,'ReplaceReport=1','ShutdownTerminal=1')
+$L=@('[Tester]','Expert=ABTG_CpiM5',('ExpertParameters=' + $SET),'Symbol=XAUUSD','Period=M5','Optimization=0','Model=1','FromDate=2018.01.01','ToDate=2024.06.30','ForwardMode=0','Deposit=100000','Currency=EUR','Leverage=100','ExecutionMode=0','Visual=0',('Report=' + $rep),'ReplaceReport=1','ShutdownTerminal=1')
 Set-Content -LiteralPath $iniRun -Value ($L -join "`r`n") -Encoding Unicode
 $t0=Get-Date; $p=Start-Process -FilePath $EXE -ArgumentList ('/config:"' + $iniRun + '"') -PassThru
 $scad=(Get-Date).AddMinutes(120); $ult=Get-Date
