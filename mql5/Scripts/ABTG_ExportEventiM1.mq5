@@ -27,8 +27,8 @@
 #property script_show_inputs
 #property version "1.00"
 
-input string InpSimboli  = "EURUSD,GBPUSD,USDJPY,EURJPY"; // voci (alias con |)
-input string InpFinestre = "2024.01.01-2025.01.01,2025.01.01-2026.01.01,2026.01.01-2026.11.21"; // finestre da-a (a esclusa)
+input string InpSimboli  = "EURJPY,EURUSD"; // voci (alias con |)
+input string InpFinestre = "2013.01.01-2016.01.01,2016.01.01-2019.01.01,2019.01.01-2022.01.01,2022.01.01-2025.01.01,2025.01.01-2026.11.21"; // finestre da-a (a esclusa)
 input bool   InpChiudiTerminale = false;   // true SOLO nel lancio automatico
 
 #define F_SIMBOLI   "ABTG_SIMBOLI_BCM.txt"
@@ -60,7 +60,7 @@ string g_evtxt =
 datetime g_ev[];
 int g_i0=0;
 #define PRE_SEC  3600
-#define POST_SEC 25200
+#define POST_SEC 201600
 void CaricaEventi()
   {
    string p[]; int n=StringSplit(g_evtxt,',',p); ArrayResize(g_ev,0);
