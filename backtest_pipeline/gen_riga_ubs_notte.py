@@ -90,3 +90,11 @@ assert _t7.startswith("& { ")
 _t7 = "& { " + _f + _t7[len("& { "):]
 open('righe/RIGA_LANCIA_UBS_NOTTE.txt', 'w', encoding='ascii').write(_t7)
 print('guardia selettiva: sostituzioni', _n)
+
+# --- FIX 25/11 sera: IMP vuoto lasciava un ';' finale in -Imposti: lo script del tester spezza sui ';', trova una voce vuota e va in throw (rc 1, prima del tester) su TUTTE le 98 passate.
+_t9 = open('righe/RIGA_LANCIA_UBS_NOTTE.txt', encoding='ascii').read()
+_n9 = _t9.count(":s;'")
+assert _n9 == 98, _n9
+_t9 = _t9.replace(":s;'", ":s'")
+open('righe/RIGA_LANCIA_UBS_NOTTE.txt', 'w', encoding='ascii').write(_t9)
+print('fix ";" finale in -Imposti: 98 voci')
