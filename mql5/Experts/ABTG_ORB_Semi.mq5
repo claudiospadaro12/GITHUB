@@ -28,10 +28,21 @@ input int      InpRangeMinutes  = 5;        // durata della finestra in minuti (
 input double   InpMinRange      = 0.0;      // range minimo in prezzo (0 = spento). Emiliano sul Nasdaq: 17-40 punti
 input double   InpMaxRange      = 0.0;      // range massimo in prezzo (0 = spento)
 input group "=== INGRESSO ==="
-input int      InpEntryMode     = 0;        // 0 = ordini pendenti Buy/Sell stop (OCO); 1 = solo linee e avviso, entra Claudio a mano
+input int      InpEntryMode     = 0;        // 0 = ordini pendenti Buy/Sell stop (OCO); 1 = solo linee e avviso, entra Claudio a mano; 2 = INGRESSO A MERCATO fatto dall'Expert quando una candela M5 CHIUDE oltre il livello (con i filtri sotto)
 input double   InpBuffer        = 0.0;      // distanza oltre i livelli in PREZZO (Emiliano: 7 punti Nasdaq, 10 punti notte; Paolo 5 punti) MANCA per l'oro
 input int      InpCancelMin     = 90;       // cancella i pendenti dopo N minuti dalla fine del range
 input bool     InpNoSecond      = true;     // quando uno entra si cancella l'altro (OCO)
+input group "=== MODO 2: INGRESSO A MERCATO (regole di Emiliano, i valori sono modificabili) ==="
+input bool     InpUseVol        = true;     // volume (tick) della candela di rottura >= InpVolMult x media delle precedenti (Emiliano: +50%; volumi affidabili sugli indici, NON sul forex)
+input double   InpVolMult       = 1.5;
+input int      InpVolBars       = 20;
+input bool     InpUseEma        = true;     // medie 9 e 21 su M5 allineate e inclinate nel verso (buy: prezzo>EMA9>EMA21)
+input int      InpEmaA          = 9;
+input int      InpEmaB          = 21;
+input double   InpMaxChase      = 0.0;      // se il prezzo e gia oltre il livello di piu di N (prezzo) NON inseguo (0 = spento). Emiliano: entrare sul retest, mai inseguire
+input bool     InpRetest        = false;    // true: dopo la rottura valida aspetto il RETEST del livello e una chiusura M5 di conferma, poi entro
+input double   InpRetestTol     = 0.0;      // tolleranza del retest in prezzo
+input bool     InpOneTrade      = true;     // un solo ingresso per sessione
 input group "=== STOP E TARGET ==="
 input int      InpStopMode      = 1;        // 0 = lato opposto del range; 1 = META del range (Emiliano); 2 = distanza fissa
 input double   InpStopExtra     = 0.0;      // extra oltre lo stop in prezzo (Emiliano: 5-10 punti oltre il riferimento)
@@ -63,15 +74,16 @@ input string   InpComment       = "ORB-S";
 input bool     InpDiary         = true;
 
 CTrade   trade;
-int      hEma=INVALID_HANDLE, hFast=INVALID_HANDLE;
+int      hEma=INVALID_HANDLE, hFast=INVALID_HANDLE, hA=INVALID_HANDLE, hB=INVALID_HANDLE;
 datetime gDay=0;                 // giorno italiano (mezzanotte) gia elaborato
+bool     gTraded=false; int gBreakDir=0; double gBreakLevel=0;
 bool     gRangeDone=false, gOrdersDone=false, gAlertBuy=false, gAlertSell=false, gSkipDay=false;
 double   gHi=0, gLo=0, gBuyTrg=0, gSellTrg=0;
 datetime gRangeEndSrv=0, gCancelSrv=0, gCloseSrv=0;
 datetime gLastM5=0;
 int      gTries=0;
 double   P_buf, P_minR, P_maxR, P_part, P_stopExtra, P_stopFixed;
-int      P_min, P_sh, P_sm;
+int      P_min, P_sh, P_sm; bool P_useVol=true;
 
 //------------------------------------------------ tempo italiano
 datetime LastSunday(int y,int m)
@@ -149,6 +161,7 @@ void PlaceOrders()
    Diary("RANGE",StringFormat("hi=%.5f;lo=%.5f;ampiezza=%.5f;buy=%.5f;sell=%.5f",gHi,gLo,rg,gBuyTrg,gSellTrg));
    if((P_minR>0 && rg<P_minR) || (P_maxR>0 && rg>P_maxR)){ Say("range fuori dai limiti: oggi non si opera"); Diary("SALTA","range fuori limiti"); gSkipDay=true; return; }
    if(InpEntryMode==1){ Say("modo AVVISO: entra tu quando rompe; li gestisco io dopo"); return; }
+   if(InpEntryMode==2){ Say("modo MERCATO: entro io alla chiusura M5 oltre il livello, con i filtri"); return; }
    double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
    double minD=(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
    datetime expT=gCancelSrv;
@@ -174,6 +187,59 @@ void CancelPendings(string why)
   }
 bool HasMyPendings()
   { for(int i=OrdersTotal()-1;i>=0;i--){ ulong t=OrderGetTicket(i); if(t==0) continue; if(OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic) return true; } return false; }
+
+//------------------------------------------------ ingresso a mercato (modo 2)
+double EmaVal(int handle,int shift){ double b[1]; if(handle==INVALID_HANDLE || CopyBuffer(handle,0,shift,1,b)!=1) return 0.0; return b[0]; }
+bool VolumeOk()
+  {
+   if(!P_useVol) return true;
+   long v1=iVolume(_Symbol,PERIOD_M5,1); double sum=0; int n=0;
+   for(int i=2;i<2+InpVolBars;i++){ long v=iVolume(_Symbol,PERIOD_M5,i); if(v>0){ sum+=(double)v; n++; } }
+   if(n<5) return true;
+   return (double)v1>=InpVolMult*(sum/n);
+  }
+bool EmaOk(bool isBuy)
+  {
+   if(!InpUseEma) return true;
+   double a1=EmaVal(hA,1), b1=EmaVal(hB,1), a2=EmaVal(hA,2), b2=EmaVal(hB,2), c=iClose(_Symbol,PERIOD_M5,1);
+   if(a1<=0 || b1<=0 || a2<=0 || b2<=0) return true;
+   if(isBuy) return (c>a1 && a1>b1 && a1>a2 && b1>=b2);
+   return (c<a1 && a1<b1 && a1<a2 && b1<=b2);
+  }
+void MarketEntry(bool isBuy,string why)
+  {
+   double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID), px=isBuy?ask:bid;
+   double lvl=isBuy?gBuyTrg:gSellTrg;
+   if(InpMaxChase>0 && MathAbs(px-lvl)>InpMaxChase){ Say("prezzo troppo lontano dal livello: non inseguo"); Diary("SALTA","troppo lontano "+DoubleToString(px,_Digits)); return; }
+   double sl=StopFor(isBuy,px), minD=(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
+   if((isBuy && sl>=bid-minD) || (!isBuy && sl<=ask+minD)){ Say("stop troppo vicino al prezzo: salto"); Diary("SALTA","stop troppo vicino"); return; }
+   double tp=0.0; if(InpTpR>0) tp=NormalizeDouble(isBuy?px+InpTpR*(px-sl):px-InpTpR*(sl-px),_Digits);
+   double lot=CalcLot(px,sl,isBuy);
+   bool ok=isBuy?trade.Buy(lot,_Symbol,0,sl,tp,InpComment+" Buy"):trade.Sell(lot,_Symbol,0,sl,tp,InpComment+" Sell");
+   if(ok){ gTraded=true; Say(StringFormat("ENTRATO %s a %.2f stop %.2f (%s)",isBuy?"BUY":"SELL",px,sl,why)); Diary("INGRESSO",StringFormat("%s;%.5f;sl=%.5f;lot=%.2f;%s",isBuy?"BUY":"SELL",px,sl,lot,why)); }
+   else Say("ordine a mercato rifiutato: "+trade.ResultRetcodeDescription());
+  }
+void CheckMarketEntry()
+  {
+   if(InpOneTrade && gTraded) return;
+   double c=iClose(_Symbol,PERIOD_M5,1), lo=iLow(_Symbol,PERIOD_M5,1), hi=iHigh(_Symbol,PERIOD_M5,1);
+   if(iTime(_Symbol,PERIOD_M5,1)<gRangeEndSrv) return;                  // solo candele dopo la fine del range
+   double mid=(gHi+gLo)/2.0;
+   if(gBreakDir!=0)                                                    // aspetto il retest
+     {
+      bool buy=(gBreakDir>0);
+      if(buy && c<mid){ gBreakDir=0; Say("setup annullato: chiusura sotto meta range"); return; }
+      if(!buy && c>mid){ gBreakDir=0; Say("setup annullato: chiusura sopra meta range"); return; }
+      bool touched=buy?(lo<=gBreakLevel+InpRetestTol):(hi>=gBreakLevel-InpRetestTol);
+      bool conf=buy?(c>gBreakLevel):(c<gBreakLevel);
+      if(touched && conf){ MarketEntry(buy,"retest confermato"); gBreakDir=0; }
+      return;
+     }
+   if(c>gBuyTrg && VolumeOk() && EmaOk(true))
+     { if(InpRetest){ gBreakDir=1; gBreakLevel=gBuyTrg; Say("rottura BUY valida: aspetto il retest"); Diary("ROTTURA","BUY in attesa di retest"); } else MarketEntry(true,"chiusura M5 oltre il massimo"); }
+   else if(c<gSellTrg && VolumeOk() && EmaOk(false))
+     { if(InpRetest){ gBreakDir=-1; gBreakLevel=gSellTrg; Say("rottura SELL valida: aspetto il retest"); Diary("ROTTURA","SELL in attesa di retest"); } else MarketEntry(false,"chiusura M5 sotto il minimo"); }
+  }
 
 //------------------------------------------------ gestione posizioni
 string GV(ulong t,string k){ return "ORBS_"+IntegerToString((long)t)+"_"+k; }
@@ -254,18 +320,20 @@ int OnInit()
    if(InpPreset==1){ P_sh=15; P_sm=30; P_min=5; }
    if(InpPreset==2){ P_sh=15; P_sm=30; P_min=15; }
    if(P_min<1) P_min=1;
+   P_useVol=InpUseVol && (InpPreset!=1);   // sull'oro (CFD) il volume tick non e affidabile (Paolo): filtro volumi spento col preset ORO
    trade.SetExpertMagicNumber(InpMagic); trade.SetDeviationInPoints(30);
    hEma=iMA(_Symbol,PERIOD_M5,InpTrailEma,0,MODE_EMA,PRICE_CLOSE); hFast=iMA(_Symbol,PERIOD_M5,InpFastEma,0,MODE_EMA,PRICE_CLOSE);
-   Say(StringFormat("avviato su %s: range %02d:%02d IT per %d minuti; modo %s",_Symbol,P_sh,P_sm,P_min,InpEntryMode==0?"ordini pendenti":"avviso (entri tu)"));
+   hA=iMA(_Symbol,PERIOD_M5,InpEmaA,0,MODE_EMA,PRICE_CLOSE); hB=iMA(_Symbol,PERIOD_M5,InpEmaB,0,MODE_EMA,PRICE_CLOSE);
+   Say(StringFormat("avviato su %s: range %02d:%02d IT per %d minuti; modo %s",_Symbol,P_sh,P_sm,P_min,InpEntryMode==0?"ordini pendenti":InpEntryMode==2?"ingresso a mercato dell'Expert":"avviso (entri tu)"));
    return INIT_SUCCEEDED;
   }
-void OnDeinit(const int reason){ if(hEma!=INVALID_HANDLE) IndicatorRelease(hEma); if(hFast!=INVALID_HANDLE) IndicatorRelease(hFast); }
+void OnDeinit(const int reason){ if(hEma!=INVALID_HANDLE) IndicatorRelease(hEma); if(hFast!=INVALID_HANDLE) IndicatorRelease(hFast); if(hA!=INVALID_HANDLE) IndicatorRelease(hA); if(hB!=INVALID_HANDLE) IndicatorRelease(hB); }
 void OnTick()
   {
    datetime it0=ItalyDay0();
    if(it0!=gDay)   // nuovo giorno italiano
      {
-      gDay=it0; gRangeDone=false; gOrdersDone=false; gAlertBuy=false; gAlertSell=false; gSkipDay=false; gTries=0; gHi=0; gLo=0;
+      gDay=it0; gRangeDone=false; gTraded=false; gBreakDir=0; gBreakLevel=0; gOrdersDone=false; gAlertBuy=false; gAlertSell=false; gSkipDay=false; gTries=0; gHi=0; gLo=0;
       gCloseSrv=ItToSrv(it0,InpCloseH,InpCloseM);
       ObjectsDeleteAll(0,"ORBS_");
      }
@@ -287,6 +355,8 @@ void OnTick()
       if(!gAlertBuy && ask>=gBuyTrg){ gAlertBuy=true; Say(StringFormat("ROTTO IL MASSIMO %.2f: ingresso BUY a mercato, stop suggerito %.2f",gBuyTrg,StopFor(true,ask))); Alert("ORB-S ",_Symbol," BUY rottura ",DoubleToString(gBuyTrg,_Digits)); Diary("AVVISO","BUY "+DoubleToString(ask,_Digits)); }
       if(!gAlertSell && bid<=gSellTrg){ gAlertSell=true; Say(StringFormat("ROTTO IL MINIMO %.2f: ingresso SELL a mercato, stop suggerito %.2f",gSellTrg,StopFor(false,bid))); Alert("ORB-S ",_Symbol," SELL rottura ",DoubleToString(gSellTrg,_Digits)); Diary("AVVISO","SELL "+DoubleToString(bid,_Digits)); }
      }
+   // modo 2: ingresso a mercato alla chiusura della candela M5
+   if(newM5 && InpEntryMode==2 && gRangeDone && !gSkipDay && now<gCancelSrv) CheckMarketEntry();
    // OCO + gestione
    if(InpNoSecond) { bool pos=false; for(int i=PositionsTotal()-1;i>=0;i--){ ulong tk=PositionGetTicket(i); if(tk!=0 && PositionSelectByTicket(tk) && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic){ pos=true; break; } } if(pos && HasMyPendings()) CancelPendings("OCO"); }
    ManagePositions(newM5);
