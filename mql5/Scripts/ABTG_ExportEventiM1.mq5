@@ -27,7 +27,7 @@
 #property script_show_inputs
 #property version "1.00"
 
-input string InpSimboli  = "EURUSD,GBPUSD,USDJPY"; // voci (alias con |)
+input string InpSimboli  = "EURUSD,GBPUSD,USDJPY,EURJPY"; // voci (alias con |)
 input string InpFinestre = "2013.01.01-2014.01.01,2014.01.01-2015.01.01,2015.01.01-2016.01.01,2016.01.01-2017.01.01,2017.01.01-2018.01.01,2018.01.01-2019.01.01,2019.01.01-2020.01.01,2020.01.01-2021.01.01,2021.01.01-2022.01.01,2022.01.01-2023.01.01,2023.01.01-2024.01.01,2024.01.01-2025.01.01,2025.01.01-2026.01.01,2026.01.01-2026.11.21"; // finestre da-a (a esclusa)
 input bool   InpChiudiTerminale = false;   // true SOLO nel lancio automatico
 
