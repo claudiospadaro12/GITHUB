@@ -50,6 +50,7 @@ def nuovo(i, thumbs):
 rows = []; thumbs = []
 for i, f in enumerate(frames):
     t = i * a.ogni; words = ' '.join(s['text'] for s in segs if t <= s['start'] < t + a.ogni)
+    if not words and any(s['start'] < t and s['end'] > t for s in segs): words = '(continua la frase iniziata prima)'
     rows.append(dict(i=i, t=t, f=f, parole=words, cambia=nuovo(i, thumbs)))
 with open(os.path.join(OUT, 'lezione.md'), 'w', encoding='utf-8') as fh:
     fh.write('# %s\nUn fotogramma ogni %g s. "stesso schermo" = lo schermo non e cambiato rispetto al fotogramma prima.\n\n' % (os.path.basename(a.video), a.ogni))
