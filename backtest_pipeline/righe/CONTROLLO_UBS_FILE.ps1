@@ -6,13 +6,13 @@ function R($s){ [void]$out.Add($s); Write-Host $s }
 R ('CONTROLLO FILE UBS - PC ' + $env:COMPUTERNAME + ' - ' + (Get-Date).ToString('yyyy-MM-dd HH:mm',$ci))
 $home1=$env:USERPROFILE; $dirs=New-Object System.Collections.ArrayList
 foreach($d in @([Environment]::GetFolderPath('Desktop'), (Join-Path $home1 'Downloads'), (Join-Path $home1 'Documents'), (Join-Path $home1 'OneDrive\Desktop'), (Join-Path $home1 'OneDrive\Documents'), (Join-Path $home1 'abtg_wim_sets'))){ if((Test-Path -LiteralPath $d) -and -not ($dirs -contains $d)){ [void]$dirs.Add($d) } }
-R ''; R '== 1. ZIP DEI SET (cartelle cercate: ' + ($dirs -join ' | ') + ') =='
+R ''; R ('== 1. ZIP DEI SET (cartelle cercate: ' + ($dirs -join ' | ') + ') ==')
 $rxz='(?i)(Ultimate-Breakout|UBS|TG_SET|SET_FOR_SALE|LIBPACK|GTPD1|CHRISTMAS|BREAKOUT.*SET|SET.*FILES)'
 $trovati=0
 foreach($d in $dirs){ foreach($f in @(Get-ChildItem -LiteralPath $d -Filter *.zip -File -Recurse -Depth 2 -ErrorAction SilentlyContinue | Where-Object { $_.Name -match $rxz })){ $trovati++; R ('  ZIP  ' + $f.Name + '  ' + ($f.Length/1MB).ToString('0.0',$ci) + ' MB  ' + $f.LastWriteTime.ToString('yyyy-MM-dd') + '  ' + $f.DirectoryName) } }
 if($trovati -eq 0){ R '  NESSUNO ZIP DI SET TROVATO nelle cartelle sopra.' }
 $cercati=@('Ultimate-Breakout-System-Set-Files','TG_SET_PARTE1','TG_SET_PARTE2','TG_SET_PARTE3','TG_SET_PARTE4','TG_SET_PARTE5','TG_SET_PARTE6','SET_FOR_SALE','UBS_LIBPACK')
-R ''; R '  Attesi dal piano: ' + ($cercati -join ', ')
+R ''; R ('  Attesi dal piano: ' + ($cercati -join ', '))
 $tutti=@(); foreach($d in $dirs){ $tutti += @(Get-ChildItem -LiteralPath $d -Filter *.zip -File -Recurse -Depth 2 -ErrorAction SilentlyContinue) }
 foreach($c in $cercati){ $m=@($tutti | Where-Object { $_.Name -like ('*' + $c + '*') }); if($m.Count -gt 0){ R ('  [OK]      ' + $c + '  ->  ' + $m[0].FullName + $(if($m.Count -gt 1){ '  (+' + ($m.Count-1) + ' copie)' } else { '' })) } else { R ('  [MANCA]   ' + $c) } }
 R ''; R '== 2. EA UBS (Ultimate_Breakout_EA_WSC_V*.ex5) nei terminali MT5 =='
