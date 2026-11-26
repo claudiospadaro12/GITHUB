@@ -1,0 +1,192 @@
+//@version=5
+indicator("Bulge Signals Scanner FX (1 alert, 28 cross)", overlay=true)
+
+// Scanner a UN SOLO ALERT: stessa logica dell'indicatore "Bulge Signals FILTRO R/R - Breaking Band"
+// (bulge -> uscita dalla banda -> rientro, filtro R/R, anti-doppione), applicata a 28 cross OANDA
+// sul timeframe del grafico su cui lo metti. Come usarlo: aggiungilo a un grafico H1 di qualsiasi
+// simbolo, poi Alert -> Condizione: questo indicatore -> "Qualsiasi chiamata alert()" -> "Una volta alla chiusura della barra".
+
+bbLen      = input.int(20,   "Periodo Bollinger", minval=1)
+bbMult     = input.float(2.0,"Deviazioni Bollinger", minval=0.1)
+expLook    = input.int(20,   "Barre per misurare l'espansione", minval=2)
+expFactor  = input.float(1.12,"Fattore di espansione banda (bulge)", minval=1.0)
+atrLen     = input.int(14,   "Periodo ATR (per lo stop)", minval=1)
+slAtrMult  = input.float(3.0,"Stop = n x ATR oltre l'estremo", minval=0.1)
+minRR      = input.float(1.5,"Rapporto R/R minimo per segnalare", minval=0.1)
+antiRepeat = input.int(6,    "Barre di attesa tra due segnali (anti-doppione)", minval=0)
+
+f_sig() =>
+    basis = ta.sma(close, bbLen)
+    dev   = bbMult * ta.stdev(close, bbLen)
+    upper = basis + dev
+    lower = basis - dev
+    width = upper - lower
+    avgWidth = ta.sma(width, expLook)
+    isBulge  = width > avgWidth * expFactor
+    atr = ta.atr(atrLen)
+    rawBuy  = isBulge[1] and close[1] < lower[1] and close > lower and close < basis
+    rawSell = isBulge[1] and close[1] > upper[1] and close < upper and close > basis
+    buySL    = low  - slAtrMult * atr
+    buyRisk  = close - buySL
+    buyRR    = buyRisk > 0 ? (basis - close) / buyRisk : 0.0
+    sellSL   = high + slAtrMult * atr
+    sellRisk = sellSL - close
+    sellRR   = sellRisk > 0 ? (close - basis) / sellRisk : 0.0
+    buyOK  = rawBuy  and buyRR  >= minRR
+    sellOK = rawSell and sellRR >= minRR
+    var int lastBuyBar  = -1000
+    var int lastSellBar = -1000
+    buySig  = buyOK  and (bar_index - lastBuyBar  > antiRepeat)
+    sellSig = sellOK and (bar_index - lastSellBar > antiRepeat)
+    if buySig
+        lastBuyBar := bar_index
+    if sellSig
+        lastSellBar := bar_index
+    [buySig, sellSig, buyRR, sellRR, buySL, sellSL]
+
+string msg = ""
+[b1, s1, br1, sr1, bl1, sl1] = request.security("OANDA:EURUSD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b1
+    msg += "BULGE BUY EURUSD | SL " + str.tostring(bl1, "#.#####") + " | R/R " + str.tostring(br1, "#.0") + "\n"
+if s1
+    msg += "BULGE SELL EURUSD | SL " + str.tostring(sl1, "#.#####") + " | R/R " + str.tostring(sr1, "#.0") + "\n"
+[b2, s2, br2, sr2, bl2, sl2] = request.security("OANDA:GBPUSD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b2
+    msg += "BULGE BUY GBPUSD | SL " + str.tostring(bl2, "#.#####") + " | R/R " + str.tostring(br2, "#.0") + "\n"
+if s2
+    msg += "BULGE SELL GBPUSD | SL " + str.tostring(sl2, "#.#####") + " | R/R " + str.tostring(sr2, "#.0") + "\n"
+[b3, s3, br3, sr3, bl3, sl3] = request.security("OANDA:USDJPY", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b3
+    msg += "BULGE BUY USDJPY | SL " + str.tostring(bl3, "#.#####") + " | R/R " + str.tostring(br3, "#.0") + "\n"
+if s3
+    msg += "BULGE SELL USDJPY | SL " + str.tostring(sl3, "#.#####") + " | R/R " + str.tostring(sr3, "#.0") + "\n"
+[b4, s4, br4, sr4, bl4, sl4] = request.security("OANDA:USDCHF", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b4
+    msg += "BULGE BUY USDCHF | SL " + str.tostring(bl4, "#.#####") + " | R/R " + str.tostring(br4, "#.0") + "\n"
+if s4
+    msg += "BULGE SELL USDCHF | SL " + str.tostring(sl4, "#.#####") + " | R/R " + str.tostring(sr4, "#.0") + "\n"
+[b5, s5, br5, sr5, bl5, sl5] = request.security("OANDA:USDCAD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b5
+    msg += "BULGE BUY USDCAD | SL " + str.tostring(bl5, "#.#####") + " | R/R " + str.tostring(br5, "#.0") + "\n"
+if s5
+    msg += "BULGE SELL USDCAD | SL " + str.tostring(sl5, "#.#####") + " | R/R " + str.tostring(sr5, "#.0") + "\n"
+[b6, s6, br6, sr6, bl6, sl6] = request.security("OANDA:AUDUSD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b6
+    msg += "BULGE BUY AUDUSD | SL " + str.tostring(bl6, "#.#####") + " | R/R " + str.tostring(br6, "#.0") + "\n"
+if s6
+    msg += "BULGE SELL AUDUSD | SL " + str.tostring(sl6, "#.#####") + " | R/R " + str.tostring(sr6, "#.0") + "\n"
+[b7, s7, br7, sr7, bl7, sl7] = request.security("OANDA:NZDUSD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b7
+    msg += "BULGE BUY NZDUSD | SL " + str.tostring(bl7, "#.#####") + " | R/R " + str.tostring(br7, "#.0") + "\n"
+if s7
+    msg += "BULGE SELL NZDUSD | SL " + str.tostring(sl7, "#.#####") + " | R/R " + str.tostring(sr7, "#.0") + "\n"
+[b8, s8, br8, sr8, bl8, sl8] = request.security("OANDA:EURGBP", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b8
+    msg += "BULGE BUY EURGBP | SL " + str.tostring(bl8, "#.#####") + " | R/R " + str.tostring(br8, "#.0") + "\n"
+if s8
+    msg += "BULGE SELL EURGBP | SL " + str.tostring(sl8, "#.#####") + " | R/R " + str.tostring(sr8, "#.0") + "\n"
+[b9, s9, br9, sr9, bl9, sl9] = request.security("OANDA:EURJPY", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b9
+    msg += "BULGE BUY EURJPY | SL " + str.tostring(bl9, "#.#####") + " | R/R " + str.tostring(br9, "#.0") + "\n"
+if s9
+    msg += "BULGE SELL EURJPY | SL " + str.tostring(sl9, "#.#####") + " | R/R " + str.tostring(sr9, "#.0") + "\n"
+[b10, s10, br10, sr10, bl10, sl10] = request.security("OANDA:EURCHF", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b10
+    msg += "BULGE BUY EURCHF | SL " + str.tostring(bl10, "#.#####") + " | R/R " + str.tostring(br10, "#.0") + "\n"
+if s10
+    msg += "BULGE SELL EURCHF | SL " + str.tostring(sl10, "#.#####") + " | R/R " + str.tostring(sr10, "#.0") + "\n"
+[b11, s11, br11, sr11, bl11, sl11] = request.security("OANDA:EURCAD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b11
+    msg += "BULGE BUY EURCAD | SL " + str.tostring(bl11, "#.#####") + " | R/R " + str.tostring(br11, "#.0") + "\n"
+if s11
+    msg += "BULGE SELL EURCAD | SL " + str.tostring(sl11, "#.#####") + " | R/R " + str.tostring(sr11, "#.0") + "\n"
+[b12, s12, br12, sr12, bl12, sl12] = request.security("OANDA:EURAUD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b12
+    msg += "BULGE BUY EURAUD | SL " + str.tostring(bl12, "#.#####") + " | R/R " + str.tostring(br12, "#.0") + "\n"
+if s12
+    msg += "BULGE SELL EURAUD | SL " + str.tostring(sl12, "#.#####") + " | R/R " + str.tostring(sr12, "#.0") + "\n"
+[b13, s13, br13, sr13, bl13, sl13] = request.security("OANDA:EURNZD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b13
+    msg += "BULGE BUY EURNZD | SL " + str.tostring(bl13, "#.#####") + " | R/R " + str.tostring(br13, "#.0") + "\n"
+if s13
+    msg += "BULGE SELL EURNZD | SL " + str.tostring(sl13, "#.#####") + " | R/R " + str.tostring(sr13, "#.0") + "\n"
+[b14, s14, br14, sr14, bl14, sl14] = request.security("OANDA:GBPJPY", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b14
+    msg += "BULGE BUY GBPJPY | SL " + str.tostring(bl14, "#.#####") + " | R/R " + str.tostring(br14, "#.0") + "\n"
+if s14
+    msg += "BULGE SELL GBPJPY | SL " + str.tostring(sl14, "#.#####") + " | R/R " + str.tostring(sr14, "#.0") + "\n"
+[b15, s15, br15, sr15, bl15, sl15] = request.security("OANDA:GBPCHF", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b15
+    msg += "BULGE BUY GBPCHF | SL " + str.tostring(bl15, "#.#####") + " | R/R " + str.tostring(br15, "#.0") + "\n"
+if s15
+    msg += "BULGE SELL GBPCHF | SL " + str.tostring(sl15, "#.#####") + " | R/R " + str.tostring(sr15, "#.0") + "\n"
+[b16, s16, br16, sr16, bl16, sl16] = request.security("OANDA:GBPCAD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b16
+    msg += "BULGE BUY GBPCAD | SL " + str.tostring(bl16, "#.#####") + " | R/R " + str.tostring(br16, "#.0") + "\n"
+if s16
+    msg += "BULGE SELL GBPCAD | SL " + str.tostring(sl16, "#.#####") + " | R/R " + str.tostring(sr16, "#.0") + "\n"
+[b17, s17, br17, sr17, bl17, sl17] = request.security("OANDA:GBPAUD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b17
+    msg += "BULGE BUY GBPAUD | SL " + str.tostring(bl17, "#.#####") + " | R/R " + str.tostring(br17, "#.0") + "\n"
+if s17
+    msg += "BULGE SELL GBPAUD | SL " + str.tostring(sl17, "#.#####") + " | R/R " + str.tostring(sr17, "#.0") + "\n"
+[b18, s18, br18, sr18, bl18, sl18] = request.security("OANDA:GBPNZD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b18
+    msg += "BULGE BUY GBPNZD | SL " + str.tostring(bl18, "#.#####") + " | R/R " + str.tostring(br18, "#.0") + "\n"
+if s18
+    msg += "BULGE SELL GBPNZD | SL " + str.tostring(sl18, "#.#####") + " | R/R " + str.tostring(sr18, "#.0") + "\n"
+[b19, s19, br19, sr19, bl19, sl19] = request.security("OANDA:AUDJPY", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b19
+    msg += "BULGE BUY AUDJPY | SL " + str.tostring(bl19, "#.#####") + " | R/R " + str.tostring(br19, "#.0") + "\n"
+if s19
+    msg += "BULGE SELL AUDJPY | SL " + str.tostring(sl19, "#.#####") + " | R/R " + str.tostring(sr19, "#.0") + "\n"
+[b20, s20, br20, sr20, bl20, sl20] = request.security("OANDA:AUDCHF", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b20
+    msg += "BULGE BUY AUDCHF | SL " + str.tostring(bl20, "#.#####") + " | R/R " + str.tostring(br20, "#.0") + "\n"
+if s20
+    msg += "BULGE SELL AUDCHF | SL " + str.tostring(sl20, "#.#####") + " | R/R " + str.tostring(sr20, "#.0") + "\n"
+[b21, s21, br21, sr21, bl21, sl21] = request.security("OANDA:AUDCAD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b21
+    msg += "BULGE BUY AUDCAD | SL " + str.tostring(bl21, "#.#####") + " | R/R " + str.tostring(br21, "#.0") + "\n"
+if s21
+    msg += "BULGE SELL AUDCAD | SL " + str.tostring(sl21, "#.#####") + " | R/R " + str.tostring(sr21, "#.0") + "\n"
+[b22, s22, br22, sr22, bl22, sl22] = request.security("OANDA:AUDNZD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b22
+    msg += "BULGE BUY AUDNZD | SL " + str.tostring(bl22, "#.#####") + " | R/R " + str.tostring(br22, "#.0") + "\n"
+if s22
+    msg += "BULGE SELL AUDNZD | SL " + str.tostring(sl22, "#.#####") + " | R/R " + str.tostring(sr22, "#.0") + "\n"
+[b23, s23, br23, sr23, bl23, sl23] = request.security("OANDA:CADJPY", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b23
+    msg += "BULGE BUY CADJPY | SL " + str.tostring(bl23, "#.#####") + " | R/R " + str.tostring(br23, "#.0") + "\n"
+if s23
+    msg += "BULGE SELL CADJPY | SL " + str.tostring(sl23, "#.#####") + " | R/R " + str.tostring(sr23, "#.0") + "\n"
+[b24, s24, br24, sr24, bl24, sl24] = request.security("OANDA:CADCHF", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b24
+    msg += "BULGE BUY CADCHF | SL " + str.tostring(bl24, "#.#####") + " | R/R " + str.tostring(br24, "#.0") + "\n"
+if s24
+    msg += "BULGE SELL CADCHF | SL " + str.tostring(sl24, "#.#####") + " | R/R " + str.tostring(sr24, "#.0") + "\n"
+[b25, s25, br25, sr25, bl25, sl25] = request.security("OANDA:CHFJPY", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b25
+    msg += "BULGE BUY CHFJPY | SL " + str.tostring(bl25, "#.#####") + " | R/R " + str.tostring(br25, "#.0") + "\n"
+if s25
+    msg += "BULGE SELL CHFJPY | SL " + str.tostring(sl25, "#.#####") + " | R/R " + str.tostring(sr25, "#.0") + "\n"
+[b26, s26, br26, sr26, bl26, sl26] = request.security("OANDA:NZDJPY", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b26
+    msg += "BULGE BUY NZDJPY | SL " + str.tostring(bl26, "#.#####") + " | R/R " + str.tostring(br26, "#.0") + "\n"
+if s26
+    msg += "BULGE SELL NZDJPY | SL " + str.tostring(sl26, "#.#####") + " | R/R " + str.tostring(sr26, "#.0") + "\n"
+[b27, s27, br27, sr27, bl27, sl27] = request.security("OANDA:NZDCHF", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b27
+    msg += "BULGE BUY NZDCHF | SL " + str.tostring(bl27, "#.#####") + " | R/R " + str.tostring(br27, "#.0") + "\n"
+if s27
+    msg += "BULGE SELL NZDCHF | SL " + str.tostring(sl27, "#.#####") + " | R/R " + str.tostring(sr27, "#.0") + "\n"
+[b28, s28, br28, sr28, bl28, sl28] = request.security("OANDA:NZDCAD", timeframe.period, f_sig(), lookahead=barmerge.lookahead_off)
+if b28
+    msg += "BULGE BUY NZDCAD | SL " + str.tostring(bl28, "#.#####") + " | R/R " + str.tostring(br28, "#.0") + "\n"
+if s28
+    msg += "BULGE SELL NZDCAD | SL " + str.tostring(sl28, "#.#####") + " | R/R " + str.tostring(sr28, "#.0") + "\n"
+
+if msg != ""
+    alert(msg, alert.freq_once_per_bar_close)
+
+plot(na)
