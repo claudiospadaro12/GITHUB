@@ -1,0 +1,67 @@
+job;file;simbolo;tf;provenienza;pf_excel;op_excel;dd_excel;origine
+K001;K001_AUDJPY_D1_DaytradePro_AUDJPY.set;AUDJPY;D1;pacchetto_V9.8_di_Wim;1.82;93;2.19;DaytradePro_AUDJPY.set
+K002;K002_CHFJPY_D1_DaytradePro_CHFJPY.set;CHFJPY;D1;pacchetto_V9.8_di_Wim;1.88;209;1.59;DaytradePro_CHFJPY.set
+K003;K003_EURAUD_D1_DaytradePro_EURAUD.set;EURAUD;D1;pacchetto_V9.8_di_Wim;1.37;49;1.7;DaytradePro_EURAUD.set
+K004;K004_EURNZD_D1_DaytradePro_EURNZD.set;EURNZD;D1;pacchetto_V9.8_di_Wim;1.66;269;1.73;DaytradePro_EURNZD.set
+K005;K005_EURUSD_D1_9637068_storyG_eurusd_f356_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;2.12;60;1.47;9637068_storyG_eurusd f356 d1 storyg.set
+K006;K006_EURUSD_D1_9637069_storyG_eurusd_g357_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;2.91;31;1.31;9637069_storyG_eurusd g357 d1 storyg.set
+K007;K007_EURUSD_H4_9637070_storyG_eurusd_h368_h4_storyg.set;EURUSD;H4;pacchetto_V9.8_di_Wim;1.36;39;0.94;9637070_storyG_eurusd h368 h4 storyg.set
+K008;K008_EURUSD_D1_9637071_storyG_eurusd_o3515_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;2.3;94;2.34;9637071_storyG_eurusd o3515 d1 storyg.set
+K009;K009_EURUSD_D1_9637072_storyG_eurusd_p3516_d1_storyg.set;EURUSD;D1;pacchetto_V9.8_di_Wim;1.87;81;1.14;9637072_storyG_eurusd p3516 d1 storyg.set
+K010;K010_USDJPY_D1_9637073_storyG_usdjpy_a341_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.12;132;2.17;9637073_storyG_usdjpy a341 d1 storyg.set
+K011;K011_USDJPY_D1_9637074_storyG_usdjpy_d343_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;0.85;50;4.72;9637074_storyG_usdjpy d343 d1 storyg.set
+K012;K012_USDJPY_D1_9637075_storyG_usdjpy_e345_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;0.91;37;3.63;9637075_storyG_usdjpy e345 d1 storyg.set
+K013;K013_USDJPY_D1_9637076_storyG_usdjpy_g347_d1_storyg.set;USDJPY;D1;pacchetto_V9.8_di_Wim;1.31;91;2.44;9637076_storyG_usdjpy g347 d1 storyg.set
+K014;K014_XAUUSD_H1_9637039_Till_UBS-XAUUSD-H1-H1E04.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.74;625;6.19;9637039_Till_UBS-XAUUSD-H1-H1E04.set
+K015;K015_XAUUSD_H4_9637042_Till_UBS-XAUUSD-H4-H4A05.set;XAUUSD;H4;pacchetto_V9.8_di_Wim;1.64;513;3.37;9637042_Till_UBS-XAUUSD-H4-H4A05.set
+K016;K016_XAUUSD_D1_9637045_basa_gold_d1_-_sr_-_2008-2024_-_11.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.41;335;12.74;9637045_basa_gold d1 - sr - 2008-2024 - 11.set
+K017;K017_XAUUSD_D1_9637045_basa_gold_d1_-_sr_-_2008-2024_-_11.set;XAUUSD;D1;pacchetto_set_di_Wim;1.41;335;12.74;9637045_basa_gold d1 - sr - 2008-2024 - 11.set
+K018;K018_XAUUSD_D1_9637046_basa_gold_d1_-_sr_-_2008-2024_-_14.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.94;171;23.41;9637046_basa_gold d1 - sr - 2008-2024 - 14.set
+K019;K019_XAUUSD_D1_9637046_basa_gold_d1_-_sr_-_2008-2024_-_14.set;XAUUSD;D1;pacchetto_set_di_Wim;1.94;171;23.41;9637046_basa_gold d1 - sr - 2008-2024 - 14.set
+K020;K020_XAUUSD_D1_9637047_basa_gold_d1_-_sr_-_2008-2024_-_5.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;2.07;248;14.52;9637047_basa_gold d1 - sr - 2008-2024 - 5.set
+K021;K021_XAUUSD_D1_9637047_basa_gold_d1_-_sr_-_2008-2024_-_5.set;XAUUSD;D1;pacchetto_set_di_Wim;2.07;248;14.52;9637047_basa_gold d1 - sr - 2008-2024 - 5.set
+K022;K022_XAUUSD_D1_9637048_basa_gold_d1_-_sr_-_2008-2024_-_9.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.63;211;20.43;9637048_basa_gold d1 - sr - 2008-2024 - 9.set
+K023;K023_XAUUSD_D1_9637048_basa_gold_d1_-_sr_-_2008-2024_-_9.set;XAUUSD;D1;pacchetto_set_di_Wim;1.63;211;20.43;9637048_basa_gold d1 - sr - 2008-2024 - 9.set
+K024;K024_XAUUSD_H1_9637049_basa_xauusd_h1_-_sr_-_scalp_-_2010-2020_-_1.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.1;749;6;9637049_basa_xauusd h1 - sr - scalp - 2010-2020 - 1.set
+K025;K025_XAUUSD_H1_9637050_basa_xauusd_h1_-_sr_-_scalp_-_2010-2020_-_11.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.05;1800;10.58;9637050_basa_xauusd h1 - sr - scalp - 2010-2020 - 11.set
+K026;K026_XAUUSD_H1_9637051_basa_xauusd_h1_-_sr_-_scalp_-_2010-2020_-_5.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.44;395;3.83;9637051_basa_xauusd h1 - sr - scalp - 2010-2020 - 5.set
+K027;K027_XAUUSD_H1_9637052_basa_xauusd_h1_-_sr_-_scalp_-_2010-2020_-_9.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.21;921;6.47;9637052_basa_xauusd h1 - sr - scalp - 2010-2020 - 9.set
+K028;K028_XAUUSD_H1_9637053_basa_xauusd-h1-2007-2023-1.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.37;715;2.99;9637053_basa_xauusd-h1-2007-2023-1.set
+K029;K029_XAUUSD_H1_9637054_basa_xauusd-h1-2007-2023-2.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.42;620;4.76;9637054_basa_xauusd-h1-2007-2023-2.set
+K030;K030_XAUUSD_H1_9637055_basa_xauusd-h1-2007-2023-3.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.66;539;2.44;9637055_basa_xauusd-h1-2007-2023-3.set
+K031;K031_XAUUSD_H1_9637056_basa_xauusd-h1-2007-2023-4.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.47;398;3.78;9637056_basa_xauusd-h1-2007-2023-4.set
+K032;K032_XAUUSD_D1_DaytradePro_XAUUSD.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.67;278;1.58;DaytradePro_XAUUSD.set
+K033;K033_XAUUSD_H1_MT4A.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.62;731;3.72;MT4A.set
+K034;K034_XAUUSD_H1_MT4_F.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.31;279;3.46;MT4_F.set
+K035;K035_XAUUSD_H1_MT5_A.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.62;544;2.5;MT5_A.set
+K036;K036_XAUUSD_H1_MT5_B.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;3.01;285;1.23;MT5_B.set
+K037;K037_XAUUSD_H1_MT5_C.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.02;2521;13.92;MT5_C.set
+K038;K038_XAUUSD_H1_MT5_D.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.02;285;11.29;MT5_D.set
+K039;K039_XAUUSD_H1_MT5_E.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.04;285;11.15;MT5_E.set
+K040;K040_XAUUSD_H1_MT5_F.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.79;285;2.82;MT5_F.set
+K041;K041_XAUUSD_D1_MT5_longterm_A.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;2.31;185;4.06;MT5_longterm_A.set
+K042;K042_XAUUSD_D1_MT5_longterm_C.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.73;384;1.56;MT5_longterm_C.set
+K043;K043_XAUUSD_H1_MT5_longterm_D.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.86;1014;0.83;MT5_longterm_D.set
+K044;K044_XAUUSD_H1_MT5_longterm_E.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.93;1286;0.42;MT5_longterm_E.set
+K045;K045_XAUUSD_H1_MT5_longterm_F.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.56;839;1.03;MT5_longterm_F.set
+K046;K046_XAUUSD_H1_MT5_longterm_H.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.68;848;1.27;MT5_longterm_H.set
+K047;K047_XAUUSD_H1_MT5_longterm_I.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;2.05;558;0.54;MT5_longterm_I.set
+K048;K048_XAUUSD_H1_MT5_longterm_J.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.78;690;0.35;MT5_longterm_J.set
+K049;K049_XAUUSD_H1_MT5_longterm_L.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.55;1032;0.53;MT5_longterm_L.set
+K050;K050_XAUUSD_H1_MT5_longterm_M.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.64;960;1.92;MT5_longterm_M.set
+K051;K051_XAUUSD_H1_MT5_longterm_O.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.81;832;1.6;MT5_longterm_O.set
+K052;K052_XAUUSD_H1_MT5_longterm_P.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.39;1693;2.12;MT5_longterm_P.set
+K053;K053_XAUUSD_H1_MT5_longterm_Q.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.51;2014;1.48;MT5_longterm_Q.set
+K054;K054_XAUUSD_H1_MT5_longterm_S.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.54;1343;1.3;MT5_longterm_S.set
+K055;K055_XAUUSD_H1_MT5_longterm_T.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.63;1298;1.01;MT5_longterm_T.set
+K056;K056_XAUUSD_H1_MT5_longterm_U.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.52;1851;1.3;MT5_longterm_U.set
+K057;K057_XAUUSD_H1_ScalpH1_C.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.89;776;16.76;ScalpH1_C.set
+K058;K058_XAUUSD_D1_dailyF.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;3;100;2.83;dailyF.set
+K059;K059_XAUUSD_D1_dailyG.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.47;279;3.63;dailyG.set
+K060;K060_XAUUSD_D1_dailyJ.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.43;283;2.62;dailyJ.set
+K061;K061_XAUUSD_D1_dailyL.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.81;266;1.72;dailyL.set
+K062;K062_XAUUSD_D1_strategy2_Daily.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;2.58;112;3.24;strategy2_Daily.set
+K063;K063_XAUUSD_D1_strategy3_Daily.set;XAUUSD;D1;pacchetto_V9.8_di_Wim;1.74;168;4.2;strategy3_Daily.set
+K064;K064_XAUUSD_H4_strategy4_H4.set;XAUUSD;H4;pacchetto_V9.8_di_Wim;1.82;331;3.07;strategy4_H4.set
+K065;K065_XAUUSD_H1_strategy5_H1.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.6;776;3.63;strategy5_H1.set
+K066;K066_XAUUSD_H1_strategy6_H1.set;XAUUSD;H1;pacchetto_V9.8_di_Wim;1.7;882;2.23;strategy6_H1.set
