@@ -1,14 +1,14 @@
-# Report finale (PROVVISORIO: manca la verifica di A6), Sala del Consiglio, 14 EA nuove, 26/11/2026
+# Report finale, Sala del Consiglio, 14 EA nuove, 26/11/2026 (verificato da A6)
 
-**Stato:** A1-A5 hanno consegnato le 14 schede (`agents/A1..A5/`). **A6 (verificatore) non ha ancora consegnato**: le citazioni file:riga e le classi sotto sono dichiarazioni dei revisori, NON verificate. Aggiornare questo file quando arriva `agents/A6/VERIFICA.md`. Nessun backtest eseguito: tutto e' lettura del codice e piano di test. Probabilita' = stima a priori dei revisori di superare il criterio scritto prima.
+**Stato:** A1-A5 hanno consegnato le 14 schede; **A6 ha ricontrollato 155 citazioni di codice (tutte e 14 le EA, 9-14 per EA) + 9 dichiarazioni su altri file: 162 CONFERMATE, 2 ERRATE, 0 NON TROVATE** (`agents/A6/VERIFICA.md`). Le due errate: LiquiditySweep cita r.152-155 (sono r.148-151, sostanza vera); CanaleLento cita il valore 0,44 dal file sbagliato (esiste in `SUPERTREND_CORRELAZIONE_CRITERI_2026-11-21.md`). Nessun backtest eseguito: tutto e' lettura del codice e piano di test. Probabilita' = stima a priori dei revisori di superare il criterio scritto prima.
 
 | # | EA | Classe | Difetto principale | Primo test (criterio scritto prima) | Prob. |
 |---|---|---|---|---|---|
 | 1 | PunteLarry (oro H1) | **A** | spread/commissioni nel P/L; D1 tagliato a mezzanotte server (BCM non trasferibile su FTMO); gia' misurato: PF 1,43/1,66/1,28, tick 1,44, ~10-15 op/anno, p~0,06, EURUSD 0/3 | argento (XAGUSD) con i default: PF >= 1,20 in >= 2 finestre su 3, >= 8 op per finestra | 25% |
 | 2 | FvgRetest | **A** | filtro spread spento (InpMaxSpread=0); sui `_EXT` spread 0 e tickvol 1; manca l'include Guardian | NASUSD_EXT M15 IS 2010-19, OOS 2020-23, costo fisso: IS PF >= 1,30, OOS >= 1,20, >= 150 trade | n.d. (ablazione 25%) |
-| 3 | TurnaroundTuesday | **A** (con 3 correzioni) | intestazione "server = IT - 1" vero solo in ora legale: ora per stagione; riga 00:00 oro FTMO; lotto riportato al minimo (r.682) | motore nudo con ora per stagione e costo fisso; placebo mercoledi'/giovedi'/venerdi' | prior basso |
+| 3 | TurnaroundTuesday | **A solo su altri mercati; oro CHIUSO (A6)** | intestazione "server = IT - 1" vero solo in ora legale: ora per stagione; riga 00:00 oro FTMO; lotto riportato al minimo (r.682) | motore nudo con ora per stagione e costo fisso; placebo mercoledi'/giovedi'/venerdi' | prior basso. **Sul codice identico alla copia `_F1` del repo l'oro e' gia' misurato: PF 0,84 e 0,74 (NON REGGE, `FAMIGLIA1_ORO_CRITERI`)** |
 | 4 | OutOfNoise | **A con protocollo** | sessione fissa DAX 08:00-16:30 / US 14:30-21:00 corretta solo in estate | baseline per stagione su dati nativi 2024-26 (periodo corto, nessun fuori campione) | 6% |
-| 5 | LiquiditySweep | **A** | BE a 1R acceso di default; nessun pavimento sullo stop (con buffer 0 il lotto puo' esplodere); riga 00:00 oro FTMO; "fade falso breakout" gia' chiuso | oro BCM IS 2013-22, OOS 2004-12, HO 2023-24, BE spento | 6% |
+| 5 | LiquiditySweep | **A solo su altri mercati; oro CHIUSO (A6)** | BE a 1R acceso di default; nessun pavimento sullo stop (con buffer 0 il lotto puo' esplodere); riga 00:00 oro FTMO; "fade falso breakout" gia' chiuso. **Oro gia' misurato (codice = copia `_F1`): PF 0,79 e 0,71, NON REGGE** | oro BCM IS 2013-22, OOS 2004-12, HO 2023-24, BE spento | 6% |
 | 6 | MeanRevert | **A** | nessuna uscita a tempo (swap, gap weekend), nessun tetto giornaliero | baseline su 28 cross + oro + 3 indici, IS/OOS/HO con costi | 4% |
 | 7 | Gold_Ichimoku_TK_ATR_EA | **A (priorita' bassa)** | `PositionSelect(_Symbol)` (r.672) con altri EA sull'oro su conto hedging; nessuno stop minimo broker; swap long BCM; mai misurato; "VALIDATA" nell'intestazione senza riscontro | 2015-23 PF >= 1,20, >= 100 op; 2005-14 PF >= 1,0; hold-out chiuso | 22% (REGGE completo 5%) |
 | 8 | CanaleLento | **A (bassa)** | pulito; Donchian 55/20 D1 long+short; long-only gia' 0/34; sull'oro = motore di GoldenZoe (rho attesa 0,5-0,8, INFERENZA) | misura Python economica di short e uscita a 20 | basso |
@@ -29,5 +29,11 @@
 ## Ordine di misura proposto (economico prima)
 a) In Python, senza PC di prova: CanaleLento (short + uscita a 20), CrossEma (cella nuda), conteggio setup di VwapRevert, ablazione di ChaosLyapunov. b) Nel tester: FvgRetest e TurnaroundTuesday (con ora per stagione, costo fisso, riga 00:00 scartata), poi PunteLarry su argento e MeanRevert. c) Le classi B solo dopo le correzioni.
 
+## Verifica indipendente (A6)
+- **Incoerenza trovata:** TurnaroundTuesday e LiquiditySweep (classe A dei revisori) ignoravano misure gia' nel repo: i sorgenti sono identici alle copie `_F1`, e sull'oro sono NON REGGE. Anche `RIANALISI_EA_NOSTRI_2026-11-26.md` (riga A9) li dava come mai misurati: **errore mio, corretto qui**. Restano misurabili su altri mercati (indici, forex), non sull'oro.
+- **Difetti nuovi:** ChaosLyapunov, gate 'non caos' fail-open (casi degeneri danno LLE 0.0, il gate blocca solo se LLE > soglia: passa): gravita' media, falsa i test. FvgRetest r.947 e CrossEma r.402: se il TP cade dentro lo stops level, l'EA lo toglie in silenzio e apre con il solo SL (minore).
+- **Altre incoerenze minori:** OutOfNoise (A) e VwapRevert (B) hanno difetti dello stesso tipo senza criterio dichiarato; Ichimoku ha un difetto etichettato 'falsa i test' ma classe senza correzioni; l'include `ABTG_PausaGuardian.mqh` assente ha gravita' diverse tra le schede.
+- **Affidabilita' revisori:** A1 alta (unico ad aver incrociato le misure del repo), A2 alta sul codice, A3 medio-alta, A4 alta sul codice ma lacuna sulle misure esistenti, A5 alta.
+
 ## Limiti dichiarati
-Nessun backtest; citazioni non ancora verificate da A6; le probabilita' sono stime a priori; sorgenti NON nel repo (pubblico).
+Nessun backtest; le probabilita' sono stime a priori; sorgenti NON nel repo (pubblico).

@@ -38,3 +38,7 @@ AvvisoBulge, TradeExporter, ManagerMediana, Apertura_Study_EA, CLAU12_TESTORARI,
 
 ## Aspettativa onesta (dal piano, gia' scritta il 16/11)
 "Pochi candidati reali, ma diversi da Wim": 55%; "nessuno": 30%; "molti": 15%. Gran parte della famiglia nostra e' gia' chiusa o ha dati insufficienti; la coda utile e' corta (circa 8-10 EA).
+
+
+## Errata (26/11, dopo la verifica A6)
+Riga A9: **TurnaroundTuesday e LiquiditySweep NON sono 'mai misurati'**: i sorgenti sono identici alle copie `_F1` del repo e sull'oro sono NON REGGE (TurnaroundTuesday PF 0,84 e 0,74; LiquiditySweep PF 0,79 e 0,71, `FAMIGLIA1_ORO_CRITERI_2026-11-18.md`). Restano non misurati su indici e forex. Vedi `sala-del-consiglio/ea_famiglie_nuove/final/REPORT.md`.
