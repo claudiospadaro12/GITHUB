@@ -7,7 +7,7 @@ a = s.index("U2SETS = ["); b = s.index("N = len(runs)")
 import csv as _csv
 _J=list(_csv.DictReader(open('../report/UBS_NOTTE/JOBS_R1b.csv',encoding='utf-8'),delimiter=';'))
 IMP = {r['job']: '' for r in _J}
-FX = [('UBS_R1B_SET.zip', '2020', '2026.11.01', r['tf'], r['file'], r['simbolo'], r['job']) for r in _J]
+FX = [('UBS_R1B_SET.zip', ('2020' if r['tf'] == 'D1' else '2025'), '2026.11.01', r['tf'], r['file'], r['simbolo'], r['job']) for r in _J]
 assert len(FX) == 66
 nuovo = ("IMP = " + repr(IMP) + "\n"
          "ZNEW = 'UBS_R1B_SET.zip'\n"
@@ -15,7 +15,7 @@ nuovo = ("IMP = " + repr(IMP) + "\n"
          "LOTS = {}\n"
          "SYMS = []; MODS = []\n"
          "for zipn, anno, fine, per, rel, sym, tag in FX:\n"
-         "    for mod in ('1',):\n"
+         "    for mod in (('1',) if per == 'D1' else ('4',)):\n"
          "        runs.append((EA, zipn, anno, fine, per, rel, 'Risk=0:i;StartLots=0.1:d;ForceSymbol=' + sym + ':s;' + IMP[tag], 'UBSR1B_%s_M%s_100000_%s' % (tag, mod, anno), 100000)); SYMS.append(sym); MODS.append(mod)\n")
 s = s[:a] + nuovo + s[b:]
 assert s.count("q(['1'] * N)") == 1
@@ -26,10 +26,10 @@ assert s.count("assert N == 18") == 1
 s = s.replace("assert N == 18", "assert N == 66")
 s = s.replace("RIGA_LANCIA_UBS_U2.txt", "RIGA_LANCIA_UBS_R1B.txt").replace("ANNO_ORO_GRADINI_UBSU2_", "ANNO_ORO_GRADINI_UBSR1B_")
 i = s.index("testa = ("); j = s.index('t = t[:i] + "Write-Host')
-testa = ('testa = ("UBS REPLICA NOTTURNA R1b: 66 set ORO (53) e forex rimasti dell Excel di Wim e degli utenti provati COSI COME SONO, senza ottimizzare, XAUUSD escluso, dal 01/01/2020 al 31/10/2026 (il periodo dell Excel dei PF), Modello 1, deposito 100000 EUR, lotto fisso 0,1, EA Ultimate_Breakout_EA_WSC_V9.5. Si confronta il PF nostro con quello dichiarato nell Excel (criteri: report/UBS_REPLICA_CRITERI_2026-11-25.md). Serve UBS_R1B_SET.zip sul Desktop. Mi mandi lo zip ANNO_ORO_GRADINI_UBSNOTTE_<data>. Il terminale PRINCIPALE BCM CHIUSO, il PC acceso e in carica tutta la notte, niente in stop o sospensione. EA e set di Wim: ricerca, fuori dal progetto prop. NON collaudata da agenti: passata SOLO dal cancello meccanico.")\n')
+testa = ('testa = ("UBS REPLICA NOTTURNA R1b: 66 set ORO (53) e forex rimasti dell Excel di Wim e degli utenti provati COSI COME SONO, senza ottimizzare, XAUUSD escluso, D1: 2020-2026 Modello 1; H1/H4: 2025-2026 Modello 4 (tick reali), deposito 100000 EUR, lotto fisso 0,1, EA Ultimate_Breakout_EA_WSC_V9.5. Si confronta il PF nostro con quello dichiarato nell Excel (criteri: report/UBS_REPLICA_CRITERI_2026-11-25.md). Serve UBS_R1B_SET.zip sul Desktop. Mi mandi lo zip ANNO_ORO_GRADINI_UBSNOTTE_<data>. Il terminale PRINCIPALE BCM CHIUSO, il PC acceso e in carica tutta la notte, niente in stop o sospensione. EA e set di Wim: ricerca, fuori dal progetto prop. NON collaudata da agenti: passata SOLO dal cancello meccanico.")\n')
 s = s[:i] + testa + s[j:]
 pass
-s = s.replace("TEMPO: circa 1-3 ore (\" + str(N) + \" passate: 9 set su 13 anni, 2 bracci;", "TEMPO: 66 passate su 6,8 anni a barre da 1 minuto: da 3 a 15 minuti ciascuna, stima 5-12 ore (tutta la notte), timeout 150 minuti per passata; (\" + str(N) + \" passate;")
+s = s.replace("TEMPO: circa 1-3 ore (\" + str(N) + \" passate: 9 set su 13 anni, 2 bracci;", "TEMPO: 66 passate: D1 a barre da 1 minuto 2020-2026 e H1/H4 a TICK REALI 2025-2026 (le H1/H4 a 1 minuto sono gonfiate): stima 8-16 ore (tutta la notte), timeout 180 minuti per passata; (\" + str(N) + \" passate;")
 sys.argv = ['gen_riga_ubs_cft_tmp.py'] + sys.argv[1:]
 exec(compile(s, 'gen_riga_ubs_cp_tmp', 'exec'))
 # --- patch post-generazione: ricerca del set per PERCORSO (GOLDTRADEPRO_E.set esiste due volte in V9.0), controllo per ogni passata sul SUO zip, entrambi gli zip obbligatori
@@ -72,7 +72,7 @@ print('skip-dopo-2-KO disattivato')
 
 _t5 = open('righe/RIGA_LANCIA_UBS_R1B.txt', encoding='ascii').read()
 assert _t5.count("$TO=300;") == 1
-_t5 = _t5.replace("$TO=300;", "$TO=150;").replace("timeout 300 minuti", "timeout 150 minuti")
+_t5 = _t5.replace("$TO=300;", "$TO=180;").replace("timeout 300 minuti", "timeout 180 minuti")
 open('righe/RIGA_LANCIA_UBS_R1B.txt', 'w', encoding='ascii').write(_t5)
 print('TO 40 ok')
 
