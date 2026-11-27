@@ -1,0 +1,30 @@
+{
+  "_nota": "Tutte le soglie del triage. Modificarle PRIMA di vedere i risultati di un EA, mai dopo.",
+  "split_is_frazione": 0.60,
+  "costo_moltiplicatore": 1.0,
+  "diagnosi": {
+    "min_trade_cella": 30,
+    "ore_tossiche_pf_sotto": 0.80,
+    "finestra_sessione_max_ore": 4,
+    "tp_griglia_R": [0.5, 0.75, 1.0, 1.5, 2.0, 3.0],
+    "inversione_se_pf_sotto": 0.70,
+    "inversione_pf_sospetto_sopra": 1.20
+  },
+  "kill_switch": {
+    "pf_minimo_dopo_leva": 1.05,
+    "min_trade_oos_dopo_leva": 100,
+    "miglioramento_oos_minimo_pf": 0.05,
+    "movimento_lordo_vs_costi_min": 1.0,
+    "pf_baseline_marginale_da": 1.00
+  },
+  "verdetto": {
+    "pf_is_min": 1.25,
+    "pf_oos_min": 1.15,
+    "min_trade_totali": 200,
+    "anni_positivi_min_frazione": 0.60,
+    "plateau_vicini_pf_sopra": 1.00,
+    "plateau_vicini_frazione_min": 0.80,
+    "dd_giornaliero_max_pct": 4.0,
+    "dd_totale_max_pct": 8.0
+  }
+}

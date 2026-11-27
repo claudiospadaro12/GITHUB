@@ -1,0 +1,97 @@
+{
+ "esito": "SCARTA",
+ "motivo": "nessuna leva porta il PF OOS a >= 1.05 con almeno 100 trade OOS; movimento lordo medio (+0.014R) inferiore ai costi (0.035R)",
+ "baseline_pf": 0.9191894758209965,
+ "baseline_oos_pf": 0.8721391478772366,
+ "n_leve_testate": 8,
+ "leve": [
+  {
+   "leva": "solo_long",
+   "descrizione": "solo Long",
+   "n_is": 2113,
+   "pf_is": 0.930102750875364,
+   "n_oos": 1412,
+   "pf_oos": 0.8279872408834839,
+   "lordo_medio_R": 0.005036502207987579,
+   "costo_medio_R": 0.03513970896029678,
+   "passa": false
+  },
+  {
+   "leva": "solo_short",
+   "descrizione": "solo Short",
+   "n_is": 2067,
+   "pf_is": 0.9787576891756393,
+   "n_oos": 1375,
+   "pf_oos": 0.920042923224024,
+   "lordo_medio_R": 0.0228797954107262,
+   "costo_medio_R": 0.03457461484407591,
+   "passa": false
+  },
+  {
+   "leva": "solo_tag_CONT",
+   "descrizione": "solo segmento CONT",
+   "n_is": 4061,
+   "pf_is": 0.9511084499472787,
+   "n_oos": 2697,
+   "pf_oos": 0.8674704451902098,
+   "lordo_medio_R": 0.012776172219901884,
+   "costo_medio_R": 0.03488015449995494,
+   "passa": false
+  },
+  {
+   "leva": "solo_tag_INV",
+   "descrizione": "solo segmento INV",
+   "n_is": 119,
+   "pf_is": 1.099660928412,
+   "n_oos": 90,
+   "pf_oos": 1.0596173122354642,
+   "lordo_medio_R": 0.0486342307405687,
+   "costo_medio_R": 0.03422590558688954,
+   "passa": false
+  },
+  {
+   "leva": "senza_finestra_oraria",
+   "descrizione": "togliere ore [6, 7, 8, 9] (server, scelta su IS)",
+   "n_is": 3363,
+   "pf_is": 0.9935319102200543,
+   "n_oos": 2391,
+   "pf_oos": 0.8565285280925444,
+   "lordo_medio_R": 0.01756838403965917,
+   "costo_medio_R": 0.03503716335030869,
+   "passa": false
+  },
+  {
+   "leva": "solo_simboli_pf_is_ge_1",
+   "descrizione": "solo simboli con PF IS>=1: ['EURGBP', 'GBPJPY', 'EURUSD', 'USDJPY', 'USDCAD']",
+   "n_is": 1515,
+   "pf_is": 1.133575394401447,
+   "n_oos": 1164,
+   "pf_oos": 0.8891656054479667,
+   "lordo_medio_R": 0.03663990499966543,
+   "costo_medio_R": 0.03292190456319401,
+   "passa": false
+  },
+  {
+   "leva": "senza_terzile_vol_peggiore",
+   "descrizione": "togliere il terzile di volatilita 2 (0=bassa,2=alta), scelto su IS",
+   "n_is": 2393,
+   "pf_is": 1.0247169438349804,
+   "n_oos": 2251,
+   "pf_oos": 0.8707107296939479,
+   "lordo_medio_R": 0.026008581904091763,
+   "costo_medio_R": 0.04001016414444272,
+   "passa": false
+  },
+  {
+   "leva": "tp_a_0.5R",
+   "descrizione": "take profit a 0.5R da MAE/MFE (scelto su IS, stima prudente)",
+   "n_is": 4180,
+   "pf_is": 1.0184537184638027,
+   "n_oos": 2787,
+   "pf_oos": 0.9127789767421016,
+   "lordo_medio_R": null,
+   "costo_medio_R": null,
+   "passa": false
+  }
+ ]
+}
