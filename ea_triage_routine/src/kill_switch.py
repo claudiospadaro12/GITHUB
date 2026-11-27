@@ -62,6 +62,9 @@ def evaluate(d, cfg):
         res.append(dict(leva='tp_a_%gR' % k, descrizione='take profit a %gR da MAE/MFE (scelto su IS, stima prudente)' % k, n_is=len(a), pf_is=pf(a), n_oos=len(b), pf_oos=pf(b), lordo_medio_R=None, costo_medio_R=None, passa=bool(ok)))
     return res
 def decide(d, cfg, res):
+    v = cfg['verdetto']; bi, bo = pf(d.net[d.IS]), pf(d.net[~d.IS])
+    if bi >= v['pf_is_min'] and bo >= v['pf_oos_min'] and len(d) >= v['min_trade_totali']:
+        return 'BASELINE_OK', 'PF IS %.2f >= %.2f e PF OOS %.2f >= %.2f con %d trade: l\'EA non ha bisogno di recupero. Va al verdetto (plateau, anni positivi, DD prop), non si ottimizza.' % (bi, v['pf_is_min'], bo, v['pf_oos_min'], len(d))
     base = pf(d.net); winners = [r for r in res if r['passa']]
     if winners: return 'PROCEDI', 'Leve che reggono sull\'OOS: ' + ', '.join(r['leva'] for r in winners)
     why = ['nessuna leva porta il PF OOS a >= %.2f con almeno %d trade OOS' % (cfg['kill_switch']['pf_minimo_dopo_leva'], cfg['kill_switch']['min_trade_oos_dopo_leva'])]
@@ -75,4 +78,4 @@ if __name__ == '__main__':
     L += ['| %s | %d | %.2f | %d | %.2f | %s |' % (r['descrizione'], r['n_is'], r['pf_is'], r['n_oos'], r['pf_oos'], 'SI' if r['passa'] else 'no') for r in res]
     L += ['', 'Nota: con %d leve testate un passaggio isolato puo' ' essere caso; in tal caso lo STEP 3 deve confermarlo con IS/OOS e plateau.' % len(res)]
     open(os.path.join(out, 'kill_switch.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
-    print(('STOP' if v == 'SCARTA' else 'VAI'), v, '-', why)
+    print({'SCARTA': 'STOP', 'PROCEDI': 'VAI', 'BASELINE_OK': 'OK'}[v], v, '-', why)

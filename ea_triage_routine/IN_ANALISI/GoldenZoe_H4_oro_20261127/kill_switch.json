@@ -1,0 +1,64 @@
+{
+ "esito": "BASELINE_OK",
+ "motivo": "PF IS 1.35 >= 1.25 e PF OOS 1.74 >= 1.15 con 381 trade: l'EA non ha bisogno di recupero. Va al verdetto (plateau, anni positivi, DD prop), non si ottimizza.",
+ "baseline_pf": 1.519636704019368,
+ "baseline_oos_pf": 1.7407089613976807,
+ "n_leve_testate": 5,
+ "leve": [
+  {
+   "leva": "lato:solo_long",
+   "descrizione": "solo Long",
+   "n_is": 229,
+   "pf_is": 1.3481225467159828,
+   "n_oos": 152,
+   "pf_oos": 1.7407089613976807,
+   "lordo_medio_R": 0.22591280035475275,
+   "costo_medio_R": 0.06621237458651291,
+   "passa": false
+  },
+  {
+   "leva": "lato:solo_short",
+   "descrizione": "solo Short [NON scelta su IS: solo informativa]",
+   "n_is": 0,
+   "pf_is": NaN,
+   "n_oos": 0,
+   "pf_oos": NaN,
+   "lordo_medio_R": NaN,
+   "costo_medio_R": NaN,
+   "passa": false
+  },
+  {
+   "leva": "senza_finestra_oraria",
+   "descrizione": "togliere ore [8] (server, scelta su IS)",
+   "n_is": 208,
+   "pf_is": 1.4310722687949569,
+   "n_oos": 143,
+   "pf_oos": 1.7682874621089797,
+   "lordo_medio_R": 0.24483141116744958,
+   "costo_medio_R": 0.06687890899074948,
+   "passa": false
+  },
+  {
+   "leva": "senza_terzile_vol_peggiore",
+   "descrizione": "togliere il terzile di volatilita 2 (0=bassa,2=alta), scelto su IS",
+   "n_is": 141,
+   "pf_is": 1.5949727357755419,
+   "n_oos": 113,
+   "pf_oos": 1.7980132947803504,
+   "lordo_medio_R": 0.28370889527791127,
+   "costo_medio_R": 0.07816252260629797,
+   "passa": true
+  },
+  {
+   "leva": "tp_a_1R",
+   "descrizione": "take profit a 1R da MAE/MFE (scelto su IS, stima prudente)",
+   "n_is": 229,
+   "pf_is": 1.5230624632348266,
+   "n_oos": 152,
+   "pf_oos": 1.1297269203963234,
+   "lordo_medio_R": null,
+   "costo_medio_R": null,
+   "passa": false
+  }
+ ]
+}
