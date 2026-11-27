@@ -10,9 +10,9 @@ def contiguous_windows(maxlen):
 def levers(d, cfg):
     """Restituisce {nome: (maschera_applicata_a_tutto, descrizione)}, scelte con i soli dati IS."""
     dg = cfg['diagnosi']; IS = d.IS; out = {}
-    out['solo_long'] = (d.side == 'long', 'solo Long'); out['solo_short'] = (d.side == 'short', 'solo Short')
-    if 'tag' in d:
-        for t in d.tag.dropna().unique(): out['solo_tag_' + str(t)] = (d.tag == t, 'solo segmento ' + str(t))
+    out['lato:solo_long'] = (d.side == 'long', 'solo Long'); out['lato:solo_short'] = (d.side == 'short', 'solo Short')
+    if 'tag' in d and d.tag.nunique() > 1:
+        for t in d.tag.dropna().unique(): out['segmento:' + str(t)] = (d.tag == t, 'solo segmento ' + str(t))
     # sessione: rimuovere la finestra oraria contigua che migliora di piu' il PF IS (max N ore)
     best = None
     for w in contiguous_windows(dg['finestra_sessione_max_ore']):
@@ -40,13 +40,22 @@ def tp_lever(d, cfg):
     return k, sim(k, d.IS), sim(k, ~d.IS)
 def evaluate(d, cfg):
     ks = cfg['kill_switch']; res = []
-    base_oos = pf(d.net[~d.IS])
-    for name, (mask, desc) in levers(d, cfg).items():
+    base_oos = pf(d.net[~d.IS]); allv = levers(d, cfg)
+    # famiglie con piu varianti (lato, segmento): si sceglie UNA variante sul solo IS; le altre sono mostrate ma NON possono passare (selezione post hoc)
+    fam = {}
+    for name in allv:
+        if ':' in name: fam.setdefault(name.split(':')[0], []).append(name)
+    scelte = {}
+    for f, names in fam.items():
+        cand = [n for n in names if (d.IS & allv[n][0]).sum() >= cfg['diagnosi']['min_trade_cella']]
+        scelte[f] = max(cand, key=lambda n: pf(d.net[d.IS & allv[n][0]])) if cand else None
+    for name, (mask, desc) in allv.items():
+        ammessa = (':' not in name) or scelte.get(name.split(':')[0]) == name
         a, b = d.net[d.IS & mask], d.net[~d.IS & mask]
         gl = d.R_gross[mask].mean(); cs = d.cost_R[mask].mean()
-        ok = (pf(b) >= ks['pf_minimo_dopo_leva'] and len(b) >= ks['min_trade_oos_dopo_leva'] and pf(b) - base_oos >= ks['miglioramento_oos_minimo_pf']
+        ok = ammessa and (pf(b) >= ks['pf_minimo_dopo_leva'] and len(b) >= ks['min_trade_oos_dopo_leva'] and pf(b) - base_oos >= ks['miglioramento_oos_minimo_pf']
               and gl >= ks['movimento_lordo_vs_costi_min'] * cs)
-        res.append(dict(leva=name, descrizione=desc, n_is=len(a), pf_is=pf(a), n_oos=len(b), pf_oos=pf(b), lordo_medio_R=float(gl), costo_medio_R=float(cs), passa=bool(ok)))
+        res.append(dict(leva=name, descrizione=desc + ('' if ammessa else ' [NON scelta su IS: solo informativa]'), n_is=len(a), pf_is=pf(a), n_oos=len(b), pf_oos=pf(b), lordo_medio_R=float(gl), costo_medio_R=float(cs), passa=bool(ok)))
     tl = tp_lever(d, cfg)
     if tl:
         k, a, b = tl; ok = pf(b) >= ks['pf_minimo_dopo_leva'] and len(b) >= ks['min_trade_oos_dopo_leva'] and pf(b) - base_oos >= ks['miglioramento_oos_minimo_pf']

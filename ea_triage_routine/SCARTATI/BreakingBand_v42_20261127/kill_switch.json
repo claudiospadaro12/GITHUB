@@ -6,8 +6,8 @@
  "n_leve_testate": 8,
  "leve": [
   {
-   "leva": "solo_long",
-   "descrizione": "solo Long",
+   "leva": "lato:solo_long",
+   "descrizione": "solo Long [NON scelta su IS: solo informativa]",
    "n_is": 2113,
    "pf_is": 0.930102750875364,
    "n_oos": 1412,
@@ -17,7 +17,7 @@
    "passa": false
   },
   {
-   "leva": "solo_short",
+   "leva": "lato:solo_short",
    "descrizione": "solo Short",
    "n_is": 2067,
    "pf_is": 0.9787576891756393,
@@ -28,8 +28,8 @@
    "passa": false
   },
   {
-   "leva": "solo_tag_CONT",
-   "descrizione": "solo segmento CONT",
+   "leva": "segmento:CONT",
+   "descrizione": "solo segmento CONT [NON scelta su IS: solo informativa]",
    "n_is": 4061,
    "pf_is": 0.9511084499472787,
    "n_oos": 2697,
@@ -39,7 +39,7 @@
    "passa": false
   },
   {
-   "leva": "solo_tag_INV",
+   "leva": "segmento:INV",
    "descrizione": "solo segmento INV",
    "n_is": 119,
    "pf_is": 1.099660928412,

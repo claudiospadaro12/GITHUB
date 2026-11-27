@@ -6,9 +6,9 @@ Baseline PF 0.92 (OOS 0.87). Leve testate: 8 (scelte su IS fino al 2015-11-04, v
 
 | leva | n IS | PF IS | n OOS | PF OOS | passa |
 |---|---|---|---|---|---|
-| solo Long | 2113 | 0.93 | 1412 | 0.83 | no |
+| solo Long [NON scelta su IS: solo informativa] | 2113 | 0.93 | 1412 | 0.83 | no |
 | solo Short | 2067 | 0.98 | 1375 | 0.92 | no |
-| solo segmento CONT | 4061 | 0.95 | 2697 | 0.87 | no |
+| solo segmento CONT [NON scelta su IS: solo informativa] | 4061 | 0.95 | 2697 | 0.87 | no |
 | solo segmento INV | 119 | 1.10 | 90 | 1.06 | no |
 | togliere ore [6, 7, 8, 9] (server, scelta su IS) | 3363 | 0.99 | 2391 | 0.86 | no |
 | solo simboli con PF IS>=1: ['EURGBP', 'GBPJPY', 'EURUSD', 'USDJPY', 'USDCAD'] | 1515 | 1.13 | 1164 | 0.89 | no |

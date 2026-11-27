@@ -12,6 +12,8 @@ Soglie in `config/soglie.json` (modificarle prima di vedere i risultati, mai dop
 ## Regole anti-overfitting incorporate
 Ogni leva (solo Long, solo Short, solo segmento, finestra oraria contigua max 4 ore, simboli con PF IS >= 1, terzile di volatilita peggiore, TP da MAE/MFE) e SCELTA sull'IS e GIUDICATA sull'OOS; deve dare PF OOS >= 1,05, almeno 100 trade OOS, miglioramento OOS >= 0,05 e movimento lordo >= costi. Il numero di leve testate e stampato (piu leve = piu rischio di caso).
 ## Collaudi
+- **Correzione trovata dal collaudo (27/11):** nella prima versione "solo Long" e "solo Short" erano valutate entrambe sull'OOS e bastava che una passasse: la scelta del lato avveniva sull'OOS. Ora le famiglie con piu varianti (lato, segmento) scelgono UNA variante sul solo IS; le altre sono mostrate come informative e non possono passare.
+- Golden Cross HA H4 (ADX 25, dist 1,5, TP 1,5R, stop 1,5 ATR; 953 operazioni, 10 cross 2005-26; baseline PF IS 1,31 / OOS 0,91): SCARTA. Su IS vince il lato Long (1,38), che sull'OOS scende a 0,71; "solo Short" avrebbe PF OOS 1,12 ma non e stato scelto sull'IS (ipotesi post hoc, da non promuovere senza un nuovo test). Coerente con l'esito manuale del 25/11 (OOS 0,85-0,94).
 - Breaking Band v4.2 (6.967 operazioni, 10 cross H1 2005-26): SCARTA, come la decisione manuale del 24/11. La leva "simboli con PF IS >= 1" sale a PF 1,13 su IS ma cade a 0,89 su OOS: il cancello IS/OOS ha preso l'overfitting. Risultati in `SCARTATI/BreakingBand_v42_20261127/`.
 - Dati sintetici con un edge nei soli Long: PROCEDI (solo_long, tp). Il cancello non dice sempre no.
 ## Limiti noti

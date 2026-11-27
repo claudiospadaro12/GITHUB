@@ -1,0 +1,75 @@
+{
+ "esito": "SCARTA",
+ "motivo": "nessuna leva porta il PF OOS a >= 1.05 con almeno 100 trade OOS",
+ "baseline_pf": 1.1385296541965262,
+ "baseline_oos_pf": 0.9130435359604278,
+ "n_leve_testate": 6,
+ "leve": [
+  {
+   "leva": "lato:solo_long",
+   "descrizione": "solo Long",
+   "n_is": 246,
+   "pf_is": 1.3809594514090022,
+   "n_oos": 170,
+   "pf_oos": 0.70915440464163,
+   "lordo_medio_R": 0.05948488692813392,
+   "costo_medio_R": 0.030576781750629542,
+   "passa": false
+  },
+  {
+   "leva": "lato:solo_short",
+   "descrizione": "solo Short [NON scelta su IS: solo informativa]",
+   "n_is": 326,
+   "pf_is": 1.2555401119648422,
+   "n_oos": 211,
+   "pf_oos": 1.1176908809784547,
+   "lordo_medio_R": 0.118826840827821,
+   "costo_medio_R": 0.02962552841768331,
+   "passa": false
+  },
+  {
+   "leva": "senza_finestra_oraria",
+   "descrizione": "togliere ore [20] (server, scelta su IS)",
+   "n_is": 452,
+   "pf_is": 1.3709210315780453,
+   "n_oos": 302,
+   "pf_oos": 0.8368031460543118,
+   "lordo_medio_R": 0.09442934876376637,
+   "costo_medio_R": 0.030174654869813265,
+   "passa": false
+  },
+  {
+   "leva": "solo_simboli_pf_is_ge_1",
+   "descrizione": "solo simboli con PF IS>=1: ['EURJPY', 'EURUSD', 'GBPJPY', 'NZDUSD', 'USDCAD', 'EURGBP', 'GBPUSD', 'USDCHF']",
+   "n_is": 478,
+   "pf_is": 1.3948674356345951,
+   "n_oos": 302,
+   "pf_oos": 0.8328932518422459,
+   "lordo_medio_R": 0.09950085363151748,
+   "costo_medio_R": 0.03155305314298606,
+   "passa": false
+  },
+  {
+   "leva": "senza_terzile_vol_peggiore",
+   "descrizione": "togliere il terzile di volatilita 0 (0=bassa,2=alta), scelto su IS",
+   "n_is": 450,
+   "pf_is": 1.3195343900127483,
+   "n_oos": 183,
+   "pf_oos": 0.8439822264931349,
+   "lordo_medio_R": 0.0987639146477421,
+   "costo_medio_R": 0.02437159529501978,
+   "passa": false
+  },
+  {
+   "leva": "tp_a_2R",
+   "descrizione": "take profit a 2R da MAE/MFE (scelto su IS, stima prudente)",
+   "n_is": 572,
+   "pf_is": 1.4218734034063525,
+   "n_oos": 381,
+   "pf_oos": 0.98275866669326,
+   "lordo_medio_R": null,
+   "costo_medio_R": null,
+   "passa": false
+  }
+ ]
+}
