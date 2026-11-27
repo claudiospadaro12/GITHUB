@@ -1,0 +1,35 @@
+﻿terminale;server;simbolo;anni;primo;ultimo;MB_totali;MB_mediano_per_anno;anni_sotto_3MB
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;BCMMarkets-Server;225JPY;3;2024;2026;42.5;17.61;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;BCMMarkets-Server;D30EUR;3;2024;2026;83.6;18.81;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;BCMMarkets-Server;F40EUR;3;2024;2026;25.1;10.14;1
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;BCMMarkets-Server;NASUSD;3;2024;2026;90.1;19.65;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;BCMMarkets-Server;SPXUSD;3;2024;2026;42.8;18.32;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;BCMMarkets-Server;U30USD;3;2024;2026;87.0;19.63;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;225JPY_EXT;8;2019;2026;137.1;18.54;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;NASUSD_EXT;17;2010;2026;304.4;19.50;1
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;NASUSD_EXT_T;17;2010;2026;710.4;39.12;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;NASUSD_T;3;2024;2026;116.5;54.61;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;SPXUSD_EXT;17;2010;2026;264.3;16.26;1
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;SPXUSD_EXT_T;17;2010;2026;634.7;34.48;1
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;SPXUSD_T;3;2024;2026;124.9;54.59;0
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;U30USD_DK;3;2024;2026;24.0;7.42;1
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;U30USD_DKNEG;2;2025;2026;0.2;0.14;2
+APPDATA C:\Program Files\BCM Markets MT5 Terminal;Custom;U30USD_T;3;2024;2026;158.5;72.09;0
+APPDATA C:\FundedNext_Manuale;FundedNext-Server;GER30;1;2026;2026;16.5;16.47;0
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;AUS200.cash;1;2026;2026;1.4;1.44;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;EU50.cash;1;2026;2026;0.7;0.68;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;FRA40.cash;1;2026;2026;0.6;0.63;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;GER40.cash;1;2026;2026;1.3;1.25;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;HK50.cash;1;2026;2026;1.5;1.54;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;JP225.cash;1;2026;2026;1.6;1.58;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;UK100.cash;1;2026;2026;1.3;1.25;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;US100.cash;1;2026;2026;1.1;1.11;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;US2000.cash;1;2026;2026;1.4;1.42;1
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;US30.cash;8;2019;2026;154.1;20.05;0
+APPDATA C:\MT5_Backtest\Mt5_Ftmo_Prova;FTMO-Demo;US500.cash;1;2026;2026;1.3;1.27;1
+CARTELLA C:\MT5_BCM_Opt;BCMMarkets-Server;225JPY;3;2024;2026;43.9;19.00;0
+CARTELLA C:\MT5_BCM_Opt;BCMMarkets-Server;D30EUR;3;2024;2026;42.1;18.54;0
+CARTELLA C:\MT5_BCM_Opt;BCMMarkets-Server;F40EUR;3;2024;2026;26.2;11.20;1
+CARTELLA C:\MT5_BCM_Opt;BCMMarkets-Server;NASUSD;3;2024;2026;42.5;17.84;0
+CARTELLA C:\MT5_BCM_Opt;BCMMarkets-Server;SPXUSD;3;2024;2026;43.3;18.83;0
+CARTELLA C:\MT5_BCM_Opt;BCMMarkets-Server;U30USD;3;2024;2026;42.8;18.16;0
