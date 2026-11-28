@@ -1,0 +1,11 @@
+# Bulge: ostacoli tra ingresso e mediana + volatilita giornaliera - CRITERI (scritti prima dei numeri, 28/11/2026)
+Richiesta di Claudio: valutare se tra l'ingresso (rientro dalla banda) e la mediana c'e un livello (media, Supertrend, massimi/minimi della notte e del giorno precedente, altri) che blocca il rientro; analizzare la volatilita giornaliera di ogni cross.
+## Dati e segnali
+Forex H1 BCM 10 cross 2005-2026 (ora server GMT+1 fisso), 39.474 segnali del Pine Bulge (stesse regole di `bulge_sala.py`). Uscita di riferimento = quella del Pine: stop 3 ATR oltre l'estremo, target mediana (aggiornata a ogni barra), 40 barre. Costo realistico (spread per coppia + 0,2 pip). IS 2005-2015, OOS 2016-2026.
+## Livelli (calcolati solo con dati noti al momento del segnale)
+EMA 50/100/200 (H1); linea del Supertrend 10/3 (H1); massimo/minimo delle ultime 20 e 50 barre; livelli tondi (multipli di 50 pip, 0,50 sul JPY); massimo/minimo della NOTTE (22:00-07:59 server, l'ultima notte completata); massimo/minimo del GIORNO precedente; massimo/minimo della SETTIMANA precedente; apertura del giorno. Ostacolo = un livello strettamente tra prezzo di ingresso e mediana. Gruppi: percorso libero (0 ostacoli), 1, 2 o piu; e per tipo (media, Supertrend, swing, tondo, notte, giorno prec., settimana prec.).
+## Volatilita
+ADR (media di massimo-minimo giornaliero in pip) per cross su D1 (28 cross; 2005-2026, ultimo anno, ultimi 5 anni) e per ora/giorno della settimana sui 10 H1; poi legame con i segnali: quota dell'ADR (ultimi 20 giorni) gia consumata dal range del giorno al segnale (terzili) e PF per terzile; regime ADR20/ADR250 (terzili).
+## Cancelli (non abbassati)
+Un filtro e UTILE se il gruppo "libero" (o il suo complemento per il filtro) ha PF netto IS >= 1,15 e OOS >= 1,10 con >= 100 operazioni per periodo, e il PF dei segnali scartati e < 0,95 (il filtro separa davvero). Per un EA serve ritenzione >= 75%; per l'uso discrezionale di Claudio (avvisi) basta che separi, con il numero di segnali rimasti dichiarato. Controllo del caso: stessa suddivisione con etichette casuali (200 repliche): la differenza di PF deve superare il 95 percentile del caso.
+Previsione scritta: 15% che il percorso libero separi in modo robusto; il lordo del Bulge e 1,0, quindi anche un filtro ottimo difficilmente porta il PF netto sopra 1,15 con ritenzione alta.
