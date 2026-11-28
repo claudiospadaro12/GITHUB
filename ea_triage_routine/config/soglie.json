@@ -40,6 +40,12 @@
     },
     "profilo_valutazione": "PROP",
     "stress_costi_x": 2.0,
-    "stress_pf_min": 1.0
+    "stress_pf_min": 1.0,
+    "controllo_casuale": {
+      "rango_min_pattern": 0.95,
+      "rango_min_trend": 0.9,
+      "trend_solo_bandiera": true,
+      "_nota": "Modifica confermata da Claudio 28/11/2026: per i sistemi trend/long-only il controllo con ingressi casuali e una BANDIERA di rischio (rango >= 0,90 atteso), non un blocco; per i sistemi basati su pattern d'ingresso resta un cancello duro al 95 percentile."
+    }
   }
 }

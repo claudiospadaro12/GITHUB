@@ -13,6 +13,8 @@ python src/verdetto.py       trades.csv cartella/ --plateau plateau.csv --nome N
 Esiti STEP 2: SCARTA, PROCEDI (leva da ottimizzare, STEP 3), BASELINE_OK (EA gia sopra soglia: va dritto allo STEP 4). STEP 4 verifica PF IS/OOS, n trade, anni positivi, PF con costi x2 (swap/spread), plateau dei parametri vicini (file `plateau.csv` prodotto da un adattatore, es. `adapters/goldenzoe_plateau.py`: 27 combinazioni), DD totale e giornaliero per profilo di rischio (PROP 0,5% / MEDIO 0,9% / ALTO 1,3% a trade); scrive `verdict_report.md` con, se scartato, le 3 ragioni. Il DD e sul CHIUSO (additivo): il flottante intraday e peggiore.
 ```
 Soglie in `config/soglie.json` (modificarle prima di vedere i risultati, mai dopo).
+## Controllo con ingressi casuali (modifica confermata da Claudio il 28/11/2026)
+`verdetto.py --null null.csv --tipo trend|pattern`: `null.csv` ha la colonna `pf_null` (PF di sistemi con ingressi casuali, stessa frequenza e stessa uscita). Per i sistemi TREND/long-only e una BANDIERA (rango atteso >= 90%, non blocca: se scende, il valore sta in uscite e crescita del mercato e il rischio va dichiarato); per i sistemi basati su PATTERN d'ingresso resta un CANCELLO DURO al 95 percentile. Fonti e motivazione: `report/FONTI_CRITERI_VALIDAZIONE_2026-11-28.md`. GoldenZoe: rango 97%, bandiera OK.
 ## Regole anti-overfitting incorporate
 Ogni leva (solo Long, solo Short, solo segmento, finestra oraria contigua max 4 ore, simboli con PF IS >= 1, terzile di volatilita peggiore, TP da MAE/MFE) e SCELTA sull'IS e GIUDICATA sull'OOS; deve dare PF OOS >= 1,05, almeno 100 trade OOS, miglioramento OOS >= 0,05 e movimento lordo >= costi. Il numero di leve testate e stampato (piu leve = piu rischio di caso).
 ## Collaudi

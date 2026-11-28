@@ -10,6 +10,7 @@ EA: GoldenZoe_H4_oro | 381 operazioni | IS fino al 2018-02-16, OOS dopo.
 | Anni positivi | 15/23 (65%) | >= 60% | OK |  |
 | PF con costi x2 (stress swap/spread) | 1.28 | > 1.00 | OK |  |
 | Plateau (vicini con PF netto > 1.00) | 100% di 26 | >= 80% | OK | PF vicini min 1.42 / mediana 1.49 |
+| Ingressi casuali (bandiera, sistema trend) | rango 97% (PF reale 1.52, casuale medio 1.23) | >= 90% atteso | OK | non blocca: se FLAG il valore e in uscite/drift, rischio da dichiarare |
 | DD totale al profilo PROP (0.50% a trade) | 4.8% | <= 8.0% | OK |  |
 | DD giornaliero (chiuso) al profilo PROP | 0.5% | <= 4.0% | OK |  |
 

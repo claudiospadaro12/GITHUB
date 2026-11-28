@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """STEP 4 - Verdetto finale SALVATO / SCARTATO, con archiviazione.
-Uso: verdetto.py <trades.csv> <cartella_analisi> [--plateau plateau.csv] [--nome NOME] [--archivia] [soglie.json]
+Uso: verdetto.py <trades.csv> <cartella_analisi> [--plateau plateau.csv] [--null null.csv --tipo trend|pattern] [--nome NOME] [--archivia] [soglie.json]
 Criteri (config/soglie.json -> verdetto): PF IS e OOS, n trade, anni positivi, stress costi x2, plateau (vicini con PF netto > 1 in frazione >= soglia),
 drawdown giornaliero e totale al profilo di rischio valutato (DD realizzato sul chiuso: limite noto, il DD intraday di posizioni aperte e' peggiore).
 Con --archivia sposta la cartella in SALVATI/ o SCARTATI/ (la cartella radice e quella che contiene IN_ANALISI)."""
@@ -11,7 +11,7 @@ def dd_profile(d, risk_pct):
     s = d.sort_values('ts_close'); eq = (s.net * risk_pct).cumsum(); peak = eq.cummax().clip(lower=0)
     tot = float((peak - eq).max()); daily = float((s.groupby(s.ts_close.dt.date).net.sum() * risk_pct).min())
     return tot, -daily
-def verdict(path, outdir, cfg, plateau=None):
+def verdict(path, outdir, cfg, plateau=None, null=None, tipo='pattern'):
     d, cut = load(path, cfg); v = cfg['verdetto']; rows = []; ok_all = True
     def chk(nome, valore, soglia, ok, nota=''):
         nonlocal ok_all; ok_all &= bool(ok); rows.append((nome, valore, soglia, 'OK' if ok else 'NO', nota))
@@ -24,6 +24,12 @@ def verdict(path, outdir, cfg, plateau=None):
         nb = plateau[~plateau.centro]; frac = float((nb.pf_netto > v['plateau_vicini_pf_sopra']).mean())
         chk('Plateau (vicini con PF netto > %.2f)' % v['plateau_vicini_pf_sopra'], '%.0f%% di %d' % (100 * frac, len(nb)), '>= %.0f%%' % (100 * v['plateau_vicini_frazione_min']), frac >= v['plateau_vicini_frazione_min'], 'PF vicini min %.2f / mediana %.2f' % (nb.pf_netto.min(), nb.pf_netto.median()))
     else: chk('Plateau', 'non calcolato', '-', False, 'serve --plateau: senza plateau non si salva')
+    if null is not None:
+        cc = v['controllo_casuale']; real = pf(d.net); rango = float((null.pf_null < real).mean())
+        if tipo == 'trend' and cc['trend_solo_bandiera']:
+            rows.append(('Ingressi casuali (bandiera, sistema trend)', 'rango %.0f%% (PF reale %.2f, casuale medio %.2f)' % (100 * rango, real, null.pf_null.mean()), '>= %.0f%% atteso' % (100 * cc['rango_min_trend']), 'OK' if rango >= cc['rango_min_trend'] else 'FLAG', 'non blocca: se FLAG il valore e in uscite/drift, rischio da dichiarare'))
+        else:
+            chk('Ingressi casuali (cancello, sistema a pattern)', 'rango %.0f%% (PF reale %.2f, casuale medio %.2f)' % (100 * rango, real, null.pf_null.mean()), '>= %.0f%%' % (100 * cc['rango_min_pattern']), rango >= cc['rango_min_pattern'])
     dd = {}
     for nome, rp in v['profili_rischio_pct'].items(): dd[nome] = dd_profile(d, rp)
     pv = v['profilo_valutazione']; t, g = dd[pv]
@@ -35,7 +41,8 @@ def main():
     path, outdir = a[0], a[1]; cfgp = next((x for x in a[2:] if x.endswith('.json')), os.path.join(os.path.dirname(__file__), '..', 'config', 'soglie.json'))
     cfg = json.load(open(cfgp)); plateau = pd.read_csv(flags[flags.index('--plateau') + 1]) if '--plateau' in flags else None
     nome = flags[flags.index('--nome') + 1] if '--nome' in flags else os.path.basename(os.path.normpath(outdir))
-    ok, rows, dd, d, cut = verdict(path, outdir, cfg, plateau); os.makedirs(outdir, exist_ok=True)
+    null = pd.read_csv(flags[flags.index('--null') + 1]) if '--null' in flags else None; tipo = flags[flags.index('--tipo') + 1] if '--tipo' in flags else 'pattern'
+    ok, rows, dd, d, cut = verdict(path, outdir, cfg, plateau, null, tipo); os.makedirs(outdir, exist_ok=True)
     L = ['# Verdetto finale (STEP 4): ' + ('🟢 SALVATO' if ok else '🔴 SCARTATO DEFINITIVAMENTE'), '', 'EA: %s | %d operazioni | IS fino al %s, OOS dopo.' % (nome, len(d), cut.date()), '', '| criterio | valore | soglia | esito | nota |', '|---|---|---|---|---|']
     L += ['| %s | %s | %s | %s | %s |' % r for r in rows]
     L += ['', '**Drawdown (chiuso, additivo) per profilo di rischio:** ' + '; '.join('%s %.2f%% a trade: totale %.1f%%, peggior giorno %.1f%%' % (n, cfg['verdetto']['profili_rischio_pct'][n], t, g) for n, (t, g) in dd.items())]
