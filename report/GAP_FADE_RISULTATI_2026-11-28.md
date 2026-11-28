@@ -1,0 +1,6 @@
+# Gap fade sugli indici USA - RISULTATI (28/11/2026) - 0 candidate
+Criteri: `GAP_FADE_CRITERI_2026-11-28.md`; script `backtest_runner/simulatore/gap_fade.py`. Nasdaq 3.648 e S&P 3.570 giorni (2010-26), 16 celle per indice, ora New York.
+- **Cancelli:** 0 celle su 32 passano (richiesto PF netto IS >= 1,25 e OOS >= 1,15 su entrambi). Migliore: soglia 0,4%, target 100% del gap, stop 1x, uscita 12:00: Nasdaq IS 1,14 / OOS 1,02, S&P IS 1,03 / OOS 0,90.
+- **Costo zero:** massimo IS 1,18 (Nasdaq), S&P 1,10; OOS <= 1,10. Controllo con direzione casuale su tutta la griglia: miglior PF IS 1,11 in media (max 1,23), cioe PIU' ALTO del miglior reale (1,14 Nasdaq): rumore.
+- **Hold-out 2024-26 (calcolato per tutte le celle, mentre i criteri lo prevedevano solo per le passanti):** PF 1,0-1,29 in molte celle (migliori: target 100%, uscita 12:00, Nasdaq 1,27-1,29 e S&P 1,20-1,25). E un pattern recente, nato DOPO che IS e OOS non passano: non si promuove (post hoc, tre anni, regime di volatilita diverso).
+- **Conclusione:** il gap fade sugli indici USA non ha vantaggio dimostrabile 2011-2023; il 2024-26 e da osservare come ipotesi nuova (richiederebbe criteri propri e dati successivi). DAX: non testato (serve la diagnostica dell'orologio `D30EUR_M1` di HistData).
