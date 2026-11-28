@@ -1,0 +1,8 @@
+# IBS giornaliero - RISULTATI (28/11/2026) - CHIUSO, 0 candidate
+Criteri: `IBS_CRITERI_2026-11-28.md` e `IBS_VALIDAZIONE_CRITERI_2026-11-28.md`; script `backtest_runner/simulatore/ibs_d1.py` e `ibs_validazione.py`.
+## Prova principale (Nasdaq e S&P, barre cash da M1, 2010-26, 24 celle per indice)
+5 celle su 24 superano i cancelli di PF su entrambi gli indici (IBS <= 0,13 con uscita IBS >= 0,8 o dopo 3 giorni, con e senza SMA200; IBS <= 0,2 uscita IBS >= 0,8): PF IS 1,3-1,6, OOS 1,4-3,0, hold-out 2024-26 PF 1,6-4,4, stress (costi x2, finanziamento 14%) > 1. MA il controllo con ingressi casuali (stessa frequenza e stessa uscita, 200 repliche per cella) da' PF IS 1,1-1,3 (drift e struttura dell'uscita), e le celle reali stanno al 72-91% della distribuzione casuale, mai oltre il 95%. Il vantaggio rispetto al caso e +0,1-0,3 PF, non separabile dal rumore.
+## Validazione indipendente (D1 completi, nessun parametro cambiato)
+Pre-2010 su 8 indici (SP500 1970, Nasdaq100 1985, Dow30 1992, DAX 1987, FTSE100 1984, CAC40 1990, Nikkei 1970, Russell2000 1987): PF >= 1,15 in 1-2 mercati su 8 per cella (cancello: 6 su 8), PF < 0,85 in 1-3 mercati, sopra il 90 percentile casuale in 0-2 su 8 (cancello: 6). Esempi: SP500 1970-2009 PF 0,93-1,16, FTSE 0,74-0,92, Russell 0,53-0,94. Secondario 2010-26 (DAX, FTSE, CAC, Nikkei, Russell): PF 0,72-1,38, Nikkei e Russell > 1,15 ma mai sopra il p90 casuale.
+**0 celle confermate. Famiglia chiusa:** l'IBS sugli indici USA 2011-26 e un effetto di periodo (rimbalzi in mercato rialzista), non una regola stabile.
+Limiti: costi prudenti (0,01-0,03% + finanziamento 7,5%); barre D1 complete dei file storici diverse dalle barre cash degli M1; hold-out calcolato per tutte le celle.
