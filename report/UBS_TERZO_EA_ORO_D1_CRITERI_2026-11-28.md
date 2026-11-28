@@ -23,3 +23,10 @@
 
 ## Limiti
 Pool di 20 con V1/V3 gia' visti; V3 con 28 operazioni; oro del 2004-12, 2025-26 e 2023-24 con trend; stessa famiglia di Wim (rischio "strategia unica"/popolarita' per FTMO); il set e' di Wim: mai clonare il motore.
+
+## Passi 3-4: dettaglio della riga R5 (aggiunto 28/11, prima dei numeri)
+- **Riga:** `report/RIGA_UBS_R5.txt` (corta) -> riga lunga `backtest_pipeline/righe/RIGA_LANCIA_UBS_R5.txt` @ `6e969052`; passate in `report/UBS_NOTTE/JOBS_R5.csv` (39): RP00A controllo (set intatto, deve ridare PF 2,89 / 130 op), RP01A-RP37A perturbazioni, **RP00H hold-out 2023-01..2024-12 a 1 minuto, ultima passata, aperta una volta sola**. Parser `ubs_r4_parse.py` adattabile.
+- **Perturbazioni:** i 20 parametri che l'ottimizzazione variava (flag Y nel set), uno alla volta a -20% e +20% (interi arrotondati, decimali a 0,5), 1 minuto 2004-2012, stesso periodo di V1. **Limitati al range dell'ottimizzazione:** ATRDefault +20% -> 50 (+5%), ATR_Period +20% -> 150 (+12%), ST1_countback +20% -> 250 (+14%). **Saltati (nessun vicino a +-20%):** ST1_MaxPendingOrders (1, discreto) e ST1_Expiration_hours -20% (sotto il minimo del range 24): 37 vicini.
+- **Verdetto P3:** >= 70% dei 37 vicini (>= 26) con PF >= 1,20 e nessuno in perdita netta; il controllo RP00A deve riprodurre PF 2,89 (altrimenti la riga non e' affidabile e si ferma tutto).
+- **Verdetto P4:** hold-out PF >= 1,20, utile > 0, >= 20 operazioni. Se P3 fallisce, il n. 4 e' scartato e l'hold-out per le riserve va rifatto con riga propria (questo hold-out e' del solo n. 4).
+- Tempo stimato: R4 faceva 4-5 minuti per passata D1 a 1 minuto 2004-12: circa 3-4 ore.
